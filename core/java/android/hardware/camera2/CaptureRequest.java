@@ -733,8 +733,16 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * included at all in the request settings. When included and
      * set to START, the camera device will trigger the autoexposure
      * precapture metering sequence.</p>
-     * <p>The effect of auto-exposure (AE) precapture trigger depends
-     * on the current AE mode and state; see
+     * <p>The precapture sequence should triggered before starting a
+     * high-quality still capture for final metering decisions to
+     * be made, and for firing pre-capture flash pulses to estimate
+     * scene brightness and required final capture flash power, when
+     * the flash is enabled.</p>
+     * <p>Normally, this entry should be set to START for only a
+     * single request, and the application should wait until the
+     * sequence completes before starting a new one.</p>
+     * <p>The exact effect of auto-exposure (AE) precapture trigger
+     * depends on the current AE mode and state; see
      * {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture state transition
      * details.</p>
      *
@@ -800,7 +808,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * autofocus algorithm. If autofocus is disabled, this trigger has no effect.</p>
      * <p>When set to CANCEL, the camera device will cancel any active trigger,
      * and return to its initial AF state.</p>
-     * <p>See {@link CaptureResult#CONTROL_AF_STATE android.control.afState} for what that means for each AF mode.</p>
+     * <p>Generally, applications should set this entry to START or CANCEL for only a
+     * single capture, and then return it to IDLE (or not set at all). Specifying
+     * START for multiple captures in a row means restarting the AF operation over
+     * and over again.</p>
+     * <p>See {@link CaptureResult#CONTROL_AF_STATE android.control.afState} for what the trigger means for each AF mode.</p>
      *
      * @see CaptureResult#CONTROL_AF_STATE
      * @see #CONTROL_AF_TRIGGER_IDLE
@@ -813,9 +825,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Whether auto-white balance (AWB) is currently locked to its
      * latest calculated values.</p>
-     * <p>Note that AWB lock is only meaningful for AUTO
-     * mode; in other modes, AWB is already fixed to a specific
-     * setting.</p>
+     * <p>Note that AWB lock is only meaningful when
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} is in the AUTO mode; in other modes,
+     * AWB is already fixed to a specific setting.</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final Key<Boolean> CONTROL_AWB_LOCK =
             new Key<Boolean>("android.control.awbLock", boolean.class);
@@ -825,17 +839,21 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * transform fields, and what its illumination target
      * is.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is AUTO.</p>
-     * <p>When set to the ON mode, the camera device's auto white balance
+     * <p>When set to the ON mode, the camera device's auto-white balance
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
-     * <p>When set to the OFF mode, the camera device's auto white balance
+     * <p>When set to the OFF mode, the camera device's auto-white balance
      * routine is disabled. The application manually controls the white
      * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
      * and {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
-     * <p>When set to any other modes, the camera device's auto white balance
-     * routine is disabled. The camera device uses each particular illumination
-     * target for white balance adjustment.</p>
+     * <p>When set to any other modes, the camera device's auto-white
+     * balance routine is disabled. The camera device uses each
+     * particular illumination target for white balance
+     * adjustment. The application's values for
+     * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform},
+     * {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} are ignored.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
@@ -886,8 +904,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * strategy.</p>
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
-     * <p>ZERO_SHUTTER_LAG must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
-     * contains ZSL. MANUAL must be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * <p>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains ZSL. MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
      * contains MANUAL_SENSOR.</p>
      *
      * @see CaptureRequest#CONTROL_MODE
@@ -962,7 +980,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This is the mode that that is active when
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} == USE_SCENE_MODE</code>. Aside from FACE_PRIORITY,
      * these modes will disable {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
-     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} while in use.</p>
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode} while in use.
+     * The scene modes available for a given camera device are listed in
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}.</p>
      * <p>The interpretation and implementation of these scene modes is left
      * to the implementor of the camera device. Their behavior will not be
      * consistent across all devices, and any given device may only implement
@@ -970,6 +990,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
      * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_SCENE_MODE_DISABLED
@@ -996,6 +1017,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Whether video stabilization is
      * active.</p>
+     * <p>Video stabilization automatically translates and scales images from the camera
+     * in order to stabilize motion between consecutive frames.</p>
      * <p>If enabled, video stabilization can modify the
      * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream
      * stabilized</p>
@@ -1110,14 +1133,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Compression quality of the final JPEG
      * image.</p>
-     * <p>85-95 is typical usage range</p>
+     * <p>85-95 is typical usage range.</p>
      */
     public static final Key<Byte> JPEG_QUALITY =
             new Key<Byte>("android.jpeg.quality", byte.class);
 
     /**
      * <p>Compression quality of JPEG
-     * thumbnail</p>
+     * thumbnail.</p>
      */
     public static final Key<Byte> JPEG_THUMBNAIL_QUALITY =
             new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
@@ -1229,12 +1252,18 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Sets whether the camera device uses optical image stabilization (OIS)
      * when capturing images.</p>
-     * <p>OIS is used to compensate for motion blur due to small movements of
-     * the camera during capture. Unlike digital image stabilization, OIS makes
-     * use of mechanical elements to stabilize the camera sensor, and thus
-     * allows for longer exposure times before camera shake becomes
-     * apparent.</p>
-     * <p>This is not expected to be supported on most devices.</p>
+     * <p>OIS is used to compensate for motion blur due to small
+     * movements of the camera during capture. Unlike digital image
+     * stabilization ({@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode}), OIS
+     * makes use of mechanical elements to stabilize the camera
+     * sensor, and thus allows for longer exposure times before
+     * camera shake becomes apparent.</p>
+     * <p>Not all devices will support OIS; see
+     * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization} for
+     * available controls.</p>
+     *
+     * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
+     * @see CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION
      * @see #LENS_OPTICAL_STABILIZATION_MODE_OFF
      * @see #LENS_OPTICAL_STABILIZATION_MODE_ON
      */
@@ -1242,16 +1271,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.lens.opticalStabilizationMode", int.class);
 
     /**
-     * <p>Mode of operation for the noise reduction.
-     * algorithm</p>
+     * <p>Mode of operation for the noise reduction algorithm.</p>
      * <p>Noise filtering control. OFF means no noise reduction
      * will be applied by the camera device.</p>
-     * <p>This must be set to a valid mode in
+     * <p>This must be set to a valid mode from
      * {@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes}.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined noise filtering
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
-     * even if it slows down capture rate. FAST means the camera device should not
+     * even if it slows down capture rate. FAST means the camera device will not
      * slow down capture rate when applying noise filtering.</p>
      *
      * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
@@ -1435,7 +1463,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>When enabled, the sensor sends a test pattern instead of
      * doing a real exposure from the camera.</p>
      * <p>When a test pattern is enabled, all manual sensor controls specified
-     * by android.sensor.* should be ignored. All other controls should
+     * by android.sensor.* will be ignored. All other controls should
      * work as normal.</p>
      * <p>For example, if manual flash is enabled, flash firing should still
      * occur (and that the test pattern remain unmodified, since the flash
@@ -1490,7 +1518,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.shading.mode", int.class);
 
     /**
-     * <p>State of the face detector
+     * <p>Control for the face detector
      * unit.</p>
      * <p>Whether face detection is enabled, and whether it
      * should output just the basic fields or the full set of
@@ -1508,7 +1536,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Operating mode for hotpixel map generation.</p>
      * <p>If set to ON, a hotpixel map is returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.
-     * If set to OFF, no hotpixel map should be returned.</p>
+     * If set to OFF, no hotpixel map will be returned.</p>
      * <p>This must be set to a valid mode from {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES android.statistics.info.availableHotPixelMapModes}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
@@ -1521,7 +1549,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Whether the camera device will output the lens
      * shading map in output result metadata.</p>
      * <p>When set to ON,
-     * android.statistics.lensShadingMap must be provided in
+     * android.statistics.lensShadingMap will be provided in
      * the output result metadata.</p>
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON

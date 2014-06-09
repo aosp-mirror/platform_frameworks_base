@@ -157,8 +157,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The lens focus distance is not accurate, and the units used for
-     * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} do not correspond to any physical units.
-     * Setting the lens to the same focus distance on separate occasions may
+     * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} do not correspond to any physical units.</p>
+     * <p>Setting the lens to the same focus distance on separate occasions may
      * result in a different real focus distance, depending on factors such
      * as the orientation of the device, the age of the focusing mechanism,
      * and the device temperature. The focus distance value will still be
@@ -172,20 +172,24 @@ public abstract class CameraMetadata<TKey> {
     public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED = 0;
 
     /**
-     * <p>The lens focus distance is measured in diopters. However, setting the lens
-     * to the same focus distance on separate occasions may result in a
-     * different real focus distance, depending on factors such as the
-     * orientation of the device, the age of the focusing mechanism, and
-     * the device temperature.</p>
+     * <p>The lens focus distance is measured in diopters.</p>
+     * <p>However, setting the lens to the same focus distance
+     * on separate occasions may result in a different real
+     * focus distance, depending on factors such as the
+     * orientation of the device, the age of the focusing
+     * mechanism, and the device temperature.</p>
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE = 1;
 
     /**
-     * <p>The lens focus distance is measured in diopters. The lens mechanism is
-     * calibrated so that setting the same focus distance is repeatable on
-     * multiple occasions with good accuracy, and the focus distance corresponds
-     * to the real physical distance to the plane of best focus.</p>
+     * <p>The lens focus distance is measured in diopters, and
+     * is calibrated.</p>
+     * <p>The lens mechanism is calibrated so that setting the
+     * same focus distance is repeatable on multiple
+     * occasions with good accuracy, and the focus distance
+     * corresponds to the real physical distance to the plane
+     * of best focus.</p>
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED = 2;
@@ -195,11 +199,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>The camera device faces the same direction as the device's screen.</p>
      * @see CameraCharacteristics#LENS_FACING
      */
     public static final int LENS_FACING_FRONT = 0;
 
     /**
+     * <p>The camera device faces the opposite direction as the device's screen.</p>
      * @see CameraCharacteristics#LENS_FACING
      */
     public static final int LENS_FACING_BACK = 1;
@@ -215,11 +221,10 @@ public abstract class CameraMetadata<TKey> {
      * <p>The full set of features supported by this capability makes
      * the camera2 api backwards compatible with the camera1
      * (android.hardware.Camera) API.</p>
-     * <p>TODO: @hide this. Doesn't really mean anything except
-     * act as a catch-all for all the 'base' functionality.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @hide
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0;
 
@@ -228,15 +233,14 @@ public abstract class CameraMetadata<TKey> {
      * tags or functionality not encapsulated by one of the other
      * capabilities.</p>
      * <p>A typical example is all tags marked 'optional'.</p>
-     * <p>TODO: @hide. We may not need this if we @hide all the optional
-     * tags not belonging to a capability.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @hide
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL = 1;
 
     /**
      * <p>The camera device can be manually controlled (3A algorithms such
-     * as auto exposure, and auto focus can be bypassed).
+     * as auto-exposure, and auto-focus can be bypassed).
      * The camera device supports basic manual control of the sensor image
      * acquisition related stages. This means the following controls are
      * guaranteed to be supported:</p>
@@ -257,11 +261,11 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</li>
      * </ul>
      * </li>
-     * <li>Manual lens control<ul>
+     * <li>Manual lens control (if the lens is adjustable)<ul>
      * <li>android.lens.*</li>
      * </ul>
      * </li>
-     * <li>Manual flash control<ul>
+     * <li>Manual flash control (if a flash unit is present)<ul>
      * <li>android.flash.*</li>
      * </ul>
      * </li>
@@ -312,8 +316,6 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>If auto white balance is enabled, then the camera device
      * will accurately report the values applied by AWB in the result.</p>
-     * <p>The camera device will also support everything in MANUAL_SENSOR
-     * except manual lens control and manual flash control.</p>
      * <p>A given camera device may also support additional post-processing
      * controls, but this capability only covers the above list of controls.</p>
      *
@@ -340,8 +342,8 @@ public abstract class CameraMetadata<TKey> {
      * (both input/output) will match the maximum available
      * resolution of JPEG streams.</li>
      * </ul>
-     * <p>@hide this, TODO: remove it when input related APIs are ready.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @hide
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
 
@@ -355,7 +357,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>RAW16 is reprocessable into both YUV_420_888 and JPEG
      * formats.</li>
      * <li>The maximum available resolution for RAW16 streams (both
-     * input/output) will match the either value in
+     * input/output) will match either the value in
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
      * <li>All DNG-related optional metadata entries are provided
@@ -373,13 +375,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>The camera device will only support centered crop regions.</p>
+     * <p>The camera device only supports centered crop regions.</p>
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      */
     public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0;
 
     /**
-     * <p>The camera device will support arbitrarily chosen crop regions.</p>
+     * <p>The camera device supports arbitrarily chosen crop regions.</p>
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      */
     public static final int SCALER_CROPPING_TYPE_FREEFORM = 1;
@@ -525,7 +527,7 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>android.led.transmit control is used</p>
+     * <p>android.led.transmit control is used.</p>
      * @see CameraCharacteristics#LED_AVAILABLE_LEDS
      * @hide
      */
@@ -536,11 +538,14 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>This camera device has only limited capabilities.</p>
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
 
     /**
+     * <p>This camera device is capable of supporting advanced imaging
+     * applications.</p>
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
@@ -550,9 +555,9 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>Every frame has the requests immediately applied.
-     * (and furthermore for all results,
-     * <code>android.sync.frameNumber == android.request.frameCount</code>)</p>
+     * <p>Every frame has the requests immediately applied.</p>
+     * <p>Furthermore for all results,
+     * <code>android.sync.frameNumber == android.request.frameCount</code></p>
      * <p>Changing controls over multiple requests one after another will
      * produce results that have those controls applied atomically
      * each frame.</p>
@@ -592,8 +597,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
 
     /**
-     * <p>Must not slow down capture rate relative to sensor raw
-     * output.</p>
+     * <p>Color correction processing must not slow down
+     * capture rate relative to sensor raw output.</p>
      * <p>Advanced white balance adjustments above and beyond
      * the specified white balance pipeline may be applied.</p>
      * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
@@ -606,8 +611,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int COLOR_CORRECTION_MODE_FAST = 1;
 
     /**
-     * <p>Capture rate (relative to sensor raw output)
-     * may be reduced by high quality.</p>
+     * <p>Color correction processing operates at improved
+     * quality but reduced capture rate (relative to sensor raw
+     * output).</p>
      * <p>Advanced white balance adjustments above and beyond
      * the specified white balance pipeline may be applied.</p>
      * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
@@ -658,8 +664,8 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>The camera device's autoexposure routine is disabled;
-     * the application-selected {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
+     * <p>The camera device's autoexposure routine is disabled.</p>
+     * <p>The application-selected {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are used by the camera
      * device, along with android.flash.* fields, if there's
@@ -674,7 +680,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device's autoexposure routine is active,
-     * with no flash control. The application's values for
+     * with no flash control.</p>
+     * <p>The application's values for
      * {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored. The
@@ -691,10 +698,10 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Like ON, except that the camera device also controls
      * the camera's flash unit, firing it in low-light
-     * conditions. The flash may be fired during a
-     * precapture sequence (triggered by
-     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and may be fired
-     * for captures for which the
+     * conditions.</p>
+     * <p>The flash may be fired during a precapture sequence
+     * (triggered by {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and
+     * may be fired for captures for which the
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
@@ -707,10 +714,10 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Like ON, except that the camera device also controls
      * the camera's flash unit, always firing it for still
-     * captures. The flash may be fired during a precapture
-     * sequence (triggered by
-     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and will always
-     * be fired for captures for which the
+     * captures.</p>
+     * <p>The flash may be fired during a precapture sequence
+     * (triggered by {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}) and
+     * will always be fired for captures for which the
      * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} field is set to
      * STILL_CAPTURE</p>
      *
@@ -722,9 +729,10 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Like ON_AUTO_FLASH, but with automatic red eye
-     * reduction. If deemed necessary by the camera device,
-     * a red eye reduction flash will fire during the
-     * precapture sequence.</p>
+     * reduction.</p>
+     * <p>If deemed necessary by the camera device, a red eye
+     * reduction flash will fire during the precapture
+     * sequence.</p>
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4;
@@ -741,8 +749,9 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The precapture metering sequence will be started
-     * by the camera device. The exact effect of the precapture
-     * trigger depends on the current AE mode and state.</p>
+     * by the camera device.</p>
+     * <p>The exact effect of the precapture trigger depends on
+     * the current AE mode and state.</p>
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
@@ -754,7 +763,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The auto-focus routine does not control the lens;
      * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} is controlled by the
-     * application</p>
+     * application.</p>
      *
      * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CaptureRequest#CONTROL_AF_MODE
@@ -839,8 +848,11 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AF_MODE_CONTINUOUS_PICTURE = 4;
 
     /**
-     * <p>Extended depth of field (digital focus). AF
-     * trigger is ignored, AF state should always be
+     * <p>Extended depth of field (digital focus) mode.</p>
+     * <p>The camera device will produce images with an extended
+     * depth of field automatically; no special focusing
+     * operations need to be done before taking a picture.</p>
+     * <p>AF triggers are ignored, and the AF state will always be
      * INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
      */
@@ -874,8 +886,8 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
-     * the application-selected color transform matrix
+     * <p>The camera device's auto-white balance routine is disabled.</p>
+     * <p>The application-selected color transform matrix
      * ({@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}) and gains
      * ({@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}) are used by the camera
      * device for manual white balance control.</p>
@@ -887,9 +899,12 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AWB_MODE_OFF = 0;
 
     /**
-     * <p>The camera device's auto white balance routine is active;
-     * the application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
-     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.</p>
+     * <p>The camera device's auto-white balance routine is active.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
@@ -898,65 +913,125 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AWB_MODE_AUTO = 1;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses incandescent light as the assumed scene
-     * illumination for white balance. While the exact white balance
-     * transforms are up to the camera device, they will approximately
-     * match the CIE standard illuminant A.</p>
+     * illumination for white balance.</p>
+     * <p>While the exact white balance transforms are up to the
+     * camera device, they will approximately match the CIE
+     * standard illuminant A.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_INCANDESCENT = 2;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses fluorescent light as the assumed scene
-     * illumination for white balance. While the exact white balance
-     * transforms are up to the camera device, they will approximately
-     * match the CIE standard illuminant F2.</p>
+     * illumination for white balance.</p>
+     * <p>While the exact white balance transforms are up to the
+     * camera device, they will approximately match the CIE
+     * standard illuminant F2.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_FLUORESCENT = 3;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses warm fluorescent light as the assumed scene
-     * illumination for white balance. While the exact white balance
-     * transforms are up to the camera device, they will approximately
-     * match the CIE standard illuminant F4.</p>
+     * illumination for white balance.</p>
+     * <p>While the exact white balance transforms are up to the
+     * camera device, they will approximately match the CIE
+     * standard illuminant F4.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_WARM_FLUORESCENT = 4;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses daylight light as the assumed scene
-     * illumination for white balance. While the exact white balance
-     * transforms are up to the camera device, they will approximately
-     * match the CIE standard illuminant D65.</p>
+     * illumination for white balance.</p>
+     * <p>While the exact white balance transforms are up to the
+     * camera device, they will approximately match the CIE
+     * standard illuminant D65.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_DAYLIGHT = 5;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses cloudy daylight light as the assumed scene
      * illumination for white balance.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_CLOUDY_DAYLIGHT = 6;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses twilight light as the assumed scene
      * illumination for white balance.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_TWILIGHT = 7;
 
     /**
-     * <p>The camera device's auto white balance routine is disabled;
+     * <p>The camera device's auto-white balance routine is disabled;
      * the camera device uses shade light as the assumed scene
      * illumination for white balance.</p>
+     * <p>The application's values for {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}
+     * and {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} are ignored.
+     * For devices that support the MANUAL_POST_PROCESSING capability, the
+     * values used by the camera device for the transform and gains
+     * will be available in the capture result for this request.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_GAINS
+     * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     public static final int CONTROL_AWB_MODE_SHADE = 8;
@@ -966,38 +1041,43 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This request doesn't fall into the other
-     * categories. Default to preview-like
+     * <p>The goal of this request doesn't fall into the other
+     * categories. The camera device will default to preview-like
      * behavior.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_CUSTOM = 0;
 
     /**
-     * <p>This request is for a preview-like usecase. The
-     * precapture trigger may be used to start off a metering
-     * w/flash sequence</p>
+     * <p>This request is for a preview-like use case.</p>
+     * <p>The precapture trigger may be used to start off a metering
+     * w/flash sequence.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_PREVIEW = 1;
 
     /**
      * <p>This request is for a still capture-type
-     * usecase.</p>
+     * use case.</p>
+     * <p>If the flash unit is under automatic control, it may fire as needed.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_STILL_CAPTURE = 2;
 
     /**
      * <p>This request is for a video recording
-     * usecase.</p>
+     * use case.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_RECORD = 3;
 
     /**
      * <p>This request is for a video snapshot (still
-     * image while recording video) usecase</p>
+     * image while recording video) use case.</p>
+     * <p>The camera device should take the highest-quality image
+     * possible (given the other settings) without disrupting the
+     * frame rate of video recording.<br />
+     * </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
@@ -1006,15 +1086,16 @@ public abstract class CameraMetadata<TKey> {
      * <p>This request is for a ZSL usecase; the
      * application will stream full-resolution images and
      * reprocess one or several later for a final
-     * capture</p>
+     * capture.</p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG = 5;
 
     /**
      * <p>This request is for manual capture use case where
-     * the applications want to directly control the capture parameters
-     * (e.g. {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} etc.).</p>
+     * the applications want to directly control the capture parameters.</p>
+     * <p>For example, the application may wish to manually control
+     * {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, etc.</p>
      *
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_SENSITIVITY
@@ -1034,7 +1115,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>A "monocolor" effect where the image is mapped into
-     * a single color.  This will typically be grayscale.</p>
+     * a single color.</p>
+     * <p>This will typically be grayscale.</p>
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      */
     public static final int CONTROL_EFFECT_MODE_MONO = 1;
@@ -1094,31 +1176,42 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>Full application control of pipeline. All 3A
-     * routines are disabled, no other settings in
-     * android.control.* have any effect</p>
+     * <p>Full application control of pipeline.</p>
+     * <p>All control by the device's metering and focusing (3A)
+     * routines is disabled, and no other settings in
+     * android.control.* have any effect, except that
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} may be used by the camera
+     * device to select post-processing values for processing
+     * blocks that do not allow for manual control, or are not
+     * exposed by the camera API.</p>
+     * <p>However, the camera device's 3A routines may continue to
+     * collect statistics and update their internal state so that
+     * when control is switched to AUTO mode, good control values
+     * can be immediately applied.</p>
+     *
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_OFF = 0;
 
     /**
-     * <p>Use settings for each individual 3A routine.
-     * Manual control of capture parameters is disabled. All
+     * <p>Use settings for each individual 3A routine.</p>
+     * <p>Manual control of capture parameters is disabled. All
      * controls in android.control.* besides sceneMode take
-     * effect</p>
+     * effect.</p>
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_AUTO = 1;
 
     /**
-     * <p>Use specific scene mode. Enabling this disables
-     * control.aeMode, control.awbMode and control.afMode
-     * controls; the camera device will ignore those settings while
-     * USE_SCENE_MODE is active (except for FACE_PRIORITY
-     * scene mode). Other control entries are still active.
-     * This setting can only be used if scene mode is supported
-     * (i.e. {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes} contain some modes
-     * other than DISABLED).</p>
+     * <p>Use a specific scene mode.</p>
+     * <p>Enabling this disables control.aeMode, control.awbMode and
+     * control.afMode controls; the camera device will ignore
+     * those settings while USE_SCENE_MODE is active (except for
+     * FACE_PRIORITY scene mode). Other control entries are still
+     * active.  This setting can only be used if scene mode is
+     * supported (i.e. {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
+     * contain some modes other than DISABLED).</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
      * @see CaptureRequest#CONTROL_MODE
@@ -1128,7 +1221,12 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Same as OFF mode, except that this capture will not be
      * used by camera device background auto-exposure, auto-white balance and
-     * auto-focus algorithms to update their statistics.</p>
+     * auto-focus algorithms (3A) to update their statistics.</p>
+     * <p>Specifically, the 3A routines are locked to the last
+     * values set from a request with AUTO, OFF, or
+     * USE_SCENE_MODE, and any statistics or state updates
+     * collected from manual captures with OFF_KEEP_STATE will be
+     * discarded by the camera device.</p>
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_OFF_KEEP_STATE = 3;
@@ -1146,8 +1244,9 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>If face detection support exists, use face
      * detection data for auto-focus, auto-white balance, and
-     * auto-exposure routines. If face detection statistics are
-     * disabled (i.e. {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} is set to OFF),
+     * auto-exposure routines.</p>
+     * <p>If face detection statistics are disabled
+     * (i.e. {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} is set to OFF),
      * this should still operate correctly (but will not return
      * face detection statistics to the framework).</p>
      * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
@@ -1163,8 +1262,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1;
 
     /**
-     * <p>Optimized for photos of quickly moving objects.
-     * Similar to SPORTS.</p>
+     * <p>Optimized for photos of quickly moving objects.</p>
+     * <p>Similar to SPORTS.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_ACTION = 2;
@@ -1233,8 +1332,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_FIREWORKS = 12;
 
     /**
-     * <p>Optimized for photos of quickly moving people.
-     * Similar to ACTION.</p>
+     * <p>Optimized for photos of quickly moving people.</p>
+     * <p>Similar to ACTION.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_SPORTS = 13;
@@ -1266,11 +1365,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>Video stabilization is disabled.</p>
      * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      */
     public static final int CONTROL_VIDEO_STABILIZATION_MODE_OFF = 0;
 
     /**
+     * <p>Video stabilization is enabled.</p>
      * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      */
     public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1;
@@ -1280,21 +1381,20 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>No edge enhancement is applied</p>
+     * <p>No edge enhancement is applied.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_OFF = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to sensor
+     * <p>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
      * output</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_FAST = 1;
 
     /**
-     * <p>Frame rate may be reduced by high
-     * quality</p>
+     * <p>Apply high-quality edge enhancement, at a cost of reducing output frame rate.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
@@ -1327,10 +1427,10 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>No hot pixel correction is applied.</p>
      * <p>The frame rate must not be reduced relative to sensor raw output
      * for this option.</p>
-     * <p>No hot pixel correction is applied.
-     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     * <p>The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
@@ -1338,10 +1438,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int HOT_PIXEL_MODE_OFF = 0;
 
     /**
-     * <p>The frame rate must not be reduced relative to sensor raw output
-     * for this option.</p>
-     * <p>Hot pixel correction is applied.
-     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     * <p>Hot pixel correction is applied, without reducing frame
+     * rate relative to sensor raw output.</p>
+     * <p>The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
@@ -1349,10 +1448,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int HOT_PIXEL_MODE_FAST = 1;
 
     /**
-     * <p>The frame rate may be reduced relative to sensor raw output
-     * for this option.</p>
-     * <p>A high-quality hot pixel correction is applied.
-     * The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
+     * <p>High-quality hot pixel correction is applied, at a cost
+     * of reducing frame rate relative to sensor raw output.</p>
+     * <p>The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
      * @see CaptureRequest#HOT_PIXEL_MODE
@@ -1380,21 +1478,21 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>No noise reduction is applied</p>
+     * <p>No noise reduction is applied.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_OFF = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to sensor
-     * output</p>
+     * <p>Noise reduction is applied without reducing frame rate relative to sensor
+     * output.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_FAST = 1;
 
     /**
-     * <p>May slow down frame rate to provide highest
-     * quality</p>
+     * <p>High-quality noise reduction is applied, at the cost of reducing frame rate
+     * relative to sensor output.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
@@ -1404,8 +1502,9 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>Default. No test pattern mode is used, and the camera
+     * <p>No test pattern mode is used, and the camera
      * device returns captures from the image sensor.</p>
+     * <p>This is the default if the key is not set.</p>
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     public static final int SENSOR_TEST_PATTERN_MODE_OFF = 0;
@@ -1509,19 +1608,21 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>No lens shading correction is applied</p>
+     * <p>No lens shading correction is applied.</p>
      * @see CaptureRequest#SHADING_MODE
      */
     public static final int SHADING_MODE_OFF = 0;
 
     /**
-     * <p>Must not slow down frame rate relative to sensor raw output</p>
+     * <p>Apply lens shading corrections, without slowing
+     * frame rate relative to sensor raw output</p>
      * @see CaptureRequest#SHADING_MODE
      */
     public static final int SHADING_MODE_FAST = 1;
 
     /**
-     * <p>Frame rate may be reduced by high quality</p>
+     * <p>Apply high-quality lens shading correction, at the
+     * cost of reduced frame rate.</p>
      * @see CaptureRequest#SHADING_MODE
      */
     public static final int SHADING_MODE_HIGH_QUALITY = 2;
@@ -1531,20 +1632,28 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>Do not include face detection statistics in capture
+     * results.</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0;
 
     /**
-     * <p>Optional Return rectangle and confidence
-     * only</p>
+     * <p>Return face rectangle and confidence values only.</p>
+     * <p>In this mode, only android.statistics.faceRectangles and
+     * android.statistics.faceScores outputs are valid.</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1;
 
     /**
-     * <p>Optional Return all face
-     * metadata</p>
+     * <p>Return all face
+     * metadata.</p>
+     * <p>In this mode,
+     * android.statistics.faceRectangles,
+     * android.statistics.faceScores,
+     * android.statistics.faceIds, and
+     * android.statistics.faceLandmarks outputs are valid.</p>
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2;
@@ -1554,11 +1663,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>Do not include a lens shading map in the capture result.</p>
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      */
     public static final int STATISTICS_LENS_SHADING_MAP_MODE_OFF = 0;
 
     /**
+     * <p>Include a lens shading map in the capture result.</p>
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      */
     public static final int STATISTICS_LENS_SHADING_MAP_MODE_ON = 1;
@@ -1582,15 +1693,15 @@ public abstract class CameraMetadata<TKey> {
     public static final int TONEMAP_MODE_CONTRAST_CURVE = 0;
 
     /**
-     * <p>Advanced gamma mapping and color enhancement may be applied.</p>
-     * <p>Should not slow down frame rate relative to raw sensor output.</p>
+     * <p>Advanced gamma mapping and color enhancement may be applied, without
+     * reducing frame rate compared to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_FAST = 1;
 
     /**
-     * <p>Advanced gamma mapping and color enhancement may be applied.</p>
-     * <p>May slow down frame rate relative to raw sensor output.</p>
+     * <p>High-quality gamma mapping and color enhancement will be applied, at
+     * the cost of reduced frame rate compared to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
@@ -1600,7 +1711,8 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>AE is off or recently reset. When a camera device is opened, it starts in
+     * <p>AE is off or recently reset.</p>
+     * <p>When a camera device is opened, it starts in
      * this state. This is a transient state, the camera device may skip reporting
      * this state in capture result.</p>
      * @see CaptureResult#CONTROL_AE_STATE
@@ -1609,7 +1721,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>AE doesn't yet have a good set of control values
-     * for the current scene. This is a transient state, the camera device may skip
+     * for the current scene.</p>
+     * <p>This is a transient state, the camera device may skip
      * reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AE_STATE
      */
@@ -1638,11 +1751,13 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>AE has been asked to do a precapture sequence
-     * (through the {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} START),
-     * and is currently executing it. Once PRECAPTURE
-     * completes, AE will transition to CONVERGED or
-     * FLASH_REQUIRED as appropriate. This is a transient state, the
-     * camera device may skip reporting this state in capture result.</p>
+     * and is currently executing it.</p>
+     * <p>Precapture can be triggered through setting
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to START.</p>
+     * <p>Once PRECAPTURE completes, AE will transition to CONVERGED
+     * or FLASH_REQUIRED as appropriate. This is a transient
+     * state, the camera device may skip reporting this state in
+     * capture result.</p>
      *
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CaptureResult#CONTROL_AE_STATE
@@ -1654,61 +1769,78 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>AF off or has not yet tried to scan/been asked
-     * to scan.  When a camera device is opened, it starts in
-     * this state. This is a transient state, the camera device may
-     * skip reporting this state in capture result.</p>
+     * <p>AF is off or has not yet tried to scan/been asked
+     * to scan.</p>
+     * <p>When a camera device is opened, it starts in this
+     * state. This is a transient state, the camera device may
+     * skip reporting this state in capture
+     * result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_INACTIVE = 0;
 
     /**
-     * <p>if CONTINUOUS_* modes are supported. AF is
-     * currently doing an AF scan initiated by a continuous
-     * autofocus mode. This is a transient state, the camera device may
-     * skip reporting this state in capture result.</p>
+     * <p>AF is currently performing an AF scan initiated the
+     * camera device in a continuous autofocus mode.</p>
+     * <p>Only used by CONTINUOUS_* AF modes. This is a transient
+     * state, the camera device may skip reporting this state in
+     * capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_SCAN = 1;
 
     /**
-     * <p>if CONTINUOUS_* modes are supported. AF currently
-     * believes it is in focus, but may restart scanning at
-     * any time. This is a transient state, the camera device may skip
-     * reporting this state in capture result.</p>
+     * <p>AF currently believes it is in focus, but may
+     * restart scanning at any time.</p>
+     * <p>Only used by CONTINUOUS_* AF modes. This is a transient
+     * state, the camera device may skip reporting this state in
+     * capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_PASSIVE_FOCUSED = 2;
 
     /**
-     * <p>if AUTO or MACRO modes are supported. AF is doing
-     * an AF scan because it was triggered by AF trigger. This is a
-     * transient state, the camera device may skip reporting
-     * this state in capture result.</p>
+     * <p>AF is performing an AF scan because it was
+     * triggered by AF trigger.</p>
+     * <p>Only used by AUTO or MACRO AF modes. This is a transient
+     * state, the camera device may skip reporting this state in
+     * capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_ACTIVE_SCAN = 3;
 
     /**
-     * <p>if any AF mode besides OFF is supported. AF
-     * believes it is focused correctly and is
-     * locked.</p>
+     * <p>AF believes it is focused correctly and has locked
+     * focus.</p>
+     * <p>This state is reached only after an explicit START AF trigger has been
+     * sent ({@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}), when good focus has been obtained.</p>
+     * <p>The lens will remain stationary until the AF mode ({@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}) is changed or
+     * a new AF trigger is sent to the camera device ({@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}).</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_FOCUSED_LOCKED = 4;
 
     /**
-     * <p>if any AF mode besides OFF is supported. AF has
-     * failed to focus successfully and is
-     * locked.</p>
+     * <p>AF has failed to focus successfully and has locked
+     * focus.</p>
+     * <p>This state is reached only after an explicit START AF trigger has been
+     * sent ({@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}), when good focus cannot be obtained.</p>
+     * <p>The lens will remain stationary until the AF mode ({@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}) is changed or
+     * a new AF trigger is sent to the camera device ({@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}).</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
      * @see CaptureResult#CONTROL_AF_STATE
      */
     public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5;
 
     /**
-     * <p>if CONTINUOUS_* modes are supported. AF finished a
-     * passive scan without finding focus, and may restart
-     * scanning at any time. This is a transient state, the camera
+     * <p>AF finished a passive scan without finding focus,
+     * and may restart scanning at any time.</p>
+     * <p>Only used by CONTINUOUS_* AF modes. This is a transient state, the camera
      * device may skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AF_STATE
      */
@@ -1719,16 +1851,19 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>AWB is not in auto mode.  When a camera device is opened, it
-     * starts in this state. This is a transient state, the camera device may
-     * skip reporting this state in capture result.</p>
+     * <p>AWB is not in auto mode, or has not yet started metering.</p>
+     * <p>When a camera device is opened, it starts in this
+     * state. This is a transient state, the camera device may
+     * skip reporting this state in capture
+     * result.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
     public static final int CONTROL_AWB_STATE_INACTIVE = 0;
 
     /**
      * <p>AWB doesn't yet have a good set of control
-     * values for the current scene. This is a transient state, the camera device
+     * values for the current scene.</p>
+     * <p>This is a transient state, the camera device
      * may skip reporting this state in capture result.</p>
      * @see CaptureResult#CONTROL_AWB_STATE
      */
@@ -1776,8 +1911,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int FLASH_STATE_FIRED = 3;
 
     /**
-     * <p>Flash partially illuminated this frame. This is usually due to the next
-     * or previous frame having the flash fire, and the flash spilling into this capture
+     * <p>Flash partially illuminated this frame.</p>
+     * <p>This is usually due to the next or previous frame having
+     * the flash fire, and the flash spilling into this capture
      * due to hardware limitations.</p>
      * @see CaptureResult#FLASH_STATE
      */
@@ -1800,8 +1936,10 @@ public abstract class CameraMetadata<TKey> {
     public static final int LENS_STATE_STATIONARY = 0;
 
     /**
-     * <p>Any of the lens parameters ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
-     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} or {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) is changing.</p>
+     * <p>One or several of the lens parameters
+     * ({@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}, {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance},
+     * {@link CaptureRequest#LENS_FILTER_DENSITY android.lens.filterDensity} or {@link CaptureRequest#LENS_APERTURE android.lens.aperture}) is
+     * currently changing.</p>
      *
      * @see CaptureRequest#LENS_APERTURE
      * @see CaptureRequest#LENS_FILTER_DENSITY
@@ -1816,16 +1954,22 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
+     * <p>The camera device does not detect any flickering illumination
+     * in the current scene.</p>
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      */
     public static final int STATISTICS_SCENE_FLICKER_NONE = 0;
 
     /**
+     * <p>The camera device detects illumination flickering at 50Hz
+     * in the current scene.</p>
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      */
     public static final int STATISTICS_SCENE_FLICKER_50HZ = 1;
 
     /**
+     * <p>The camera device detects illumination flickering at 60Hz
+     * in the current scene.</p>
      * @see CaptureResult#STATISTICS_SCENE_FLICKER
      */
     public static final int STATISTICS_SCENE_FLICKER_60HZ = 2;
@@ -1835,8 +1979,8 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>The current result is not yet fully synchronized to any request.
-     * Synchronization is in progress, and reading metadata from this
+     * <p>The current result is not yet fully synchronized to any request.</p>
+     * <p>Synchronization is in progress, and reading metadata from this
      * result may include a mix of data that have taken effect since the
      * last synchronization time.</p>
      * <p>In some future result, within {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} frames,
@@ -1851,10 +1995,10 @@ public abstract class CameraMetadata<TKey> {
     public static final int SYNC_FRAME_NUMBER_CONVERGING = -1;
 
     /**
-     * <p>The current result's synchronization status is unknown. The
-     * result may have already converged, or it may be in progress.
-     * Reading from this result may include some mix of settings from
-     * past requests.</p>
+     * <p>The current result's synchronization status is unknown.</p>
+     * <p>The result may have already converged, or it may be in
+     * progress.  Reading from this result may include some mix
+     * of settings from past requests.</p>
      * <p>After a settings change, the new settings will eventually all
      * take effect for the output buffers and results. However, this
      * value will not change when that happens. Altering settings
