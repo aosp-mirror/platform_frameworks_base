@@ -314,11 +314,6 @@ public final class PowerManager {
      * The value to pass as the 'reason' argument to reboot() to
      * reboot into recovery mode (for applying system updates, doing
      * factory resets, etc.).
-     * <p>
-     * Requires the {@link android.Manifest.permission#RECOVERY}
-     * permission (in addition to
-     * {@link android.Manifest.permission#REBOOT}).
-     * </p>
      */
     public static final String REBOOT_RECOVERY = "recovery";
     
