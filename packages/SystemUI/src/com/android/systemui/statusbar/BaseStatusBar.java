@@ -80,11 +80,10 @@ import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
+import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
@@ -106,6 +105,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_SHOW_HEADS_UP = 1026;
     protected static final int MSG_HIDE_HEADS_UP = 1027;
     protected static final int MSG_ESCALATE_HEADS_UP = 1028;
+    protected static final int MSG_DECAY_HEADS_UP = 1029;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -129,7 +129,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NotificationData mNotificationData = new NotificationData();
     protected NotificationStackScrollLayout mStackScroller;
 
-    protected NotificationData.Entry mInterruptingNotificationEntry;
+    // for heads up notifications
+    protected HeadsUpNotificationView mHeadsUpNotificationView;
+    protected int mHeadsUpNotificationDecay;
     protected long mInterruptingNotificationTime;
 
     // used to notify status bar for suppressing notification LED
@@ -505,8 +507,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        if (n.isClearable() || (mInterruptingNotificationEntry != null
-                && mInterruptingNotificationEntry.row == row)) {
+        if (n.isClearable() || (mHeadsUpNotificationView.getEntry() != null
+                && mHeadsUpNotificationView.getEntry().row == row)) {
             final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
@@ -766,6 +768,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public abstract void resetHeadsUpDecayTimer();
 
+    public abstract void scheduleHeadsUpOpen();
+
+    public abstract void scheduleHeadsUpClose();
+
+    public abstract void scheduleHeadsUpEscalation();
+
     /**
      * Save the current "public" (locked and secure) state of the lockscreen.
      */
@@ -795,6 +803,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         return mUsersAllowingPrivateNotifications.get(userHandle);
+    }
+
+    public void onNotificationClear(StatusBarNotification notification) {
+        try {
+            mBarService.onNotificationClear(
+                    notification.getPackageName(),
+                    notification.getTag(),
+                    notification.getId(),
+                    notification.getUserId());
+        } catch (android.os.RemoteException ex) {
+            // oh well
+        }
     }
 
     protected class H extends Handler {
@@ -1101,7 +1121,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     try {
                         if (mIsHeadsUp) {
-                            mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                            mHeadsUpNotificationView.clear();
                         }
                         mBarService.onNotificationClick(mNotificationKey);
                     } catch (RemoteException ex) {
@@ -1394,15 +1414,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             try {
                 updateNotificationViews(oldEntry, notification);
 
-                if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
-                        && oldNotification == mInterruptingNotificationEntry.notification) {
+                if (ENABLE_HEADS_UP && mHeadsUpNotificationView.getEntry() != null
+                        && oldNotification == mHeadsUpNotificationView.getEntry().notification) {
                     if (!shouldInterrupt(notification)) {
                         if (DEBUG) Log.d(TAG, "no longer interrupts!");
-                        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                        scheduleHeadsUpClose();
                     } else {
                         if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
-                        mInterruptingNotificationEntry.notification = notification;
-                        updateHeadsUpViews(mInterruptingNotificationEntry, notification);
+                        mHeadsUpNotificationView.getEntry().notification = notification;
+                        updateHeadsUpViews(mHeadsUpNotificationView.getEntry(), notification);
                     }
                 }
 
@@ -1511,8 +1531,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {
-        if (!screenOn && mInterruptingNotificationEntry != null) {
-            mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
+        if (!screenOn) {
+            scheduleHeadsUpEscalation();
         }
     }
 

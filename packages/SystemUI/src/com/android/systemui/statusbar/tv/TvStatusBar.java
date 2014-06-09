@@ -147,6 +147,18 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void scheduleHeadsUpOpen() {
+    }
+
+    @Override
+    public void scheduleHeadsUpEscalation() {
+    }
+
+    @Override
+    public void scheduleHeadsUpClose() {
+    }
+
+    @Override
     protected int getMaxKeyguardNotifications() {
         return 0;
     }
