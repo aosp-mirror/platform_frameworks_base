@@ -6939,13 +6939,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (getClass() != another.getClass()) {
                 return 1;
             }
-            // First is above second.
-            if (mLocation.bottom - another.mLocation.top <= 0) {
-                return -1;
-            }
-            // First is below second.
-            if (mLocation.top - another.mLocation.bottom >= 0) {
-                return 1;
+            final int topDiference = mLocation.top - another.mLocation.top;
+            if (topDiference != 0) {
+                return topDiference;
             }
             // LTR
             if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
@@ -6960,11 +6956,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (rightDifference != 0) {
                     return -rightDifference;
                 }
-            }
-            // Break tie by top.
-            final int topDiference = mLocation.top - another.mLocation.top;
-            if (topDiference != 0) {
-                return topDiference;
             }
             // Break tie by height.
             final int heightDiference = mLocation.height() - another.mLocation.height();
