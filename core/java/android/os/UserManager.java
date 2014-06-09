@@ -481,10 +481,11 @@ public class UserManager {
     }
 
     /**
-     * @hide
      * Returns whether the current user has been disallowed from performing certain actions
      * or setting certain settings.
-     * @param restrictionKey the string key representing the restriction
+     *
+     * @param restrictionKey The string key representing the restriction.
+     * @return {@code true} if the current user has the given restriction, {@code false} otherwise.
      */
     public boolean hasUserRestriction(String restrictionKey) {
         return hasUserRestriction(restrictionKey, Process.myUserHandle());
