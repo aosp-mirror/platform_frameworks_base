@@ -188,10 +188,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
-    <!-- no translation found for user_owner_label (6465364741001216388) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (3022906847647343112) -->
-    <skip />
+    <string name="user_owner_label" msgid="6465364741001216388">"Programu binafsi"</string>
+    <string name="managed_profile_label" msgid="3022906847647343112">"Android kwa Kazi"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Huduma ambazo zinakugharimu pesa"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Fanya mambo ambayo yanaweza kukugharimu pesa."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ujumbe wako"</string>
@@ -522,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Inaruhusu programu kunasa na kuelekeza sauti kwingine."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Kutambua neno tekelezi"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Inaruhusu programu kunasa sauti kwa ajili ya utambuzi wa Neno Tekelezi. Kunasa kunaweza kukafanyika chinichini lakini hakutazuia unasaji mwingine wa sauti (kwa mfano Kamkoda)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Uelekezaji wa Sauti"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Huruhusu programu kudhibiti uelekezaji wa sauti moja kwa moja na kupuuza maamuzi ya sera ya sauti."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"nasa sauti ya video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Inaruhusu programu kunasa na kuelekeza video kwingine."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"nasa sauti ya video kwa usalama"</string>
@@ -1358,6 +1358,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Huruhusu programu kudhibiti kilinda-funguo."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Sikiliza mabadiliko ya hali ya kuaminiwa."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Huruhusu programu kusikiliza mabadiliko katika hali ya kuaminiwa."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Toa wakala wa uaminifu."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Huruhusu programu kutoa wakala wa uaminifu."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Funga kwenye huduma ya dalali wa kuaminiwa"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Huruhusu programu kufungamanisha kwenye huduma ya dalali wa kuaminiwa."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Ingiliana na sasisho na mfumo wa kurejesha"</string>

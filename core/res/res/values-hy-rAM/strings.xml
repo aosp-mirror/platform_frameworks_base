@@ -188,10 +188,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Անվտանգ ռեժիմ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android համակարգ"</string>
-    <!-- no translation found for user_owner_label (6465364741001216388) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (3022906847647343112) -->
-    <skip />
+    <string name="user_owner_label" msgid="6465364741001216388">"Անձնական ​​ծրագրեր"</string>
+    <string name="managed_profile_label" msgid="3022906847647343112">"Android for Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Ծառայություններ, որոնց համար կգանձվեք"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Կատարել գործողություններ, որի դիմաց ձեր հաշվից գումար կծախսվի:"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ձեր հաղորդագրությունները"</string>
@@ -522,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Թույլ է տալիս ծրագրին պահել և վերահղել աուդիո արտածումը:"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Թեժ բառի հայտնաբերում"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Հավելվածին թույլ է տալիս որսալ ձայնանյութը՝ թեժ բառի հայտնաբերման համար: Դա կարող է տեղի ունենալ հետնաշերտում, սակայն չի խանգարի այլ աուդիո ձայնագրություններին (օր.՝ Տեսախցիկից):"</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Աուդիո երթուղայնացում"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Ծրագրին թույլ է տալիս անմիջականորեն վերահսկել աուդիո երթուղայնացումը և վերասահմանել աուդիո քաղաքականության որոշումները:"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"պահել վիդեո արտածումը"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Թույլ է տալիս ծրագրին պահել և վերահղել վիդեո արտածումը:"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"պահել անվտանգ վիդեո արտածումը"</string>
@@ -1358,6 +1358,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Թույլ է տալիս հավելվածին կառավարել ստեղնաշարի պաշտպանիչը:"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Լսել վստահության կարգավիճակի ​փոփոխությունները:"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ծրագրին թույլ է տալիս լսել վստահության կարգավիճակի փոփոխությունները:"</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Տրամադրել վստահելի գործակալ:"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ծրագրին թույլ է տալիս տրամադրել վստահելի գործակալ:"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Կապվել վստահելի գործակալի ծառայությանը"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ծրագրին թույլ է տալիս կապվել վստահելի գործակալի ծառայությանը:"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Փոխազդել թարմացման և վերականգնման համակարգի հետ"</string>
