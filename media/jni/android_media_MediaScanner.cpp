@@ -350,7 +350,7 @@ android_media_MediaScanner_extractAlbumArt(
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     MediaAlbumArt* mediaAlbumArt =
             reinterpret_cast<MediaAlbumArt*>(mp->extractAlbumArt(fd));
-    if (mediaAlbumArt != NULL) {
+    if (mediaAlbumArt == NULL) {
         return NULL;
     }
 
