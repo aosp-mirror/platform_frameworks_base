@@ -422,7 +422,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final SurfaceSession mFxSession;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
-    CircularDisplayMask mCircularDisplayMask;
     FocusedStackFrame mFocusedStackFrame;
 
     int mFocusedStackLayer;
@@ -819,8 +818,6 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             SurfaceControl.closeTransaction();
         }
-
-        showCircularDisplayMaskIfNeeded();
     }
 
     public InputMonitor getInputMonitor() {
@@ -5553,39 +5550,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void showCircularDisplayMaskIfNeeded() {
-        // we're fullscreen and not hosted in an ActivityView
-        if (mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_windowIsRound)) {
-            mH.sendMessage(mH.obtainMessage(H.SHOW_DISPLAY_MASK));
-        }
-    }
-
-    public void showCircularMask() {
-        synchronized(mWindowMap) {
-
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION showDisplayMask");
-            SurfaceControl.openTransaction();
-            try {
-                // TODO(multi-display): support multiple displays
-                if (mCircularDisplayMask == null) {
-                    mCircularDisplayMask = new CircularDisplayMask(
-                            getDefaultDisplayContentLocked().getDisplay(),
-                            mFxSession,
-                            mPolicy.windowTypeToLayerLw(
-                                    WindowManager.LayoutParams.TYPE_POINTER)
-                                    * TYPE_LAYER_MULTIPLIER + 10);
-                }
-                mCircularDisplayMask.setVisibility(true);
-            } finally {
-                SurfaceControl.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION showDisplayMask");
-            }
-        }
-    }
-
     // TODO: more accounting of which pid(s) turned it on, keep count,
     // only allow disables from pids which have count on, etc.
     @Override
@@ -7201,8 +7165,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int REMOVE_STARTING_TIMEOUT = 33;
 
-        public static final int SHOW_DISPLAY_MASK = 34;
-        public static final int ALL_WINDOWS_DRAWN = 35;
+        public static final int ALL_WINDOWS_DRAWN = 34;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7603,11 +7566,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_STRICT_MODE_VIOLATION: {
                     showStrictModeViolation(msg.arg1, msg.arg2);
-                    break;
-                }
-
-                case SHOW_DISPLAY_MASK: {
-                    showCircularMask();
                     break;
                 }
 
@@ -9094,9 +9052,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mStrictModeFlash != null) {
                 mStrictModeFlash.positionSurface(defaultDw, defaultDh);
-            }
-            if (mCircularDisplayMask != null) {
-                mCircularDisplayMask.positionSurface(defaultDw, defaultDh, mRotation);
             }
 
             boolean focusDisplayed = false;
