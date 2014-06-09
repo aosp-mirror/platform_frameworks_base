@@ -17,6 +17,8 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -72,6 +74,15 @@ import java.util.List;
 public class Notification implements Parcelable
 {
     private static final String TAG = "Notification";
+
+    /**
+     * An activity that provides a user interface for adjusting notification preferences for its
+     * containing application. Optional but recommended for apps that post
+     * {@link android.app.Notification Notifications}.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String INTENT_CATEGORY_NOTIFICATION_PREFERENCES
+            = "android.intent.category.NOTIFICATION_PREFERENCES";
 
     /**
      * Use all default values (where applicable).
