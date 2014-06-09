@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Lar appen ta opp og omdirigere lydutdata."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Gjenkjennelse av kommandoord"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Gir appen tillatelse til å ta opp lyd for å gjenkjenne kommandoord. Opptaket kan skje i bakgrunnen, men forhindrer ikke lydopptak i andre funksjoner (f.eks. i videoopptak)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Lydruting"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tillater appen å styre lydruting direkte og overstyre angitte lydinnstillinger."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ta opp fra videoutdata"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Lar appen ta opp og omdirigere videoutdata."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ta opp fra sikre videoutdata"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillater at en app kontrollerer tastelåsen."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Oppdag endringer i tillitsstatusen."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Gir appen tillatelse til å oppdage endringer i tillitsstatusen."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Angivelse av en pålitelig agent."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillater appen å angi en pålitelig agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Tilknytt en tillitsagent-tjeneste."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en tillitsagent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Samhandling med oppdateringer og gjenopprettingssystem"</string>

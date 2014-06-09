@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite que la aplicación capture y redirija la salida de audio."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Detectar palabras activas"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Permite que la aplicación capture audio para la detección de palabras activas. La captura puede realizarse en segundo plano, pero no impide otras capturas de audio (por ejemplo, de la videocámara)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Enrutamiento de audio"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Permite que la aplicación controle directamente el enrutamiento de audio y anule las decisiones de políticas de audio."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"Capturar salida de video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite que la aplicación capture y redirija la salida de video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"Capturar salida de video segura"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Permite que una aplicación controle los bloqueos."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Detectar cambios en estado de confianza"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite que una aplicación detecte cambios en el estado de confianza."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Proporcionar un agente de confianza"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite que una aplicación proporcione un agente de confianza."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Vincular con un servicio de agente de confianza"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite que una aplicación se vincule con un servicio de agente de confianza."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interaccionar con el sistema de recuperación y las actualizaciones"</string>

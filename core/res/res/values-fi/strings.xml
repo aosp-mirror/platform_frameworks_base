@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Antaa sovellukselle luvan äänentoiston kaappaamiseen ja uudelleenohjaamiseen."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Toimintosanan tunnistus"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Antaa sovelluksen siepata ääntä toimintosanojen tunnistusta varten. Sieppaus voi tapahtua taustalla, mutta se ei estä muita laitteita, kuten videokameraa, käyttämästä ääntä."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Äänen reititys"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Antaa sovelluksen hallita äänen reititystä suoraan ja ohittaa ääniä koskevia sääntöjä."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"videokuvan kaappaus"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Antaa sovellukselle luvan videokuvan kaappaamiseen ja uudelleenohjaamiseen"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"suojatun videokuvan kaappaus"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Antaa sovelluksen hallita näppäinvahtia."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Seuraa luottamuksen tilamuutoksia."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Antaa sovelluksen seurata luottamuksen tilamuutoksia."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Luotettavan tahon tarjoaminen"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Antaa sovelluksen tarjota luotettavan tahon."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Luotettavaan tahoon sitoutuminen"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Antaa sovelluksen sitoutua luotettavaan tahoon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Vuorovaikutus päivitys- ja palautusjärjestelmän kanssa"</string>

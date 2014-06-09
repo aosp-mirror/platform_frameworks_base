@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"音声出力のキャプチャとリダイレクトをアプリに許可します。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"注目ワード検出"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"注目ワード検出での音声キャプチャをアプリに許可します。キャプチャはバックグラウンドで発生しますが、その他の音声キャプチャ（例: ビデオ録画）を妨げることはありません。"</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"オーディオルーティング"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"オーディオルーティングの直接制御とオーディオポリシー決定の上書きをアプリに許可します。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"動画出力のキャプチャ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"セキュリティ保護された動画出力のキャプチャ"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"キーガードの制御をアプリに許可します。"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"信頼状態の変更をリッスン"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"信頼状態の変更をリッスンすることをアプリに許可します。"</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"信頼できるエージェントの提供"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"信頼できるエージェントの提供をアプリに許可します。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"信頼できるエージェントサービスへのバインド"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"信頼できるエージェントサービスにバインドすることをアプリに許可します。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"アップデートと回復システムへのアクセス"</string>

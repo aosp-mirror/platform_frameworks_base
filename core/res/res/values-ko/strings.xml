@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"앱이 오디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"핫워드 감지"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"앱에서 핫워드 감지를 위해 오디오를 캡처하도록 허용합니다. 캡처는 백그라운드에서 수행될 수 있지만 다른 오디오 캡처를 차단하지 않습니다(예: 캠코더)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"오디오 라우팅"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"앱이 오디오 라우팅을 직접 제어하고 오디오 정책 결정을 무시할 수 있도록 허용합니다."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"동영상 출력 캡처"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"앱이 동영상 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"안전한 동영상 출력 캡처"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"애플리케이션에서 키가드를 제어하도록 허용합니다."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Trust 상태 변경사항 수신"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"애플리케이션이 Trust 상태에서의 변경사항을 수신할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust Agent 제공"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"애플리케이션이 Trust Agent를 제공할 수 있도록 허용합니다."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Trust Agent 서비스에 연결"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>

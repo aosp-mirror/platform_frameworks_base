@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Programai leidžiama fiksuoti ir peradresuoti garso išvestį."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Aktyvinamųjų žodžių aptikimas"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Programai leidžiama įrašyti garsą, kad būtų galima aptikti aktyvinamuosius žodžius. Įrašymas gali būti vykdomas fone, bet tai netrikdo kitų garso įrašymo veiksmų (pvz., įrašymo vaizdo kamera)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Garso nukreipimas"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Programai leidžiama tiesiogiai valdyti garso nukreipimo ir garso nepaisymo politikos sprendimus."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fiksuoti vaizdo išvestį"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Programai leidžiama fiksuoti ir peradresuoti vaizdo išvestį."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"fiksuoti saugią vaizdo išvestį"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Programai leidžiama valdyti „KeyGuard“."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Atsižvelgti į patikimos būsenos pakeitimus."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Programai leidžiama atsižvelgti į patikimos būsenos pakeitimus."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Teikti patikimos priemonės paslaugą."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Programai leidžiama teikti patikimos priemonės paslaugą."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Susisaistyti su „trust agent“ paslauga"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Programai leidžiama susisaistyti su „trust agent“ paslauga."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Sąveikauti su naujiniu ir atkūrimo sistema"</string>
