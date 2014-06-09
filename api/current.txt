@@ -16087,11 +16087,12 @@ package android.media.tv {
     method public void setOverlayViewEnabled(boolean);
   }
 
-  public class TvView extends android.view.SurfaceView {
+  public class TvView extends android.view.ViewGroup {
     ctor public TvView(android.content.Context);
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
