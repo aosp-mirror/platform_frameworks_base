@@ -251,13 +251,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (view == null) {
             mEpicenterCallback.setEpicenter(null);
         } else {
-            int[] loc = new int[2];
-            view.getLocationOnScreen(loc);
-            int left = loc[0] + Math.round(view.getTranslationX());
-            int top = loc[1] + Math.round(view.getTranslationY());
-            int right = left + view.getWidth();
-            int bottom = top + view.getHeight();
-            Rect epicenter = new Rect(left, top, right, bottom);
+            Rect epicenter = new Rect();
+            view.getBoundsOnScreen(epicenter);
             mEpicenterCallback.setEpicenter(epicenter);
         }
     }
@@ -492,11 +487,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected Bundle captureSharedElementState() {
         Bundle bundle = new Bundle();
-        int[] tempLoc = new int[2];
+        Rect tempBounds = new Rect();
         for (int i = 0; i < mSharedElementNames.size(); i++) {
             View sharedElement = mSharedElements.get(i);
             String name = mSharedElementNames.get(i);
-            captureSharedElementState(sharedElement, name, bundle, tempLoc);
+            captureSharedElementState(sharedElement, name, bundle, tempBounds);
         }
         return bundle;
     }
@@ -509,20 +504,19 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * @param name           The shared element name in the target Activity to apply the placement
      *                       information for.
      * @param transitionArgs Bundle to store shared element placement information.
-     * @param tempLoc        A temporary int[2] for capturing the current location of views.
+     * @param tempBounds     A temporary Rect for capturing the current location of views.
      */
     private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
-            int[] tempLoc) {
+            Rect tempBounds) {
         Bundle sharedElementBundle = new Bundle();
-        view.getLocationOnScreen(tempLoc);
-        float scaleX = view.getScaleX();
-        sharedElementBundle.putInt(KEY_SCREEN_X, tempLoc[0]);
-        int width = Math.round(view.getWidth() * scaleX);
+        tempBounds.set(0, 0, view.getWidth(), view.getHeight());
+        view.getBoundsOnScreen(tempBounds);
+        sharedElementBundle.putInt(KEY_SCREEN_X, tempBounds.left);
+        int width = tempBounds.width();
         sharedElementBundle.putInt(KEY_WIDTH, width);
 
-        float scaleY = view.getScaleY();
-        sharedElementBundle.putInt(KEY_SCREEN_Y, tempLoc[1]);
-        int height = Math.round(view.getHeight() * scaleY);
+        sharedElementBundle.putInt(KEY_SCREEN_Y, tempBounds.top);
+        int height = tempBounds.height();
         sharedElementBundle.putInt(KEY_HEIGHT, height);
 
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());

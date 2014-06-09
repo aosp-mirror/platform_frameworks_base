@@ -431,7 +431,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * child. The child must use this size, and guarantee that all of its
  * descendants will fit within this size.
  * <li>AT_MOST: This is used by the parent to impose a maximum size on the
- * child. The child must gurantee that it and all of its descendants will fit
+ * child. The child must guarantee that it and all of its descendants will fit
  * within this size.
  * </ul>
  * </p>
@@ -5377,8 +5377,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Gets the location of this view in screen coordintates.
      *
      * @param outRect The output location
+     * @hide
      */
-    void getBoundsOnScreen(Rect outRect) {
+    public void getBoundsOnScreen(Rect outRect) {
         if (mAttachInfo == null) {
             return;
         }
@@ -9670,7 +9671,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * The transform matrix of this view, which is calculated based on the current
-     * roation, scale, and pivot properties.
+     * rotation, scale, and pivot properties.
      *
      * @see #getRotation()
      * @see #getScaleX()
