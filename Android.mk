@@ -304,14 +304,15 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
-        media/java/android/media/routeprovider/IRouteConnection.aidl \
-        media/java/android/media/routeprovider/IRouteProvider.aidl \
-        media/java/android/media/routeprovider/IRouteProviderCallback.aidl \
-        media/java/android/media/session/ISessionController.aidl \
-        media/java/android/media/session/ISessionControllerCallback.aidl \
-        media/java/android/media/session/ISession.aidl \
-        media/java/android/media/session/ISessionCallback.aidl \
-        media/java/android/media/session/ISessionManager.aidl \
+	media/java/android/media/routeprovider/IRouteConnection.aidl \
+	media/java/android/media/routeprovider/IRouteProvider.aidl \
+	media/java/android/media/routeprovider/IRouteProviderCallback.aidl \
+	media/java/android/media/session/IActiveSessionsListener.aidl \
+	media/java/android/media/session/ISessionController.aidl \
+	media/java/android/media/session/ISessionControllerCallback.aidl \
+	media/java/android/media/session/ISession.aidl \
+	media/java/android/media/session/ISessionCallback.aidl \
+	media/java/android/media/session/ISessionManager.aidl \
 	media/java/android/media/tv/ITvInputClient.aidl \
 	media/java/android/media/tv/ITvInputHardware.aidl \
 	media/java/android/media/tv/ITvInputHardwareCallback.aidl \
