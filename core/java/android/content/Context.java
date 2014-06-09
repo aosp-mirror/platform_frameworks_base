@@ -2035,6 +2035,7 @@ public abstract class Context {
             AUDIO_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
+            TELECOMM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
             TEXT_SERVICES_MANAGER_SERVICE,
@@ -2163,6 +2164,8 @@ public abstract class Context {
      * @see android.media.MediaRouter
      * @see #TELEPHONY_SERVICE
      * @see android.telephony.TelephonyManager
+     * @see #TELECOMM_SERVICE
+     * @see android.telecomm.TelecommManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2491,6 +2494,16 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      */
     public static final String TELEPHONY_SERVICE = "phone";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.telecomm.TelecommManager} to manage telecomm-related features
+     * of the device.
+     *
+     * @see #getSystemService
+     * @see android.telecomm.TelecommManager
+     */
+    public static final String TELECOMM_SERVICE = "telecomm";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
