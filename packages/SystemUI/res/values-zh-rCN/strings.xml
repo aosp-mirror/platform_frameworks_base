@@ -120,8 +120,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"开启。"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"关闭。"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"已连接。"</string>
-    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
-    <skip />
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"正在连接。"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -189,10 +188,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙：关闭"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"自动旋转"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"屏幕方向：锁定"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"锁定为纵向"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"锁定为横向"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"旋转功能已锁定"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"纵向"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"横向"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"输入法"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"位置信息"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置信息：关闭"</string>
@@ -206,7 +205,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未连接"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"无网络"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN：关闭"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"投射屏幕"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"投射屏幕"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"反色"</string>
@@ -228,13 +227,14 @@
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"触摸即可显示"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"勿扰"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"还有%d条"</item>
-  </plurals>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+另外<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>条"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"向右滑动可打开拨号界面"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"向左滑动可打开相机"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直到您将其关闭"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"正在充电（还需<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>才能充满）"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1分钟"</item>
     <item quantity="other" msgid="6924190729213550991">"%d分钟"</item>

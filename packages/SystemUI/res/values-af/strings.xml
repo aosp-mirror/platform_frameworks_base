@@ -120,8 +120,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Aan."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Af"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Gekoppel."</string>
-    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
-    <skip />
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Koppel tans."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -187,10 +186,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> toestelle)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth af"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Helderheid"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Outoroteer"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotasie gesluit"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Gesluit op portret"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Gesluit op landskap"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Outo-draai"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotasie is gesluit"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portret"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Landskap"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Invoermetode"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Ligging"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Ligging af"</string>
@@ -204,7 +203,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nie gekoppel nie"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Geen netwerk nie"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi af"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Saai na skerm uit"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Uitsaaiskerm"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helderheid"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Keer kleure om"</string>
@@ -226,13 +225,14 @@
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Raak om te wys"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"Moenie steur nie"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"%d meer"</item>
-  </plurals>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder dringende kennisgewings hieronder"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tik weer om oop te maak"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Sleep op om te ontsluit"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Sleep regs vir foon"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Sleep links vir kamera"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Totdat jy dit afskakel"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laai tans (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tot vol)"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Een minuut lank"</item>
     <item quantity="other" msgid="6924190729213550991">"%d minute lank"</item>
