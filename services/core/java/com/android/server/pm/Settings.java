@@ -517,6 +517,7 @@ final class Settings {
             int vc, int pkgFlags, UserHandle installUser, boolean add,
             boolean allowInstall) {
         PackageSetting p = mPackages.get(name);
+        UserManagerService userManager = UserManagerService.getInstance();
         if (p != null) {
             p.primaryCpuAbiString = primaryCpuAbiString;
             p.secondaryCpuAbiString = secondaryCpuAbiString;
@@ -594,6 +595,7 @@ final class Settings {
                         Slog.i(PackageManagerService.TAG, "Stopping package " + name, e);
                     }
                     List<UserInfo> users = getAllUsers();
+                    final int installUserId = installUser != null ? installUser.getIdentifier() : 0;
                     if (users != null && allowInstall) {
                         for (UserInfo user : users) {
                             // By default we consider this app to be installed
@@ -603,8 +605,9 @@ final class Settings {
                             // asked to install for all users, or this is the
                             // user we are installing for.
                             final boolean installed = installUser == null
-                                    || installUser.getIdentifier() == UserHandle.USER_ALL
-                                    || installUser.getIdentifier() == user.id;
+                                    || (installUserId == UserHandle.USER_ALL
+                                        && !isAdbInstallDisallowed(userManager, user.id))
+                                    || installUserId == user.id;
                             p.setUserState(user.id, COMPONENT_ENABLED_STATE_DEFAULT,
                                     installed,
                                     true, // stopped,
@@ -670,7 +673,8 @@ final class Settings {
                 List<UserInfo> users = getAllUsers();
                 if (users != null) {
                     for (UserInfo user : users) {
-                        if (installUser.getIdentifier() == UserHandle.USER_ALL
+                        if ((installUser.getIdentifier() == UserHandle.USER_ALL
+                                    && !isAdbInstallDisallowed(userManager, user.id))
                                 || installUser.getIdentifier() == user.id) {
                             boolean installed = p.getInstalled(user.id);
                             if (!installed) {
@@ -683,6 +687,11 @@ final class Settings {
             }
         }
         return p;
+    }
+
+    boolean isAdbInstallDisallowed(UserManagerService userManager, int userId) {
+        return userManager.hasUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES,
+                userId);
     }
 
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {

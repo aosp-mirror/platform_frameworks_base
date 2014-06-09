@@ -4608,7 +4608,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabled) {
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
+        final int userHandle = user.getIdentifier();
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -4619,7 +4620,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
             }
-            boolean alreadyRestricted = mUserManager.hasUserRestriction(key, userHandle);
+            boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
 
             IAudioService iAudioService = null;
             if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)
@@ -4645,7 +4646,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
-                                userHandle.getIdentifier());
+                                userHandle);
                     } else if (UserManager.DISALLOW_USB_FILE_TRANSFER.equals(key)) {
                         UsbManager manager =
                                 (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
@@ -4653,27 +4654,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,
-                                userHandle.getIdentifier());
+                                userHandle);
                         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
-                                userHandle.getIdentifier());
+                                userHandle);
                     } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
-                        Settings.Global.putStringForUser(mContext.getContentResolver(),
-                                Settings.Global.ADB_ENABLED, "0", userHandle.getIdentifier());
+                        // Only disable adb if changing for primary user, since it is global
+                        if (userHandle == UserHandle.USER_OWNER) {
+                            Settings.Global.putStringForUser(mContext.getContentResolver(),
+                                    Settings.Global.ADB_ENABLED, "0", userHandle);
+                        }
                     } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
                         Settings.Global.putStringForUser(mContext.getContentResolver(),
                                 Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
-                                userHandle.getIdentifier());
+                                userHandle);
                         Settings.Global.putStringForUser(mContext.getContentResolver(),
                                 Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
-                                userHandle.getIdentifier());
+                                userHandle);
                     } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
-                                userHandle.getIdentifier());
+                                userHandle);
                     }
                 }
-                mUserManager.setUserRestriction(key, enabled, userHandle);
+                mUserManager.setUserRestriction(key, enabled, user);
             } finally {
                 restoreCallingIdentity(id);
             }

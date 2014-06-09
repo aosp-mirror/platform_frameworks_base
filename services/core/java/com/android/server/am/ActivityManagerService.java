@@ -180,6 +180,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UpdateLock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -3361,6 +3362,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     void enforceNotIsolatedCaller(String caller) {
         if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
+        }
+    }
+
+    void enforceShellRestriction(String restriction, int userHandle) {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            if (userHandle < 0
+                    || mUserManager.hasUserRestriction(restriction, userHandle)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + userHandle);
+            }
         }
     }
 
@@ -14548,6 +14559,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException(
                     "Call does not support special user #" + targetUserId);
         }
+        // Check shell permission
+        if (callingUid == Process.SHELL_UID && targetUserId >= UserHandle.USER_OWNER) {
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    targetUserId)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + targetUserId + "\n " + Debug.getCallers(3));
+            }
+        }
         return targetUserId;
     }
 
@@ -14606,6 +14625,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent service, String resolvedType,
             IServiceConnection connection, int flags, int userId) {
         enforceNotIsolatedCaller("bindService");
+
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -15040,12 +15060,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
-            int[] users) {
+            int callingUid, int[] users) {
         List<ResolveInfo> receivers = null;
         try {
             HashSet<ComponentName> singleUserReceivers = null;
             boolean scannedFirstReceivers = false;
             for (int user : users) {
+                // Skip users that have Shell restrictions
+                if (callingUid == Process.SHELL_UID
+                        && getUserManagerLocked().hasUserRestriction(
+                                UserManager.DISALLOW_DEBUGGING_FEATURES, user)) {
+                    continue;
+                }
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
                         .queryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user);
                 if (user != 0 && newReceivers != null) {
@@ -15133,7 +15159,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Make sure that the user who is receiving this broadcast is started.
         // If not, we will just skip it.
-
 
         if (userId != UserHandle.USER_ALL && mStartedUsers.get(userId) == null) {
             if (callingUid != Process.SYSTEM_UID || (intent.getFlags()
@@ -15399,11 +15424,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Need to resolve the intent to interested receivers...
         if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                  == 0) {
-            receivers = collectReceiverComponents(intent, resolvedType, users);
+            receivers = collectReceiverComponents(intent, resolvedType, callingUid, users);
         }
         if (intent.getComponent() == null) {
-            registeredReceivers = mReceiverResolver.queryIntent(intent,
-                    resolvedType, false, userId);
+            if (userId == UserHandle.USER_ALL && callingUid == Process.SHELL_UID) {
+                // Query one target user at a time, excluding shell-restricted users
+                UserManagerService ums = getUserManagerLocked();
+                for (int i = 0; i < users.length; i++) {
+                    if (ums.hasUserRestriction(
+                            UserManager.DISALLOW_DEBUGGING_FEATURES, users[i])) {
+                        continue;
+                    }
+                    List<BroadcastFilter> registeredReceiversForUser =
+                            mReceiverResolver.queryIntent(intent,
+                                    resolvedType, false, users[i]);
+                    if (registeredReceivers == null) {
+                        registeredReceivers = registeredReceiversForUser;
+                    } else if (registeredReceiversForUser != null) {
+                        registeredReceivers.addAll(registeredReceiversForUser);
+                    }
+                }
+            } else {
+                registeredReceivers = mReceiverResolver.queryIntent(intent,
+                        resolvedType, false, userId);
+            }
         }
 
         final boolean replacePending =
@@ -15565,7 +15609,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("broadcastIntent");
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
-            
+
             final ProcessRecord callerApp = getRecordForAppLocked(caller);
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
@@ -17973,6 +18017,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean switchUser(final int userId) {
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         String userName;
         synchronized (this) {
             UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
@@ -18414,6 +18459,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (userId <= 0) {
             throw new IllegalArgumentException("Can't stop primary user " + userId);
         }
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (this) {
             return stopUserLocked(userId, callback);
         }
