@@ -874,6 +874,26 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Returns whether there is an open connection to this device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return True if there is at least one open connection to this device.
+     * @hide
+     */
+    public boolean isConnected() {
+        if (sService == null) {
+            // BT is not enabled, we cannot be connected.
+            return false;
+        }
+        try {
+            return sService.isConnected(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+    }
+
+    /**
      * Get the Bluetooth class of the remote device.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
