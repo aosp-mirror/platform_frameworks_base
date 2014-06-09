@@ -1321,8 +1321,13 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#setMasterMute(boolean, int) */
-    public void setMasterMute(boolean state, int flags, IBinder cb) {
+    public void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb) {
         if (mUseFixedVolume) {
+            return;
+        }
+
+        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 

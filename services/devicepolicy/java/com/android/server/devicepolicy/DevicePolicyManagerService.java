@@ -51,6 +51,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.media.AudioManager;
+import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ProxyInfo;
@@ -3773,6 +3775,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 restoreCallingIdentity(id);
             }
+        }
+    }
+
+    @Override
+    public void setMasterVolumeMuted(ComponentName who, boolean on) {
+        final ContentResolver contentResolver = mContext.getContentResolver();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            IAudioService iAudioService = IAudioService.Stub.asInterface(
+                    ServiceManager.getService(Context.AUDIO_SERVICE));
+            try{
+                iAudioService.setMasterMute(on, 0, who.getPackageName(), null);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Failed to setMasterMute", re);
+            }
+        }
+    }
+
+    @Override
+    public boolean isMasterVolumeMuted(ComponentName who) {
+        final ContentResolver contentResolver = mContext.getContentResolver();
+
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            AudioManager audioManager =
+                    (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            return audioManager.isMasterMute();
         }
     }
 }

@@ -147,4 +147,7 @@ interface IDevicePolicyManager {
 
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
+
+    void setMasterVolumeMuted(in ComponentName admin, boolean on);
+    boolean isMasterVolumeMuted(in ComponentName admin);
 }

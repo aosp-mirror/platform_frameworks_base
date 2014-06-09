@@ -5205,6 +5205,7 @@ package android.app.admin {
     method public boolean isApplicationBlocked(android.content.ComponentName, java.lang.String);
     method public boolean isDeviceOwnerApp(java.lang.String);
     method public boolean isLockTaskPermitted(android.content.ComponentName);
+    method public boolean isMasterVolumeMuted(android.content.ComponentName);
     method public boolean isProfileOwnerApp(java.lang.String);
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
@@ -5218,6 +5219,7 @@ package android.app.admin {
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
     method public void setLockTaskComponents(android.content.ComponentName[]) throws java.lang.SecurityException;
+    method public void setMasterVolumeMuted(android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);

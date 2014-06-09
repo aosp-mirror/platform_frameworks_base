@@ -1017,7 +1017,7 @@ public class AudioManager {
     public void setMasterMute(boolean state, int flags) {
         IAudioService service = getService();
         try {
-            service.setMasterMute(state, flags, mICallBack);
+            service.setMasterMute(state, flags, mContext.getOpPackageName(), mICallBack);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMasterMute", e);
         }
