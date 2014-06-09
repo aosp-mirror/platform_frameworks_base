@@ -1457,9 +1457,9 @@ status_t AaptAssets::filter(Bundle* bundle)
                         if (AaptConfig::isSameExcept(config, mconfig, ResTable_config::CONFIG_DENSITY)) {
                             // See if there is a better density resource
                             if (mconfig.density < bestDensity &&
-                                    mconfig.density > preferredDensity &&
+                                    mconfig.density >= preferredDensity &&
                                     bestDensity > preferredDensity) {
-                                // This density is between our best density and
+                                // This density is our preferred density, or between our best density and
                                 // the preferred density, therefore it is better.
                                 bestDensity = mconfig.density;
                             } else if (mconfig.density > bestDensity &&
