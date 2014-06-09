@@ -813,13 +813,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * Set profiler options
      */
     if (libart) {
-        // Number of seconds during profile runs.
+        // Whether or not the profiler should be enabled.
         property_get("dalvik.vm.profiler", propBuf, "0");
         if (propBuf[0] == '1') {
             opt.optionString = "-Xenable-profiler";
             mOptions.add(opt);
         }
 
+        // Whether the profile should start upon app startup or be delayed by some random offset.
         property_get("dalvik.vm.profile.start-immediately", propBuf, "0");
         if (propBuf[0] == '1') {
             opt.optionString = "-Xprofile-start-immediately";
