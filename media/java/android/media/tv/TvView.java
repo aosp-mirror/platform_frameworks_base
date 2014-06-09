@@ -33,12 +33,13 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 /**
  * View playing TV
  */
-public class TvView extends SurfaceView {
+public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
     // STOPSHIP: Turn debugging off.
     private static final boolean DEBUG = true;
@@ -57,6 +58,7 @@ public class TvView extends SurfaceView {
 
     private final Handler mHandler = new Handler();
     private TvInputManager.Session mSession;
+    private final SurfaceView mSurfaceView;
     private Surface mSurface;
     private boolean mOverlayViewCreated;
     private Rect mOverlayViewFrame;
@@ -124,7 +126,14 @@ public class TvView extends SurfaceView {
 
     public TvView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        getHolder().addCallback(mSurfaceHolderCallback);
+        mSurfaceView = new SurfaceView(context, attrs, defStyleAttr) {
+                @Override
+                protected void updateWindow(boolean force, boolean redrawNeeded) {
+                    super.updateWindow(force, redrawNeeded);
+                    relayoutSessionOverlayView();
+                }};
+        mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+        addView(mSurfaceView);
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
     }
 
@@ -310,11 +319,26 @@ public class TvView extends SurfaceView {
         super.onDetachedFromWindow();
     }
 
-    /** @hide */
     @Override
-    protected void updateWindow(boolean force, boolean redrawNeeded) {
-        super.updateWindow(force, redrawNeeded);
-        relayoutSessionOverlayView();
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        mSurfaceView.layout(0, 0, right - left, bottom - top);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mSurfaceView.measure(widthMeasureSpec, heightMeasureSpec);
+        int width = mSurfaceView.getMeasuredWidth();
+        int height = mSurfaceView.getMeasuredHeight();
+        int childState = mSurfaceView.getMeasuredState();
+        setMeasuredDimension(resolveSizeAndState(width, widthMeasureSpec, childState),
+                resolveSizeAndState(height, heightMeasureSpec,
+                        childState << MEASURED_HEIGHT_STATE_SHIFT));
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        mSurfaceView.setVisibility(visibility);
     }
 
     private void release() {
