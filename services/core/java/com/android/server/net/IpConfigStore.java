@@ -81,7 +81,7 @@ public class IpConfigStore {
                     for (LinkAddress linkAddr : linkProperties.getLinkAddresses()) {
                         out.writeUTF(LINK_ADDRESS_KEY);
                         out.writeUTF(linkAddr.getAddress().getHostAddress());
-                        out.writeInt(linkAddr.getNetworkPrefixLength());
+                        out.writeInt(linkAddr.getPrefixLength());
                     }
                     for (RouteInfo route : linkProperties.getRoutes()) {
                         out.writeUTF(GATEWAY_KEY);
@@ -89,7 +89,7 @@ public class IpConfigStore {
                         if (dest != null) {
                             out.writeInt(1);
                             out.writeUTF(dest.getAddress().getHostAddress());
-                            out.writeInt(dest.getNetworkPrefixLength());
+                            out.writeInt(dest.getPrefixLength());
                         } else {
                             out.writeInt(0);
                         }
