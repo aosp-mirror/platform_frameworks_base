@@ -29,9 +29,11 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.routeprovider.RouteRequest;
+import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
+import android.media.session.MediaSessionToken;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
 import android.media.session.MediaSession;
@@ -39,6 +41,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -75,10 +78,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private final ArrayList<MediaSessionRecord> mAllSessions = new ArrayList<MediaSessionRecord>();
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<UserRecord>();
+    private final ArrayList<SessionsListenerRecord> mSessionsListeners
+            = new ArrayList<SessionsListenerRecord>();
     // private final ArrayList<MediaRouteProviderProxy> mProviders
     // = new ArrayList<MediaRouteProviderProxy>();
     private final Object mLock = new Object();
-    private final Handler mHandler = new Handler();
+    private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
 
     private KeyguardManager mKeyguardManager;
@@ -200,15 +205,20 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
         }
+        mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
     }
 
     public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
+        boolean updateSessions = false;
         synchronized (mLock) {
             if (!mAllSessions.contains(record)) {
                 Log.d(TAG, "Unknown session changed playback state. Ignoring.");
                 return;
             }
-            mPriorityStack.onPlaystateChange(record, oldState, newState);
+            updateSessions = mPriorityStack.onPlaystateChange(record, oldState, newState);
+        }
+        if (updateSessions) {
+            mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
         }
     }
 
@@ -315,6 +325,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             // ignore exceptions while destroying a session.
         }
         session.onDestroy();
+
+        mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, session.getUserId(), 0);
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -428,6 +440,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         UserRecord user = getOrCreateUser(userId);
         user.addSessionLocked(session);
 
+        mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, userId, 0);
+
         if (DEBUG) {
             Log.d(TAG, "Created session for package " + callerPackageName + " with tag " + tag);
         }
@@ -453,9 +467,41 @@ public class MediaSessionService extends SystemService implements Monitor {
         return -1;
     }
 
+    private int findIndexOfSessionsListenerLocked(IActiveSessionsListener listener) {
+        for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
+            if (mSessionsListeners.get(i).mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private boolean isSessionDiscoverable(MediaSessionRecord record) {
         // TODO probably want to check more than if it's active.
         return record.isActive();
+    }
+
+    private void pushSessionsChanged(int userId) {
+        synchronized (mLock) {
+            List<MediaSessionRecord> records = mPriorityStack.getActiveSessions(userId);
+            int size = records.size();
+            ArrayList<MediaSessionToken> tokens = new ArrayList<MediaSessionToken>();
+            for (int i = 0; i < size; i++) {
+                tokens.add(new MediaSessionToken(records.get(i).getControllerBinder()));
+            }
+            for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
+                SessionsListenerRecord record = mSessionsListeners.get(i);
+                if (record.mUserId == UserHandle.USER_ALL || record.mUserId == userId) {
+                    try {
+                        record.mListener.onActiveSessionsChanged(tokens);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Dead ActiveSessionsListener in pushSessionsChanged, removing",
+                                e);
+                        mSessionsListeners.remove(i);
+                    }
+                }
+            }
+        }
     }
 
     private MediaRouteProviderProxy.RoutesListener mRoutesCallback
@@ -613,6 +659,23 @@ public class MediaSessionService extends SystemService implements Monitor {
         };
     }
 
+    final class SessionsListenerRecord implements IBinder.DeathRecipient {
+        private final IActiveSessionsListener mListener;
+        private final int mUserId;
+
+        public SessionsListenerRecord(IActiveSessionsListener listener, int userId) {
+            mListener = listener;
+            mUserId = userId;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mSessionsListeners.remove(this);
+            }
+        }
+    }
+
     class SessionManagerImpl extends ISessionManager.Stub {
         private static final String EXTRA_WAKELOCK_ACQUIRED =
                 "android.media.AudioService.WAKELOCK_ACQUIRED";
@@ -648,20 +711,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
 
             try {
-                String packageName = null;
-                if (componentName != null) {
-                    // If they gave us a component name verify they own the
-                    // package
-                    packageName = componentName.getPackageName();
-                    enforcePackageName(packageName, uid);
-                }
-                // Check that they can make calls on behalf of the user and
-                // get the final user id
-                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                        true /* allowAll */, true /* requireFull */, "getSessions", packageName);
-                // Check if they have the permissions or their component is
-                // enabled for the user they're calling from.
-                enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
+                int resolvedUserId = verifySessionsRequest(componentName, userId, pid, uid);
                 ArrayList<IBinder> binders = new ArrayList<IBinder>();
                 synchronized (mLock) {
                     ArrayList<MediaSessionRecord> records = mPriorityStack
@@ -674,6 +724,52 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return binders;
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void addSessionsListener(IActiveSessionsListener listener,
+                ComponentName componentName, int userId) throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
+            try {
+                int resolvedUserId = verifySessionsRequest(componentName, userId, pid, uid);
+                synchronized (mLock) {
+                    int index = findIndexOfSessionsListenerLocked(listener);
+                    if (index != -1) {
+                        Log.w(TAG, "ActiveSessionsListener is already added, ignoring");
+                        return;
+                    }
+                    SessionsListenerRecord record = new SessionsListenerRecord(listener,
+                            resolvedUserId);
+                    try {
+                        listener.asBinder().linkToDeath(record, 0);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "ActiveSessionsListener is dead, ignoring it", e);
+                        return;
+                    }
+                    mSessionsListeners.add(record);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void removeSessionsListener(IActiveSessionsListener listener)
+                throws RemoteException {
+            synchronized (mLock) {
+                int index = findIndexOfSessionsListenerLocked(listener);
+                if (index != -1) {
+                    SessionsListenerRecord record = mSessionsListeners.remove(index);
+                    try {
+                        record.mListener.asBinder().unlinkToDeath(record, 0);
+                    } catch (Exception e) {
+                        // ignore exceptions, the record is being removed
+                    }
+                }
             }
         }
 
@@ -762,6 +858,25 @@ public class MediaSessionService extends SystemService implements Monitor {
                     user.dumpLocked(pw, "");
                 }
             }
+        }
+
+        private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,
+                final int uid) {
+            String packageName = null;
+            if (componentName != null) {
+                // If they gave us a component name verify they own the
+                // package
+                packageName = componentName.getPackageName();
+                enforcePackageName(packageName, uid);
+            }
+            // Check that they can make calls on behalf of the user and
+            // get the final user id
+            int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
+                    true /* allowAll */, true /* requireFull */, "getSessions", packageName);
+            // Check if they have the permissions or their component is
+            // enabled for the user they're calling from.
+            enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
+            return resolvedUserId;
         }
 
         private void dispatchAdjustVolumeByLocked(int suggestedStream, int delta, int flags,
@@ -1005,4 +1120,20 @@ public class MediaSessionService extends SystemService implements Monitor {
         };
     }
 
+    final class MessageHandler extends Handler {
+        private static final int MSG_SESSIONS_CHANGED = 1;
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SESSIONS_CHANGED:
+                    pushSessionsChanged(msg.arg1);
+                    break;
+            }
+        }
+
+        public void post(int what, int arg1, int arg2) {
+            obtainMessage(what, arg1, arg2).sendToTarget();
+        }
+    }
 }

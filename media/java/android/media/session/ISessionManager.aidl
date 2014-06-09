@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.ComponentName;
+import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
@@ -30,4 +31,7 @@ interface ISessionManager {
     List<IBinder> getSessions(in ComponentName compName, int userId);
     void dispatchMediaKeyEvent(in KeyEvent keyEvent, boolean needWakeLock);
     void dispatchAdjustVolumeBy(int suggestedStream, int delta, int flags);
+    void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
+            int userId);
+    void removeSessionsListener(in IActiveSessionsListener listener);
 }
