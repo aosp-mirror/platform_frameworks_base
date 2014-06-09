@@ -7533,12 +7533,12 @@ package android.content {
     field public static final int FLAG_ACTIVITY_BROUGHT_TO_FRONT = 4194304; // 0x400000
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
-    field public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 524288; // 0x80000
+    field public static final deprecated int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 524288; // 0x80000
     field public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 8388608; // 0x800000
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000
     field public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 134217728; // 0x8000000
-    field public static final int FLAG_ACTIVITY_NEW_DOCUMENT = 268959744; // 0x10080000
+    field public static final int FLAG_ACTIVITY_NEW_DOCUMENT = 524288; // 0x80000
     field public static final int FLAG_ACTIVITY_NEW_TASK = 268435456; // 0x10000000
     field public static final int FLAG_ACTIVITY_NO_ANIMATION = 65536; // 0x10000
     field public static final int FLAG_ACTIVITY_NO_HISTORY = 1073741824; // 0x40000000
@@ -7989,6 +7989,7 @@ package android.content.pm {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DOCUMENT_LAUNCH_ALWAYS = 2; // 0x2
     field public static final int DOCUMENT_LAUNCH_INTO_EXISTING = 1; // 0x1
+    field public static final int DOCUMENT_LAUNCH_NEVER = 3; // 0x3
     field public static final int DOCUMENT_LAUNCH_NONE = 0; // 0x0
     field public static final int FLAG_ALLOW_TASK_REPARENTING = 64; // 0x40
     field public static final int FLAG_ALWAYS_RETAIN_TASK_STATE = 8; // 0x8
