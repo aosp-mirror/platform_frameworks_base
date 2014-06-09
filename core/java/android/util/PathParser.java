@@ -45,6 +45,9 @@ public class PathParser {
      * @return an array of the PathDataNode.
      */
     public static PathDataNode[] createNodesFromPathData(String pathData) {
+        if (pathData == null) {
+            return null;
+        }
         int start = 0;
         int end = 1;
 
@@ -62,6 +65,57 @@ public class PathParser {
             addNode(list, pathData.charAt(start), new float[0]);
         }
         return list.toArray(new PathDataNode[list.size()]);
+    }
+
+    /**
+     * @param source The array of PathDataNode to be duplicated.
+     * @return a deep copy of the <code>source</code>.
+     */
+    public static PathDataNode[] deepCopyNodes(PathDataNode[] source) {
+        PathDataNode[] copy = new PathParser.PathDataNode[source.length];
+        for (int i = 0; i < source.length; i ++) {
+            copy[i] = new PathDataNode(source[i]);
+        }
+        return copy;
+    }
+
+    /**
+     * @param nodesFrom The source path represented in an array of PathDataNode
+     * @param nodesTo The target path represented in an array of PathDataNode
+     * @return whether the <code>nodesFrom</code> can morph into <code>nodesTo</code>
+     */
+    public static boolean canMorph(PathDataNode[] nodesFrom, PathDataNode[] nodesTo) {
+        if (nodesFrom == null || nodesTo == null) {
+            return false;
+        }
+
+        if (nodesFrom.length != nodesTo.length) {
+            return false;
+        }
+
+        for (int i = 0; i < nodesFrom.length; i ++) {
+            if (nodesFrom[i].mType != nodesTo[i].mType
+                    || nodesFrom[i].mParams.length != nodesTo[i].mParams.length) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Update the target's data to match the source.
+     * Before calling this, make sure canMorph(target, source) is true.
+     *
+     * @param target The target path represented in an array of PathDataNode
+     * @param source The source path represented in an array of PathDataNode
+     */
+    public static void updateNodes(PathDataNode[] target, PathDataNode[] source) {
+        for (int i = 0; i < source.length; i ++) {
+            target[i].mType = source[i].mType;
+            for (int j = 0; j < source[i].mParams.length; j ++) {
+                target[i].mParams[j] = source[i].mParams[j];
+            }
+        }
     }
 
     private static int nextStart(String s, int end) {
@@ -132,6 +186,11 @@ public class PathParser {
         return (comma > space) ? space : comma;
     }
 
+    /**
+     * Each PathDataNode represents one command in the "d" attribute of the svg
+     * file.
+     * An array of PathDataNode can represent the whole "d" attribute.
+     */
     public static class PathDataNode {
         private char mType;
         private float[] mParams;
@@ -146,12 +205,35 @@ public class PathParser {
             mParams = Arrays.copyOf(n.mParams, n.mParams.length);
         }
 
+        /**
+         * Convert an array of PathDataNode to Path.
+         *
+         * @param node The source array of PathDataNode.
+         * @param path The target Path object.
+         */
         public static void nodesToPath(PathDataNode[] node, Path path) {
             float[] current = new float[4];
             char previousCommand = 'm';
             for (int i = 0; i < node.length; i++) {
                 addCommand(path, current, previousCommand, node[i].mType, node[i].mParams);
                 previousCommand = node[i].mType;
+            }
+        }
+
+        /**
+         * The current PathDataNode will be interpolated between the
+         * <code>nodeFrom</code> and <code>nodeTo</code> according to the
+         * <code>fraction</code>.
+         *
+         * @param nodeFrom The start value as a PathDataNode.
+         * @param nodeTo The end value as a PathDataNode
+         * @param fraction The fraction to interpolate.
+         */
+        public void interpolatePathDataNode(PathDataNode nodeFrom,
+                PathDataNode nodeTo, float fraction) {
+            for (int i = 0; i < nodeFrom.mParams.length; i++) {
+                mParams[i] = nodeFrom.mParams[i] * (1 - fraction)
+                        + nodeTo.mParams[i] * fraction;
             }
         }
 
@@ -523,6 +605,5 @@ public class PathParser {
                 ep1y = ep2y;
             }
         }
-
     }
 }

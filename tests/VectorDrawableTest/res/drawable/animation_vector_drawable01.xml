@@ -19,9 +19,13 @@
     <target
         android:name="pie1"
         android:animation="@anim/trim_path_animation01" />
+
     <target
         android:name="v"
         android:animation="@anim/trim_path_animation02" />
+    <target
+        android:name="v"
+        android:animation="@anim/trim_path_animation05" />
 
     <target
         android:name="rotationGroup"

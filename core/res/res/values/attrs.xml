@@ -5400,6 +5400,9 @@
             <enum name="floatType" value="0" />
             <!-- valueFrom and valueTo are integers. -->
             <enum name="intType"   value="1" />
+            <!-- valueFrom and valueTo are paths defined as strings.
+                 This type is used for path morphing in AnimatedVectorDrawable. -->
+            <enum name="pathType"   value="2" />
         </attr>
     </declare-styleable>
 

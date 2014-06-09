@@ -1019,67 +1019,98 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        /* Setters and Getters */
+        /* Setters and Getters, mostly used by animator from AnimatedVectorDrawable. */
+        @SuppressWarnings("unused")
+        public PathParser.PathDataNode[] getPathData() {
+            return mNode;
+        }
+
+        @SuppressWarnings("unused")
+        public void setPathData(PathParser.PathDataNode[] node) {
+            if (!PathParser.canMorph(mNode, node)) {
+                // This should not happen in the middle of animation.
+                mNode = PathParser.deepCopyNodes(node);
+            } else {
+                PathParser.updateNodes(mNode, node);
+            }
+        }
+
+        @SuppressWarnings("unused")
         int getStroke() {
             return mStrokeColor;
         }
 
+        @SuppressWarnings("unused")
         void setStroke(int strokeColor) {
             mStrokeColor = strokeColor;
         }
 
+        @SuppressWarnings("unused")
         float getStrokeWidth() {
             return mStrokeWidth;
         }
 
+        @SuppressWarnings("unused")
         void setStrokeWidth(float strokeWidth) {
             mStrokeWidth = strokeWidth;
         }
 
+        @SuppressWarnings("unused")
         float getStrokeOpacity() {
             return mStrokeOpacity;
         }
 
+        @SuppressWarnings("unused")
         void setStrokeOpacity(float strokeOpacity) {
             mStrokeOpacity = strokeOpacity;
         }
 
+        @SuppressWarnings("unused")
         int getFill() {
             return mFillColor;
         }
 
+        @SuppressWarnings("unused")
         void setFill(int fillColor) {
             mFillColor = fillColor;
         }
 
+        @SuppressWarnings("unused")
         float getFillOpacity() {
             return mFillOpacity;
         }
 
+        @SuppressWarnings("unused")
         void setFillOpacity(float fillOpacity) {
             mFillOpacity = fillOpacity;
         }
 
+        @SuppressWarnings("unused")
         float getTrimPathStart() {
             return mTrimPathStart;
         }
 
+        @SuppressWarnings("unused")
         void setTrimPathStart(float trimPathStart) {
             mTrimPathStart = trimPathStart;
         }
 
+        @SuppressWarnings("unused")
         float getTrimPathEnd() {
             return mTrimPathEnd;
         }
 
+        @SuppressWarnings("unused")
         void setTrimPathEnd(float trimPathEnd) {
             mTrimPathEnd = trimPathEnd;
         }
 
+        @SuppressWarnings("unused")
         float getTrimPathOffset() {
             return mTrimPathOffset;
         }
 
+        @SuppressWarnings("unused")
         void setTrimPathOffset(float trimPathOffset) {
             mTrimPathOffset = trimPathOffset;
         }
