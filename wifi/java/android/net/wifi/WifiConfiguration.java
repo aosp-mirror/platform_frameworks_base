@@ -347,8 +347,63 @@ public class WifiConfiguration implements Parcelable {
      */
     public HashMap<String, ScanResult> scanResultCache;
 
+    /** The Below RSSI thresholds are used to configure AutoJoin
+     *  - GOOD/LOW/BAD thresholds are used so as to calculate link score
+     *  - UNWANTED_SOFT are used by the blacklisting logic so as to handle the unwanted network message coming from CS
+     *  - UNBLACKLIST thresholds are used so as to tweak the speed at which the network is unblacklisted (i.e. if
+     *          it is seen with good RSSI, it is blacklisted faster)
+     *  - INITIAL_AUTOJOIN_ATTEMPT, used to determine how close from the network we need to be before autojoin kicks in
+     */
     /** @hide **/
     public static int INVALID_RSSI = -127;
+
+    /** @hide **/
+    public static int UNWANTED_BLACKLIST_SOFT_RSSI_24 = -80;
+
+    /** @hide **/
+    public static int UNWANTED_BLACKLIST_SOFT_RSSI_5 = -70;
+
+    /** @hide **/
+    public static int GOOD_RSSI_24 = -65;
+
+    /** @hide **/
+    public static int LOW_RSSI_24 = -75;
+
+    /** @hide **/
+    public static int BAD_RSSI_24 = -85;
+
+    /** @hide **/
+    public static int GOOD_RSSI_5 = -55;
+
+    /** @hide **/
+    public static int LOW_RSSI_5 = -65;
+
+    /** @hide **/
+    public static int BAD_RSSI_5 = -75;
+
+    /** @hide **/
+    public static int UNWANTED_BLACKLIST_SOFT_BUMP = 4;
+
+    /** @hide **/
+    public static int UNWANTED_BLACKLIST_HARD_BUMP = 8;
+
+    /** @hide **/
+    public static int UNBLACKLIST_THRESHOLD_24_SOFT = -75;
+
+    /** @hide **/
+    public static int UNBLACKLIST_THRESHOLD_24_HARD = -68;
+
+    /** @hide **/
+    public static int UNBLACKLIST_THRESHOLD_5_SOFT = -63;
+
+    /** @hide **/
+    public static int UNBLACKLIST_THRESHOLD_5_HARD = -56;
+
+    /** @hide **/
+    public static int INITIAL_AUTO_JOIN_ATTEMPT_MIN_24 = -80;
+
+    /** @hide **/
+    public static int INITIAL_AUTO_JOIN_ATTEMPT_MIN_5 = -70;
 
     /**
      * @hide
@@ -456,7 +511,7 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public static final int AUTO_JOIN_ENABLED                   = 0;
-    /** @hide
+    /**
      * if this is set, the WifiConfiguration cannot use linkages so as to bump
      * it's relative priority.
      * - status between and 128 indicate various level of blacklisting depending
@@ -465,7 +520,17 @@ public class WifiConfiguration implements Parcelable {
      * although it may have been self added we will not re-self-add it, ignore it,
      * not return it to applications, and not connect to it
      * */
+
+    /** @hide
+     * network was temporary disabled due to bad connection, most likely due
+     * to weak RSSI */
     public static final int AUTO_JOIN_TEMPORARY_DISABLED  = 1;
+    /** @hide
+     * network was temporary disabled due to bad connection, which cant be attributed
+     * to weak RSSI */
+    public static final int AUTO_JOIN_TEMPORARY_DISABLED_LINK_ERRORS  = 32;
+    /** @hide */
+    public static final int AUTO_JOIN_TEMPORARY_DISABLED_AT_SUPPLICANT  = 64;
     /** @hide */
     public static final int AUTO_JOIN_DISABLED_ON_AUTH_FAILURE  = 128;
     /** @hide */
@@ -475,6 +540,13 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public int autoJoinStatus;
+
+
+    /**
+     * @hide
+     */
+    public long blackListTimestamp;
+
 
     /**
      * Set if the configuration was self added by the framework
@@ -614,6 +686,16 @@ public class WifiConfiguration implements Parcelable {
         return mostRecent;
     }
 
+    /** @hide **/
+    public void setAutoJoinStatus(int status) {
+        if (status == 0) {
+            blackListTimestamp = 0;
+        }  else if (status > autoJoinStatus) {
+            blackListTimestamp = System.currentTimeMillis();
+        }
+        autoJoinStatus = status;
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
@@ -697,6 +779,15 @@ public class WifiConfiguration implements Parcelable {
         if (selfAdded)  sbuf.append("selfAdded");
         if (creatorUid != 0)  sbuf.append("uid=" + Integer.toString(creatorUid));
 
+        if (blackListTimestamp != 0) {
+            long now_ms = System.currentTimeMillis();
+            long diff = now_ms - blackListTimestamp;
+            if (diff <= 0) {
+                sbuf.append("blackListed since <incorrect>");
+            } else {
+                sbuf.append("blackListed since ").append(Long.toString(diff/1000)).append( "sec");
+            }
+        }
 
         return sbuf.toString();
     }
@@ -987,6 +1078,7 @@ public class WifiConfiguration implements Parcelable {
             lastUpdateUid = source.lastUpdateUid;
             creatorUid = source.creatorUid;
             peerWifiConfiguration = source.peerWifiConfiguration;
+            blackListTimestamp = source.blackListTimestamp;
         }
     }
 
@@ -1030,17 +1122,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
-        /*
-        TODO: should we write the cache results to the parcel?
-        if (scanResultCache != null) {
-            dest.writeInt(WifiConfiguration.SCAN_CACHE_TAG);
-            dest.writeInt(scanResultCache.size());
-            for (ScanResult result : scanResultCache.values()) {
-                result.writeToParcel(dest, flags);
-            }
-        } else {
-            dest.writeInt(WifiConfiguration.NOTHING_TAG);
-        }*/
+        dest.writeLong(blackListTimestamp);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1079,26 +1161,7 @@ public class WifiConfiguration implements Parcelable {
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
-                /*
-                TODO: should we write the cache results to the parcel?
-                boolean done = false;
-                do {
-                    int tag = in.readInt();
-                    switch (tag) {
-                        case WifiConfiguration.SCAN_CACHE_TAG:
-                            int size = in.readInt();
-                            config.scanResultCache = new HashMap<String, ScanResult>();
-                            while (size > 0) {
-                                ScanResult result = ScanResult.CREATOR.createFromParcel(in);
-                                config.scanResultCache.put(result.BSSID, result);
-                                size--;
-                            }
-                            break;
-                        case WifiConfiguration.NOTHING_TAG:
-                            done = true;
-                            break;
-                    }
-                } while (!done);*/
+                config.blackListTimestamp = in.readLong();
                 return config;
             }
 
