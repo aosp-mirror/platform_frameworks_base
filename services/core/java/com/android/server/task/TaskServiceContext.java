@@ -466,16 +466,14 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
             removeMessages(MSG_TIMEOUT);
             mWakeLock.release();
             mContext.unbindService(TaskServiceContext.this);
-            mWakeLock = null;
+            mCompletedListener.onTaskCompleted(mRunningTask, reschedule);
 
+            mWakeLock = null;
             mRunningTask = null;
             mParams = null;
             mVerb = -1;
             mCancelled.set(false);
-
             service = null;
-
-            mCompletedListener.onTaskCompleted(mRunningTask, reschedule);
             synchronized (mAvailableLock) {
                 mAvailable = true;
             }

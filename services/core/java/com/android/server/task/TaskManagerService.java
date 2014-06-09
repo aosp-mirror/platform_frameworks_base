@@ -374,7 +374,7 @@ public class TaskManagerService extends com.android.server.SystemService
     public void onTaskCompleted(TaskStatus taskStatus, boolean needsReschedule) {
         if (!stopTrackingTask(taskStatus)) {
             if (DEBUG) {
-                Slog.e(TAG, "Error removing task: could not find task to remove. Was task" +
+                Slog.e(TAG, "Error removing task: could not find task to remove. Was task " +
                         "removed while executing?");
             }
             return;
