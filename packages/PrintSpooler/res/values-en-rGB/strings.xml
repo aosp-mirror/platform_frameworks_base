@@ -17,12 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Print Spooler"</string>
-    <string name="advanced_settings_button" msgid="5764225091289415632">"Printer settings"</string>
-    <string name="print_button" msgid="645164566271246268">"Print"</string>
-    <string name="save_button" msgid="1921310454071758999">"Save"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"More options"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destination"</string>
     <string name="label_copies" msgid="3634531042822968308">"Copies"</string>
-    <string name="label_paper_size" msgid="8681895607876809323">"Paper Size"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Copies:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Paper size"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Paper size:"</string>
     <string name="label_color" msgid="1108690305218188969">"Colour"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientation"</string>
     <string name="label_pages" msgid="6300874667546617333">"Pages (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -63,7 +63,6 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"No connection to printer"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"unknown"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – unavailable"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Couldn\'t generate print job"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Black &amp; White"</item>
     <item msgid="2762241247228983754">"Colour"</item>
@@ -76,4 +75,9 @@
     <item msgid="7421377442011699994">"All"</item>
     <item msgid="6812869625222503603">"Range"</item>
   </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"Couldn\'t write to file"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Couldn\'t generate print job"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Retry"</string>
+    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Printer unavailable"</string>
+    <string name="print_operation_canceling" msgid="5274571823242489160">"Cancelling…"</string>
 </resources>
