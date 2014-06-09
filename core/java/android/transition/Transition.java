@@ -206,6 +206,10 @@ public abstract class Transition implements Cloneable {
     // like CircularPropagation
     EpicenterCallback mEpicenterCallback;
 
+    // For Fragment shared element transitions, linking views explicitly by mismatching
+    // viewNames.
+    ArrayMap<String, String> mNameOverrides;
+
     /**
      * Constructs a Transition object with no target objects. A transition with
      * no targets defaults to running on all target objects in the scene hierarchy
@@ -1347,6 +1351,21 @@ public abstract class Transition implements Cloneable {
         } else {
             captureHierarchy(sceneRoot, start);
         }
+        if (!start && mNameOverrides != null) {
+            int numOverrides = mNameOverrides.size();
+            ArrayList<View> overriddenViews = new ArrayList<View>(numOverrides);
+            for (int i = 0; i < numOverrides; i++) {
+                String fromName = mNameOverrides.keyAt(i);
+                overriddenViews.add(mStartValues.nameValues.remove(fromName));
+            }
+            for (int i = 0; i < numOverrides; i++) {
+                View view = overriddenViews.get(i);
+                if (view != null) {
+                    String toName = mNameOverrides.valueAt(i);
+                    mStartValues.nameValues.put(toName, view);
+                }
+            }
+        }
     }
 
     static void addViewValues(TransitionValuesMaps transitionValuesMaps,
@@ -1400,10 +1419,12 @@ public abstract class Transition implements Cloneable {
             mStartValues.viewValues.clear();
             mStartValues.idValues.clear();
             mStartValues.itemIdValues.clear();
+            mStartValues.nameValues.clear();
         } else {
             mEndValues.viewValues.clear();
             mEndValues.idValues.clear();
             mEndValues.itemIdValues.clear();
+            mEndValues.nameValues.clear();
         }
     }
 
@@ -1864,6 +1885,20 @@ public abstract class Transition implements Cloneable {
 
     public boolean canRemoveViews() {
         return mCanRemoveViews;
+    }
+
+    /**
+     * Sets the shared element names -- a mapping from a name at the start state to
+     * a different name at the end state.
+     * @hide
+     */
+    public void setNameOverrides(ArrayMap<String, String> overrides) {
+        mNameOverrides = overrides;
+    }
+
+    /** @hide */
+    public ArrayMap<String, String> getNameOverrides() {
+        return mNameOverrides;
     }
 
     @Override

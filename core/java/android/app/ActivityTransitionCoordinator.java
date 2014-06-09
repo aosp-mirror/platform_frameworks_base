@@ -293,13 +293,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (transition == null || views == null || views.isEmpty()) {
             return null;
         }
+        // Add the targets to a set containing transition so that transition
+        // remains unaffected. We don't want to modify the targets of transition itself.
         TransitionSet set = new TransitionSet();
-        set.addTransition(transition);
         if (views != null) {
-            for (View view: views) {
+            for (View view : views) {
                 set.addTarget(view);
             }
         }
+        // By adding the transition after addTarget, we prevent addTarget from
+        // affecting transition.
+        set.addTransition(transition);
         return set;
     }
 

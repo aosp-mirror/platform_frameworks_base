@@ -1,5 +1,8 @@
 package android.app;
 
+import android.util.Pair;
+import android.view.View;
+
 /**
  * API for performing a set of Fragment operations.
  *
@@ -167,6 +170,36 @@ public abstract class FragmentTransaction {
      * or {@link #TRANSIT_FRAGMENT_CLOSE}
      */
     public abstract FragmentTransaction setTransition(int transit);
+
+    /**
+     * Set a {@link android.transition.Transition} resource id to use with this transaction.
+     * <var>transitionId</var> will be played for fragments when going forward and when popping
+     * the back stack.
+     * @param sceneRootId The ID of the element acting as the scene root for the transition.
+     *                    This should be a ViewGroup containing all Fragments in the transaction.
+     * @param transitionId The resource ID for the Transition used during the Fragment transaction.
+     */
+    public abstract FragmentTransaction setCustomTransition(int sceneRootId, int transitionId);
+
+    /**
+     * Used with {@link #setCustomTransition(int, int)} to map a View from a removed or hidden
+     * Fragment to a View from a shown or added Fragment.
+     * <var>sharedElement</var> must have a unique viewName in the View hierarchy.
+     * @param sharedElement A View in a disappearing Fragment to match with a View in an
+     *                      appearing Fragment.
+     * @param name The viewName for a View in an appearing Fragment to match to the shared
+     *             element.
+     */
+    public abstract FragmentTransaction setSharedElement(View sharedElement, String name);
+
+    /**
+     * Used with {@link #setCustomTransition(int, int)} to map multiple Views from removed or hidden
+     * Fragments to a Views from a shown or added Fragments. Views in
+     * <var>sharedElements</var> must have unique viewNames in the View hierarchy.
+     * @param sharedElements Pairs of Views in disappearing Fragments to viewNames in
+     *                       appearing Fragments.
+     */
+    public abstract FragmentTransaction setSharedElements(Pair<View, String>... sharedElements);
 
     /**
      * Set a custom style resource that will be used for resolving transit
