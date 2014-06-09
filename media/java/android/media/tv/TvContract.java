@@ -306,7 +306,7 @@ public final class TvContract {
         public static final int TYPE_ATSC_C = 0x00030200;
 
         /** The channel type for ATSC-M/H (mobile/handheld). */
-        public static final int TYPE_ATSC_M_H = 0x00030200;
+        public static final int TYPE_ATSC_M_H = 0x00030300;
 
         /** The channel type for ISDB-T (terrestrial). */
         public static final int TYPE_ISDB_T = 0x00040000;
