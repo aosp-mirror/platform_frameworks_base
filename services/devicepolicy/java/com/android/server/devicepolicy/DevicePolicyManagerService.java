@@ -52,6 +52,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ProxyInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -3095,6 +3096,37 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return null;
+    }
+
+    @Override
+    public void clearDeviceOwner(String packageName) {
+        if (packageName == null) {
+            throw new NullPointerException("packageName is null");
+        }
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
+            if (uid != Binder.getCallingUid()) {
+                throw new SecurityException("Invalid packageName");
+            }
+        } catch (NameNotFoundException e) {
+            throw new SecurityException(e);
+        }
+        if (!isDeviceOwner(packageName)) {
+            throw new SecurityException("clearDeviceOwner can only be called by the device owner");
+        }
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mUserManager.setUserRestrictions(new Bundle(),
+                        new UserHandle(UserHandle.USER_OWNER));
+                if (mDeviceOwner != null) {
+                    mDeviceOwner.clearDeviceOwner();
+                    mDeviceOwner.writeOwnerFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     @Override
