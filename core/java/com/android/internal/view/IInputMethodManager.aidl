@@ -77,6 +77,6 @@ interface IInputMethodManager {
     boolean setInputMethodEnabled(String id, boolean enabled);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
-    oneway void notifyUserAction();
+    oneway void notifyUserAction(int sequenceNumber);
     void setCursorAnchorMonitorMode(in IBinder token, int monitorMode);
 }

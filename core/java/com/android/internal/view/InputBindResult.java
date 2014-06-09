@@ -47,13 +47,19 @@ public final class InputBindResult implements Parcelable {
      * Sequence number of this binding.
      */
     public final int sequence;
-    
+
+    /**
+     * Sequence number of user action notification.
+     */
+    public final int userActionNotificationSequenceNumber;
+
     public InputBindResult(IInputMethodSession _method, InputChannel _channel,
-            String _id, int _sequence) {
+            String _id, int _sequence, int _userActionNotificationSequenceNumber) {
         method = _method;
         channel = _channel;
         id = _id;
         sequence = _sequence;
+        userActionNotificationSequenceNumber = _userActionNotificationSequenceNumber;
     }
     
     InputBindResult(Parcel source) {
@@ -65,12 +71,15 @@ public final class InputBindResult implements Parcelable {
         }
         id = source.readString();
         sequence = source.readInt();
+        userActionNotificationSequenceNumber = source.readInt();
     }
 
     @Override
     public String toString() {
         return "InputBindResult{" + method + " " + id
-                + " #" + sequence + "}";
+                + " sequence:" + sequence
+                + " userActionNotificationSequenceNumber:" + userActionNotificationSequenceNumber
+                + "}";
     }
 
     /**
@@ -90,6 +99,7 @@ public final class InputBindResult implements Parcelable {
         }
         dest.writeString(id);
         dest.writeInt(sequence);
+        dest.writeInt(userActionNotificationSequenceNumber);
     }
 
     /**

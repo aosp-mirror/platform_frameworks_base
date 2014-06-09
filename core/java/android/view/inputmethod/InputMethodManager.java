@@ -320,6 +320,25 @@ public final class InputMethodManager {
     int mCursorCandEnd;
 
     /**
+     * Represents an invalid action notification sequence number. {@link InputMethodManagerService}
+     * always issues a positive integer for action notification sequence numbers. Thus -1 is
+     * guaranteed to be different from any valid sequence number.
+     */
+    private static final int NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER = -1;
+    /**
+     * The next sequence number that is to be sent to {@link InputMethodManagerService} via
+     * {@link IInputMethodManager#notifyUserAction(int)} at once when a user action is observed.
+     */
+    private int mNextUserActionNotificationSequenceNumber =
+            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
+
+    /**
+     * The last sequence number that is already sent to {@link InputMethodManagerService}.
+     */
+    private int mLastSentUserActionNotificationSequenceNumber =
+            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
+
+    /**
      * The instance that has previously been sent to the input method.
      */
     private CursorAnchorInfo mCursorAnchorInfo = null;
@@ -364,6 +383,7 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_SET_CURSOR_ANCHOR_MONITOR_MODE = 8;
+    static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 9;
 
     class H extends Handler {
         H(Looper looper) {
@@ -503,6 +523,11 @@ public final class InputMethodManager {
                     }
                     return;
                 }
+                case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
+                    synchronized (mH) {
+                        mNextUserActionNotificationSequenceNumber = msg.arg1;
+                    }
+                }
             }
         }
     }
@@ -571,6 +596,12 @@ public final class InputMethodManager {
         @Override
         public void setCursorAnchorMonitorMode(int monitorMode) {
             mH.sendMessage(mH.obtainMessage(MSG_SET_CURSOR_ANCHOR_MONITOR_MODE, monitorMode, 0));
+        }
+
+        @Override
+        public void setUserActionNotificationSequenceNumber(int sequenceNumber) {
+            mH.sendMessage(mH.obtainMessage(MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
+                    sequenceNumber, 0));
         }
     };
 
@@ -1214,6 +1245,8 @@ public final class InputMethodManager {
                         mBindSequence = res.sequence;
                         mCurMethod = res.method;
                         mCurId = res.id;
+                        mNextUserActionNotificationSequenceNumber =
+                                res.userActionNotificationSequenceNumber;
                     } else {
                         if (res.channel != null && res.channel != mCurChannel) {
                             res.channel.dispose();
@@ -1918,8 +1951,28 @@ public final class InputMethodManager {
      */
     public void notifyUserAction() {
         synchronized (mH) {
+            if (mLastSentUserActionNotificationSequenceNumber ==
+                    mNextUserActionNotificationSequenceNumber) {
+                if (DEBUG) {
+                    Log.w(TAG, "Ignoring notifyUserAction as it has already been sent."
+                            + " mLastSentUserActionNotificationSequenceNumber: "
+                            + mLastSentUserActionNotificationSequenceNumber
+                            + " mNextUserActionNotificationSequenceNumber: "
+                            + mNextUserActionNotificationSequenceNumber);
+                }
+                return;
+            }
             try {
-                mService.notifyUserAction();
+                if (DEBUG) {
+                    Log.w(TAG, "notifyUserAction: "
+                            + " mLastSentUserActionNotificationSequenceNumber: "
+                            + mLastSentUserActionNotificationSequenceNumber
+                            + " mNextUserActionNotificationSequenceNumber: "
+                            + mNextUserActionNotificationSequenceNumber);
+                }
+                mService.notifyUserAction(mNextUserActionNotificationSequenceNumber);
+                mLastSentUserActionNotificationSequenceNumber =
+                        mNextUserActionNotificationSequenceNumber;
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
@@ -2103,6 +2156,10 @@ public final class InputMethodManager {
                 + " mCursorSelEnd=" + mCursorSelEnd
                 + " mCursorCandStart=" + mCursorCandStart
                 + " mCursorCandEnd=" + mCursorCandEnd);
+        p.println("  mNextUserActionNotificationSequenceNumber="
+                + mNextUserActionNotificationSequenceNumber
+                + " mLastSentUserActionNotificationSequenceNumber="
+                + mLastSentUserActionNotificationSequenceNumber);
     }
 
     /**

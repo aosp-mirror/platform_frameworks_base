@@ -28,4 +28,5 @@ oneway interface IInputMethodClient {
     void onUnbindMethod(int sequence);
     void setActive(boolean active);
     void setCursorAnchorMonitorMode(int monitorMode);
+    void setUserActionNotificationSequenceNumber(int sequenceNumber);
 }
