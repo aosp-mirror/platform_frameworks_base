@@ -236,7 +236,7 @@ class Ripple {
         // Cache the paint alpha so we can restore it later.
         final int paintAlpha = p.getAlpha();
 
-        final int outerAlpha = (int) (255 * mOuterOpacity + 0.5f);
+        final int outerAlpha = (int) (paintAlpha * mOuterOpacity + 0.5f);
         if (outerAlpha > 0 && mOuterRadius > 0) {
             p.setAlpha(outerAlpha);
             p.setStyle(Style.FILL);
@@ -244,7 +244,7 @@ class Ripple {
             hasContent = true;
         }
 
-        final int alpha = (int) (255 * mOpacity + 0.5f);
+        final int alpha = (int) (paintAlpha * mOpacity + 0.5f);
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         if (alpha > 0 && radius > 0) {
             final float x = MathUtils.lerp(mStartingX - mBounds.exactCenterX(), mOuterX, mTweenX);

@@ -296,8 +296,8 @@ please see styles_device_defaults.xml.
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Material.WindowTitle" parent="TextAppearance.Material.Headline" />
-    <style name="TextAppearance.Material.DialogWindowTitle" parent="TextAppearance.Material.Headline" />
+    <style name="TextAppearance.Material.WindowTitle" parent="TextAppearance.Material.Title" />
+    <style name="TextAppearance.Material.DialogWindowTitle" parent="TextAppearance.Material.Title" />
 
     <style name="TextAppearance.Material.CalendarViewWeekDayView" parent="TextAppearance.Material.Small">
         <item name="textStyle">bold</item>
@@ -966,8 +966,6 @@ please see styles_device_defaults.xml.
         <item name="textAppearance">@style/TextAppearance.Material.DialogWindowTitle</item>
     </style>
 
-    <style name="DialogWindowTitle.Material.Light">
-        <item name="textAppearance">@style/TextAppearance.Material.DialogWindowTitle</item>
-    </style>
+    <style name="DialogWindowTitle.Material.Light" />
 
 </resources>
