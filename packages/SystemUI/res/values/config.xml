@@ -141,5 +141,10 @@
 
     <!-- Wait on the touch feedback this long before performing an action. -->
     <integer name="feedback_start_delay">300</integer>
+
+    <!-- Set to true to enable the classic notification ticker that scrolls
+         Notification.tickerText across the status bar for what seems like an
+         eternity. -->
+    <bool name="enable_ticker">false</bool>
 </resources>
 

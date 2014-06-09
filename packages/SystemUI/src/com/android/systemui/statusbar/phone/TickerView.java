@@ -32,7 +32,7 @@ public class TickerView extends TextSwitcher
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mTicker.reflowText();
+        if (mTicker != null) mTicker.reflowText();
     }
 
     public void setTicker(Ticker t) {
