@@ -1268,7 +1268,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
+                Intent.FLAG_RECEIVER_FOREGROUND);
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
         mContext.sendBroadcastAsUser(managedProfileIntent, new UserHandle(parentUserId), null);
     }

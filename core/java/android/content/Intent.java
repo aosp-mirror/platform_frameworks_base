@@ -2656,7 +2656,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile is added (the profile
      * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
-     * the UserHandle of the profile that was added. This is only sent to registered receivers,
+     * the UserHandle of the profile that was added. Only applications (for example Launchers)
+     * that need to display merged content across both primary and managed profiles need to
+     * worry about this broadcast. This is only sent to registered receivers,
      * not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_ADDED =
@@ -2664,8 +2666,10 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the primary user when an associated managed profile is removed. Carries an
-     * extra {@link #EXTRA_USER} that specifies the UserHandle of the profile that was removed. This
-     * is only sent to registered receivers, not manifest receivers.
+     * extra {@link #EXTRA_USER} that specifies the UserHandle of the profile that was removed.
+     * Only applications (for example Launchers) that need to display merged content across both
+     * primary and managed profiles need to worry about this broadcast. This is only sent to
+     * registered receivers, not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_REMOVED =
             "android.intent.action.MANAGED_PROFILE_REMOVED";
