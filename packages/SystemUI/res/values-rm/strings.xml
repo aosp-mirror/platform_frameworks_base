@@ -414,7 +414,8 @@
     <skip />
     <!-- no translation found for zen_mode_title (8793432092004749188) -->
     <skip />
-    <!-- no translation found for keyguard_more_overflow_text:other (9180696159506883684) -->
+    <!-- no translation found for keyguard_more_overflow_text (9195222469041601365) -->
+    <skip />
     <!-- no translation found for speed_bump_explanation (1288875699658819755) -->
     <skip />
     <!-- no translation found for notification_tap_again (7590196980943943842) -->
@@ -426,6 +427,8 @@
     <!-- no translation found for camera_hint (5241441720959174226) -->
     <skip />
     <!-- no translation found for zen_mode_forever (7420011936770086993) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_charging_time (1757251776872835768) -->
     <skip />
     <!-- no translation found for zen_mode_duration_minutes:one (9040808414992812341) -->
     <!-- no translation found for zen_mode_duration_minutes:other (6924190729213550991) -->

@@ -120,8 +120,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Activat."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivat."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connectat."</string>
-    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
-    <skip />
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"S’està connectant."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -189,14 +188,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositius)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivat"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
-    <!-- no translation found for quick_settings_rotation_unlocked_label (7305323031808150099) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_label (6359205706154282377) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_portrait_label (5102691921442135053) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_landscape_label (8553157770061178719) -->
-    <skip />
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotació automàtica"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotació bloquejada"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horitzontal"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mètode d\'entrada"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Ubicació"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Ubicació desactivada"</string>
@@ -210,8 +205,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Desconnectat"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hi ha cap xarxa"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desconnectada"</string>
-    <!-- no translation found for quick_settings_remote_display_no_connection_label (7482103121002965053) -->
-    <skip />
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Pantalla d\'emissió"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverteix els colors"</string>
@@ -233,17 +227,14 @@
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Toca per mostrar-ho."</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"No molesteu"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"%d més"</item>
-  </plurals>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Torna a tocar per obrir-la."</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Fes lliscar el dit cap amunt per desbloquejar el teclat."</string>
-    <!-- no translation found for phone_hint (3101468054914424646) -->
-    <skip />
-    <!-- no translation found for camera_hint (5241441720959174226) -->
-    <skip />
+    <string name="phone_hint" msgid="3101468054914424646">"Fes lliscar el dit cap a la dreta per obrir el telèfon."</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Fes lliscar el dit cap a l\'esquerra per obrir la càmera."</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Fins que no ho desactivis"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregant (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar la càrrega)"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Durant un minut"</item>
     <item quantity="other" msgid="6924190729213550991">"Durant %d minuts"</item>
