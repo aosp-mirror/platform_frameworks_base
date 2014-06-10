@@ -48,6 +48,11 @@ public class Task implements Parcelable {
      * @hide
      */
     public static final int DEFAULT_BACKOFF_POLICY = BackoffPolicy.EXPONENTIAL;
+    /**
+     * Maximum backoff we allow for a job, in milliseconds.
+     * @hide
+     */
+    public static final long MAX_BACKOFF_DELAY_MILLIS = 24 * 60 * 60 * 1000;  // 24 hours.
 
     /**
      * Linear: retry_time(failure_time, t) = failure_time + initial_retry_delay * t, t >= 1
@@ -185,7 +190,7 @@ public class Task implements Parcelable {
     private Task(Parcel in) {
         taskId = in.readInt();
         extras = in.readPersistableBundle();
-        service = ComponentName.readFromParcel(in);
+        service = in.readParcelable(null);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
         networkCapabilities = in.readInt();
@@ -201,7 +206,7 @@ public class Task implements Parcelable {
 
     private Task(Task.Builder b) {
         taskId = b.mTaskId;
-        extras = new PersistableBundle(b.mExtras);
+        extras = b.mExtras;
         service = b.mTaskService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
@@ -225,7 +230,7 @@ public class Task implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(taskId);
         out.writePersistableBundle(extras);
-        ComponentName.writeToParcel(service, out);
+        out.writeParcelable(service, flags);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
         out.writeInt(networkCapabilities);

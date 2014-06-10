@@ -16,6 +16,7 @@
 
 package com.android.server.task.controllers;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import android.app.AlarmManager;
@@ -176,5 +177,10 @@ public class IdleController extends StateController {
                 }
             }
         }
+    }
+
+    @Override
+    public void dumpControllerState(PrintWriter pw) {
+
     }
 }

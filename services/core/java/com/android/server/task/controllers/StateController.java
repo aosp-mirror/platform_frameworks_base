@@ -21,6 +21,8 @@ import android.content.Context;
 import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
+import java.io.PrintWriter;
+
 /**
  * Incorporates shared controller logic between the various controllers of the TaskManager.
  * These are solely responsible for tracking a list of tasks, and notifying the TM when these
@@ -47,5 +49,7 @@ public abstract class StateController {
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
     public abstract void maybeStopTrackingTask(TaskStatus taskStatus);
+
+    public abstract void dumpControllerState(PrintWriter pw);
 
 }
