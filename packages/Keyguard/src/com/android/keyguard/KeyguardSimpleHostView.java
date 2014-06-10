@@ -25,6 +25,7 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
 
     public KeyguardSimpleHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
     }
 
     @Override
@@ -62,4 +63,10 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
         // TODO Auto-generated method stub
     }
 
+    private KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            getSecurityContainer().showPrimarySecurityScreen(false /* turning off */);
+        }
+    };
 }
