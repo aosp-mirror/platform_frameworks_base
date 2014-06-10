@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -831,14 +832,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         sendAdminCommandLocked(admin, action, null);
     }
 
+    void sendAdminCommandLocked(ActiveAdmin admin, String action, BroadcastReceiver result) {
+        sendAdminCommandLocked(admin, action, null, result);
+    }
+
     /**
      * Send an update to one specific admin, get notified when that admin returns a result.
      */
-    void sendAdminCommandLocked(ActiveAdmin admin, String action, BroadcastReceiver result) {
+    void sendAdminCommandLocked(ActiveAdmin admin, String action, Bundle adminExtras,
+            BroadcastReceiver result) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
         if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
             intent.putExtra("expiration", admin.passwordExpirationDate);
+        }
+        if (adminExtras != null) {
+            intent.putExtras(adminExtras);
         }
         if (result != null) {
             mContext.sendOrderedBroadcastAsUser(intent, admin.getUserHandle(),
@@ -1367,6 +1376,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        setActiveAdmin(adminReceiver, refreshing, userHandle, null);
+    }
+
+    private void setActiveAdmin(ComponentName adminReceiver, boolean refreshing, int userHandle,
+            Bundle onEnableData) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
         enforceCrossUserPermission(userHandle);
@@ -1403,7 +1417,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mAdminList.set(replaceIndex, newAdmin);
                 }
                 saveSettingsLocked(userHandle);
-                sendAdminCommandLocked(newAdmin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED);
+                sendAdminCommandLocked(newAdmin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
+                        onEnableData, null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3486,6 +3501,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 restoreCallingIdentity(id);
             }
+        }
+    }
+
+    @Override
+    public UserHandle createAndInitializeUser(ComponentName who, String name,
+            String ownerName, ComponentName profileOwnerComponent, Bundle adminExtras) {
+        UserHandle user = createUser(who, name);
+        long id = Binder.clearCallingIdentity();
+        try {
+            String profileOwnerPkg = profileOwnerComponent.getPackageName();
+            final IPackageManager ipm = AppGlobals.getPackageManager();
+            IActivityManager activityManager = ActivityManagerNative.getDefault();
+
+            try {
+                // Install the profile owner if not present.
+                if (!ipm.isPackageAvailable(profileOwnerPkg, user.getIdentifier())) {
+                    ipm.installExistingPackageAsUser(profileOwnerPkg, user.getIdentifier());
+                }
+
+                // Start user in background.
+                activityManager.startUserInBackground(user.getIdentifier());
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Failed to make remote calls for configureUser", e);
+            }
+
+            setActiveAdmin(profileOwnerComponent, true, user.getIdentifier(), adminExtras);
+            setProfileOwner(profileOwnerPkg, ownerName, user.getIdentifier());
+            return user;
+        } finally {
+            restoreCallingIdentity(id);
         }
     }
 

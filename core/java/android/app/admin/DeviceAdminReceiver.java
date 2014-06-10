@@ -222,6 +222,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * Called after the administrator is first enabled, as a result of
      * receiving {@link #ACTION_DEVICE_ADMIN_ENABLED}.  At this point you
      * can use {@link DevicePolicyManager} to set your desired policies.
+     *
+     * <p> If the admin is activated by a device owner, then the intent
+     * may contain private extras that are relevant to user setup.
+     * {@see DevicePolicyManager#createAndInitializeUser(ComponentName, String, String,
+     *      ComponentName, Intent)}
+     *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
