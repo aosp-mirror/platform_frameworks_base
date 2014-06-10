@@ -117,6 +117,8 @@ public final class HdmiControlService extends SystemService {
     private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
             new ArrayList<>();
 
+    private final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
+
     @Nullable
     private HdmiCecController mCecController;
 
@@ -368,6 +370,9 @@ public final class HdmiControlService extends SystemService {
     }
 
     boolean handleCecCommand(HdmiCecMessage message) {
+        // Cache incoming message. Note that it caches only white-listed one.
+        mCecMessageCache.cacheMessage(message);
+
         // Commands that queries system information replies directly instead
         // of creating FeatureAction because they are state-less.
         switch (message.getOpcode()) {
@@ -441,7 +446,6 @@ public final class HdmiControlService extends SystemService {
         return strategy | iterationStrategy;
     }
 
-
     /**
      * Launch device discovery sequence. It starts with clearing the existing device info list.
      * Note that it assumes that logical address of all local devices is already allocated.
@@ -451,6 +455,7 @@ public final class HdmiControlService extends SystemService {
     void launchDeviceDiscovery(final int sourceAddress) {
         // At first, clear all existing device infos.
         mCecController.clearDeviceInfoList();
+        mCecMessageCache.flushAll();
 
         // TODO: check whether TV is one of local devices.
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
@@ -784,5 +789,19 @@ public final class HdmiControlService extends SystemService {
     boolean isInPresetInstallationMode() {
         // TODO: Implement this.
         return false;
+    }
+
+    /**
+     * Called when a device is removed or removal of device is detected.
+     *
+     * @param address a logical address of a device to be removed
+     */
+    void removeCecDevice(int address) {
+        mCecController.removeDeviceInfo(address);
+        mCecMessageCache.flushMessagesFrom(address);
+    }
+
+    HdmiCecMessageCache getCecMessageCache() {
+        return mCecMessageCache;
     }
 }
