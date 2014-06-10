@@ -63,8 +63,9 @@
     <ImageButton android:id="@+id/settings_button"
         style="@android:style/Widget.Material.Button.Borderless"
         android:layout_toStartOf="@id/multi_user_switch"
-        android:layout_width="56dp"
+        android:layout_width="48dp"
         android:layout_height="@dimen/status_bar_header_height"
+        android:layout_marginStart="8dp"
         android:src="@drawable/ic_settings_24dp"
         android:contentDescription="@string/accessibility_desc_quick_settings"/>
 
@@ -72,7 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/status_bar_header_height"
         android:layout_toStartOf="@id/multi_user_switch"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="2dp"
         android:layout_marginStart="16dp"
         />
 
@@ -117,12 +118,11 @@
             android:layout_below="@id/clock"
             />
     </RelativeLayout>
-
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_header_height_keyguard"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="16dp"
         android:layout_toStartOf="@id/system_icons_container"
         android:gravity="center_vertical"
         android:ellipsize="marquee"

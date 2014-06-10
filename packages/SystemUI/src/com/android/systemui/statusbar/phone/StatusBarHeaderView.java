@@ -70,6 +70,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private int mKeyguardWidth = ViewGroup.LayoutParams.MATCH_PARENT;
     private int mNormalWidth;
+    private int mPadding;
+    private int mMultiUserExpandedMargin;
 
     private ActivityStarter mActivityStarter;
     private BrightnessController mBrightnessController;
@@ -120,6 +122,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mKeyguardHeight = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_header_height_keyguard);
         mNormalWidth = getLayoutParams().width;
+        mPadding = getResources().getDimensionPixelSize(R.dimen.notification_side_padding);
+        mMultiUserExpandedMargin =
+                getResources().getDimensionPixelSize(R.dimen.multi_user_switch_expanded_margin);
+
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -147,6 +153,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateZTranslation();
             updateClickTargets();
             updateWidth();
+            updatePadding();
+            updateMultiUserSwitch();
             if (mQSPanel != null) {
                 mQSPanel.setExpanded(expanded && !overscrolled);
             }
@@ -256,6 +264,21 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
+    private void updatePadding() {
+        boolean padded = !mKeyguardShowing || mExpanded;
+        int padding = padded ? mPadding : 0;
+        setPaddingRelative(padding, 0, padding, 0);
+    }
+
+    private void updateMultiUserSwitch() {
+        int marginEnd = !mKeyguardShowing || mExpanded ? mMultiUserExpandedMargin : 0;
+        MarginLayoutParams lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
+        if (marginEnd != lp.getMarginEnd()) {
+            lp.setMarginEnd(marginEnd);
+            mMultiUserSwitch.setLayoutParams(lp);
+        }
+    }
+
     public void setExpansion(float height) {
         height = (height - mCollapsedHeight) * EXPANSION_RUBBERBAND_FACTOR + mCollapsedHeight;
         if (height < mCollapsedHeight) {
@@ -301,6 +324,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateWidth();
         updateVisibilities();
         updateZTranslation();
+        updatePadding();
+        updateMultiUserSwitch();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
