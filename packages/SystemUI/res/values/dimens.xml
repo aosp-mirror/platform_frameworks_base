@@ -338,4 +338,7 @@
     <!-- The width of the region on the left/right edge of the screen for performing the camera/
          phone hints. -->
     <dimen name="edge_tap_area_width">48dp</dimen>
+
+    <!-- end margin for multi user switch in expanded quick settings -->
+    <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
 </resources>
