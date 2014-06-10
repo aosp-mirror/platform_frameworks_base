@@ -1,0 +1,50 @@
+page.title=Understand User Behavior
+page.metaDescription=Use Google Analytics to learn what your users like and what keeps them coming back.
+page.tags="analytics, user behavior"
+page.image=/images/gp-analytics.jpg
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-analytics.jpg" style="width:320px">
+</div>
+
+
+<p>
+  Link your Google Play Developer Console with Google Analytics to learn much
+  more about how users interact with your app &mdash; before and after they
+  download it.
+</p>
+
+<p>
+  Start by discovering how many people visit your Google Play listing page,
+  where they come from, and how many go on to install your app. Once the app is
+  launched, use Google Analytics to see which of your features are most
+  popular, where power users spend their time, who tends to make in-app
+  purchases, and more.
+</p>
+
+<p>
+  Google Analytics delivers the numbers in real time, so you can act fast to
+  update your landing page and your app. <a href=
+  "http://www.google.com/analytics/mobile/">Learn more</a>.
+</p>
+
+<p>
+  If you have a Google Analytics account already, linking it to Google Play
+  takes just a few moments. You can also link your Google Analytics account to
+  Admob to start gaining more user insights to improve your in-app marketing.
+</p>
+
+  <div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/engage/analytics"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>
