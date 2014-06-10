@@ -33917,15 +33917,15 @@ package android.view.inputmethod {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public static final class CursorAnchorInfo.CursorAnchorInfoBuilder {
-    ctor public CursorAnchorInfo.CursorAnchorInfoBuilder();
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder addCharacterRect(int, float, float, float, float);
+  public static final class CursorAnchorInfo.Builder {
+    ctor public CursorAnchorInfo.Builder();
+    method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterRect(int, float, float, float, float);
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setComposingText(int, java.lang.CharSequence);
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setInsertionMarkerLocation(float, float, float, float);
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setMatrix(android.graphics.Matrix);
-    method public android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder setSelectionRange(int, int);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, java.lang.CharSequence);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
   }
 
   public class EditorInfo implements android.text.InputType android.os.Parcelable {
