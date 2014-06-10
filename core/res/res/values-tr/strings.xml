@@ -188,10 +188,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Güvenli mod"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android Sistemi"</string>
-    <!-- no translation found for user_owner_label (6465364741001216388) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (3022906847647343112) -->
-    <skip />
+    <string name="user_owner_label" msgid="6465364741001216388">"Kişisel uygulamalar"</string>
+    <string name="managed_profile_label" msgid="3022906847647343112">"İş için Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Size maliyet getiren hizmetler"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Size maliyet getirebilecek işlemler yapma."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajlarınız"</string>
@@ -522,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Uygulamaya, ses çıkışını yakalayıp yönlendirme izni verir."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Özel kelime algılama"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Uygulamaya, Özel Kelime algılamak için ses yakalama izni verir. Ses yakalama işlemi arka planda yapılabilir, ancak diğer ses yakalama işlemlerini (ör. kameranın ses kaydını) engellemez."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Ses Yönlendirme"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Uygulamanın ses yönlendirmeyi doğrudan denetlemesine ve ses politikası kararlarını geçersiz kılmasına izin verir."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video çıkışını yakala"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Uygulamaya, video çıkışını yakalayıp yönlendirme izni verir."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"güvenli video çıkışını yakala"</string>
@@ -1358,6 +1358,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Bir uygulamaya tuş koruyucuyu denetleme izni verir."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Güven durumundaki değişiklileri dinle."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Bir uygulamanın, güven durumundaki değişiklikleri dinlemesine izin verir."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Güven aracısı sağlama."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Bir uygulamanın güven aracısı sağlamasına izin verir."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Güven aracı hizmetine bağlan"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Bir uygulamanın, güven aracı hizmetine bağlanmasına izin verir."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Güncelleme ve kurtarma sistemiyle etkileşim kur"</string>

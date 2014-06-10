@@ -188,10 +188,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
-    <!-- no translation found for user_owner_label (6465364741001216388) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (3022906847647343112) -->
-    <skip />
+    <string name="user_owner_label" msgid="6465364741001216388">"Προσωπικές εφαρμογές"</string>
+    <string name="managed_profile_label" msgid="3022906847647343112">"Android for Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Υπηρεσίες επί πληρωμή"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Πραγματοποίηση ενεργειών για τις οποίες ενδέχεται να χρεωθείτε."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Τα μηνύματά σας"</string>
@@ -522,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Δίνει στην εφαρμογή τη δυνατότητα εγγραφής και ανακατεύθυνσης εξόδου ήχου."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Ανίχνευση ενεργών λέξεων"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Επιτρέπει στην εφαρμογή την εγγραφή ήχου για ανίχνευση ενεργών λέξεων. Η εγγραφή μπορεί να πραγματοποιηθεί στο παρασκήνιο, αλλά δεν εμποδίζει την εγγραφή ήχου από άλλες πηγές (π.χ. βιντεοκάμερα)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Δρομολόγηση ήχου"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Επιτρέπει στην εφαρμογή να ελέγχει άμεσα τη δρομολόγηση ήχου και αντικαθιστά τις αποφάσεις πολιτικής ήχου."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"έγγραφή εξόδου βίντεο"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Δίνει στην εφαρμογή τη δυνατότητα εγγραφής και ανακατεύθυνσης εξόδου βίντεο."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"έγγραφή ασφαλούς εξόδου βίντεο"</string>
@@ -1358,6 +1358,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Επιτρέπει σε μια εφαρμογή τον έλεγχο του κλειδώματος πληκτρολογίου."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Αντίληψη αλλαγών καταστάσεων εμπιστοσύνης."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Επιτρέπει σε μια εφαρμογή να αντιλαμβάνεται τις αλλαγές στην κατάσταση εμπιστοσύνης."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Παράσχετε έναν αξιόπιστο αντιπρόσωπο."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Επιτρέπει σε μια εφαρμογή να προσφέρει έναν αξιόπιστο αντιπρόσωπο."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Σύνδεση σε υπηρεσία trust agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Αλληλεπίδραση με το σύστημα ενημέρωσης και ανάκτησης"</string>
