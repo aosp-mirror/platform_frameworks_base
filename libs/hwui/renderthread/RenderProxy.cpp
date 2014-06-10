@@ -47,7 +47,7 @@ namespace renderthread {
 
 #define SETUP_TASK(method) \
     LOG_ALWAYS_FATAL_IF( METHOD_INVOKE_PAYLOAD_SIZE < sizeof(ARGS(method)), \
-        "METHOD_INVOKE_PAYLOAD_SIZE %d is smaller than sizeof(" #method "Args) %d", \
+        "METHOD_INVOKE_PAYLOAD_SIZE %zu is smaller than sizeof(" #method "Args) %zu", \
                 METHOD_INVOKE_PAYLOAD_SIZE, sizeof(ARGS(method))); \
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
