@@ -43,6 +43,7 @@
 #include "PatchCache.h"
 #include "ProgramCache.h"
 #include "PathCache.h"
+#include "TessellationCache.h"
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
 #include "ResourceCache.h"
@@ -326,6 +327,7 @@ public:
     ProgramCache programCache;
     PathCache pathCache;
     PatchCache patchCache;
+    TessellationCache tessellationCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
     ResourceCache resourceCache;

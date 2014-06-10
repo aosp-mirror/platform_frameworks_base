@@ -66,12 +66,12 @@ namespace uirenderer {
 
 class ShadowTessellator {
 public:
-    static VertexBufferMode tessellateAmbientShadow(bool isCasterOpaque,
+    static void tessellateAmbientShadow(bool isCasterOpaque,
             const Vector3* casterPolygon, int casterVertexCount,
             const Vector3& centroid3d,  const Rect& casterBounds,
             const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer);
 
-    static VertexBufferMode tessellateSpotShadow(bool isCasterOpaque,
+    static void tessellateSpotShadow(bool isCasterOpaque,
             const Vector3* casterPolygon, int casterVertexCount,
             const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
             const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer);

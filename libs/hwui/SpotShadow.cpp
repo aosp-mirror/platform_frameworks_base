@@ -500,14 +500,14 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
 *                            empty strip if error.
 *
 */
-VertexBufferMode SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
+void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
         int polyLength, const Vector3& lightCenter, float lightSize,
         int lightVertexCount, VertexBuffer& retStrips) {
     Vector3 light[lightVertexCount * 3];
     computeLightPolygon(lightVertexCount, lightCenter, lightSize, light);
     computeSpotShadow(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
             polyLength, retStrips);
-    return kVertexBufferMode_TwoPolyRingShadow;
+    retStrips.setMode(VertexBuffer::kTwoPolyRingShadow);
 }
 
 /**
