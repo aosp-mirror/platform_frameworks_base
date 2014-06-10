@@ -894,7 +894,7 @@
         android:label="@string/permlab_nfc" />
 
     <!-- @SystemApi Allows an internal user to use privileged ConnectivityManager APIs.
-        @hide -->
+         @hide -->
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="signature|system" />
@@ -905,10 +905,10 @@
         android:protectionLevel="signature|system" />
 
     <!-- @SystemApi Allows access to the loop radio (Android@Home mesh network) device.
-	@hide -->
+         @hide -->
     <permission android:name="android.permission.LOOP_RADIO"
-	android:permissionGroup="android.permission-group.NETWORK"
-	android:protectionLevel="signature|system" />
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="signature|system" />
 
     <!-- Allows sending and receiving handover transfer status from Wifi and Bluetooth
          @hide
@@ -2856,7 +2856,7 @@
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Material.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2864,14 +2864,14 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Material.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Material.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2879,14 +2879,14 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
+                android:theme="@android:style/Theme.Material.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.DialogWhenLarge"
+                android:theme="@android:style/Theme.Material.DialogWhenLarge"
                 android:process=":ui">
         </activity>
 
