@@ -65,7 +65,7 @@ public class NotificationOverflowIconsView extends IconMerger {
     }
 
     private void applyColor(Notification notification, StatusBarIconView view) {
-        if (notification.color != Notification.COLOR_DEFAULT) {
+        if (notification.color == Notification.COLOR_DEFAULT) {
             if (mNotificationColorUtil.isGrayscale(view.getDrawable())) {
                 view.setColorFilter(mTintColor, PorterDuff.Mode.MULTIPLY);
             }

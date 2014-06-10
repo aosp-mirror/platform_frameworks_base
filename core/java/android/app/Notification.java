@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -31,7 +30,6 @@ import android.media.AudioManager;
 import android.media.session.MediaSessionToken;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -2568,7 +2566,7 @@ public class Notification implements Parcelable
                     R.id.icon,
                     true,
                     -1,
-                    mColor,
+                    resolveColor(),
                     PorterDuff.Mode.SRC_ATOP,
                     -1);
         }
@@ -2595,17 +2593,22 @@ public class Notification implements Parcelable
                         R.id.right_icon,
                         true,
                         -1,
-                        mColor,
+                        resolveColor(),
                         PorterDuff.Mode.SRC_ATOP,
                         -1);
             }
         }
 
+        private int sanitizeColor() {
+            if (mColor != COLOR_DEFAULT) {
+                mColor |= 0xFF000000; // no alpha for custom colors
+            }
+            return mColor;
+        }
+
         private int resolveColor() {
             if (mColor == COLOR_DEFAULT) {
-                mColor = mContext.getResources().getColor(R.color.notification_icon_bg_color);
-            } else {
-                mColor |= 0xFF000000; // no alpha for custom colors
+                return mContext.getResources().getColor(R.color.notification_icon_bg_color);
             }
             return mColor;
         }
@@ -2621,7 +2624,7 @@ public class Notification implements Parcelable
             n.iconLevel = mSmallIconLevel;
             n.number = mNumber;
 
-            n.color = resolveColor();
+            n.color = sanitizeColor();
 
             n.contentView = makeContentView();
             n.contentIntent = mContentIntent;
