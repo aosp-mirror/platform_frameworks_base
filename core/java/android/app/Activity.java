@@ -5326,7 +5326,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @hide
      */
-    void convertToTranslucent(TranslucentConversionListener callback, ActivityOptions options) {
+    public void convertToTranslucent(TranslucentConversionListener callback, 
+            ActivityOptions options) {
         boolean drawComplete;
         try {
             mTranslucentCallback = callback;
