@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -2640,7 +2641,9 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.hardware.hdmi.HdmiControlManager
+     * @hide
      */
+    @SystemApi
     public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
 
     /**

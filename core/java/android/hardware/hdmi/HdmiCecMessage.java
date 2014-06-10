@@ -16,6 +16,7 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,7 +28,10 @@ import java.util.Arrays;
  * A class to encapsulate HDMI-CEC message used for the devices connected via
  * HDMI cable to communicate with one another. A message is defined by its
  * source and destination address, command (or opcode), and optional parameters.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiCecMessage implements Parcelable {
 
     public static final byte[] EMPTY_PARAM = EmptyArray.BYTE;

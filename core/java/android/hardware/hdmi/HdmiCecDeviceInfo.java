@@ -16,6 +16,7 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,7 +24,10 @@ import android.os.Parcelable;
  * A class to encapsulate device information for HDMI-CEC. This container
  * include basic information such as logical address, physical address and
  * device type, and additional information like vendor id and osd name.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiCecDeviceInfo implements Parcelable {
     // Logical address, phsical address, device type, vendor id and display name
     // are immutable value.

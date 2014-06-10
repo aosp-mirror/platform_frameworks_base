@@ -16,12 +16,16 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * A class that describes the HDMI port hotplug event.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiHotplugEvent implements Parcelable {
 
     private final int mPort;
