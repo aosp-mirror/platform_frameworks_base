@@ -120,8 +120,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Zapnuto."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Vypnuto."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Připojeno."</string>
-    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
-    <skip />
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Připojování."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -189,10 +188,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> zařízení)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Rozhraní Bluetooth je vypnuto"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jas"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automatické otáčení"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Otáčení je uzamčeno"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Uzamčen režim na výšku"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Uzamčen režim na šířku"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatické otáčení"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Otáčení je uzamčeno"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Na výšku"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Na šířku"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metoda zadávání dat"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Poloha"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Poloha vypnuta"</string>
@@ -206,7 +205,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nepřipojeno"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Žádná síť"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi vypnuta"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Vzdálená obrazovka"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Odesílání obrazovky"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Převrátit barvy"</string>
@@ -228,13 +227,14 @@
   </plurals>
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Oznámení zobrazíte kliknutím"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"Nerušit"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"Další: %d"</item>
-  </plurals>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Méně urgentní oznámení níže"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Oznámení otevřete opětovným klepnutím"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Zařízení odemknete přejetím prstem nahoru"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Telefon otevřete přejetím prstem vpravo."</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Fotoaparát otevřete přejetím prstem vlevo."</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokud tuto funkci nevypnete"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Na jednu minutu"</item>
     <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>

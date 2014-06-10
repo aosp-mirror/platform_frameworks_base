@@ -120,8 +120,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Sees."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Väljas."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Ühendatud."</string>
-    <!-- no translation found for accessibility_desc_connecting (3812924520316280149) -->
-    <skip />
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Ühenduse loomine."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -187,10 +186,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> seadet)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth on väljas"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Heledus"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automaatne pööramine"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Pööramine lukus"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="1553131290066230775">"Lukustatud vertikaalpaigutusse"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="7216265671276086593">"Lukustatud horisontaalpaigutusse"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automaatne pööramine"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Pööramine on lukustatud"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertikaalpaigutus"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horisontaalpaigutus"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Sisestusmeetod"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Asukoht"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Asukoht on väljas"</string>
@@ -204,7 +203,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ühendus puudub"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Võrku pole"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi-ühendus on väljas"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Cast-ekraan"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Ülekandeekraan"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Heledus"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMAATNE"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Vaheta värve"</string>
@@ -224,13 +223,14 @@
     <!-- no translation found for zen_mode_notification_title:other (7388721375827338153) -->
     <string name="zen_mode_notification_text" msgid="8336623711388065713">"Puudutage kuvamiseks"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"Mitte segada"</string>
-  <plurals name="keyguard_more_overflow_text">
-    <item quantity="other" msgid="9180696159506883684">"Veel %d"</item>
-  </plurals>
+    <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähem kiireloomulised märguanded on allpool"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avamiseks puudutage uuesti"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Lukustuse tühistamiseks pühkige üles"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Telefoni kasutamiseks pühkige paremale"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"Kaamera kasutamiseks pühkige vasakule"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kuni lülitate selle välja"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Üheks minutiks"</item>
     <item quantity="other" msgid="6924190729213550991">"%d minutiks"</item>
