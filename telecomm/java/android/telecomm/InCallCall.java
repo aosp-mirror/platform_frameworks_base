@@ -39,7 +39,6 @@ public final class InCallCall implements Parcelable {
     private final GatewayInfo mGatewayInfo;
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
     private final CallServiceDescriptor mHandoffCallServiceDescriptor;
-    private final List<String> mConferenceCapableCallIds;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
 
@@ -57,8 +56,7 @@ public final class InCallCall implements Parcelable {
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor) {
         this(id, state, disconnectCauseCode, disconnectCauseMsg, capabilities, connectTimeMillis,
-                handle, gatewayInfo, descriptor, handoffDescriptor, Collections.EMPTY_LIST, null,
-                Collections.EMPTY_LIST);
+                handle, gatewayInfo, descriptor, handoffDescriptor, null, Collections.EMPTY_LIST);
     }
 
     /** @hide */
@@ -73,7 +71,6 @@ public final class InCallCall implements Parcelable {
             GatewayInfo gatewayInfo,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor,
-            List<String> conferenceCapableCallIds,
             String parentCallId,
             List<String> childCallIds) {
         mId = id;
@@ -86,7 +83,6 @@ public final class InCallCall implements Parcelable {
         mGatewayInfo = gatewayInfo;
         mCurrentCallServiceDescriptor = descriptor;
         mHandoffCallServiceDescriptor = handoffDescriptor;
-        mConferenceCapableCallIds = conferenceCapableCallIds;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
     }
@@ -151,14 +147,6 @@ public final class InCallCall implements Parcelable {
     }
 
     /**
-     * The calls with which this call can conference.
-     * @hide
-     */
-    public List<String> getConferenceCapableCallIds() {
-        return mConferenceCapableCallIds;
-    }
-
-    /**
      * The conference call to which this call is conferenced. Null if not conferenced.
      * @hide
      */
@@ -191,14 +179,12 @@ public final class InCallCall implements Parcelable {
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
             CallServiceDescriptor handoffDescriptor = source.readParcelable(classLoader);
-            List<String> conferenceCapableCallIds = new ArrayList<>();
-            source.readList(conferenceCapableCallIds, classLoader);
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg, capabilities,
                     connectTimeMillis, handle, gatewayInfo, descriptor, handoffDescriptor,
-                    conferenceCapableCallIds, parentCallId, childCallIds);
+                    parentCallId, childCallIds);
         }
 
         @Override
@@ -226,8 +212,12 @@ public final class InCallCall implements Parcelable {
         destination.writeParcelable(mGatewayInfo, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
         destination.writeParcelable(mHandoffCallServiceDescriptor, 0);
-        destination.writeList(mConferenceCapableCallIds);
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s, parent:%s, children:%s]", mId, mParentCallId, mChildCallIds);
     }
 }

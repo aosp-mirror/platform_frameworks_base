@@ -199,15 +199,14 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecomm to conference the specified calls together.
+     * Instructs Telecomm to conference the specified call.
      *
      * @param callId The unique ID of the call.
-     * @param callIdToConference The unique ID of the call to conference with.
      * @hide
      */
-    void conferenceWith(String callId, String callIdToConference) {
+    public void conference(String callId) {
         try {
-            mAdapter.conferenceWith(callId, callIdToConference);
+            mAdapter.conference(callId);
         } catch (RemoteException ignored) {
         }
     }
@@ -219,7 +218,7 @@ public final class InCallAdapter {
      * @param callId The unique ID of the call.
      * @hide
      */
-    void splitFromConference(String callId) {
+    public void splitFromConference(String callId) {
         try {
             mAdapter.splitFromConference(callId);
         } catch (RemoteException ignored) {

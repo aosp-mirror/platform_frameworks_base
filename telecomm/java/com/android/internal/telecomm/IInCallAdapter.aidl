@@ -48,7 +48,7 @@ oneway interface IInCallAdapter {
 
     void handoffCall(String callId);
 
-    void conferenceWith(String callId, String callIdToConference);
+    void conference(String callId);
 
     void splitFromConference(String callId);
 }

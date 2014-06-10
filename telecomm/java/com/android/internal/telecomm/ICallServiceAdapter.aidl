@@ -47,9 +47,11 @@ oneway interface ICallServiceAdapter {
 
     void setRequestingRingback(String callId, boolean ringing);
 
-    void setCanConferenceWith(String callId, in List<String> conferenceCapableCallIds);
+    void setCanConference(String callId, boolean canConference);
 
-    void setIsConferenced(String conferenceCallId, String callId, boolean isConferenced);
+    void setIsConferenced(String callId, String conferenceCallId);
+
+    void addConferenceCall(String callId, in CallInfo callInfo);
 
     void removeCall(String callId);
 

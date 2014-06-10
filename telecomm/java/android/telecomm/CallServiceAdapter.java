@@ -179,12 +179,12 @@ public final class CallServiceAdapter {
      * Indicates that the specified call can conference with any of the specified list of calls.
      *
      * @param callId The unique ID of the call.
-     * @param conferenceCapableCallIds The unique IDs of the calls which can be conferenced.
+     * @param canConference Specified whether or not the call can be conferenced.
      * @hide
      */
-    public void setCanConferenceWith(String callId, List<String> conferenceCapableCallIds) {
+    public void setCanConference(String callId, boolean canConference) {
         try {
-            mAdapter.setCanConferenceWith(callId, conferenceCapableCallIds);
+            mAdapter.setCanConference(callId, canConference);
         } catch (RemoteException ignored) {
         }
     }
@@ -193,13 +193,14 @@ public final class CallServiceAdapter {
      * Indicates whether or not the specified call is currently conferenced into the specified
      * conference call.
      *
-     * @param conferenceCallId The unique ID of the conference call.
      * @param callId The unique ID of the call being conferenced.
+     * @param conferenceCallId The unique ID of the conference call. Null if call is not
+     *         conferenced.
      * @hide
      */
-    public void setIsConferenced(String conferenceCallId, String callId, boolean isConferenced) {
+    public void setIsConferenced(String callId, String conferenceCallId) {
         try {
-            mAdapter.setIsConferenced(conferenceCallId, callId, isConferenced);
+            mAdapter.setIsConferenced(callId, conferenceCallId);
         } catch (RemoteException ignored) {
         }
     }
@@ -221,6 +222,18 @@ public final class CallServiceAdapter {
     public void onPostDialWait(String callId, String remaining) {
         try {
             mAdapter.onPostDialWait(callId, remaining);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Indicates that a new conference call has been created.
+     *
+     * @param callId The unique ID of the conference call.
+     */
+    public void addConferenceCall(String callId) {
+        try {
+            mAdapter.addConferenceCall(callId, null);
         } catch (RemoteException ignored) {
         }
     }
