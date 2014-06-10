@@ -209,7 +209,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getMaxExpandHeight() {
-        return mMaxExpandHeight;
+        return mShowingPublic ? mRowMinHeight : mMaxExpandHeight;
     }
 
     /**
@@ -221,30 +221,35 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public boolean isContentExpandable() {
-        return mPrivateLayout.isContentExpandable();
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout.isContentExpandable();
     }
 
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         mPrivateLayout.setActualHeight(height);
+        mPublicLayout.setActualHeight(height);
         invalidate();
         super.setActualHeight(height, notifyListeners);
     }
 
     @Override
     public int getMaxHeight() {
-        return mPrivateLayout.getMaxHeight();
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout.getMaxHeight();
     }
 
     @Override
     public int getMinHeight() {
-        return mPrivateLayout.getMinHeight();
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout.getMinHeight();
     }
 
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
         mPrivateLayout.setClipTopAmount(clipTopAmount);
+        mPublicLayout.setClipTopAmount(clipTopAmount);
     }
 
     public boolean isBelowSpeedBump() {
@@ -256,11 +261,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void notifyContentUpdated() {
+        mPublicLayout.notifyContentUpdated();
         mPrivateLayout.notifyContentUpdated();
     }
 
     public boolean isShowingLayoutLayouted() {
-        View showingLayout = mShowingPublic ? mPublicLayout : mPrivateLayout;
+        NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getWidth() != 0;
+    }
+
+    private NotificationContentView getShowingLayout() {
+        return mShowingPublic ? mPublicLayout : mPrivateLayout;
     }
 }
