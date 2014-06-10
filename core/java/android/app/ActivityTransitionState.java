@@ -87,6 +87,11 @@ class ActivityTransitionState {
      */
     private boolean mHasExited;
 
+    /**
+     * Postpone painting and starting the enter transition until this is false.
+     */
+    private boolean mIsEnterPostponed;
+
     public ActivityTransitionState() {
     }
 
@@ -140,15 +145,38 @@ class ActivityTransitionState {
         if (mEnterActivityOptions.isReturning()) {
             restoreExitedViews();
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
-            mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
-                    resultReceiver, sharedElementNames, mExitingFrom, mExitingTo);
+        }
+        mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
+                resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning());
+
+        if (!mIsEnterPostponed) {
+            startEnter();
+        }
+    }
+
+    public void postponeEnterTransition() {
+        mIsEnterPostponed = true;
+    }
+
+    public void startPostponedEnterTransition() {
+        if (mIsEnterPostponed) {
+            mIsEnterPostponed = false;
+            if (mEnterTransitionCoordinator != null) {
+                startEnter();
+            }
+        }
+    }
+
+    private void startEnter() {
+        if (mEnterActivityOptions.isReturning()) {
+            mEnterTransitionCoordinator.viewsReady(mExitingFrom, mExitingTo);
         } else {
-            mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
-                    resultReceiver, sharedElementNames, null, null);
-            mEnteringNames = sharedElementNames;
+            mEnterTransitionCoordinator.viewsReady(null, null);
+            mEnteringNames = mEnterTransitionCoordinator.getAllSharedElementNames();
             mEnteringFrom = mEnterTransitionCoordinator.getAcceptedNames();
             mEnteringTo = mEnterTransitionCoordinator.getMappedNames();
         }
+
         mExitingFrom = null;
         mExitingTo = null;
         mEnterActivityOptions = null;
