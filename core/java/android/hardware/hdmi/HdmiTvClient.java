@@ -15,11 +15,16 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
+
 /**
  * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
  * which acts as TV/Display. It provides with methods that manage, interact with other
  * devices on the CEC bus.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiTvClient {
     private static final String TAG = "HdmiTvClient";
 

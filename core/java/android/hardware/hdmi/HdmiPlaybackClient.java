@@ -16,6 +16,7 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 
 import android.util.Log;
@@ -25,7 +26,10 @@ import android.util.Log;
  * in the Android system which acts as a playback device such as set-top box.
  * It provides with methods that control, get information from TV/Display device
  * connected through HDMI bus.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiPlaybackClient {
     private static final String TAG = "HdmiPlaybackClient";
 

@@ -17,6 +17,7 @@
 package android.hardware.hdmi;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 
 /**
@@ -28,7 +29,10 @@ import android.os.RemoteException;
  * {@link HdmiTvClient} object if the system is configured to host one. Android system
  * can host more than one logical CEC devices. If multiple types are configured they
  * all work as if they were independent logical devices running in the system.
+ *
+ * @hide
  */
+@SystemApi
 public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
 
