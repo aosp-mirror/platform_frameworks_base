@@ -68,6 +68,8 @@ class Ripple {
 
     private float mStartingX;
     private float mStartingY;
+    private float mClampedStartingX;
+    private float mClampedStartingY;
 
     // Hardware rendering properties.
     private CanvasProperty<Paint> mPropPaint;
@@ -112,6 +114,7 @@ class Ripple {
     public Ripple(RippleDrawable owner, Rect bounds, float startingX, float startingY) {
         mOwner = owner;
         mBounds = bounds;
+
         mStartingX = startingX;
         mStartingY = startingY;
     }
@@ -131,6 +134,23 @@ class Ripple {
         mOuterX = 0;
         mOuterY = 0;
         mDensity = density;
+
+        clampStartingPosition();
+    }
+
+    private void clampStartingPosition() {
+        final float dX = mStartingX - mBounds.exactCenterX();
+        final float dY = mStartingY - mBounds.exactCenterY();
+        final float r = mOuterRadius;
+        if (dX * dX + dY * dY > r * r) {
+            // Point is outside the circle, clamp to the circumference.
+            final double angle = Math.atan2(dY, dX);
+            mClampedStartingX = (float) (Math.cos(angle) * r);
+            mClampedStartingY = (float) (Math.sin(angle) * r);
+        } else {
+            mClampedStartingX = mStartingX;
+            mClampedStartingY = mStartingY;
+        }
     }
 
     public void onHotspotBoundsChanged() {
@@ -138,6 +158,8 @@ class Ripple {
             final float halfWidth = mBounds.width() / 2.0f;
             final float halfHeight = mBounds.height() / 2.0f;
             mOuterRadius = (float) Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
+
+            clampStartingPosition();
         }
     }
 
@@ -247,8 +269,10 @@ class Ripple {
         final int alpha = (int) (paintAlpha * mOpacity + 0.5f);
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         if (alpha > 0 && radius > 0) {
-            final float x = MathUtils.lerp(mStartingX - mBounds.exactCenterX(), mOuterX, mTweenX);
-            final float y = MathUtils.lerp(mStartingY - mBounds.exactCenterY(), mOuterY, mTweenY);
+            final float x = MathUtils.lerp(
+                    mClampedStartingX - mBounds.exactCenterX(), mOuterX, mTweenX);
+            final float y = MathUtils.lerp(
+                    mClampedStartingY - mBounds.exactCenterY(), mOuterY, mTweenY);
             p.setAlpha(alpha);
             p.setStyle(Style.FILL);
             c.drawCircle(x, y, radius, p);
@@ -277,6 +301,8 @@ class Ripple {
     public void move(float x, float y) {
         mStartingX = x;
         mStartingY = y;
+
+        clampStartingPosition();
     }
 
     /**
@@ -361,8 +387,10 @@ class Ripple {
             int inflectionOpacity) {
         mPendingAnimations.clear();
 
-        final float startX = MathUtils.lerp(mStartingX - mBounds.exactCenterX(), mOuterX, mTweenX);
-        final float startY = MathUtils.lerp(mStartingY - mBounds.exactCenterY(), mOuterY, mTweenY);
+        final float startX = MathUtils.lerp(
+                mClampedStartingX - mBounds.exactCenterX(), mOuterX, mTweenX);
+        final float startY = MathUtils.lerp(
+                mClampedStartingY - mBounds.exactCenterY(), mOuterY, mTweenY);
         final Paint outerPaint = new Paint();
         outerPaint.setAntiAlias(true);
         outerPaint.setColor(mColor);

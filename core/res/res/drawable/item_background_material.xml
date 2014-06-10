@@ -15,7 +15,7 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorControlHighlight">
+    android:color="?attr/colorControlHighlight">
     <item android:id="@id/mask">
         <color android:color="@color/white" />
     </item>

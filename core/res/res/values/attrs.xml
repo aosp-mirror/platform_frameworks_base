@@ -4669,12 +4669,8 @@
 
     <!-- Drawable used to show animated touch feedback. -->
     <declare-styleable name="RippleDrawable">
-        <!-- The tint to use for ripple effects. This attribute is required. -->
-        <attr name="tint" />
-        <!-- Specifies the Porter-Duff blending mode used to apply the tint. The default value is src_atop, which draws over the opaque parts of the drawable. -->
-        <attr name="tintMode" />
-        <!-- Whether to pin ripple effects to the center of the drawable. Default value is false. -->
-        <attr name="pinned" format="boolean" />
+        <!-- The color to use for ripple effects. This attribute is required. -->
+        <attr name="color" />
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">

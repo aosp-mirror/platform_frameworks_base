@@ -646,6 +646,14 @@ please see styles_device_defaults.xml.
         <item name="maxWidth">180dip</item>
     </style>
 
+    <style name="Widget.Material.Toolbar" parent="Widget.Toolbar">
+        <item name="android:navigationButtonStyle">@android:style/Widget.Material.Toolbar.Button.Navigation</item>
+    </style>
+
+    <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
 
     <style name="Widget.Material.WebView" parent="Widget.WebView"/>
