@@ -360,15 +360,6 @@ public final class HdmiControlService extends SystemService {
         mCecController.sendCommand(command, null);
     }
 
-    /**
-     * Add a new {@link HdmiCecDeviceInfo} to controller.
-     *
-     * @param deviceInfo new device information object to add
-     */
-    void addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
-        // TODO: Implement this.
-    }
-
     boolean handleCecCommand(HdmiCecMessage message) {
         // Cache incoming message. Note that it caches only white-listed one.
         mCecMessageCache.cacheMessage(message);
@@ -463,12 +454,12 @@ public final class HdmiControlService extends SystemService {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
                         for (HdmiCecDeviceInfo info : deviceInfos) {
-                            mCecController.addDeviceInfo(info);
+                            addCecDevice(info);
                         }
 
                         // Add device info of all local devices.
                         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-                            mCecController.addDeviceInfo(device.getDeviceInfo());
+                            addCecDevice(device.getDeviceInfo());
                         }
 
                         addAndStartAction(new HotplugDetectionAction(HdmiControlService.this,

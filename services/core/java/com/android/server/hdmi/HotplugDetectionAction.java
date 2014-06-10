@@ -122,7 +122,7 @@ final class HotplugDetectionAction extends FeatureAction {
         mService.pollDevices(new DevicePollingCallback() {
             @Override
             public void onPollingFinished(List<Integer> ackedAddress) {
-                checkHotplug(ackedAddress, false);
+                checkHotplug(ackedAddress, true);
             }
         }, HdmiControlService.POLL_ITERATION_IN_ORDER
                 | HdmiControlService.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
