@@ -2132,7 +2132,6 @@
   <public type="attr" name="strokeLineJoin" />
   <public type="attr" name="clipToPath" />
   <public type="attr" name="requiredForProfile"/>
-  <public type="attr" name="pinned" />
   <public type="attr" name="colorControlNormal" />
   <public type="attr" name="colorControlActivated" />
   <public type="attr" name="colorButtonNormal" />
@@ -2193,6 +2192,8 @@
 
   <public type="style" name="Widget.FastScroll" />
   <public type="style" name="Widget.StackView" />
+  <public type="style" name="Widget.Toolbar" />
+  <public type="style" name="Widget.Toolbar.Button.Navigation" />
 
   <public type="style" name="Widget.Holo.FastScroll" />
   <public type="style" name="Widget.Holo.StackView" />
@@ -2339,6 +2340,8 @@
   <public type="style" name="Widget.Material.TabWidget" />
   <public type="style" name="Widget.Material.TextView" />
   <public type="style" name="Widget.Material.TextView.SpinnerItem" />
+  <public type="style" name="Widget.Material.Toolbar" />
+  <public type="style" name="Widget.Material.Toolbar.Button.Navigation" />
   <public type="style" name="Widget.Material.WebTextView" />
   <public type="style" name="Widget.Material.WebView" />
 

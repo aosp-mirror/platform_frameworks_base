@@ -15,8 +15,7 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorControlActivated"
-    android:tintMode="src_over">
+    android:color="?attr/colorControlActivated">
     <item>
         <selector>
             <item android:state_enabled="false">

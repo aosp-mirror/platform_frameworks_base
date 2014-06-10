@@ -321,6 +321,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_material</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_material</item>
 
+        <item name="toolbarStyle">@style/Widget.Material.Toolbar</item>
+
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Material.ButtonBar</item>
@@ -666,6 +668,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_material</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_material</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_material</item>
+
+        <item name="toolbarStyle">@style/Widget.Material.Toolbar</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>

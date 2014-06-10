@@ -16,6 +16,4 @@
   -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:tint="?android:attr/colorControlHighlight"
-        android:tintMode="src_over"
-        android:pinned="true" />
+    android:color="?android:attr/colorControlHighlight" />
