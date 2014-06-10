@@ -1871,7 +1871,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             mNetd.addRoute(netId, r);
                         }
                         if (exempt) {
-                            LinkAddress dest = r.getDestination();
+                            LinkAddress dest = r.getDestinationLinkAddress();
                             if (!mExemptAddresses.contains(dest)) {
                                 mNetd.setHostExemption(dest);
                                 mExemptAddresses.add(dest);
@@ -1904,7 +1904,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             } else {
                                 mNetd.removeRoute(netId, r);
                             }
-                            LinkAddress dest = r.getDestination();
+                            LinkAddress dest = r.getDestinationLinkAddress();
                             if (mExemptAddresses.contains(dest)) {
                                 mNetd.clearHostExemption(dest);
                                 mExemptAddresses.remove(dest);

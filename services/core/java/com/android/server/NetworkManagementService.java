@@ -882,7 +882,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final Command cmd = new Command("network", "route", action, netId);
 
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
-        final LinkAddress la = route.getDestination();
+        final LinkAddress la = route.getDestinationLinkAddress();
         cmd.appendArg(route.getInterface());
         cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
         if (route.hasGateway()) {
@@ -1697,7 +1697,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setMarkedForwardingRoute(String iface, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            LinkAddress dest = route.getDestination();
+            LinkAddress dest = route.getDestinationLinkAddress();
             mConnector.execute("interface", "fwmark", "route", "add", iface,
                     dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
         } catch (NativeDaemonConnectorException e) {
@@ -1709,7 +1709,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void clearMarkedForwardingRoute(String iface, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            LinkAddress dest = route.getDestination();
+            LinkAddress dest = route.getDestinationLinkAddress();
             mConnector.execute("interface", "fwmark", "route", "remove", iface,
                     dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
         } catch (NativeDaemonConnectorException e) {
@@ -1998,7 +1998,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final Command cmd = new Command("network", "route", "legacy", uid, action, netId);
 
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
-        final LinkAddress la = routeInfo.getDestination();
+        final LinkAddress la = routeInfo.getDestinationLinkAddress();
         cmd.appendArg(routeInfo.getInterface());
         cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
         if (routeInfo.hasGateway()) {
