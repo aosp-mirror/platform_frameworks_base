@@ -84,6 +84,11 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int DOCUMENT_LAUNCH_ALWAYS = 2;
     /**
+     * Constant corresponding to <code>never</code> in
+     * the {@link android.R.attr#documentLaunchMode} attribute.
+     */
+    public static final int DOCUMENT_LAUNCH_NEVER = 3;
+    /**
      * The document launch mode style requested by the activity. From the
      * {@link android.R.attr#documentLaunchMode} attribute, one of
      * {@link #DOCUMENT_LAUNCH_NONE}, {@link #DOCUMENT_LAUNCH_INTO_EXISTING},

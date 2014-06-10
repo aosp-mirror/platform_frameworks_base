@@ -647,8 +647,9 @@ final class TaskRecord extends ThumbnailHolder {
         final int numActivities = activities.size();
         for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);
-            if (!r.isPersistable() || (r.intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
-                    Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) {
+            if (!r.isPersistable() || (activityNdx > 0 &&
+                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0)) {
+                // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
                 break;
             }
             out.startTag(null, TAG_ACTIVITY);

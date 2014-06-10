@@ -1269,7 +1269,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // to ensure that it is safe to do so.  If the upcoming activity will also
             // be part of the voice session, we can only launch it if it has explicitly
             // said it supports the VOICE category, or it is a part of the calling app.
-            if ((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) == 0
+            if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
                     if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
@@ -1486,6 +1486,47 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         int launchFlags = intent.getFlags();
 
+        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
+                (r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
+                        r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK)) {
+            // We have a conflict between the Intent and the Activity manifest, manifest wins.
+            Slog.i(TAG, "Ignoring FLAG_ACTIVITY_NEW_DOCUMENT, launchMode is " +
+                    "\"singleInstance\" or \"singleTask\"");
+            launchFlags &=
+                    ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        } else {
+            switch (r.info.documentLaunchMode) {
+                case ActivityInfo.DOCUMENT_LAUNCH_NONE:
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_NEVER:
+                    launchFlags &= ~Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+                    break;
+            }
+        }
+
+        if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            // For whatever reason this activity is being launched into a new
+            // task...  yet the caller has requested a result back.  Well, that
+            // is pretty messed up, so instead immediately send back a cancel
+            // and let the new task continue launched as normal without a
+            // dependency on its originator.
+            Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
+            r.resultTo.task.stack.sendActivityResultLocked(-1,
+                    r.resultTo, r.resultWho, r.requestCode,
+                    Activity.RESULT_CANCELED, null);
+            r.resultTo = null;
+        }
+
+        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 && r.resultTo == null) {
+            launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+        }
+
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mUserLeaving = (launchFlags & Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
@@ -1516,20 +1557,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        switch (r.info.documentLaunchMode) {
-            case ActivityInfo.DOCUMENT_LAUNCH_NONE:
-                break;
-            case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
-                intent.addFlags(
-                        Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                launchFlags = intent.getFlags();
-                break;
-            case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-                launchFlags = intent.getFlags();
-                break;
-        }
-        final boolean newDocument = intent.isDocument();
         if (sourceRecord == null) {
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
@@ -1537,11 +1564,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
                         "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                 launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-            }
-        } else if (newDocument) {
-            if (r.launchMode != ActivityInfo.LAUNCH_MULTIPLE) {
-                Slog.w(TAG, "FLAG_ACTIVITY_NEW_DOCUMENT and launchMode != \"standard\"");
-                r.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             }
         } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
             // The original activity who is starting us is running as a single
@@ -1581,18 +1603,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             sourceStack = null;
         }
 
-        if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-            // For whatever reason this activity is being launched into a new
-            // task...  yet the caller has requested a result back.  Well, that
-            // is pretty messed up, so instead immediately send back a cancel
-            // and let the new task continue launched as normal without a
-            // dependency on its originator.
-            Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
-            r.resultTo.task.stack.sendActivityResultLocked(-1,
-                    r.resultTo, r.resultWho, r.requestCode,
-                Activity.RESULT_CANCELED, null);
-            r.resultTo = null;
-        }
+        intent.setFlags(launchFlags);
 
         boolean addingToTask = false;
         boolean movedHome = false;
@@ -1827,7 +1838,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Should this be considered a new task?
         if (r.resultTo == null && !addingToTask
-                && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+                && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             if (isLockTaskModeViolation(reuseTask)) {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;

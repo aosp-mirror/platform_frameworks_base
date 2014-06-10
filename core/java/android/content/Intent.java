@@ -3711,30 +3711,8 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 0x00100000;
     /**
-     * If set, this marks a point in the task's activity stack that should
-     * be cleared when the task is reset.  That is, the next time the task
-     * is brought to the foreground with
-     * {@link #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} (typically as a result of
-     * the user re-launching it from home), this activity and all on top of
-     * it will be finished so that the user does not return to them, but
-     * instead returns to whatever activity preceeded it.
-     *
-     * <p>When this flag is assigned to the root activity all activities up
-     * to, but not including the root activity, will be cleared. This prevents
-     * this flag from being used to finish all activities in a task and thereby
-     * ending the task.
-     *
-     * <p>This is useful for cases where you have a logical break in your
-     * application.  For example, an e-mail application may have a command
-     * to view an attachment, which launches an image view activity to
-     * display it.  This activity should be part of the e-mail application's
-     * task, since it is a part of the task the user is involved in.  However,
-     * if the user leaves that task, and later selects the e-mail app from
-     * home, we may like them to return to the conversation they were
-     * viewing, not the picture attachment, since that is confusing.  By
-     * setting this flag when launching the image viewer, that viewer and
-     * any activities it starts will be removed the next time the user returns
-     * to mail.
+     * @deprecated As of API 21 this performs identically to
+     * {@link #FLAG_ACTIVITY_NEW_DOCUMENT} which should be used instead of this.
      */
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
     /**
@@ -3761,8 +3739,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see android.R.attr#documentLaunchMode
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      */
-    public static final int FLAG_ACTIVITY_NEW_DOCUMENT =
-            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET | FLAG_ACTIVITY_NEW_TASK;
+    public static final int FLAG_ACTIVITY_NEW_DOCUMENT = FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
     /**
      * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaveHint}
      * callback from occurring on the current frontmost activity before it is
