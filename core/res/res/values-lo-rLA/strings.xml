@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງສຽງ."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ການກວດຫາ Hotword"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ອະນຸຍາດໃຫ້ແອັບຯຈັບຂໍ້ມູນສຽງສຳລັບການກວດຈັບ Hotword. ການຈັບຂໍ້ມູນສາມາດເກີດຂຶ້ນໃນພື້ນຫຼັງໄດ້ ແຕ່ຈະບໍ່ໄປຂັດຂວາງການຈັບຂໍ້ມູນສຽງອື່ນໆ (ເຊັ່ນ: ກ້ອງວິດີໂອ)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"​​ເສັ້ນ​ທາງ​ສຽງ"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຄວບ​ຄຸມ​ເສັ້ນ​ທາງ​ສຽງ ແລະ​ປ່ຽນ​ແປງ​ການ​ຕັດ​ສິນ​ໃຈ​ນະ​ໂຍ​ບາຍ​ສຽງ​ໄດ້."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ບັນທຶກວິດີໂອອອກ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກ ແລະປ່ຽນເສັ້ນທາງການປ້ອນຂໍ້ມູນອອກຂອງວິດີໂອ."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ບັນທຶກວິດີໂອອອກຢ່າງປອດໄພ"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນສາມາດຄວບຄຸມຄີກາດໄດ້."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"​ຕິດ​ຕາມ​ການ​ປ່ຽນ​ແປງ​ສະ​ຖາ​ນະ​ການ​ເຊື່ອ​ຖືກ."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຕິດ​ຕາມ​​ການ​ປ່ຽນ​ແປງ​ໃນ​ສະ​ຖາ​ນະ​ການ​ເຊື່ອ​ຖື."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"​ລະ​ບຸ​ເອ​ເຈນ​ທີ່​ເຊື່ອ​ຖື​ໄດ້."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ລະ​ບຸ​ເອ​ເຈນ​ທີ່​ເຊື່ອ​ຖື​ໄດ້."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"​ເຊື່ອມ​ໂຍງ​ຫາ​ບໍ​ລິ​ການ​ຕົວ​ແທນ​ການ​ເຊື່ອ​ຖື"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນເຊື່ອມ​ໂຍງ​ກັບ​ບໍ​ລິ​ການ​ຕົວ​ແທນ​ທີ່​ເຊື່ອ​ຖື​ໄດ້."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ຕິດຕໍ່ກັບລະບົບອັບເດດ ແລະລະບົບກູ້ຂໍ້ມູນ."</string>
@@ -1697,7 +1697,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">

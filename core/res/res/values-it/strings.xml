@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Consente all\'app di acquisire e reindirizzare l\'uscita audio."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Rilevamento hotword"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Consente all\'app di acquisire l\'audio per il rilevamento Hotword. L\'acquisizione può avvenire in background ma non impedisce l\'acquisizione di altro audio (ad esempio con la videocamera)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Routing dell\'audio"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Consente all\'app di controllare direttamente il routing audio e di sostituire le impostazioni delle norme per l\'audio."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"acquisizione dell\'uscita video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Consente all\'app di acquisire e reindirizzare l\'uscita video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"acquisizione dell\'uscita video sicura"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Consente a un\'applicazione di controllare keguard."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Rilevamento modifiche dello stato trust."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Consente a un\'applicazione di rilevare le modifiche nello stato trust."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Indica un trust agent."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Consente a un\'applicazione di indicare un trust agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Associazione a un servizio trust agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Consente a un\'applicazione di associarsi a un servizio trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interazione con il sistema di ripristino e aggiornamento"</string>

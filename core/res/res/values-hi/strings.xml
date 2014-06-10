@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ऐप्स को ऑडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"हॉटवर्ड पहचान"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"एप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ऑडियो रूटिंग"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ऐप्स को ऑडियो रूटिंग पर प्रत्यक्ष नियंत्रण करने देती है और ऑडियो नीति निर्णयों को ओवरराइड करने देती है."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"वीडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ऐप्स को वीडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"सुरक्षित वीडियो आउटपुट को कैप्‍चर करें"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ऐप्स  को कीगार्ड नियंत्रित करने देती है."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"ट्रस्ट स्थिति बदलावों को सुनें."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"किसी एप्लिकेशन को ट्रस्ट स्थिति के बदलावों को सुनने की अनुमति देती है."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वसनीय एजेंट प्रदान करें."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"एप्लिकेशन को विश्वसनीय एजेंट प्रदान करने देती है."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ट्रस्ट एजेंट सेवा से आबद्ध करना"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी एप्लिकेशन को ट्रस्ट एजेंट सेवा से आबद्ध करने की अनुमति देती है."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अपडेट और पुनर्प्राप्ति सिस्टम के साथ सहभागिता करें"</string>

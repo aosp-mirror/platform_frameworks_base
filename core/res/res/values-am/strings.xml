@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"መተግበሪያው የድምጽ ውጽዓት እንዲቀርጽ እና አቅጣጫውን እንዲያዞር ያስችለዋል።"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ትኩስ ቃል ማወቅ"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ትኩስ ቃል ለይቶ ለማወቅ ድምጽ እንዲቀርጽ ለመተግበሪያው ይፈቅድለታል። ቀረጻው በጀርባ ሊካሄድ ይችላል ነገር ግን ሌላ የድምጽ ቀረጻዎችን አይከለክልም (ለምሳሌ፣  የካሜራ መቅረጫ)።"</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"የድምጽ ማስተላለፊያ"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"መተግበሪያው በቀጥታ የድምጽ ማስተላለፍን እንዲቆጣጠርና የድምጽ መምሪያ ውሳኔዎችን እንዲጥስ ይፈቅድለታል።"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"የቪዲዮ ውጽዓት ይቅረጹ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"መተግበሪያው የቪዲዮ ውጽዓት እንዲቀርጽ እና አቅጣጫውን እንዲያዞር ያስችለዋል።"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ደህንነቱ የተጠበቀ የቪዲዮ ውጽዓት ይቅረጹ"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"አንድ መተግበሪያ የቁልፍ መጠበቂያውን እንዲቆጣጠር ያስችለዋል።"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"የተአማኒነት ሁኔታ ለውጦችን አዳምጥ።"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"መተግበሪያው በተአማኒነት ሁኔታ ውስጥ ለውጦችን እንዲያዳምጥ ይፈቅዳል።"</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"የመታመን ወኪል ያቅርቡ።"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"አንድ መተግበሪያ የመታመን ወኪል እንዲያቀርብ ይፈቅድለታል።"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ለተአማኒነት ወኪል አገልግሎት ተገዢ አድርግ"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ለመተግበሪያን የተአማኒነት ወኪል አገልግሎትን እንዲያከብር ይፈቅዳል።"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ከዝማኔዎች እና ከመልሶ ማግኛ ስርዓቶች ጋር ይገናኙ"</string>

@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音頻輸出。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"啟動字詞偵測"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允許應用程式擷取啟動字詞偵測的音頻。擷取操作可以在背景執行，但並未阻止其他音頻擷取 (例如攝錄機)。"</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"音效檔案路由"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"允許應用程式直接控制音效檔案路由及覆寫音效檔案政策決定。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"擷取視頻輸出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允許應用程式擷取及重新導向視頻輸出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"擷取安全視頻輸出"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允許應用程式控制鍵盤鎖。"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"聽取信任狀態變更。"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允許應用程式聽取信任狀態的變更。"</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理程式。"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允許應用程式提供信任的代理程式。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"繫結至信任的代理程式服務"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允許應用程式繫結至信任的代理程式服務。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"與更新和復原系統互動"</string>

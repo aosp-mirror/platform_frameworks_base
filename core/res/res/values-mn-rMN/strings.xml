@@ -520,6 +520,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Апп-т аудио гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Хотворд таних"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Апп-д Хотворд илрүүлэхийн тулд аудиог бичихийг зөвшөөрнө. Бичилт далд хийгдэх бөгөөд бусад аудио бичилтэд (жнь. видео бичлэг) саад болохгүй."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Аудио чиглүүлэлт"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Апп-д аудио чиглүүлэгчийг шууд удирдах, аудио бодлогын шийдвэрүүдийг давах боломж олгоно."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"видео гаралтыг барих"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Апп-т видео гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"найдвартай видео гаралтыг барих"</string>
@@ -1354,10 +1356,8 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Аппликешн нь түлхүүр хамгаалагчыг удирдах боломжтой."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"Итгэмжлэлд орж буй өөрчлөлтийг мэдэх."</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Итгэмжлэлд орж буй өөрчлөлтийг мэдэх боломжийг аппликешнд олгоно."</string>
-    <!-- no translation found for permlab_provide_trust_agent (5465587586091358316) -->
-    <skip />
-    <!-- no translation found for permdesc_provide_trust_agent (3865702641053068148) -->
-    <skip />
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Итгэмжлэгдсэн төлөөлөгч нийлүүлэх"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Аппликешнд итгэмжлэгдсэн төлөөлөгч нийлүүлэх боломж олгоно."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Итгэмжлэгдсэн төлөөлөгчийн үйлчилгээтэй холбогдох"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Аппликешнд итгэмжлэгдсэн төлөөлөгчтэй холбогдох боломж олгоно."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Шинэчлэлт болон сэргээх системтэй харилцах"</string>
