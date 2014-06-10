@@ -145,7 +145,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 final RootInfo root = new RootInfo();
                 root.rootId = rootId;
                 root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
-                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_DIR_SELECTION;
+                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
                 if (ROOT_ID_PRIMARY_EMULATED.equals(rootId)) {
                     root.title = getContext().getString(R.string.root_internal_storage);
                 } else {

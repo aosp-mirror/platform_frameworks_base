@@ -7400,6 +7400,7 @@ package android.content {
     field public static final java.lang.String ACTION_MY_PACKAGE_REPLACED = "android.intent.action.MY_PACKAGE_REPLACED";
     field public static final java.lang.String ACTION_NEW_OUTGOING_CALL = "android.intent.action.NEW_OUTGOING_CALL";
     field public static final java.lang.String ACTION_OPEN_DOCUMENT = "android.intent.action.OPEN_DOCUMENT";
+    field public static final java.lang.String ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
     field public static final java.lang.String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
     field public static final java.lang.String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     field public static final java.lang.String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
@@ -7414,7 +7415,6 @@ package android.content {
     field public static final java.lang.String ACTION_PASTE = "android.intent.action.PASTE";
     field public static final java.lang.String ACTION_PICK = "android.intent.action.PICK";
     field public static final java.lang.String ACTION_PICK_ACTIVITY = "android.intent.action.PICK_ACTIVITY";
-    field public static final java.lang.String ACTION_PICK_DIRECTORY = "android.intent.action.PICK_DIRECTORY";
     field public static final java.lang.String ACTION_POWER_CONNECTED = "android.intent.action.ACTION_POWER_CONNECTED";
     field public static final java.lang.String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
     field public static final java.lang.String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
@@ -23824,21 +23824,21 @@ package android.provider {
 
   public final class DocumentsContract {
     method public static android.net.Uri buildChildDocumentsUri(java.lang.String, java.lang.String);
-    method public static android.net.Uri buildChildDocumentsViaUri(android.net.Uri, java.lang.String);
+    method public static android.net.Uri buildChildDocumentsUriUsingTree(android.net.Uri, java.lang.String);
     method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
-    method public static android.net.Uri buildDocumentViaUri(android.net.Uri, java.lang.String);
+    method public static android.net.Uri buildDocumentUriUsingTree(android.net.Uri, java.lang.String);
     method public static android.net.Uri buildRecentDocumentsUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchDocumentsUri(java.lang.String, java.lang.String, java.lang.String);
-    method public static android.net.Uri buildViaUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildTreeDocumentUri(java.lang.String, java.lang.String);
     method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);
     method public static boolean deleteDocument(android.content.ContentResolver, android.net.Uri);
     method public static java.lang.String getDocumentId(android.net.Uri);
     method public static android.graphics.Bitmap getDocumentThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point, android.os.CancellationSignal);
     method public static java.lang.String getRootId(android.net.Uri);
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
-    method public static java.lang.String getViaDocumentId(android.net.Uri);
+    method public static java.lang.String getTreeDocumentId(android.net.Uri);
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
     method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
     field public static final java.lang.String EXTRA_ERROR = "error";
@@ -23877,7 +23877,7 @@ package android.provider {
     field public static final java.lang.String COLUMN_TITLE = "title";
     field public static final int FLAG_LOCAL_ONLY = 2; // 0x2
     field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
-    field public static final int FLAG_SUPPORTS_DIR_SELECTION = 16; // 0x10
+    field public static final int FLAG_SUPPORTS_IS_CHILD = 16; // 0x10
     field public static final int FLAG_SUPPORTS_RECENTS = 4; // 0x4
     field public static final int FLAG_SUPPORTS_SEARCH = 8; // 0x8
   }
