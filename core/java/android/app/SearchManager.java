@@ -253,6 +253,7 @@ public class SearchManager
      * for more information on these schemes.
      */
     public final static String SUGGEST_COLUMN_ICON_1 = "suggest_icon_1";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
      *  then all suggestions will be provided in a format that includes space for two small icons,
@@ -269,6 +270,24 @@ public class SearchManager
      * for more information on these schemes.
      */
     public final static String SUGGEST_COLUMN_ICON_2 = "suggest_icon_2";
+
+    /**
+     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
+     * then the image will be displayed when forming the suggestion. The suggested dimension for
+     * the image is 270x400 px for portrait mode and 400x225 px for landscape mode. The data in the
+     * column must be a resource ID of a drawable, or a URI in one of the following formats:
+     *
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+     * </ul>
+     *
+     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)}
+     * for more information on these schemes.
+     */
+    public final static String SUGGEST_COLUMN_RESULT_CARD_IMAGE = "suggest_result_card_image";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the action that will be used when
@@ -279,6 +298,7 @@ public class SearchManager
      * it from the cursor.
      */
     public final static String SUGGEST_COLUMN_INTENT_ACTION = "suggest_intent_action";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the data that will be used when
@@ -289,6 +309,7 @@ public class SearchManager
      * it is more efficient to specify it using XML metadata and omit it from the cursor.
      */
     public final static String SUGGEST_COLUMN_INTENT_DATA = "suggest_intent_data";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the data that will be used when
@@ -297,6 +318,7 @@ public class SearchManager
      * an extra under the key {@link #EXTRA_DATA_KEY}.
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, then "/" and this value will be appended to the data
@@ -304,6 +326,7 @@ public class SearchManager
      * appropriate base string.
      */
     public final static String SUGGEST_COLUMN_INTENT_DATA_ID = "suggest_intent_data_id";
+
     /**
      * Column name for suggestions cursor.  <i>Required if action is
      * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}, optional otherwise.</i>  If this
@@ -329,6 +352,89 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
             "suggest_spinner_while_refreshing";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is media type, you
+     * should provide this column so search app could understand more about your content. The data
+     * in the column must specify the MIME type of the content.
+     */
+    public final static String SUGGEST_COLUMN_CONTENT_TYPE = "suggest_content_type";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is media type, you
+     * should provide this column to specify whether your content is live media such as live video
+     * or live audio. The value in the column is of integer type with value of either 0 indicating
+     * non-live content or 1 indicating live content.
+     */
+    public final static String SUGGEST_COLUMN_IS_LIVE = "suggest_is_live";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is video, you should
+     * provide this column to specify the number of vertical lines. The data in the column is of
+     * integer type.
+     */
+    public final static String SUGGEST_COLUMN_VIDEO_WIDTH = "suggest_video_width";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is video, you should
+     * provide this column to specify the number of horizontal lines. The data in the column is of
+     * integer type.
+     */
+    public final static String SUGGEST_COLUMN_VIDEO_HEIGHT = "suggest_video_height";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content contains audio, you
+     * should provide this column to specify the audio channel configuration. The data in the
+     * column is string with format like "channels.subchannels" such as "1.0" or "5.1".
+     */
+    public final static String SUGGEST_COLUMN_AUDIO_CHANNEL_CONFIG = "suggest_audio_channel_config";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is purchasable, you
+     * should provide this column to specify the displayable string representation of the purchase
+     * price of your content including the currency and the amount. If it's free, you should
+     * provide localized string to specify that it's free. This column can be omitted if the content
+     * is not applicable to purchase.
+     */
+    public final static String SUGGEST_COLUMN_PURCHASE_PRICE = "suggest_purchase_price";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is rentable, you
+     * should provide this column to specify the displayable string representation of the rental
+     * price of your content including the currency and the amount. If it's free, you should
+     * provide localized string to specify that it's free. This column can be ommitted if the
+     * content is not applicable to rent.
+     */
+    public final static String SUGGEST_COLUMN_RENTAL_PRICE = "suggest_rental_price";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content has a rating, you
+     * should provide this column to specify the rating style of your content. The data in the
+     * column must be one of the constant values specified in {@link android.media.Rating}
+     */
+    public final static String SUGGEST_COLUMN_RATING_STYLE = "suggest_rating_style";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content has a rating, you
+     * should provide this column to specify the rating score of your content. The data in the
+     * column is of float type. See {@link android.media.Rating} about valid rating scores for each
+     * rating style.
+     */
+    public final static String SUGGEST_COLUMN_RATING_SCORE = "suggest_rating_score";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is video or audio and
+     * has a known production year, you should provide this column to specify the production year
+     * of your content. The data in the column is of integer type.
+     */
+    public final static String SUGGEST_COLUMN_PRODUCTION_YEAR = "suggest_production_year";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  If your content is video or audio, you
+     * should provide this column to specify the duration of your content in milliseconds. The data
+     * in the column is of long type.
+     */
+    public final static String SUGGEST_COLUMN_DURATION = "suggest_duration";
 
     /**
      * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
