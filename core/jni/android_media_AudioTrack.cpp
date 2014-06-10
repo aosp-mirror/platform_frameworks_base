@@ -220,8 +220,13 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     }
 
     // compute the frame count
-    const size_t bytesPerSample = audio_bytes_per_sample(format);
-    size_t frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
+    size_t frameCount;
+    if (audio_is_linear_pcm(format)) {
+        const size_t bytesPerSample = audio_bytes_per_sample(format);
+        frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
+    } else {
+        frameCount = buffSizeInBytes;
+    }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -266,7 +271,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
             format,// word length, PCM
             nativeChannelMask,
             frameCount,
-            AUDIO_OUTPUT_FLAG_NONE,
+            audio_is_linear_pcm(format) ? AUDIO_OUTPUT_FLAG_NONE : AUDIO_OUTPUT_FLAG_DIRECT,
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             0,// shared mem
@@ -478,14 +483,6 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* da
         switch (format) {
 
         default:
-            // TODO Currently the only possible values for format are AUDIO_FORMAT_PCM_16_BIT,
-            // AUDIO_FORMAT_PCM_8_BIT, and AUDIO_FORMAT_PCM_FLOAT,
-            // due to the limited set of values for audioFormat.
-            // The next section of the switch will probably work for more formats, but it has only
-            // been tested for AUDIO_FORMAT_PCM_16_BIT and AUDIO_FORMAT_PCM_FLOAT,
-            // so that's why the "default" case fails.
-            break;
-
         case AUDIO_FORMAT_PCM_FLOAT:
         case AUDIO_FORMAT_PCM_16_BIT: {
             // writing to shared memory, check for capacity
@@ -904,8 +901,12 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
         return -1;
     }
     const audio_format_t format = audioFormatToNative(audioFormat);
-    const size_t bytesPerSample = audio_bytes_per_sample(format);
-    return frameCount * channelCount * bytesPerSample;
+    if (audio_is_linear_pcm(format)) {
+        const size_t bytesPerSample = audio_bytes_per_sample(format);
+        return frameCount * channelCount * bytesPerSample;
+    } else {
+        return frameCount;
+    }
 }
 
 // ----------------------------------------------------------------------------

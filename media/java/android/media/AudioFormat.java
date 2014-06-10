@@ -25,10 +25,10 @@ import java.lang.annotation.RetentionPolicy;
  * The AudioFormat class is used to access a number of audio format and
  * channel configuration constants. They are for instance used
  * in {@link AudioTrack} and {@link AudioRecord}.
- * 
+ *
  */
 public class AudioFormat {
-    
+
     //---------------------------------------------------------
     // Constants
     //--------------------
@@ -44,6 +44,10 @@ public class AudioFormat {
     public static final int ENCODING_PCM_8BIT = 3;
     /** Audio data format: single-precision floating-point per sample */
     public static final int ENCODING_PCM_FLOAT = 4;
+    /** Audio data format: AC-3 compressed */
+    public static final int ENCODING_AC3 = 5;
+    /** Audio data format: E-AC-3 compressed */
+    public static final int ENCODING_E_AC3 = 6;
 
     /** Invalid audio channel configuration */
     /** @deprecated use CHANNEL_INVALID instead  */
@@ -152,11 +156,44 @@ public class AudioFormat {
         switch (audioFormat) {
         case ENCODING_PCM_8BIT:
             return 1;
-        case ENCODING_PCM_FLOAT:
-            return 4;
         case ENCODING_PCM_16BIT:
         case ENCODING_DEFAULT:
             return 2;
+        case ENCODING_PCM_FLOAT:
+            return 4;
+        case ENCODING_INVALID:
+        default:
+            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+        }
+    }
+
+    /** @hide */
+    public static boolean isValidEncoding(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+        case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_FLOAT:
+        case ENCODING_AC3:
+        case ENCODING_E_AC3:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    /** @hide */
+    public static boolean isEncodingLinearPcm(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+        case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_FLOAT:
+        case ENCODING_DEFAULT:
+            return true;
+        case ENCODING_AC3:
+        case ENCODING_E_AC3:
+            return false;
         case ENCODING_INVALID:
         default:
             throw new IllegalArgumentException("Bad audio format " + audioFormat);
@@ -236,7 +273,9 @@ public class AudioFormat {
          * @param encoding one of {@link AudioFormat#ENCODING_DEFAULT},
          *     {@link AudioFormat#ENCODING_PCM_8BIT},
          *     {@link AudioFormat#ENCODING_PCM_16BIT},
-         *     {@link AudioFormat#ENCODING_PCM_FLOAT}.
+         *     {@link AudioFormat#ENCODING_PCM_FLOAT},
+         *     {@link AudioFormat#ENCODING_AC3},
+         *     {@link AudioFormat#ENCODING_E_AC3}.
          * @return the same Builder instance.
          * @throws java.lang.IllegalArgumentException
          */
@@ -248,6 +287,8 @@ public class AudioFormat {
                 case ENCODING_PCM_8BIT:
                 case ENCODING_PCM_16BIT:
                 case ENCODING_PCM_FLOAT:
+                case ENCODING_AC3:
+                case ENCODING_E_AC3:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -311,7 +352,9 @@ public class AudioFormat {
         ENCODING_DEFAULT,
         ENCODING_PCM_8BIT,
         ENCODING_PCM_16BIT,
-        ENCODING_PCM_FLOAT
+        ENCODING_PCM_FLOAT,
+        ENCODING_AC3,
+        ENCODING_E_AC3
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}

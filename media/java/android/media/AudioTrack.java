@@ -457,25 +457,19 @@ public class AudioTrack
 
         //--------------
         // audio format
-        switch (audioFormat) {
-        case AudioFormat.ENCODING_DEFAULT:
-            mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
-            break;
-        case AudioFormat.ENCODING_PCM_16BIT:
-        case AudioFormat.ENCODING_PCM_8BIT:
-        case AudioFormat.ENCODING_PCM_FLOAT:
-            mAudioFormat = audioFormat;
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported sample encoding."
-                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT"
-                + " or ENCODING_PCM_FLOAT"
-                + ".");
+        if (audioFormat == AudioFormat.ENCODING_DEFAULT) {
+            audioFormat = AudioFormat.ENCODING_PCM_16BIT;
         }
+
+        if (!AudioFormat.isValidEncoding(audioFormat)) {
+            throw new IllegalArgumentException("Unsupported audio encoding.");
+        }
+        mAudioFormat = audioFormat;
 
         //--------------
         // audio load mode
-        if ( (mode != MODE_STREAM) && (mode != MODE_STATIC) ) {
+        if (((mode != MODE_STREAM) && (mode != MODE_STATIC)) ||
+                ((mode != MODE_STREAM) && !AudioFormat.isEncodingLinearPcm(mAudioFormat))) {
             throw new IllegalArgumentException("Invalid mode.");
         }
         mDataLoadMode = mode;
@@ -522,8 +516,13 @@ public class AudioTrack
     private void audioBuffSizeCheck(int audioBufferSize) {
         // NB: this section is only valid with PCM data.
         //     To update when supporting compressed formats
-        int frameSizeInBytes = mChannelCount
-                * (AudioFormat.getBytesPerSample(mAudioFormat));
+        int frameSizeInBytes;
+        if (AudioFormat.isEncodingLinearPcm(mAudioFormat)) {
+            frameSizeInBytes = mChannelCount
+                    * (AudioFormat.getBytesPerSample(mAudioFormat));
+        } else {
+            frameSizeInBytes = 1;
+        }
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
             throw new IllegalArgumentException("Invalid audio buffer size.");
         }
@@ -757,9 +756,7 @@ public class AudioTrack
             }
         }
 
-        if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT)
-            && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)
-            && (audioFormat != AudioFormat.ENCODING_PCM_FLOAT)) {
+        if (!AudioFormat.isValidEncoding(audioFormat)) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }
@@ -1164,7 +1161,9 @@ public class AudioTrack
      * @param sizeInBytes the number of bytes to read in audioData after the offset.
      * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
+     *    the parameters don't resolve to valid data and indexes, or
+     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated.
      */
 
     public int write(byte[] audioData, int offsetInBytes, int sizeInBytes) {
@@ -1213,7 +1212,7 @@ public class AudioTrack
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
 
-        if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
+        if (mState == STATE_UNINITIALIZED || mAudioFormat != AudioFormat.ENCODING_PCM_16BIT) {
             return ERROR_INVALID_OPERATION;
         }
 
@@ -1472,7 +1471,6 @@ public class AudioTrack
          */
         void onPeriodicNotification(AudioTrack track);
     }
-
 
     //---------------------------------------------------------
     // Inner classes

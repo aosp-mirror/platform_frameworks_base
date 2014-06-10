@@ -2974,7 +2974,9 @@ public class AudioManager {
     /** @hide
      */
     public static final int ERROR_NO_INIT = AudioSystem.NO_INIT;
-    /** @hide
+    /**
+     * An error code indicating that the object reporting it is no longer valid and needs to
+     * be recreated.
      */
     public static final int ERROR_DEAD_OBJECT = AudioSystem.DEAD_OBJECT;
 
