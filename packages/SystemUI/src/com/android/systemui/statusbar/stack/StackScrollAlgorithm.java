@@ -657,7 +657,7 @@ public class StackScrollAlgorithm {
             } else {
 
                 // We are expanding the shade, expand it to its full height.
-                if (mFirstChildWhileExpanding.getWidth() == 0) {
+                if (!isMaxSizeInitialized(mFirstChildWhileExpanding)) {
 
                     // This child was not layouted yet, wait for a layout pass
                     mFirstChildWhileExpanding
@@ -682,6 +682,14 @@ public class StackScrollAlgorithm {
         } else {
             mFirstChildMaxHeight = 0;
         }
+    }
+
+    private boolean isMaxSizeInitialized(ExpandableView child) {
+        if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            return row.isShowingLayoutLayouted();
+        }
+        return child == null || child.getWidth() != 0;
     }
 
     private View findFirstVisibleChild(ViewGroup container) {

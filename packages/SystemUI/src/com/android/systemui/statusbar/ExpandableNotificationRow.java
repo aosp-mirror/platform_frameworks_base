@@ -258,4 +258,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void notifyContentUpdated() {
         mPrivateLayout.notifyContentUpdated();
     }
+
+    public boolean isShowingLayoutLayouted() {
+        View showingLayout = mShowingPublic ? mPublicLayout : mPrivateLayout;
+        return showingLayout.getWidth() != 0;
+    }
 }
