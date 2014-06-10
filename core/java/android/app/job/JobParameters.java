@@ -14,40 +14,42 @@
  * limitations under the License
  */
 
-package android.app.task;
+package android.app.job;
 
+import android.app.job.IJobCallback;
+import android.app.job.IJobCallback.Stub;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
 /**
- * Contains the parameters used to configure/identify your task. You do not create this object
+ * Contains the parameters used to configure/identify your job. You do not create this object
  * yourself, instead it is handed in to your application by the System.
  */
-public class TaskParams implements Parcelable {
+public class JobParameters implements Parcelable {
 
-    private final int taskId;
+    private final int jobId;
     private final PersistableBundle extras;
     private final IBinder callback;
 
     /** @hide */
-    public TaskParams(int taskId, PersistableBundle extras, IBinder callback) {
-        this.taskId = taskId;
+    public JobParameters(int jobId, PersistableBundle extras, IBinder callback) {
+        this.jobId = jobId;
         this.extras = extras;
         this.callback = callback;
     }
 
     /**
-     * @return The unique id of this task, specified at creation time.
+     * @return The unique id of this job, specified at creation time.
      */
-    public int getTaskId() {
-        return taskId;
+    public int getJobId() {
+        return jobId;
     }
 
     /**
-     * @return The extras you passed in when constructing this task with
-     * {@link android.app.task.Task.Builder#setExtras(android.os.PersistableBundle)}. This will
+     * @return The extras you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setExtras(android.os.PersistableBundle)}. This will
      * never be null. If you did not set any extras this will be an empty bundle.
      */
     public PersistableBundle getExtras() {
@@ -55,12 +57,12 @@ public class TaskParams implements Parcelable {
     }
 
     /** @hide */
-    public ITaskCallback getCallback() {
-        return ITaskCallback.Stub.asInterface(callback);
+    public IJobCallback getCallback() {
+        return IJobCallback.Stub.asInterface(callback);
     }
 
-    private TaskParams(Parcel in) {
-        taskId = in.readInt();
+    private JobParameters(Parcel in) {
+        jobId = in.readInt();
         extras = in.readPersistableBundle();
         callback = in.readStrongBinder();
     }
@@ -72,20 +74,20 @@ public class TaskParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(taskId);
+        dest.writeInt(jobId);
         dest.writePersistableBundle(extras);
         dest.writeStrongBinder(callback);
     }
 
-    public static final Creator<TaskParams> CREATOR = new Creator<TaskParams>() {
+    public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {
         @Override
-        public TaskParams createFromParcel(Parcel in) {
-            return new TaskParams(in);
+        public JobParameters createFromParcel(Parcel in) {
+            return new JobParameters(in);
         }
 
         @Override
-        public TaskParams[] newArray(int size) {
-            return new TaskParams[size];
+        public JobParameters[] newArray(int size) {
+            return new JobParameters[size];
         }
     };
 }

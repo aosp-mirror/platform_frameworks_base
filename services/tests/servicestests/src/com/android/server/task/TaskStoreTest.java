@@ -3,18 +3,20 @@ package com.android.server.task;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.app.task.Task;
-import android.app.task.Task.Builder;
+import android.app.job.JobInfo;
+import android.app.job.JobInfo.Builder;
 import android.os.PersistableBundle;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
 
-import com.android.server.task.controllers.TaskStatus;
+import com.android.server.job.JobMapReadFinishedListener;
+import com.android.server.job.JobStore;
+import com.android.server.job.controllers.JobStatus;
 
 import java.util.List;
 
-import static com.android.server.task.TaskStore.initAndGet;
+import static com.android.server.job.JobStore.initAndGet;
 /**
  * Test reading and writing correctly from file.
  */
@@ -26,12 +28,12 @@ public class TaskStoreTest extends AndroidTestCase {
     private ComponentName mComponent;
     private static final long IO_WAIT = 600L;
 
-    TaskStore mTaskStoreUnderTest;
+    JobStore mTaskStoreUnderTest;
     Context mTestContext;
-    TaskMapReadFinishedListener mTaskMapReadFinishedListenerStub =
-            new TaskMapReadFinishedListener() {
+    JobMapReadFinishedListener mTaskMapReadFinishedListenerStub =
+            new JobMapReadFinishedListener() {
         @Override
-        public void onTaskMapReadFinished(List<TaskStatus> tasks) {
+        public void onJobMapReadFinished(List<JobStatus> tasks) {
             // do nothing.
         }
     };
@@ -40,7 +42,7 @@ public class TaskStoreTest extends AndroidTestCase {
     public void setUp() throws Exception {
         mTestContext = new RenamingDelegatingContext(getContext(), TEST_PREFIX);
         Log.d(TAG, "Saving tasks to '" + mTestContext.getFilesDir() + "'");
-        mTaskStoreUnderTest = TaskStore.initAndGetForTesting(mTestContext,
+        mTaskStoreUnderTest = JobStore.initAndGetForTesting(mTestContext,
                 mTestContext.getFilesDir(), mTaskMapReadFinishedListenerStub);
         mComponent = new ComponentName(getContext().getPackageName(), StubClass.class.getName());
     }
@@ -56,23 +58,23 @@ public class TaskStoreTest extends AndroidTestCase {
         long runFromMillis = 2000L; // 2s
         long initialBackoff = 10000L; // 10s
 
-        final Task task = new Builder(taskId, mComponent)
+        final JobInfo task = new Builder(taskId, mComponent)
                 .setRequiresCharging(true)
-                .setRequiredNetworkCapabilities(Task.NetworkType.ANY)
-                .setBackoffCriteria(initialBackoff, Task.BackoffPolicy.EXPONENTIAL)
+                .setRequiredNetworkCapabilities(JobInfo.NetworkType.ANY)
+                .setBackoffCriteria(initialBackoff, JobInfo.BackoffPolicy.EXPONENTIAL)
                 .setOverrideDeadline(runByMillis)
                 .setMinimumLatency(runFromMillis)
                 .build();
-        final TaskStatus ts = new TaskStatus(task, SOME_UID, true /* persisted */);
+        final JobStatus ts = new JobStatus(task, SOME_UID, true /* persisted */);
         mTaskStoreUnderTest.add(ts);
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
-        mTaskStoreUnderTest.readTaskMapFromDisk(new TaskMapReadFinishedListener() {
+        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
             @Override
-            public void onTaskMapReadFinished(List<TaskStatus> tasks) {
+            public void onJobMapReadFinished(List<JobStatus> tasks) {
                 assertEquals("Didn't get expected number of persisted tasks.", 1, tasks.size());
-                TaskStatus loadedTaskStatus = tasks.get(0);
-                assertTasksEqual(task, loadedTaskStatus.getTask());
+                JobStatus loadedTaskStatus = tasks.get(0);
+                assertTasksEqual(task, loadedTaskStatus.getJob());
                 assertEquals("Different uids.", SOME_UID, tasks.get(0).getUid());
                 compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
                         ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
@@ -84,30 +86,30 @@ public class TaskStoreTest extends AndroidTestCase {
     }
 
     public void testWritingTwoFilesToDisk() throws Exception {
-        final Task task1 = new Builder(8, mComponent)
+        final JobInfo task1 = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(10000L)
                 .setRequiresCharging(true)
                 .build();
-        final Task task2 = new Builder(12, mComponent)
+        final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
-                .setBackoffCriteria(15000L, Task.BackoffPolicy.LINEAR)
+                .setBackoffCriteria(15000L, JobInfo.BackoffPolicy.LINEAR)
                 .setOverrideDeadline(30000L)
-                .setRequiredNetworkCapabilities(Task.NetworkType.UNMETERED)
+                .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
                 .build();
-        final TaskStatus taskStatus1 = new TaskStatus(task1, SOME_UID, true /* persisted */);
-        final TaskStatus taskStatus2 = new TaskStatus(task2, SOME_UID, true /* persisted */);
+        final JobStatus taskStatus1 = new JobStatus(task1, SOME_UID, true /* persisted */);
+        final JobStatus taskStatus2 = new JobStatus(task2, SOME_UID, true /* persisted */);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         Thread.sleep(IO_WAIT);
-        mTaskStoreUnderTest.readTaskMapFromDisk(new TaskMapReadFinishedListener() {
+        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
             @Override
-            public void onTaskMapReadFinished(List<TaskStatus> tasks) {
+            public void onJobMapReadFinished(List<JobStatus> tasks) {
                 assertEquals("Incorrect # of persisted tasks.", 2, tasks.size());
-                TaskStatus loaded1 = tasks.get(0);
-                TaskStatus loaded2 = tasks.get(1);
-                assertTasksEqual(task1, loaded1.getTask());
-                assertTasksEqual(task2, loaded2.getTask());
+                JobStatus loaded1 = tasks.get(0);
+                JobStatus loaded2 = tasks.get(1);
+                assertTasksEqual(task1, loaded1.getJob());
+                assertTasksEqual(task2, loaded2.getJob());
 
                 // Check that the loaded task has the correct runtimes.
                 compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
@@ -124,7 +126,7 @@ public class TaskStoreTest extends AndroidTestCase {
     }
 
     public void testWritingTaskWithExtras() throws Exception {
-        Task.Builder b = new Builder(8, mComponent)
+        JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(10000L)
                 .setRequiresCharging(true);
@@ -134,17 +136,17 @@ public class TaskStoreTest extends AndroidTestCase {
         extras.putString("hi", "there");
         extras.putInt("into", 3);
         b.setExtras(extras);
-        final Task task = b.build();
-        TaskStatus taskStatus = new TaskStatus(task, SOME_UID, true /* persisted */);
+        final JobInfo task = b.build();
+        JobStatus taskStatus = new JobStatus(task, SOME_UID, true /* persisted */);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
-        mTaskStoreUnderTest.readTaskMapFromDisk(new TaskMapReadFinishedListener() {
+        mTaskStoreUnderTest.readJobMapFromDisk(new JobMapReadFinishedListener() {
             @Override
-            public void onTaskMapReadFinished(List<TaskStatus> tasks) {
+            public void onJobMapReadFinished(List<JobStatus> tasks) {
                 assertEquals("Incorrect # of persisted tasks.", 1, tasks.size());
-                TaskStatus loaded = tasks.get(0);
-                assertTasksEqual(task, loaded.getTask());
+                JobStatus loaded = tasks.get(0);
+                assertTasksEqual(task, loaded.getJob());
             }
         });
 
@@ -153,7 +155,7 @@ public class TaskStoreTest extends AndroidTestCase {
     /**
      * Helper function to throw an error if the provided task and TaskStatus objects are not equal.
      */
-    private void assertTasksEqual(Task first, Task second) {
+    private void assertTasksEqual(JobInfo first, JobInfo second) {
         assertEquals("Different task ids.", first.getId(), second.getId());
         assertEquals("Different components.", first.getService(), second.getService());
         assertEquals("Different periodic status.", first.isPeriodic(), second.isPeriodic());
@@ -168,11 +170,11 @@ public class TaskStoreTest extends AndroidTestCase {
         assertEquals("Invalid idle constraint.", first.isRequireDeviceIdle(),
                 second.isRequireDeviceIdle());
         assertEquals("Invalid unmetered constraint.",
-                first.getNetworkCapabilities() == Task.NetworkType.UNMETERED,
-                second.getNetworkCapabilities() == Task.NetworkType.UNMETERED);
+                first.getNetworkCapabilities() == JobInfo.NetworkType.UNMETERED,
+                second.getNetworkCapabilities() == JobInfo.NetworkType.UNMETERED);
         assertEquals("Invalid connectivity constraint.",
-                first.getNetworkCapabilities() == Task.NetworkType.ANY,
-                second.getNetworkCapabilities() == Task.NetworkType.ANY);
+                first.getNetworkCapabilities() == JobInfo.NetworkType.ANY,
+                second.getNetworkCapabilities() == JobInfo.NetworkType.ANY);
         assertEquals("Invalid deadline constraint.",
                 first.hasLateConstraint(),
                 second.hasLateConstraint());

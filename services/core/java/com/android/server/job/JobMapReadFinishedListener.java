@@ -14,21 +14,21 @@
  * limitations under the License
  */
 
-package com.android.server.task;
+package com.android.server.job;
 
 import java.util.List;
 
-import com.android.server.task.controllers.TaskStatus;
+import com.android.server.job.controllers.JobStatus;
 
 /**
- * Callback definition for I/O thread to let the TaskManagerService know when
+ * Callback definition for I/O thread to let the JobManagerService know when
  * I/O read has completed. Done this way so we don't stall the main thread on
  * boot.
  */
-public interface TaskMapReadFinishedListener {
+public interface JobMapReadFinishedListener {
 
     /**
-     * Called by the {@link TaskStore} at boot, when the disk read is finished.
+     * Called by the {@link JobStore} at boot, when the disk read is finished.
      */
-    public void onTaskMapReadFinished(List<TaskStatus> tasks);
+    public void onJobMapReadFinished(List<JobStatus> jobs);
 }
