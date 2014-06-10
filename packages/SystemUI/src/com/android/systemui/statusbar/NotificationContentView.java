@@ -106,7 +106,7 @@ public class NotificationContentView extends FrameLayout {
 
     private void selectLayout() {
         if (mActualHeight <= mSmallHeight || mExpandedChild == null) {
-            if (mContractedChild.getVisibility() != View.VISIBLE) {
+            if (mContractedChild != null && mContractedChild.getVisibility() != View.VISIBLE) {
                 mContractedChild.setVisibility(View.VISIBLE);
             }
             if (mExpandedChild != null && mExpandedChild.getVisibility() != View.INVISIBLE) {
@@ -116,7 +116,7 @@ public class NotificationContentView extends FrameLayout {
             if (mExpandedChild.getVisibility() != View.VISIBLE) {
                 mExpandedChild.setVisibility(View.VISIBLE);
             }
-            if (mContractedChild.getVisibility() != View.INVISIBLE) {
+            if (mContractedChild != null && mContractedChild.getVisibility() != View.INVISIBLE) {
                 mContractedChild.setVisibility(View.INVISIBLE);
             }
         }
