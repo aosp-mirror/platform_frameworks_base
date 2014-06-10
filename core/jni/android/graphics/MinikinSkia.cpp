@@ -118,8 +118,10 @@ void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
 
 void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery) {
     paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->GetSkTypeface());
-    paint->setFakeBoldText(fakery.isFakeBold());
-    // TODO: fake italics
+    paint->setFakeBoldText(paint->isFakeBoldText() || fakery.isFakeBold());
+    if (fakery.isFakeItalic()) {
+        paint->setTextSkewX(paint->getTextSkewX() - 0.25f);
+    }
 }
 
 }
