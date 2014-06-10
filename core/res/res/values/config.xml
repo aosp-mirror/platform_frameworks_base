@@ -605,6 +605,9 @@
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
 
+    <!-- Number of notifications to keep in the notification service historical archive -->
+    <integer name="config_notificationServiceArchiveSize">250</integer>
+
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 
