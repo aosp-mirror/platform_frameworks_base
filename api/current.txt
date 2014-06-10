@@ -7887,7 +7887,6 @@ package android.content {
 
   public class SyncRequest implements android.os.Parcelable {
     method public int describeContents();
-    method public boolean isExpedited();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -7902,7 +7901,6 @@ package android.content {
     method public android.content.SyncRequest.Builder setIgnoreSettings(boolean);
     method public android.content.SyncRequest.Builder setManual(boolean);
     method public android.content.SyncRequest.Builder setNoRetry(boolean);
-    method public android.content.SyncRequest.Builder setPriority(int);
     method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, java.lang.String);
     method public android.content.SyncRequest.Builder syncOnce();
     method public android.content.SyncRequest.Builder syncPeriodic(long, long);
