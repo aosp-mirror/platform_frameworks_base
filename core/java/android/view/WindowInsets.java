@@ -87,7 +87,12 @@ public final class WindowInsets {
         if (mTempRect == null) {
             mTempRect = new Rect();
         }
-        mTempRect.set(mSystemWindowInsets);
+        if (mSystemWindowInsets != null) {
+            mTempRect.set(mSystemWindowInsets);
+        } else {
+            // If there were no system window insets, this is just empty.
+            mTempRect.setEmpty();
+        }
         return mTempRect;
     }
 
