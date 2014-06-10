@@ -29,7 +29,15 @@ namespace uirenderer {
 
 class PathTessellator {
 public:
-    static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint);
+    /**
+     * Populates scaleX and scaleY with the 'tessellation scale' of the transform - the effective X
+     * and Y scales that tessellation will take into account when generating the 1.0 pixel thick
+     * ramp.
+     *
+     * Two instances of the same shape (size, paint, etc.) will only generate the same vertices if
+     * their tessellation scales are equal.
+     */
+    static void extractTessellationScales(const Matrix4& transform, float* scaleX, float* scaleY);
 
     /**
      * Populates a VertexBuffer with a tessellated approximation of the input convex path, as a single
@@ -54,11 +62,10 @@ public:
      * @param paint The paint the points will be drawn with indicating AA, stroke width & cap
      * @param transform The transform the points will be drawn with, used to drive stretch-aware path
      *        vertex approximation, and correct AA ramp offsetting
-     * @param bounds An output rectangle, which returns the total area covered by the output buffer
      * @param vertexBuffer The output buffer
      */
     static void tessellatePoints(const float* points, int count, const SkPaint* paint,
-            const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+            const mat4& transform, VertexBuffer& vertexBuffer);
 
     /**
      * Populates a VertexBuffer with a tessellated approximation of lines as a single triangle
@@ -69,11 +76,10 @@ public:
      * @param paint The paint the lines will be drawn with indicating AA, stroke width & cap
      * @param transform The transform the points will be drawn with, used to drive stretch-aware path
      *        vertex approximation, and correct AA ramp offsetting
-     * @param bounds An output rectangle, which returns the total area covered by the output buffer
      * @param vertexBuffer The output buffer
      */
     static void tessellateLines(const float* points, int count, const SkPaint* paint,
-            const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+            const mat4& transform, VertexBuffer& vertexBuffer);
 
     /**
      * Approximates a convex, CW outline into a Vector of 2d vertices.

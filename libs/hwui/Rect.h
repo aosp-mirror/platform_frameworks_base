@@ -186,6 +186,13 @@ public:
         bottom += delta;
     }
 
+    void outset(float xdelta, float ydelta) {
+        left -= xdelta;
+        top -= ydelta;
+        right += xdelta;
+        bottom += ydelta;
+    }
+
     /**
      * Similar to snapToPixelBoundaries, but estimates bounds conservatively to handle GL rounding
      * errors.

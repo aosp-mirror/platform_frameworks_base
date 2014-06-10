@@ -273,6 +273,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
             gradientCache.getSize(), gradientCache.getMaxSize());
     log.appendFormat("  PathCache            %8d / %8d\n",
             pathCache.getSize(), pathCache.getMaxSize());
+    log.appendFormat("  TessellationCache    %8d / %8d\n",
+            tessellationCache.getSize(), tessellationCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
     log.appendFormat("  PatchCache           %8d / %8d\n",
@@ -295,6 +297,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += renderBufferCache.getSize();
     total += gradientCache.getSize();
     total += pathCache.getSize();
+    total += tessellationCache.getSize();
     total += dropShadowCache.getSize();
     total += patchCache.getSize();
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
@@ -358,6 +361,7 @@ void Caches::flush(FlushMode mode) {
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
+            tessellationCache.clear();
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();

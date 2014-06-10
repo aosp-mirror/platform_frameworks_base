@@ -57,15 +57,17 @@ namespace uirenderer {
 #define ROUND_CAP_THRESH 0.25f
 #define PI 3.1415926535897932f
 
-/**
- * Note: this function doesn't account for the AA case with sub-pixel line thickness (not just 0 <
- * width < 1.0, canvas scale factors in as well) so this can't be used for points/lines
- */
-void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint) {
-    if (paint->getStyle() != SkPaint::kFill_Style) {
-        float outset = paint->getStrokeWidth() * 0.5f;
-        if (outset == 0) outset = 0.5f; // account for hairline
-        bounds.outset(outset, outset);
+void PathTessellator::extractTessellationScales(const Matrix4& transform,
+        float* scaleX, float* scaleY) {
+    *scaleX = 1.0f;
+    *scaleY = 1.0f;
+    if (CC_UNLIKELY(!transform.isPureTranslate())) {
+        float m00 = transform.data[Matrix4::kScaleX];
+        float m01 = transform.data[Matrix4::kSkewY];
+        float m10 = transform.data[Matrix4::kSkewX];
+        float m11 = transform.data[Matrix4::kScaleY];
+        *scaleX = sqrt(m00 * m00 + m01 * m01);
+        *scaleY = sqrt(m10 * m10 + m11 * m11);
     }
 }
 
@@ -94,18 +96,15 @@ public:
             halfStrokeWidth(paint->getStrokeWidth() * 0.5f), maxAlpha(1.0f) {
         // compute inverse scales
         if (CC_UNLIKELY(!transform.isPureTranslate())) {
-            float m00 = transform.data[Matrix4::kScaleX];
-            float m01 = transform.data[Matrix4::kSkewY];
-            float m10 = transform.data[Matrix4::kSkewX];
-            float m11 = transform.data[Matrix4::kScaleY];
-            float scaleX = sqrt(m00 * m00 + m01 * m01);
-            float scaleY = sqrt(m10 * m10 + m11 * m11);
+            float scaleX, scaleY;
+            PathTessellator::extractTessellationScales(transform, &scaleX, &scaleY);
             inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 1.0f;
             inverseScaleY = (scaleY != 0) ? (1.0f / scaleY) : 1.0f;
         }
 
         if (isAA && halfStrokeWidth != 0 && inverseScaleX == inverseScaleY &&
                 2 * halfStrokeWidth < inverseScaleX) {
+            // AA, with non-hairline stroke, width < 1 pixel. Scale alpha and treat as hairline.
             maxAlpha *= (2 * halfStrokeWidth) / inverseScaleX;
             halfStrokeWidth = 0.0f;
         }
@@ -159,10 +158,10 @@ public:
      * Outset the bounds of point data (for line endpoints or points) to account for AA stroke
      * geometry.
      */
-    void expandBoundsForStrokeAA(SkRect& bounds) const {
+    void expandBoundsForStroke(Rect* bounds) const {
         float outset = halfStrokeWidth;
         if (outset == 0) outset = 0.5f;
-        bounds.outset(outset * inverseScaleX + Vertex::GeometryFudgeFactor(),
+        bounds->outset(outset * inverseScaleX + Vertex::GeometryFudgeFactor(),
                 outset * inverseScaleY + Vertex::GeometryFudgeFactor());
     }
 };
@@ -778,21 +777,25 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
             getFillVerticesFromPerimeterAA(paintInfo, tempVertices, vertexBuffer);
         }
     }
+
+    Rect bounds(path.getBounds());
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
-static void expandRectToCoverVertex(SkRect& rect, float x, float y) {
-    rect.fLeft = fminf(rect.fLeft, x);
-    rect.fTop = fminf(rect.fTop, y);
-    rect.fRight = fmaxf(rect.fRight, x);
-    rect.fBottom = fmaxf(rect.fBottom, y);
+static void expandRectToCoverVertex(Rect& rect, float x, float y) {
+    rect.left = fminf(rect.left, x);
+    rect.top = fminf(rect.top, y);
+    rect.right = fmaxf(rect.right, x);
+    rect.bottom = fmaxf(rect.bottom, y);
 }
-static void expandRectToCoverVertex(SkRect& rect, const Vertex& vertex) {
+static void expandRectToCoverVertex(Rect& rect, const Vertex& vertex) {
     expandRectToCoverVertex(rect, vertex.x, vertex.y);
 }
 
 template <class TYPE>
 static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
-        const float* points, int count, SkRect& bounds) {
+        const float* points, int count, Rect& bounds) {
     bounds.set(points[0], points[1], points[0], points[1]);
 
     int numPoints = count / 2;
@@ -807,7 +810,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
 }
 
 void PathTessellator::tessellatePoints(const float* points, int count, const SkPaint* paint,
-        const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     const PaintInfo paintInfo(paint, transform);
 
     // determine point shape
@@ -830,6 +833,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
 
     if (!outlineVertices.size()) return;
 
+    Rect bounds;
     // tessellate, then duplicate outline across points
     int numPoints = count / 2;
     VertexBuffer tempBuffer;
@@ -843,12 +847,12 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
     }
 
     // expand bounds from vertex coords to pixel data
-    paintInfo.expandBoundsForStrokeAA(bounds);
-
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, const SkPaint* paint,
-        const mat4& transform, SkRect& bounds, VertexBuffer& vertexBuffer) {
+        const mat4& transform, VertexBuffer& vertexBuffer) {
     ATRACE_CALL();
     const PaintInfo paintInfo(paint, transform);
 
@@ -868,6 +872,7 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
     tempVertices.push();
     tempVertices.push();
     Vertex* tempVerticesData = tempVertices.editArray();
+    Rect bounds;
     bounds.set(points[0], points[1], points[0], points[1]);
     for (int i = 0; i < count; i += 4) {
         Vertex::set(&(tempVerticesData[0]), points[i + 0], points[i + 1]);
@@ -892,7 +897,8 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
     }
 
     // expand bounds from vertex coords to pixel data
-    paintInfo.expandBoundsForStrokeAA(bounds);
+    paintInfo.expandBoundsForStroke(&bounds);
+    vertexBuffer.setBounds(bounds);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

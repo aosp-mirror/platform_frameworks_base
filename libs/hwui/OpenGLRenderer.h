@@ -111,12 +111,6 @@ enum ModelViewMode {
     kModelViewMode_TranslateAndScale = 1,
 };
 
-enum VertexBufferMode {
-    kVertexBufferMode_Standard = 0,
-    kVertexBufferMode_OnePolyRingShadow = 1,
-    kVertexBufferMode_TwoPolyRingShadow = 2
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,8 +207,8 @@ public:
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
     virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
 
-    status_t drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
-            float casterAlpha, bool casterUnclipped, const SkPath* casterPerimeter);
+    status_t drawShadow(float casterAlpha,
+            const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer);
 
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
@@ -347,6 +341,9 @@ public:
         if (stencilWasEnabled) mCaches.stencil.enableTest();
     }
 #endif
+
+    const Vector3& getLightCenter() const { return mLightCenter; }
+    float getLightRadius() const { return mLightRadius; }
 
 protected:
     /**
@@ -661,8 +658,16 @@ private:
      * @param paint The paint to render with
      * @param useOffset Offset the vertexBuffer (used in drawing non-AA lines)
      */
-    status_t drawVertexBuffer(VertexBufferMode mode, const VertexBuffer& vertexBuffer,
+    status_t drawVertexBuffer(float translateX, float translateY, const VertexBuffer& vertexBuffer,
             const SkPaint* paint, bool useOffset = false);
+
+    /**
+     * Convenience for translating method
+     */
+    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer,
+            const SkPaint* paint, bool useOffset = false) {
+        return drawVertexBuffer(0.0f, 0.0f, vertexBuffer, paint, useOffset);
+    }
 
     /**
      * Renders the convex hull defined by the specified path as a strip of polygons.

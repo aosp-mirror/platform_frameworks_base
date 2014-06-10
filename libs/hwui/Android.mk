@@ -52,6 +52,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		SpotShadow.cpp \
 		StatefulBaseRenderer.cpp \
 		Stencil.cpp \
+		TessellationCache.cpp \
 		Texture.cpp \
 		TextureCache.cpp \
 		TextDropShadowCache.cpp

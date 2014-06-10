@@ -38,6 +38,10 @@ public:
         return isZero(valueA - valueB);
     }
 
+    inline static int max(int a, int b) {
+        return a > b ? a : b;
+    }
+
     inline static int min(int a, int b) {
         return a < b ? a : b;
     }

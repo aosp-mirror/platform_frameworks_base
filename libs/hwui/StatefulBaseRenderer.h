@@ -69,6 +69,7 @@ public:
     //        int alpha, SkXfermode::Mode mode, int flags);
 
     // Matrix
+    void getMatrix(Matrix4* outMatrix) const;
     virtual void getMatrix(SkMatrix* outMatrix) const;
     virtual void translate(float dx, float dy, float dz = 0.0f);
     virtual void rotate(float degrees);

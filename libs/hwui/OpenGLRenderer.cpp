@@ -287,6 +287,7 @@ void OpenGLRenderer::finish() {
     // of the current frame
     if (getTargetFbo() == 0) {
         mCaches.pathCache.trim();
+        mCaches.tessellationCache.trim();
     }
 
     if (!suppressErrorChecks()) {
@@ -2390,13 +2391,16 @@ status_t OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* 
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
+status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         const VertexBuffer& vertexBuffer, const SkPaint* paint, bool useOffset) {
     // not missing call to quickReject/dirtyLayer, always done at a higher level
     if (!vertexBuffer.getVertexCount()) {
         // no vertices to draw
         return DrawGlInfo::kStatusDone;
     }
+
+    const Rect& bounds = vertexBuffer.getBounds();
+    dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
 
     int color = paint->getColor();
     bool isAA = paint->isAntiAlias();
@@ -2409,7 +2413,7 @@ status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
     setupDrawShader(getShader(paint));
     setupDrawBlending(paint, isAA);
     setupDrawProgram();
-    setupDrawModelView(kModelViewMode_Translate, useOffset, 0, 0, 0, 0);
+    setupDrawModelView(kModelViewMode_Translate, useOffset, translateX, translateY, 0, 0);
     setupDrawColorUniforms(getShader(paint));
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(getShader(paint));
@@ -2429,13 +2433,14 @@ status_t OpenGLRenderer::drawVertexBuffer(VertexBufferMode mode,
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
     }
 
-    if (mode == kVertexBufferMode_Standard) {
+    const VertexBuffer::Mode mode = vertexBuffer.getMode();
+    if (mode == VertexBuffer::kStandard) {
         mCaches.unbindIndicesBuffer();
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
-    } else if (mode == kVertexBufferMode_OnePolyRingShadow) {
+    } else if (mode == VertexBuffer::kOnePolyRingShadow) {
         mCaches.bindShadowIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, ONE_POLY_RING_SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
-    } else if (mode == kVertexBufferMode_TwoPolyRingShadow) {
+    } else if (mode == VertexBuffer::kTwoPolyRingShadow) {
         mCaches.bindShadowIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, TWO_POLY_RING_SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
     }
@@ -2460,14 +2465,7 @@ status_t OpenGLRenderer::drawConvexPath(const SkPath& path, const SkPaint* paint
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
     PathTessellator::tessellatePath(path, paint, *currentTransform(), vertexBuffer);
-
-    if (hasLayer()) {
-        SkRect bounds = path.getBounds();
-        PathTessellator::expandBoundsForStroke(bounds, paint);
-        dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
-    }
-
-    return drawVertexBuffer(kVertexBufferMode_Standard, vertexBuffer, paint);
+    return drawVertexBuffer(vertexBuffer, paint);
 }
 
 /**
@@ -2487,18 +2485,15 @@ status_t OpenGLRenderer::drawLines(const float* points, int count, const SkPaint
     count &= ~0x3; // round down to nearest four
 
     VertexBuffer buffer;
-    SkRect bounds;
-    PathTessellator::tessellateLines(points, count, paint, *currentTransform(), bounds, buffer);
+    PathTessellator::tessellateLines(points, count, paint, *currentTransform(), buffer);
+    const Rect& bounds = buffer.getBounds();
 
-    // can't pass paint, since style would be checked for outset. outset done by tessellation.
-    if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+    if (quickRejectSetupScissor(bounds.left, bounds.top, bounds.right, bounds.bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
-
     bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(kVertexBufferMode_Standard, buffer, paint, useOffset);
+    return drawVertexBuffer(buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
@@ -2507,18 +2502,15 @@ status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPain
     count &= ~0x1; // round down to nearest two
 
     VertexBuffer buffer;
-    SkRect bounds;
-    PathTessellator::tessellatePoints(points, count, paint, *currentTransform(), bounds, buffer);
+    PathTessellator::tessellatePoints(points, count, paint, *currentTransform(), buffer);
 
-    // can't pass paint, since style would be checked for outset. outset done by tessellation.
-    if (quickRejectSetupScissor(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom)) {
+    const Rect& bounds = buffer.getBounds();
+    if (quickRejectSetupScissor(bounds.left, bounds.top, bounds.right, bounds.bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *currentTransform());
-
     bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(kVertexBufferMode_Standard, buffer, paint, useOffset);
+    return drawVertexBuffer(buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -2564,16 +2556,9 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
         return drawShape(left, top, texture, p);
     }
 
-    SkPath path;
-    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
-    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
-        float outset = p->getStrokeWidth() / 2;
-        rect.outset(outset, outset);
-        rx += outset;
-        ry += outset;
-    }
-    path.addRoundRect(rect, rx, ry);
-    return drawConvexPath(path, p);
+    const VertexBuffer* vertexBuffer = mCaches.tessellationCache.getRoundRect(*currentTransform(),
+            right - left, bottom - top, rx, ry, p);
+    return drawVertexBuffer(left, top, *vertexBuffer, p);
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p) {
@@ -3192,8 +3177,8 @@ static void mapPointFakeZ(Vector3& point, const mat4& transformXY, const mat4& t
     transformXY.mapPoint(point.x, point.y);
 }
 
-status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& casterTransformZ,
-        float casterAlpha, bool casterUnclipped, const SkPath* casterPerimeter) {
+status_t OpenGLRenderer::drawShadow(float casterAlpha,
+        const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // TODO: use quickRejectWithScissor. For now, always force enable scissor.
@@ -3202,77 +3187,14 @@ status_t OpenGLRenderer::drawShadow(const mat4& casterTransformXY, const mat4& c
     SkPaint paint;
     paint.setAntiAlias(true); // want to use AlphaVertex
 
-    // tessellate caster outline into a 2d polygon
-    Vector<Vertex> casterVertices2d;
-    const float casterRefinementThresholdSquared = 20.0f; // TODO: experiment with this value
-    PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
-            casterRefinementThresholdSquared, casterVertices2d);
-    if (!ShadowTessellator::isClockwisePath(*casterPerimeter)) {
-        ShadowTessellator::reverseVertexArray(casterVertices2d.editArray(),
-                casterVertices2d.size());
-    }
-
-    if (casterVertices2d.size() == 0) {
-        // empty caster polygon computed from path
-        return DrawGlInfo::kStatusDone;
-    }
-
-    // map 2d caster poly into 3d
-    const int casterVertexCount = casterVertices2d.size();
-    Vector3 casterPolygon[casterVertexCount];
-    float minZ = FLT_MAX;
-    float maxZ = -FLT_MAX;
-    for (int i = 0; i < casterVertexCount; i++) {
-        const Vertex& point2d = casterVertices2d[i];
-        casterPolygon[i] = Vector3(point2d.x, point2d.y, 0);
-        mapPointFakeZ(casterPolygon[i], casterTransformXY, casterTransformZ);
-        minZ = fmin(minZ, casterPolygon[i].z);
-        maxZ = fmax(maxZ, casterPolygon[i].z);
-    }
-
-    // map the centroid of the caster into 3d
-    Vector2 centroid =  ShadowTessellator::centroid2d(
-            reinterpret_cast<const Vector2*>(casterVertices2d.array()),
-            casterVertexCount);
-    Vector3 centroid3d(centroid.x, centroid.y, 0);
-    mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);
-
-    // if the caster intersects the z=0 plane, lift it in Z so it doesn't
-    if (minZ < SHADOW_MIN_CASTER_Z) {
-        float casterLift = SHADOW_MIN_CASTER_Z - minZ;
-        for (int i = 0; i < casterVertexCount; i++) {
-            casterPolygon[i].z += casterLift;
-        }
-        centroid3d.z += casterLift;
-    }
-
-    // Check whether we want to draw the shadow at all by checking the caster's
-    // bounds against clip.
-    // We only have ortho projection, so we can just ignore the Z in caster for
-    // simple rejection calculation.
-    Rect localClip = mSnapshot->getLocalClip();
-    Rect casterBounds(casterPerimeter->getBounds());
-    casterTransformXY.mapRect(casterBounds);
-
-    bool isCasterOpaque = (casterAlpha == 1.0f) && casterUnclipped;
-    // draw caster's shadows
-    if (mCaches.propertyAmbientShadowStrength > 0) {
+    if (ambientShadowVertexBuffer && mCaches.propertyAmbientShadowStrength > 0) {
         paint.setARGB(casterAlpha * mCaches.propertyAmbientShadowStrength, 0, 0, 0);
-        VertexBuffer ambientShadowVertexBuffer;
-        VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateAmbientShadow(
-                isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
-                casterBounds, localClip, maxZ, ambientShadowVertexBuffer);
-        drawVertexBuffer(vertexBufferMode, ambientShadowVertexBuffer, &paint);
+        drawVertexBuffer(*ambientShadowVertexBuffer, &paint);
     }
 
-    if (mCaches.propertySpotShadowStrength > 0) {
+    if (spotShadowVertexBuffer && mCaches.propertySpotShadowStrength > 0) {
         paint.setARGB(casterAlpha * mCaches.propertySpotShadowStrength, 0, 0, 0);
-        VertexBuffer spotShadowVertexBuffer;
-        VertexBufferMode vertexBufferMode = ShadowTessellator::tessellateSpotShadow(
-                isCasterOpaque, casterPolygon, casterVertexCount,
-                *currentTransform(), mLightCenter, mLightRadius, casterBounds, localClip,
-                spotShadowVertexBuffer);
-        drawVertexBuffer(vertexBufferMode, spotShadowVertexBuffer, &paint);
+        drawVertexBuffer(*spotShadowVertexBuffer, &paint);
     }
 
     return DrawGlInfo::kStatusDrew;

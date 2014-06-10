@@ -26,6 +26,7 @@
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
+#include "utils/Macros.h"
 #include "utils/Pair.h"
 
 class SkBitmap;
@@ -107,6 +108,7 @@ enum ShapeType {
 };
 
 struct PathDescription {
+    DESCRIPTION_TYPE(PathDescription);
     ShapeType type;
     SkPaint::Join join;
     SkPaint::Cap cap;
@@ -148,29 +150,6 @@ struct PathDescription {
     PathDescription(ShapeType shapeType, const SkPaint* paint);
 
     hash_t hash() const;
-
-    int compare(const PathDescription& rhs) const;
-
-    bool operator==(const PathDescription& other) const {
-        return compare(other) == 0;
-    }
-
-    bool operator!=(const PathDescription& other) const {
-        return compare(other) != 0;
-    }
-
-    friend inline int strictly_order_type(
-            const PathDescription& lhs, const PathDescription& rhs) {
-        return lhs.compare(rhs) < 0;
-    }
-
-    friend inline int compare_type(const PathDescription& lhs, const PathDescription& rhs) {
-        return lhs.compare(rhs);
-    }
-
-    friend inline hash_t hash_type(const PathDescription& entry) {
-        return entry.hash();
-    }
 };
 
 /**

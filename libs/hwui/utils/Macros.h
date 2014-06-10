@@ -21,5 +21,12 @@
         Type(const Type&); \
         void operator=(const Type&)
 
+#define DESCRIPTION_TYPE(Type) \
+        int compare(const Type& rhs) const { return memcmp(this, &rhs, sizeof(Type));} \
+        bool operator==(const Type& other) const { return compare(other) == 0; } \
+        bool operator!=(const Type& other) const { return compare(other) != 0; } \
+        friend inline int strictly_order_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs) < 0; } \
+        friend inline int compare_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs); } \
+        friend inline hash_t hash_type(const Type& entry) { return entry.hash(); }
 
 #endif /* MACROS_H */

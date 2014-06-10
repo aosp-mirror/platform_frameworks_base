@@ -74,10 +74,6 @@ hash_t PathDescription::hash() const {
     return JenkinsHashWhiten(hash);
 }
 
-int PathDescription::compare(const PathDescription& rhs) const {
-    return memcmp(this, &rhs, sizeof(PathDescription));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,14 +159,7 @@ PathCache::PathCache():
     } else {
         INIT_LOGD("  Using default %s cache size of %.2fMB", name, DEFAULT_PATH_CACHE_SIZE);
     }
-    init();
-}
 
-PathCache::~PathCache() {
-    mCache.clear();
-}
-
-void PathCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
@@ -178,6 +167,10 @@ void PathCache::init() {
     mMaxTextureSize = maxTextureSize;
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
+}
+
+PathCache::~PathCache() {
+    mCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,7 +334,7 @@ PathCache::PathProcessor::PathProcessor(Caches& caches):
 }
 
 void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
-    sp<PathTask> t = static_cast<PathTask* >(task.get());
+    PathTask* t = static_cast<PathTask*>(task.get());
     ATRACE_NAME("pathPrecache");
 
     float left, top, offset;

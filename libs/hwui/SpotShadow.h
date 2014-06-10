@@ -26,7 +26,7 @@ namespace uirenderer {
 
 class SpotShadow {
 public:
-    static VertexBufferMode createSpotShadow(bool isCasterOpaque, const Vector3* poly,
+    static void createSpotShadow(bool isCasterOpaque, const Vector3* poly,
             int polyLength, const Vector3& lightCenter, float lightSize,
             int lightVertexCount, VertexBuffer& retStrips);
 
