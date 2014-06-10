@@ -15955,6 +15955,7 @@ package android.net {
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
     method public android.net.NetworkInfo getNetworkInfo(int);
     method public deprecated int getNetworkPreference();
+    method public static android.net.Network getProcessDefaultNetwork();
     method public boolean isActiveNetworkMetered();
     method public boolean isNetworkActive();
     method public static boolean isNetworkTypeValid(int);
@@ -15966,6 +15967,7 @@ package android.net {
     method public android.net.NetworkRequest requestNetwork(android.net.NetworkCapabilities, android.app.PendingIntent);
     method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
+    method public static boolean setProcessDefaultNetwork(android.net.Network);
     method public deprecated int startUsingNetworkFeature(int, java.lang.String);
     method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
     method public void unregisterNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
@@ -16138,13 +16140,10 @@ package android.net {
   }
 
   public class Network implements android.os.Parcelable {
-    method public void bindProcess();
     method public int describeContents();
     method public java.net.InetAddress[] getAllByName(java.lang.String) throws java.net.UnknownHostException;
     method public java.net.InetAddress getByName(java.lang.String) throws java.net.UnknownHostException;
-    method public static android.net.Network getProcessBoundNetwork();
-    method public javax.net.SocketFactory socketFactory();
-    method public static void unbindProcess();
+    method public javax.net.SocketFactory getSocketFactory();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
