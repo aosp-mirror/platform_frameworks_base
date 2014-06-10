@@ -21,6 +21,11 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Convenience class to construct sync requests. See {@link android.content.SyncRequest.Builder}
+ * for an explanation of the various functions. The resulting object is passed through to the
+ * framework via {@link android.content.ContentResolver#requestSync(SyncRequest)}.
+ */
 public class SyncRequest implements Parcelable {
     private static final String TAG = "SyncRequest";
     /** Account to pass to the sync adapter. Can be null. */
@@ -57,6 +62,10 @@ public class SyncRequest implements Parcelable {
         return mIsPeriodic;
     }
 
+    /**
+     * {@hide}
+     * @return whether this sync is expedited.
+     */
     public boolean isExpedited() {
         return mIsExpedited;
     }
@@ -199,14 +208,8 @@ public class SyncRequest implements Parcelable {
          * discriminate between equivalent syncs.
          */
         private Bundle mSyncConfigExtras;
-        /** Expected upload transfer in bytes. */
-        private long mTxBytes = -1L;
-        /** Expected download transfer in bytes. */
-        private long mRxBytes = -1L;
         /** Whether or not this sync can occur on metered networks. Default false. */
         private boolean mDisallowMetered;
-        /** Priority of this sync relative to others from calling app [-2, 2]. Default 0. */
-        private int mPriority = 0;
         /**
          * Whether this builder is building a periodic sync, or a one-time sync.
          */
@@ -314,7 +317,6 @@ public class SyncRequest implements Parcelable {
             return this;
         }
 
-        /** {@hide} */
         private void setupInterval(long at, long before) {
             if (before > at) {
                 throw new IllegalArgumentException("Specified run time for the sync must be" +
@@ -477,18 +479,6 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * @param priority the priority of this request among all requests from the calling app.
-         * Range of [-2,2] similar to how this is done with notifications.
-         */
-        public Builder setPriority(int priority) {
-            if (priority < -2 || priority > 2) {
-                throw new IllegalArgumentException("Priority must be within range [-2, 2]");
-            }
-            mPriority = priority;
-            return this;
-        }
-
-        /**
          * Performs validation over the request and throws the runtime exception
          * <code>IllegalArgumentException</code> if this validation fails.
          *
@@ -522,9 +512,6 @@ public class SyncRequest implements Parcelable {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
             }
-            mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD, mTxBytes);
-            mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD, mRxBytes);
-            mSyncConfigExtras.putInt(ContentResolver.SYNC_EXTRAS_PRIORITY, mPriority);
             if (mSyncType == SYNC_TYPE_PERIODIC) {
                 // If this is a periodic sync ensure than invalid extras were not set.
                 if (ContentResolver.invalidPeriodicExtras(mCustomExtras) ||
