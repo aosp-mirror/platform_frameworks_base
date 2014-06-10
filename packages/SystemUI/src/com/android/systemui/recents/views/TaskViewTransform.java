@@ -22,6 +22,7 @@ import android.graphics.Rect;
 /* The transform state for a task view */
 public class TaskViewTransform {
     public int translationY = 0;
+    public int translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
     public float dismissAlpha = 1f;
@@ -35,6 +36,7 @@ public class TaskViewTransform {
 
     public TaskViewTransform(TaskViewTransform o) {
         translationY = o.translationY;
+        translationZ = o.translationZ;
         scale = o.scale;
         alpha = o.alpha;
         dismissAlpha = o.dismissAlpha;
