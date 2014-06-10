@@ -59,10 +59,12 @@ public final class InCallAdapter {
      * is ported over.
      *
      * @param callId The identifier of the call to reject.
+     * @param rejectWithMessage Whether to reject with a text message.
+     * @param textMessage An optional text message with which to respond.
      */
-    public void rejectCall(String callId) {
+    public void rejectCall(String callId, boolean rejectWithMessage, String textMessage) {
         try {
-            mAdapter.rejectCall(callId);
+            mAdapter.rejectCall(callId, rejectWithMessage, textMessage);
         } catch (RemoteException e) {
         }
     }

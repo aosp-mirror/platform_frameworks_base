@@ -107,6 +107,13 @@ public abstract class Connection {
     protected Connection() {}
 
     /**
+     * The handle (e.g., phone number) to which this Connection is currently communicating.
+     *
+     * IMPORTANT: If an incoming connection has a phone number (or other handle) that the user
+     * is not supposed to be able to see (e.g. it is PRESENTATION_RESTRICTED), then a compliant
+     * ConnectionService implementation MUST NOT reveal this phone number and MUST return
+     * {@code null} from this method.
+     *
      * @return The handle (e.g., phone number) to which this Connection
      *         is currently communicating.
      */

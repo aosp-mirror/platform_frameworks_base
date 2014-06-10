@@ -386,6 +386,11 @@ public abstract class ConnectionService extends CallService {
     /**
      * Create a Connection to match an incoming connection notification.
      *
+     * IMPORTANT: If the incoming connection has a phone number (or other handle) that the user
+     * is not supposed to be able to see (e.g. it is PRESENTATION_RESTRICTED), then a compliant
+     * ConnectionService implementation MUST NOT reveal this phone number as part of the Intent
+     * it sends to notify Telecomm of an incoming connection.
+     *
      * @param request Data encapsulating details of the desired Connection.
      * @param callback A callback for providing the result.
      */
