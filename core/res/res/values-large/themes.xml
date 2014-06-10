@@ -46,4 +46,19 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar"
             parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar.FixedSize">
     </style>
+
+    <style name="Theme.Material.DialogWhenLarge"
+            parent="@android:style/Theme.Material.Dialog.FixedSize">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+    <style name="Theme.Material.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Material.Dialog.NoActionBar.FixedSize">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+    <style name="Theme.Material.Light.DialogWhenLarge"
+            parent="@android:style/Theme.Material.Light.Dialog.FixedSize">
+    </style>
+    <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Material.Light.Dialog.NoActionBar.FixedSize">
+    </style>
 </resources>
