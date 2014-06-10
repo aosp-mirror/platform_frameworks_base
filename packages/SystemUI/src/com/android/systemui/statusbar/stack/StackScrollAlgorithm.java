@@ -228,11 +228,16 @@ public class StackScrollAlgorithm {
             View child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.dimmed = dimmed;
-            childViewState.scale = !dimmed || activatedChild == child
+            boolean isActivatedChild = activatedChild == child;
+            childViewState.scale = !dimmed || isActivatedChild
                     ? 1.0f
                     : DIMMED_SCALE;
-            if (dimmed && activatedChild != null && child != activatedChild) {
-                childViewState.alpha *= ACTIVATED_INVERSE_ALPHA;
+            if (dimmed && activatedChild != null) {
+                if (!isActivatedChild) {
+                    childViewState.alpha *= ACTIVATED_INVERSE_ALPHA;
+                } else {
+                    childViewState.zTranslation += 2.0f * mZDistanceBetweenElements;
+                }
             }
         }
     }
