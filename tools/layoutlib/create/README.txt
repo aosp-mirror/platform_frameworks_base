@@ -119,8 +119,8 @@ name.
 
 The class is then fed to RefactorClassAdapter which is like RenameClassAdapter but updates the
 references in all classes. This is used to update the references of classes in the java package that
-were added in the Dalvik VM but are not a part of the standard JVM. The existing classes are
-modified to update all references to these non-standard classes. An alternate implementation of
+were added in the Dalvik VM but are not a part of the Desktop VM. The existing classes are
+modified to update all references to these non-desktop classes. An alternate implementation of
 these (com.android.tools.layoutlib.java.*) is injected.
 
 RenameClassAdapter and RefactorClassAdapter both inherit from AbstractClassAdapter which changes the
@@ -130,11 +130,15 @@ the StackMapTable correctly and Java 7 VM enforces that classes with version gre
 valid StackMapTable. As a side benefit of this, we can continue to support Java 6 because Java 7 on
 Mac has horrible font rendering support.
 
+ReplaceMethodCallsAdapter replaces calls to certain methods. Currently, it only rewrites calls to
+java.lang.System.arraycopy([CI[CII)V, which is not part of the Desktop VM to call the more general
+method java.lang.System.arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V.
+
 The ClassAdapters are chained together to achieve the desired output. (Look at section 2.2.7
 Transformation chains in the asm user guide, link in the References.) The order of execution of
 these is:
 ClassReader -> [DelegateClassAdapter] -> TransformClassAdapter -> [RenameClassAdapter] ->
-RefactorClassAdapter -> ClassWriter
+RefactorClassAdapter -> [ReplaceMethodCallsAdapter] -> ClassWriter
 
 - Method stubs
 --------------
@@ -169,7 +173,7 @@ This is the easiest: we currently inject the following classes:
 - AutoCloseable and Objects are part of Java 7. To enable us to still run on Java 6, new classes are
   injected. The implementation for these classes has been taken from Android's libcore
   (platform/libcore/luni/src/main/java/java/...).
-- Charsets, IntegralToString and UnsafeByteSequence are not part of the standard JAVA VM. They are
+- Charsets, IntegralToString and UnsafeByteSequence are not part of the Desktop VM. They are
   added to the Dalvik VM for performance reasons. An implementation that is very close to the
   original (which is at platform/libcore/luni/src/main/java/...) is injected. Since these classees
   were in part of the java package, where we can't inject classes, all references to these have been
@@ -209,7 +213,7 @@ This won't rename/replace the inner static methods of a given class.
 
 This is very similar to the Renaming classes except that it also updates the reference in all
 classes. This is done for classes which are added to the Dalvik VM for performance reasons but are
-not present in the Standard Java VM. An implementation for these classes is also injected.
+not present in the Desktop VM. An implementation for these classes is also injected.
 
 
 5- Method erasure based on return type
