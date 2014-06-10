@@ -33,6 +33,7 @@ public final class InCallCall implements Parcelable {
     private final CallState mState;
     private final int mDisconnectCauseCode;
     private final String mDisconnectCauseMsg;
+    private final List<String> mCannedSmsResponses;
     private final int mCapabilities;
     private final long mConnectTimeMillis;
     private final Uri mHandle;
@@ -49,14 +50,16 @@ public final class InCallCall implements Parcelable {
             CallState state,
             int disconnectCauseCode,
             String disconnectCauseMsg,
+            List<String> cannedSmsResponses,
             int capabilities,
             long connectTimeMillis,
             Uri handle,
             GatewayInfo gatewayInfo,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor) {
-        this(id, state, disconnectCauseCode, disconnectCauseMsg, capabilities, connectTimeMillis,
-                handle, gatewayInfo, descriptor, handoffDescriptor, null, Collections.EMPTY_LIST);
+        this(id, state, disconnectCauseCode, disconnectCauseMsg, cannedSmsResponses,
+                capabilities, connectTimeMillis, handle, gatewayInfo, descriptor, handoffDescriptor,
+                null, Collections.EMPTY_LIST);
     }
 
     /** @hide */
@@ -65,6 +68,7 @@ public final class InCallCall implements Parcelable {
             CallState state,
             int disconnectCauseCode,
             String disconnectCauseMsg,
+            List<String> cannedSmsResponses,
             int capabilities,
             long connectTimeMillis,
             Uri handle,
@@ -77,6 +81,7 @@ public final class InCallCall implements Parcelable {
         mState = state;
         mDisconnectCauseCode = disconnectCauseCode;
         mDisconnectCauseMsg = disconnectCauseMsg;
+        mCannedSmsResponses = cannedSmsResponses;
         mCapabilities = capabilities;
         mConnectTimeMillis = connectTimeMillis;
         mHandle = handle;
@@ -111,6 +116,13 @@ public final class InCallCall implements Parcelable {
      */
     public String getDisconnectCauseMsg() {
         return mDisconnectCauseMsg;
+    }
+
+    /**
+     * The set of possible text message responses when this call is incoming.
+     */
+    public List<String> getCannedSmsResponses() {
+        return mCannedSmsResponses;
     }
 
     // Bit mask of actions a call supports, values are defined in {@link CallCapabilities}.
@@ -168,13 +180,15 @@ public final class InCallCall implements Parcelable {
             new Parcelable.Creator<InCallCall> () {
         @Override
         public InCallCall createFromParcel(Parcel source) {
+            ClassLoader classLoader = InCallCall.class.getClassLoader();
             String id = source.readString();
             CallState state = CallState.valueOf(source.readString());
             int disconnectCauseCode = source.readInt();
             String disconnectCauseMsg = source.readString();
+            List<String> cannedSmsResponses = new ArrayList<>();
+            source.readList(cannedSmsResponses, classLoader);
             int capabilities = source.readInt();
             long connectTimeMillis = source.readLong();
-            ClassLoader classLoader = InCallCall.class.getClassLoader();
             Uri handle = source.readParcelable(classLoader);
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
@@ -182,9 +196,9 @@ public final class InCallCall implements Parcelable {
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
-            return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg, capabilities,
-                    connectTimeMillis, handle, gatewayInfo, descriptor, handoffDescriptor,
-                    parentCallId, childCallIds);
+            return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
+                    cannedSmsResponses, capabilities, connectTimeMillis, handle, gatewayInfo,
+                    descriptor, handoffDescriptor, parentCallId, childCallIds);
         }
 
         @Override
@@ -206,6 +220,7 @@ public final class InCallCall implements Parcelable {
         destination.writeString(mState.name());
         destination.writeInt(mDisconnectCauseCode);
         destination.writeString(mDisconnectCauseMsg);
+        destination.writeList(mCannedSmsResponses);
         destination.writeInt(mCapabilities);
         destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mHandle, 0);
