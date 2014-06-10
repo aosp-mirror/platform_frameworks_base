@@ -25,7 +25,10 @@ import java.util.List;
 import android.app.task.ITaskManager;
 import android.app.task.Task;
 import android.app.task.TaskManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -33,6 +36,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -53,9 +57,8 @@ import java.util.LinkedList;
  * about constraints, or the state of active tasks. It receives callbacks from the various
  * controllers and completed tasks and operates accordingly.
  *
- * Note on locking: Any operations that manipulate {@link #mTasks} need to lock on that object, and
- * similarly for {@link #mActiveServices}. If both locks need to be held take mTasksSet first and then
- * mActiveService afterwards.
+ * Note on locking: Any operations that manipulate {@link #mTasks} need to lock on that object.
+ * Any function with the suffix 'Locked' also needs to lock on {@link #mTasks}.
  * @hide
  */
 public class TaskManagerService extends com.android.server.SystemService
@@ -65,12 +68,6 @@ public class TaskManagerService extends com.android.server.SystemService
     /** The number of concurrent tasks we run at one time. */
     private static final int MAX_TASK_CONTEXTS_COUNT = 3;
     static final String TAG = "TaskManager";
-    /**
-     * When a task fails, it gets rescheduled according to its backoff policy. To be nice, we allow
-     * this amount of time from the rescheduled time by which the retry must occur.
-     */
-    private static final long RESCHEDULE_WINDOW_SLOP_MILLIS = 5000L;
-
     /** Master list of tasks. */
     private final TaskStore mTasks;
 
@@ -109,18 +106,42 @@ public class TaskManagerService extends com.android.server.SystemService
 
     private final TaskHandler mHandler;
     private final TaskManagerStub mTaskManagerStub;
+    /**
+     * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
+     * still clean up. On reinstall the package will have a new uid.
+     */
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Slog.d(TAG, "Receieved: " + intent.getAction());
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                int uidRemoved = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
+                }
+                cancelTasksForUid(uidRemoved);
+            } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing jobs for user: " + userId);
+                }
+                cancelTasksForUser(userId);
+            }
+        }
+    };
 
     /**
      * Entry point from client to schedule the provided task.
-     * This will add the task to the
+     * This cancels the task if it's already been scheduled, and replaces it with the one provided.
      * @param task Task object containing execution parameters
      * @param uId The package identifier of the application this task is for.
-     * @param canPersistTask Whether or not the client has the appropriate permissions for persisting
-     *                    of this task.
+     * @param canPersistTask Whether or not the client has the appropriate permissions for
+     *                       persisting this task.
      * @return Result of this operation. See <code>TaskManager#RESULT_*</code> return codes.
      */
     public int schedule(Task task, int uId, boolean canPersistTask) {
         TaskStatus taskStatus = new TaskStatus(task, uId, canPersistTask);
+        cancelTask(uId, task.getId());
         startTrackingTask(taskStatus);
         return TaskManager.RESULT_SUCCESS;
     }
@@ -137,36 +158,33 @@ public class TaskManagerService extends com.android.server.SystemService
         return outList;
     }
 
+    private void cancelTasksForUser(int userHandle) {
+        synchronized (mTasks) {
+            List<TaskStatus> tasksForUser = mTasks.getTasksByUser(userHandle);
+            for (TaskStatus toRemove : tasksForUser) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Cancelling: " + toRemove);
+                }
+                cancelTaskLocked(toRemove);
+            }
+        }
+    }
+
     /**
      * Entry point from client to cancel all tasks originating from their uid.
      * This will remove the task from the master list, and cancel the task if it was staged for
      * execution or being executed.
      * @param uid To check against for removal of a task.
      */
-    public void cancelTaskForUid(int uid) {
+    public void cancelTasksForUid(int uid) {
         // Remove from master list.
         synchronized (mTasks) {
-            if (!mTasks.removeAllByUid(uid)) {
-                // If it's not in the master list, it's nowhere.
-                return;
-            }
-        }
-        // Remove from pending queue.
-        synchronized (mPendingTasks) {
-            Iterator<TaskStatus> it = mPendingTasks.iterator();
-            while (it.hasNext()) {
-                TaskStatus ts = it.next();
-                if (ts.getUid() == uid) {
-                    it.remove();
+            List<TaskStatus> tasksForUid = mTasks.getTasksByUid(uid);
+            for (TaskStatus toRemove : tasksForUid) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Cancelling: " + toRemove);
                 }
-            }
-        }
-        // Cancel if running.
-        synchronized (mActiveServices) {
-            for (TaskServiceContext tsc : mActiveServices) {
-                if (tsc.getRunningTask().getUid() == uid) {
-                    tsc.cancelExecutingTask();
-                }
+                cancelTaskLocked(toRemove);
             }
         }
     }
@@ -179,32 +197,22 @@ public class TaskManagerService extends com.android.server.SystemService
      * @param taskId Id of the task, provided at schedule-time.
      */
     public void cancelTask(int uid, int taskId) {
+        TaskStatus toCancel;
         synchronized (mTasks) {
-            if (!mTasks.remove(uid, taskId)) {
-                // If it's not in the master list, it's nowhere.
-                return;
+            toCancel = mTasks.getTaskByUidAndTaskId(uid, taskId);
+            if (toCancel != null) {
+                cancelTaskLocked(toCancel);
             }
         }
-        synchronized (mPendingTasks) {
-            Iterator<TaskStatus> it = mPendingTasks.iterator();
-            while (it.hasNext()) {
-                TaskStatus ts = it.next();
-                if (ts.getUid() == uid && ts.getTaskId() == taskId) {
-                    it.remove();
-                    // If we got it from pending, it didn't make it to active so return.
-                    return;
-                }
-            }
-        }
-        synchronized (mActiveServices) {
-            for (TaskServiceContext tsc : mActiveServices) {
-                if (tsc.getRunningTask().getUid() == uid &&
-                        tsc.getRunningTask().getTaskId() == taskId) {
-                    tsc.cancelExecutingTask();
-                    return;
-                }
-            }
-        }
+    }
+
+    private void cancelTaskLocked(TaskStatus cancelled) {
+        // Remove from store.
+        stopTrackingTask(cancelled);
+        // Remove from pending queue.
+        mPendingTasks.remove(cancelled);
+        // Cancel if running.
+        stopTaskOnServiceContextLocked(cancelled);
     }
 
     /**
@@ -218,7 +226,13 @@ public class TaskManagerService extends com.android.server.SystemService
      */
     public TaskManagerService(Context context) {
         super(context);
-        mTasks = TaskStore.initAndGet(this);
+        // Create the controllers.
+        mControllers = new LinkedList<StateController>();
+        mControllers.add(ConnectivityController.get(this));
+        mControllers.add(TimeController.get(this));
+        mControllers.add(IdleController.get(this));
+        mControllers.add(BatteryController.get(this));
+
         mHandler = new TaskHandler(context.getMainLooper());
         mTaskManagerStub = new TaskManagerStub();
         // Create the "runners".
@@ -226,17 +240,26 @@ public class TaskManagerService extends com.android.server.SystemService
             mActiveServices.add(
                     new TaskServiceContext(this, context.getMainLooper()));
         }
-        // Create the controllers.
-        mControllers = new LinkedList<StateController>();
-        mControllers.add(ConnectivityController.get(this));
-        mControllers.add(TimeController.get(this));
-        mControllers.add(IdleController.get(this));
-        mControllers.add(BatteryController.get(this));
+        mTasks = TaskStore.initAndGet(this);
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.TASK_SERVICE, mTaskManagerStub);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (PHASE_SYSTEM_SERVICES_READY == phase) {
+            // Register br for package removals and user removals.
+            final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme("package");
+            getContext().registerReceiverAsUser(
+                    mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+            final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
+            getContext().registerReceiverAsUser(
+                    mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
+        }
     }
 
     /**
@@ -245,12 +268,15 @@ public class TaskManagerService extends com.android.server.SystemService
      * about.
      */
     private void startTrackingTask(TaskStatus taskStatus) {
+        boolean update;
         synchronized (mTasks) {
-            mTasks.add(taskStatus);
+            update = mTasks.add(taskStatus);
         }
         for (StateController controller : mControllers) {
+            if (update) {
+                controller.maybeStopTrackingTask(taskStatus);
+            }
             controller.maybeStartTrackingTask(taskStatus);
-
         }
     }
 
@@ -272,16 +298,15 @@ public class TaskManagerService extends com.android.server.SystemService
         return removed;
     }
 
-    private boolean cancelTaskOnServiceContext(TaskStatus ts) {
-        synchronized (mActiveServices) {
-            for (TaskServiceContext tsc : mActiveServices) {
-                if (tsc.getRunningTask() == ts) {
-                    tsc.cancelExecutingTask();
-                    return true;
-                }
+    private boolean stopTaskOnServiceContextLocked(TaskStatus ts) {
+        for (TaskServiceContext tsc : mActiveServices) {
+            final TaskStatus executing = tsc.getRunningTask();
+            if (executing != null && executing.matches(ts.getUid(), ts.getTaskId())) {
+                tsc.cancelExecutingTask();
+                return true;
             }
-            return false;
         }
+        return false;
     }
 
     /**
@@ -289,15 +314,14 @@ public class TaskManagerService extends com.android.server.SystemService
      * @return Whether or not the task represented by the status object is currently being run or
      * is pending.
      */
-    private boolean isCurrentlyActive(TaskStatus ts) {
-        synchronized (mActiveServices) {
-            for (TaskServiceContext serviceContext : mActiveServices) {
-                if (serviceContext.getRunningTask() == ts) {
-                    return true;
-                }
+    private boolean isCurrentlyActiveLocked(TaskStatus ts) {
+        for (TaskServiceContext serviceContext : mActiveServices) {
+            final TaskStatus running = serviceContext.getRunningTask();
+            if (running != null && running.matches(ts.getUid(), ts.getTaskId())) {
+                return true;
             }
-            return false;
         }
+        return false;
     }
 
     /**
@@ -326,13 +350,14 @@ public class TaskManagerService extends com.android.server.SystemService
                     Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
                 }
             case Task.BackoffPolicy.EXPONENTIAL:
-                newEarliestRuntimeElapsed += Math.pow(initialBackoffMillis, backoffAttempt);
+                newEarliestRuntimeElapsed +=
+                        Math.pow(initialBackoffMillis * 0.001, backoffAttempt) * 1000;
                 break;
         }
-        long newLatestRuntimeElapsed = failureToReschedule.hasIdleConstraint() ? Long.MAX_VALUE
-                : newEarliestRuntimeElapsed + RESCHEDULE_WINDOW_SLOP_MILLIS;
+        newEarliestRuntimeElapsed =
+                Math.min(newEarliestRuntimeElapsed, Task.MAX_BACKOFF_DELAY_MILLIS);
         return new TaskStatus(failureToReschedule, newEarliestRuntimeElapsed,
-                newLatestRuntimeElapsed, backoffAttempt);
+                TaskStatus.NO_LATEST_RUNTIME, backoffAttempt);
     }
 
     /**
@@ -372,6 +397,9 @@ public class TaskManagerService extends com.android.server.SystemService
      */
     @Override
     public void onTaskCompleted(TaskStatus taskStatus, boolean needsReschedule) {
+        if (DEBUG) {
+            Slog.d(TAG, "Completed " + taskStatus + ", reschedule=" + needsReschedule);
+        }
         if (!stopTrackingTask(taskStatus)) {
             if (DEBUG) {
                 Slog.e(TAG, "Error removing task: could not find task to remove. Was task " +
@@ -405,8 +433,8 @@ public class TaskManagerService extends com.android.server.SystemService
     }
 
     @Override
-    public void onTaskDeadlineExpired(TaskStatus taskStatus) {
-        mHandler.obtainMessage(MSG_TASK_EXPIRED, taskStatus);
+    public void onRunTaskNow(TaskStatus taskStatus) {
+        mHandler.obtainMessage(MSG_TASK_EXPIRED, taskStatus).sendToTarget();
     }
 
     /**
@@ -419,7 +447,7 @@ public class TaskManagerService extends com.android.server.SystemService
     public void onTaskMapReadFinished(List<TaskStatus> tasks) {
         synchronized (mTasks) {
             for (TaskStatus ts : tasks) {
-                if (mTasks.contains(ts)) {
+                if (mTasks.containsTaskIdForUid(ts.getTaskId(), ts.getUid())) {
                     // An app with BOOT_COMPLETED *might* have decided to reschedule their task, in
                     // the same amount of time it took us to read it from disk. If this is the case
                     // we leave it be.
@@ -440,7 +468,12 @@ public class TaskManagerService extends com.android.server.SystemService
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_TASK_EXPIRED:
-                    final TaskStatus expired = (TaskStatus) message.obj;  // Unused for now.
+                    synchronized (mTasks) {
+                        TaskStatus runNow = (TaskStatus) message.obj;
+                        if (!mPendingTasks.contains(runNow)) {
+                            mPendingTasks.add(runNow);
+                        }
+                    }
                     queueReadyTasksForExecutionH();
                     break;
                 case MSG_CHECK_TASKS:
@@ -448,7 +481,7 @@ public class TaskManagerService extends com.android.server.SystemService
                     maybeQueueReadyTasksForExecutionH();
                     break;
             }
-            maybeRunNextPendingTaskH();
+            maybeRunPendingTasksH();
             // Don't remove TASK_EXPIRED in case one came along while processing the queue.
             removeMessages(MSG_CHECK_TASKS);
         }
@@ -460,14 +493,10 @@ public class TaskManagerService extends com.android.server.SystemService
         private void queueReadyTasksForExecutionH() {
             synchronized (mTasks) {
                 for (TaskStatus ts : mTasks.getTasks()) {
-                    final boolean criteriaSatisfied = ts.isReady();
-                    final boolean isRunning = isCurrentlyActive(ts);
-                    if (criteriaSatisfied && !isRunning) {
-                        synchronized (mPendingTasks) {
-                            mPendingTasks.add(ts);
-                        }
-                    } else if (!criteriaSatisfied && isRunning) {
-                        cancelTaskOnServiceContext(ts);
+                    if (isReadyToBeExecutedLocked(ts)) {
+                        mPendingTasks.add(ts);
+                    } else if (isReadyToBeCancelledLocked(ts)) {
+                        stopTaskOnServiceContextLocked(ts);
                     }
                 }
             }
@@ -477,62 +506,93 @@ public class TaskManagerService extends com.android.server.SystemService
          * The state of at least one task has changed. Here is where we could enforce various
          * policies on when we want to execute tasks.
          * Right now the policy is such:
-         *      If >1 of the ready tasks is idle mode we send all of them off
-         *      if more than 2 network connectivity tasks are ready we send them all off.
-         *      If more than 4 tasks total are ready we send them all off.
-         *      TODO: It would be nice to consolidate these sort of high-level policies somewhere.
+         * If >1 of the ready tasks is idle mode we send all of them off
+         * if more than 2 network connectivity tasks are ready we send them all off.
+         * If more than 4 tasks total are ready we send them all off.
+         * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
          */
         private void maybeQueueReadyTasksForExecutionH() {
             synchronized (mTasks) {
                 int idleCount = 0;
+                int backoffCount = 0;
                 int connectivityCount = 0;
                 List<TaskStatus> runnableTasks = new ArrayList<TaskStatus>();
                 for (TaskStatus ts : mTasks.getTasks()) {
-                    final boolean criteriaSatisfied = ts.isReady();
-                    final boolean isRunning = isCurrentlyActive(ts);
-                    if (criteriaSatisfied && !isRunning) {
+                    if (isReadyToBeExecutedLocked(ts)) {
+                        if (ts.getNumFailures() > 0) {
+                            backoffCount++;
+                        }
                         if (ts.hasIdleConstraint()) {
                             idleCount++;
                         }
-                        if (ts.hasConnectivityConstraint() || ts.hasMeteredConstraint()) {
+                        if (ts.hasConnectivityConstraint() || ts.hasUnmeteredConstraint()) {
                             connectivityCount++;
                         }
                         runnableTasks.add(ts);
-                    } else if (!criteriaSatisfied && isRunning) {
-                        cancelTaskOnServiceContext(ts);
+                    } else if (isReadyToBeCancelledLocked(ts)) {
+                        stopTaskOnServiceContextLocked(ts);
                     }
                 }
-                if (idleCount >= MIN_IDLE_COUNT || connectivityCount >= MIN_CONNECTIVITY_COUNT ||
+                if (backoffCount > 0 || idleCount >= MIN_IDLE_COUNT ||
+                        connectivityCount >= MIN_CONNECTIVITY_COUNT ||
                         runnableTasks.size() >= MIN_READY_TASKS_COUNT) {
                     for (TaskStatus ts : runnableTasks) {
-                        synchronized (mPendingTasks) {
-                            mPendingTasks.add(ts);
-                        }
+                        mPendingTasks.add(ts);
                     }
                 }
             }
         }
 
         /**
-         * Checks the state of the pending queue against any available
-         * {@link com.android.server.task.TaskServiceContext} that can run a new task.
-         * {@link com.android.server.task.TaskServiceContext}.
+         * Criteria for moving a job into the pending queue:
+         *      - It's ready.
+         *      - It's not pending.
+         *      - It's not already running on a TSC.
          */
-        private void maybeRunNextPendingTaskH() {
-            TaskStatus nextPending;
-            synchronized (mPendingTasks) {
-                nextPending = mPendingTasks.poll();
-            }
-            if (nextPending == null) {
-                return;
-            }
+        private boolean isReadyToBeExecutedLocked(TaskStatus ts) {
+              return ts.isReady() && !mPendingTasks.contains(ts) && !isCurrentlyActiveLocked(ts);
+        }
 
-            synchronized (mActiveServices) {
-                for (TaskServiceContext tsc : mActiveServices) {
-                    if (tsc.isAvailable()) {
-                        if (tsc.executeRunnableTask(nextPending)) {
-                            return;
+        /**
+         * Criteria for cancelling an active job:
+         *      - It's not ready
+         *      - It's running on a TSC.
+         */
+        private boolean isReadyToBeCancelledLocked(TaskStatus ts) {
+            return !ts.isReady() && isCurrentlyActiveLocked(ts);
+        }
+
+        /**
+         * Reconcile jobs in the pending queue against available execution contexts.
+         * A controller can force a task into the pending queue even if it's already running, but
+         * here is where we decide whether to actually execute it.
+         */
+        private void maybeRunPendingTasksH() {
+            synchronized (mTasks) {
+                Iterator<TaskStatus> it = mPendingTasks.iterator();
+                while (it.hasNext()) {
+                    TaskStatus nextPending = it.next();
+                    TaskServiceContext availableContext = null;
+                    for (TaskServiceContext tsc : mActiveServices) {
+                        final TaskStatus running = tsc.getRunningTask();
+                        if (running != null && running.matches(nextPending.getUid(),
+                                nextPending.getTaskId())) {
+                            // Already running this tId for this uId, skip.
+                            availableContext = null;
+                            break;
                         }
+                        if (tsc.isAvailable()) {
+                            availableContext = tsc;
+                        }
+                    }
+                    if (availableContext != null) {
+                        if (!availableContext.executeRunnableTask(nextPending)) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Error executing " + nextPending);
+                            }
+                            mTasks.remove(nextPending);
+                        }
+                        it.remove();
                     }
                 }
             }
@@ -556,7 +616,7 @@ public class TaskManagerService extends com.android.server.SystemService
             final int callingUid = Binder.getCallingUid();
             synchronized (mPersistCache) {
                 Boolean cached = mPersistCache.get(callingUid);
-                if (cached) {
+                if (cached != null) {
                     canPersist = cached.booleanValue();
                 } else {
                     // Persisting tasks is tantamount to running at boot, so we permit
@@ -574,6 +634,9 @@ public class TaskManagerService extends com.android.server.SystemService
         // ITaskManager implementation
         @Override
         public int schedule(Task task) throws RemoteException {
+            if (DEBUG) {
+                Slog.d(TAG, "Scheduling task: " + task);
+            }
             final boolean canPersist = canCallerPersistTasks();
             final int uid = Binder.getCallingUid();
 
@@ -603,7 +666,7 @@ public class TaskManagerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                TaskManagerService.this.cancelTaskForUid(uid);
+                TaskManagerService.this.cancelTasksForUid(uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -639,15 +702,35 @@ public class TaskManagerService extends com.android.server.SystemService
 
     void dumpInternal(PrintWriter pw) {
         synchronized (mTasks) {
-            pw.print("Registered tasks:");
+            pw.println("Registered tasks:");
             if (mTasks.size() > 0) {
                 for (TaskStatus ts : mTasks.getTasks()) {
-                    pw.println();
                     ts.dump(pw, "  ");
                 }
             } else {
                 pw.println();
                 pw.println("No tasks scheduled.");
+            }
+            for (StateController controller : mControllers) {
+                pw.println();
+                controller.dumpControllerState(pw);
+            }
+            pw.println();
+            pw.println("Pending");
+            for (TaskStatus taskStatus : mPendingTasks) {
+                pw.println(taskStatus.hashCode());
+            }
+            pw.println();
+            pw.println("Active jobs:");
+            for (TaskServiceContext tsc : mActiveServices) {
+                if (tsc.isAvailable()) {
+                    continue;
+                } else {
+                    pw.println(tsc.getRunningTask().hashCode() + " for: " +
+                            (SystemClock.elapsedRealtime()
+                                    - tsc.getExecutionStartTimeElapsed())/1000 + "s " +
+                            "timeout: " + tsc.getTimeoutElapsed());
+                }
             }
         }
         pw.println();

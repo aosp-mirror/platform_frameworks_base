@@ -35,6 +35,7 @@ import com.android.server.BatteryService;
 import com.android.server.task.StateChangedListener;
 import com.android.server.task.TaskManagerService;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -209,5 +210,10 @@ public class BatteryController extends StateController {
                 }
             }
         }
+    }
+
+    @Override
+    public void dumpControllerState(PrintWriter pw) {
+
     }
 }
