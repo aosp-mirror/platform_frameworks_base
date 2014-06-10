@@ -2735,6 +2735,7 @@ public class Intent implements Parcelable, Cloneable {
      * returned in {@link #getClipData()}.
      *
      * @see DocumentsContract
+     * @see #ACTION_OPEN_DOCUMENT_TREE
      * @see #ACTION_CREATE_DOCUMENT
      * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
      */
@@ -2769,28 +2770,30 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see DocumentsContract
      * @see #ACTION_OPEN_DOCUMENT
+     * @see #ACTION_OPEN_DOCUMENT_TREE
      * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
 
     /**
-     * Activity Action: Allow the user to pick a directory. When invoked, the
-     * system will display the various {@link DocumentsProvider} instances
-     * installed on the device, letting the user navigate through them. Apps can
-     * fully manage documents within the returned directory.
+     * Activity Action: Allow the user to pick a directory subtree. When
+     * invoked, the system will display the various {@link DocumentsProvider}
+     * instances installed on the device, letting the user navigate through
+     * them. Apps can fully manage documents within the returned directory.
      * <p>
      * To gain access to descendant (child, grandchild, etc) documents, use
-     * {@link DocumentsContract#buildDocumentViaUri(Uri, String)} and
-     * {@link DocumentsContract#buildChildDocumentsViaUri(Uri, String)} using
-     * the returned directory URI.
+     * {@link DocumentsContract#buildDocumentUriUsingTree(Uri, String)} and
+     * {@link DocumentsContract#buildChildDocumentsUriUsingTree(Uri, String)}
+     * with the returned URI.
      * <p>
-     * Output: The URI representing the selected directory.
+     * Output: The URI representing the selected directory tree.
      *
      * @see DocumentsContract
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_PICK_DIRECTORY = "android.intent.action.PICK_DIRECTORY";
+    public static final String
+            ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -3369,8 +3372,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #ACTION_GET_CONTENT
      * @see #ACTION_OPEN_DOCUMENT
+     * @see #ACTION_OPEN_DOCUMENT_TREE
      * @see #ACTION_CREATE_DOCUMENT
-     * @see #ACTION_PICK_DIRECTORY
      */
     public static final String EXTRA_LOCAL_ONLY =
             "android.intent.extra.LOCAL_ONLY";
