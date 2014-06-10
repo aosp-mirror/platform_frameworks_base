@@ -13928,6 +13928,7 @@ package android.media {
     method public static boolean hasProfile(int);
     method public static boolean hasProfile(int, int);
     field public static final int QUALITY_1080P = 6; // 0x6
+    field public static final int QUALITY_2160P = 8; // 0x8
     field public static final int QUALITY_480P = 4; // 0x4
     field public static final int QUALITY_720P = 5; // 0x5
     field public static final int QUALITY_CIF = 3; // 0x3
@@ -13936,6 +13937,7 @@ package android.media {
     field public static final int QUALITY_QCIF = 2; // 0x2
     field public static final int QUALITY_QVGA = 7; // 0x7
     field public static final int QUALITY_TIME_LAPSE_1080P = 1006; // 0x3ee
+    field public static final int QUALITY_TIME_LAPSE_2160P = 1008; // 0x3f0
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
     field public static final int QUALITY_TIME_LAPSE_CIF = 1003; // 0x3eb
