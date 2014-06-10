@@ -4438,7 +4438,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 mIsProvisioningNetwork.set(true);
                                 MobileDataStateTracker mdst = (MobileDataStateTracker)
                                         mNetTrackers[ConnectivityManager.TYPE_MOBILE];
-                                mdst.setInternalDataEnable(false);
+
+                                // Disable radio until user starts provisioning
+                                mdst.setRadio(false);
                             } else {
                                 if (DBG) log("CheckMp.onComplete: warm (no dns/tcp), no url");
                             }
@@ -4950,17 +4952,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // Mark notification as not visible
         setProvNotificationVisible(false, ConnectivityManager.TYPE_MOBILE_HIPRI, null, null);
 
-        // If provisioning network handle as a special case,
+        // Check airplane mode
+        boolean isAirplaneModeOn = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+        // If provisioning network and not in airplane mode handle as a special case,
         // otherwise launch browser with the intent directly.
-        if (mIsProvisioningNetwork.get()) {
+        if (mIsProvisioningNetwork.get() && !isAirplaneModeOn) {
             if (DBG) log("handleMobileProvisioningAction: on prov network enable then launch");
+            mIsProvisioningNetwork.set(false);
 //            mIsStartingProvisioning.set(true);
 //            MobileDataStateTracker mdst = (MobileDataStateTracker)
 //                    mNetTrackers[ConnectivityManager.TYPE_MOBILE];
+            // Radio was disabled on CMP_RESULT_CODE_PROVISIONING_NETWORK, enable it here
+//            mdst.setRadio(true);
 //            mdst.setEnableFailFastMobileData(DctConstants.ENABLED);
 //            mdst.enableMobileProvisioning(url);
         } else {
             if (DBG) log("handleMobileProvisioningAction: not prov network");
+            mIsProvisioningNetwork.set(false);
             // Check for  apps that can handle provisioning first
             Intent provisioningIntent = new Intent(TelephonyIntents.ACTION_CARRIER_SETUP);
             provisioningIntent.addCategory(TelephonyIntents.CATEGORY_MCCMNC_PREFIX
