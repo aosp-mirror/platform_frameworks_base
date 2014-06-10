@@ -118,9 +118,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (configureSuccess) {
             mStateListener.onConfigured(this);
+            if (VERBOSE) Log.v(TAG, "ctor - Created session successfully");
         } else {
             mStateListener.onConfigureFailed(this);
             mClosed = true; // do not fire any other callbacks, do not allow any other work
+            Log.e(TAG, "Failed to create capture session; configuration failed");
         }
     }
 
@@ -132,6 +134,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     @Override
     public synchronized int capture(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
+        if (request == null) {
+            throw new IllegalArgumentException("request must not be null");
+        }
+
         checkNotClosed();
         checkLegalToCapture();
 
@@ -139,7 +145,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (VERBOSE) {
             Log.v(TAG, "capture - request " + request + ", listener " + listener + " handler" +
-                    "" + handler);
+                    " " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.capture(request,
@@ -149,6 +155,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     @Override
     public synchronized int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
+        if (requests == null) {
+            throw new IllegalArgumentException("requests must not be null");
+        } else if (requests.isEmpty()) {
+            throw new IllegalArgumentException("requests must have at least one element");
+        }
+
         checkNotClosed();
         checkLegalToCapture();
 
@@ -167,10 +179,19 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     @Override
     public synchronized int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
+        if (request == null) {
+            throw new IllegalArgumentException("request must not be null");
+        }
+
         checkNotClosed();
         checkLegalToCapture();
 
         handler = checkHandler(handler);
+
+        if (VERBOSE) {
+            Log.v(TAG, "setRepeatingRequest - request " + request + ", listener " + listener +
+                    " handler" + " " + handler);
+        }
 
         return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
                 createCaptureListenerProxy(handler, listener), mDeviceHandler));
@@ -179,6 +200,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     @Override
     public synchronized int setRepeatingBurst(List<CaptureRequest> requests,
             CaptureListener listener, Handler handler) throws CameraAccessException {
+        if (requests == null) {
+            throw new IllegalArgumentException("requests must not be null");
+        } else if (requests.isEmpty()) {
+            throw new IllegalArgumentException("requests must have at least one element");
+        }
+
         checkNotClosed();
         checkLegalToCapture();
 
@@ -249,8 +276,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * but this would introduce nondeterministic behavior.
          */
 
+        if (VERBOSE) Log.v(TAG, "replaceSessionClose");
+
         // #close was already called explicitly, keep going the slow route
         if (mClosed) {
+            if (VERBOSE) Log.v(TAG, "replaceSessionClose - close was already called");
             return;
         }
 
@@ -260,9 +290,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     @Override
     public synchronized void close() {
+
         if (mClosed) {
+            if (VERBOSE) Log.v(TAG, "close - reentering");
             return;
         }
+
+        if (VERBOSE) Log.v(TAG, "close - first time");
 
         mClosed = true;
 
@@ -270,11 +304,25 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * Flush out any repeating request. Since camera is closed, no new requests
          * can be queued, and eventually the entire request queue will be drained.
          *
-         * Once this is done, wait for camera to idle, then unconfigure the camera.
-         * Once that's done, fire #onClosed.
+         * If the camera device was already closed, short circuit and do nothing; since
+         * no more internal device callbacks will fire anyway.
+         *
+         * Otherwise, once stopRepeating is done, wait for camera to idle, then unconfigure the
+         * camera. Once that's done, fire #onClosed.
          */
         try {
             mDeviceImpl.stopRepeating();
+        } catch (IllegalStateException e) {
+            // OK: Camera device may already be closed, nothing else to do
+            Log.w(TAG, "The camera device was already closed: ", e);
+
+            // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
+            // or just suppress the ISE only and rely onClosed.
+            // Also skip any of the draining work if this is already closed.
+
+            // Short-circuit; queue listener immediately and return
+            mStateListener.onClosed(this);
+            return;
         } catch (CameraAccessException e) {
             // OK: close does not throw checked exceptions.
             Log.e(TAG, "Exception while stopping repeating: ", e);

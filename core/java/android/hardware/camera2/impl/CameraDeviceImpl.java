@@ -257,6 +257,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         synchronized (mLock) {
             mInError = true;
             mDeviceHandler.post(new Runnable() {
+                @Override
                 public void run() {
                     if (isError) {
                         mDeviceListener.onError(CameraDeviceImpl.this, code);
@@ -360,6 +361,9 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             } catch (CameraAccessException e) {
                 configureSuccess = false;
                 pendingException = e;
+                if (DEBUG) {
+                    Log.v(TAG, "createCaptureSession - failed with exception ", e);
+                }
             }
 
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
