@@ -207,7 +207,7 @@ public class JobStore {
         Iterator<JobStatus> it = mJobSet.iterator();
         while (it.hasNext()) {
             JobStatus ts = it.next();
-            if (ts.getUid() == uid && ts.getJobId() == jobid) {
+            if (ts.getUid() == uid && ts.getJobId() == jobId) {
                 return ts;
             }
         }
