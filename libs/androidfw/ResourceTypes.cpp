@@ -3221,7 +3221,7 @@ status_t ResTable::addEmpty(const int32_t cookie) {
 
     header->header = (const ResTable_header*) resHeader;
     mHeaders.add(header);
-    return NO_ERROR;
+    return (mError=NO_ERROR);
 }
 
 status_t ResTable::addInternal(const void* data, size_t size, const int32_t cookie,
