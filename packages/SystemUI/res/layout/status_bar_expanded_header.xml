@@ -35,12 +35,65 @@
         android:background="@drawable/notification_header_bg"
         android:clickable="true"
         />
+
+    <View android:id="@+id/header_spacer"
+        android:layout_height="8dp"
+        android:layout_width="0dp" />
+
+    <TextView
+        android:id="@+id/header_emergency_calls_only"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/header_spacer"
+        android:paddingTop="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+        android:text="@*android:string/emergency_calls_only" />
+
+    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+        android:layout_width="40dp"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_alignParentEnd="true"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:padding="8dp" />
+
+    <ImageButton android:id="@+id/settings_button"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:layout_toStartOf="@id/multi_user_switch"
+        android:layout_width="56dp"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:src="@drawable/ic_settings_24dp"
+        android:contentDescription="@string/accessibility_desc_quick_settings"/>
+
+    <FrameLayout android:id="@+id/system_icons_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_toStartOf="@id/multi_user_switch"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="16dp"
+        />
+
+    <TextView
+        android:id="@+id/header_charging_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/system_icons_container"
+        android:layout_below="@id/header_spacer"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="4dp"
+        style="@style/TextAppearance.StatusBar.Expanded.ChargingInfo"/>
+
     <RelativeLayout
         android:id="@+id/datetime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:paddingTop="16dp"
+        android:layout_below="@id/header_emergency_calls_only"
+        android:paddingTop="8dp"
         android:paddingBottom="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -65,30 +118,6 @@
             />
     </RelativeLayout>
 
-    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
-        android:layout_width="40dp"
-        android:layout_height="@dimen/status_bar_header_height"
-        android:layout_alignParentEnd="true"
-        android:background="@null"
-        android:scaleType="centerInside"
-        android:padding="8dp"
-        />
-
-    <ImageButton android:id="@+id/settings_button"
-        style="@android:style/Widget.Material.Button.Borderless"
-        android:layout_toStartOf="@id/multi_user_switch"
-        android:layout_width="56dp"
-        android:layout_height="@dimen/status_bar_header_height"
-        android:src="@drawable/ic_settings_24dp"
-        android:contentDescription="@string/accessibility_desc_quick_settings"/>
-
-    <FrameLayout android:id="@+id/system_icons_container"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/status_bar_header_height"
-        android:layout_toStartOf="@id/multi_user_switch"
-        android:layout_marginEnd="4dp"
-        />
-
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
@@ -105,6 +134,8 @@
         layout="@layout/quick_settings_brightness_dialog"
         android:id="@+id/brightness_container"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         />
 
     <TextView

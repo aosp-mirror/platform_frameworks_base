@@ -266,7 +266,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private TextView mCarrierLabel;
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
-    private TextView mEmergencyCallLabel;
     private int mStatusBarHeaderHeight;
 
     private boolean mShowCarrierInPanel = false;
@@ -720,23 +719,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
-
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
-            mEmergencyCallLabel =
-                    (TextView) mStatusBarWindow.findViewById(R.id.emergency_calls_only);
-            // TODO: Uncomment when correctly positioned
-//            if (mEmergencyCallLabel != null) {
-//                mNetworkController.addEmergencyLabelView(mEmergencyCallLabel);
-//                mEmergencyCallLabel.setOnClickListener(new View.OnClickListener() {
-//                    public void onClick(View v) { }});
-//                mEmergencyCallLabel.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-//                    @Override
-//                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-//                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-//                        updateCarrierLabelVisibility(false);
-//                    }});
-//            }
+            mNetworkController.addEmergencyLabelView(mHeader);
         }
 
         mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
@@ -761,6 +746,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 //                public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
 //                    updateCarrierLabelVisibility(false);
         }
+
+        mBatteryController.setStatusBarHeaderView(mHeader);
 
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
@@ -1351,7 +1338,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mCarrierLabelHeight));
         }
 
-        final boolean emergencyCallsShownElsewhere = mEmergencyCallLabel != null;
+        // Emergency calls only is shown in the expanded header now.
+        final boolean emergencyCallsShownElsewhere = true;
         final boolean makeVisible =
             !(emergencyCallsShownElsewhere && mNetworkController.isEmergencyOnly())
             && mStackScroller.getHeight() < (mNotificationPanel.getHeight()

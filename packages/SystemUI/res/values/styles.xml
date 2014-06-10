@@ -70,16 +70,28 @@
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
-        <item name="android:textSize">18dp</item>
+        <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#ffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#99ffffff</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#afb3b6</item>
+        <item name="android:textColor">#99ffffff</item>
     </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+           parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
+
+    <style name="TextAppearance.StatusBar.Expanded.ChargingInfo"
+            parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
     <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textColor">#999999</item>
