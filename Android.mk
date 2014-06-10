@@ -605,8 +605,12 @@ framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # The since flag (-since N.xml API_LEVEL) is used to add API Level information
 # to the reference documentation. Must be in order of oldest to newest.
+#
+# Conscrypt (com.android.org.conscrypt) is an implementation detail and should
+# not be referenced in the documentation.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
+    -hidePackage com.android.org.conscrypt \
     -since $(SRC_API_DIR)/1.xml 1 \
     -since $(SRC_API_DIR)/2.xml 2 \
     -since $(SRC_API_DIR)/3.xml 3 \
