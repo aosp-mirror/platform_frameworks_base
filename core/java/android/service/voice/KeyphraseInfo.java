@@ -19,4 +19,9 @@ public class KeyphraseInfo {
             this.supportedLocales.add(locale);
         }
     }
+
+    @Override
+    public String toString() {
+        return "id=" + id + ", keyphrase=" + keyphrase + ", supported-locales=" + supportedLocales;
+    }
 }
