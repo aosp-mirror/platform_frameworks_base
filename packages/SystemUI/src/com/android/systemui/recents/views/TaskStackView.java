@@ -156,10 +156,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         float boundedT = Math.max(t, -(numPeekCards + 1));
 
         // Set the scale relative to its position
+        int numFrontScaledCards = 3;
         float minScale = Constants.Values.TaskStackView.StackPeekMinScale;
         float scaleRange = 1f - minScale;
-        float scaleInc = scaleRange / numPeekCards;
-        float scale = Math.max(minScale, Math.min(1f, 1f + (boundedT * scaleInc)));
+        float scaleInc = scaleRange / (numPeekCards + numFrontScaledCards);
+        float scale = Math.max(minScale, Math.min(1f, minScale + 
+            ((boundedT + (numPeekCards + 1)) * scaleInc)));
         float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
         transform.scale = scale;
 
@@ -170,6 +172,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             transform.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
         }
+
+        // Set the z translation
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        int minZ = config.taskViewTranslationZMinPx;
+        int incZ = config.taskViewTranslationZIncrementPx;
+        transform.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
 
         // Set the alphas
         transform.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;

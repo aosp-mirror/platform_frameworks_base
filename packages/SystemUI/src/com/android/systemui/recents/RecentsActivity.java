@@ -41,6 +41,8 @@ import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -78,6 +80,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     boolean mVisible;
     boolean mTaskLaunched;
+
+    private static Method sPropertyMethod;
+    static {
+        try {
+            Class<?> c = Class.forName("android.view.GLES20Canvas");
+            sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
+            if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Broadcast receiver to handle messages from our RecentsService
     BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
@@ -139,21 +154,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Add the default no-recents layout
         if (stacks.size() == 1 && stacks.get(0).getTaskCount() == 0) {
             mEmptyView.setVisibility(View.VISIBLE);
-
-            // Dim the background even more
-            WindowManager.LayoutParams wlp = getWindow().getAttributes();
-            wlp.dimAmount = Constants.Values.Window.DarkBackgroundDim;
-            getWindow().setAttributes(wlp);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         } else {
             mEmptyView.setVisibility(View.GONE);
-
-            // Un-dim the background
-            WindowManager.LayoutParams wlp = getWindow().getAttributes();
-            wlp.dimAmount = 0f;
-            getWindow().setAttributes(wlp);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
+
+        // Dim the background
+        mRecentsView.setBackgroundColor(0x80000000);
     }
 
     /** Attempts to allocate and bind the search bar app widget */
@@ -277,6 +283,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         LayoutInflater inflater = LayoutInflater.from(this);
         mEmptyView = inflater.inflate(R.layout.recents_empty, mContainerView, false);
         mNavBarScrimView = inflater.inflate(R.layout.recents_nav_bar_scrim, mContainerView, false);
+        mNavBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
 
         mContainerView = new FrameLayout(this);
         mContainerView.addView(mRecentsView);
@@ -295,6 +304,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Update if we are getting a configuration change
         if (savedInstanceState != null) {
             onConfigurationChange();
+        }
+
+        // XXX: Update the shadows
+        try {
+            sPropertyMethod.invoke(null, "ambientShadowStrength", String.valueOf(35f));
+            sPropertyMethod.invoke(null, "ambientRatio", String.valueOf(0.5f));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
         }
     }
 
