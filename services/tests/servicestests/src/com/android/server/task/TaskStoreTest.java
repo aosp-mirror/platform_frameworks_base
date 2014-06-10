@@ -16,7 +16,6 @@ import com.android.server.job.controllers.JobStatus;
 
 import java.util.List;
 
-import static com.android.server.job.JobStore.initAndGet;
 /**
  * Test reading and writing correctly from file.
  */
