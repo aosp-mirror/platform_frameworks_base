@@ -52,7 +52,7 @@ public class TaskDrainer<T> {
     }
 
     private static final String TAG = "TaskDrainer";
-    private static final boolean VERBOSE = false;
+    private final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Handler mHandler;
     private final DrainListener mListener;
