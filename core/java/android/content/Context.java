@@ -2059,7 +2059,7 @@ public abstract class Context {
             PRINT_SERVICE,
             MEDIA_SESSION_SERVICE,
             BATTERY_SERVICE,
-            TASK_SERVICE,
+            JOB_SCHEDULER_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2116,8 +2116,8 @@ public abstract class Context {
      * <dd> A {@link android.app.DownloadManager} for requesting HTTP downloads
      * <dt> {@link #BATTERY_SERVICE} ("batterymanager")
      * <dd> A {@link android.os.BatteryManager} for managing battery state
-     * <dt> {@link #TASK_SERVICE} ("taskmanager")
-     * <dd>  A {@link android.app.task.TaskManager} for managing scheduled tasks
+     * <dt> {@link #JOB_SCHEDULER_SERVICE} ("taskmanager")
+     * <dd>  A {@link android.app.job.JobScheduler} for managing scheduled tasks
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2171,8 +2171,8 @@ public abstract class Context {
      * @see android.app.DownloadManager
      * @see #BATTERY_SERVICE
      * @see android.os.BatteryManager
-     * @see #TASK_SERVICE
-     * @see android.app.task.TaskManager
+     * @see #JOB_SCHEDULER_SERVICE
+     * @see android.app.job.JobScheduler
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
@@ -2761,12 +2761,12 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.app.task.TaskManager} instance for managing occasional
+     * android.app.job.JobScheduler} instance for managing occasional
      * background tasks.
      * @see #getSystemService
-     * @see android.app.task.TaskManager
+     * @see android.app.job.JobScheduler
      */
-    public static final String TASK_SERVICE = "task";
+    public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
 
     /**
      * Determine whether the given permission is allowed for a particular

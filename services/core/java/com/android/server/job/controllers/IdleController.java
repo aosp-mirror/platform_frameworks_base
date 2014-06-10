@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.task.controllers;
+package com.android.server.job.controllers;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.util.Slog;
 
-import com.android.server.task.StateChangedListener;
-import com.android.server.task.TaskManagerService;
+import com.android.server.job.JobSchedulerService;
+import com.android.server.job.StateChangedListener;
 
 public class IdleController extends StateController {
     private static final String TAG = "IdleController";
@@ -43,14 +43,14 @@ public class IdleController extends StateController {
     private static final String ACTION_TRIGGER_IDLE =
             "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE";
 
-    final ArrayList<TaskStatus> mTrackedTasks = new ArrayList<TaskStatus>();
+    final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     IdlenessTracker mIdleTracker;
 
     // Singleton factory
     private static Object sCreationLock = new Object();
     private static volatile IdleController sController;
 
-    public static IdleController get(TaskManagerService service) {
+    public static IdleController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new IdleController(service, service.getContext());
@@ -68,7 +68,7 @@ public class IdleController extends StateController {
      * StateController interface
      */
     @Override
-    public void maybeStartTrackingTask(TaskStatus taskStatus) {
+    public void maybeStartTrackingJob(JobStatus taskStatus) {
         if (taskStatus.hasIdleConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.add(taskStatus);
@@ -78,7 +78,7 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingTask(TaskStatus taskStatus) {
+    public void maybeStopTrackingJob(JobStatus taskStatus) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.remove(taskStatus);
         }
@@ -89,7 +89,7 @@ public class IdleController extends StateController {
      */
     void reportNewIdleState(boolean isIdle) {
         synchronized (mTrackedTasks) {
-            for (TaskStatus task : mTrackedTasks) {
+            for (JobStatus task : mTrackedTasks) {
                 task.idleConstraintSatisfied.set(isIdle);
             }
         }

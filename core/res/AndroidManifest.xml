@@ -1758,11 +1758,11 @@
 
     <!-- Allows the system to bind to an application's task services
          @hide -->
-    <permission android:name="android.permission.BIND_TASK_SERVICE"
+    <permission android:name="android.permission.BIND_JOB_SERVICE"
         android:protectionLevel="signature"
-        android:label="@string/permlab_bindTaskService"
-        android:description="@string/permdesc_bindTaskService" />
-    <uses-permission android:name="android.permission.BIND_TASK_SERVICE"/>
+        android:label="@string/permlab_bindJobService"
+        android:description="@string/permdesc_bindJobService" />
+    <uses-permission android:name="android.permission.BIND_JOB_SERVICE"/>
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
@@ -2877,8 +2877,8 @@
         </service>
 
         <service android:name="com.android.server.MountServiceIdler"
-                 android:exported="false"
-                 android:permission="android.permission.BIND_TASK_SERVICE" >
+                 android:exported="true"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
     </application>

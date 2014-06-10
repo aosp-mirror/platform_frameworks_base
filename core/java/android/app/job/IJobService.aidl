@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package android.app.task;
+package android.app.job;
 
-import android.app.task.ITaskCallback;
-import android.app.task.TaskParams;
-
-import android.os.Bundle;
+import android.app.job.JobParameters;
 
 /**
  * Interface that the framework uses to communicate with application code that implements a
- * TaskService.  End user code does not implement this interface directly; instead, the app's
- * service implementation will extend android.app.task.TaskService.
+ * JobService.  End user code does not implement this interface directly; instead, the app's
+ * service implementation will extend android.app.job.JobService.
  * {@hide}
  */
-oneway interface ITaskService {
-    /** Begin execution of application's task. */
-    void startTask(in TaskParams taskParams);
+oneway interface IJobService {
+    /** Begin execution of application's job. */
+    void startJob(in JobParameters jobParams);
     /** Stop execution of application's task. */
-    void stopTask(in TaskParams taskParams);
+    void stopJob(in JobParameters jobParams);
 }

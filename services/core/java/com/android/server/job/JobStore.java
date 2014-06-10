@@ -14,10 +14,10 @@
  * limitations under the License
  */
 
-package com.android.server.task;
+package com.android.server.job;
 
 import android.content.ComponentName;
-import android.app.task.Task;
+import android.app.job.JobInfo;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
@@ -33,7 +33,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
-import com.android.server.task.controllers.TaskStatus;
+import com.android.server.job.controllers.JobStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,94 +50,94 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
- * Maintain a list of classes, and accessor methods/logic for these tasks.
+ * Maintain a list of classes, and accessor methods/logic for these jobs.
  * This class offers the following functionality:
- *     - When a task is added, it will determine if the task requirements have changed (update) and
+ *     - When a job is added, it will determine if the job requirements have changed (update) and
  *       whether the controllers need to be updated.
- *     - Persists Tasks, figures out when to to rewrite the Task to disk.
- *     - Handles rescheduling of tasks.
- *       - When a periodic task is executed and must be re-added.
- *       - When a task fails and the client requests that it be retried with backoff.
+ *     - Persists JobInfos, figures out when to to rewrite the JobInfo to disk.
+ *     - Handles rescheduling of jobs.
+ *       - When a periodic job is executed and must be re-added.
+ *       - When a job fails and the client requests that it be retried with backoff.
  *       - This class <strong>is not</strong> thread-safe.
  *
  * Note on locking:
  *      All callers to this class must <strong>lock on the class object they are calling</strong>.
- *      This is important b/c {@link com.android.server.task.TaskStore.WriteTasksMapToDiskRunnable}
- *      and {@link com.android.server.task.TaskStore.ReadTaskMapFromDiskRunnable} lock on that
+ *      This is important b/c {@link com.android.server.job.JobStore.WriteJobsMapToDiskRunnable}
+ *      and {@link com.android.server.job.JobStore.ReadJobMapFromDiskRunnable} lock on that
  *      object.
  */
-public class TaskStore {
-    private static final String TAG = "TaskManagerStore";
-    private static final boolean DEBUG = TaskManagerService.DEBUG;
+public class JobStore {
+    private static final String TAG = "JobStore";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
     /** Threshold to adjust how often we want to write to the db. */
     private static final int MAX_OPS_BEFORE_WRITE = 1;
-    final ArraySet<TaskStatus> mTasksSet;
+    final ArraySet<JobStatus> mJobSet;
     final Context mContext;
 
     private int mDirtyOperations;
 
     private static final Object sSingletonLock = new Object();
-    private final AtomicFile mTasksFile;
+    private final AtomicFile mJobsFile;
     /** Handler backed by IoThread for writing to disk. */
     private final Handler mIoHandler = IoThread.getHandler();
-    private static TaskStore sSingleton;
+    private static JobStore sSingleton;
 
-    /** Used by the {@Link TaskManagerService} to instantiate the TaskStore. */
-    static TaskStore initAndGet(TaskManagerService taskManagerService) {
+    /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
+    static JobStore initAndGet(JobSchedulerService jobManagerService) {
         synchronized (sSingletonLock) {
             if (sSingleton == null) {
-                sSingleton = new TaskStore(taskManagerService.getContext(),
-                        Environment.getDataDirectory(), taskManagerService);
+                sSingleton = new JobStore(jobManagerService.getContext(),
+                        Environment.getDataDirectory(), jobManagerService);
             }
             return sSingleton;
         }
     }
 
     @VisibleForTesting
-    public static TaskStore initAndGetForTesting(Context context, File dataDir,
-                                                 TaskMapReadFinishedListener callback) {
-        return new TaskStore(context, dataDir, callback);
+    public static JobStore initAndGetForTesting(Context context, File dataDir,
+                                                 JobMapReadFinishedListener callback) {
+        return new JobStore(context, dataDir, callback);
     }
 
-    private TaskStore(Context context, File dataDir, TaskMapReadFinishedListener callback) {
+    private JobStore(Context context, File dataDir, JobMapReadFinishedListener callback) {
         mContext = context;
         mDirtyOperations = 0;
 
         File systemDir = new File(dataDir, "system");
-        File taskDir = new File(systemDir, "task");
-        taskDir.mkdirs();
-        mTasksFile = new AtomicFile(new File(taskDir, "tasks.xml"));
+        File jobDir = new File(systemDir, "job");
+        jobDir.mkdirs();
+        mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"));
 
-        mTasksSet = new ArraySet<TaskStatus>();
+        mJobSet = new ArraySet<JobStatus>();
 
-        readTaskMapFromDiskAsync(callback);
+        readJobMapFromDiskAsync(callback);
     }
 
     /**
-     * Add a task to the master list, persisting it if necessary. If the TaskStatus already exists,
+     * Add a job to the master list, persisting it if necessary. If the JobStatus already exists,
      * it will be replaced.
-     * @param taskStatus Task to add.
-     * @return Whether or not an equivalent TaskStatus was replaced by this operation.
+     * @param jobStatus Job to add.
+     * @return Whether or not an equivalent JobStatus was replaced by this operation.
      */
-    public boolean add(TaskStatus taskStatus) {
-        boolean replaced = mTasksSet.remove(taskStatus);
-        mTasksSet.add(taskStatus);
-        if (taskStatus.isPersisted()) {
+    public boolean add(JobStatus jobStatus) {
+        boolean replaced = mJobSet.remove(jobStatus);
+        mJobSet.add(jobStatus);
+        if (jobStatus.isPersisted()) {
             maybeWriteStatusToDiskAsync();
         }
         if (DEBUG) {
-            Slog.d(TAG, "Added task status to store: " + taskStatus);
+            Slog.d(TAG, "Added job status to store: " + jobStatus);
         }
         return replaced;
     }
 
     /**
-     * Whether this taskStatus object already exists in the TaskStore.
+     * Whether this jobStatus object already exists in the JobStore.
      */
-    public boolean containsTaskIdForUid(int taskId, int uId) {
-        for (TaskStatus ts : mTasksSet) {
-            if (ts.getUid() == uId && ts.getTaskId() == taskId) {
+    public boolean containsJobIdForUid(int jobId, int uId) {
+        for (JobStatus ts : mJobSet) {
+            if (ts.getUid() == uId && ts.getJobId() == jobId) {
                 return true;
             }
         }
@@ -145,18 +145,18 @@ public class TaskStore {
     }
 
     public int size() {
-        return mTasksSet.size();
+        return mJobSet.size();
     }
 
     /**
-     * Remove the provided task. Will also delete the task if it was persisted.
-     * @return Whether or not the task existed to be removed.
+     * Remove the provided job. Will also delete the job if it was persisted.
+     * @return Whether or not the job existed to be removed.
      */
-    public boolean remove(TaskStatus taskStatus) {
-        boolean removed = mTasksSet.remove(taskStatus);
+    public boolean remove(JobStatus jobStatus) {
+        boolean removed = mJobSet.remove(jobStatus);
         if (!removed) {
             if (DEBUG) {
-                Slog.d(TAG, "Couldn't remove task: didn't exist: " + taskStatus);
+                Slog.d(TAG, "Couldn't remove job: didn't exist: " + jobStatus);
             }
             return false;
         }
@@ -166,48 +166,48 @@ public class TaskStore {
 
     @VisibleForTesting
     public void clear() {
-        mTasksSet.clear();
+        mJobSet.clear();
         maybeWriteStatusToDiskAsync();
     }
 
-    public List<TaskStatus> getTasksByUser(int userHandle) {
-        List<TaskStatus> matchingTasks = new ArrayList<TaskStatus>();
-        Iterator<TaskStatus> it = mTasksSet.iterator();
+    public List<JobStatus> getJobsByUser(int userHandle) {
+        List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
+        Iterator<JobStatus> it = mJobSet.iterator();
         while (it.hasNext()) {
-            TaskStatus ts = it.next();
+            JobStatus ts = it.next();
             if (UserHandle.getUserId(ts.getUid()) == userHandle) {
-                matchingTasks.add(ts);
+                matchingJobs.add(ts);
             }
         }
-        return matchingTasks;
+        return matchingJobs;
     }
 
     /**
      * @param uid Uid of the requesting app.
-     * @return All TaskStatus objects for a given uid from the master list.
+     * @return All JobStatus objects for a given uid from the master list.
      */
-    public List<TaskStatus> getTasksByUid(int uid) {
-        List<TaskStatus> matchingTasks = new ArrayList<TaskStatus>();
-        Iterator<TaskStatus> it = mTasksSet.iterator();
+    public List<JobStatus> getJobsByUid(int uid) {
+        List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
+        Iterator<JobStatus> it = mJobSet.iterator();
         while (it.hasNext()) {
-            TaskStatus ts = it.next();
+            JobStatus ts = it.next();
             if (ts.getUid() == uid) {
-                matchingTasks.add(ts);
+                matchingJobs.add(ts);
             }
         }
-        return matchingTasks;
+        return matchingJobs;
     }
 
     /**
      * @param uid Uid of the requesting app.
-     * @param taskId Task id, specified at schedule-time.
-     * @return the TaskStatus that matches the provided uId and taskId, or null if none found.
+     * @param jobId Job id, specified at schedule-time.
+     * @return the JobStatus that matches the provided uId and jobId, or null if none found.
      */
-    public TaskStatus getTaskByUidAndTaskId(int uid, int taskId) {
-        Iterator<TaskStatus> it = mTasksSet.iterator();
+    public JobStatus getJobByUidAndJobId(int uid, int jobId) {
+        Iterator<JobStatus> it = mJobSet.iterator();
         while (it.hasNext()) {
-            TaskStatus ts = it.next();
-            if (ts.getUid() == uid && ts.getTaskId() == taskId) {
+            JobStatus ts = it.next();
+            if (ts.getUid() == uid && ts.getJobId() == jobid) {
                 return ts;
             }
         }
@@ -215,15 +215,15 @@ public class TaskStore {
     }
 
     /**
-     * @return The live array of TaskStatus objects.
+     * @return The live array of JobStatus objects.
      */
-    public ArraySet<TaskStatus> getTasks() {
-        return mTasksSet;
+    public ArraySet<JobStatus> getJobs() {
+        return mJobSet;
     }
 
     /** Version of the db schema. */
-    private static final int TASKS_FILE_VERSION = 0;
-    /** Tag corresponds to constraints this task needs. */
+    private static final int JOBS_FILE_VERSION = 0;
+    /** Tag corresponds to constraints this job needs. */
     private static final String XML_TAG_PARAMS_CONSTRAINTS = "constraints";
     /** Tag corresponds to execution parameters. */
     private static final String XML_TAG_PERIODIC = "periodic";
@@ -231,7 +231,7 @@ public class TaskStore {
     private static final String XML_TAG_EXTRAS = "extras";
 
     /**
-     * Every time the state changes we write all the tasks in one swathe, instead of trying to
+     * Every time the state changes we write all the jobs in one swath, instead of trying to
      * track incremental changes.
      * @return Whether the operation was successful. This will only fail for e.g. if the system is
      * low on storage. If this happens, we continue as normal
@@ -240,38 +240,38 @@ public class TaskStore {
         mDirtyOperations++;
         if (mDirtyOperations >= MAX_OPS_BEFORE_WRITE) {
             if (DEBUG) {
-                Slog.v(TAG, "Writing tasks to disk.");
+                Slog.v(TAG, "Writing jobs to disk.");
             }
-            mIoHandler.post(new WriteTasksMapToDiskRunnable());
+            mIoHandler.post(new WriteJobsMapToDiskRunnable());
         }
     }
 
-    private void readTaskMapFromDiskAsync(TaskMapReadFinishedListener callback) {
-        mIoHandler.post(new ReadTaskMapFromDiskRunnable(callback));
+    private void readJobMapFromDiskAsync(JobMapReadFinishedListener callback) {
+        mIoHandler.post(new ReadJobMapFromDiskRunnable(callback));
     }
 
-    public void readTaskMapFromDisk(TaskMapReadFinishedListener callback) {
-        new ReadTaskMapFromDiskRunnable(callback).run();
+    public void readJobMapFromDisk(JobMapReadFinishedListener callback) {
+        new ReadJobMapFromDiskRunnable(callback).run();
     }
 
     /**
-     * Runnable that writes {@link #mTasksSet} out to xml.
-     * NOTE: This Runnable locks on TaskStore.this
+     * Runnable that writes {@link #mJobSet} out to xml.
+     * NOTE: This Runnable locks on JobStore.this
      */
-    private class WriteTasksMapToDiskRunnable implements Runnable {
+    private class WriteJobsMapToDiskRunnable implements Runnable {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
-            synchronized (TaskStore.this) {
-                writeTasksMapImpl();
+            synchronized (JobStore.this) {
+                writeJobsMapImpl();
             }
-            if (TaskManagerService.DEBUG) {
+            if (JobSchedulerService.DEBUG) {
                 Slog.v(TAG, "Finished writing, took " + (SystemClock.elapsedRealtime()
                         - startElapsed) + "ms");
             }
         }
 
-        private void writeTasksMapImpl() {
+        private void writeJobsMapImpl() {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
@@ -279,31 +279,31 @@ public class TaskStore {
                 out.startDocument(null, true);
                 out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
-                out.startTag(null, "task-info");
-                out.attribute(null, "version", Integer.toString(TASKS_FILE_VERSION));
-                for (int i = 0; i < mTasksSet.size(); i++) {
-                    final TaskStatus taskStatus = mTasksSet.valueAt(i);
+                out.startTag(null, "job-info");
+                out.attribute(null, "version", Integer.toString(JOBS_FILE_VERSION));
+                for (int i = 0; i < mJobSet.size(); i++) {
+                    final JobStatus jobStatus = mJobSet.valueAt(i);
                     if (DEBUG) {
-                        Slog.d(TAG, "Saving task " + taskStatus.getTaskId());
+                        Slog.d(TAG, "Saving job " + jobStatus.getJobId());
                     }
-                    out.startTag(null, "task");
-                    addIdentifierAttributesToTaskTag(out, taskStatus);
-                    writeConstraintsToXml(out, taskStatus);
-                    writeExecutionCriteriaToXml(out, taskStatus);
-                    writeBundleToXml(taskStatus.getExtras(), out);
-                    out.endTag(null, "task");
+                    out.startTag(null, "job");
+                    addIdentifierAttributesToJobTag(out, jobStatus);
+                    writeConstraintsToXml(out, jobStatus);
+                    writeExecutionCriteriaToXml(out, jobStatus);
+                    writeBundleToXml(jobStatus.getExtras(), out);
+                    out.endTag(null, "job");
                 }
-                out.endTag(null, "task-info");
+                out.endTag(null, "job-info");
                 out.endDocument();
 
                 // Write out to disk in one fell sweep.
-                FileOutputStream fos = mTasksFile.startWrite();
+                FileOutputStream fos = mJobsFile.startWrite();
                 fos.write(baos.toByteArray());
-                mTasksFile.finishWrite(fos);
+                mJobsFile.finishWrite(fos);
                 mDirtyOperations = 0;
             } catch (IOException e) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Error writing out task data.", e);
+                    Slog.v(TAG, "Error writing out job data.", e);
                 }
             } catch (XmlPullParserException e) {
                 if (DEBUG) {
@@ -312,13 +312,13 @@ public class TaskStore {
             }
         }
 
-        /** Write out a tag with data comprising the required fields of this task and its client. */
-        private void addIdentifierAttributesToTaskTag(XmlSerializer out, TaskStatus taskStatus)
+        /** Write out a tag with data comprising the required fields of this job and its client. */
+        private void addIdentifierAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
                 throws IOException {
-            out.attribute(null, "taskid", Integer.toString(taskStatus.getTaskId()));
-            out.attribute(null, "package", taskStatus.getServiceComponent().getPackageName());
-            out.attribute(null, "class", taskStatus.getServiceComponent().getClassName());
-            out.attribute(null, "uid", Integer.toString(taskStatus.getUid()));
+            out.attribute(null, "jobid", Integer.toString(jobStatus.getJobId()));
+            out.attribute(null, "package", jobStatus.getServiceComponent().getPackageName());
+            out.attribute(null, "class", jobStatus.getServiceComponent().getClassName());
+            out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -328,57 +328,57 @@ public class TaskStore {
             out.endTag(null, XML_TAG_EXTRAS);
         }
         /**
-         * Write out a tag with data identifying this tasks constraints. If the constraint isn't here
+         * Write out a tag with data identifying this job's constraints. If the constraint isn't here
          * it doesn't apply.
          */
-        private void writeConstraintsToXml(XmlSerializer out, TaskStatus taskStatus) throws IOException {
+        private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
-            if (taskStatus.hasUnmeteredConstraint()) {
+            if (jobStatus.hasUnmeteredConstraint()) {
                 out.attribute(null, "unmetered", Boolean.toString(true));
             }
-            if (taskStatus.hasConnectivityConstraint()) {
+            if (jobStatus.hasConnectivityConstraint()) {
                 out.attribute(null, "connectivity", Boolean.toString(true));
             }
-            if (taskStatus.hasIdleConstraint()) {
+            if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
             }
-            if (taskStatus.hasChargingConstraint()) {
+            if (jobStatus.hasChargingConstraint()) {
                 out.attribute(null, "charging", Boolean.toString(true));
             }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
 
-        private void writeExecutionCriteriaToXml(XmlSerializer out, TaskStatus taskStatus)
+        private void writeExecutionCriteriaToXml(XmlSerializer out, JobStatus jobStatus)
                 throws IOException {
-            final Task task = taskStatus.getTask();
-            if (taskStatus.getTask().isPeriodic()) {
+            final JobInfo job = jobStatus.getJob();
+            if (jobStatus.getJob().isPeriodic()) {
                 out.startTag(null, XML_TAG_PERIODIC);
-                out.attribute(null, "period", Long.toString(task.getIntervalMillis()));
+                out.attribute(null, "period", Long.toString(job.getIntervalMillis()));
             } else {
                 out.startTag(null, XML_TAG_ONEOFF);
             }
 
-            if (taskStatus.hasDeadlineConstraint()) {
+            if (jobStatus.hasDeadlineConstraint()) {
                 // Wall clock deadline.
                 final long deadlineWallclock =  System.currentTimeMillis() +
-                        (taskStatus.getLatestRunTimeElapsed() - SystemClock.elapsedRealtime());
+                        (jobStatus.getLatestRunTimeElapsed() - SystemClock.elapsedRealtime());
                 out.attribute(null, "deadline", Long.toString(deadlineWallclock));
             }
-            if (taskStatus.hasTimingDelayConstraint()) {
+            if (jobStatus.hasTimingDelayConstraint()) {
                 final long delayWallclock = System.currentTimeMillis() +
-                        (taskStatus.getEarliestRunTime() - SystemClock.elapsedRealtime());
+                        (jobStatus.getEarliestRunTime() - SystemClock.elapsedRealtime());
                 out.attribute(null, "delay", Long.toString(delayWallclock));
             }
 
             // Only write out back-off policy if it differs from the default.
-            // This also helps the case where the task is idle -> these aren't allowed to specify
+            // This also helps the case where the job is idle -> these aren't allowed to specify
             // back-off.
-            if (taskStatus.getTask().getInitialBackoffMillis() != Task.DEFAULT_INITIAL_BACKOFF_MILLIS
-                    || taskStatus.getTask().getBackoffPolicy() != Task.DEFAULT_BACKOFF_POLICY) {
-                out.attribute(null, "backoff-policy", Integer.toString(task.getBackoffPolicy()));
-                out.attribute(null, "initial-backoff", Long.toString(task.getInitialBackoffMillis()));
+            if (jobStatus.getJob().getInitialBackoffMillis() != JobInfo.DEFAULT_INITIAL_BACKOFF_MILLIS
+                    || jobStatus.getJob().getBackoffPolicy() != JobInfo.DEFAULT_BACKOFF_POLICY) {
+                out.attribute(null, "backoff-policy", Integer.toString(job.getBackoffPolicy()));
+                out.attribute(null, "initial-backoff", Long.toString(job.getInitialBackoffMillis()));
             }
-            if (task.isPeriodic()) {
+            if (job.isPeriodic()) {
                 out.endTag(null, XML_TAG_PERIODIC);
             } else {
                 out.endTag(null, XML_TAG_ONEOFF);
@@ -387,43 +387,43 @@ public class TaskStore {
     }
 
     /**
-     * Runnable that reads list of persisted task from xml.
-     * NOTE: This Runnable locks on TaskStore.this
+     * Runnable that reads list of persisted job from xml.
+     * NOTE: This Runnable locks on JobStore.this
      */
-    private class ReadTaskMapFromDiskRunnable implements Runnable {
-        private TaskMapReadFinishedListener mCallback;
-        public ReadTaskMapFromDiskRunnable(TaskMapReadFinishedListener callback) {
+    private class ReadJobMapFromDiskRunnable implements Runnable {
+        private JobMapReadFinishedListener mCallback;
+        public ReadJobMapFromDiskRunnable(JobMapReadFinishedListener callback) {
             mCallback = callback;
         }
 
         @Override
         public void run() {
             try {
-                List<TaskStatus> tasks;
-                FileInputStream fis = mTasksFile.openRead();
-                synchronized (TaskStore.this) {
-                    tasks = readTaskMapImpl(fis);
+                List<JobStatus> jobs;
+                FileInputStream fis = mJobsFile.openRead();
+                synchronized (JobStore.this) {
+                    jobs = readJobMapImpl(fis);
                 }
                 fis.close();
-                if (tasks != null) {
-                    mCallback.onTaskMapReadFinished(tasks);
+                if (jobs != null) {
+                    mCallback.onJobMapReadFinished(jobs);
                 }
             } catch (FileNotFoundException e) {
-                if (TaskManagerService.DEBUG) {
-                    Slog.d(TAG, "Could not find tasks file, probably there was nothing to load.");
+                if (JobSchedulerService.DEBUG) {
+                    Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
                 }
             } catch (XmlPullParserException e) {
-                if (TaskManagerService.DEBUG) {
+                if (JobSchedulerService.DEBUG) {
                     Slog.d(TAG, "Error parsing xml.", e);
                 }
             } catch (IOException e) {
-                if (TaskManagerService.DEBUG) {
+                if (JobSchedulerService.DEBUG) {
                     Slog.d(TAG, "Error parsing xml.", e);
                 }
             }
         }
 
-        private List<TaskStatus> readTaskMapImpl(FileInputStream fis) throws XmlPullParserException, IOException {
+        private List<JobStatus> readJobMapImpl(FileInputStream fis) throws XmlPullParserException, IOException {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
 
@@ -435,66 +435,66 @@ public class TaskStore {
             }
             if (eventType == XmlPullParser.END_DOCUMENT) {
                 if (DEBUG) {
-                    Slog.d(TAG, "No persisted tasks.");
+                    Slog.d(TAG, "No persisted jobs.");
                 }
                 return null;
             }
 
             String tagName = parser.getName();
-            if ("task-info".equals(tagName)) {
-                final List<TaskStatus> tasks = new ArrayList<TaskStatus>();
+            if ("job-info".equals(tagName)) {
+                final List<JobStatus> jobs = new ArrayList<JobStatus>();
                 // Read in version info.
                 try {
                     int version = Integer.valueOf(parser.getAttributeValue(null, "version"));
-                    if (version != TASKS_FILE_VERSION) {
-                        Slog.d(TAG, "Invalid version number, aborting tasks file read.");
+                    if (version != JOBS_FILE_VERSION) {
+                        Slog.d(TAG, "Invalid version number, aborting jobs file read.");
                         return null;
                     }
                 } catch (NumberFormatException e) {
-                    Slog.e(TAG, "Invalid version number, aborting tasks file read.");
+                    Slog.e(TAG, "Invalid version number, aborting jobs file read.");
                     return null;
                 }
                 eventType = parser.next();
                 do {
-                    // Read each <task/>
+                    // Read each <job/>
                     if (eventType == XmlPullParser.START_TAG) {
                         tagName = parser.getName();
-                        // Start reading task.
-                        if ("task".equals(tagName)) {
-                            TaskStatus persistedTask = restoreTaskFromXml(parser);
-                            if (persistedTask != null) {
+                        // Start reading job.
+                        if ("job".equals(tagName)) {
+                            JobStatus persistedJob = restoreJobFromXml(parser);
+                            if (persistedJob != null) {
                                 if (DEBUG) {
-                                    Slog.d(TAG, "Read out " + persistedTask);
+                                    Slog.d(TAG, "Read out " + persistedJob);
                                 }
-                                tasks.add(persistedTask);
+                                jobs.add(persistedJob);
                             } else {
-                                Slog.d(TAG, "Error reading task from file.");
+                                Slog.d(TAG, "Error reading job from file.");
                             }
                         }
                     }
                     eventType = parser.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
-                return tasks;
+                return jobs;
             }
             return null;
         }
 
         /**
-         * @param parser Xml parser at the beginning of a "<task/>" tag. The next "parser.next()" call
-         *               will take the parser into the body of the task tag.
-         * @return Newly instantiated task holding all the information we just read out of the xml tag.
+         * @param parser Xml parser at the beginning of a "<job/>" tag. The next "parser.next()" call
+         *               will take the parser into the body of the job tag.
+         * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
-        private TaskStatus restoreTaskFromXml(XmlPullParser parser) throws XmlPullParserException,
+        private JobStatus restoreJobFromXml(XmlPullParser parser) throws XmlPullParserException,
                 IOException {
-            Task.Builder taskBuilder;
+            JobInfo.Builder jobBuilder;
             int uid;
 
-            // Read out task identifier attributes.
+            // Read out job identifier attributes.
             try {
-                taskBuilder = buildBuilderFromXml(parser);
+                jobBuilder = buildBuilderFromXml(parser);
                 uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
             } catch (NumberFormatException e) {
-                Slog.e(TAG, "Error parsing task's required fields, skipping");
+                Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
             }
 
@@ -510,7 +510,7 @@ public class TaskStore {
                 return null;
             }
             try {
-                buildConstraintsFromXml(taskBuilder, parser);
+                buildConstraintsFromXml(jobBuilder, parser);
             } catch (NumberFormatException e) {
                 Slog.d(TAG, "Error reading constraints, skipping.");
                 return null;
@@ -538,22 +538,22 @@ public class TaskStore {
             if (XML_TAG_PERIODIC.equals(parser.getName())) {
                 try {
                     String val = parser.getAttributeValue(null, "period");
-                    taskBuilder.setPeriodic(Long.valueOf(val));
+                    jobBuilder.setPeriodic(Long.valueOf(val));
                 } catch (NumberFormatException e) {
                     Slog.d(TAG, "Error reading periodic execution criteria, skipping.");
                     return null;
                 }
             } else if (XML_TAG_ONEOFF.equals(parser.getName())) {
                 try {
-                    if (runtimes.first != TaskStatus.NO_EARLIEST_RUNTIME) {
-                        taskBuilder.setMinimumLatency(runtimes.first - SystemClock.elapsedRealtime());
+                    if (runtimes.first != JobStatus.NO_EARLIEST_RUNTIME) {
+                        jobBuilder.setMinimumLatency(runtimes.first - SystemClock.elapsedRealtime());
                     }
-                    if (runtimes.second != TaskStatus.NO_LATEST_RUNTIME) {
-                        taskBuilder.setOverrideDeadline(
+                    if (runtimes.second != JobStatus.NO_LATEST_RUNTIME) {
+                        jobBuilder.setOverrideDeadline(
                                 runtimes.second - SystemClock.elapsedRealtime());
                     }
                 } catch (NumberFormatException e) {
-                    Slog.d(TAG, "Error reading task execution criteria, skipping.");
+                    Slog.d(TAG, "Error reading job execution criteria, skipping.");
                     return null;
                 }
             } else {
@@ -563,7 +563,7 @@ public class TaskStore {
                 // Expecting a parameters start tag.
                 return null;
             }
-            maybeBuildBackoffPolicyFromXml(taskBuilder, parser);
+            maybeBuildBackoffPolicyFromXml(jobBuilder, parser);
 
             parser.nextTag(); // Consume parameters end tag.
 
@@ -579,52 +579,52 @@ public class TaskStore {
             }
 
             PersistableBundle extras = PersistableBundle.restoreFromXml(parser);
-            taskBuilder.setExtras(extras);
+            jobBuilder.setExtras(extras);
             parser.nextTag(); // Consume </extras>
 
-            return new TaskStatus(taskBuilder.build(), uid, runtimes.first, runtimes.second);
+            return new JobStatus(jobBuilder.build(), uid, runtimes.first, runtimes.second);
         }
 
-        private Task.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {
-            // Pull out required fields from <task> attributes.
-            int taskId = Integer.valueOf(parser.getAttributeValue(null, "taskid"));
+        private JobInfo.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {
+            // Pull out required fields from <job> attributes.
+            int jobId = Integer.valueOf(parser.getAttributeValue(null, "jobid"));
             String packageName = parser.getAttributeValue(null, "package");
             String className = parser.getAttributeValue(null, "class");
             ComponentName cname = new ComponentName(packageName, className);
 
-            return new Task.Builder(taskId, cname);
+            return new JobInfo.Builder(jobId, cname);
         }
 
-        private void buildConstraintsFromXml(Task.Builder taskBuilder, XmlPullParser parser) {
+        private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
             String val = parser.getAttributeValue(null, "unmetered");
             if (val != null) {
-                taskBuilder.setRequiredNetworkCapabilities(Task.NetworkType.UNMETERED);
+                jobBuilder.setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED);
             }
             val = parser.getAttributeValue(null, "connectivity");
             if (val != null) {
-                taskBuilder.setRequiredNetworkCapabilities(Task.NetworkType.ANY);
+                jobBuilder.setRequiredNetworkCapabilities(JobInfo.NetworkType.ANY);
             }
             val = parser.getAttributeValue(null, "idle");
             if (val != null) {
-                taskBuilder.setRequiresDeviceIdle(true);
+                jobBuilder.setRequiresDeviceIdle(true);
             }
             val = parser.getAttributeValue(null, "charging");
             if (val != null) {
-                taskBuilder.setRequiresCharging(true);
+                jobBuilder.setRequiresCharging(true);
             }
         }
 
         /**
          * Builds the back-off policy out of the params tag. These attributes may not exist, depending
-         * on whether the back-off was set when the task was first scheduled.
+         * on whether the back-off was set when the job was first scheduled.
          */
-        private void maybeBuildBackoffPolicyFromXml(Task.Builder taskBuilder, XmlPullParser parser) {
+        private void maybeBuildBackoffPolicyFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
             String val = parser.getAttributeValue(null, "initial-backoff");
             if (val != null) {
                 long initialBackoff = Long.valueOf(val);
                 val = parser.getAttributeValue(null, "backoff-policy");
                 int backoffPolicy = Integer.valueOf(val);  // Will throw NFE which we catch higher up.
-                taskBuilder.setBackoffCriteria(initialBackoff, backoffPolicy);
+                jobBuilder.setBackoffCriteria(initialBackoff, backoffPolicy);
             }
         }
 
@@ -640,8 +640,8 @@ public class TaskStore {
             final long nowWallclock = System.currentTimeMillis();
             final long nowElapsed = SystemClock.elapsedRealtime();
 
-            long earliestRunTimeElapsed = TaskStatus.NO_EARLIEST_RUNTIME;
-            long latestRunTimeElapsed = TaskStatus.NO_LATEST_RUNTIME;
+            long earliestRunTimeElapsed = JobStatus.NO_EARLIEST_RUNTIME;
+            long latestRunTimeElapsed = JobStatus.NO_LATEST_RUNTIME;
             String val = parser.getAttributeValue(null, "deadline");
             if (val != null) {
                 long latestRuntimeWallclock = Long.valueOf(val);

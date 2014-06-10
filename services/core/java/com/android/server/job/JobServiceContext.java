@@ -14,12 +14,12 @@
  * limitations under the License
  */
 
-package com.android.server.task;
+package com.android.server.job;
 
 import android.app.ActivityManager;
-import android.app.task.ITaskCallback;
-import android.app.task.ITaskService;
-import android.app.task.TaskParams;
+import android.app.job.JobParameters;
+import android.app.job.IJobCallback;
+import android.app.job.IJobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,32 +39,32 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.task.controllers.TaskStatus;
+import com.android.server.job.controllers.JobStatus;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Handles client binding and lifecycle of a task. A task will only execute one at a time on an
+ * Handles client binding and lifecycle of a job. A job will only execute one at a time on an
  * instance of this class.
  */
-public class TaskServiceContext extends ITaskCallback.Stub implements ServiceConnection {
+public class JobServiceContext extends IJobCallback.Stub implements ServiceConnection {
     private static final boolean DEBUG = true;
-    private static final String TAG = "TaskServiceContext";
-    /** Define the maximum # of tasks allowed to run on a service at once. */
-    private static final int defaultMaxActiveTasksPerService =
+    private static final String TAG = "JobServiceContext";
+    /** Define the maximum # of jobs allowed to run on a service at once. */
+    private static final int defaultMaxActiveJobsPerService =
             ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
-    /** Amount of time a task is allowed to execute for before being considered timed-out. */
+    /** Amount of time a job is allowed to execute for before being considered timed-out. */
     private static final long EXECUTING_TIMESLICE_MILLIS = 60 * 1000;
-    /** Amount of time the TaskManager will wait for a response from an app for a message. */
+    /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
     /** String prefix for all wakelock names. */
-    private static final String TM_WAKELOCK_PREFIX = "*task*/";
+    private static final String JS_WAKELOCK_PREFIX = "*job*/";
 
     private static final String[] VERB_STRINGS = {
             "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_PENDING"
     };
 
-    // States that a task occupies while interacting with the client.
+    // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
     static final int VERB_STARTING = 1;
     static final int VERB_EXECUTING = 2;
@@ -75,30 +75,30 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     private static final int MSG_TIMEOUT = 0;
     /** Received a callback from client. */
     private static final int MSG_CALLBACK = 1;
-    /** Run through list and start any ready tasks.*/
+    /** Run through list and start any ready jobs.*/
     private static final int MSG_SERVICE_BOUND = 2;
-    /** Cancel a task. */
+    /** Cancel a job. */
     private static final int MSG_CANCEL = 3;
-    /** Shutdown the Task. Used when the client crashes and we can't die gracefully.*/
+    /** Shutdown the job. Used when the client crashes and we can't die gracefully.*/
     private static final int MSG_SHUTDOWN_EXECUTION = 4;
 
     private final Handler mCallbackHandler;
-    /** Make callbacks to {@link TaskManagerService} to inform on task completion status. */
-    private final TaskCompletedListener mCompletedListener;
+    /** Make callbacks to {@link JobSchedulerService} to inform on job completion status. */
+    private final JobCompletedListener mCompletedListener;
     /** Used for service binding, etc. */
     private final Context mContext;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
-    private TaskParams mParams;
+    private JobParameters mParams;
     @VisibleForTesting
     int mVerb;
     private AtomicBoolean mCancelled = new AtomicBoolean();
 
-    /** All the information maintained about the task currently being executed. */
-    private TaskStatus mRunningTask;
+    /** All the information maintained about the job currently being executed. */
+    private JobStatus mRunningJob;
     /** Binder to the client service. */
-    ITaskService service;
+    IJobService service;
 
     private final Object mLock = new Object();
     /** Whether this context is free. */
@@ -109,45 +109,45 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     /** Track when job will timeout. */
     private long mTimeoutElapsed;
 
-    TaskServiceContext(TaskManagerService service, Looper looper) {
+    JobServiceContext(JobSchedulerService service, Looper looper) {
         this(service.getContext(), service, looper);
     }
 
     @VisibleForTesting
-    TaskServiceContext(Context context, TaskCompletedListener completedListener, Looper looper) {
+    JobServiceContext(Context context, JobCompletedListener completedListener, Looper looper) {
         mContext = context;
-        mCallbackHandler = new TaskServiceHandler(looper);
+        mCallbackHandler = new JobServiceHandler(looper);
         mCompletedListener = completedListener;
         mAvailable = true;
     }
 
     /**
-     * Give a task to this context for execution. Callers must first check {@link #isAvailable()}
+     * Give a job to this context for execution. Callers must first check {@link #isAvailable()}
      * to make sure this is a valid context.
-     * @param ts The status of the task that we are going to run.
-     * @return True if the task is valid and is running. False if the task cannot be executed.
+     * @param job The status of the job that we are going to run.
+     * @return True if the job is valid and is running. False if the job cannot be executed.
      */
-    boolean executeRunnableTask(TaskStatus ts) {
+    boolean executeRunnableJob(JobStatus job) {
         synchronized (mLock) {
             if (!mAvailable) {
                 Slog.e(TAG, "Starting new runnable but context is unavailable > Error.");
                 return false;
             }
 
-            mRunningTask = ts;
-            mParams = new TaskParams(ts.getTaskId(), ts.getExtras(), this);
+            mRunningJob = job;
+            mParams = new JobParameters(job.getJobId(), job.getExtras(), this);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;
-            final Intent intent = new Intent().setComponent(ts.getServiceComponent());
+            final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
-                    new UserHandle(ts.getUserId()));
+                    new UserHandle(job.getUserId()));
             if (!binding) {
                 if (DEBUG) {
-                    Slog.d(TAG, ts.getServiceComponent().getShortClassName() + " unavailable.");
+                    Slog.d(TAG, job.getServiceComponent().getShortClassName() + " unavailable.");
                 }
-                mRunningTask = null;
+                mRunningJob = null;
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
                 return false;
@@ -157,13 +157,13 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
         }
     }
 
-    /** Used externally to query the running task. Will return null if there is no task running. */
-    TaskStatus getRunningTask() {
-        return mRunningTask;
+    /** Used externally to query the running job. Will return null if there is no job running. */
+    JobStatus getRunningJob() {
+        return mRunningJob;
     }
 
-    /** Called externally when a task that was scheduled for execution should be cancelled. */
-    void cancelExecutingTask() {
+    /** Called externally when a job that was scheduled for execution should be cancelled. */
+    void cancelExecutingJob() {
         mCallbackHandler.obtainMessage(MSG_CANCEL).sendToTarget();
     }
 
@@ -185,29 +185,29 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     }
 
     @Override
-    public void taskFinished(int taskId, boolean reschedule) {
+    public void jobFinished(int jobId, boolean reschedule) {
         if (!verifyCallingUid()) {
             return;
         }
-        mCallbackHandler.obtainMessage(MSG_CALLBACK, taskId, reschedule ? 1 : 0)
+        mCallbackHandler.obtainMessage(MSG_CALLBACK, jobId, reschedule ? 1 : 0)
                 .sendToTarget();
     }
 
     @Override
-    public void acknowledgeStopMessage(int taskId, boolean reschedule) {
+    public void acknowledgeStopMessage(int jobId, boolean reschedule) {
         if (!verifyCallingUid()) {
             return;
         }
-        mCallbackHandler.obtainMessage(MSG_CALLBACK, taskId, reschedule ? 1 : 0)
+        mCallbackHandler.obtainMessage(MSG_CALLBACK, jobId, reschedule ? 1 : 0)
                 .sendToTarget();
     }
 
     @Override
-    public void acknowledgeStartMessage(int taskId, boolean ongoing) {
+    public void acknowledgeStartMessage(int jobId, boolean ongoing) {
         if (!verifyCallingUid()) {
             return;
         }
-        mCallbackHandler.obtainMessage(MSG_CALLBACK, taskId, ongoing ? 1 : 0).sendToTarget();
+        mCallbackHandler.obtainMessage(MSG_CALLBACK, jobId, ongoing ? 1 : 0).sendToTarget();
     }
 
     /**
@@ -219,25 +219,25 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
      */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        if (!name.equals(mRunningTask.getServiceComponent())) {
+        if (!name.equals(mRunningJob.getServiceComponent())) {
             mCallbackHandler.obtainMessage(MSG_SHUTDOWN_EXECUTION).sendToTarget();
             return;
         }
-        this.service = ITaskService.Stub.asInterface(service);
+        this.service = IJobService.Stub.asInterface(service);
         // Remove all timeouts.
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                TM_WAKELOCK_PREFIX + mRunningTask.getServiceComponent().getPackageName());
-        mWakeLock.setWorkSource(new WorkSource(mRunningTask.getUid()));
+                JS_WAKELOCK_PREFIX + mRunningJob.getServiceComponent().getPackageName());
+        mWakeLock.setWorkSource(new WorkSource(mRunningJob.getUid()));
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
     }
 
     /**
-     * If the client service crashes we reschedule this task and clean up.
+     * If the client service crashes we reschedule this job and clean up.
      * @param name The concrete component name of the service whose
      */
     @Override
@@ -251,7 +251,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
      * @return True if the binder calling is coming from the client we expect.
      */
     private boolean verifyCallingUid() {
-        if (mRunningTask == null || Binder.getCallingUid() != mRunningTask.getUid()) {
+        if (mRunningJob == null || Binder.getCallingUid() != mRunningJob.getUid()) {
             if (DEBUG) {
                 Slog.d(TAG, "Stale callback received, ignoring.");
             }
@@ -261,12 +261,12 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
     }
 
     /**
-     * Handles the lifecycle of the TaskService binding/callbacks, etc. The convention within this
+     * Handles the lifecycle of the JobService binding/callbacks, etc. The convention within this
      * class is to append 'H' to each function name that can only be called on this handler. This
      * isn't strictly necessary because all of these functions are private, but helps clarity.
      */
-    private class TaskServiceHandler extends Handler {
-        TaskServiceHandler(Looper looper) {
+    private class JobServiceHandler extends Handler {
+        JobServiceHandler(Looper looper) {
             super(looper);
         }
 
@@ -278,7 +278,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     break;
                 case MSG_CALLBACK:
                     if (DEBUG) {
-                        Slog.d(TAG, "MSG_CALLBACK of : " + mRunningTask + " v:" +
+                        Slog.d(TAG, "MSG_CALLBACK of : " + mRunningJob + " v:" +
                                 VERB_STRINGS[mVerb]);
                     }
                     removeMessages(MSG_TIMEOUT);
@@ -292,7 +292,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                         handleFinishedH(reschedule);
                     } else {
                         if (DEBUG) {
-                            Slog.d(TAG, "Unrecognised callback: " + mRunningTask);
+                            Slog.d(TAG, "Unrecognised callback: " + mRunningJob);
                         }
                     }
                     break;
@@ -303,42 +303,42 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     handleOpTimeoutH();
                     break;
                 case MSG_SHUTDOWN_EXECUTION:
-                    closeAndCleanupTaskH(true /* needsReschedule */);
+                    closeAndCleanupJobH(true /* needsReschedule */);
                     break;
                 default:
                     Log.e(TAG, "Unrecognised message: " + message);
             }
         }
 
-        /** Start the task on the service. */
+        /** Start the job on the service. */
         private void handleServiceBoundH() {
             if (mVerb != VERB_BINDING) {
-                Slog.e(TAG, "Sending onStartTask for a task that isn't pending. "
+                Slog.e(TAG, "Sending onStartJob for a job that isn't pending. "
                         + VERB_STRINGS[mVerb]);
-                closeAndCleanupTaskH(false /* reschedule */);
+                closeAndCleanupJobH(false /* reschedule */);
                 return;
             }
             if (mCancelled.get()) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Task cancelled while waiting for bind to complete. "
-                            + mRunningTask);
+                    Slog.d(TAG, "Job cancelled while waiting for bind to complete. "
+                            + mRunningJob);
                 }
-                closeAndCleanupTaskH(true /* reschedule */);
+                closeAndCleanupJobH(true /* reschedule */);
                 return;
             }
             try {
                 mVerb = VERB_STARTING;
                 scheduleOpTimeOut();
-                service.startTask(mParams);
+                service.startJob(mParams);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error sending onStart message to '" +
-                        mRunningTask.getServiceComponent().getShortClassName() + "' ", e);
+                        mRunningJob.getServiceComponent().getShortClassName() + "' ", e);
             }
         }
 
         /**
          * State behaviours.
-         * VERB_STARTING   -> Successful start, change task to VERB_EXECUTING and post timeout.
+         * VERB_STARTING   -> Successful start, change job to VERB_EXECUTING and post timeout.
          *     _PENDING    -> Error
          *     _EXECUTING  -> Error
          *     _STOPPING   -> Error
@@ -348,7 +348,7 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                 case VERB_STARTING:
                     mVerb = VERB_EXECUTING;
                     if (!workOngoing) {
-                        // Task is finished already so fast-forward to handleFinished.
+                        // Job is finished already so fast-forward to handleFinished.
                         handleFinishedH(false);
                         return;
                     }
@@ -360,14 +360,14 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     scheduleOpTimeOut();
                     break;
                 default:
-                    Log.e(TAG, "Handling started task but task wasn't starting! Was "
+                    Log.e(TAG, "Handling started job but job wasn't starting! Was "
                             + VERB_STRINGS[mVerb] + ".");
                     return;
             }
         }
 
         /**
-         * VERB_EXECUTING  -> Client called taskFinished(), clean up and notify done.
+         * VERB_EXECUTING  -> Client called jobFinished(), clean up and notify done.
          *     _STOPPING   -> Successful finish, clean up and notify done.
          *     _STARTING   -> Error
          *     _PENDING    -> Error
@@ -376,20 +376,20 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
             switch (mVerb) {
                 case VERB_EXECUTING:
                 case VERB_STOPPING:
-                    closeAndCleanupTaskH(reschedule);
+                    closeAndCleanupJobH(reschedule);
                     break;
                 default:
-                    Slog.e(TAG, "Got an execution complete message for a task that wasn't being" +
+                    Slog.e(TAG, "Got an execution complete message for a job that wasn't being" +
                             "executed. Was " + VERB_STRINGS[mVerb] + ".");
             }
         }
 
         /**
-         * A task can be in various states when a cancel request comes in:
+         * A job can be in various states when a cancel request comes in:
          * VERB_BINDING    -> Cancelled before bind completed. Mark as cancelled and wait for
          *                    {@link #onServiceConnected(android.content.ComponentName, android.os.IBinder)}
          *     _STARTING   -> Mark as cancelled and wait for
-         *                    {@link TaskServiceContext#acknowledgeStartMessage(int, boolean)}
+         *                    {@link JobServiceContext#acknowledgeStartMessage(int, boolean)}
          *     _EXECUTING  -> call {@link #sendStopMessageH}}.
          *     _ENDING     -> No point in doing anything here, so we ignore.
          */
@@ -406,48 +406,48 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     // Nada.
                     break;
                 default:
-                    Slog.e(TAG, "Cancelling a task without a valid verb: " + mVerb);
+                    Slog.e(TAG, "Cancelling a job without a valid verb: " + mVerb);
                     break;
             }
         }
 
         /** Process MSG_TIMEOUT here. */
         private void handleOpTimeoutH() {
-            if (Log.isLoggable(TaskManagerService.TAG, Log.DEBUG)) {
+            if (Log.isLoggable(JobSchedulerService.TAG, Log.DEBUG)) {
                 Log.d(TAG, "MSG_TIMEOUT of " +
-                        mRunningTask.getServiceComponent().getShortClassName() + " : "
-                        + mParams.getTaskId());
+                        mRunningJob.getServiceComponent().getShortClassName() + " : "
+                        + mParams.getJobId());
             }
 
-            final int taskId = mParams.getTaskId();
+            final int jobId = mParams.getJobId();
             switch (mVerb) {
                 case VERB_STARTING:
                     // Client unresponsive - wedged or failed to respond in time. We don't really
-                    // know what happened so let's log it and notify the TaskManager
+                    // know what happened so let's log it and notify the JobScheduler
                     // FINISHED/NO-RETRY.
-                    Log.e(TAG, "No response from client for onStartTask '" +
-                            mRunningTask.getServiceComponent().getShortClassName() + "' tId: "
-                            + taskId);
-                    closeAndCleanupTaskH(false /* needsReschedule */);
+                    Log.e(TAG, "No response from client for onStartJob '" +
+                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                            + jobId);
+                    closeAndCleanupJobH(false /* needsReschedule */);
                     break;
                 case VERB_STOPPING:
-                    // At least we got somewhere, so fail but ask the TaskManager to reschedule.
-                    Log.e(TAG, "No response from client for onStopTask, '" +
-                            mRunningTask.getServiceComponent().getShortClassName() + "' tId: "
-                            + taskId);
-                    closeAndCleanupTaskH(true /* needsReschedule */);
+                    // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
+                    Log.e(TAG, "No response from client for onStopJob, '" +
+                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                            + jobId);
+                    closeAndCleanupJobH(true /* needsReschedule */);
                     break;
                 case VERB_EXECUTING:
                     // Not an error - client ran out of time.
-                    Log.i(TAG, "Client timed out while executing (no taskFinished received)." +
+                    Log.i(TAG, "Client timed out while executing (no jobFinished received)." +
                             " sending onStop. "  +
-                            mRunningTask.getServiceComponent().getShortClassName() + "' tId: "
-                            + taskId);
+                            mRunningJob.getServiceComponent().getShortClassName() + "' tId: "
+                            + jobId);
                     sendStopMessageH();
                     break;
                 default:
-                    Log.e(TAG, "Handling timeout for an unknown active task state: "
-                            + mRunningTask);
+                    Log.e(TAG, "Handling timeout for an unknown active job state: "
+                            + mRunningJob);
                     return;
             }
         }
@@ -459,35 +459,35 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
         private void sendStopMessageH() {
             mCallbackHandler.removeMessages(MSG_TIMEOUT);
             if (mVerb != VERB_EXECUTING) {
-                Log.e(TAG, "Sending onStopTask for a task that isn't started. " + mRunningTask);
-                closeAndCleanupTaskH(false /* reschedule */);
+                Log.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
+                closeAndCleanupJobH(false /* reschedule */);
                 return;
             }
             try {
                 mVerb = VERB_STOPPING;
                 scheduleOpTimeOut();
-                service.stopTask(mParams);
+                service.stopJob(mParams);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error sending onStopTask to client.", e);
-                closeAndCleanupTaskH(false /* reschedule */);
+                Log.e(TAG, "Error sending onStopJob to client.", e);
+                closeAndCleanupJobH(false /* reschedule */);
             }
         }
 
         /**
-         * The provided task has finished, either by calling
-         * {@link android.app.task.TaskService#taskFinished(android.app.task.TaskParams, boolean)}
+         * The provided job has finished, either by calling
+         * {@link android.app.job.JobService#jobFinished(android.app.job.JobParameters, boolean)}
          * or from acknowledging the stop message we sent. Either way, we're done tracking it and
          * we want to clean up internally.
          */
-        private void closeAndCleanupTaskH(boolean reschedule) {
+        private void closeAndCleanupJobH(boolean reschedule) {
             removeMessages(MSG_TIMEOUT);
             synchronized (mLock) {
                 mWakeLock.release();
-                mContext.unbindService(TaskServiceContext.this);
-                mCompletedListener.onTaskCompleted(mRunningTask, reschedule);
+                mContext.unbindService(JobServiceContext.this);
+                mCompletedListener.onJobCompleted(mRunningJob, reschedule);
 
                 mWakeLock = null;
-                mRunningTask = null;
+                mRunningJob = null;
                 mParams = null;
                 mVerb = -1;
                 mCancelled.set(false);
@@ -508,8 +508,8 @@ public class TaskServiceContext extends ITaskCallback.Stub implements ServiceCon
                     EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
             if (DEBUG) {
                 Slog.d(TAG, "Scheduling time out for '" +
-                        mRunningTask.getServiceComponent().getShortClassName() + "' tId: " +
-                        mParams.getTaskId() + ", in " + (timeoutMillis / 1000) + " s");
+                        mRunningJob.getServiceComponent().getShortClassName() + "' tId: " +
+                        mParams.getJobId() + ", in " + (timeoutMillis / 1000) + " s");
             }
             Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
             mCallbackHandler.sendMessageDelayed(m, timeoutMillis);

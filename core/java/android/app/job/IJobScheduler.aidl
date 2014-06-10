@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,22 +11,20 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.server.task;
+package android.app.job;
 
-import com.android.server.task.controllers.TaskStatus;
+import android.app.job.JobInfo;
 
-/**
- * Used for communication between {@link com.android.server.task.TaskServiceContext} and the
- * {@link com.android.server.task.TaskManagerService}.
- */
-public interface TaskCompletedListener {
-
-    /**
-     * Callback for when a task is completed.
-     * @param needsReschedule Whether the implementing class should reschedule this task.
-     */
-    public void onTaskCompleted(TaskStatus taskStatus, boolean needsReschedule);
+ /**
+  * IPC interface that supports the app-facing {@link #JobScheduler} api.
+  * {@hide}
+  */
+interface IJobScheduler {
+    int schedule(in JobInfo job);
+    void cancel(int jobId);
+    void cancelAll();
+    List<JobInfo> getAllPendingJobs();
 }

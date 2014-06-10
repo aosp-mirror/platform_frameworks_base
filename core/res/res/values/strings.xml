@@ -1261,10 +1261,10 @@
          permission that an application must be granted by the user.  Instead, it
          is part of a mechanism that applications use to indicate to the system
          that they want to do scheduled background work.  -->
-    <string name="permlab_bindTaskService">run the application\'s scheduled background work</string>
+    <string name="permlab_bindJobService">run the application\'s scheduled background work</string>
     <!-- Description of an application permission, so that the user can understand
          what is being done if they are curious. -->
-    <string name="permdesc_bindTaskService">This permission allows the Android system to run the application in the background when requested.</string>
+    <string name="permdesc_bindJobService">This permission allows the Android system to run the application in the background when requested.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>

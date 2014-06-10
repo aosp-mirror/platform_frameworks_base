@@ -65,6 +65,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
+import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
@@ -83,7 +84,6 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
-import com.android.server.task.TaskManagerService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
@@ -131,8 +131,8 @@ public final class SystemServer {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String ETHERNET_SERVICE_CLASS =
             "com.android.server.ethernet.EthernetService";
-    private static final String TASK_SERVICE_CLASS =
-            "com.android.server.task.TaskManagerService";
+    private static final String JOB_SCHEDULER_SERVICE_CLASS =
+            "com.android.server.job.JobSchedulerService";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -832,7 +832,7 @@ public final class SystemServer {
 
             mSystemServiceManager.startService(UiModeManagerService.class);
 
-            mSystemServiceManager.startService(TaskManagerService.class);
+            mSystemServiceManager.startService(JobSchedulerService.class);
 
             if (!disableNonCoreServices) {
                 try {

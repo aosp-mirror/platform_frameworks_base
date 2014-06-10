@@ -16,28 +16,20 @@
 
 package com.android.demo.jobSchedulerApp.service;
 
-import android.app.Service;
-import android.app.task.Task;
-import android.app.task.TaskManager;
-import android.app.task.TaskParams;
-import android.app.task.TaskService;
-import android.content.ComponentName;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.demo.jobSchedulerApp.MainActivity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
 
 /**
@@ -52,7 +44,7 @@ import java.util.List;
  * lifecycle of our and provide a handle to said SyncAdapter to the OS on
  * request.
  */
-public class TestJobService extends TaskService {
+public class TestJobService extends JobService {
     private static final String TAG = "SyncService";
 
     @Override
@@ -82,44 +74,44 @@ public class TestJobService extends TaskService {
     }
 
     @Override
-    public boolean onStartTask(TaskParams params) {
-        taskParamsMap.add(params);
+    public boolean onStartJob(JobParameters params) {
+        jobParamsMap.add(params);
         if (mActivity != null) {
-            mActivity.onReceivedStartTask(params);
+            mActivity.onReceivedStartJob(params);
         }
-        Log.i(TAG, "on start task: " + params.getTaskId());
+        Log.i(TAG, "on start job: " + params.getJobId());
         return true;
     }
 
     @Override
-    public boolean onStopTask(TaskParams params) {
-        taskParamsMap.remove(params);
-        mActivity.onReceivedStopTask();
-        Log.i(TAG, "on stop task: " + params.getTaskId());
+    public boolean onStopJob(JobParameters params) {
+        jobParamsMap.remove(params);
+        mActivity.onReceivedStopJob();
+        Log.i(TAG, "on stop job: " + params.getJobId());
         return true;
     }
 
     MainActivity mActivity;
-    private final LinkedList<TaskParams> taskParamsMap = new LinkedList<TaskParams>();
+    private final LinkedList<JobParameters> jobParamsMap = new LinkedList<JobParameters>();
 
     public void setUiCallback(MainActivity activity) {
         mActivity = activity;
     }
 
     /** Send job to the JobScheduler. */
-    public void scheduleJob(Task t) {
+    public void scheduleJob(JobInfo t) {
         Log.d(TAG, "Scheduling job");
-        TaskManager tm =
-                (TaskManager) getSystemService(Context.TASK_SERVICE);
+        JobScheduler tm =
+                (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
         tm.schedule(t);
     }
 
-    public boolean callTaskFinished() {
-        TaskParams params = taskParamsMap.poll();
+    public boolean callJobFinished() {
+        JobParameters params = jobParamsMap.poll();
         if (params == null) {
             return false;
         } else {
-            taskFinished(params, false);
+            jobFinished(params, false);
             return true;
         }
     }

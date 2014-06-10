@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.task.controllers;
+package com.android.server.job.controllers;
 
 
 import android.content.BroadcastReceiver;
@@ -28,8 +28,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.ConnectivityService;
-import com.android.server.task.StateChangedListener;
-import com.android.server.task.TaskManagerService;
+import com.android.server.job.JobSchedulerService;
+import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
 import java.util.LinkedList;
@@ -42,9 +42,9 @@ import java.util.List;
  */
 public class ConnectivityController extends StateController implements
         ConnectivityManager.OnNetworkActiveListener {
-    private static final String TAG = "TaskManager.Conn";
+    private static final String TAG = "JobScheduler.Conn";
 
-    private final List<TaskStatus> mTrackedTasks = new LinkedList<TaskStatus>();
+    private final List<JobStatus> mTrackedJobs = new LinkedList<JobStatus>();
     private final BroadcastReceiver mConnectivityChangedReceiver =
             new ConnectivityChangedReceiver();
     /** Singleton. */
@@ -55,10 +55,10 @@ public class ConnectivityController extends StateController implements
     /** Track whether the latest active network is connected. */
     private boolean mNetworkConnected;
 
-    public static ConnectivityController get(TaskManagerService taskManager) {
+    public static ConnectivityController get(JobSchedulerService jms) {
         synchronized (sCreationLock) {
             if (mSingleton == null) {
-                mSingleton = new ConnectivityController(taskManager, taskManager.getContext());
+                mSingleton = new ConnectivityController(jms, jms.getContext());
             }
             return mSingleton;
         }
@@ -82,21 +82,21 @@ public class ConnectivityController extends StateController implements
     }
 
     @Override
-    public void maybeStartTrackingTask(TaskStatus taskStatus) {
-        if (taskStatus.hasConnectivityConstraint() || taskStatus.hasUnmeteredConstraint()) {
-            synchronized (mTrackedTasks) {
-                taskStatus.connectivityConstraintSatisfied.set(mNetworkConnected);
-                taskStatus.unmeteredConstraintSatisfied.set(mNetworkUnmetered);
-                mTrackedTasks.add(taskStatus);
+    public void maybeStartTrackingJob(JobStatus jobStatus) {
+        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
+            synchronized (mTrackedJobs) {
+                jobStatus.connectivityConstraintSatisfied.set(mNetworkConnected);
+                jobStatus.unmeteredConstraintSatisfied.set(mNetworkUnmetered);
+                mTrackedJobs.add(jobStatus);
             }
         }
     }
 
     @Override
-    public void maybeStopTrackingTask(TaskStatus taskStatus) {
-        if (taskStatus.hasConnectivityConstraint() || taskStatus.hasUnmeteredConstraint()) {
-            synchronized (mTrackedTasks) {
-                mTrackedTasks.remove(taskStatus);
+    public void maybeStopTrackingJob(JobStatus jobStatus) {
+        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
+            synchronized (mTrackedJobs) {
+                mTrackedJobs.remove(jobStatus);
             }
         }
     }
@@ -104,16 +104,16 @@ public class ConnectivityController extends StateController implements
     /**
      * @param userId Id of the user for whom we are updating the connectivity state.
      */
-    private void updateTrackedTasks(int userId) {
-        synchronized (mTrackedTasks) {
+    private void updateTrackedJobs(int userId) {
+        synchronized (mTrackedJobs) {
             boolean changed = false;
-            for (TaskStatus ts : mTrackedTasks) {
-                if (ts.getUserId() != userId) {
+            for (JobStatus js : mTrackedJobs) {
+                if (js.getUserId() != userId) {
                     continue;
                 }
                 boolean prevIsConnected =
-                        ts.connectivityConstraintSatisfied.getAndSet(mNetworkConnected);
-                boolean prevIsMetered = ts.unmeteredConstraintSatisfied.getAndSet(mNetworkUnmetered);
+                        js.connectivityConstraintSatisfied.getAndSet(mNetworkConnected);
+                boolean prevIsMetered = js.unmeteredConstraintSatisfied.getAndSet(mNetworkUnmetered);
                 if (prevIsConnected != mNetworkConnected || prevIsMetered != mNetworkUnmetered) {
                     changed = true;
                 }
@@ -125,16 +125,16 @@ public class ConnectivityController extends StateController implements
     }
 
     /**
-     * We know the network has just come up. We want to run any tasks that are ready.
+     * We know the network has just come up. We want to run any jobs that are ready.
      */
     public synchronized void onNetworkActive() {
-        synchronized (mTrackedTasks) {
-            for (TaskStatus ts : mTrackedTasks) {
-                if (ts.isReady()) {
+        synchronized (mTrackedJobs) {
+            for (JobStatus js : mTrackedJobs) {
+                if (js.isReady()) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Running " + ts + " due to network activity.");
+                        Slog.d(TAG, "Running " + js + " due to network activity.");
                     }
-                    mStateChangedListener.onRunTaskNow(ts);
+                    mStateChangedListener.onRunJobNow(js);
                 }
             }
         }
@@ -169,7 +169,7 @@ public class ConnectivityController extends StateController implements
                 if (activeNetwork == null) {
                     mNetworkUnmetered = false;
                     mNetworkConnected = false;
-                    updateTrackedTasks(userid);
+                    updateTrackedJobs(userid);
                 } else if (activeNetwork.getType() == networkType) {
                     mNetworkUnmetered = false;
                     mNetworkConnected = !intent.getBooleanExtra(
@@ -177,7 +177,7 @@ public class ConnectivityController extends StateController implements
                     if (mNetworkConnected) {  // No point making the call if we know there's no conn.
                         mNetworkUnmetered = !connManager.isActiveNetworkMetered();
                     }
-                    updateTrackedTasks(userid);
+                    updateTrackedJobs(userid);
                 }
             } else {
                 if (DEBUG) {
@@ -191,10 +191,10 @@ public class ConnectivityController extends StateController implements
     public void dumpControllerState(PrintWriter pw) {
         pw.println("Conn.");
         pw.println("connected: " + mNetworkConnected + " unmetered: " + mNetworkUnmetered);
-        for (TaskStatus ts: mTrackedTasks) {
-            pw.println(String.valueOf(ts.hashCode()).substring(0, 3) + ".."
-                    + ": C=" + ts.hasConnectivityConstraint()
-                    + ", UM=" + ts.hasUnmeteredConstraint());
+        for (JobStatus js: mTrackedJobs) {
+            pw.println(String.valueOf(js.hashCode()).substring(0, 3) + ".."
+                    + ": C=" + js.hasConnectivityConstraint()
+                    + ", UM=" + js.hasUnmeteredConstraint());
         }
     }
 }

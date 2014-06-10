@@ -21,9 +21,11 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.test.AndroidTestCase;
 
-import com.android.server.task.StateChangedListener;
+import com.android.server.job.StateChangedListener;
+import com.android.server.job.controllers.BatteryController;
+import com.android.server.job.controllers.JobStatus;
 
-import static com.android.server.task.controllers.BatteryController.getForTesting;
+import static com.android.server.job.controllers.BatteryController.getForTesting;
 
 import static org.mockito.Mockito.*;
 
@@ -40,7 +42,7 @@ public class BatteryControllerTest extends AndroidTestCase {
         }
 
         @Override
-        public void onRunTaskNow(TaskStatus taskStatus) {
+        public void onRunJobNow(JobStatus taskStatus) {
 
         }
     };

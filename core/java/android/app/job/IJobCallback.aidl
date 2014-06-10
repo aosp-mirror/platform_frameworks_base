@@ -14,43 +14,40 @@
  * limitations under the License.
  */
 
-package android.app.task;
-
-import android.app.task.ITaskService;
-import android.app.task.TaskParams;
+package android.app.job;
 
 /**
- * The server side of the TaskManager IPC protocols.  The app-side implementation
+ * The server side of the JobScheduler IPC protocols.  The app-side implementation
  * invokes on this interface to indicate completion of the (asynchronous) instructions
  * issued by the server.
  *
  * In all cases, the 'who' parameter is the caller's service binder, used to track
- * which Task Service instance is reporting.
+ * which Job Service instance is reporting.
  *
  * {@hide}
  */
-interface ITaskCallback {
+interface IJobCallback {
     /**
      * Immediate callback to the system after sending a start signal, used to quickly detect ANR.
      *
-     * @param taskId Unique integer used to identify this task.
-     * @param ongoing True to indicate that the client is processing the task. False if the task is
+     * @param jobId Unique integer used to identify this job.
+     * @param ongoing True to indicate that the client is processing the job. False if the job is
      * complete
      */
-    void acknowledgeStartMessage(int taskId, boolean ongoing);
+    void acknowledgeStartMessage(int jobId, boolean ongoing);
     /**
      * Immediate callback to the system after sending a stop signal, used to quickly detect ANR.
      *
-     * @param taskId Unique integer used to identify this task.
-     * @param rescheulde Whether or not to reschedule this task.
+     * @param jobId Unique integer used to identify this job.
+     * @param reschedule Whether or not to reschedule this job.
      */
-    void acknowledgeStopMessage(int taskId, boolean reschedule);
+    void acknowledgeStopMessage(int jobId, boolean reschedule);
     /*
-     * Tell the task manager that the client is done with its execution, so that it can go on to
+     * Tell the job manager that the client is done with its execution, so that it can go on to
      * the next one and stop attributing wakelock time to us etc.
      *
-     * @param taskId Unique integer used to identify this task.
-     * @param reschedule Whether or not to reschedule this task.
+     * @param jobId Unique integer used to identify this job.
+     * @param reschedule Whether or not to reschedule this job.
      */
-    void taskFinished(int taskId, boolean reschedule);
+    void jobFinished(int jobId, boolean reschedule);
 }
