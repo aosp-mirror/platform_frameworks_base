@@ -42,6 +42,8 @@
 
 #include <ScopedUtfChars.h>
 
+#include "SkTemplates.h"
+
 // ----------------------------------------------------------------------------
 
 namespace android {
@@ -125,7 +127,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
     Rect sourceCrop(left, top, right, bottom);
 
-    ScreenshotClient* screenshot = new ScreenshotClient();
+    SkAutoTDelete<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
     if (width > 0 && height > 0) {
         if (allLayers) {
@@ -139,7 +141,6 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         res = screenshot->update(displayToken, sourceCrop, useIdentityTransform);
     }
     if (res != NO_ERROR) {
-        delete screenshot;
         return NULL;
     }
 
@@ -164,7 +165,6 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             break;
         }
         default: {
-            delete screenshot;
             return NULL;
         }
     }
@@ -178,7 +178,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         // takes ownership of ScreenshotClient
         SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
                 (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
-                (void*) screenshot);
+                (void*) (screenshot.detach()));
         pixels->setImmutable();
         bitmap->setPixelRef(pixels)->unref();
         bitmap->lockPixels();
