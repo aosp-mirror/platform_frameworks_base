@@ -348,17 +348,16 @@ android_media_MediaScanner_extractAlbumArt(
     }
 
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    MediaAlbumArt* mediaAlbumArt =
-            reinterpret_cast<MediaAlbumArt*>(mp->extractAlbumArt(fd));
+    MediaAlbumArt* mediaAlbumArt = mp->extractAlbumArt(fd);
     if (mediaAlbumArt == NULL) {
         return NULL;
     }
 
-    jbyteArray array = env->NewByteArray(mediaAlbumArt->mSize);
+    jbyteArray array = env->NewByteArray(mediaAlbumArt->size());
     if (array != NULL) {
-        jbyte* bytes = env->GetByteArrayElements(array, NULL);
-        memcpy(bytes, &mediaAlbumArt->mData[0], mediaAlbumArt->mSize);
-        env->ReleaseByteArrayElements(array, bytes, 0);
+        const jbyte* data =
+                reinterpret_cast<const jbyte*>(mediaAlbumArt->data());
+        env->SetByteArrayRegion(array, 0, mediaAlbumArt->size(), data);
     }
 
 done:
