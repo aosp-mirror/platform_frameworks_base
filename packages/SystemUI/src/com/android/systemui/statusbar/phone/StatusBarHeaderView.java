@@ -307,4 +307,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mBrightnessContainer.animate().alpha(showingDetail ? 0 : 1).withLayer().start();
         }
     };
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
 }
