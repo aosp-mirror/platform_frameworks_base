@@ -1832,6 +1832,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         return super.dispatchTouchEvent(ev);
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
