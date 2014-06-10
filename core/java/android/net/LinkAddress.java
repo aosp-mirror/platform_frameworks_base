@@ -39,18 +39,13 @@ import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
  * <ul>
  * <li>An IP address and prefix length (e.g., {@code 2001:db8::1/64} or {@code 192.0.2.1/24}).
  * The address must be unicast, as multicast addresses cannot be assigned to interfaces.
- * <li>Address flags: A bitmask of {@code IFA_F_*} values representing properties
- * of the address.
- * <li>Address scope: An integer defining the scope in which the address is unique (e.g.,
- * {@code RT_SCOPE_LINK} or {@code RT_SCOPE_SITE}).
- * <ul>
- *<p>
- * When constructing a {@code LinkAddress}, the IP address and prefix are required. The flags and
- * scope are optional. If they are not specified, the flags are set to zero, and the scope will be
- * determined based on the IP address (e.g., link-local addresses will be created with a scope of
- * {@code RT_SCOPE_LINK}, global addresses with {@code RT_SCOPE_UNIVERSE},
- * etc.) If they are specified, they are not checked for validity.
- *
+ * <li>Address flags: A bitmask of {@code OsConstants.IFA_F_*} values representing properties
+ * of the address (e.g., {@code android.system.OsConstants.IFA_F_OPTIMISTIC}).
+ * <li>Address scope: One of the {@code OsConstants.IFA_F_*} values; defines the scope in which
+ * the address is unique (e.g.,
+ * {@code android.system.OsConstants.RT_SCOPE_LINK} or
+ * {@code android.system.OsConstants.RT_SCOPE_UNIVERSE}).
+ * </ul>
  */
 public class LinkAddress implements Parcelable {
     /**
@@ -202,7 +197,9 @@ public class LinkAddress implements Parcelable {
 
     /**
      * Compares this {@code LinkAddress} instance against {@code obj}. Two addresses are equal if
-     * their address, prefix length, flags and scope are equal.
+     * their address, prefix length, flags and scope are equal. Thus, for example, two addresses
+     * that have the same address and prefix length are not equal if one of them is deprecated and
+     * the other is not.
      *
      * @param obj the object to be tested for equality.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
@@ -236,6 +233,7 @@ public class LinkAddress implements Parcelable {
      * @param other the {@code LinkAddress} to compare to.
      * @return {@code true} if both objects have the same address and prefix length, {@code false}
      * otherwise.
+     * @hide
      */
     public boolean isSameAddressAs(LinkAddress other) {
         return address.equals(other.address) && prefixLength == other.prefixLength;
@@ -251,8 +249,17 @@ public class LinkAddress implements Parcelable {
     /**
      * Returns the prefix length of this {@code LinkAddress}.
      */
-    public int getNetworkPrefixLength() {
+    public int getPrefixLength() {
         return prefixLength;
+    }
+
+    /**
+     * Returns the prefix length of this {@code LinkAddress}.
+     * TODO: Delete all callers and remove in favour of getPrefixLength().
+     * @hide
+     */
+    public int getNetworkPrefixLength() {
+        return getPrefixLength();
     }
 
     /**

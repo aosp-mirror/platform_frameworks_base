@@ -16172,9 +16172,8 @@ package android.net {
     method public int describeContents();
     method public java.net.InetAddress getAddress();
     method public int getFlags();
-    method public int getNetworkPrefixLength();
+    method public int getPrefixLength();
     method public int getScope();
-    method public boolean isSameAddressAs(android.net.LinkAddress);
     method public void writeToParcel(android.os.Parcel, int);
   }
 

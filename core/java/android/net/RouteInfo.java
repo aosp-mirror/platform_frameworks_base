@@ -119,7 +119,7 @@ public class RouteInfo implements Parcelable {
         mHasGateway = (!gateway.isAnyLocalAddress());
 
         mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
-                destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
+                destination.getPrefixLength()), destination.getPrefixLength());
         if ((destination.getAddress() instanceof Inet4Address &&
                  (gateway instanceof Inet4Address == false)) ||
                 (destination.getAddress() instanceof Inet6Address &&
@@ -210,18 +210,18 @@ public class RouteInfo implements Parcelable {
 
     private boolean isHost() {
         return (mDestination.getAddress() instanceof Inet4Address &&
-                mDestination.getNetworkPrefixLength() == 32) ||
+                mDestination.getPrefixLength() == 32) ||
                (mDestination.getAddress() instanceof Inet6Address &&
-                mDestination.getNetworkPrefixLength() == 128);
+                mDestination.getPrefixLength() == 128);
     }
 
     private boolean isDefault() {
         boolean val = false;
         if (mGateway != null) {
             if (mGateway instanceof Inet4Address) {
-                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 0);
+                val = (mDestination == null || mDestination.getPrefixLength() == 0);
             } else {
-                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 0);
+                val = (mDestination == null || mDestination.getPrefixLength() == 0);
             }
         }
         return val;
@@ -306,7 +306,7 @@ public class RouteInfo implements Parcelable {
 
         // match the route destination and destination with prefix length
         InetAddress dstNet = NetworkUtils.getNetworkPart(destination,
-                mDestination.getNetworkPrefixLength());
+                mDestination.getPrefixLength());
 
         return mDestination.getAddress().equals(dstNet);
     }
@@ -328,8 +328,8 @@ public class RouteInfo implements Parcelable {
         for (RouteInfo route : routes) {
             if (NetworkUtils.addressTypeMatches(route.mDestination.getAddress(), dest)) {
                 if ((bestRoute != null) &&
-                        (bestRoute.mDestination.getNetworkPrefixLength() >=
-                        route.mDestination.getNetworkPrefixLength())) {
+                        (bestRoute.mDestination.getPrefixLength() >=
+                        route.mDestination.getPrefixLength())) {
                     continue;
                 }
                 if (route.matches(dest)) bestRoute = route;
@@ -394,7 +394,7 @@ public class RouteInfo implements Parcelable {
         } else {
             dest.writeByte((byte) 1);
             dest.writeByteArray(mDestination.getAddress().getAddress());
-            dest.writeInt(mDestination.getNetworkPrefixLength());
+            dest.writeInt(mDestination.getPrefixLength());
         }
 
         if (mGateway == null) {

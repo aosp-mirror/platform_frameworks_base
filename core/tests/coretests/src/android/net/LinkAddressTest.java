@@ -56,26 +56,26 @@ public class LinkAddressTest extends AndroidTestCase {
         // Valid addresses work as expected.
         address = new LinkAddress(V4_ADDRESS, 25);
         assertEquals(V4_ADDRESS, address.getAddress());
-        assertEquals(25, address.getNetworkPrefixLength());
+        assertEquals(25, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
 
         address = new LinkAddress(V6_ADDRESS, 127);
         assertEquals(V6_ADDRESS, address.getAddress());
-        assertEquals(127, address.getNetworkPrefixLength());
+        assertEquals(127, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
 
         // Nonsensical flags/scopes or combinations thereof are acceptable.
         address = new LinkAddress(V6 + "/64", IFA_F_DEPRECATED | IFA_F_PERMANENT, RT_SCOPE_LINK);
         assertEquals(V6_ADDRESS, address.getAddress());
-        assertEquals(64, address.getNetworkPrefixLength());
+        assertEquals(64, address.getPrefixLength());
         assertEquals(IFA_F_DEPRECATED | IFA_F_PERMANENT, address.getFlags());
         assertEquals(RT_SCOPE_LINK, address.getScope());
 
         address = new LinkAddress(V4 + "/23", 123, 456);
         assertEquals(V4_ADDRESS, address.getAddress());
-        assertEquals(23, address.getNetworkPrefixLength());
+        assertEquals(23, address.getPrefixLength());
         assertEquals(123, address.getFlags());
         assertEquals(456, address.getScope());
 
@@ -94,10 +94,10 @@ public class LinkAddressTest extends AndroidTestCase {
         }
 
         assertEquals(NetworkUtils.numericToInetAddress("127.0.0.1"), ipv4Loopback.getAddress());
-        assertEquals(8, ipv4Loopback.getNetworkPrefixLength());
+        assertEquals(8, ipv4Loopback.getPrefixLength());
 
         assertEquals(NetworkUtils.numericToInetAddress("::1"), ipv6Loopback.getAddress());
-        assertEquals(128, ipv6Loopback.getNetworkPrefixLength());
+        assertEquals(128, ipv6Loopback.getPrefixLength());
 
         // Null addresses are rejected.
         try {
