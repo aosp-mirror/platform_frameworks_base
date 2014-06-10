@@ -545,12 +545,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
             // Using custom RemoteViews
-            if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
-                entry.row.setBackgroundResource(R.drawable.notification_row_legacy_bg);
-            } else if (version < Build.VERSION_CODES.L) {
+            if (version >= Build.VERSION_CODES.GINGERBREAD && version < Build.VERSION_CODES.L) {
                 entry.row.setBackgroundResourceIds(
                         com.android.internal.R.drawable.notification_bg,
                         com.android.internal.R.drawable.notification_bg_dim);
+                entry.legacy = true;
             }
         } else {
             // Using platform templates
@@ -1026,6 +1025,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     com.android.internal.R.id.text);
             text.setText("Unlock your device to see this notification.");
 
+            entry.autoRedacted = true;
             // TODO: fill out "time" as well
         }
 
