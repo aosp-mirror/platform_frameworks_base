@@ -53,18 +53,37 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsCanceled;
     private ObjectAnimator mBackgroundAnimator;
     private boolean mIsExitTransitionComplete;
+    private boolean mIsReadyForTransition;
+    private Bundle mSharedElementsBundle;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
-            ArrayList<String> sharedElementNames,
-            ArrayList<String> acceptedNames, ArrayList<String> mappedNames) {
-        super(activity.getWindow(), sharedElementNames, acceptedNames, mappedNames,
-                getListener(activity, acceptedNames), acceptedNames != null);
+            ArrayList<String> sharedElementNames, boolean isReturning) {
+        super(activity.getWindow(), sharedElementNames,
+                getListener(activity, isReturning), isReturning);
         mActivity = activity;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
         resultReceiverBundle.putParcelable(KEY_REMOTE_RECEIVER, this);
         mResultReceiver.send(MSG_SET_REMOTE_RECEIVER, resultReceiverBundle);
+        getDecor().getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                if (mIsReadyForTransition) {
+                    getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                }
+                return mIsReadyForTransition;
+            }
+        });
+    }
+
+    public void viewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
+        if (mIsReadyForTransition) {
+            return;
+        }
+        super.viewsReady(accepted, localNames);
+
+        mIsReadyForTransition = true;
         if (mIsReturning) {
             mHandler = new Handler() {
                 @Override
@@ -74,6 +93,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             };
             mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
             send(MSG_SEND_SHARED_ELEMENT_DESTINATION, null);
+        }
+        setViewVisibility(mSharedElements, View.INVISIBLE);
+        if (getViewsTransition() != null) {
+            setViewVisibility(mTransitioningViews, View.INVISIBLE);
+        }
+        if (mSharedElementsBundle != null) {
+            onTakeSharedElements();
         }
     }
 
@@ -94,9 +120,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    private static SharedElementListener getListener(Activity activity,
-            ArrayList<String> acceptedNames) {
-        boolean isReturning = acceptedNames != null;
+    private static SharedElementListener getListener(Activity activity, boolean isReturning) {
         return isReturning ? activity.mExitTransitionListener : activity.mEnterTransitionListener;
     }
 
@@ -108,7 +132,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     if (mHandler != null) {
                         mHandler.removeMessages(MSG_CANCEL);
                     }
-                    onTakeSharedElements(resultData);
+                    mSharedElementsBundle = resultData;
+                    onTakeSharedElements();
                 }
                 break;
             case MSG_EXIT_TRANSITION_COMPLETE:
@@ -139,7 +164,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             mSharedElementNames.clear();
             mSharedElements.clear();
             mAllSharedElementNames.clear();
-            onTakeSharedElements(null);
+            startSharedElementTransition(null);
             onRemoteExitTransitionComplete();
         }
     }
@@ -149,10 +174,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     protected void prepareEnter() {
-        setViewVisibility(mSharedElements, View.INVISIBLE);
-        if (getViewsTransition() != null) {
-            setViewVisibility(mTransitioningViews, View.INVISIBLE);
-        }
         mActivity.overridePendingTransition(0, 0);
         if (!mIsReturning) {
             mActivity.convertToTranslucent(null, null);
@@ -185,7 +206,25 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    protected void onTakeSharedElements(Bundle sharedElementState) {
+    protected void onTakeSharedElements() {
+        if (!mIsReadyForTransition || mSharedElementsBundle == null) {
+            return;
+        }
+        final Bundle sharedElementState = mSharedElementsBundle;
+        mSharedElementsBundle = null;
+        getDecor().getViewTreeObserver()
+                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        startSharedElementTransition(sharedElementState);
+                        return false;
+                    }
+                });
+        getDecor().invalidate();
+    }
+
+    private void startSharedElementTransition(Bundle sharedElementState) {
         setEpicenter();
         // Remove rejected shared elements
         ArrayList<String> rejectedNames = new ArrayList<String>(mAllSharedElementNames);
@@ -299,8 +338,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void stop() {
+        makeOpaque();
         mHasStopped = true;
-        mActivity = null;
         mIsCanceled = true;
         mResultReceiver = null;
         if (mBackgroundAnimator != null) {
@@ -310,7 +349,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void makeOpaque() {
-        if (!mHasStopped) {
+        if (!mHasStopped && mActivity != null) {
             mActivity.convertFromTranslucent();
             mActivity = null;
         }
