@@ -17,12 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Λογισμικό ουράς εκτύπωσης"</string>
-    <string name="advanced_settings_button" msgid="5764225091289415632">"Ρυθμίσεις εκτυπωτή"</string>
-    <string name="print_button" msgid="645164566271246268">"Εκτύπωση"</string>
-    <string name="save_button" msgid="1921310454071758999">"Αποθήκευση"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Περισσότερες επιλογές"</string>
     <string name="label_destination" msgid="9132510997381599275">"Προορισμός"</string>
     <string name="label_copies" msgid="3634531042822968308">"Αντίγραφα"</string>
-    <string name="label_paper_size" msgid="8681895607876809323">"Μέγεθος χαρτιού"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Αντίγραφα:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Μεγέθος χαρτιού"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Μέγεθος χαρτιού:"</string>
     <string name="label_color" msgid="1108690305218188969">"Χρώμα"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Προσανατολισμός"</string>
     <string name="label_pages" msgid="6300874667546617333">"Σελίδες (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -63,7 +63,6 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Δεν υπάρχει σύνδεση με εκτυπωτή"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"άγνωστο"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – μη διαθέσιμο"</string>
-    <string name="print_error_default_message" msgid="8568506918983980567">"Δεν ήταν δυνατή η δημιουργία εργασίας εκτύπωσης"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Ασπρόμαυρο"</item>
     <item msgid="2762241247228983754">"Χρώμα"</item>
@@ -76,4 +75,9 @@
     <item msgid="7421377442011699994">"Όλα"</item>
     <item msgid="6812869625222503603">"Εύρος"</item>
   </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"Δεν ήταν δυνατή η εγγραφή στο αρχείο"</string>
+    <string name="print_error_default_message" msgid="8568506918983980567">"Δεν ήταν δυνατή η δημιουργία εργασίας εκτύπωσης"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Επανάληψη"</string>
+    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Ο εκτυπωτής δεν είναι διαθέσιμος"</string>
+    <string name="print_operation_canceling" msgid="5274571823242489160">"Ακύρωση…"</string>
 </resources>
