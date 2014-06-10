@@ -335,6 +335,10 @@ public final class Installer {
         }
     }
 
+    public int pruneDexCache() {
+        return execute("prunedexcache");
+    }
+
     public int freeCache(long freeStorageSize) {
         StringBuilder builder = new StringBuilder("freecache");
         builder.append(' ');
