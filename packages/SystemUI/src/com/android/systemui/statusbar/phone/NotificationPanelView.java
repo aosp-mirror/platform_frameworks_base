@@ -108,6 +108,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardBottomAreaView mKeyguardBottomArea;
     private boolean mBlockTouches;
     private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
+    private ArrayList<View> mSwipeFadingViews = new ArrayList<>();
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -152,7 +153,7 @@ public class NotificationPanelView extends PanelView implements
                 android.R.interpolator.fast_out_linear_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mSwipeTranslationViews.add(mNotificationStackScroller);
-        mSwipeTranslationViews.add(mKeyguardStatusView);
+        mSwipeFadingViews.add(mKeyguardStatusView);
         mPageSwiper = new KeyguardPageSwipeHelper(this, getContext());
     }
 
@@ -955,6 +956,11 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public ArrayList<View> getTranslationViews() {
         return mSwipeTranslationViews;
+    }
+
+    @Override
+    public ArrayList<View> getFadingViews() {
+        return mSwipeFadingViews;
     }
 
     @Override

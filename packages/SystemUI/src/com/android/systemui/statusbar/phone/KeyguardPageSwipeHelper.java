@@ -246,7 +246,9 @@ public class KeyguardPageSwipeHelper {
     private void startHintTranslationAnimations(float target, long duration,
             Interpolator interpolator) {
         ArrayList<View> targetViews = mCallback.getTranslationViews();
-        for (View targetView : targetViews) {
+        int length = targetViews.size();
+        for (int i = 0; i < length; i++) {
+            View targetView = targetViews.get(i);
             targetView.animate()
                     .setDuration(duration)
                     .setInterpolator(interpolator)
@@ -259,8 +261,16 @@ public class KeyguardPageSwipeHelper {
     }
 
     private void cancelAnimations() {
-        ArrayList<View> targetViews = mCallback.getTranslationViews();
-        for (View target : targetViews) {
+        ArrayList<View> translatingViews = mCallback.getTranslationViews();
+        int length = translatingViews.size();
+        for (int i = 0; i < length; i++) {
+            View target = translatingViews.get(i);
+            target.animate().cancel();
+        }
+        ArrayList<View> fadingViews = mCallback.getFadingViews();
+        length = fadingViews.size();
+        for (int i = 0; i < length; i++) {
+            View target = fadingViews.get(i);
             target.animate().cancel();
         }
         View targetView = mTranslation > 0 ? mLeftIcon : mRightIcon;
@@ -290,6 +300,11 @@ public class KeyguardPageSwipeHelper {
 
         // translation Animation
         startTranslationAnimations(vel, target);
+
+        // fade animations
+        if (snapBack) {
+            startFadeInAnimations();
+        }
 
         // animate left / right icon
         startIconAnimation(vel, snapBack, target);
@@ -346,9 +361,20 @@ public class KeyguardPageSwipeHelper {
         mSwipeAnimator = animator;
     }
 
+    private void startFadeInAnimations() {
+        ArrayList<View> fadingViews = mCallback.getFadingViews();
+        int length = fadingViews.size();
+        for (int i = 0; i < length; i++) {
+            View targetView = fadingViews.get(i);
+            targetView.animate().alpha(1.0f);
+        }
+    }
+
     private void startTranslationAnimations(float vel, float target) {
         ArrayList<View> targetViews = mCallback.getTranslationViews();
-        for (View targetView : targetViews) {
+        int length = targetViews.size();
+        for (int i = 0; i < length; i++) {
+            View targetView = targetViews.get(i);
             ViewPropertyAnimator animator = targetView.animate();
             mFlingAnimationUtils.apply(animator, mTranslation, target, vel);
             animator.translationX(target);
@@ -375,8 +401,18 @@ public class KeyguardPageSwipeHelper {
         translation = leftSwipePossible() ? translation : Math.min(0, translation);
         if (translation != mTranslation || isReset) {
             ArrayList<View> translatedViews = mCallback.getTranslationViews();
-            for (View view : translatedViews) {
-                view.setTranslationX(translation);
+            int length = translatedViews.size();
+            for (int i = 0; i < length; i++) {
+                View target = translatedViews.get(i);
+                target.setTranslationX(translation);
+            }
+            float targetAlpha = 1.0f - Math.abs(translation / mMinTranslationAmount);
+            targetAlpha = Math.max(0.0f, targetAlpha);
+            ArrayList<View> fadingViews = mCallback.getFadingViews();
+            length = fadingViews.size();
+            for (int i = 0; i < length; i++) {
+                View view = fadingViews.get(i);
+                view.setAlpha(targetAlpha);
             }
             if (translation == 0.0f) {
                 boolean animate = !isReset;
@@ -493,6 +529,8 @@ public class KeyguardPageSwipeHelper {
         float getPageWidth();
 
         ArrayList<View> getTranslationViews();
+
+        ArrayList<View> getFadingViews();
 
         View getLeftIcon();
 
