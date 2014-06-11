@@ -22,19 +22,14 @@ import android.os.Parcelable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Defines a request for a network, made by calling {@link ConnectivityManager#requestNetwork}
- * or {@link ConnectivityManager#listenForNetwork}.
- *
- * This token records the {@link NetworkCapabilities} used to make the request and identifies
- * the request.  It should be used to release the request via
- * {@link ConnectivityManager#releaseNetworkRequest} when the network is no longer desired.
+ * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
+ * to request a network via {@link ConnectivityManager#requestNetwork} or listen for changes
+ * via {@link ConnectivityManager#listenForNetwork}.
  */
 public class NetworkRequest implements Parcelable {
     /**
-     * The {@link NetworkCapabilities} that define this request.  This should not be modified.
-     * The networkCapabilities of the request are set when
-     * {@link ConnectivityManager#requestNetwork} is called and the value is presented here
-     * as a convenient reminder of what was requested.
+     * The {@link NetworkCapabilities} that define this request.
+     * @hide
      */
     public final NetworkCapabilities networkCapabilities;
 
@@ -69,6 +64,95 @@ public class NetworkRequest implements Parcelable {
         networkCapabilities = new NetworkCapabilities(that.networkCapabilities);
         requestId = that.requestId;
         this.legacyType = that.legacyType;
+    }
+
+    /**
+     * Builder used to create {@link NetworkRequest} objects.  Specify the Network features
+     * needed in terms of {@link NetworkCapabilities} features
+     */
+    public static class Builder {
+        private final NetworkCapabilities mNetworkCapabilities = new NetworkCapabilities();
+
+        /**
+         * Default constructor for Builder.
+         */
+        public Builder() {}
+
+        /**
+         * Build {@link NetworkRequest} give the current set of capabilities.
+         */
+        public NetworkRequest build() {
+            return new NetworkRequest(mNetworkCapabilities, ConnectivityManager.TYPE_NONE,
+                    ConnectivityManager.REQUEST_ID_UNSET);
+        }
+
+        /**
+         * Add the given capability requirement to this builder.  These represent
+         * the requested network's required capabilities.  Note that when searching
+         * for a network to satisfy a request, all capabilities requested must be
+         * satisfied.  See {@link NetworkCapabilities} for {@code NET_CAPABILITIY_*}
+         * definitions.
+         *
+         * @param capability The {@code NetworkCapabilities.NET_CAPABILITY_*} to add.
+         * @return The builder to facilitate chaining
+         *         {@code builder.addCapability(...).addCapability();}.
+         */
+        public Builder addCapability(int capability) {
+            mNetworkCapabilities.addCapability(capability);
+            return this;
+        }
+
+        /**
+         * Removes (if found) the given capability from this builder instance.
+         *
+         * @param capability The {@code NetworkCapabilities.NET_CAPABILITY_*} to remove.
+         * @return The builder to facilitate chaining.
+         */
+        public Builder removeCapability(int capability) {
+            mNetworkCapabilities.removeCapability(capability);
+            return this;
+        }
+
+        /**
+         * Adds the given transport requirement to this builder.  These represent
+         * the set of allowed transports for the request.  Only networks using one
+         * of these transports will satisfy the request.  If no particular transports
+         * are required, none should be specified here.  See {@link NetworkCapabilities}
+         * for {@code TRANSPORT_*} definitions.
+         *
+         * @param transportType The {@code NetworkCapabilities.TRANSPORT_*} to add.
+         * @return The builder to facilitate chaining.
+         */
+        public Builder addTransportType(int transportType) {
+            mNetworkCapabilities.addTransportType(transportType);
+            return this;
+        }
+
+        /**
+         * Removes (if found) the given transport from this builder instance.
+         *
+         * @param transportType The {@code NetworkCapabilities.TRANSPORT_*} to remove.
+         * @return The builder to facilitate chaining.
+         */
+        public Builder removeTransportType(int transportType) {
+            mNetworkCapabilities.removeTransportType(transportType);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setLinkUpstreamBandwidthKbps(int upKbps) {
+            mNetworkCapabilities.setLinkUpstreamBandwidthKbps(upKbps);
+            return this;
+        }
+        /**
+         * @hide
+         */
+        public Builder setLinkDownstreamBandwidthKbps(int downKbps) {
+            mNetworkCapabilities.setLinkDownstreamBandwidthKbps(downKbps);
+            return this;
+        }
     }
 
     // implement the Parcelable interface

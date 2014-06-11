@@ -16119,21 +16119,12 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities();
     ctor public NetworkCapabilities(android.net.NetworkCapabilities);
-    method public void addNetworkCapability(int);
-    method public void addTransportType(int);
     method public int describeContents();
     method public int getLinkDownstreamBandwidthKbps();
     method public int getLinkUpstreamBandwidthKbps();
-    method public java.util.Collection<java.lang.Integer> getNetworkCapabilities();
-    method public java.util.Collection<java.lang.Integer> getTransportTypes();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
-    method public void removeNetworkCapability(int);
-    method public void removeTransportType(int);
-    method public void setLinkDownstreamBandwidthKbps(int);
-    method public void setLinkUpstreamBandwidthKbps(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
@@ -16207,7 +16198,15 @@ package android.net {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public final android.net.NetworkCapabilities networkCapabilities;
+  }
+
+  public static class NetworkRequest.Builder {
+    ctor public NetworkRequest.Builder();
+    method public android.net.NetworkRequest.Builder addCapability(int);
+    method public android.net.NetworkRequest.Builder addTransportType(int);
+    method public android.net.NetworkRequest build();
+    method public android.net.NetworkRequest.Builder removeCapability(int);
+    method public android.net.NetworkRequest.Builder removeTransportType(int);
   }
 
   public class ParseException extends java.lang.RuntimeException {
