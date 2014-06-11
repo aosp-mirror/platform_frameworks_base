@@ -43,5 +43,31 @@ final class HdmiConstants {
     static final int UI_COMMAND_MUTE_FUNCTION = 0x65;
     static final int UI_COMMAND_RESTORE_VOLUME_FUNCTION = 0x66;
 
+    // Flags used for setOption to CEC HAL.
+    /**
+     * When set to false, HAL does not wake up the system upon receiving
+     * <Image View On> or <Text View On>. Used when user changes the TV
+     * settings to disable the auto TV on functionality.
+     * True by default.
+     */
+    static final int FLAG_HDMI_OPTION_WAKEUP = 1;
+    /**
+     * When set to false, all the CEC commands are discarded. Used when
+     * user changes the TV settings to disable CEC functionality.
+     * True by default.
+     */
+    static final int FLAG_HDMI_OPTION_ENABLE_CEC = 2;
+    /**
+     * Setting this flag to false means Android system will stop handling
+     * CEC service and yield the control over to the microprocessor that is
+     * powered on through the standby mode. When set to true, the system
+     * will gain the control over, hence telling the microprocessor to stop
+     * handling the cec commands. This is called when system goes
+     * in and out of standby mode to notify the microprocessor that it should
+     * start/stop handling CEC commands on behalf of the system.
+     * False by default.
+     */
+    static final int FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL = 3;
+
     private HdmiConstants() { /* cannot be instantiated */ }
 }

@@ -114,8 +114,7 @@ final class NewDeviceAction extends FeatureAction {
         } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
             if (opcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
                 if (params.length == 3) {
-                    mVendorId = ((params[0] & 0xFF) << 16) + ((params[1] & 0xFF) << 8)
-                        + (params[2] & 0xFF);
+                    mVendorId = HdmiUtils.threeBytesToInt(params);
                 } else {
                     Slog.e(TAG, "Failed to get device vendor ID: ");
                 }

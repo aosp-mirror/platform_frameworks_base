@@ -17,11 +17,16 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecMessage;
+import android.util.Slog;
+
+import java.util.Locale;
 
 /**
  * Represent a logical device of type TV residing in Android system.
  */
 final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
+    private static final String TAG = "HdmiCecLocalDeviceTv";
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCec.DEVICE_TV);
@@ -38,5 +43,43 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         mService.launchDeviceDiscovery(mAddress);
         // TODO: Start routing control action, device discovery action.
+    }
+
+    @Override
+    protected boolean onMessage(HdmiCecMessage message) {
+        switch (message.getOpcode()) {
+            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+                return handleReportPhysicalAddress(message);
+            default:
+                return super.onMessage(message);
+        }
+    }
+
+    @Override
+    protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
+                mAddress, Locale.getDefault().getISO3Language());
+        // TODO: figure out how to handle failed to get language code.
+        if (command != null) {
+            mService.sendCecCommand(command);
+        } else {
+            Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
+        }
+        return true;
+    }
+
+    private boolean handleReportPhysicalAddress(HdmiCecMessage message) {
+        // Ignore if [Device Discovery Action] is going on.
+        if (mService.hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
+                    + "because Device Discovery Action is on-going:" + message);
+            return true;
+        }
+
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        mService.addAndStartAction(new NewDeviceAction(mService,
+                mAddress, message.getSource(), physicalAddress));
+
+        return true;
     }
 }

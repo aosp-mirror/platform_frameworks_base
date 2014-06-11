@@ -259,7 +259,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
         byte params[] = cmd.getParams();
         if (params.length == 3) {
-            current.mPhysicalAddress = ((params[0] & 0xFF) << 8) | (params[1] & 0xFF);
+            current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
             current.mDeviceType = params[2] & 0xFF;
 
             increaseProcessedDeviceCount();
@@ -307,9 +307,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
         byte[] params = cmd.getParams();
         if (params.length == 3) {
-            int vendorId = ((params[0] & 0xFF) << 16)
-                    | ((params[1] & 0xFF) << 8)
-                    | (params[2] & 0xFF);
+            int vendorId = HdmiUtils.threeBytesToInt(params);
             current.mVendorId = vendorId;
         } else {
             Slog.w(TAG, "Invalid vendor id: " + cmd.toString());

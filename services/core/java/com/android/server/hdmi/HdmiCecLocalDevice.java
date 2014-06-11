@@ -18,12 +18,15 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiCecMessage;
+import android.util.Slog;
 
 /**
  * Class that models a logical CEC device hosted in this system. Handles initialization,
  * CEC commands that call for actions customized per device type.
  */
 abstract class HdmiCecLocalDevice {
+    private static final String TAG = "HdmiCecLocalDevice";
 
     protected final HdmiControlService mService;
     protected final int mDeviceType;
@@ -58,6 +61,83 @@ abstract class HdmiCecLocalDevice {
      * Called once a logical address of the local device is allocated.
      */
     protected abstract void onAddressAllocated(int logicalAddress);
+
+    /**
+     * Dispatch incoming message.
+     *
+     * @param message incoming message
+     * @return true if consumed a message; otherwise, return false.
+     */
+    final boolean dispatchMessage(HdmiCecMessage message) {
+        int dest = message.getDestination();
+        if (dest != mAddress && dest != HdmiCec.ADDR_BROADCAST) {
+            return false;
+        }
+        return onMessage(message);
+    }
+
+    protected boolean onMessage(HdmiCecMessage message) {
+        switch (message.getOpcode()) {
+            case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
+                return handleGetMenuLanguage(message);
+            case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
+                return handleGivePhysicalAddress();
+            case HdmiCec.MESSAGE_GIVE_OSD_NAME:
+                return handleGiveOsdName(message);
+            case HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID:
+                return handleGiveDeviceVendorId();
+            case HdmiCec.MESSAGE_GET_CEC_VERSION:
+                return handleGetCecVersion(message);
+            default:
+                return false;
+        }
+    }
+
+    protected boolean handleGivePhysicalAddress() {
+        int physicalAddress = mService.getPhysicalAddress();
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                mAddress, physicalAddress, mDeviceType);
+        mService.sendCecCommand(cecMessage);
+        return true;
+    }
+
+    protected boolean handleGiveDeviceVendorId() {
+        int vendorId = mService.getVendorId();
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
+                mAddress, vendorId);
+        mService.sendCecCommand(cecMessage);
+        return true;
+    }
+
+    protected boolean handleGetCecVersion(HdmiCecMessage message) {
+        int version = mService.getCecVersion();
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildCecVersion(message.getDestination(),
+                message.getSource(), version);
+        mService.sendCecCommand(cecMessage);
+        return true;
+    }
+
+    protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
+        Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
+        mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
+                        message.getSource(), HdmiCec.MESSAGE_GET_MENU_LANGUAGE,
+                        HdmiConstants.ABORT_UNRECOGNIZED_MODE));
+        return true;
+    }
+
+    protected boolean handleGiveOsdName(HdmiCecMessage message) {
+        // Note that since this method is called after logical address allocation is done,
+        // mDeviceInfo should not be null.
+        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                mAddress, message.getSource(), mDeviceInfo.getDisplayName());
+        if (cecMessage != null) {
+            mService.sendCecCommand(cecMessage);
+        } else {
+            Slog.w(TAG, "Failed to build <Get Osd Name>:" + mDeviceInfo.getDisplayName());
+        }
+        return true;
+    }
 
     final void handleAddressAllocated(int logicalAddress) {
         mAddress = mPreferredAddress = logicalAddress;

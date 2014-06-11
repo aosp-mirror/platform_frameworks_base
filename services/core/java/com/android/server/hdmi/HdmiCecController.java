@@ -387,6 +387,41 @@ final class HdmiCecController {
     }
 
     /**
+     * Pass a option to CEC HAL.
+     *
+     * @param flag a key of option. For more details, look at
+     *        {@link HdmiConstants#FLAG_HDMI_OPTION_WAKEUP} to
+     *        {@link HdmiConstants#FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL}
+     * @param value a value of option. Actual value varies flag. For more
+     *        details, look at description of flags
+     */
+    void setOption(int flag, int value) {
+        assertRunOnServiceThread();
+        nativeSetOption(mNativePtr, flag, value);
+    }
+
+    /**
+     * Configure ARC circuit in the hardware logic to start or stop the feature.
+     *
+     * @param enabled whether to enable/disable ARC
+     */
+    void setAudioReturnChannel(boolean enabled) {
+        assertRunOnServiceThread();
+        nativeSetAudioReturnChannel(mNativePtr, enabled);
+    }
+
+    /**
+     * Return the connection status of the specified port
+     *
+     * @param port port number to check connection status
+     * @return true if connected; otherwise, return false
+     */
+    boolean isConnected(int port) {
+        assertRunOnServiceThread();
+        return nativeIsConnected(mNativePtr, port);
+    }
+
+    /**
      * Poll all remote devices. It sends &lt;Polling Message&gt; to all remote
      * devices.
      *
@@ -606,4 +641,8 @@ final class HdmiCecController {
     private static native int nativeGetPhysicalAddress(long controllerPtr);
     private static native int nativeGetVersion(long controllerPtr);
     private static native int nativeGetVendorId(long controllerPtr);
+    private static native void nativeSetOption(long controllerPtr, int flag, int value);
+    private static native void nativeSetAudioReturnChannel(long controllerPtr, boolean flag);
+    private static native boolean nativeIsConnected(long controllerPtr, int port);
+
 }
