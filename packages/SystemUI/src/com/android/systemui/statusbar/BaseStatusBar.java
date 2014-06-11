@@ -48,7 +48,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -293,7 +293,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void onListenerConnected() {
             if (DEBUG) Log.d(TAG, "onListenerConnected");
             final StatusBarNotification[] notifications = getActiveNotifications();
-            final Ranking currentRanking = getCurrentRanking();
+            final RankingMap currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -305,41 +305,40 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         @Override
-        public void onNotificationPosted(final StatusBarNotification sbn) {
+        public void onNotificationPosted(final StatusBarNotification sbn,
+                final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
-            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mNotificationData.findByKey(sbn.getKey()) != null) {
-                        updateNotificationInternal(sbn, currentRanking);
+                        updateNotificationInternal(sbn, rankingMap);
                     } else {
-                        addNotificationInternal(sbn, currentRanking);
+                        addNotificationInternal(sbn, rankingMap);
                     }
                 }
             });
         }
 
         @Override
-        public void onNotificationRemoved(final StatusBarNotification sbn) {
+        public void onNotificationRemoved(final StatusBarNotification sbn,
+                final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
-            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    removeNotificationInternal(sbn.getKey(), currentRanking);
+                    removeNotificationInternal(sbn.getKey(), rankingMap);
                 }
             });
         }
 
         @Override
-        public void onNotificationRankingUpdate() {
+        public void onNotificationRankingUpdate(final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onRankingUpdate");
-            final Ranking currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updateRankingInternal(currentRanking);
+                    updateRankingInternal(rankingMap);
                 }
             });
         }
@@ -1177,7 +1176,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected StatusBarNotification removeNotificationViews(String key, Ranking ranking) {
+    protected StatusBarNotification removeNotificationViews(String key, RankingMap ranking) {
         NotificationData.Entry entry = mNotificationData.remove(key, ranking);
         if (entry == null) {
             Log.w(TAG, "removeNotification for unknown key: " + key);
@@ -1217,7 +1216,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry;
     }
 
-    protected void addNotificationViews(Entry entry, Ranking ranking) {
+    protected void addNotificationViews(Entry entry, RankingMap ranking) {
         if (entry == null) {
             return;
         }
@@ -1226,7 +1225,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotifications();
     }
 
-    private void addNotificationViews(StatusBarNotification notification, Ranking ranking) {
+    private void addNotificationViews(StatusBarNotification notification, RankingMap ranking) {
         addNotificationViews(createNotificationViews(notification), ranking);
     }
 
@@ -1312,9 +1311,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public abstract void addNotificationInternal(StatusBarNotification notification,
-            Ranking ranking);
+            RankingMap ranking);
 
-    protected abstract void updateRankingInternal(Ranking ranking);
+    protected abstract void updateRankingInternal(RankingMap ranking);
 
     @Override
     public void removeNotification(String key) {
@@ -1323,7 +1322,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public abstract void removeNotificationInternal(String key, Ranking ranking);
+    public abstract void removeNotificationInternal(String key, RankingMap ranking);
 
     public void updateNotification(StatusBarNotification notification) {
         if (!USE_NOTIFICATION_LISTENER) {
@@ -1331,7 +1330,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void updateNotificationInternal(StatusBarNotification notification, Ranking ranking) {
+    public void updateNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(notification.getKey());
