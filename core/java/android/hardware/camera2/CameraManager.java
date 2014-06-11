@@ -244,11 +244,7 @@ public final class CameraManager {
                             USE_CALLING_UID, holder);
                     cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
                 } catch (CameraRuntimeException e) {
-                    if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
-                        // Use legacy camera implementation for HAL1 devices
-                        Log.i(TAG, "Using legacy camera HAL.");
-                        cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id);
-                    } else if (e.getReason() == CameraAccessException.CAMERA_IN_USE ||
+                    if (e.getReason() == CameraAccessException.CAMERA_IN_USE ||
                             e.getReason() == CameraAccessException.MAX_CAMERAS_IN_USE ||
                             e.getReason() == CameraAccessException.CAMERA_DISABLED ||
                             e.getReason() == CameraAccessException.CAMERA_DISCONNECTED ||
