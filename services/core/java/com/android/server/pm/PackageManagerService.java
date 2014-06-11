@@ -4988,6 +4988,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mResolveActivity.packageName = mAndroidApplication.packageName;
                     mResolveActivity.processName = "system:ui";
                     mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+                    mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                     mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
                     mResolveActivity.theme = R.style.Theme_Holo_Dialog_Alert;
                     mResolveActivity.exported = true;

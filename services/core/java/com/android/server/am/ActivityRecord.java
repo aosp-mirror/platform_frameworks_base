@@ -906,6 +906,9 @@ final class ActivityRecord {
             }
             startTime = 0;
             finishLaunchTickingLocked();
+            if (task != null) {
+                task.hasBeenVisible = true;
+            }
         }
     }
 

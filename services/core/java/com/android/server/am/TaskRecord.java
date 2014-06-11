@@ -73,6 +73,7 @@ final class TaskRecord extends ThumbnailHolder {
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
     boolean askedCompatMode;// Have asked the user about compat mode for this task.
+    boolean hasBeenVisible; // Set if any activities in the task have been visible to the user.
 
     String stringName;      // caching of toString() result.
     int userId;             // user for which this task was created
@@ -328,8 +329,12 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     boolean autoRemoveFromRecents() {
-        return intent != null &&
-                (intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS) != 0;
+        // We will automatically remove the task either if it has explicitly asked for
+        // this, or it is empty and has never contained an activity that got shown to
+        // the user.
+        return (intent != null &&
+                (intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS) != 0) ||
+                (mActivities.isEmpty() && !hasBeenVisible);
     }
 
     /**
@@ -800,7 +805,8 @@ final class TaskRecord extends ThumbnailHolder {
         }
         pw.print(prefix); pw.print("lastThumbnail="); pw.print(lastThumbnail);
                 pw.print(" lastDescription="); pw.println(lastDescription);
-        pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
+        pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
+                pw.print(" lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");
     }
