@@ -1826,11 +1826,7 @@ public class MediaPlayer implements SubtitleController.Listener
             }
             SubtitleTrack track = mInbandSubtitleTracks[index];
             if (track != null) {
-                long runID = data.getStartTimeUs() + 1;
-                track.onData(data.getData(), true /* eos */, runID);
-                track.setRunDiscardTimeMs(
-                        runID,
-                        (data.getStartTimeUs() + data.getDurationUs()) / 1000);
+                track.onData(data);
             }
         }
     };

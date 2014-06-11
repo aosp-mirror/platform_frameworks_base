@@ -75,6 +75,14 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
 
     private long mNextScheduledTimeMs = -1;
 
+    protected void onData(SubtitleData data) {
+        long runID = data.getStartTimeUs() + 1;
+        onData(data.getData(), true /* eos */, runID);
+        setRunDiscardTimeMs(
+                runID,
+                (data.getStartTimeUs() + data.getDurationUs()) / 1000);
+    }
+
     /**
      * Called when there is input data for the subtitle track.  The
      * complete subtitle for a track can include multiple whole units
