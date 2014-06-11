@@ -1001,22 +1001,28 @@ class WebVttTrack extends SubtitleTrack implements WebVttCueListener {
     }
 
     @Override
-    public void onData(String data, boolean eos, long runID) {
-        // implement intermixing restriction for WebVTT only for now
-        synchronized(mParser) {
-            if (mCurrentRunID != null && runID != mCurrentRunID) {
-                throw new IllegalStateException(
-                        "Run #" + mCurrentRunID +
-                        " in progress.  Cannot process run #" + runID);
+    public void onData(byte[] data, boolean eos, long runID) {
+        try {
+            String str = new String(data, "UTF-8");
+
+            // implement intermixing restriction for WebVTT only for now
+            synchronized(mParser) {
+                if (mCurrentRunID != null && runID != mCurrentRunID) {
+                    throw new IllegalStateException(
+                            "Run #" + mCurrentRunID +
+                            " in progress.  Cannot process run #" + runID);
+                }
+                mCurrentRunID = runID;
+                mParser.parse(str);
+                if (eos) {
+                    finishedRun(runID);
+                    mParser.eos();
+                    mRegions.clear();
+                    mCurrentRunID = null;
+                }
             }
-            mCurrentRunID = runID;
-            mParser.parse(data);
-            if (eos) {
-                finishedRun(runID);
-                mParser.eos();
-                mRegions.clear();
-                mCurrentRunID = null;
-            }
+        } catch (java.io.UnsupportedEncodingException e) {
+            Log.w(TAG, "subtitle data is not UTF-8 encoded: " + e);
         }
     }
 

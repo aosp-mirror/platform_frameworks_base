@@ -1649,8 +1649,8 @@ public class MediaPlayer implements SubtitleController.Listener
                 mFormat = MediaFormat.createSubtitleFormat(
                     MEDIA_MIMETYPE_TEXT_SUBRIP, language);
             } else if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
-                mFormat = MediaFormat.createSubtitleFormat(
-                    MEDIA_MIMETYPE_TEXT_VTT, language);
+                String mime = in.readString();
+                mFormat = MediaFormat.createSubtitleFormat(mime, language);
                 mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.readInt());
@@ -1683,10 +1683,38 @@ public class MediaPlayer implements SubtitleController.Listener
             dest.writeString(getLanguage());
 
             if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
+                dest.writeString(mFormat.getString(MediaFormat.KEY_MIME));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_AUTOSELECT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_DEFAULT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE));
             }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder out = new StringBuilder(128);
+            out.append(getClass().getName());
+            out.append('{');
+            switch (mTrackType) {
+            case MEDIA_TRACK_TYPE_VIDEO:
+                out.append("VIDEO");
+                break;
+            case MEDIA_TRACK_TYPE_AUDIO:
+                out.append("AUDIO");
+                break;
+            case MEDIA_TRACK_TYPE_TIMEDTEXT:
+                out.append("TIMEDTEXT");
+                break;
+            case MEDIA_TRACK_TYPE_SUBTITLE:
+                out.append("SUBTITLE");
+                break;
+            default:
+                out.append("UNKNOWN");
+                break;
+            }
+            out.append(", " + mFormat.toString());
+            out.append("}");
+            return out.toString();
         }
 
         /**
@@ -1792,16 +1820,11 @@ public class MediaPlayer implements SubtitleController.Listener
             }
             SubtitleTrack track = mInbandSubtitleTracks[index];
             if (track != null) {
-                try {
-                    long runID = data.getStartTimeUs() + 1;
-                    // TODO: move conversion into track
-                    track.onData(new String(data.getData(), "UTF-8"), true /* eos */, runID);
-                    track.setRunDiscardTimeMs(
-                            runID,
-                            (data.getStartTimeUs() + data.getDurationUs()) / 1000);
-                } catch (java.io.UnsupportedEncodingException e) {
-                    Log.w(TAG, "subtitle data for track " + index + " is not UTF-8 encoded: " + e);
-                }
+                long runID = data.getStartTimeUs() + 1;
+                track.onData(data.getData(), true /* eos */, runID);
+                track.setRunDiscardTimeMs(
+                        runID,
+                        (data.getStartTimeUs() + data.getDurationUs()) / 1000);
             }
         }
     };
@@ -1872,7 +1895,7 @@ public class MediaPlayer implements SubtitleController.Listener
                 }
                 scanner.close();
                 mOutOfBandSubtitleTracks.add(track);
-                track.onData(contents, true /* eos */, ~0 /* runID: keep forever */);
+                track.onData(contents.getBytes(), true /* eos */, ~0 /* runID: keep forever */);
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 

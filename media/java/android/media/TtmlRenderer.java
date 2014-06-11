@@ -563,28 +563,35 @@ class TtmlTrack extends SubtitleTrack implements TtmlNodeListener {
     }
 
     @Override
-    public void onData(String data, boolean eos, long runID) {
-        // implement intermixing restriction for TTML.
-        synchronized(mParser) {
-            if (mCurrentRunID != null && runID != mCurrentRunID) {
-                throw new IllegalStateException(
-                        "Run #" + mCurrentRunID +
-                        " in progress.  Cannot process run #" + runID);
-            }
-            mCurrentRunID = runID;
-            mParsingData += data;
-            if (eos) {
-                try {
-                    mParser.parse(mParsingData, mCurrentRunID);
-                } catch (XmlPullParserException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+    public void onData(byte[] data, boolean eos, long runID) {
+        try {
+            // TODO: handle UTF-8 conversion properly
+            String str = new String(data, "UTF-8");
+
+            // implement intermixing restriction for TTML.
+            synchronized(mParser) {
+                if (mCurrentRunID != null && runID != mCurrentRunID) {
+                    throw new IllegalStateException(
+                            "Run #" + mCurrentRunID +
+                            " in progress.  Cannot process run #" + runID);
                 }
-                finishedRun(runID);
-                mParsingData = "";
-                mCurrentRunID = null;
+                mCurrentRunID = runID;
+                mParsingData += str;
+                if (eos) {
+                    try {
+                        mParser.parse(mParsingData, mCurrentRunID);
+                    } catch (XmlPullParserException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    finishedRun(runID);
+                    mParsingData = "";
+                    mCurrentRunID = null;
+                }
             }
+        } catch (java.io.UnsupportedEncodingException e) {
+            Log.w(TAG, "subtitle data is not UTF-8 encoded: " + e);
         }
     }
 
