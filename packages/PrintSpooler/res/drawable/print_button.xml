@@ -16,8 +16,7 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="@color/print_button_tint_color"
-    android:pinned="true">
+    android:color="@color/print_button_tint_color">
     <item
         android:drawable="@drawable/print_button_background">
     </item>
