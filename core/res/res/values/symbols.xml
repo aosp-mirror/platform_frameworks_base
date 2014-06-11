@@ -1679,7 +1679,6 @@
   <java-symbol type="drawable" name="notification_material_bg" />
   <java-symbol type="drawable" name="notification_material_media_progress" />
   <java-symbol type="color" name="notification_media_action_bg" />
-  <java-symbol type="color" name="notification_media_info_bg" />
   <java-symbol type="color" name="notification_media_progress" />
   <java-symbol type="id" name="media_action_area" />
 
