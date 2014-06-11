@@ -1154,6 +1154,101 @@ nScriptForEachClippedV(JNIEnv *_env, jobject _this, jlong con,
     _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
 }
 
+static void
+nScriptForEachMultiClipped(JNIEnv *_env, jobject _this, jlong con,
+                      jlong script, jint slot, jlongArray ains, jlong aout,
+                      jint xstart, jint xend,
+                      jint ystart, jint yend, jint zstart, jint zend)
+{
+    LOG_API("nScriptForEachMultiClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+
+    jint   in_len = _env->GetArrayLength(ains);
+    jlong* in_ptr = _env->GetLongArrayElements(ains, NULL);
+
+    RsAllocation *in_allocs = NULL;
+
+    if (sizeof(RsAllocation) == sizeof(jlong)) {
+      in_allocs = (RsAllocation*)in_ptr;
+
+    } else {
+      // Convert from 64-bit jlong types to the native pointer type.
+
+      in_allocs = new RsAllocation[in_len];
+
+      for (int index = in_len; --index >= 0;) {
+        in_allocs[index] = (RsAllocation)in_ptr[index];
+      }
+    }
+
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot, in_allocs, in_len, (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
+
+    if (sizeof(RsAllocation) != sizeof(jlong)) {
+      delete[] in_allocs;
+    }
+
+    _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
+}
+
+static void
+nScriptForEachMultiClippedV(JNIEnv *_env, jobject _this, jlong con,
+                       jlong script, jint slot, jlongArray ains, jlong aout,
+                       jbyteArray params, jint xstart, jint xend,
+                       jint ystart, jint yend, jint zstart, jint zend)
+{
+    LOG_API("nScriptForEachMultiClippedV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+
+    jint   in_len = _env->GetArrayLength(ains);
+    jlong* in_ptr = _env->GetLongArrayElements(ains, NULL);
+
+    RsAllocation *in_allocs = NULL;
+
+    if (sizeof(RsAllocation) == sizeof(jlong)) {
+      in_allocs = (RsAllocation*)in_ptr;
+
+    } else {
+      // Convert from 64-bit jlong types to the native pointer type.
+
+      in_allocs = new RsAllocation[in_len];
+
+      for (int index = in_len; --index >= 0;) {
+        in_allocs[index] = (RsAllocation)in_ptr[index];
+      }
+    }
+
+    jint   param_len = _env->GetArrayLength(params);
+    jbyte* param_ptr = _env->GetByteArrayElements(params, NULL);
+
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot, in_allocs, in_len, (RsAllocation)aout, param_ptr, param_len, &sc, sizeof(sc));
+
+    if (sizeof(RsAllocation) != sizeof(jlong)) {
+      delete[] in_allocs;
+    }
+
+    _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
+    _env->ReleaseByteArrayElements(params, param_ptr, JNI_ABORT);
+}
+
 // -----------------------------------
 
 static jlong
@@ -1669,6 +1764,8 @@ static JNINativeMethod methods[] = {
 {"rsnScriptForEach",                 "(JJIJJ[B)V",                            (void*)nScriptForEachV },
 {"rsnScriptForEachClipped",          "(JJIJJIIIIII)V",                        (void*)nScriptForEachClipped },
 {"rsnScriptForEachClipped",          "(JJIJJ[BIIIIII)V",                      (void*)nScriptForEachClippedV },
+{"rsnScriptForEachMultiClipped",     "(JJI[JJIIIIII)V",                       (void*)nScriptForEachMultiClipped },
+{"rsnScriptForEachMultiClipped",     "(JJI[JJ[BIIIIII)V",                     (void*)nScriptForEachMultiClippedV },
 {"rsnScriptSetVarI",                 "(JJII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptGetVarI",                 "(JJI)I",                                (void*)nScriptGetVarI },
 {"rsnScriptSetVarJ",                 "(JJIJ)V",                               (void*)nScriptSetVarJ },

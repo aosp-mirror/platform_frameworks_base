@@ -96,7 +96,7 @@ public final class ScriptIntrinsicResize extends ScriptIntrinsic {
      * @param opt LaunchOptions for clipping
      */
     public void forEach_bicubic(Allocation aout, Script.LaunchOptions opt) {
-        forEach(0, null, aout, null, opt);
+        forEach(0, (Allocation) null, aout, null, opt);
     }
 
     /**
@@ -110,4 +110,3 @@ public final class ScriptIntrinsicResize extends ScriptIntrinsic {
 
 
 }
-
