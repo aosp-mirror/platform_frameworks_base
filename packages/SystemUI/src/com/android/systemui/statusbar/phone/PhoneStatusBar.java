@@ -278,10 +278,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // the date view
     DateView mDateView;
 
-    // for heads up notifications
-    private HeadsUpNotificationView mHeadsUpNotificationView;
-    private int mHeadsUpNotificationDecay;
-
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -367,7 +363,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (!mUseHeadsUp) {
                     Log.d(TAG, "dismissing any existing heads up notification on disable event");
                     setHeadsUpVisibility(false);
-                    mHeadsUpNotificationView.setNotification(null);
+                    mHeadsUpNotificationView.release();
                     removeHeadsUpView();
                 } else {
                     addHeadsUpView();
@@ -1064,29 +1060,27 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void displayNotification(StatusBarNotification notification,
             Ranking ranking) {
-        Entry shadeEntry = createNotificationViews(notification);
-        if (shadeEntry == null) {
-            return;
-        }
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
             Entry interruptionCandidate = new Entry(notification, null);
             ViewGroup holder = mHeadsUpNotificationView.getHolder();
             if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
                 mInterruptingNotificationTime = System.currentTimeMillis();
-                mInterruptingNotificationEntry = interruptionCandidate;
-                shadeEntry.setInterruption();
 
                 // 1. Populate mHeadsUpNotificationView
-                mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
+                mHeadsUpNotificationView.showNotification(interruptionCandidate);
 
-                // 2. Animate mHeadsUpNotificationView in
-                mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
-
-                // 3. Set alarm to age the notification off
-                resetHeadsUpDecayTimer();
+                // do not show the notification in the shade, yet.
+                return;
             }
-        } else if (notification.getNotification().fullScreenIntent != null) {
+        }
+
+        Entry shadeEntry = createNotificationViews(notification);
+        if (shadeEntry == null) {
+            return;
+        }
+
+        if (notification.getNotification().fullScreenIntent != null) {
             // Stop screensaver if the notification has a full-screen intent.
             // (like an incoming phone call)
             awakenDreams();
@@ -1101,7 +1095,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // usual case: status bar visible & not immersive
 
             // show the ticker if there isn't already a heads up
-            if (mInterruptingNotificationEntry == null) {
+            if (mHeadsUpNotificationView.getEntry() == null) {
                 tick(notification, true);
             }
         }
@@ -1111,13 +1105,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
+    public void displayNotificationFromHeadsUp(StatusBarNotification notification) {
+        NotificationData.Entry shadeEntry = createNotificationViews(notification);
+        if (shadeEntry == null) {
+            return;
+        }
+        shadeEntry.setInterruption();
+
+        addNotificationViews(shadeEntry, null);
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
+
     @Override
     public void resetHeadsUpDecayTimer() {
-        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+        mHandler.removeMessages(MSG_DECAY_HEADS_UP);
         if (mUseHeadsUp && mHeadsUpNotificationDecay > 0
                 && mHeadsUpNotificationView.isClearable()) {
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, mHeadsUpNotificationDecay);
+            mHandler.sendEmptyMessageDelayed(MSG_DECAY_HEADS_UP, mHeadsUpNotificationDecay);
         }
+    }
+
+    @Override
+    public void scheduleHeadsUpOpen() {
+        mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
+    }
+
+    @Override
+    public void scheduleHeadsUpClose() {
+        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+    }
+
+    @Override
+    public void scheduleHeadsUpEscalation() {
+        mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
     }
 
     @Override
@@ -1136,6 +1158,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void removeNotificationInternal(String key, Ranking ranking) {
+        if (ENABLE_HEADS_UP && mHeadsUpNotificationView.getEntry() != null
+                && key.equals(mHeadsUpNotificationView.getEntry().notification.getKey())) {
+            mHeadsUpNotificationView.clear();
+        }
+
         StatusBarNotification old = removeNotificationViews(key, ranking);
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
@@ -1147,11 +1174,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-
-            if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
-                    && old == mInterruptingNotificationEntry.notification) {
-                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
-            }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
                     && !mNotificationPanel.isTracking() && mState != StatusBarState.KEYGUARD) {
@@ -1575,7 +1597,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 case MSG_SHOW_HEADS_UP:
                     setHeadsUpVisibility(true);
                     break;
+                case MSG_DECAY_HEADS_UP:
+                    mHeadsUpNotificationView.release();
+                    setHeadsUpVisibility(false);
+                    break;
                 case MSG_HIDE_HEADS_UP:
+                    mHeadsUpNotificationView.release();
                     setHeadsUpVisibility(false);
                     break;
                 case MSG_ESCALATE_HEADS_UP:
@@ -1588,8 +1615,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     /**  if the interrupting notification had a fullscreen intent, fire it now.  */
     private void escalateHeadsUp() {
-        if (mInterruptingNotificationEntry != null) {
-            final StatusBarNotification sbn = mInterruptingNotificationEntry.notification;
+        if (mHeadsUpNotificationView.getEntry() != null) {
+            final StatusBarNotification sbn = mHeadsUpNotificationView.getEntry().notification;
+            mHeadsUpNotificationView.release();
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG)
@@ -2244,7 +2272,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
         pw.print("  interrupting package: ");
-        pw.println(hunStateToString(mInterruptingNotificationEntry));
+        pw.println(hunStateToString(mHeadsUpNotificationView.getEntry()));
         dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             pw.print("  mNavigationBarWindowState=");
@@ -2518,26 +2546,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (!ENABLE_HEADS_UP) return;
         if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
         mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
-        if (!vis) {
-            if (DEBUG) Log.d(TAG, "setting heads up entry to null");
-            mInterruptingNotificationEntry = null;
-        }
     }
 
     public void onHeadsUpDismissed() {
-        if (mInterruptingNotificationEntry == null) return;
-        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
-        if (mHeadsUpNotificationView.isClearable()) {
-            try {
-                mBarService.onNotificationClear(
-                        mInterruptingNotificationEntry.notification.getPackageName(),
-                        mInterruptingNotificationEntry.notification.getTag(),
-                        mInterruptingNotificationEntry.notification.getId(),
-                        mInterruptingNotificationEntry.notification.getUserId());
-            } catch (android.os.RemoteException ex) {
-                // oh well
-            }
-        }
+        mHeadsUpNotificationView.dismiss();
     }
 
     /**
