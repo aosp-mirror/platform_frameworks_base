@@ -10204,7 +10204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Check whether the newly-scanned package wants to define an already-defined perm
             int N = pkg.permissions.size();
-            for (int i = 0; i < N; i++) {
+            for (int i = N-1; i >= 0; i--) {
                 PackageParser.Permission perm = pkg.permissions.get(i);
                 BasePermission bp = mSettings.mPermissions.get(perm.info.name);
                 if (bp != null) {
@@ -10212,13 +10212,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // also includes the "updating the same package" case, of course.
                     if (compareSignatures(bp.packageSetting.signatures.mSignatures,
                             pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
-                        Slog.w(TAG, "Package " + pkg.packageName
-                                + " attempting to redeclare permission " + perm.info.name
-                                + " already owned by " + bp.sourcePackage);
-                        res.returnCode = PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
-                        res.origPermission = perm.info.name;
-                        res.origPackage = bp.sourcePackage;
-                        return;
+                        // If the owning package is the system itself, we log but allow
+                        // install to proceed; we fail the install on all other permission
+                        // redefinitions.
+                        if (!bp.sourcePackage.equals("android")) {
+                            Slog.w(TAG, "Package " + pkg.packageName
+                                    + " attempting to redeclare permission " + perm.info.name
+                                    + " already owned by " + bp.sourcePackage);
+                            res.returnCode = PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+                            res.origPermission = perm.info.name;
+                            res.origPackage = bp.sourcePackage;
+                            return;
+                        } else {
+                            Slog.w(TAG, "Package " + pkg.packageName
+                                    + " attempting to redeclare system permission "
+                                    + perm.info.name + "; ignoring new declaration");
+                            pkg.permissions.remove(i);
+                        }
                     }
                 }
             }
