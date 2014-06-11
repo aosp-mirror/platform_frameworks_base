@@ -429,26 +429,19 @@ public:
         GraphicsJNI::getNativePaint(env, paint)->setTextSkewX(skewX);
     }
 
-    static jfloat ascent(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        SkPaint::FontMetrics    metrics;
-        (void)GraphicsJNI::getNativePaint(env, paint)->getFontMetrics(&metrics);
-        return SkScalarToFloat(metrics.fAscent);
-    }
-
-    static jfloat descent(JNIEnv* env, jobject paint) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        SkPaint::FontMetrics    metrics;
-        (void)GraphicsJNI::getNativePaint(env, paint)->getFontMetrics(&metrics);
-        return SkScalarToFloat(metrics.fDescent);
-    }
-
-    static SkScalar getMetricsInternal(SkPaint *paint, SkPaint::FontMetrics *metrics) {
+    static SkScalar getMetricsInternal(JNIEnv* env, jobject jpaint, SkPaint::FontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
-        const int kElegantAscent = 1946;
-        const int kElegantDescent = -512;
+        const int kElegantAscent = 1900;
+        const int kElegantDescent = -500;
         const int kElegantLeading = 0;
+        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
+#ifdef USE_MINIKIN
+        TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
+        typeface = TypefaceImpl_resolveDefault(typeface);
+        MinikinFont* baseFont = typeface->fFontCollection->baseFont(typeface->fStyle);
+        paint->setTypeface(reinterpret_cast<MinikinFontSkia*>(baseFont)->GetSkTypeface());
+#endif
         SkScalar spacing = paint->getFontMetrics(metrics);
         SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
         if (paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant) {
@@ -463,10 +456,24 @@ public:
         return spacing;
     }
 
+    static jfloat ascent(JNIEnv* env, jobject paint) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        SkPaint::FontMetrics metrics;
+        getMetricsInternal(env, paint, &metrics);
+        return SkScalarToFloat(metrics.fAscent);
+    }
+
+    static jfloat descent(JNIEnv* env, jobject paint) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        SkPaint::FontMetrics metrics;
+        getMetricsInternal(env, paint, &metrics);
+        return SkScalarToFloat(metrics.fDescent);
+    }
+
     static jfloat getFontMetrics(JNIEnv* env, jobject paint, jobject metricsObj) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         SkPaint::FontMetrics metrics;
-        SkScalar spacing = getMetricsInternal(GraphicsJNI::getNativePaint(env, paint), &metrics);
+        SkScalar spacing = getMetricsInternal(env, paint, &metrics);
 
         if (metricsObj) {
             SkASSERT(env->IsInstanceOf(metricsObj, gFontMetrics_class));
@@ -483,7 +490,7 @@ public:
         NPE_CHECK_RETURN_ZERO(env, paint);
         SkPaint::FontMetrics metrics;
 
-        getMetricsInternal(GraphicsJNI::getNativePaint(env, paint), &metrics);
+        getMetricsInternal(env, paint, &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
         int descent = SkScalarRoundToInt(metrics.fDescent);
         int leading = SkScalarRoundToInt(metrics.fLeading);
