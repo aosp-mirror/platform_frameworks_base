@@ -35,6 +35,9 @@ public final class WindowInsets {
     private Rect mTempRect;
     private boolean mIsRound;
 
+    private boolean mSystemWindowInsetsConsumed = false;
+    private boolean mWindowDecorInsetsConsumed = false;
+
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
     /**
@@ -52,13 +55,17 @@ public final class WindowInsets {
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, boolean isRound) {
-        this(systemWindowInsets, EMPTY_RECT, isRound);
+        this(systemWindowInsets, null, isRound);
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, boolean isRound) {
-        mSystemWindowInsets = systemWindowInsets;
-        mWindowDecorInsets = windowDecorInsets;
+        mSystemWindowInsetsConsumed = systemWindowInsets == null;
+        mSystemWindowInsets = mSystemWindowInsetsConsumed ? EMPTY_RECT : systemWindowInsets;
+
+        mWindowDecorInsetsConsumed = windowDecorInsets == null;
+        mWindowDecorInsets = mWindowDecorInsetsConsumed ? EMPTY_RECT : windowDecorInsets;
+
         mIsRound = isRound;
     }
 
@@ -70,12 +77,14 @@ public final class WindowInsets {
     public WindowInsets(WindowInsets src) {
         mSystemWindowInsets = src.mSystemWindowInsets;
         mWindowDecorInsets = src.mWindowDecorInsets;
+        mSystemWindowInsetsConsumed = src.mSystemWindowInsetsConsumed;
+        mWindowDecorInsetsConsumed = src.mWindowDecorInsetsConsumed;
         mIsRound = src.mIsRound;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, EMPTY_RECT);
+        this(systemWindowInsets, null);
     }
 
     /**
@@ -238,6 +247,24 @@ public final class WindowInsets {
     }
 
     /**
+     * Check if these insets have been fully consumed.
+     *
+     * <p>Insets are considered "consumed" if the applicable <code>consume*</code> methods
+     * have been called such that all insets have been set to zero. This affects propagation of
+     * insets through the view hierarchy; insets that have not been fully consumed will continue
+     * to propagate down to child views.</p>
+     *
+     * <p>The result of this method is equivalent to the return value of
+     * {@link View#fitSystemWindows(android.graphics.Rect)}.</p>
+     *
+     * @return true if the insets have been fully consumed.
+     * @hide Pending API
+     */
+    public boolean isConsumed() {
+        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed;
+    }
+
+    /**
      * Returns true if the associated window has a round shape.
      *
      * <p>A round window's left, top, right and bottom edges reach all the way to the
@@ -258,7 +285,8 @@ public final class WindowInsets {
      */
     public WindowInsets consumeSystemWindowInsets() {
         final WindowInsets result = new WindowInsets(this);
-        result.mSystemWindowInsets = new Rect(0, 0, 0, 0);
+        result.mSystemWindowInsets = EMPTY_RECT;
+        result.mSystemWindowInsetsConsumed = true;
         return result;
     }
 
@@ -276,10 +304,12 @@ public final class WindowInsets {
             boolean right, boolean bottom) {
         if (left || top || right || bottom) {
             final WindowInsets result = new WindowInsets(this);
-            result.mSystemWindowInsets = new Rect(left ? 0 : mSystemWindowInsets.left,
+            result.mSystemWindowInsets = new Rect(
+                    left ? 0 : mSystemWindowInsets.left,
                     top ? 0 : mSystemWindowInsets.top,
                     right ? 0 : mSystemWindowInsets.right,
                     bottom ? 0 : mSystemWindowInsets.bottom);
+            result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
             return result;
         }
         return this;
@@ -299,6 +329,7 @@ public final class WindowInsets {
             int right, int bottom) {
         final WindowInsets result = new WindowInsets(this);
         result.mSystemWindowInsets = new Rect(left, top, right, bottom);
+        result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
         return result;
     }
 
@@ -308,6 +339,7 @@ public final class WindowInsets {
     public WindowInsets consumeWindowDecorInsets() {
         final WindowInsets result = new WindowInsets(this);
         result.mWindowDecorInsets.set(0, 0, 0, 0);
+        result.mWindowDecorInsetsConsumed = true;
         return result;
     }
 
@@ -322,6 +354,7 @@ public final class WindowInsets {
                     top ? 0 : mWindowDecorInsets.top,
                     right ? 0 : mWindowDecorInsets.right,
                     bottom ? 0 : mWindowDecorInsets.bottom);
+            result.mWindowDecorInsetsConsumed = !hasWindowDecorInsets();
             return result;
         }
         return this;
@@ -333,6 +366,7 @@ public final class WindowInsets {
     public WindowInsets replaceWindowDecorInsets(int left, int top, int right, int bottom) {
         final WindowInsets result = new WindowInsets(this);
         result.mWindowDecorInsets = new Rect(left, top, right, bottom);
+        result.mWindowDecorInsetsConsumed = !hasWindowDecorInsets();
         return result;
     }
 

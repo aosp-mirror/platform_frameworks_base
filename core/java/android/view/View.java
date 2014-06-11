@@ -6105,7 +6105,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // apply insets path and take things from there.
             try {
                 mPrivateFlags3 |= PFLAG3_FITTING_SYSTEM_WINDOWS;
-                return !dispatchApplyWindowInsets(new WindowInsets(insets)).hasInsets();
+                return dispatchApplyWindowInsets(new WindowInsets(insets)).isConsumed();
             } finally {
                 mPrivateFlags3 &= ~PFLAG3_FITTING_SYSTEM_WINDOWS;
             }
