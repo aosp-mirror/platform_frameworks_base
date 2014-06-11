@@ -85,7 +85,7 @@ public class IpConfigStore {
                     }
                     for (RouteInfo route : linkProperties.getRoutes()) {
                         out.writeUTF(GATEWAY_KEY);
-                        LinkAddress dest = route.getDestination();
+                        LinkAddress dest = route.getDestinationLinkAddress();
                         if (dest != null) {
                             out.writeInt(1);
                             out.writeUTF(dest.getAddress().getHostAddress());
