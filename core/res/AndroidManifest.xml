@@ -2805,7 +2805,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.RestrictionsPinActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Material.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:windowSoftInputMode="adjustPan"
                 android:process=":ui">
