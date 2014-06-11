@@ -440,9 +440,18 @@ public:
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         typeface = TypefaceImpl_resolveDefault(typeface);
         FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
+        float saveSkewX = paint->getTextSkewX();
+        bool savefakeBold = paint->isFakeBoldText();
         MinikinFontSkia::populateSkPaint(paint, baseFont.font, baseFont.fakery);
 #endif
         SkScalar spacing = paint->getFontMetrics(metrics);
+#ifdef USE_MINIKIN
+        // The populateSkPaint call may have changed fake bold / text skew
+        // because we want to measure with those effects applied, so now
+        // restore the original settings.
+        paint->setTextSkewX(saveSkewX);
+        paint->setFakeBoldText(savefakeBold);
+#endif
         SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
         if (paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant) {
             SkScalar size = paint->getTextSize();
