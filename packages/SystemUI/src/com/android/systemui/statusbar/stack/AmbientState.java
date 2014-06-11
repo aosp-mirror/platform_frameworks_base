@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.stack;
 
 import android.view.View;
+import com.android.systemui.statusbar.ActivatableNotificationView;
 
 import java.util.ArrayList;
 
@@ -27,7 +28,7 @@ public class AmbientState {
     private ArrayList<View> mDraggedViews = new ArrayList<View>();
     private int mScrollY;
     private boolean mDimmed;
-    private View mActivatedChild;
+    private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
@@ -64,7 +65,7 @@ public class AmbientState {
      * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
      * interaction. This child is then scaled normally and its background is fully opaque.
      */
-    public void setActivatedChild(View activatedChild) {
+    public void setActivatedChild(ActivatableNotificationView activatedChild) {
         mActivatedChild = activatedChild;
     }
 
@@ -72,7 +73,7 @@ public class AmbientState {
         return mDimmed;
     }
 
-    public View getActivatedChild() {
+    public ActivatableNotificationView getActivatedChild() {
         return mActivatedChild;
     }
 
