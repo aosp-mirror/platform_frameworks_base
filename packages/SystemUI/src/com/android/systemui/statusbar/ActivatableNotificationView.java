@@ -158,7 +158,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            makeInactive();
+            makeInactive(true /* animate */);
         }
     };
 
@@ -183,7 +183,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (!isWithinTouchSlop(event)) {
-                    makeInactive();
+                    makeInactive(true /* animate */);
                     return false;
                 }
                 break;
@@ -193,14 +193,17 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                         makeActive();
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
-                        performClick();
+                        boolean performed = performClick();
+                        if (performed) {
+                            removeCallbacks(mTapTimeoutRunnable);
+                        }
                     }
                 } else {
-                    makeInactive();
+                    makeInactive(true /* animate */);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                makeInactive();
+                makeInactive(true /* animate */);
                 break;
             default:
                 break;
@@ -257,10 +260,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     /**
      * Cancels the hotspot and makes the notification inactive.
      */
-    private void makeInactive() {
+    public void makeInactive(boolean animate) {
         if (mActivated) {
             if (mDimmed) {
-                startActivateAnimation(true /* reverse */);
+                if (animate) {
+                    startActivateAnimation(true /* reverse */);
+                } else {
+                    mBackgroundNormal.setVisibility(View.INVISIBLE);
+                }
             }
             mActivated = false;
         }
@@ -351,6 +358,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
             mBackgroundNormal.setAlpha(1f);
+            removeCallbacks(mTapTimeoutRunnable);
         }
     }
 
@@ -581,7 +589,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public interface OnActivatedListener {
-        void onActivated(View view);
-        void onActivationReset(View view);
+        void onActivated(ActivatableNotificationView view);
+        void onActivationReset(ActivatableNotificationView view);
     }
 }

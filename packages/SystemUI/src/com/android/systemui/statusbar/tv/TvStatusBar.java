@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.tv;
 
 import android.os.IBinder;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -25,6 +24,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 /*
@@ -164,10 +164,10 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void onActivated(View view) {
+    public void onActivated(ActivatableNotificationView view) {
     }
 
     @Override
-    public void onActivationReset(View view) {
+    public void onActivationReset(ActivatableNotificationView view) {
     }
 }
