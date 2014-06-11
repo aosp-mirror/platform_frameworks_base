@@ -2956,7 +2956,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     class ActivityContainer extends android.app.IActivityContainer.Stub {
         final static int FORCE_NEW_TASK_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION;
         final int mStackId;
         IActivityContainerCallback mCallback = null;
         final ActivityStack mStack;
