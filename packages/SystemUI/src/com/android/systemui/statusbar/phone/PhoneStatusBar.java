@@ -828,6 +828,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mStatusBarView;
     }
 
+    public StatusBarWindowView getStatusBarWindow() {
+        return mStatusBarWindow;
+    }
+
     @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
         boolean opaque = false;
@@ -2983,22 +2987,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void instantExpandNotificationsPanel() {
 
-        // Make our window larger and the panel visible.
+        // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
-        mNotificationPanel.setVisibility(View.VISIBLE);
-
-        // Wait for window manager to pickup the change, so we know the maximum height of the panel
-        // then.
-        mNotificationPanel.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (mStatusBarWindow.getHeight() != getStatusBarHeight()) {
-                    mNotificationPanel.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    mNotificationPanel.setExpandedFraction(1);
-                }
-            }
-        });
+        mNotificationPanel.instantExpand();
     }
 
     private void instantCollapseNotificationPanel() {
