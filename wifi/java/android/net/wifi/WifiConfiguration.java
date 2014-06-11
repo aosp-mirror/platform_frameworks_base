@@ -405,6 +405,10 @@ public class WifiConfiguration implements Parcelable {
     /** @hide **/
     public static int INITIAL_AUTO_JOIN_ATTEMPT_MIN_5 = -70;
 
+    /** @hide
+     * 5GHz band is prefered over 2.4 if the 5GHz RSSI is higher than this threshold **/
+    public static int A_BAND_PREFERENCE_RSSI_THRESHOLD = -65;
+
     /**
      * @hide
      * A summary of the RSSI and Band status for that configuration
@@ -481,11 +485,11 @@ public class WifiConfiguration implements Parcelable {
             if (result.seen == 0)
                 continue;
 
-            if ((result.frequency > 4900) && (result.frequency < 5900)) {
+            if (result.is5GHz()) {
                 //strictly speaking: [4915, 5825]
                 //number of known BSSID on 5GHz band
                 status.num5 = status.num5 + 1;
-            } else if ((result.frequency > 2400) && (result.frequency < 2500)) {
+            } else if (result.is24GHz()) {
                 //strictly speaking: [2412, 2482]
                 //number of known BSSID on 2.4Ghz band
                 status.num24 = status.num24 + 1;
@@ -493,12 +497,12 @@ public class WifiConfiguration implements Parcelable {
 
             if ((now_ms - result.seen) > age) continue;
 
-            if ((result.frequency > 4900) && (result.frequency < 5900)) {
+            if (result.is5GHz()) {
                 if (result.level > status.rssi5) {
                     status.rssi5 = result.level;
                     status.age5 = result.seen;
                 }
-            } else if ((result.frequency > 2400) && (result.frequency < 2500)) {
+            } else if (result.is24GHz()) {
                 if (result.level > status.rssi24) {
                     status.rssi24 = result.level;
                     status.age24 = result.seen;
@@ -547,6 +551,17 @@ public class WifiConfiguration implements Parcelable {
      */
     public long blackListTimestamp;
 
+    /**
+     * @hide
+     * last time the system was connected to this configuration.
+     */
+    public long lastConnected;
+
+    /**
+     * @hide
+     * last time the system was disconnected to this configuration.
+     */
+    public long lastDisconnected;
 
     /**
      * Set if the configuration was self added by the framework
@@ -658,7 +673,20 @@ public class WifiConfiguration implements Parcelable {
 
         // TODO: Add more checks
         return true;
+    }
 
+    /**
+     * Helper function, identify if a configuration is linked
+     * @hide
+     */
+    public boolean isLinked(WifiConfiguration config) {
+        if (config.linkedConfigurations != null && linkedConfigurations != null) {
+            if (config.linkedConfigurations.get(configKey()) != null
+                    && linkedConfigurations.get(config.configKey()) != null) {
+                return true;
+            }
+        }
+        return  false;
     }
 
     /**
@@ -688,6 +716,7 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide **/
     public void setAutoJoinStatus(int status) {
+        if (status < 0) status = 0;
         if (status == 0) {
             blackListTimestamp = 0;
         }  else if (status > autoJoinStatus) {
@@ -1079,6 +1108,8 @@ public class WifiConfiguration implements Parcelable {
             creatorUid = source.creatorUid;
             peerWifiConfiguration = source.peerWifiConfiguration;
             blackListTimestamp = source.blackListTimestamp;
+            lastConnected = source.lastConnected;
+            lastDisconnected = source.lastDisconnected;
         }
     }
 
