@@ -275,14 +275,8 @@
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
 
-    <!-- The height of the collapsed speed bump view. -->
-    <dimen name="speed_bump_height_collapsed">24dp</dimen>
-
-    <!-- The padding inset the explanation text needs compared to the collapsed height -->
-    <dimen name="speed_bump_text_padding_inset">10dp</dimen>
-
-    <!-- The height of the speed bump dots. -->
-    <dimen name="speed_bump_dots_height">5dp</dimen>
+    <!-- The height of the speed bump view. -->
+    <dimen name="speed_bump_height">16dp</dimen>
 
     <!-- The total height of the stack in its collapsed size (i.e. when quick settings is open) -->
     <dimen name="collapsed_stack_height">94dp</dimen>

@@ -160,9 +160,8 @@ public class StackScrollState {
                 }
 
                 if(child instanceof SpeedBumpView) {
-                    float speedBumpEnd = newYTranslation + newHeight;
-                    performSpeedBumpAnimation(i, (SpeedBumpView) child, speedBumpEnd,
-                            newYTranslation);
+                    float lineEnd = newYTranslation + newHeight / 2;
+                    performSpeedBumpAnimation(i, (SpeedBumpView) child, lineEnd);
                 }
             }
         }
@@ -183,20 +182,12 @@ public class StackScrollState {
         child.setClipBounds(mClipRect);
     }
 
-    private void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, float speedBumpEnd,
-            float speedBumpStart) {
+    private void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, float speedBumpEnd) {
         View nextChild = getNextChildNotGone(i);
         if (nextChild != null) {
             ViewState nextState = getViewStateForView(nextChild);
-            boolean startIsAboveNext = nextState.yTranslation > speedBumpStart;
+            boolean startIsAboveNext = nextState.yTranslation > speedBumpEnd;
             speedBump.animateDivider(startIsAboveNext, null /* onFinishedRunnable */);
-
-            // handle expanded case
-            if (speedBump.isExpanded()) {
-                boolean endIsAboveNext = nextState.yTranslation > speedBumpEnd;
-                speedBump.animateExplanationText(endIsAboveNext);
-            }
-
         }
     }
 
