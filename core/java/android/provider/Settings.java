@@ -791,6 +791,15 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PAIRING_SETTINGS = "android.settings.PAIRING_SETTINGS";
 
+    /**
+     * Activity Action: Show battery saver settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BATTERY_SAVER_SETTINGS
+            = "android.settings.BATTERY_SAVER_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
@@ -6023,6 +6032,12 @@ public final class Settings {
          * @hide
          */
         public static final String LOW_POWER_MODE = "low_power";
+
+        /**
+         * Battery level [1-99] at which low power mode automatically turns on.
+         * @hide
+         */
+        public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
          /**
          * If 1, the activity manager will aggressively finish activities and
