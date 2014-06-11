@@ -48,7 +48,7 @@ public class MenuInflater_Delegate {
             AttributeSet attrs) {
         if (menuItem instanceof BridgeMenuItemImpl) {
             Context context = thisInflater.getContext();
-            if (context instanceof ContextThemeWrapper) {
+            while (context instanceof ContextThemeWrapper) {
                 context = ((ContextThemeWrapper) context).getBaseContext();
             }
             if (context instanceof BridgeContext) {
