@@ -1192,9 +1192,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final int vis = ent.notification.getNotification().visibility;
             if (vis != Notification.VISIBILITY_SECRET) {
                 // when isLockscreenPublicMode() we show the public form of VISIBILITY_PRIVATE notifications
-                ent.row.setShowingPublic(isLockscreenPublicMode()
+                boolean showingPublic = isLockscreenPublicMode()
                         && vis == Notification.VISIBILITY_PRIVATE
-                        && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId()));
+                        && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId());
+                ent.row.setShowingPublic(showingPublic);
+                if (ent.autoRedacted && ent.legacy) {
+                    if (showingPublic) {
+                        ent.row.setBackgroundResourceIds(
+                                com.android.internal.R.drawable.notification_material_bg,
+                                com.android.internal.R.drawable.notification_material_bg_dim);
+                    } else {
+                        ent.row.setBackgroundResourceIds(
+                                com.android.internal.R.drawable.notification_bg,
+                                com.android.internal.R.drawable.notification_bg_dim);
+                    }
+                }
                 toShow.add(ent.row);
             }
         }
