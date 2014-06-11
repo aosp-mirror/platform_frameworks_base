@@ -27,7 +27,7 @@ import sys
 from fontTools import ttx
 import re
 import os
-from lxml import etree
+import xml.etree.ElementTree as etree
 import shutil
 import glob
 from multiprocessing import Pool
@@ -84,14 +84,13 @@ def convert_font(input_path):
     ttx.main(ttx_args)
     # now parse the xml file to change its PS name.
     tree = etree.parse(ttx_path)
-    encoding = tree.docinfo.encoding
     root = tree.getroot()
     for name in root.iter('name'):
       [old_ps_name, version] = get_font_info(name)
       if old_ps_name is not None and version is not None:
         new_ps_name = old_ps_name + version
         update_name(name, new_ps_name)
-    tree.write(ttx_path, xml_declaration=True, encoding=encoding )
+    tree.write(ttx_path, xml_declaration=True, encoding='utf-8' )
     # generate the udpated font now.
     ttx_args = ['-q', '-d', dest_dir, ttx_path]
     ttx.main(ttx_args)
