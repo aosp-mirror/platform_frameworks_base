@@ -603,76 +603,76 @@ public abstract class Transition implements Cloneable {
         for (int i = 0; i < startValuesList.size(); ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
-            // Only bother trying to animate with values that differ between start/end
-            if (start != null || end != null) {
-                if (start == null || !start.equals(end)) {
-                    if (DBG) {
-                        View view = (end != null) ? end.view : start.view;
-                        Log.d(LOG_TAG, "  differing start/end values for view " +
-                                view);
-                        if (start == null || end == null) {
-                            Log.d(LOG_TAG, "    " + ((start == null) ?
-                                    "start null, end non-null" : "start non-null, end null"));
-                        } else {
-                            for (String key : start.values.keySet()) {
-                                Object startValue = start.values.get(key);
-                                Object endValue = end.values.get(key);
-                                if (startValue != endValue && !startValue.equals(endValue)) {
-                                    Log.d(LOG_TAG, "    " + key + ": start(" + startValue +
-                                            "), end(" + endValue +")");
-                                }
+            // Only bother trying to animate with valid values that differ between start/end
+            boolean isInvalidStart = start != null && !isValidTarget(start.view);
+            boolean isInvalidEnd = end != null && !isValidTarget(end.view);
+            boolean isChanged = start != end && (start == null || !start.equals(end));
+            if (isChanged && !isInvalidStart && !isInvalidEnd) {
+                if (DBG) {
+                    View view = (end != null) ? end.view : start.view;
+                    Log.d(LOG_TAG, "  differing start/end values for view " + view);
+                    if (start == null || end == null) {
+                        Log.d(LOG_TAG, "    " + ((start == null) ?
+                                "start null, end non-null" : "start non-null, end null"));
+                    } else {
+                        for (String key : start.values.keySet()) {
+                            Object startValue = start.values.get(key);
+                            Object endValue = end.values.get(key);
+                            if (startValue != endValue && !startValue.equals(endValue)) {
+                                Log.d(LOG_TAG, "    " + key + ": start(" + startValue +
+                                        "), end(" + endValue + ")");
                             }
                         }
                     }
-                    // TODO: what to do about targetIds and itemIds?
-                    Animator animator = createAnimator(sceneRoot, start, end);
+                }
+                // TODO: what to do about targetIds and itemIds?
+                Animator animator = createAnimator(sceneRoot, start, end);
+                if (animator != null) {
+                    // Save animation info for future cancellation purposes
+                    View view = null;
+                    TransitionValues infoValues = null;
+                    if (end != null) {
+                        view = end.view;
+                        String[] properties = getTransitionProperties();
+                        if (view != null && properties != null && properties.length > 0) {
+                            infoValues = new TransitionValues();
+                            infoValues.view = view;
+                            TransitionValues newValues = endValues.viewValues.get(view);
+                            if (newValues != null) {
+                                for (int j = 0; j < properties.length; ++j) {
+                                    infoValues.values.put(properties[j],
+                                            newValues.values.get(properties[j]));
+                                }
+                            }
+                            int numExistingAnims = runningAnimators.size();
+                            for (int j = 0; j < numExistingAnims; ++j) {
+                                Animator anim = runningAnimators.keyAt(j);
+                                AnimationInfo info = runningAnimators.get(anim);
+                                if (info.values != null && info.view == view &&
+                                        ((info.name == null && getName() == null) ||
+                                                info.name.equals(getName()))) {
+                                    if (info.values.equals(infoValues)) {
+                                        // Favor the old animator
+                                        animator = null;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        view = (start != null) ? start.view : null;
+                    }
                     if (animator != null) {
-                        // Save animation info for future cancellation purposes
-                        View view = null;
-                        TransitionValues infoValues = null;
-                        if (end != null) {
-                            view = end.view;
-                            String[] properties = getTransitionProperties();
-                            if (view != null && properties != null && properties.length > 0) {
-                                infoValues = new TransitionValues();
-                                infoValues.view = view;
-                                TransitionValues newValues = endValues.viewValues.get(view);
-                                if (newValues != null) {
-                                    for (int j = 0; j < properties.length; ++j) {
-                                        infoValues.values.put(properties[j],
-                                                newValues.values.get(properties[j]));
-                                    }
-                                }
-                                int numExistingAnims = runningAnimators.size();
-                                for (int j = 0; j < numExistingAnims; ++j) {
-                                    Animator anim = runningAnimators.keyAt(j);
-                                    AnimationInfo info = runningAnimators.get(anim);
-                                    if (info.values != null && info.view == view &&
-                                            ((info.name == null && getName() == null) ||
-                                            info.name.equals(getName()))) {
-                                        if (info.values.equals(infoValues)) {
-                                            // Favor the old animator
-                                            animator = null;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            view = (start != null) ? start.view : null;
+                        if (mPropagation != null) {
+                            long delay = mPropagation
+                                    .getStartDelay(sceneRoot, this, start, end);
+                            startDelays.put(mAnimators.size(), delay);
+                            minStartDelay = Math.min(delay, minStartDelay);
                         }
-                        if (animator != null) {
-                            if (mPropagation != null) {
-                                long delay = mPropagation
-                                        .getStartDelay(sceneRoot, this, start, end);
-                                startDelays.put(mAnimators.size(), delay);
-                                minStartDelay = Math.min(delay, minStartDelay);
-                            }
-                            AnimationInfo info = new AnimationInfo(view, getName(),
-                                    sceneRoot.getWindowId(), infoValues);
-                            runningAnimators.put(animator, info);
-                            mAnimators.add(animator);
-                        }
+                        AnimationInfo info = new AnimationInfo(view, getName(),
+                                sceneRoot.getWindowId(), infoValues);
+                        runningAnimators.put(animator, info);
+                        mAnimators.add(animator);
                     }
                 }
             }
