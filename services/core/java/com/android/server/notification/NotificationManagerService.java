@@ -188,6 +188,8 @@ public class NotificationManagerService extends SystemService {
 
     private AppOpsManager mAppOps;
 
+    private Archive mArchive;
+
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
@@ -223,10 +225,12 @@ public class NotificationManagerService extends SystemService {
     private static final int REASON_LISTENER_CANCEL_ALL = 11;
 
     private static class Archive {
-        static final int BUFFER_SIZE = 250;
-        ArrayDeque<StatusBarNotification> mBuffer = new ArrayDeque<StatusBarNotification>(BUFFER_SIZE);
+        final int mBufferSize;
+        final ArrayDeque<StatusBarNotification> mBuffer;
 
-        public Archive() {
+        public Archive(int size) {
+            mBufferSize = size;
+            mBuffer = new ArrayDeque<StatusBarNotification>(mBufferSize);
         }
 
         public String toString() {
@@ -240,7 +244,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public void record(StatusBarNotification nr) {
-            if (mBuffer.size() == BUFFER_SIZE) {
+            if (mBuffer.size() == mBufferSize) {
                 mBuffer.removeFirst();
             }
 
@@ -249,7 +253,6 @@ public class NotificationManagerService extends SystemService {
             // store a (lightened) copy.
             mBuffer.addLast(nr.cloneLight());
         }
-
 
         public void clear() {
             mBuffer.clear();
@@ -300,7 +303,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public StatusBarNotification[] getArray(int count) {
-            if (count == 0) count = Archive.BUFFER_SIZE;
+            if (count == 0) count = mBufferSize;
             final StatusBarNotification[] a
                     = new StatusBarNotification[Math.min(count, mBuffer.size())];
             Iterator<StatusBarNotification> iter = descendingIterator();
@@ -312,7 +315,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public StatusBarNotification[] getArray(int count, String pkg, int userId) {
-            if (count == 0) count = Archive.BUFFER_SIZE;
+            if (count == 0) count = mBufferSize;
             final StatusBarNotification[] a
                     = new StatusBarNotification[Math.min(count, mBuffer.size())];
             Iterator<StatusBarNotification> iter = filter(descendingIterator(), pkg, userId);
@@ -324,8 +327,6 @@ public class NotificationManagerService extends SystemService {
         }
 
     }
-
-    Archive mArchive = new Archive();
 
     private void loadPolicyFile() {
         synchronized(mPolicyFile) {
@@ -853,6 +854,9 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "Problem accessing extractor " + extractorName + ".", e);
             }
         }
+
+        mArchive = new Archive(resources.getInteger(
+                R.integer.config_notificationServiceArchiveSize));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
