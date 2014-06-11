@@ -6390,6 +6390,16 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
+    <!-- Use <code>voice-enrollment-application</code>
+         as the root tag of the XML resource that escribes the supported keyphrases (hotwords)
+         by the enrollment application.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="VoiceEnrollmentApplication">
+        <attr name="searchKeyphraseId" format="integer" />
+        <attr name="searchKeyphrase" format="string" />
+        <attr name="searchKeyphraseSupportedLocales" format="string" />
+    </declare-styleable>
+
     <!-- Attributes used to style the Action Bar. -->
     <declare-styleable name="ActionBar">
         <!-- The type of navigation to use. -->
