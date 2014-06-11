@@ -80,6 +80,11 @@ public class TrustAgentService extends Service {
 
     private ITrustAgentServiceCallback mCallback;
 
+    private Runnable mPendingGrantTrustTask;
+
+    // Lock used to access mPendingGrantTrustTask and mCallback.
+    private final Object mLock = new Object();
+
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -127,12 +132,24 @@ public class TrustAgentService extends Service {
      * @param initiatedByUser indicates that the user has explicitly initiated an action that proves
      *                        the user is about to use the device.
      */
-    public final void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser) {
-        if (mCallback != null) {
-            try {
-                mCallback.grantTrust(message.toString(), durationMs, initiatedByUser);
-            } catch (RemoteException e) {
-                onError("calling enableTrust()");
+    public final void grantTrust(
+            final CharSequence message, final long durationMs, final boolean initiatedByUser) {
+        synchronized (mLock) {
+            if (mCallback != null) {
+                try {
+                    mCallback.grantTrust(message.toString(), durationMs, initiatedByUser);
+                } catch (RemoteException e) {
+                    onError("calling enableTrust()");
+                }
+            } else {
+                // Remember trust has been granted so we can effectively grant it once the service
+                // is bound.
+                mPendingGrantTrustTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        grantTrust(message, durationMs, initiatedByUser);
+                    }
+                };
             }
         }
     }
@@ -141,11 +158,16 @@ public class TrustAgentService extends Service {
      * Call to revoke trust on the device.
      */
     public final void revokeTrust() {
-        if (mCallback != null) {
-            try {
-                mCallback.revokeTrust();
-            } catch (RemoteException e) {
-                onError("calling revokeTrust()");
+        synchronized (mLock) {
+            if (mPendingGrantTrustTask != null) {
+                mPendingGrantTrustTask = null;
+            }
+            if (mCallback != null) {
+                try {
+                    mCallback.revokeTrust();
+                } catch (RemoteException e) {
+                    onError("calling revokeTrust()");
+                }
             }
         }
     }
@@ -164,7 +186,13 @@ public class TrustAgentService extends Service {
         }
 
         public void setCallback(ITrustAgentServiceCallback callback) {
-            mCallback = callback;
+            synchronized (mLock) {
+                mCallback = callback;
+                if (mPendingGrantTrustTask != null) {
+                    mPendingGrantTrustTask.run();
+                    mPendingGrantTrustTask = null;
+                }
+            }
         }
     }
 
