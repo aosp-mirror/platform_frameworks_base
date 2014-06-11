@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 Copyright (C) 2014 The Android Open Source Project
 
@@ -14,18 +13,16 @@ Copyright (C) 2014 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<animation-list
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:oneshot="true">
-    <item android:drawable="@drawable/ic_qs_location_11" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_10" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_09" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_08" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_07" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_06" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_05" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_04" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_03" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_02" android:duration="16" />
-    <item android:drawable="@drawable/ic_qs_location_01" android:duration="16" />
-</animation-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <size
+        android:width="64dp"
+        android:height="64dp"/>
+
+    <viewport
+        android:viewportWidth="48.0"
+        android:viewportHeight="48.0"/>
+
+    <path
+        android:fill="#FFFFFFFF"
+        android:pathData="M24.0,4.0c-7.7,0.0 -14.0,6.3 -14.0,14.0c0.0,10.5 14.0,26.0 14.0,26.0s14.0,-15.5 14.0,-26.0C38.0,10.3 31.7,4.0 24.0,4.0zM24.0,23.0c-2.8,0.0 -5.0,-2.2 -5.0,-5.0s2.2,-5.0 5.0,-5.0c2.8,0.0 5.0,2.2 5.0,5.0S26.8,23.0 24.0,23.0z"/>
+</vector>

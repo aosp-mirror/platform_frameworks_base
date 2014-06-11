@@ -16,9 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -63,28 +60,15 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean locationEnabled =  mController.isLocationEnabled();
         state.visible = true;
-        if (state.value != locationEnabled) {
-            state.value = locationEnabled;
-            final Resources res = mContext.getResources();
-            final AnimationDrawable d = (AnimationDrawable) res.getDrawable(locationEnabled
-                    ? R.drawable.ic_qs_location_on
-                    : R.drawable.ic_qs_location_off);
-            state.icon = d;
-            mUiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    d.start();
-                }
-            });
-        }
+        state.value = locationEnabled;
         if (locationEnabled) {
-            if (state.icon == null) state.iconId = R.drawable.ic_qs_location_01;
+            state.iconId = R.drawable.ic_qs_location_on;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,
                     mContext.getString(R.string.accessibility_desc_on));
         } else {
-            if (state.icon == null) state.iconId = R.drawable.ic_qs_location_11;
+            state.iconId = R.drawable.ic_qs_location_off;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location,

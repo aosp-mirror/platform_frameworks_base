@@ -72,12 +72,15 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         if (cb == null) return;
 
         final Resources r = mContext.getResources();
-        state.iconId = cb.enabled && (cb.mobileSignalIconId > 0)
+        state.iconId = cb.noSim
+                ? R.drawable.stat_sys_no_sim
+                : cb.enabled && (cb.mobileSignalIconId > 0)
                 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
         state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiEnabled
                 ? cb.dataTypeIconId
                 : 0;
+        state.filter = state.iconId != R.drawable.stat_sys_no_sim;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
 
@@ -117,6 +120,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         boolean activityIn;
         boolean activityOut;
         String enabledDesc;
+        boolean noSim;
     }
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
@@ -134,7 +138,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description) {
+                String dataTypeContentDescriptionId, String description, boolean noSim) {
             final CallbackInfo info = new CallbackInfo();  // TODO pool?
             info.enabled = enabled;
             info.wifiEnabled = mWifiEnabled;
@@ -145,6 +149,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             info.activityIn = activityIn;
             info.activityOut = activityOut;
             info.enabledDesc = description;
+            info.noSim = noSim;
             refreshState(info);
         }
 
