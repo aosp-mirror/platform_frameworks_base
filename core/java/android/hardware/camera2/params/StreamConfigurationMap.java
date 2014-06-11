@@ -34,8 +34,10 @@ import static com.android.internal.util.Preconditions.*;
 
 /**
  * Immutable class to store the available stream
- * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP configurations} to be used
- * when configuring streams with {@link CameraDevice#configureOutputs}.
+ * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP configurations} to set up
+ * {@link android.view.Surface Surfaces} for creating a
+ * {@link android.hardware.camera2.CameraCaptureSession capture session} with
+ * {@link android.hardware.camera2.CameraDevice#createCaptureSession}.
  * <!-- TODO: link to input stream configuration -->
  *
  * <p>This is the authoritative list for all <!-- input/ -->output formats (and sizes respectively
@@ -56,7 +58,7 @@ import static com.android.internal.util.Preconditions.*;
  * }</code></pre>
  *
  * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
- * @see CameraDevice#configureOutputs
+ * @see CameraDevice#createCaptureSession
  */
 public final class StreamConfigurationMap {
 
@@ -155,8 +157,8 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Determine whether or not output streams can be
-     * {@link CameraDevice#configureOutputs configured} with a particular user-defined format.
+     * Determine whether or not output surfaces with a particular user-defined format can be passed
+     * {@link CameraDevice#createCaptureSession createCaptureSession}.
      *
      * <p>This method determines that the output {@code format} is supported by the camera device;
      * each output {@code surface} target may or may not itself support that {@code format}.
@@ -168,7 +170,7 @@ public final class StreamConfigurationMap {
      * @param format an image format from either {@link ImageFormat} or {@link PixelFormat}
      * @return
      *          {@code true} iff using a {@code surface} with this {@code format} will be
-     *          supported with {@link CameraDevice#configureOutputs}
+     *          supported with {@link CameraDevice#createCaptureSession}
      *
      * @throws IllegalArgumentException
      *          if the image format was not a defined named constant
@@ -176,7 +178,7 @@ public final class StreamConfigurationMap {
      *
      * @see ImageFormat
      * @see PixelFormat
-     * @see CameraDevice#configureOutputs
+     * @see CameraDevice#createCaptureSession
      */
     public boolean isOutputSupportedFor(int format) {
         checkArgumentFormat(format);
@@ -210,7 +212,7 @@ public final class StreamConfigurationMap {
      *
      * <p>Generally speaking this means that creating a {@link Surface} from that class <i>may</i>
      * provide a producer endpoint that is suitable to be used with
-     * {@link CameraDevice#configureOutputs}.</p>
+     * {@link CameraDevice#createCaptureSession}.</p>
      *
      * <p>Since not all of the above classes support output of all format and size combinations,
      * the particular combination should be queried with {@link #isOutputSupportedFor(Surface)}.</p>
@@ -220,7 +222,7 @@ public final class StreamConfigurationMap {
      *
      * @throws NullPointerException if {@code klass} was {@code null}
      *
-     * @see CameraDevice#configureOutputs
+     * @see CameraDevice#createCaptureSession
      * @see #isOutputSupportedFor(Surface)
      */
     public static <T> boolean isOutputSupportedFor(Class<T> klass) {
@@ -244,8 +246,8 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Determine whether or not the {@code surface} in its current state is suitable to be
-     * {@link CameraDevice#configureOutputs configured} as an output.
+     * Determine whether or not the {@code surface} in its current state is suitable to be included
+     * in a {@link CameraDevice#createCaptureSession capture session} as an output.
      *
      * <p>Not all surfaces are usable with the {@link CameraDevice}, and not all configurations
      * of that {@code surface} are compatible. Some classes that provide the {@code surface} are
@@ -269,7 +271,7 @@ public final class StreamConfigurationMap {
      *
      * @throws NullPointerException if {@code surface} was {@code null}
      *
-     * @see CameraDevice#configureOutputs
+     * @see CameraDevice#createCaptureSession
      * @see #isOutputSupportedFor(Class)
      */
     public boolean isOutputSupportedFor(Surface surface) {

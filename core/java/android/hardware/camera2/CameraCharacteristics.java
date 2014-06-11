@@ -320,7 +320,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>List of frame rate ranges supported by the
-     * AE algorithm/hardware</p>
+     * auto-exposure (AE) algorithm/hardware</p>
      */
     public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
             new Key<android.util.Range<Integer>[]>("android.control.aeAvailableTargetFpsRanges", new TypeReference<android.util.Range<Integer>[]>() {{ }});
@@ -343,7 +343,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Rational>("android.control.aeCompensationStep", Rational.class);
 
     /**
-     * <p>List of AF modes that can be
+     * <p>List of auto-focus (AF) modes that can be
      * selected with {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
      * <p>Not all the auto-focus modes may be supported by a
      * given camera device. This entry lists the valid modes for
@@ -496,7 +496,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.hotPixel.availableHotPixelModes", int[].class);
 
     /**
-     * <p>Supported resolutions for the JPEG thumbnail</p>
+     * <p>Supported resolutions for the JPEG thumbnail.</p>
      * <p>Below condiditions will be satisfied for this size list:</p>
      * <ul>
      * <li>The sizes will be sorted by increasing pixel area (width x height).
@@ -784,11 +784,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * may be delivered to the application layer from the camera device as
      * soon as they are available.</p>
      * <p>A value of 1 means that partial results are not supported.</p>
-     * <p>A typical use case for this might be: after requesting an AF lock the
-     * new AF state might be available 50% of the way through the pipeline.
-     * The camera device could then immediately dispatch this state via a
-     * partial result to the framework/application layer, and the rest of
-     * the metadata via later partial results.</p>
+     * <p>A typical use case for this might be: after requesting an
+     * auto-focus (AF) lock the new AF state might be available 50%
+     * of the way through the pipeline.  The camera device could
+     * then immediately dispatch this state via a partial result to
+     * the framework/application layer, and the rest of the
+     * metadata via later partial results.</p>
      */
     public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
             new Key<Integer>("android.request.partialResultCount", int.class);
@@ -1326,7 +1327,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
 
     /**
-     * <p>Range of valid sensitivities</p>
+     * <p>Range of valid sensitivities.</p>
+     * <p>The minimum and maximum valid values for the
+     * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} control.</p>
+     * <p>The values are the standard ISO sensitivity values,
+     * as defined in ISO 12232:2006.</p>
+     *
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     public static final Key<android.util.Range<Integer>> SENSOR_INFO_SENSITIVITY_RANGE =
             new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
@@ -1372,8 +1379,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>The physical dimensions of the full pixel
-     * array</p>
-     * <p>Needed for FOV calculation for old API</p>
+     * array.</p>
+     * <p>This is the physical size of the sensor pixel
+     * array defined by {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
     public static final Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE =
             new Key<android.util.SizeF>("android.sensor.info.physicalSize", android.util.SizeF.class);
@@ -1381,9 +1391,17 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Dimensions of full pixel array, possibly
      * including black calibration pixels.</p>
-     * <p>Maximum output resolution for raw format must
-     * match this in
-     * android.scaler.availableStreamConfigurations.</p>
+     * <p>The pixel count of the full pixel array,
+     * which covers {@link CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE android.sensor.info.physicalSize} area.</p>
+     * <p>If a camera device supports raw sensor formats, either this
+     * or {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} is the maximum output
+     * raw size listed in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.
+     * If a size corresponding to pixelArraySize is listed, the resulting
+     * raw sensor image will include black pixels.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
      */
     public static final Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
             new Key<android.util.Size>("android.sensor.info.pixelArraySize", android.util.Size.class);
@@ -1638,8 +1656,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sensor.orientation", int.class);
 
     /**
-     * <p>Optional. Defaults to [OFF]. Lists the supported test
-     * pattern modes for {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode}.</p>
+     * <p>Lists the supported sensor test pattern modes for {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode}.</p>
+     * <p>Optional. Defaults to [OFF].</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
@@ -1649,7 +1667,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Which face detection modes are available,
-     * if any</p>
+     * if any.</p>
      * <p>OFF means face detection is disabled, it must
      * be included in the list.</p>
      * <p>SIMPLE means the device supports the

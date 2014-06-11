@@ -35,7 +35,7 @@ import android.util.ArrayMap;
 import java.util.ArrayList;
 
 /**
- * <p>An interface for iterating, listing, and connecting to
+ * <p>A system service manager for detecting, characterizing, and connecting to
  * {@link CameraDevice CameraDevices}.</p>
  *
  * <p>You can get an instance of this class by calling
@@ -357,13 +357,17 @@ public final class CameraManager {
     }
 
     /**
-     * Interface for listening to camera devices becoming available or
-     * unavailable.
+     * A listener for camera devices becoming available or
+     * unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
      * removable camera is connected. They become unavailable when some
      * application or service starts using a camera, or when a removable camera
      * is disconnected.</p>
+     *
+     * <p>Extend this listener and pass an instance of the subclass to
+     * {@link CameraManager#addAvailabilityListener} to be notified of such availability
+     * changes.</p>
      *
      * @see addAvailabilityListener
      */

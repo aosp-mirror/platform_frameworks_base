@@ -355,12 +355,14 @@ public abstract class CameraMetadata<TKey> {
      * <li>RAW16 is reprocessable into both YUV_420_888 and JPEG
      * formats.</li>
      * <li>The maximum available resolution for RAW16 streams (both
-     * input/output) will match the value in
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</li>
+     * input/output) will match the either value in
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
      * <li>All DNG-related optional metadata entries are provided
      * by the camera device.</li>
      * </ul>
      *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
@@ -760,12 +762,14 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AF_MODE_OFF = 0;
 
     /**
-     * <p>If lens is not fixed focus.</p>
-     * <p>Use {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} to determine if lens
-     * is fixed-focus. In this mode, the lens does not move unless
+     * <p>Basic automatic focus mode.</p>
+     * <p>In this mode, the lens does not move unless
      * the autofocus trigger action is called. When that trigger
-     * is activated, AF must transition to ACTIVE_SCAN, then to
+     * is activated, AF will transition to ACTIVE_SCAN, then to
      * the outcome of the scan (FOCUSED or NOT_FOCUSED).</p>
+     * <p>Always supported if lens is not fixed focus.</p>
+     * <p>Use {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} to determine if lens
+     * is fixed-focus.</p>
      * <p>Triggering AF_CANCEL resets the lens position to default,
      * and sets the AF state to INACTIVE.</p>
      *
@@ -775,11 +779,16 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AF_MODE_AUTO = 1;
 
     /**
+     * <p>Close-up focusing mode.</p>
      * <p>In this mode, the lens does not move unless the
-     * autofocus trigger action is called.</p>
-     * <p>When that trigger is activated, AF must transition to
+     * autofocus trigger action is called. When that trigger is
+     * activated, AF will transition to ACTIVE_SCAN, then to
+     * the outcome of the scan (FOCUSED or NOT_FOCUSED). This
+     * mode is optimized for focusing on objects very close to
+     * the camera.</p>
+     * <p>When that trigger is activated, AF will transition to
      * ACTIVE_SCAN, then to the outcome of the scan (FOCUSED or
-     * NOT_FOCUSED).  Triggering cancel AF resets the lens
+     * NOT_FOCUSED). Triggering cancel AF resets the lens
      * position to default, and sets the AF state to
      * INACTIVE.</p>
      * @see CaptureRequest#CONTROL_AF_MODE
