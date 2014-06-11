@@ -373,6 +373,9 @@
             <li><a href="<?cs var:toroot ?>guide/topics/media/mediarouteprovider.html">
                   <span class="en">Media Route Provider</span></a>
                 </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/exoplayer.html">
+                  <span class="en">ExoPlayer</span></a>
+                </li>
             <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
                    <span class="en">Supported Media Formats</span></a>
                 </li>
