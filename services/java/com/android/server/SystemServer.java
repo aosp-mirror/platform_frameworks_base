@@ -349,6 +349,7 @@ public final class SystemServer {
         boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
         boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+        boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
             Slog.i(TAG, "Telephony Registry");
@@ -461,7 +462,7 @@ public final class SystemServer {
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should
             // support Bluetooth - see bug 988521
-            if (SystemProperties.get("ro.kernel.qemu").equals("1")) {
+            if (isEmulator) {
                 Slog.i(TAG, "No Bluetooh Service (emulator)");
             } else if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
@@ -662,10 +663,17 @@ public final class SystemServer {
                     reportWtf("starting Wi-Fi Scanning Service", e);
                 }
 
-                try {
-                    mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Ethernet Service", e);
+                if (!isEmulator) {
+                    try {
+                        mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
+                    } catch (Throwable e) {
+                        reportWtf("starting Ethernet Service", e);
+                    }
+                } else {
+                    // Don't start the Ethernet service on the emulator because
+                    // it interferes with qemu's SLIRP emulation, which uses
+                    // IPv4 over eth0. http://b/15341003 .
+                    Slog.i(TAG, "Not starting Ethernet service (emulator)");
                 }
 
                 try {
