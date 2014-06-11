@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -66,6 +67,11 @@ public abstract class PanelView extends FrameLayout {
     private ObjectAnimator mPeekAnimator;
     private VelocityTrackerInterface mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
+
+    /**
+     * Whether an instant expand request is currently pending and we are just waiting for layout.
+     */
+    private boolean mInstantExpanding;
 
     PanelBar mBar;
 
@@ -128,6 +134,9 @@ public abstract class PanelView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mInstantExpanding) {
+            return false;
+        }
 
         /*
          * We capture touch events here and update the expand height here in case according to
@@ -263,6 +272,9 @@ public abstract class PanelView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mInstantExpanding) {
+            return false;
+        }
 
         /*
          * If the user drags anywhere inside the panel we intercept it if he moves his finger
@@ -553,6 +565,41 @@ public abstract class PanelView extends FrameLayout {
     public void cancelPeek() {
         if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
             mPeekAnimator.cancel();
+        }
+    }
+
+    public void instantExpand() {
+        mInstantExpanding = true;
+        abortAnimations();
+        if (mTracking) {
+            onTrackingStopped(true /* expands */); // The panel is expanded after this call.
+            onExpandingFinished();
+        }
+        setVisibility(VISIBLE);
+
+        // Wait for window manager to pickup the change, so we know the maximum height of the panel
+        // then.
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (mStatusBar.getStatusBarWindow().getHeight()
+                                != mStatusBar.getStatusBarHeight()) {
+                            getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            setExpandedFraction(1f);
+                            mInstantExpanding = false;
+                        }
+                    }
+                });
+
+        // Make sure a layout really happens.
+        requestLayout();
+    }
+
+    private void abortAnimations() {
+        cancelPeek();
+        if (mHeightAnimator != null) {
+            mHeightAnimator.cancel();
         }
     }
 
