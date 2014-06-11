@@ -34,6 +34,7 @@ import android.util.Log;
  *      <li>{@code CONFIGURING -> IDLE}</li>
  *      <li>{@code IDLE -> CONFIGURING}</li>
  *      <li>{@code IDLE -> CAPTURING}</li>
+ *      <li>{@code IDLE -> IDLE}</li>
  *      <li>{@code CAPTURING -> IDLE}</li>
  *      <li>{@code ANY -> ERROR}</li>
  * </ul>
@@ -216,12 +217,17 @@ public class CameraDeviceState {
                 mCurrentState = STATE_CONFIGURING;
                 break;
             case STATE_IDLE:
+                if (mCurrentState == STATE_IDLE) {
+                    break;
+                }
+
                 if (mCurrentState != STATE_CONFIGURING && mCurrentState != STATE_CAPTURING) {
                     Log.e(TAG, "Cannot call idle while in state: " + mCurrentState);
                     mCurrentError = CameraBinderDecorator.INVALID_OPERATION;
                     doStateTransition(STATE_ERROR);
                     break;
                 }
+
                 if (mCurrentState != STATE_IDLE && mCurrentHandler != null &&
                         mCurrentListener != null) {
                     mCurrentHandler.post(new Runnable() {

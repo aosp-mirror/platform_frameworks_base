@@ -48,7 +48,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class LegacyCameraDevice implements AutoCloseable {
     public static final String DEBUG_PROP = "HAL1ShimLogging";
-
     private final String TAG;
 
     private final int mCameraId;
@@ -56,10 +55,11 @@ public class LegacyCameraDevice implements AutoCloseable {
     private final CameraDeviceState mDeviceState = new CameraDeviceState();
 
     private final ConditionVariable mIdle = new ConditionVariable(/*open*/true);
-    private final AtomicInteger mRequestIdCounter = new AtomicInteger(0);
 
-    private final HandlerThread mCallbackHandlerThread = new HandlerThread("ResultThread");
+    private final HandlerThread mResultThread = new HandlerThread("ResultThread");
+    private final HandlerThread mCallbackHandlerThread = new HandlerThread("CallbackThread");
     private final Handler mCallbackHandler;
+    private final Handler mResultHandler;
     private static final int ILLEGAL_VALUE = -1;
 
     private CaptureResultExtras getExtrasFromRequest(RequestHolder holder) {
@@ -81,11 +81,18 @@ public class LegacyCameraDevice implements AutoCloseable {
         public void onError(final int errorCode, RequestHolder holder) {
             mIdle.open();
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
-            try {
-                mDeviceCallbacks.onCameraError(errorCode, extras);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Received remote exception during onCameraError callback: ", e);
-            }
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mDeviceCallbacks.onCameraError(errorCode, extras);
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onCameraError callback: ", e);
+                    }
+                }
+            });
+
 
         }
 
@@ -98,36 +105,55 @@ public class LegacyCameraDevice implements AutoCloseable {
         public void onIdle() {
             mIdle.open();
 
-            try {
-                mDeviceCallbacks.onCameraIdle();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Received remote exception during onCameraIdle callback: ", e);
-            }
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mDeviceCallbacks.onCameraIdle();
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onCameraIdle callback: ", e);
+                    }
+                }
+            });
         }
 
         @Override
         public void onCaptureStarted(RequestHolder holder) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 
-            try {
-                // TODO: Don't fake timestamp
-                mDeviceCallbacks.onCaptureStarted(extras, System.nanoTime());
-            } catch (RemoteException e) {
-                Log.e(TAG, "Received remote exception during onCameraError callback: ", e);
-            }
+            final long timestamp = System.nanoTime();
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO: Don't fake timestamp
+                        mDeviceCallbacks.onCaptureStarted(extras, timestamp);
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onCameraError callback: ", e);
+                    }
+                }
+            });
 
         }
 
         @Override
-        public void onCaptureResult(CameraMetadataNative result, RequestHolder holder) {
+        public void onCaptureResult(final CameraMetadataNative result, RequestHolder holder) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 
-            try {
-                // TODO: Don't fake metadata
-                mDeviceCallbacks.onResultReceived(result, extras);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Received remote exception during onCameraError callback: ", e);
-            }
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO: Don't fake metadata
+                        mDeviceCallbacks.onResultReceived(result, extras);
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onCameraError callback: ", e);
+                    }
+                }
+            });
         }
     };
 
@@ -161,6 +187,8 @@ public class LegacyCameraDevice implements AutoCloseable {
         mDeviceCallbacks = callbacks;
         TAG = String.format("CameraDevice-%d-LE", mCameraId);
 
+        mResultThread.start();
+        mResultHandler = new Handler(mResultThread.getLooper());
         mCallbackHandlerThread.start();
         mCallbackHandler = new Handler(mCallbackHandlerThread.getLooper());
         mDeviceState.setCameraDeviceCallbacks(mCallbackHandler, mStateListener);
@@ -244,6 +272,22 @@ public class LegacyCameraDevice implements AutoCloseable {
     public void close() {
         mRequestThreadManager.quit();
         mCallbackHandlerThread.quitSafely();
+        mResultThread.quitSafely();
+
+        try {
+            mCallbackHandlerThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, String.format("Thread %s (%d) interrupted while quitting.",
+                    mCallbackHandlerThread.getName(), mCallbackHandlerThread.getId()));
+        }
+
+        try {
+            mResultThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, String.format("Thread %s (%d) interrupted while quitting.",
+                    mResultThread.getName(), mResultThread.getId()));
+        }
+
         // TODO: throw IllegalStateException in every method after close has been called
     }
 

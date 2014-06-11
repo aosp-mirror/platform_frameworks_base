@@ -431,6 +431,11 @@ public class SurfaceTextureRenderer {
     public void configureSurfaces(Collection<Surface> surfaces) {
         releaseEGLContext();
 
+        if (surfaces == null || surfaces.size() == 0) {
+            Log.w(TAG, "No output surfaces configured for GL drawing.");
+            return;
+        }
+
         for (Surface s : surfaces) {
             // If pixel conversions aren't handled by egl, use a pbuffer
             if (LegacyCameraDevice.needsConversion(s)) {
