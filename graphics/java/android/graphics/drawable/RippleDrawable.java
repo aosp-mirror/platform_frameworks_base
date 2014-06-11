@@ -48,22 +48,41 @@ import java.io.IOException;
  * A touch feedback drawable may contain multiple child layers, including a
  * special mask layer that is not drawn to the screen. A single layer may be set
  * as the mask by specifying its android:id value as {@link android.R.id#mask}.
+ * <pre>
+ * <code>&lt!-- A red ripple masked against an opaque rectangle. --/>
+ * &ltripple android:color="#ffff0000">
+ *   &ltitem android:id="@android:id/mask"
+ *         android:drawable="#ffffffff" />
+ * &ltripple /></code>
+ * </pre>
  * <p>
  * If a mask layer is set, the ripple effect will be masked against that layer
- * before it is blended onto the composite of the remaining child layers.
+ * before it is drawn over the composite of the remaining child layers.
  * <p>
- * If no mask layer is set, the ripple effect is simply blended onto the
- * composite of the child layers using the specified
- * {@link android.R.styleable#RippleDrawable_tintMode}.
+ * If no mask layer is set, the ripple effect is masked against the composite
+ * of the child layers.
+ * <pre>
+ * <code>&lt!-- A blue ripple drawn atop a green rectangle. --/>
+ * &ltripple android:color="#ff00ff00">
+ *   &ltitem android:drawable="#ff0000ff" />
+ * &ltripple />
+ *
+ * &lt!-- A red ripple drawn atop a drawable resource. --/>
+ * &ltripple android:color="#ff00ff00">
+ *   &ltitem android:drawable="@drawable/my_drawable" />
+ * &ltripple /></code>
+ * </pre>
  * <p>
  * If no child layers or mask is specified and the ripple is set as a View
- * background, the ripple will be blended onto the first available parent
- * background within the View's hierarchy using the specified
- * {@link android.R.styleable#RippleDrawable_tintMode}. In this case, the
- * drawing region may extend outside of the Drawable bounds.
+ * background, the ripple will be drawn atop the first available parent
+ * background within the View's hierarchy. In this case, the drawing region
+ * may extend outside of the Drawable bounds.
+ * <pre>
+ * <code>&lt!-- An unbounded green ripple. --/>
+ * &ltripple android:color="#ff0000ff" /></code>
+ * </pre>
  *
- * @attr ref android.R.styleable#DrawableStates_state_focused
- * @attr ref android.R.styleable#DrawableStates_state_pressed
+ * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
     private static final String LOG_TAG = RippleDrawable.class.getSimpleName();
@@ -188,8 +207,8 @@ public class RippleDrawable extends LayerDrawable {
         setActive(active && enabled);
 
         // Update the paint color. Only applicable when animated in software.
-        if (mRipplePaint != null && mState.mTint != null) {
-            final ColorStateList stateList = mState.mTint;
+        if (mRipplePaint != null && mState.mColor != null) {
+            final ColorStateList stateList = mState.mColor;
             final int newColor = stateList.getColorForState(stateSet, 0);
             final int oldColor = mRipplePaint.getColor();
             if (oldColor != newColor) {
@@ -248,10 +267,8 @@ public class RippleDrawable extends LayerDrawable {
         return true;
     }
 
-    @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mState.mTint = tint;
-        mState.setTintMode(tintMode);
+    public void setColor(ColorStateList color) {
+        mState.mColor = color;
         invalidateSelf();
     }
 
@@ -312,22 +329,15 @@ public class RippleDrawable extends LayerDrawable {
         // Extract the theme attributes, if any.
         state.mTouchThemeAttrs = a.extractThemeAttrs();
 
-        final ColorStateList tint = a.getColorStateList(R.styleable.RippleDrawable_tint);
-        if (tint != null) {
-            mState.mTint = tint;
+        final ColorStateList color = a.getColorStateList(R.styleable.RippleDrawable_color);
+        if (color != null) {
+            mState.mColor = color;
         }
-
-        final int tintMode = a.getInt(R.styleable.RippleDrawable_tintMode, -1);
-        if (tintMode != -1) {
-            mState.setTintMode(Drawable.parseTintMode(tintMode, Mode.SRC_ATOP));
-        }
-
-        mState.mPinned = a.getBoolean(R.styleable.RippleDrawable_pinned, mState.mPinned);
 
         // If we're not waiting on a theme, verify required attributes.
-        if (state.mTouchThemeAttrs == null && mState.mTint == null) {
+        if (state.mTouchThemeAttrs == null && mState.mColor == null) {
             throw new XmlPullParserException(a.getPositionDescription() +
-                    ": <ripple> requires a valid tint attribute");
+                    ": <ripple> requires a valid color attribute");
         }
     }
 
@@ -372,11 +382,6 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public void setHotspot(float x, float y) {
-        if (mState.mPinned && !circleContains(mHotspotBounds, x, y)) {
-            x = mHotspotBounds.exactCenterX();
-            y = mHotspotBounds.exactCenterY();
-        }
-
         if (mHotspot == null) {
             mHotspot = new Ripple(this, mHotspotBounds, x, y);
 
@@ -386,18 +391,6 @@ public class RippleDrawable extends LayerDrawable {
         } else {
             mHotspot.move(x, y);
         }
-    }
-
-    private boolean circleContains(Rect bounds, float x, float y) {
-        final float pX = bounds.exactCenterX() - x;
-        final float pY = bounds.exactCenterY() - y;
-        final double pointRadius = Math.sqrt(pX * pX + pY * pY);
-
-        final float bX = bounds.width() / 2.0f;
-        final float bY = bounds.height() / 2.0f;
-        final double boundsRadius = Math.sqrt(bX * bX + bY * bY);
-
-        return pointRadius < boundsRadius;
     }
 
     /**
@@ -417,7 +410,7 @@ public class RippleDrawable extends LayerDrawable {
             mHotspot = new Ripple(this, mHotspotBounds, x, y);
         }
 
-        final int color = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+        final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
         mHotspot.setup(mState.mMaxRadius, color, mDensity);
         mHotspot.enter();
 
@@ -485,8 +478,10 @@ public class RippleDrawable extends LayerDrawable {
         final int contentLayer = drawNonMaskContent ?
                 drawContentLayer(canvas, bounds, SRC_OVER) : -1;
 
-        // Next, try to draw the ripples (into a layer if necessary).
-        final int rippleLayer = drawRippleLayer(canvas, bounds, mState.mTintXfermode);
+        // Next, try to draw the ripples (into a layer if necessary). If we need
+        // to mask against the underlying content, set the xfermode to SRC_ATOP.
+        final PorterDuffXfermode xfermode = (hasMask || !drawNonMaskContent) ? SRC_OVER : SRC_ATOP;
+        final int rippleLayer = drawRippleLayer(canvas, bounds, xfermode);
 
         // If we have ripples and a non-opaque mask, draw the masking layer.
         if (rippleLayer >= 0 && drawMask) {
@@ -533,14 +528,27 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private int drawContentLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        // TODO: We don't need a layer if all the content is opaque.
-        final Paint maskingPaint = getMaskingPaint(mode);
-        final int restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
-                bounds.right, bounds.bottom, maskingPaint);
-
-        // Draw everything except the mask.
         final ChildDrawable[] array = mLayerState.mChildren;
         final int count = mLayerState.mNum;
+
+        // We don't need a layer if we don't expect to draw any ripples, we have
+        // an explicit mask, or if the non-mask content is all opaque.
+        boolean needsLayer = false;
+        if (mAnimatingRipplesCount > 0 && mMask == null) {
+            for (int i = 0; i < count; i++) {
+                if (array[i].mId != R.id.mask
+                        && array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
+                    needsLayer = true;
+                    break;
+                }
+            }
+        }
+
+        final Paint maskingPaint = getMaskingPaint(mode);
+        final int restoreToCount = needsLayer ? canvas.saveLayer(bounds.left, bounds.top,
+                bounds.right, bounds.bottom, maskingPaint) : -1;
+
+        // Draw everything except the mask.
         for (int i = 0; i < count; i++) {
             if (array[i].mId != R.id.mask) {
                 array[i].mDrawable.draw(canvas);
@@ -559,8 +567,8 @@ public class RippleDrawable extends LayerDrawable {
         // Separate the ripple color and alpha channel. The alpha will be
         // applied when we merge the ripples down to the canvas.
         final int rippleARGB;
-        if (mState.mTint != null) {
-            rippleARGB = mState.mTint.getColorForState(getState(), Color.TRANSPARENT);
+        if (mState.mColor != null) {
+            rippleARGB = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
         } else {
             rippleARGB = Color.TRANSPARENT;
         }
@@ -665,29 +673,17 @@ public class RippleDrawable extends LayerDrawable {
 
     static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
-        ColorStateList mTint = null;
-        PorterDuffXfermode mTintXfermode = SRC_ATOP;
+        ColorStateList mColor = null;
         int mMaxRadius = RADIUS_AUTO;
-        boolean mPinned = false;
 
         public RippleState(RippleState orig, RippleDrawable owner, Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
                 mTouchThemeAttrs = orig.mTouchThemeAttrs;
-                mTint = orig.mTint;
-                mTintXfermode = orig.mTintXfermode;
+                mColor = orig.mColor;
                 mMaxRadius = orig.mMaxRadius;
-                mPinned = orig.mPinned;
             }
-        }
-
-        public void setTintMode(Mode mode) {
-            mTintXfermode = new PorterDuffXfermode(mode);
-        }
-
-        public PorterDuffXfermode getTintXfermode() {
-            return mTintXfermode;
         }
 
         @Override

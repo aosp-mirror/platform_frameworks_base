@@ -21,7 +21,7 @@
     android:insetRight="4dp">
     <layer-list android:paddingMode="stack">
         <item>
-            <ripple android:tint="?attr/colorControlHighlight">
+            <ripple android:color="?attr/colorControlHighlight">
                 <item>
                     <nine-patch android:src="@drawable/btn_toggle_mtrl_alpha"
                         android:tint="?attr/colorButtonNormal" />

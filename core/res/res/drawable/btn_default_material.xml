@@ -15,7 +15,7 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:tint="?attr/colorControlHighlight">
+    android:color="?attr/colorControlHighlight">
     <item>
         <nine-patch android:src="@drawable/btn_mtrl_alpha"
             android:tint="?attr/colorButtonNormal" />
