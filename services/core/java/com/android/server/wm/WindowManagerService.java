@@ -1484,10 +1484,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (pos >= 0) {
             final AppWindowToken targetAppToken = mInputMethodTarget.mAppToken;
-            if (pos < windows.size()) {
-                WindowState wp = windows.get(pos);
-                if (wp == mInputMethodWindow) {
-                    pos++;
+            // Skip windows owned by the input method.
+            if (mInputMethodWindow != null) {
+                while (pos < windows.size()) {
+                    WindowState wp = windows.get(pos);
+                    if (wp == mInputMethodWindow || wp.mAttachedWindow == mInputMethodWindow) {
+                        pos++;
+                        continue;
+                    }
+                    break;
                 }
             }
             if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Adding " + N + " dialogs at pos=" + pos);
