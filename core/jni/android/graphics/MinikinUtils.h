@@ -36,23 +36,24 @@ public:
 
     static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
 
-    // f is a functor of type void f(SkTypeface *, size_t start, size_t end);
+    // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
-    static void forFontRun(const Layout& layout, F& f) {
-        SkTypeface* lastFace = NULL;
+    static void forFontRun(const Layout& layout, SkPaint* paint, F& f) {
+        MinikinFont* curFont = NULL;
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
         for (size_t i = 0; i < nGlyphs; i++) {
-            MinikinFontSkia* mfs = static_cast<MinikinFontSkia*>(layout.getFont(i));
-            SkTypeface* skFace = mfs->GetSkTypeface();
-            if (i > 0 && skFace != lastFace) {
-                f(lastFace, start, i);
+            MinikinFont* nextFont = layout.getFont(i);
+            if (i > 0 && nextFont != curFont) {
+                MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
+                f(start, i);
                 start = i;
             }
-            lastFace = skFace;
+            curFont = nextFont;
         }
         if (nGlyphs > start) {
-            f(lastFace, start, nGlyphs);
+            MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
+            f(start, nGlyphs);
         }
     }
 };

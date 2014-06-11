@@ -656,13 +656,12 @@ public:
                 uirenderer::Rect& bounds)
             : layout(layout), renderer(renderer), x(x), y(y), paint(paint), glyphs(glyphs),
             pos(pos), totalAdvance(totalAdvance), bounds(bounds) { }
-    void operator()(SkTypeface* t, size_t start, size_t end) {
+    void operator()(size_t start, size_t end) {
         for (size_t i = start; i < end; i++) {
             glyphs[i] = layout.getGlyphId(i);
             pos[2 * i] = layout.getX(i);
             pos[2 * i + 1] = layout.getY(i);
         }
-        paint->setTypeface(t);
         size_t glyphsCount = end - start;
         int bytesCount = glyphsCount * sizeof(jchar);
         renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
@@ -692,7 +691,7 @@ static void renderTextLayout(OpenGLRenderer* renderer, Layout* layout,
     float totalAdvance = layout->getAdvance();
 
     RenderTextFunctor f(*layout, renderer, x, y, paint, glyphs, pos, totalAdvance, bounds);
-    MinikinUtils::forFontRun(*layout, f);
+    MinikinUtils::forFontRun(*layout, paint, f);
     delete[] glyphs;
     delete[] pos;
 }

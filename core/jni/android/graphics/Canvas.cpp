@@ -828,13 +828,12 @@ public:
                 : layout(layout), canvas(canvas), x(x), y(y), paint(paint), glyphs(glyphs),
                     pos(pos) { }
 
-        void operator()(SkTypeface* t, size_t start, size_t end) {
+        void operator()(size_t start, size_t end) {
             for (size_t i = start; i < end; i++) {
                 glyphs[i] = layout.getGlyphId(i);
                 pos[i].fX = x + layout.getX(i);
                 pos[i].fY = y + layout.getY(i);
             }
-            paint->setTypeface(t);
             canvas->drawPosText(glyphs + start, (end - start) << 1, pos + start, *paint);
         }
     private:
@@ -857,7 +856,7 @@ public:
         paint->setTextAlign(SkPaint::kLeft_Align);
         paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         DrawTextFunctor f(layout, canvas, x, y, paint, glyphs, pos);
-        MinikinUtils::forFontRun(layout, f);
+        MinikinUtils::forFontRun(layout, paint, f);
         doDrawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
         paint->setTextAlign(align);
         delete[] glyphs;
