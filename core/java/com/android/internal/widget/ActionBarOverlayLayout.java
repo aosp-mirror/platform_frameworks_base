@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -135,6 +136,13 @@ public class ActionBarOverlayLayout extends ViewGroup {
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        init(getContext());
+        requestApplyInsets();
+    }
+
+    @Override
     public void onWindowSystemUiVisibilityChanged(int visible) {
         super.onWindowSystemUiVisibilityChanged(visible);
         pullChildren();
@@ -219,7 +227,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
         // insets in all cases, we need to know the measured size of the various action
         // bar elements.  onApplyWindowInsets() happens before the measure pass, so we can't
         // do that here.  Instead we will take this up in onMeasure().
-        return WindowInsets.EMPTY;
+        return WindowInsets.CONSUMED;
     }
 
     @Override
