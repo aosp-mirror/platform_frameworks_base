@@ -136,7 +136,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final String ACTION_PROVISIONING_USER_HAS_CONSENTED
-        = "android.app.action.USER_HAS_CONSENTED";
+        = "android.app.action.ACTION_PROVISIONING_USER_HAS_CONSENTED";
 
     /**
      * A String extra holding the name of the package of the mobile device management application
