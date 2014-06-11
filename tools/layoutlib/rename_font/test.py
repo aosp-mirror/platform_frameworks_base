@@ -14,7 +14,7 @@ import build_font
 
 from fontTools import ttx
 import os
-from lxml import etree
+import xml.etree.ElementTree as etree
 import shutil
 import tempfile
 
