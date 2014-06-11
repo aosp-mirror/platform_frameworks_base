@@ -30,7 +30,7 @@ public interface NetworkController {
         void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description);
+                String dataTypeContentDescriptionId, String description, boolean noSim);
         void onAirplaneModeChanged(boolean enabled);
     }
 }

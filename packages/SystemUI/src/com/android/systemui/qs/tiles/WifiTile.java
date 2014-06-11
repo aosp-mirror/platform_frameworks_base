@@ -87,6 +87,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         state.connected = wifiConnected;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
+        state.filter = true;
         final String signalContentDescription;
         final Resources r = mContext.getResources();
         if (wifiConnected) {
@@ -159,7 +160,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                 int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description) {
+                String dataTypeContentDescriptionId, String description, boolean noSim) {
             // noop
         }
 

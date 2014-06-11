@@ -93,12 +93,12 @@ public final class SignalTileView extends QSTileView {
         final SignalState s = (SignalState) state;
         mSignal.setImageDrawable(null);  // force refresh
         mSignal.setImageResource(s.iconId);
-        mSignal.setColorFilter(FILTER);
+        mSignal.setColorFilter(s.filter ? FILTER : null);
         if (s.overlayIconId > 0) {
             mOverlay.setVisibility(VISIBLE);
             mOverlay.setImageDrawable(null);  // force refresh
             mOverlay.setImageResource(s.overlayIconId);
-            mOverlay.setColorFilter(FILTER);
+            mOverlay.setColorFilter(s.filter ? FILTER : null);
         } else {
             mOverlay.setVisibility(GONE);
         }

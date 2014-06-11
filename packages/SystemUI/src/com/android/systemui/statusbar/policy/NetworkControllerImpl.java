@@ -87,6 +87,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     int mQSDataTypeIconId;
     int mAirplaneIconId;
     boolean mDataActive;
+    boolean mNoSim;
     int mLastSignalLevel;
     boolean mShowPhoneRSSIForData = false;
     boolean mShowAtLeastThreeGees = false;
@@ -349,18 +350,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (isEmergencyOnly()) {
             cb.onMobileDataSignalChanged(false, mQSPhoneSignalIconId,
                     mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                    mContentDescriptionDataType, null);
+                    mContentDescriptionDataType, null, mNoSim);
         } else {
             if (mIsWimaxEnabled && mWimaxConnected) {
                 // Wimax is special
                 cb.onMobileDataSignalChanged(true, mQSPhoneSignalIconId,
                         mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                        mContentDescriptionDataType, mNetworkName);
+                        mContentDescriptionDataType, mNetworkName, mNoSim);
             } else {
                 // Normal mobile data
                 cb.onMobileDataSignalChanged(mHasMobileDataFeature, mQSPhoneSignalIconId,
                         mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                        mContentDescriptionDataType, mNetworkName);
+                        mContentDescriptionDataType, mNetworkName, mNoSim);
             }
         }
         cb.onAirplaneModeChanged(mAirplaneMode);
@@ -736,6 +737,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             // GSM case, we have to check also the sim state
             if (mSimState == IccCardConstants.State.READY ||
                     mSimState == IccCardConstants.State.UNKNOWN) {
+                mNoSim = false;
                 if (hasService() && mDataState == TelephonyManager.DATA_CONNECTED) {
                     switch (mDataActivity) {
                         case TelephonyManager.DATA_ACTIVITY_IN:
@@ -758,6 +760,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
             } else {
                 iconId = R.drawable.stat_sys_no_sim;
+                mNoSim = true;
                 visible = false; // no SIM? no data
             }
         } else {
