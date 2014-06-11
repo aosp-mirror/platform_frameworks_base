@@ -74,8 +74,10 @@ public class DhcpResults implements Parcelable {
         if (linkProperties.getRoutes().size() == 0) {
             for (RouteInfo r : orig.linkProperties.getRoutes()) linkProperties.addRoute(r);
         }
-        if (linkProperties.getDnses().size() == 0) {
-            for (InetAddress d : orig.linkProperties.getDnses()) linkProperties.addDns(d);
+        if (linkProperties.getDnsServers().size() == 0) {
+            for (InetAddress d : orig.linkProperties.getDnsServers()) {
+                linkProperties.addDnsServer(d);
+            }
         }
     }
 
@@ -211,7 +213,7 @@ public class DhcpResults implements Parcelable {
     public boolean addDns(String addrString) {
         if (TextUtils.isEmpty(addrString) == false) {
             try {
-                linkProperties.addDns(NetworkUtils.numericToInetAddress(addrString));
+                linkProperties.addDnsServer(NetworkUtils.numericToInetAddress(addrString));
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "addDns failed with addrString " + addrString);
                 return true;

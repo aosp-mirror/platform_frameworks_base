@@ -336,7 +336,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(dnsAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addDns(InetAddress.getByName(dnsAddr));
+                    mLinkProperties.addDnsServer(InetAddress.getByName(dnsAddr));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
@@ -348,7 +348,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(dnsAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addDns(InetAddress.getByName(dnsAddr));
+                    mLinkProperties.addDnsServer(InetAddress.getByName(dnsAddr));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }

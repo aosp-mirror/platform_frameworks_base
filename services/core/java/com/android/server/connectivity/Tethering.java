@@ -1344,7 +1344,7 @@ public class Tethering extends BaseNetworkObserver {
 
                     if (iface != null) {
                         String[] dnsServers = mDefaultDnsServers;
-                        Collection<InetAddress> dnses = linkProperties.getDnses();
+                        Collection<InetAddress> dnses = linkProperties.getDnsServers();
                         if (dnses != null) {
                             // we currently only handle IPv4
                             ArrayList<InetAddress> v4Dnses =

@@ -16030,33 +16030,15 @@ package android.net {
   public class LinkProperties implements android.os.Parcelable {
     ctor public LinkProperties();
     ctor public LinkProperties(android.net.LinkProperties);
-    method public void addDns(java.net.InetAddress);
-    method public boolean addLinkAddress(android.net.LinkAddress);
-    method public void addRoute(android.net.RouteInfo);
-    method public void clear();
     method public int describeContents();
-    method public java.util.Collection<java.lang.String> getAllInterfaceNames();
-    method public java.util.Collection<java.net.InetAddress> getDnses();
+    method public java.util.List<java.net.InetAddress> getDnsServers();
     method public java.lang.String getDomains();
     method public android.net.ProxyInfo getHttpProxy();
     method public java.lang.String getInterfaceName();
-    method public java.util.Collection<android.net.LinkAddress> getLinkAddresses();
-    method public java.util.Collection<android.net.RouteInfo> getRoutes();
-    method public boolean hasIPv4Address();
-    method public boolean hasIPv6Address();
-    method public boolean removeLinkAddress(android.net.LinkAddress);
-    method public void setDomains(java.lang.String);
-    method public void setHttpProxy(android.net.ProxyInfo);
-    method public void setInterfaceName(java.lang.String);
-    method public void setLinkAddresses(java.util.Collection<android.net.LinkAddress>);
+    method public java.util.List<android.net.LinkAddress> getLinkAddresses();
+    method public java.util.List<android.net.RouteInfo> getRoutes();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static class LinkProperties.CompareResult {
-    ctor public LinkProperties.CompareResult();
-    field public java.util.Collection added;
-    field public java.util.Collection removed;
   }
 
   public class LocalServerSocket {
