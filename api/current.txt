@@ -3335,6 +3335,7 @@ package android.app {
     method public void openContextMenu(android.view.View);
     method public void openOptionsMenu();
     method public void overridePendingTransition(int, int);
+    method public void postponeEnterTransition();
     method public void recreate();
     method public void registerForContextMenu(android.view.View);
     method public final deprecated void removeDialog(int);
@@ -3390,6 +3391,7 @@ package android.app {
     method public deprecated void startManagingCursor(android.database.Cursor);
     method public boolean startNextMatchingActivity(android.content.Intent);
     method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
+    method public void startPostponedEnterTransition();
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
     method public void stopLockTask();
     method public deprecated void stopManagingCursor(android.database.Cursor);
