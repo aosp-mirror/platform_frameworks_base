@@ -57,6 +57,7 @@ public final class MediaController {
     private final Object mLock = new Object();
 
     private boolean mCbRegistered = false;
+    private MediaSessionInfo mInfo;
 
     private TransportControls mTransportController;
 
@@ -174,6 +175,21 @@ public final class MediaController {
     }
 
     /**
+     * Get the flags for this session.
+     *
+     * @return The current set of flags for the session.
+     * @hide
+     */
+    public long getFlags() {
+        try {
+            return mSessionBinder.getFlags();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getFlags.", e);
+        }
+        return 0;
+    }
+
+    /**
      * Adds a callback to receive updates from the Session. Updates will be
      * posted on the caller's thread.
      *
@@ -253,12 +269,14 @@ public final class MediaController {
      * @hide
      */
     public MediaSessionInfo getSessionInfo() {
-        try {
-            return mSessionBinder.getSessionInfo();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in getSessionInfo.", e);
+        if (mInfo == null) {
+            try {
+                mInfo = mSessionBinder.getSessionInfo();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in getSessionInfo.", e);
+            }
         }
-        return null;
+        return mInfo;
     }
 
     /*
