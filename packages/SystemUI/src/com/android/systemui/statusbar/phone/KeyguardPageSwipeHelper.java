@@ -423,6 +423,7 @@ public class KeyguardPageSwipeHelper {
             return;
         }
         if (!animate) {
+            view.animate().cancel();
             view.setAlpha(alpha);
             view.setScaleX(scale);
             view.setScaleY(scale);
@@ -465,6 +466,13 @@ public class KeyguardPageSwipeHelper {
     }
 
     public void reset() {
+        if (mSwipeAnimator != null) {
+            mSwipeAnimator.cancel();
+        }
+        ArrayList<View> targetViews = mCallback.getTranslationViews();
+        for (View view : targetViews) {
+            view.animate().cancel();
+        }
         setTranslation(0.0f, true);
         mSwipingInProgress = false;
     }
