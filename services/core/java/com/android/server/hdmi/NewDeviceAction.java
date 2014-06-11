@@ -70,10 +70,13 @@ final class NewDeviceAction extends FeatureAction {
 
     @Override
     public boolean start() {
-        sendCommand(
-                HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress,
-                        mDeviceLogicalAddress));
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
+        if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_SET_OSD_NAME)) {
+            return true;
+        }
+
+        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress,
+                mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
         return true;
     }
@@ -99,13 +102,11 @@ final class NewDeviceAction extends FeatureAction {
                 } catch (UnsupportedEncodingException e) {
                     Slog.e(TAG, "Failed to get OSD name: " + e.getMessage());
                 }
-                mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
                 requestVendorId();
                 return true;
             } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1] & 0xff;
+                int requestOpcode = params[1] & 0xFF;
                 if (requestOpcode == HdmiCec.MESSAGE_SET_OSD_NAME) {
-                    mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
                     requestVendorId();
                     return true;
                 }
@@ -113,8 +114,8 @@ final class NewDeviceAction extends FeatureAction {
         } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
             if (opcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
                 if (params.length == 3) {
-                    mVendorId = ((params[0] & 0xff) << 16) + ((params[1] & 0xff) << 8)
-                        + (params[2] & 0xff);
+                    mVendorId = ((params[0] & 0xFF) << 16) + ((params[1] & 0xFF) << 8)
+                        + (params[2] & 0xFF);
                 } else {
                     Slog.e(TAG, "Failed to get device vendor ID: ");
                 }
@@ -122,7 +123,7 @@ final class NewDeviceAction extends FeatureAction {
                 finish();
                 return true;
             } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1] & 0xff;
+                int requestOpcode = params[1] & 0xFF;
                 if (requestOpcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
                     addDeviceInfo();
                     finish();
@@ -133,7 +134,21 @@ final class NewDeviceAction extends FeatureAction {
         return false;
     }
 
+    private boolean mayProcessCommandIfCached(int destAddress, int opcode) {
+        HdmiCecMessage message = mService.getCecMessageCache().getMessage(destAddress, opcode);
+        if (message != null) {
+            return processCommand(message);
+        }
+        return false;
+    }
+
     private void requestVendorId() {
+        // At first, transit to waiting status for <Device Vendor Id>.
+        mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
+        // If the message is already in cache, process it.
+        if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
+            return;
+        }
         sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress,
                 mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
@@ -143,7 +158,7 @@ final class NewDeviceAction extends FeatureAction {
         if (mDisplayName == null) {
             mDisplayName = HdmiCec.getDefaultDeviceName(mDeviceLogicalAddress);
         }
-        mService.addDeviceInfo(new HdmiCecDeviceInfo(
+        mService.addCecDevice(new HdmiCecDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 HdmiCec.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));
@@ -156,7 +171,6 @@ final class NewDeviceAction extends FeatureAction {
         }
         if (state == STATE_WAITING_FOR_SET_OSD_NAME) {
             // Osd name request timed out. Try vendor id
-            mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
             requestVendorId();
         } else if (state == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
             // vendor id timed out. Go ahead creating the device info what we've got so far.
