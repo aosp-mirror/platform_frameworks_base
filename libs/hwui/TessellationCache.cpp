@@ -165,12 +165,12 @@ public:
     ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
             const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
             const Vector3& lightCenter, float lightRadius)
-        : drawTransform(drawTransform)
+        : drawTransform(*drawTransform)
         , localClip(localClip)
         , opaque(opaque)
-        , casterPerimeter(casterPerimeter)
-        , transformXY(transformXY)
-        , transformZ(transformZ)
+        , casterPerimeter(*casterPerimeter)
+        , transformXY(*transformXY)
+        , transformZ(*transformZ)
         , lightCenter(lightCenter)
         , lightRadius(lightRadius) {
     }
@@ -182,14 +182,19 @@ public:
         delete bufferPair;
     }
 
-    // Note - only the localClip is deep copied, since other pointers point at Allocator controlled
-    // objects, which are safe for the entire frame
-    const Matrix4* drawTransform;
+    /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
+     * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
+     * certain Allocators are destroyed before trim() is called to flush incomplete tasks.
+     *
+     * These deep copies could be avoided, long term, by cancelling or flushing outstanding tasks
+     * before tearning down single-frame LinearAllocators.
+     */
+    const Matrix4 drawTransform;
     const Rect localClip;
     bool opaque;
-    const SkPath* casterPerimeter;
-    const Matrix4* transformXY;
-    const Matrix4* transformZ;
+    const SkPath casterPerimeter;
+    const Matrix4 transformXY;
+    const Matrix4 transformZ;
     const Vector3 lightCenter;
     const float lightRadius;
 };
@@ -281,8 +286,8 @@ public:
 
         VertexBuffer* ambientBuffer = new VertexBuffer;
         VertexBuffer* spotBuffer = new VertexBuffer;
-        tessellateShadows(t->drawTransform, &t->localClip, t->opaque, t->casterPerimeter,
-                t->transformXY, t->transformZ, t->lightCenter, t->lightRadius,
+        tessellateShadows(&t->drawTransform, &t->localClip, t->opaque, &t->casterPerimeter,
+                &t->transformXY, &t->transformZ, t->lightCenter, t->lightRadius,
                 *ambientBuffer, *spotBuffer);
 
         t->setResult(new TessellationCache::vertexBuffer_pair_t(ambientBuffer, spotBuffer));
