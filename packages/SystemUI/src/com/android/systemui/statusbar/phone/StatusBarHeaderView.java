@@ -146,6 +146,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateBrightnessControllerState();
             updateZTranslation();
             updateClickTargets();
+            updateWidth();
             if (mQSPanel != null) {
                 mQSPanel.setExpanded(expanded && !overscrolled);
             }
@@ -181,7 +182,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateWidth() {
-        int width = mKeyguardShowing ? mKeyguardWidth : mNormalWidth;
+        int width = (mKeyguardShowing && !mExpanded) ? mKeyguardWidth : mNormalWidth;
         ViewGroup.LayoutParams lp = getLayoutParams();
         if (width != lp.width) {
             lp.width = width;
