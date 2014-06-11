@@ -121,6 +121,7 @@ class SystemUIMessageHandler extends Handler {
             // Send a broadcast to hide recents
             Intent intent = new Intent(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
             intent.setPackage(context.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (msg.arg1 != 0) {
                 intent.putExtra(RecentsService.EXTRA_TRIGGERED_FROM_ALT_TAB, true);
             }
@@ -129,6 +130,7 @@ class SystemUIMessageHandler extends Handler {
             // Send a broadcast to toggle recents
             Intent intent = new Intent(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(context.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             context.sendBroadcast(intent);
 
             // Time this path
@@ -140,6 +142,7 @@ class SystemUIMessageHandler extends Handler {
             // Send a broadcast to start the enter animation
             Intent intent = new Intent(RecentsService.ACTION_START_ENTER_ANIMATION);
             intent.setPackage(context.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             context.sendBroadcast(intent);
         }
     }
