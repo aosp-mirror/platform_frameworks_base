@@ -2344,19 +2344,24 @@ public class AudioManager {
         if (rctlr == null) {
             return false;
         }
-        IAudioService service = getService();
-        final RemoteController.OnClientUpdateListener l = rctlr.getUpdateListener();
-        final ComponentName listenerComponent = new ComponentName(mContext, l.getClass());
-        try {
-            int[] artworkDimensions = rctlr.getArtworkSize();
-            boolean reg = service.registerRemoteController(rctlr.getRcDisplay(),
-                    artworkDimensions[0]/*w*/, artworkDimensions[1]/*h*/,
-                    listenerComponent);
-            rctlr.setIsRegistered(reg);
-            return reg;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerRemoteController " + e);
-            return false;
+        if (USE_SESSIONS) {
+            rctlr.startListeningToSessions();
+            return true;
+        } else {
+            IAudioService service = getService();
+            final RemoteController.OnClientUpdateListener l = rctlr.getUpdateListener();
+            final ComponentName listenerComponent = new ComponentName(mContext, l.getClass());
+            try {
+                int[] artworkDimensions = rctlr.getArtworkSize();
+                boolean reg = service.registerRemoteController(rctlr.getRcDisplay(),
+                        artworkDimensions[0]/* w */, artworkDimensions[1]/* h */,
+                        listenerComponent);
+                rctlr.setIsRegistered(reg);
+                return reg;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in registerRemoteController " + e);
+                return false;
+            }
         }
     }
 
@@ -2369,12 +2374,16 @@ public class AudioManager {
         if (rctlr == null) {
             return;
         }
-        IAudioService service = getService();
-        try {
-            service.unregisterRemoteControlDisplay(rctlr.getRcDisplay());
-            rctlr.setIsRegistered(false);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
+        if (USE_SESSIONS) {
+            rctlr.stopListeningToSessions();
+        } else {
+            IAudioService service = getService();
+            try {
+                service.unregisterRemoteControlDisplay(rctlr.getRcDisplay());
+                rctlr.setIsRegistered(false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
+            }
         }
     }
 

@@ -20,6 +20,10 @@ import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaMetadata;
+import android.media.MediaMetadataEditor;
+import android.media.MediaMetadataRetriever;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.ArrayMap;
@@ -62,6 +66,88 @@ public class MediaSessionLegacyHelper {
             }
         }
         return sInstance;
+    }
+
+    public static Bundle getOldMetadata(MediaMetadata metadata) {
+        Bundle oldMetadata = new Bundle();
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUM),
+                    metadata.getString(MediaMetadata.METADATA_KEY_ALBUM));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_ART)) {
+            oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK),
+                    metadata.getBitmap(MediaMetadata.METADATA_KEY_ART));
+        } else if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM_ART)) {
+            // Fall back to album art if the track art wasn't available
+            oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK),
+                    metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST),
+                    metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_ARTIST)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_ARTIST),
+                    metadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_AUTHOR)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_AUTHOR),
+                    metadata.getString(MediaMetadata.METADATA_KEY_AUTHOR));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_COMPILATION)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_COMPILATION),
+                    metadata.getString(MediaMetadata.METADATA_KEY_COMPILATION));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_COMPOSER)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_COMPOSER),
+                    metadata.getString(MediaMetadata.METADATA_KEY_COMPOSER));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_DATE)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_DATE),
+                    metadata.getString(MediaMetadata.METADATA_KEY_DATE));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_DISC_NUMBER)) {
+            oldMetadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_DISC_NUMBER));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
+            oldMetadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_DURATION));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_GENRE)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_GENRE),
+                    metadata.getString(MediaMetadata.METADATA_KEY_GENRE));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_NUM_TRACKS)) {
+            oldMetadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_RATING)) {
+            oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.RATING_KEY_BY_OTHERS),
+                    metadata.getRating(MediaMetadata.METADATA_KEY_RATING));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_USER_RATING)) {
+            oldMetadata.putParcelable(String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER),
+                    metadata.getRating(MediaMetadata.METADATA_KEY_USER_RATING));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_TITLE)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_TITLE),
+                    metadata.getString(MediaMetadata.METADATA_KEY_TITLE));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_TRACK_NUMBER)) {
+            oldMetadata.putLong(
+                    String.valueOf(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_WRITER)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_WRITER),
+                    metadata.getString(MediaMetadata.METADATA_KEY_WRITER));
+        }
+        if (metadata.containsKey(MediaMetadata.METADATA_KEY_YEAR)) {
+            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_YEAR),
+                    metadata.getString(MediaMetadata.METADATA_KEY_YEAR));
+        }
+        return oldMetadata;
     }
 
     public MediaSession getSession(PendingIntent pi) {

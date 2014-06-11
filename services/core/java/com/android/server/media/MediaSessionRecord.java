@@ -949,6 +949,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public long getFlags() {
+            return mFlags;
+        }
+
+        @Override
         public void play() throws RemoteException {
             mSessionCb.play();
         }

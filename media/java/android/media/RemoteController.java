@@ -19,11 +19,17 @@ package android.media;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.IRemoteControlDisplay;
 import android.media.MediaMetadataEditor;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionLegacyHelper;
+import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +40,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * The RemoteController class is used to control media playback, display and update media metadata
@@ -56,6 +63,7 @@ public final class RemoteController
     private final static int TRANSPORT_UNKNOWN = 0;
     private final static String TAG = "RemoteController";
     private final static boolean DEBUG = false;
+    private final static boolean USE_SESSIONS = true;
     private final static Object mGenLock = new Object();
     private final static Object mInfoLock = new Object();
     private final RcDisplay mRcd;
@@ -63,6 +71,11 @@ public final class RemoteController
     private final AudioManager mAudioManager;
     private final int mMaxBitmapDimension;
     private MetadataEditor mMetadataEditor;
+
+    private MediaSessionManager mSessionManager;
+    private MediaSessionManager.SessionListener mSessionListener
+            = new TopTransportSessionListener();
+    private MediaController.Callback mSessionCb = new MediaControllerCallback();
 
     /**
      * Synchronized on mGenLock
@@ -79,6 +92,8 @@ public final class RemoteController
     private int mArtworkWidth = -1;
     private int mArtworkHeight = -1;
     private boolean mEnabled = true;
+    // synchronized on mInfoLock, for USE_SESSION apis.
+    private MediaController mCurrentSession;
 
     /**
      * Class constructor.
@@ -123,6 +138,8 @@ public final class RemoteController
         mContext = context;
         mRcd = new RcDisplay(this);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mSessionManager = (MediaSessionManager) context
+                .getSystemService(Context.MEDIA_SESSION_SERVICE);
 
         if (ActivityManager.isLowRamDeviceStatic()) {
             mMaxBitmapDimension = MAX_BITMAP_DIMENSION;
@@ -194,8 +211,15 @@ public final class RemoteController
      * @hide
      */
     public String getRemoteControlClientPackageName() {
-        return mClientPendingIntentCurrent != null ?
-                mClientPendingIntentCurrent.getCreatorPackage() : null;
+        if (USE_SESSIONS) {
+            synchronized (mInfoLock) {
+                return mCurrentSession != null ? mCurrentSession.getSessionInfo().getPackageName()
+                        : null;
+            }
+        } else {
+            return mClientPendingIntentCurrent != null ?
+                    mClientPendingIntentCurrent.getCreatorPackage() : null;
+        }
     }
 
     /**
@@ -215,22 +239,38 @@ public final class RemoteController
      * @see OnClientUpdateListener#onClientPlaybackStateUpdate(int, long, long, float)
      */
     public long getEstimatedMediaPosition() {
-        if (mLastPlaybackInfo != null) {
-            if (!RemoteControlClient.playbackPositionShouldMove(mLastPlaybackInfo.mState)) {
-                return mLastPlaybackInfo.mCurrentPosMs;
+        if (USE_SESSIONS) {
+            synchronized (mInfoLock) {
+                if (mCurrentSession != null) {
+                    PlaybackState state = mCurrentSession.getPlaybackState();
+                    if (state != null) {
+                        return state.getPosition();
+                    }
+                }
             }
-
-            // Take the current position at the time of state change and estimate.
-            final long thenPos = mLastPlaybackInfo.mCurrentPosMs;
-            if (thenPos < 0) {
-                return -1;
+        } else {
+            final PlaybackInfo lastPlaybackInfo;
+            synchronized (mInfoLock) {
+                lastPlaybackInfo = mLastPlaybackInfo;
             }
+            if (lastPlaybackInfo != null) {
+                if (!RemoteControlClient.playbackPositionShouldMove(lastPlaybackInfo.mState)) {
+                    return lastPlaybackInfo.mCurrentPosMs;
+                }
 
-            final long now = SystemClock.elapsedRealtime();
-            final long then = mLastPlaybackInfo.mStateChangeTimeMs;
-            final long sinceThen = now - then;
-            final long scaledSinceThen = (long) (sinceThen * mLastPlaybackInfo.mSpeed);
-            return thenPos + scaledSinceThen;
+                // Take the current position at the time of state change and
+                // estimate.
+                final long thenPos = lastPlaybackInfo.mCurrentPosMs;
+                if (thenPos < 0) {
+                    return -1;
+                }
+
+                final long now = SystemClock.elapsedRealtime();
+                final long then = lastPlaybackInfo.mStateChangeTimeMs;
+                final long sinceThen = now - then;
+                final long scaledSinceThen = (long) (sinceThen * lastPlaybackInfo.mSpeed);
+                return thenPos + scaledSinceThen;
+            }
         }
         return -1;
     }
@@ -267,30 +307,40 @@ public final class RemoteController
         if (!KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
             throw new IllegalArgumentException("not a media key event");
         }
-        final PendingIntent pi;
-        synchronized(mInfoLock) {
-            if (!mIsRegistered) {
-                Log.e(TAG, "Cannot use sendMediaKeyEvent() from an unregistered RemoteController");
-                return false;
-            }
-            if (!mEnabled) {
-                Log.e(TAG, "Cannot use sendMediaKeyEvent() from a disabled RemoteController");
-                return false;
-            }
-            pi = mClientPendingIntentCurrent;
-        }
-        if (pi != null) {
-            Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-            try {
-                pi.send(mContext, 0, intent);
-            } catch (CanceledException e) {
-                Log.e(TAG, "Error sending intent for media button down: ", e);
+        if (USE_SESSIONS) {
+            synchronized (mInfoLock) {
+                if (mCurrentSession != null) {
+                    return mCurrentSession.dispatchMediaButtonEvent(keyEvent);
+                }
                 return false;
             }
         } else {
-            Log.i(TAG, "No-op when sending key click, no receiver right now");
-            return false;
+            final PendingIntent pi;
+            synchronized (mInfoLock) {
+                if (!mIsRegistered) {
+                    Log.e(TAG,
+                            "Cannot use sendMediaKeyEvent() from an unregistered RemoteController");
+                    return false;
+                }
+                if (!mEnabled) {
+                    Log.e(TAG, "Cannot use sendMediaKeyEvent() from a disabled RemoteController");
+                    return false;
+                }
+                pi = mClientPendingIntentCurrent;
+            }
+            if (pi != null) {
+                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                try {
+                    pi.send(mContext, 0, intent);
+                } catch (CanceledException e) {
+                    Log.e(TAG, "Error sending intent for media button down: ", e);
+                    return false;
+                }
+            } else {
+                Log.i(TAG, "No-op when sending key click, no receiver right now");
+                return false;
+            }
         }
         return true;
     }
@@ -311,11 +361,19 @@ public final class RemoteController
         if (timeMs < 0) {
             throw new IllegalArgumentException("illegal negative time value");
         }
-        final int genId;
-        synchronized (mGenLock) {
-            genId = mClientGenerationIdCurrent;
+        if (USE_SESSIONS) {
+            synchronized (mInfoLock) {
+                if (mCurrentSession != null) {
+                    mCurrentSession.getTransportControls().seekTo(timeMs);
+                }
+            }
+        } else {
+            final int genId;
+            synchronized (mGenLock) {
+                genId = mClientGenerationIdCurrent;
+            }
+            mAudioManager.setRemoteControlClientPlaybackPosition(genId, timeMs);
         }
-        mAudioManager.setRemoteControlClientPlaybackPosition(genId, timeMs);
         return true;
     }
 
@@ -430,7 +488,6 @@ public final class RemoteController
         return editor;
     }
 
-
     /**
      * A class to read the metadata published by a {@link RemoteControlClient}, or send a
      * {@link RemoteControlClient} new values for keys that can be edited.
@@ -477,26 +534,41 @@ public final class RemoteController
             if (!mMetadataChanged) {
                 return;
             }
-            final int genId;
-            synchronized(mGenLock) {
-                genId = mClientGenerationIdCurrent;
-            }
-            synchronized(mInfoLock) {
-                if (mEditorMetadata.containsKey(
-                        String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER))) {
-                    Rating rating = (Rating) getObject(
-                            MediaMetadataEditor.RATING_KEY_BY_USER, null);
-                    mAudioManager.updateRemoteControlClientMetadata(genId,
-                          MediaMetadataEditor.RATING_KEY_BY_USER,
-                          rating);
-                } else {
-                    Log.e(TAG, "no metadata to apply");
+            if (USE_SESSIONS) {
+                synchronized (mInfoLock) {
+                    if (mCurrentSession != null) {
+                        if (mEditorMetadata.containsKey(
+                                String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER))) {
+                            Rating rating = (Rating) getObject(
+                                    MediaMetadataEditor.RATING_KEY_BY_USER, null);
+                            if (rating != null) {
+                                mCurrentSession.getTransportControls().setRating(rating);
+                            }
+                        }
+                    }
                 }
-                // NOT setting mApplied to true as this type of MetadataEditor will be applied
-                // multiple times, whenever the user of a RemoteController needs to change the
-                // metadata (e.g. user changes the rating of a song more than once during playback)
-                mApplied = false;
+            } else {
+                final int genId;
+                synchronized(mGenLock) {
+                    genId = mClientGenerationIdCurrent;
+                }
+                synchronized(mInfoLock) {
+                    if (mEditorMetadata.containsKey(
+                            String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER))) {
+                        Rating rating = (Rating) getObject(
+                                MediaMetadataEditor.RATING_KEY_BY_USER, null);
+                        mAudioManager.updateRemoteControlClientMetadata(genId,
+                              MediaMetadataEditor.RATING_KEY_BY_USER,
+                              rating);
+                    } else {
+                        Log.e(TAG, "no metadata to apply");
+                    }
+                }
             }
+            // NOT setting mApplied to true as this type of MetadataEditor will be applied
+            // multiple times, whenever the user of a RemoteController needs to change the
+            // metadata (e.g. user changes the rating of a song more than once during playback)
+            mApplied = false;
         }
 
     }
@@ -649,6 +721,46 @@ public final class RemoteController
         }
     }
 
+    /**
+     * This receives updates when the current session changes. This is
+     * registered to receive the updates on the handler thread so it can call
+     * directly into the appropriate methods.
+     */
+    private class MediaControllerCallback extends MediaController.Callback {
+        @Override
+        public void onPlaybackStateChanged(PlaybackState state) {
+            onNewPlaybackState(state);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            onNewMediaMetadata(metadata);
+        }
+    }
+
+    /**
+     * Listens for changes to the active session stack and replaces the
+     * currently tracked session if it has changed.
+     */
+    private class TopTransportSessionListener extends MediaSessionManager.SessionListener {
+        @Override
+        public void onActiveSessionsChanged(List<MediaController> controllers) {
+            int size = controllers.size();
+            for (int i = 0; i < size; i++) {
+                MediaController controller = controllers.get(i);
+                long flags = controller.getFlags();
+                // We only care about sessions that handle transport controls,
+                // which will be true for apps using RCC
+                if ((flags & MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS) != 0) {
+                    updateController(controller);
+                    return;
+                }
+            }
+            updateController(null);
+        }
+
+    }
+
     //==================================================
     // Event handling
     private final EventHandler mEventHandler;
@@ -658,6 +770,8 @@ public final class RemoteController
     private final static int MSG_NEW_METADATA       = 3; // msg always has non-null obj parameter
     private final static int MSG_CLIENT_CHANGE      = 4;
     private final static int MSG_DISPLAY_ENABLE     = 5;
+    private final static int MSG_NEW_PLAYBACK_STATE = 6;
+    private final static int MSG_NEW_MEDIA_METADATA = 7;
 
     private class EventHandler extends Handler {
 
@@ -686,9 +800,43 @@ public final class RemoteController
                 case MSG_DISPLAY_ENABLE:
                     onDisplayEnable(msg.arg1 == 1);
                     break;
+                case MSG_NEW_PLAYBACK_STATE:
+                    // same as new playback info but using new apis
+                    onNewPlaybackState((PlaybackState) msg.obj);
+                    break;
+                case MSG_NEW_MEDIA_METADATA:
+                    onNewMediaMetadata((MediaMetadata) msg.obj);
+                    break;
                 default:
                     Log.e(TAG, "unknown event " + msg.what);
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void startListeningToSessions() {
+        final ComponentName listenerComponent = new ComponentName(mContext,
+                mOnClientUpdateListener.getClass());
+        mSessionManager.addActiveSessionsListener(mSessionListener, listenerComponent,
+                ActivityManager.getCurrentUser());
+        mSessionListener.onActiveSessionsChanged(mSessionManager
+                .getActiveSessions(listenerComponent));
+        if (DEBUG) {
+            Log.d(TAG, "Registered session listener with component " + listenerComponent
+                    + " for user " + ActivityManager.getCurrentUser());
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void stopListeningToSessions() {
+        mSessionManager.removeActiveSessionsListener(mSessionListener);
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered session listener for user "
+                    + ActivityManager.getCurrentUser());
         }
     }
 
@@ -713,6 +861,7 @@ public final class RemoteController
         handler.sendMessageDelayed(handler.obtainMessage(msg, arg1, arg2, obj), delayMs);
     }
 
+    ///////////// These calls are used by the old APIs with RCC and RCD //////////////////////
     private void onNewPendingIntent(int genId, PendingIntent pi) {
         synchronized(mGenLock) {
             if (mClientGenerationIdCurrent != genId) {
@@ -845,6 +994,86 @@ public final class RemoteController
             metadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION), 0);
             sendMsg(mEventHandler, MSG_NEW_METADATA, SENDMSG_QUEUE,
                     genId /*arg1*/, 0 /*arg2, ignored*/, metadata /*obj*/, 0 /*delay*/);
+        }
+    }
+
+    ///////////// These calls are used by the new APIs with Sessions //////////////////////
+    private void updateController(MediaController controller) {
+        if (DEBUG) {
+            Log.d(TAG, "Updating controller to " + controller + " previous controller is "
+                    + mCurrentSession);
+        }
+        synchronized (mInfoLock) {
+            if (controller == null) {
+                if (mCurrentSession != null) {
+                    mCurrentSession.removeCallback(mSessionCb);
+                    mCurrentSession = null;
+                    sendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
+                            0 /* genId */, 1 /* clearing */, null /* obj */, 0 /* delay */);
+                }
+            } else if (mCurrentSession == null
+                    || !controller.getSessionInfo().getId()
+                            .equals(mCurrentSession.getSessionInfo().getId())) {
+                if (mCurrentSession != null) {
+                    mCurrentSession.removeCallback(mSessionCb);
+                }
+                sendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
+                        0 /* genId */, 0 /* clearing */, null /* obj */, 0 /* delay */);
+                mCurrentSession = controller;
+                mCurrentSession.addCallback(mSessionCb, mEventHandler);
+
+                PlaybackState state = controller.getPlaybackState();
+                sendMsg(mEventHandler, MSG_NEW_PLAYBACK_STATE, SENDMSG_REPLACE,
+                        0 /* genId */, 0, state /* obj */, 0 /* delay */);
+
+                MediaMetadata metadata = controller.getMetadata();
+                sendMsg(mEventHandler, MSG_NEW_MEDIA_METADATA, SENDMSG_REPLACE,
+                        0 /* arg1 */, 0 /* arg2 */, metadata /* obj */, 0 /* delay */);
+            }
+            // else same controller, no need to update
+        }
+    }
+
+    private void onNewPlaybackState(PlaybackState state) {
+        final OnClientUpdateListener l;
+        synchronized (mInfoLock) {
+            l = this.mOnClientUpdateListener;
+        }
+        if (l != null) {
+            int playstate = state == null ? RemoteControlClient.PLAYSTATE_NONE : PlaybackState
+                    .getRccStateFromState(state.getState());
+            if (state == null || state.getPosition() == PlaybackState.PLAYBACK_POSITION_UNKNOWN) {
+                l.onClientPlaybackStateUpdate(playstate);
+            } else {
+                l.onClientPlaybackStateUpdate(playstate, state.getLastPositionUpdateTime(),
+                        state.getPosition(), state.getPlaybackRate());
+            }
+            if (state != null) {
+                l.onClientTransportControlUpdate(PlaybackState.getRccControlFlagsFromActions(state
+                        .getActions()));
+            }
+        }
+    }
+
+    private void onNewMediaMetadata(MediaMetadata metadata) {
+        if (metadata == null) {
+            // RemoteController only handles non-null metadata
+            return;
+        }
+        final OnClientUpdateListener l;
+        final MetadataEditor metadataEditor;
+        // prepare the received Bundle to be used inside a MetadataEditor
+        synchronized(mInfoLock) {
+            l = mOnClientUpdateListener;
+            boolean canRate = mCurrentSession != null
+                    && mCurrentSession.getRatingType() != Rating.RATING_NONE;
+            long editableKeys = canRate ? MediaMetadataEditor.RATING_KEY_BY_USER : 0;
+            Bundle legacyMetadata = MediaSessionLegacyHelper.getOldMetadata(metadata);
+            mMetadataEditor = new MetadataEditor(legacyMetadata, editableKeys);
+            metadataEditor = mMetadataEditor;
+        }
+        if (l != null) {
+            l.onClientMetadataUpdate(metadataEditor);
         }
     }
 

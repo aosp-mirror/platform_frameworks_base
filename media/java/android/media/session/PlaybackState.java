@@ -432,8 +432,45 @@ public final class PlaybackState implements Parcelable {
                 return STATE_REWINDING;
             case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
                 return STATE_SKIPPING_TO_PREVIOUS;
+            case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
+                return STATE_SKIPPING_TO_NEXT;
             case RemoteControlClient.PLAYSTATE_STOPPED:
                 return STATE_STOPPED;
+            default:
+                return -1;
+        }
+    }
+
+    /**
+     * Get the {@link RemoteControlClient} state for the given
+     * {@link PlaybackState} state.
+     *
+     * @param state The state used by {@link PlaybackState}.
+     * @return The equivalent state used by {@link RemoteControlClient}.
+     * @hide
+     */
+    public static int getRccStateFromState(int state) {
+        switch (state) {
+            case STATE_BUFFERING:
+                return RemoteControlClient.PLAYSTATE_BUFFERING;
+            case STATE_ERROR:
+                return RemoteControlClient.PLAYSTATE_ERROR;
+            case STATE_FAST_FORWARDING:
+                return RemoteControlClient.PLAYSTATE_FAST_FORWARDING;
+            case STATE_NONE:
+                return RemoteControlClient.PLAYSTATE_NONE;
+            case STATE_PAUSED:
+                return RemoteControlClient.PLAYSTATE_PAUSED;
+            case STATE_PLAYING:
+                return RemoteControlClient.PLAYSTATE_PLAYING;
+            case STATE_REWINDING:
+                return RemoteControlClient.PLAYSTATE_REWINDING;
+            case STATE_SKIPPING_TO_PREVIOUS:
+                return RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS;
+            case STATE_SKIPPING_TO_NEXT:
+                return RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS;
+            case STATE_STOPPED:
+                return RemoteControlClient.PLAYSTATE_STOPPED;
             default:
                 return -1;
         }
@@ -452,6 +489,21 @@ public final class PlaybackState implements Parcelable {
             flag = flag << 1;
         }
         return actions;
+    }
+
+    /**
+     * @hide
+     */
+    public static int getRccControlFlagsFromActions(long actions) {
+        int rccFlags = 0;
+        long action = 1;
+        while (action <= actions && action < Integer.MAX_VALUE) {
+            if ((action & actions) != 0) {
+                rccFlags |= getRccFlagForAction(action);
+            }
+            action = action << 1;
+        }
+        return rccFlags;
     }
 
     private static long getActionForRccFlag(int flag) {
@@ -476,6 +528,35 @@ public final class PlaybackState implements Parcelable {
                 return ACTION_SEEK_TO;
             case RemoteControlClient.FLAG_KEY_MEDIA_RATING:
                 return ACTION_SET_RATING;
+        }
+        return 0;
+    }
+
+    private static int getRccFlagForAction(long action) {
+        // We only care about the lower set of actions that can map to rcc
+        // flags.
+        int testAction = action < Integer.MAX_VALUE ? (int) action : 0;
+        switch (testAction) {
+            case (int) ACTION_SKIP_TO_PREVIOUS:
+                return RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS;
+            case (int) ACTION_REWIND:
+                return RemoteControlClient.FLAG_KEY_MEDIA_REWIND;
+            case (int) ACTION_PLAY:
+                return RemoteControlClient.FLAG_KEY_MEDIA_PLAY;
+            case (int) ACTION_PLAY_PAUSE:
+                return RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE;
+            case (int) ACTION_PAUSE:
+                return RemoteControlClient.FLAG_KEY_MEDIA_PAUSE;
+            case (int) ACTION_STOP:
+                return RemoteControlClient.FLAG_KEY_MEDIA_STOP;
+            case (int) ACTION_FAST_FORWARD:
+                return RemoteControlClient.FLAG_KEY_MEDIA_FAST_FORWARD;
+            case (int) ACTION_SKIP_TO_NEXT:
+                return RemoteControlClient.FLAG_KEY_MEDIA_NEXT;
+            case (int) ACTION_SEEK_TO:
+                return RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE;
+            case (int) ACTION_SET_RATING:
+                return RemoteControlClient.FLAG_KEY_MEDIA_RATING;
         }
         return 0;
     }
