@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package android.app.task;
+package android.app.job;
 
 import android.content.ComponentName;
 import android.os.Bundle;
@@ -23,22 +23,22 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 
 /**
- * Container of data passed to the {@link android.app.task.TaskManager} fully encapsulating the
+ * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
  * parameters required to schedule work against the calling application. These are constructed
- * using the {@link Task.Builder}.
+ * using the {@link JobInfo.Builder}.
  */
-public class Task implements Parcelable {
+public class JobInfo implements Parcelable {
     public interface NetworkType {
         /** Default. */
         public final int NONE = 0;
-        /** This task requires network connectivity. */
+        /** This job requires network connectivity. */
         public final int ANY = 1;
-        /** This task requires network connectivity that is unmetered. */
+        /** This job requires network connectivity that is unmetered. */
         public final int UNMETERED = 2;
     }
 
     /**
-     * Amount of backoff a task has initially by default, in milliseconds.
+     * Amount of backoff a job has initially by default, in milliseconds.
      * @hide.
      */
     public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 5000L;
@@ -63,7 +63,7 @@ public class Task implements Parcelable {
         public final int EXPONENTIAL = 1;
     }
 
-    private final int taskId;
+    private final int jobId;
     // TODO: Change this to use PersistableBundle when that lands in master.
     private final PersistableBundle extras;
     private final ComponentName service;
@@ -80,10 +80,10 @@ public class Task implements Parcelable {
     private final int backoffPolicy;
 
     /**
-     * Unique task id associated with this class. This is assigned to your task by the scheduler.
+     * Unique job id associated with this class. This is assigned to your job by the scheduler.
      */
     public int getId() {
-        return taskId;
+        return jobId;
     }
 
     /**
@@ -94,43 +94,43 @@ public class Task implements Parcelable {
     }
 
     /**
-     * Name of the service endpoint that will be called back into by the TaskManager.
+     * Name of the service endpoint that will be called back into by the JobScheduler.
      */
     public ComponentName getService() {
         return service;
     }
 
     /**
-     * Whether this task needs the device to be plugged in.
+     * Whether this job needs the device to be plugged in.
      */
     public boolean isRequireCharging() {
         return requireCharging;
     }
 
     /**
-     * Whether this task needs the device to be in an Idle maintenance window.
+     * Whether this job needs the device to be in an Idle maintenance window.
      */
     public boolean isRequireDeviceIdle() {
         return requireDeviceIdle;
     }
 
     /**
-     * See {@link android.app.task.Task.NetworkType} for a description of this value.
+     * See {@link android.app.job.JobInfo.NetworkType} for a description of this value.
      */
     public int getNetworkCapabilities() {
         return networkCapabilities;
     }
 
     /**
-     * Set for a task that does not recur periodically, to specify a delay after which the task
-     * will be eligible for execution. This value is not set if the task recurs periodically.
+     * Set for a job that does not recur periodically, to specify a delay after which the job
+     * will be eligible for execution. This value is not set if the job recurs periodically.
      */
     public long getMinLatencyMillis() {
         return minLatencyMillis;
     }
 
     /**
-     * See {@link Builder#setOverrideDeadline(long)}. This value is not set if the task recurs
+     * See {@link Builder#setOverrideDeadline(long)}. This value is not set if the job recurs
      * periodically.
      */
     public long getMaxExecutionDelayMillis() {
@@ -138,23 +138,23 @@ public class Task implements Parcelable {
     }
 
     /**
-     * Track whether this task will repeat with a given period.
+     * Track whether this job will repeat with a given period.
      */
     public boolean isPeriodic() {
         return isPeriodic;
     }
 
     /**
-     * Set to the interval between occurrences of this task. This value is <b>not</b> set if the
-     * task does not recur periodically.
+     * Set to the interval between occurrences of this job. This value is <b>not</b> set if the
+     * job does not recur periodically.
      */
     public long getIntervalMillis() {
         return intervalMillis;
     }
 
     /**
-     * The amount of time the TaskManager will wait before rescheduling a failed task. This value
-     * will be increased depending on the backoff policy specified at task creation time. Defaults
+     * The amount of time the JobScheduler will wait before rescheduling a failed job. This value
+     * will be increased depending on the backoff policy specified at job creation time. Defaults
      * to 5 seconds.
      */
     public long getInitialBackoffMillis() {
@@ -162,7 +162,7 @@ public class Task implements Parcelable {
     }
 
     /**
-     * See {@link android.app.task.Task.BackoffPolicy} for an explanation of the values this field
+     * See {@link android.app.job.JobInfo.BackoffPolicy} for an explanation of the values this field
      * can take. This defaults to exponential.
      */
     public int getBackoffPolicy() {
@@ -187,8 +187,8 @@ public class Task implements Parcelable {
         return hasLateConstraint;
     }
 
-    private Task(Parcel in) {
-        taskId = in.readInt();
+    private JobInfo(Parcel in) {
+        jobId = in.readInt();
         extras = in.readPersistableBundle();
         service = in.readParcelable(null);
         requireCharging = in.readInt() == 1;
@@ -204,10 +204,10 @@ public class Task implements Parcelable {
         hasLateConstraint = in.readInt() == 1;
     }
 
-    private Task(Task.Builder b) {
-        taskId = b.mTaskId;
+    private JobInfo(JobInfo.Builder b) {
+        jobId = b.mJobId;
         extras = b.mExtras;
-        service = b.mTaskService;
+        service = b.mJobService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
         networkCapabilities = b.mNetworkCapabilities;
@@ -228,7 +228,7 @@ public class Task implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(taskId);
+        out.writeInt(jobId);
         out.writePersistableBundle(extras);
         out.writeParcelable(service, flags);
         out.writeInt(requireCharging ? 1 : 0);
@@ -244,23 +244,23 @@ public class Task implements Parcelable {
         out.writeInt(hasLateConstraint ? 1 : 0);
     }
 
-    public static final Creator<Task> CREATOR = new Creator<Task>() {
+    public static final Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
         @Override
-        public Task createFromParcel(Parcel in) {
-            return new Task(in);
+        public JobInfo createFromParcel(Parcel in) {
+            return new JobInfo(in);
         }
 
         @Override
-        public Task[] newArray(int size) {
-            return new Task[size];
+        public JobInfo[] newArray(int size) {
+            return new JobInfo[size];
         }
     };
 
-    /** Builder class for constructing {@link Task} objects. */
+    /** Builder class for constructing {@link JobInfo} objects. */
     public static final class Builder {
-        private int mTaskId;
+        private int mJobId;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
-        private ComponentName mTaskService;
+        private ComponentName mJobService;
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
@@ -280,15 +280,15 @@ public class Task implements Parcelable {
         private boolean mBackoffPolicySet = false;
 
         /**
-         * @param taskId Application-provided id for this task. Subsequent calls to cancel, or
-         *               tasks created with the same taskId, will update the pre-existing task with
+         * @param jobId Application-provided id for this job. Subsequent calls to cancel, or
+         *               jobs created with the same jobId, will update the pre-existing job with
          *               the same id.
-         * @param taskService The endpoint that you implement that will receive the callback from the
-         *            TaskManager.
+         * @param jobService The endpoint that you implement that will receive the callback from the
+         *            JobScheduler.
          */
-        public Builder(int taskId, ComponentName taskService) {
-            mTaskService = taskService;
-            mTaskId = taskId;
+        public Builder(int jobId, ComponentName jobService) {
+            mJobService = jobService;
+            mJobId = jobId;
         }
 
         /**
@@ -302,10 +302,10 @@ public class Task implements Parcelable {
 
         /**
          * Set some description of the kind of network capabilities you would like to have. This
-         * will be a parameter defined in {@link android.app.task.Task.NetworkType}.
+         * will be a parameter defined in {@link android.app.job.JobInfo.NetworkType}.
          * Not calling this function means the network is not necessary.
          * Bear in mind that calling this function defines network as a strict requirement for your
-         * task if the network requested is not available your task will never run. See
+         * job if the network requested is not available your job will never run. See
          * {@link #setOverrideDeadline(long)} to change this behaviour.
          */
         public Builder setRequiredNetworkCapabilities(int networkCapabilities) {
@@ -313,10 +313,10 @@ public class Task implements Parcelable {
             return this;
         }
 
-        /*
-         * Specify that to run this task, the device needs to be plugged in. This defaults to
+        /**
+         * Specify that to run this job, the device needs to be plugged in. This defaults to
          * false.
-         * @param requireCharging Whether or not the device is plugged in.
+         * @param requiresCharging Whether or not the device is plugged in.
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
             mRequiresCharging = requiresCharging;
@@ -324,11 +324,11 @@ public class Task implements Parcelable {
         }
 
         /**
-         * Specify that to run, the task needs the device to be in idle mode. This defaults to
+         * Specify that to run, the job needs the device to be in idle mode. This defaults to
          * false.
          * <p>Idle mode is a loose definition provided by the system, which means that the device
          * is not in use, and has not been in use for some time. As such, it is a good time to
-         * perform resource heavy tasks. Bear in mind that battery usage will still be attributed
+         * perform resource heavy jobs. Bear in mind that battery usage will still be attributed
          * to your application, and surfaced to the user in battery stats.</p>
          * @param requiresDeviceIdle Whether or not the device need be within an idle maintenance
          *                           window.
@@ -339,17 +339,17 @@ public class Task implements Parcelable {
         }
 
         /**
-         * Specify that this task should recur with the provided interval, not more than once per
-         * period. You have no control over when within this interval this task will be executed,
+         * Specify that this job should recur with the provided interval, not more than once per
+         * period. You have no control over when within this interval this job will be executed,
          * only the guarantee that it will be executed at most once within this interval.
-         * A periodic task will be repeated until the phone is turned off, however it will only be
+         * A periodic job will be repeated until the phone is turned off, however it will only be
          * persisted beyond boot if the client app has declared the
          * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission. You can schedule
-         * periodic tasks without this permission, they simply will cease to exist after the phone
+         * periodic jobs without this permission, they simply will cease to exist after the phone
          * restarts.
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
-         * @param intervalMillis Millisecond interval for which this task will repeat.
+         * @param intervalMillis Millisecond interval for which this job will repeat.
          */
         public Builder setPeriodic(long intervalMillis) {
             mIsPeriodic = true;
@@ -359,11 +359,11 @@ public class Task implements Parcelable {
         }
 
         /**
-         * Specify that this task should be delayed by the provided amount of time.
-         * Because it doesn't make sense setting this property on a periodic task, doing so will
+         * Specify that this job should be delayed by the provided amount of time.
+         * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
-         * {@link android.app.task.Task.Builder#build()} is called.
-         * @param minLatencyMillis Milliseconds before which this task will not be considered for
+         * {@link android.app.job.JobInfo.Builder#build()} is called.
+         * @param minLatencyMillis Milliseconds before which this job will not be considered for
          *                         execution.
          */
         public Builder setMinimumLatency(long minLatencyMillis) {
@@ -373,11 +373,11 @@ public class Task implements Parcelable {
         }
 
         /**
-         * Set deadline which is the maximum scheduling latency. The task will be run by this
+         * Set deadline which is the maximum scheduling latency. The job will be run by this
          * deadline even if other requirements are not met. Because it doesn't make sense setting
-         * this property on a periodic task, doing so will throw an
+         * this property on a periodic job, doing so will throw an
          * {@link java.lang.IllegalArgumentException} when
-         * {@link android.app.task.Task.Builder#build()} is called.
+         * {@link android.app.job.JobInfo.Builder#build()} is called.
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
             mMaxExecutionDelayMillis = maxExecutionDelayMillis;
@@ -389,13 +389,13 @@ public class Task implements Parcelable {
          * Set up the back-off/retry policy.
          * This defaults to some respectable values: {5 seconds, Exponential}. We cap back-off at
          * 1hr.
-         * Note that trying to set a backoff criteria for a task with
+         * Note that trying to set a backoff criteria for a job with
          * {@link #setRequiresDeviceIdle(boolean)} will throw an exception when you call build().
-         * This is because back-off typically does not make sense for these types of tasks. See
-         * {@link android.app.task.TaskService#taskFinished(android.app.task.TaskParams, boolean)}
-         * for more description of the return value for the case of a task executing while in idle
+         * This is because back-off typically does not make sense for these types of jobs. See
+         * {@link android.app.job.JobService#jobFinished(android.app.job.JobParameters, boolean)}
+         * for more description of the return value for the case of a job executing while in idle
          * mode.
-         * @param initialBackoffMillis Millisecond time interval to wait initially when task has
+         * @param initialBackoffMillis Millisecond time interval to wait initially when job has
          *                             failed.
          * @param backoffPolicy is one of {@link BackoffPolicy}
          */
@@ -407,25 +407,25 @@ public class Task implements Parcelable {
         }
 
         /**
-         * @return The task object to hand to the TaskManager. This object is immutable.
+         * @return The job object to hand to the JobScheduler. This object is immutable.
          */
-        public Task build() {
+        public JobInfo build() {
             mExtras = new PersistableBundle(mExtras);  // Make our own copy.
-            // Check that a deadline was not set on a periodic task.
+            // Check that a deadline was not set on a periodic job.
             if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
-                        "periodic task.");
+                        "periodic job.");
             }
             if (mIsPeriodic && (mMinLatencyMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
-                        "periodic task");
+                        "periodic job");
             }
             if (mBackoffPolicySet && mRequiresDeviceIdle) {
-                throw new IllegalArgumentException("An idle mode task will not respect any" +
+                throw new IllegalArgumentException("An idle mode job will not respect any" +
                         " back-off policy, so calling setBackoffCriteria with" +
                         " setRequiresDeviceIdle is an error.");
             }
-            return new Task(this);
+            return new JobInfo(this);
         }
     }
 

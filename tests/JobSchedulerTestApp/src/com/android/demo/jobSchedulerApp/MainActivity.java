@@ -17,8 +17,8 @@
 package com.android.demo.jobSchedulerApp;
 
 import android.app.Activity;
-import android.app.task.Task;
-import android.app.task.TaskParams;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -80,10 +80,10 @@ public class MainActivity extends Activity {
     RadioButton mWiFiConnectivityRadioButton;
     RadioButton mAnyConnectivityRadioButton;
     ComponentName mServiceComponent;
-    /** Service object to interact scheduled tasks. */
+    /** Service object to interact scheduled jobs. */
     TestJobService mTestService;
 
-    private static int kTaskId = 0;
+    private static int kJobId = 0;
 
     Handler mHandler = new Handler(/* default looper */) {
         @Override
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * UI onclick listener to schedule a task. What this task is is defined in
+     * UI onclick listener to schedule a job. What this job is is defined in
      * TestJobService#scheduleJob()
      */
     public void scheduleJob(View v) {
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
             return;
         }
 
-        Task.Builder builder = new Task.Builder(kTaskId++, mServiceComponent);
+        JobInfo.Builder builder = new JobInfo.Builder(kJobId++, mServiceComponent);
 
         String delay = mDelayEditText.getText().toString();
         if (delay != null && !TextUtils.isEmpty(delay)) {
@@ -133,9 +133,9 @@ public class MainActivity extends Activity {
         boolean requiresUnmetered = mWiFiConnectivityRadioButton.isSelected();
         boolean requiresAnyConnectivity = mAnyConnectivityRadioButton.isSelected();
         if (requiresUnmetered) {
-            builder.setRequiredNetworkCapabilities(Task.NetworkType.UNMETERED);
+            builder.setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED);
         } else if (requiresAnyConnectivity) {
-            builder.setRequiredNetworkCapabilities(Task.NetworkType.ANY);
+            builder.setRequiredNetworkCapabilities(JobInfo.NetworkType.ANY);
         }
 
         mTestService.scheduleJob(builder.build());
@@ -143,24 +143,24 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * UI onclick listener to call taskFinished() in our service.
+     * UI onclick listener to call jobFinished() in our service.
      */
     public void finishJob(View v) {
         if (!ensureTestService()) {
             return;
         }
-        mTestService.callTaskFinished();
+        mTestService.callJobFinished();
         mParamsTextView.setText("");
     }
 
-    public void onReceivedStartTask(TaskParams params) {
+    public void onReceivedStartJob(JobParameters params) {
         mShowStartView.setBackgroundColor(startJobColor);
         Message m = Message.obtain(mHandler, MSG_UNCOLOUR_START);
         mHandler.sendMessageDelayed(m, 1000L); // uncolour in 1 second.
-        mParamsTextView.setText("Executing: " + params.getTaskId() + " " + params.getExtras());
+        mParamsTextView.setText("Executing: " + params.getJobId() + " " + params.getExtras());
     }
 
-    public void onReceivedStopTask() {
+    public void onReceivedStopJob() {
         mShowStopView.setBackgroundColor(stopJobColor);
         Message m = Message.obtain(mHandler, MSG_UNCOLOUR_STOP);
         mHandler.sendMessageDelayed(m, 2000L); // uncolour in 1 second.

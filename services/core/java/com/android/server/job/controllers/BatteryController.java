@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.task.controllers;
+package com.android.server.job.controllers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -32,8 +32,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.BatteryService;
-import com.android.server.task.StateChangedListener;
-import com.android.server.task.TaskManagerService;
+import com.android.server.job.JobSchedulerService;
+import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -54,10 +54,10 @@ public class BatteryController extends StateController {
     /** Wait this long after phone is plugged in before doing any work. */
     private static final long STABLE_CHARGING_THRESHOLD_MILLIS = 2 * 60 * 1000; // 2 minutes.
 
-    private List<TaskStatus> mTrackedTasks = new ArrayList<TaskStatus>();
+    private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     private ChargingTracker mChargeTracker;
 
-    public static BatteryController get(TaskManagerService taskManagerService) {
+    public static BatteryController get(JobSchedulerService taskManagerService) {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new BatteryController(taskManagerService,
@@ -85,7 +85,7 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingTask(TaskStatus taskStatus) {
+    public void maybeStartTrackingJob(JobStatus taskStatus) {
         if (taskStatus.hasChargingConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.add(taskStatus);
@@ -96,7 +96,7 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingTask(TaskStatus taskStatus) {
+    public void maybeStopTrackingJob(JobStatus taskStatus) {
         if (taskStatus.hasChargingConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.remove(taskStatus);
@@ -108,7 +108,7 @@ public class BatteryController extends StateController {
         final boolean stablePower = mChargeTracker.isOnStablePower();
         boolean reportChange = false;
         synchronized (mTrackedTasks) {
-            for (TaskStatus ts : mTrackedTasks) {
+            for (JobStatus ts : mTrackedTasks) {
                 boolean previous = ts.chargingConstraintSatisfied.getAndSet(stablePower);
                 if (previous != stablePower) {
                     reportChange = true;

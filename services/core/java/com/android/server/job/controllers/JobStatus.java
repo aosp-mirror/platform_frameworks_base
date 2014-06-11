@@ -14,9 +14,9 @@
  * limitations under the License
  */
 
-package com.android.server.task.controllers;
+package com.android.server.job.controllers;
 
-import android.app.task.Task;
+import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
@@ -26,9 +26,9 @@ import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Uniquely identifies a task internally.
- * Created from the public {@link android.app.task.Task} object when it lands on the scheduler.
- * Contains current state of the requirements of the task, as well as a function to evaluate
+ * Uniquely identifies a job internally.
+ * Created from the public {@link android.app.job.JobInfo} object when it lands on the scheduler.
+ * Contains current state of the requirements of the job, as well as a function to evaluate
  * whether it's ready to run.
  * This object is shared among the various controllers - hence why the different fields are atomic.
  * This isn't strictly necessary because each controller is only interested in a specific field,
@@ -36,14 +36,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * but we don't enforce that so this is safer.
  * @hide
  */
-public class TaskStatus {
+public class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    final Task task;
+    final JobInfo job;
     final int uId;
 
-    /** At reschedule time we need to know whether to update task on disk. */
+    /** At reschedule time we need to know whether to update job on disk. */
     final boolean persisted;
 
     // Constraints.
@@ -55,77 +55,77 @@ public class TaskStatus {
     final AtomicBoolean connectivityConstraintSatisfied = new AtomicBoolean();
 
     /**
-     * Earliest point in the future at which this task will be eligible to run. A value of 0
+     * Earliest point in the future at which this job will be eligible to run. A value of 0
      * indicates there is no delay constraint. See {@link #hasTimingDelayConstraint()}.
      */
     private long earliestRunTimeElapsedMillis;
     /**
-     * Latest point in the future at which this task must be run. A value of {@link Long#MAX_VALUE}
+     * Latest point in the future at which this job must be run. A value of {@link Long#MAX_VALUE}
      * indicates there is no deadline constraint. See {@link #hasDeadlineConstraint()}.
      */
     private long latestRunTimeElapsedMillis;
-    /** How many times this task has failed, used to compute back-off. */
+    /** How many times this job has failed, used to compute back-off. */
     private final int numFailures;
 
-    /** Provide a handle to the service that this task will be run on. */
+    /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
         return uId;
     }
 
-    private TaskStatus(Task task, int uId, boolean persisted, int numFailures) {
-        this.task = task;
+    private JobStatus(JobInfo job, int uId, boolean persisted, int numFailures) {
+        this.job = job;
         this.uId = uId;
         this.numFailures = numFailures;
         this.persisted = persisted;
     }
 
-    /** Create a newly scheduled task. */
-    public TaskStatus(Task task, int uId, boolean persisted) {
-        this(task, uId, persisted, 0);
+    /** Create a newly scheduled job. */
+    public JobStatus(JobInfo job, int uId, boolean persisted) {
+        this(job, uId, persisted, 0);
 
         final long elapsedNow = SystemClock.elapsedRealtime();
 
-        if (task.isPeriodic()) {
+        if (job.isPeriodic()) {
             earliestRunTimeElapsedMillis = elapsedNow;
-            latestRunTimeElapsedMillis = elapsedNow + task.getIntervalMillis();
+            latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
         } else {
-            earliestRunTimeElapsedMillis = task.hasEarlyConstraint() ?
-                    elapsedNow + task.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;
-            latestRunTimeElapsedMillis = task.hasLateConstraint() ?
-                    elapsedNow + task.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
+            earliestRunTimeElapsedMillis = job.hasEarlyConstraint() ?
+                    elapsedNow + job.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;
+            latestRunTimeElapsedMillis = job.hasLateConstraint() ?
+                    elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
         }
     }
 
     /**
-     * Create a new TaskStatus that was loaded from disk. We ignore the provided
-     * {@link android.app.task.Task} time criteria because we can load a persisted periodic task
-     * from the {@link com.android.server.task.TaskStore} and still want to respect its
+     * Create a new JobStatus that was loaded from disk. We ignore the provided
+     * {@link android.app.job.JobInfo} time criteria because we can load a persisted periodic job
+     * from the {@link com.android.server.job.JobStore} and still want to respect its
      * wallclock runtime rather than resetting it on every boot.
-     * We consider a freshly loaded task to no longer be in back-off.
+     * We consider a freshly loaded job to no longer be in back-off.
      */
-    public TaskStatus(Task task, int uId, long earliestRunTimeElapsedMillis,
+    public JobStatus(JobInfo job, int uId, long earliestRunTimeElapsedMillis,
                       long latestRunTimeElapsedMillis) {
-        this(task, uId, true, 0);
+        this(job, uId, true, 0);
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
     }
 
-    /** Create a new task to be rescheduled with the provided parameters. */
-    public TaskStatus(TaskStatus rescheduling, long newEarliestRuntimeElapsedMillis,
+    /** Create a new job to be rescheduled with the provided parameters. */
+    public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
-        this(rescheduling.task, rescheduling.getUid(), rescheduling.isPersisted(), backoffAttempt);
+        this(rescheduling.job, rescheduling.getUid(), rescheduling.isPersisted(), backoffAttempt);
 
         earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
         latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
     }
 
-    public Task getTask() {
-        return task;
+    public JobInfo getJob() {
+        return job;
     }
 
-    public int getTaskId() {
-        return task.getId();
+    public int getJobId() {
+        return job.getId();
     }
 
     public int getNumFailures() {
@@ -133,7 +133,7 @@ public class TaskStatus {
     }
 
     public ComponentName getServiceComponent() {
-        return task.getService();
+        return job.getService();
     }
 
     public int getUserId() {
@@ -145,19 +145,19 @@ public class TaskStatus {
     }
 
     public PersistableBundle getExtras() {
-        return task.getExtras();
+        return job.getExtras();
     }
 
     public boolean hasConnectivityConstraint() {
-        return task.getNetworkCapabilities() == Task.NetworkType.ANY;
+        return job.getNetworkCapabilities() == JobInfo.NetworkType.ANY;
     }
 
     public boolean hasUnmeteredConstraint() {
-        return task.getNetworkCapabilities() == Task.NetworkType.UNMETERED;
+        return job.getNetworkCapabilities() == JobInfo.NetworkType.UNMETERED;
     }
 
     public boolean hasChargingConstraint() {
-        return task.isRequireCharging();
+        return job.isRequireCharging();
     }
 
     public boolean hasTimingDelayConstraint() {
@@ -169,7 +169,7 @@ public class TaskStatus {
     }
 
     public boolean hasIdleConstraint() {
-        return task.isRequireDeviceIdle();
+        return job.isRequireDeviceIdle();
     }
 
     public long getEarliestRunTime() {
@@ -184,7 +184,7 @@ public class TaskStatus {
         return persisted;
     }
     /**
-     * @return Whether or not this task is ready to run, based on its requirements.
+     * @return Whether or not this job is ready to run, based on its requirements.
      */
     public synchronized boolean isReady() {
         return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
@@ -196,36 +196,17 @@ public class TaskStatus {
                 || (hasDeadlineConstraint() && deadlineConstraintSatisfied.get());
     }
 
-    /*@Override
-    public int hashCode() {
-        int result = getServiceComponent().hashCode();
-        result = 31 * result + task.getId();
-        result = 31 * result + uId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TaskStatus)) return false;
-
-        TaskStatus that = (TaskStatus) o;
-        return ((task.getId() == that.task.getId())
-                && (uId == that.uId)
-                && (getServiceComponent().equals(that.getServiceComponent())));
-    }*/
-
-    public boolean matches(int uid, int taskId) {
-        return this.task.getId() == taskId && this.uId == uid;
+    public boolean matches(int uid, int jobId) {
+        return this.job.getId() == jobId && this.uId == uid;
     }
 
     @Override
     public String toString() {
         return String.valueOf(hashCode()).substring(0, 3) + ".."
-                + ":[" + task.getService().getPackageName() + ",tId=" + task.getId()
+                + ":[" + job.getService().getPackageName() + ",jId=" + job.getId()
                 + ",R=(" + earliestRunTimeElapsedMillis + "," + latestRunTimeElapsedMillis + ")"
-                + ",N=" + task.getNetworkCapabilities() + ",C=" + task.isRequireCharging()
-                + ",I=" + task.isRequireDeviceIdle() + ",F=" + numFailures
+                + ",N=" + job.getNetworkCapabilities() + ",C=" + job.isRequireCharging()
+                + ",I=" + job.isRequireDeviceIdle() + ",F=" + numFailures
                 + (isReady() ? "(READY)" : "")
                 + "]";
     }

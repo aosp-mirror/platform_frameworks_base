@@ -14,26 +14,26 @@
  * limitations under the License
  */
 
-package com.android.server.task;
+package com.android.server.job;
 
-import com.android.server.task.controllers.TaskStatus;
+import com.android.server.job.controllers.JobStatus;
 
 /**
- * Interface through which a {@link com.android.server.task.controllers.StateController} informs
- * the {@link com.android.server.task.TaskManagerService} that there are some tasks potentially
+ * Interface through which a {@link com.android.server.job.controllers.StateController} informs
+ * the {@link com.android.server.job.JobSchedulerService} that there are some tasks potentially
  * ready to be run.
  */
 public interface StateChangedListener {
     /**
-     * Called by the controller to notify the TaskManager that it should check on the state of a
+     * Called by the controller to notify the JobManager that it should check on the state of a
      * task.
      */
     public void onControllerStateChanged();
 
     /**
-     * Called by the controller to notify the TaskManager that regardless of the state of the task,
+     * Called by the controller to notify the JobManager that regardless of the state of the task,
      * it must be run immediately.
-     * @param taskStatus The state of the task which is to be run immediately.
+     * @param jobStatus The state of the task which is to be run immediately.
      */
-    public void onRunTaskNow(TaskStatus taskStatus);
+    public void onRunJobNow(JobStatus jobStatus);
 }

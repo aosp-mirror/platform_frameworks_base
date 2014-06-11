@@ -5372,23 +5372,9 @@ package android.app.backup {
 
 }
 
-package android.app.maintenance {
+package android.app.job {
 
-  public abstract class IdleService extends android.app.Service {
-    ctor public IdleService();
-    method public final void finishIdle();
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract boolean onIdleStart();
-    method public abstract void onIdleStop();
-    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_IDLE_SERVICE";
-    field public static final java.lang.String SERVICE_INTERFACE = "android.service.idle.IdleService";
-  }
-
-}
-
-package android.app.task {
-
-  public class Task implements android.os.Parcelable {
+  public class JobInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getBackoffPolicy();
     method public android.os.PersistableBundle getExtras();
@@ -5406,55 +5392,69 @@ package android.app.task {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public static abstract interface Task.BackoffPolicy {
+  public static abstract interface JobInfo.BackoffPolicy {
     field public static final int EXPONENTIAL = 1; // 0x1
     field public static final int LINEAR = 0; // 0x0
   }
 
-  public static final class Task.Builder {
-    ctor public Task.Builder(int, android.content.ComponentName);
-    method public android.app.task.Task build();
-    method public android.app.task.Task.Builder setBackoffCriteria(long, int);
-    method public android.app.task.Task.Builder setExtras(android.os.PersistableBundle);
-    method public android.app.task.Task.Builder setMinimumLatency(long);
-    method public android.app.task.Task.Builder setOverrideDeadline(long);
-    method public android.app.task.Task.Builder setPeriodic(long);
-    method public android.app.task.Task.Builder setRequiredNetworkCapabilities(int);
-    method public android.app.task.Task.Builder setRequiresCharging(boolean);
-    method public android.app.task.Task.Builder setRequiresDeviceIdle(boolean);
+  public static final class JobInfo.Builder {
+    ctor public JobInfo.Builder(int, android.content.ComponentName);
+    method public android.app.job.JobInfo build();
+    method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
+    method public android.app.job.JobInfo.Builder setExtras(android.os.PersistableBundle);
+    method public android.app.job.JobInfo.Builder setMinimumLatency(long);
+    method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
+    method public android.app.job.JobInfo.Builder setPeriodic(long);
+    method public android.app.job.JobInfo.Builder setRequiredNetworkCapabilities(int);
+    method public android.app.job.JobInfo.Builder setRequiresCharging(boolean);
+    method public android.app.job.JobInfo.Builder setRequiresDeviceIdle(boolean);
   }
 
-  public static abstract interface Task.NetworkType {
+  public static abstract interface JobInfo.NetworkType {
     field public static final int ANY = 1; // 0x1
     field public static final int NONE = 0; // 0x0
     field public static final int UNMETERED = 2; // 0x2
   }
 
-  public abstract class TaskManager {
-    ctor public TaskManager();
-    method public abstract void cancel(int);
-    method public abstract void cancelAll();
-    method public abstract java.util.List<android.app.task.Task> getAllPendingTasks();
-    method public abstract int schedule(android.app.task.Task);
-    field public static final int RESULT_FAILURE = 0; // 0x0
-    field public static final int RESULT_SUCCESS = 1; // 0x1
-  }
-
-  public class TaskParams implements android.os.Parcelable {
+  public class JobParameters implements android.os.Parcelable {
     method public int describeContents();
     method public android.os.PersistableBundle getExtras();
-    method public int getTaskId();
+    method public int getJobId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class TaskService extends android.app.Service {
-    ctor public TaskService();
+  public abstract class JobScheduler {
+    ctor public JobScheduler();
+    method public abstract void cancel(int);
+    method public abstract void cancelAll();
+    method public abstract java.util.List<android.app.job.JobInfo> getAllPendingJobs();
+    method public abstract int schedule(android.app.job.JobInfo);
+    field public static final int RESULT_FAILURE = 0; // 0x0
+    field public static final int RESULT_SUCCESS = 1; // 0x1
+  }
+
+  public abstract class JobService extends android.app.Service {
+    ctor public JobService();
+    method public final void jobFinished(android.app.job.JobParameters, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract boolean onStartTask(android.app.task.TaskParams);
-    method public abstract boolean onStopTask(android.app.task.TaskParams);
-    method public final void taskFinished(android.app.task.TaskParams, boolean);
-    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_TASK_SERVICE";
+    method public abstract boolean onStartJob(android.app.job.JobParameters);
+    method public abstract boolean onStopJob(android.app.job.JobParameters);
+    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
+  }
+
+}
+
+package android.app.maintenance {
+
+  public abstract class IdleService extends android.app.Service {
+    ctor public IdleService();
+    method public final void finishIdle();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract boolean onIdleStart();
+    method public abstract void onIdleStop();
+    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_IDLE_SERVICE";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.idle.IdleService";
   }
 
 }
@@ -7023,6 +7023,7 @@ package android.content {
     field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
+    field public static final java.lang.String JOB_SCHEDULER_SERVICE = "jobscheduler";
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
     field public static final java.lang.String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
@@ -7044,7 +7045,6 @@ package android.content {
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
-    field public static final java.lang.String TASK_SERVICE = "task";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";

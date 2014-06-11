@@ -135,7 +135,7 @@ import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
-import android.app.task.ITaskManager;
+import android.app.job.IJobScheduler;
 import android.app.trust.TrustManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -706,10 +706,10 @@ class ContextImpl extends Context {
                 return new UsageStatsManager(ctx.getOuterContext());
         }});
 
-        registerService(TASK_SERVICE, new ServiceFetcher() {
+        registerService(JOB_SCHEDULER_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(TASK_SERVICE);
-                return new TaskManagerImpl(ITaskManager.Stub.asInterface(b));
+                IBinder b = ServiceManager.getService(JOB_SCHEDULER_SERVICE);
+                return new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b));
             }});
     }
 

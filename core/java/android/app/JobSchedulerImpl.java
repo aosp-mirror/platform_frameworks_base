@@ -17,38 +17,38 @@
 // in android.app so ContextImpl has package access
 package android.app;
 
-import android.app.task.ITaskManager;
-import android.app.task.Task;
-import android.app.task.TaskManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.app.job.IJobScheduler;
 import android.os.RemoteException;
 
 import java.util.List;
 
 
 /**
- * Concrete implementation of the TaskManager interface
+ * Concrete implementation of the JobScheduler interface
  * @hide 
  */
-public class TaskManagerImpl extends TaskManager {
-    ITaskManager mBinder;
+public class JobSchedulerImpl extends JobScheduler {
+    IJobScheduler mBinder;
 
-    /* package */ TaskManagerImpl(ITaskManager binder) {
+    /* package */ JobSchedulerImpl(IJobScheduler binder) {
         mBinder = binder;
     }
 
     @Override
-    public int schedule(Task task) {
+    public int schedule(JobInfo job) {
         try {
-            return mBinder.schedule(task);
+            return mBinder.schedule(job);
         } catch (RemoteException e) {
-            return TaskManager.RESULT_FAILURE;
+            return JobScheduler.RESULT_FAILURE;
         }
     }
 
     @Override
-    public void cancel(int taskId) {
+    public void cancel(int jobId) {
         try {
-            mBinder.cancel(taskId);
+            mBinder.cancel(jobId);
         } catch (RemoteException e) {}
 
     }
@@ -62,9 +62,9 @@ public class TaskManagerImpl extends TaskManager {
     }
 
     @Override
-    public List<Task> getAllPendingTasks() {
+    public List<JobInfo> getAllPendingJobs() {
         try {
-            return mBinder.getAllPendingTasks();
+            return mBinder.getAllPendingJobs();
         } catch (RemoteException e) {
             return null;
         }

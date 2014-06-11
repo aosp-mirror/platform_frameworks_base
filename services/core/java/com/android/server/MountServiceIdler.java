@@ -18,32 +18,32 @@ package com.android.server;
 
 import java.util.Calendar;
 
-import android.app.task.Task;
-import android.app.task.TaskManager;
-import android.app.task.TaskParams;
-import android.app.task.TaskService;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.util.Slog;
 
-public class MountServiceIdler extends TaskService {
+public class MountServiceIdler extends JobService {
     private static final String TAG = "MountServiceIdler";
 
     private static ComponentName sIdleService =
             new ComponentName(MountServiceIdler.class.getPackage().getName(),
                     MountServiceIdler.class.getName());
 
-    private static int MOUNT_TASK_ID = 808;
+    private static int MOUNT_JOB_ID = 808;
 
     private boolean mStarted;
-    private TaskParams mTaskParams;
+    private JobParameters mJobParams;
     private Runnable mFinishCallback = new Runnable() {
         @Override
         public void run() {
             Slog.i(TAG, "Got mount service completion callback");
             synchronized (mFinishCallback) {
                 if (mStarted) {
-                    taskFinished(mTaskParams, false);
+                    jobFinished(mJobParams, false);
                     mStarted = false;
                 }
             }
@@ -53,12 +53,12 @@ public class MountServiceIdler extends TaskService {
     };
 
     @Override
-    public boolean onStartTask(TaskParams params) {
+    public boolean onStartJob(JobParameters params) {
         // The mount service will run an fstrim operation asynchronously
         // on a designated separate thread, so we provide it with a callback
         // that lets us cleanly end our idle timeslice.  It's safe to call
         // finishIdle() from any thread.
-        mTaskParams = params;
+        mJobParams = params;
         MountService ms = MountService.sSelf;
         if (ms != null) {
             synchronized (mFinishCallback) {
@@ -70,9 +70,9 @@ public class MountServiceIdler extends TaskService {
     }
 
     @Override
-    public boolean onStopTask(TaskParams params) {
+    public boolean onStopJob(JobParameters params) {
         // Once we kick off the fstrim we aren't actually interruptible; just note
-        // that we don't need to call taskFinished(), and let everything happen in
+        // that we don't need to call jobFinished(), and let everything happen in
         // the callback from the mount service.
         synchronized (mFinishCallback) {
             mStarted = false;
@@ -84,12 +84,12 @@ public class MountServiceIdler extends TaskService {
      * Schedule the idle job that will ping the mount service
      */
     public static void scheduleIdlePass(Context context) {
-        TaskManager tm = (TaskManager) context.getSystemService(Context.TASK_SERVICE);
+        JobScheduler tm = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         Calendar calendar = tomorrowMidnight();
         final long timeToMidnight = calendar.getTimeInMillis() - System.currentTimeMillis();
 
-        Task.Builder builder = new Task.Builder(MOUNT_TASK_ID, sIdleService);
+        JobInfo.Builder builder = new JobInfo.Builder(MOUNT_JOB_ID, sIdleService);
         builder.setRequiresDeviceIdle(true);
         builder.setRequiresCharging(true);
         builder.setMinimumLatency(timeToMidnight);
