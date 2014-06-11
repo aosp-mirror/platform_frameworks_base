@@ -36,6 +36,7 @@ import android.os.Debug;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
 import android.util.TimeUtils;
+import android.view.Display;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
 import com.android.server.input.InputWindowHandle;
@@ -1359,6 +1360,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, reportDraw,
                         newConfig);
             }
+
+            //TODO (multidisplay): Accessibility supported only for the default display.
+            if (mService.mAccessibilityController != null
+                    && getDisplayId() == Display.DEFAULT_DISPLAY) {
+                mService.mAccessibilityController.onSomeWindowResizedOrMoved();
+            }
+
             mOverscanInsetsChanged = false;
             mContentInsetsChanged = false;
             mVisibleInsetsChanged = false;

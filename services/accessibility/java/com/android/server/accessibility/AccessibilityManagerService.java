@@ -1640,6 +1640,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 pw.println("}]");
                 pw.println();
             }
+            final int windowCount = mSecurityPolicy.mWindows.size();
+            for (int j = 0; j < windowCount; j++) {
+                if (j > 0) {
+                    pw.append(',');
+                    pw.println();
+                }
+                pw.append("Window[");
+                AccessibilityWindowInfo window = mSecurityPolicy.mWindows.get(j);
+                pw.append(window.toString());
+                pw.append(']');
+            }
         }
     }
 
@@ -3283,7 +3294,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
 
                 if (mTouchInteractionInProgress && activeWindowGone) {
-                    mActiveWindowId = INVALID_WINDOW_ID;
+                    mActiveWindowId = mFocusedWindowId;
                 }
 
                 // Focused window may change the active one, so set the
@@ -3336,10 +3347,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // The active window also determined events from which
                     // windows are delivered.
                     synchronized (mLock) {
-                        mFocusedWindowId = getFocusedWindowId();
-                        if (mWindowsForAccessibilityCallback == null
-                                && windowId == mFocusedWindowId) {
-                            mActiveWindowId = windowId;
+                        if (mWindowsForAccessibilityCallback == null) {
+                            mFocusedWindowId = getFocusedWindowId();
+                            if (windowId == mFocusedWindowId) {
+                                mActiveWindowId = windowId;
+                            }
                         }
                     }
                 } break;

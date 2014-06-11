@@ -151,7 +151,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9228,6 +9227,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         winAnimator.setAnimation(a);
                         winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
                         winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+
+                        //TODO (multidisplay): Accessibility supported only for the default display.
+                        if (mAccessibilityController != null
+                                && displayId == Display.DEFAULT_DISPLAY) {
+                            mAccessibilityController.onSomeWindowResizedOrMoved();
+                        }
+
                         try {
                             w.mClient.moved(w.mFrame.left, w.mFrame.top);
                         } catch (RemoteException e) {
