@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
 /**
@@ -107,5 +108,14 @@ public class VoiceInteractionService extends Service {
         // the keyphrases that have an enrollment application for them.
         return mDspInfo != null
                 && mKeyphraseEnrollmentInfo.isKeyphraseEnrollmentSupported(keyphrase, locale);
+    }
+
+    /**
+     * @return Details of keyphrases available for enrollment.
+     * @hide
+     */
+    @VisibleForTesting
+    protected final KeyphraseEnrollmentInfo getKeyphraseEnrollmentInfo() {
+        return mKeyphraseEnrollmentInfo;
     }
 }

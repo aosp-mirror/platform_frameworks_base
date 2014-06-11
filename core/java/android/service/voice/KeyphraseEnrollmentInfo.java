@@ -25,7 +25,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -93,18 +93,20 @@ public class KeyphraseEnrollmentInfo {
                 if ((ai.flags & ApplicationInfo.FLAG_PRIVILEGED) == 0) {
                     // The application isn't privileged (/system/priv-app).
                     // The enrollment application needs to be a privileged system app.
+                    Slog.w(TAG, ai.packageName + "is not a privileged system app");
                     continue;
                 }
                 if (!Manifest.permission.MANAGE_VOICE_KEYPHRASES.equals(ai.permission)) {
                     // The application trying to manage keyphrases doesn't
                     // require the MANAGE_VOICE_KEYPHRASES permission.
+                    Slog.w(TAG, ai.packageName + " does not require MANAGE_VOICE_KEYPHRASES");
                     continue;
                 }
                 mEnrollmentPackage = ai.packageName;
                 found = true;
                 break;
             } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "error parsing voice enrollment meta-data", e);
+                Slog.w(TAG, "error parsing voice enrollment meta-data", e);
             }
         }
 
@@ -163,15 +165,15 @@ public class KeyphraseEnrollmentInfo {
             }
         } catch (XmlPullParserException e) {
             mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Log.w(TAG, "error parsing keyphrase enrollment meta-data", e);
+            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
             return;
         } catch (IOException e) {
             mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Log.w(TAG, "error parsing keyphrase enrollment meta-data", e);
+            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
             return;
         } catch (PackageManager.NameNotFoundException e) {
             mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Log.w(TAG, "error parsing keyphrase enrollment meta-data", e);
+            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
             return;
         } finally {
             if (parser != null) parser.close();
@@ -180,6 +182,14 @@ public class KeyphraseEnrollmentInfo {
 
     public String getParseError() {
         return mParseError;
+    }
+
+    /**
+     * @return An array of available keyphrases that can be enrolled on the system.
+     *         It may be null if no keyphrases can be enrolled.
+     */
+    public KeyphraseInfo[] getKeyphrases() {
+        return mKeyphrases;
     }
 
     /**
@@ -194,7 +204,7 @@ public class KeyphraseEnrollmentInfo {
      */
     public Intent getManageKeyphraseIntent(boolean enroll, String keyphrase, String locale) {
         if (mEnrollmentPackage == null || mEnrollmentPackage.isEmpty()) {
-            Log.w(TAG, "No enrollment application exists");
+            Slog.w(TAG, "No enrollment application exists");
             return null;
         }
 
@@ -218,7 +228,7 @@ public class KeyphraseEnrollmentInfo {
      */
     public boolean isKeyphraseEnrollmentSupported(String keyphrase, String locale) {
         if (mKeyphrases == null || mKeyphrases.length == 0) {
-            Log.w(TAG, "Enrollment application doesn't support keyphrases");
+            Slog.w(TAG, "Enrollment application doesn't support keyphrases");
             return false;
         }
         for (KeyphraseInfo keyphraseInfo : mKeyphrases) {
@@ -230,7 +240,7 @@ public class KeyphraseEnrollmentInfo {
                 return true;
             }
         }
-        Log.w(TAG, "Enrollment application doesn't support the given keyphrase");
+        Slog.w(TAG, "Enrollment application doesn't support the given keyphrase");
         return false;
     }
 }

@@ -21,6 +21,8 @@ import android.os.Bundle;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
+import java.util.Arrays;
+
 public class MainInteractionService extends VoiceInteractionService {
     static final String TAG = "MainInteractionService";
 
@@ -28,6 +30,9 @@ public class MainInteractionService extends VoiceInteractionService {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Creating " + this);
+        Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
+        Log.i(TAG, "Keyphrase enrollment meta-data: "
+                + Arrays.toString(getKeyphraseEnrollmentInfo().getKeyphrases()));
     }
 
     @Override

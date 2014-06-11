@@ -1000,6 +1000,9 @@ package android {
     field public static final int scrollbars = 16842974; // 0x10100de
     field public static final int scrollingCache = 16843006; // 0x10100fe
     field public static final deprecated int searchButtonText = 16843269; // 0x1010205
+    field public static final int searchKeyphrase = 16843874; // 0x1010462
+    field public static final int searchKeyphraseId = 16843873; // 0x1010461
+    field public static final int searchKeyphraseSupportedLocales = 16843875; // 0x1010463
     field public static final int searchMode = 16843221; // 0x10101d5
     field public static final int searchSettingsDescription = 16843402; // 0x101028a
     field public static final int searchSuggestAuthority = 16843222; // 0x10101d6
