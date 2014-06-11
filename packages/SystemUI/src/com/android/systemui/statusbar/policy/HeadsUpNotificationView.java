@@ -33,9 +33,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback,
         ViewTreeObserver.OnComputeInternalInsetsListener {
@@ -51,7 +51,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     private SwipeHelper mSwipeHelper;
     private EdgeSwipeHelper mEdgeSwipeHelper;
 
-    private BaseStatusBar mBar;
+    private PhoneStatusBar mBar;
     private ExpandHelper mExpandHelper;
 
     private long mStartTouchTime;
@@ -69,7 +69,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
     }
 
-    public void setBar(BaseStatusBar bar) {
+    public void setBar(PhoneStatusBar bar) {
         mBar = bar;
     }
 
@@ -77,7 +77,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         return mContentHolder;
     }
 
-    public boolean setNotification(NotificationData.Entry headsUp) {
+    public boolean showNotification(NotificationData.Entry headsUp) {
+        // bump any previous heads up back to the shade
+        release();
+
         mHeadsUp = headsUp;
         if (mContentHolder != null) {
             mContentHolder.removeAllViews();
@@ -97,8 +100,44 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
             mSwipeHelper.snapChild(mContentHolder, 1f);
             mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
+
+            // 2. Animate mHeadsUpNotificationView in
+            mBar.scheduleHeadsUpOpen();
+
+            // 3. Set alarm to age the notification off
+            mBar.resetHeadsUpDecayTimer();
         }
         return true;
+    }
+
+    /** Discard the Heads Up notification. */
+    public void clear() {
+        mHeadsUp = null;
+        mBar.scheduleHeadsUpClose();
+    }
+
+    /** Respond to dismissal of the Heads Up window. */
+    public void dismiss() {
+        if (mHeadsUp == null) return;
+        if (mHeadsUp.notification.isClearable()) {
+            mBar.onNotificationClear(mHeadsUp.notification);
+        } else {
+            release();
+        }
+        mHeadsUp = null;
+        mBar.scheduleHeadsUpClose();
+    }
+
+    /** Push any current Heads Up notification down into the shade. */
+    public void release() {
+        if (mHeadsUp != null) {
+            mBar.displayNotificationFromHeadsUp(mHeadsUp.notification);
+        }
+        mHeadsUp = null;
+    }
+
+    public NotificationData.Entry getEntry() {
+        return mHeadsUp;
     }
 
     public boolean isClearable() {
@@ -125,7 +164,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
         if (mHeadsUp != null) {
             // whoops, we're on already!
-            setNotification(mHeadsUp);
+            showNotification(mHeadsUp);
         }
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
@@ -280,6 +319,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         info.touchableRegion.set(mTmpTwoArray[0], mTmpTwoArray[1],
                 mTmpTwoArray[0] + mContentHolder.getWidth(),
                 mTmpTwoArray[1] + mContentHolder.getHeight());
+    }
+
+    public void escalate() {
+        mBar.scheduleHeadsUpEscalation();
     }
 
     private class EdgeSwipeHelper implements Gefingerpoken {
