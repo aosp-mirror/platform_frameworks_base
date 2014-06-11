@@ -361,7 +361,7 @@ public class RouteInfo implements Parcelable {
 
         RouteInfo target = (RouteInfo) obj;
 
-        return Objects.equals(mDestination, target.getDestination()) &&
+        return Objects.equals(mDestination, target.getDestinationLinkAddress()) &&
                 Objects.equals(mGateway, target.getGateway()) &&
                 Objects.equals(mInterface, target.getInterface());
     }
