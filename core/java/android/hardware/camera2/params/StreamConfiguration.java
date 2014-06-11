@@ -30,7 +30,8 @@ import android.util.Size;
  * Immutable class to store the available stream
  * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS configurations} to set up
  * {@link android.view.Surface Surfaces} for creating a {@link CameraCaptureSession capture session}
- * with {@link CameraDevice#createCaptureSession}.  <!-- TODO: link to input stream configuration -->
+ * with {@link CameraDevice#createCaptureSession}.
+ * <!-- TODO: link to input stream configuration -->
  *
  * <p>This is the authoritative list for all input/output formats (and sizes respectively
  * for that format) that are supported by a camera device.</p>
