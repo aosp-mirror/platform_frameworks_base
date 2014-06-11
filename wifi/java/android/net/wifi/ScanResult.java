@@ -89,6 +89,21 @@ public class ScanResult implements Parcelable {
      * {@hide}
      */
     public final static int UNSPECIFIED = -1;
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public boolean is24GHz() {
+        return frequency > 2400 && frequency < 2500;
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public boolean is5GHz() {
+        return frequency > 4900 && frequency < 5900;
+    }
 
     /** information element from beacon
      * @hide

@@ -62,6 +62,17 @@ public class WifiInfo implements Parcelable {
     private String mBSSID;
     private WifiSsid mWifiSsid;
     private int mNetworkId;
+
+    /** @hide **/
+    public static final int INVALID_RSSI = -127;
+
+    /** @hide **/
+    public static final int MIN_RSSI = -126;
+
+    /** @hide **/
+    public static final int MAX_RSSI = 200;
+
+
     /**
      * Received Signal Strength Indicator
      */
@@ -131,7 +142,8 @@ public class WifiInfo implements Parcelable {
     public int score;
 
     /**
-     * @hide *
+     * TODO: get actual timestamp and calculate true rates
+     * @hide
      */
     public void updatePacketRates(WifiLinkLayerStats stats) {
         if (stats != null) {
@@ -156,17 +168,42 @@ public class WifiInfo implements Parcelable {
             rxSuccess = rxgood;
             txRetries = txretries;
         } else {
-            txBadRate = 0;
+            txBad = 0;
             txSuccess = 0;
             rxSuccess = 0;
             txRetries = 0;
+            txBadRate = 0;
+            txSuccessRate = 0;
+            rxSuccessRate = 0;
+            txRetriesRate = 0;
         }
     }
 
+
     /**
-     * Flag indicating that AP has hinted that upstream connection is metered,
-     * and sensitive to heavy data transfers.
+     * This function is less powerful and used if the WifiLinkLayerStats API is not implemented
+     * at the Wifi HAL
+     * @hide
      */
+    public void updatePacketRates(long txPackets, long rxPackets) {
+        //paranoia
+        txBad = 0;
+        txRetries = 0;
+        txBadRate = 0;
+        txRetriesRate = 0;
+
+        txSuccessRate = (txSuccessRate * 0.5)
+                + ((double) (txPackets - txSuccess) * 0.5);
+        rxSuccessRate = (rxSuccessRate * 0.5)
+                + ((double) (rxPackets - rxSuccess) * 0.5);
+        txSuccess = txPackets;
+        rxSuccess = rxPackets;
+    }
+
+        /**
+         * Flag indicating that AP has hinted that upstream connection is metered,
+         * and sensitive to heavy data transfers.
+         */
     private boolean mMeteredHint;
 
     /** @hide */
@@ -175,9 +212,32 @@ public class WifiInfo implements Parcelable {
         mBSSID = null;
         mNetworkId = -1;
         mSupplicantState = SupplicantState.UNINITIALIZED;
-        mRssi = -9999;
+        mRssi = INVALID_RSSI;
         mLinkSpeed = -1;
         mFrequency = -1;
+        txBad = 0;
+        txSuccess = 0;
+        rxSuccess = 0;
+        txRetries = 0;
+        txBadRate = 0;
+        txSuccessRate = 0;
+        rxSuccessRate = 0;
+        txRetriesRate = 0;
+        lowRssiCount = 0;
+        badRssiCount = 0;
+        score = 0;
+    }
+
+    /** @hide */
+    public void reset() {
+        setInetAddress(null);
+        setBSSID(null);
+        setSSID(null);
+        setNetworkId(-1);
+        setRssi(INVALID_RSSI);
+        setLinkSpeed(-1);
+        setFrequency(-1);
+        setMeteredHint(false);
     }
 
     /**
@@ -256,7 +316,7 @@ public class WifiInfo implements Parcelable {
     /**
      * Returns the received signal strength indicator of the current 802.11
      * network, in dBm.
-     * @return the RSSI, in the range -110 to 10
+     * @return the RSSI, in the range -127 to 200
      */
     public int getRssi() {
         return mRssi;
@@ -264,6 +324,10 @@ public class WifiInfo implements Parcelable {
 
     /** @hide */
     public void setRssi(int rssi) {
+        if (rssi < INVALID_RSSI)
+            rssi = INVALID_RSSI;
+        if (rssi > MAX_RSSI)
+            rssi = MAX_RSSI;
         mRssi = rssi;
     }
 
