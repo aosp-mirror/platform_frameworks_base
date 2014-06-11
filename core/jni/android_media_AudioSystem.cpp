@@ -244,6 +244,12 @@ android_media_AudioSystem_isSourceActive(JNIEnv *env, jobject thiz, jint source)
 }
 
 static jint
+android_media_AudioSystem_newAudioSessionId(JNIEnv *env, jobject thiz)
+{
+    return AudioSystem::newAudioSessionId();
+}
+
+static jint
 android_media_AudioSystem_setParameters(JNIEnv *env, jobject thiz, jstring keyValuePairs)
 {
     const jchar* c_keyValuePairs = env->GetStringCritical(keyValuePairs, 0);
@@ -1295,6 +1301,7 @@ static JNINativeMethod gMethods[] = {
     {"isStreamActive",      "(II)Z",    (void *)android_media_AudioSystem_isStreamActive},
     {"isStreamActiveRemotely","(II)Z",  (void *)android_media_AudioSystem_isStreamActiveRemotely},
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
+    {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
     {"setDeviceConnectionState", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
     {"setPhoneState",       "(I)I",     (void *)android_media_AudioSystem_setPhoneState},

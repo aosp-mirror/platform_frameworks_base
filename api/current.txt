@@ -13681,6 +13681,7 @@ package android.media {
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
+    method public int allocateAudioSessionId();
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
@@ -13741,6 +13742,7 @@ package android.media {
     field public static final int AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK = -3; // 0xfffffffd
     field public static final int AUDIOFOCUS_REQUEST_FAILED = 0; // 0x0
     field public static final int AUDIOFOCUS_REQUEST_GRANTED = 1; // 0x1
+    field public static final int ERROR = -1; // 0xffffffff
     field public static final java.lang.String EXTRA_RINGER_MODE = "android.media.EXTRA_RINGER_MODE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_PREVIOUS_STATE = "android.media.extra.SCO_AUDIO_PREVIOUS_STATE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_STATE = "android.media.extra.SCO_AUDIO_STATE";

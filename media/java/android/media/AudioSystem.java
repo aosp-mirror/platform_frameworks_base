@@ -130,6 +130,11 @@ public class AudioSystem
     public static native boolean isSourceActive(int source);
 
     /*
+     * Returns a new unused audio session ID
+     */
+    public static native int newAudioSessionId();
+
+    /*
      * Sets a group generic audio configuration parameters. The use of these parameters
      * are platform dependent, see libaudio
      *

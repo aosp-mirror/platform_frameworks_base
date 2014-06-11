@@ -1653,6 +1653,25 @@ public class AudioManager {
         }
     }
 
+
+    /**
+     * Return a new audio session identifier not associated with any player or effect.
+     * It can for instance be used to create one of the {@link android.media.audiofx.AudioEffect}
+     * objects.
+     * @return a new unclaimed and unused audio session identifier, or {@link #ERROR} when the
+     *   system failed to allocate a new session.
+     */
+    public int allocateAudioSessionId() {
+        int session = AudioSystem.newAudioSessionId();
+        if (session > 0) {
+            return session;
+        } else {
+            Log.e(TAG, "Failure to allocate a new audio session ID");
+            return ERROR;
+        }
+    }
+
+
     /*
      * Sets a generic audio configuration parameter. The use of these parameters
      * are platform dependant, see libaudio
@@ -2998,7 +3017,8 @@ public class AudioManager {
     /** @hide
      */
     public static final int SUCCESS = AudioSystem.SUCCESS;
-    /** @hide
+    /**
+     * A default error code.
      */
     public static final int ERROR = AudioSystem.ERROR;
     /** @hide
