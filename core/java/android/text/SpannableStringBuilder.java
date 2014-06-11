@@ -440,25 +440,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     // Documentation from interface
-    public SpannableStringBuilder replace(int start, int end,
+    public SpannableStringBuilder replace(final int start, final int end,
             CharSequence tb, int tbstart, int tbend) {
         checkRange("replace", start, end);
-
-        // Sanity check
-        if (start > end) {
-            Log.w(TAG, "Bad arguments to #replace : "
-                    + "start = " + start + ", end = " + end);
-            final int tmp = start;
-            start = end;
-            end = tmp;
-        }
-        if (tbstart > tbend) {
-            Log.w(TAG, "Bad arguments to #replace : "
-                    + "tbstart = " + tbstart + ", tbend = " + tbend);
-            final int tmp = tbstart;
-            tbstart = tbend;
-            tbend = tmp;
-        }
 
         int filtercount = mFilters.length;
         for (int i = 0; i < filtercount; i++) {
