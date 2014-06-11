@@ -190,22 +190,18 @@ public abstract class CameraDevice implements AutoCloseable {
      *   Then obtain the Surface with
      *   {@link android.renderscript.Allocation#getSurface}.</li>
      *
-     * <li>For access to raw, uncompressed or JPEG data in the application: Create a
-     *   {@link android.media.ImageReader} object with the one of the supported
-     *   {@link StreamConfigurationMap#getOutputFormats() output image formats}, and a
-     *   size from the supported
-     *   {@link StreamConfigurationMap#getOutputSizes(int) sizes for that format}. Then obtain
-     *   a Surface from it with {@link android.media.ImageReader#getSurface}.</li>
+     * <li>For access to raw, uncompressed JPEG data in the application: Create an
+     *   {@link android.media.ImageReader} object with one of the supported output formats given by
+     *   {@link StreamConfigurationMap#getOutputFormats()}, setting its size to one of the
+     *   corresponding supported sizes by passing the chosen output format into
+     *   {@link StreamConfigurationMap#getOutputSizes(int)}. Then obtain a
+     *   {@link android.view.Surface} from it with {@link android.media.ImageReader#getSurface()}.
+     *   </li>
      *
      * </ul>
      *
-     * </p>
-     *
      * <p>The camera device will query each Surface's size and formats upon this
-     * call, so they must be set to a valid setting at this time (in particular:
-     * if the format is user-visible, it must be one of
-     * {@link StreamConfigurationMap#getOutputFormats}; and the size must be one of
-     * {@link StreamConfigurationMap#getOutputSizes(int)}).</p>
+     * call, so they must be set to a valid setting at this time.</p>
      *
      * <p>It can take several hundred milliseconds for the session's configuration to complete,
      * since camera hardware may need to be powered on or reconfigured. Once the configuration is
