@@ -214,11 +214,21 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             ArrayList<String> allSharedElementNames,
             ArrayList<String> accepted, ArrayList<String> localNames,
             SharedElementListener listener, boolean isReturning) {
+        this(window, allSharedElementNames, listener, isReturning);
+        viewsReady(accepted, localNames);
+    }
+
+    public ActivityTransitionCoordinator(Window window,
+            ArrayList<String> allSharedElementNames,
+            SharedElementListener listener, boolean isReturning) {
         super(new Handler());
         mWindow = window;
         mListener = listener;
         mAllSharedElementNames = allSharedElementNames;
         mIsReturning = isReturning;
+    }
+
+    protected void viewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
         setSharedElements(accepted, localNames);
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
@@ -268,6 +278,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
         return names;
     }
+
+    public ArrayList<String> getAllSharedElementNames() { return mAllSharedElementNames; }
 
     public static void setViewVisibility(Collection<View> views, int visibility) {
         if (views != null) {

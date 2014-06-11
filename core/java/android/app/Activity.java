@@ -5616,6 +5616,34 @@ public class Activity extends ContextThemeWrapper
         mExitTransitionListener = listener;
     }
 
+    /**
+     * Postpone the entering activity transition when Activity was started with
+     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
+     * android.util.Pair[])}.
+     * <p>This method gives the Activity the ability to delay starting the entering and
+     * shared element transitions until all data is loaded. Until then, the Activity won't
+     * draw into its window, leaving the window transparent. This may also cause the
+     * returning animation to be delayed until data is ready. This method should be
+     * called in {@link #onCreate(android.os.Bundle)} or in
+     * {@link #onActivityReenter(int, android.content.Intent)}.
+     * {@link #startPostponedEnterTransition()} must be called to allow the Activity to
+     * start the transitions. If the Activity did not use
+     * {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
+     * android.util.Pair[])}, then this method does nothing.</p>
+     */
+    public void postponeEnterTransition() {
+        mActivityTransitionState.postponeEnterTransition();
+    }
+
+    /**
+     * Begin postponed transitions after {@link #postponeEnterTransition()} was called.
+     * If postponeEnterTransition() was called, you must call startPostponedEnterTransition()
+     * to have your Activity start drawing.
+     */
+    public void startPostponedEnterTransition() {
+        mActivityTransitionState.startPostponedEnterTransition();
+    }
+
     // ------------------ Internal API ------------------
     
     final void setParent(Activity parent) {
