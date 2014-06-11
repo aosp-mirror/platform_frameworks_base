@@ -95,6 +95,7 @@ sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj) {
                 env->GetLongField(surfaceObj, gSurfaceClassInfo.mNativeObject));
         env->MonitorExit(lock);
     }
+    env->DeleteLocalRef(lock);
     return sur;
 }
 
