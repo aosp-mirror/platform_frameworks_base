@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.database.ContentObserver;
 import android.os.BatteryStats;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.am.BatteryStatsService;
@@ -149,8 +150,8 @@ public final class BatteryService extends Binder {
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
         mLowBatteryWarningLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
-        mLowBatteryCloseWarningLevel = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
+        mLowBatteryCloseWarningLevel = mLowBatteryWarningLevel + mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
         mShutdownBatteryTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
 
@@ -173,9 +174,37 @@ public final class BatteryService extends Binder {
     void systemReady() {
         // check our power situation now that it is safe to display the shutdown dialog.
         synchronized (mLock) {
-            shutdownIfNoPowerLocked();
-            shutdownIfOverTempLocked();
+            ContentObserver obs = new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    synchronized (mLock) {
+                        updateBatteryWarningLevelLocked();
+                    }
+                }
+            };
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                    false, obs, UserHandle.USER_ALL);
+            updateBatteryWarningLevelLocked();
         }
+    }
+
+    void updateBatteryWarningLevelLocked() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        int defWarnLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        mLowBatteryWarningLevel = Settings.Global.getInt(resolver,
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
+        if (mLowBatteryWarningLevel == 0) {
+            mLowBatteryWarningLevel = defWarnLevel;
+        }
+        if (mLowBatteryWarningLevel < mCriticalBatteryLevel) {
+            mLowBatteryWarningLevel = mCriticalBatteryLevel;
+        }
+        mLowBatteryCloseWarningLevel = mLowBatteryWarningLevel + mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
+        processValuesLocked(true);
     }
 
     /**
@@ -232,7 +261,7 @@ public final class BatteryService extends Binder {
         }
     }
 
-    public boolean isBatteryLowLocked() {
+    public boolean shouldSendBatteryLowLocked() {
         final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
         final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
 
@@ -299,14 +328,14 @@ public final class BatteryService extends Binder {
             if (!mUpdatesStopped) {
                 mBatteryProps = props;
                 // Process the new values.
-                processValuesLocked();
+                processValuesLocked(false);
             } else {
                 mLastBatteryProps.set(props);
             }
         }
     }
 
-    private void processValuesLocked() {
+    private void processValuesLocked(boolean force) {
         boolean logOutlier = false;
         long dischargeDuration = 0;
 
@@ -349,14 +378,14 @@ public final class BatteryService extends Binder {
         shutdownIfNoPowerLocked();
         shutdownIfOverTempLocked();
 
-        if (mBatteryProps.batteryStatus != mLastBatteryStatus ||
+        if (force || (mBatteryProps.batteryStatus != mLastBatteryStatus ||
                 mBatteryProps.batteryHealth != mLastBatteryHealth ||
                 mBatteryProps.batteryPresent != mLastBatteryPresent ||
                 mBatteryProps.batteryLevel != mLastBatteryLevel ||
                 mPlugType != mLastPlugType ||
                 mBatteryProps.batteryVoltage != mLastBatteryVoltage ||
                 mBatteryProps.batteryTemperature != mLastBatteryTemperature ||
-                mInvalidCharger != mLastInvalidCharger) {
+                mInvalidCharger != mLastInvalidCharger)) {
 
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -400,7 +429,24 @@ public final class BatteryService extends Binder {
                 logOutlier = true;
             }
 
-            mBatteryLevelLow = isBatteryLowLocked();
+            if (!mBatteryLevelLow) {
+                // Should we now switch in to low battery mode?
+                if (mPlugType == BATTERY_PLUGGED_NONE
+                        && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel) {
+                    mBatteryLevelLow = true;
+                }
+            } else {
+                // Should we now switch out of low battery mode?
+                if (mPlugType != BATTERY_PLUGGED_NONE) {
+                    mBatteryLevelLow = false;
+                } else if (mBatteryProps.batteryLevel >= mLowBatteryCloseWarningLevel)  {
+                    mBatteryLevelLow = false;
+                } else if (force && mBatteryProps.batteryLevel >= mLowBatteryWarningLevel) {
+                    // If being forced, the previous state doesn't matter, we will just
+                    // absolutely check to see if we are now above the warning level.
+                    mBatteryLevelLow = false;
+                }
+            }
 
             sendIntentLocked();
 
@@ -428,7 +474,7 @@ public final class BatteryService extends Binder {
                 });
             }
 
-            if (mBatteryLevelLow) {
+            if (shouldSendBatteryLowLocked()) {
                 mSentLowBatteryBroadcast = true;
                 mHandler.post(new Runnable() {
                     @Override
@@ -650,7 +696,7 @@ public final class BatteryService extends Binder {
                         long ident = Binder.clearCallingIdentity();
                         try {
                             mUpdatesStopped = true;
-                            processValuesLocked();
+                            processValuesLocked(false);
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
@@ -664,7 +710,7 @@ public final class BatteryService extends Binder {
                     if (mUpdatesStopped) {
                         mUpdatesStopped = false;
                         mBatteryProps.set(mLastBatteryProps);
-                        processValuesLocked();
+                        processValuesLocked(false);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);

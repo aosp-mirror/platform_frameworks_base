@@ -6029,6 +6029,7 @@ public final class Settings {
 
         /**
          * Battery level [1-99] at which low power mode automatically turns on.
+         * If 0, it will not automatically turn on.
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";

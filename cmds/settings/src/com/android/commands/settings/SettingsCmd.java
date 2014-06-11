@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IActivityManager.ContentProviderHolder;
 import android.content.IContentProvider;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -33,7 +34,8 @@ public final class SettingsCmd {
     enum CommandVerb {
         UNSPECIFIED,
         GET,
-        PUT
+        PUT,
+        DELETE
     }
 
     static String[] mArgs;
@@ -74,6 +76,8 @@ public final class SettingsCmd {
                         mVerb = CommandVerb.GET;
                     } else if ("put".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.PUT;
+                    } else if ("delete".equalsIgnoreCase(arg)) {
+                        mVerb = CommandVerb.DELETE;
                     } else {
                         // invalid
                         System.err.println("Invalid command: " + arg);
@@ -87,7 +91,7 @@ public final class SettingsCmd {
                         break;  // invalid
                     }
                     mTable = arg.toLowerCase();
-                } else if (mVerb == CommandVerb.GET) {
+                } else if (mVerb == CommandVerb.GET || mVerb == CommandVerb.DELETE) {
                     mKey = arg;
                     if (mNextArg >= mArgs.length) {
                         valid = true;
@@ -135,6 +139,10 @@ public final class SettingsCmd {
                             break;
                         case PUT:
                             putForUser(provider, mUser, mTable, mKey, mValue);
+                            break;
+                        case DELETE:
+                            System.out.println("Deleted "
+                                    + deleteForUser(provider, mUser, mTable, mKey) + " rows");
                             break;
                         default:
                             System.err.println("Unspecified command");
@@ -211,9 +219,31 @@ public final class SettingsCmd {
         }
     }
 
+    int deleteForUser(IContentProvider provider, int userHandle,
+            final String table, final String key) {
+        Uri targetUri;
+        if ("system".equals(table)) targetUri = Settings.System.getUriFor(key);
+        else if ("secure".equals(table)) targetUri = Settings.Secure.getUriFor(key);
+        else if ("global".equals(table)) targetUri = Settings.Global.getUriFor(key);
+        else {
+            System.err.println("Invalid table; no delete performed");
+            throw new IllegalArgumentException("Invalid table " + table);
+        }
+
+        int num = 0;
+        try {
+            num = provider.delete(null, targetUri, null, null);
+        } catch (RemoteException e) {
+            System.err.println("Can't clear key " + key + " in " + table + " for user "
+                    + userHandle);
+        }
+        return num;
+    }
+
     private static void printUsage() {
         System.err.println("usage:  settings [--user NUM] get namespace key");
         System.err.println("        settings [--user NUM] put namespace key value");
+        System.err.println("        settings [--user NUM] delete namespace key");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
         System.err.println("If '--user NUM' is not given, the operations are performed on the owner user.");
     }
