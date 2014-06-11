@@ -493,7 +493,8 @@ public class WifiPasspointCredential implements Parcelable {
                 }
                 if (this.mType.equals("TLS")) {
                     result = this.mRealm.equals(other.mRealm) &&
-                            this.mHomeSpFqdn.equals(other.mHomeSpFqdn);
+                            this.mHomeSpFqdn.equals(other.mHomeSpFqdn) &&
+                            this.mClientCert.equals(other.mClientCert);
                 }
                 if (this.mType.equals("SIM")) {
                     result = this.mMcc.equals(other.mMcc) &&
