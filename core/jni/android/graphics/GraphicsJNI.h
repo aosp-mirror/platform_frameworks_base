@@ -14,7 +14,7 @@
 class SkBitmapRegionDecoder;
 class SkCanvas;
 class SkPaint;
-class SkPicture;
+class AndroidPicture;
 
 class GraphicsJNI {
 public:
@@ -50,7 +50,7 @@ public:
     static SkPaint*  getNativePaint(JNIEnv*, jobject paint);
     static android::TypefaceImpl* getNativeTypeface(JNIEnv*, jobject paint);
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
-    static SkPicture* getNativePicture(JNIEnv*, jobject picture);
+    static AndroidPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     // Given the 'native' long held by the Rasterizer.java object, return a
