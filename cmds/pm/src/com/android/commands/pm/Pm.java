@@ -504,7 +504,10 @@ public final class Pm {
         if (res != 0) {
             Resources r = getResources(pii);
             if (r != null) {
-                return r.getString(res);
+                try {
+                    return r.getString(res);
+                } catch (Resources.NotFoundException e) {
+                }
             }
         }
         return null;
