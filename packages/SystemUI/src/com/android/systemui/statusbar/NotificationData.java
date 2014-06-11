@@ -68,6 +68,10 @@ public class NotificationData {
         public void setInterruption() {
             interruption = true;
         }
+
+        public boolean hasInterrupted() {
+            return interruption;
+        }
     }
 
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
