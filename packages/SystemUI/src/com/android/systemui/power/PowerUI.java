@@ -17,13 +17,16 @@
 package com.android.systemui.power;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -54,16 +57,21 @@ public class PowerUI extends SystemUI {
 
     public void start() {
 
-        mLowBatteryAlertCloseLevel = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
-        mLowBatteryReminderLevels[0] = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryWarningLevel);
-        mLowBatteryReminderLevels[1] = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
-
         final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mScreenOffTime = pm.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
         mWarnings = new PowerDialogWarnings(mContext);
+
+        ContentObserver obs = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateBatteryWarningLevels();
+            }
+        };
+        final ContentResolver resolver = mContext.getContentResolver();
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                false, obs, UserHandle.USER_ALL);
+        updateBatteryWarningLevels();
 
         // Register for Intent broadcasts for...
         IntentFilter filter = new IntentFilter();
@@ -71,6 +79,29 @@ public class PowerUI extends SystemUI {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+    }
+
+    void updateBatteryWarningLevels() {
+        int critLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+
+        final ContentResolver resolver = mContext.getContentResolver();
+        int defWarnLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        int warnLevel = Settings.Global.getInt(resolver,
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
+        if (warnLevel == 0) {
+            warnLevel = defWarnLevel;
+        }
+        if (warnLevel < critLevel) {
+            warnLevel = critLevel;
+        }
+
+        mLowBatteryReminderLevels[0] = warnLevel;
+        mLowBatteryReminderLevels[1] = critLevel;
+        mLowBatteryAlertCloseLevel = mLowBatteryReminderLevels[0]
+                + mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
     }
 
     /**
@@ -87,7 +118,7 @@ public class PowerUI extends SystemUI {
         if (level >= mLowBatteryAlertCloseLevel) {
             return 1;
         }
-        if (level >= mLowBatteryReminderLevels[0]) {
+        if (level > mLowBatteryReminderLevels[0]) {
             return 0;
         }
         final int N = mLowBatteryReminderLevels.length;
