@@ -151,7 +151,7 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public View inflate(int resource, ViewGroup root) {
         Context context = getContext();
-        if (context instanceof ContextThemeWrapper) {
+        while (context instanceof ContextThemeWrapper) {
             context = ((ContextThemeWrapper) context).getBaseContext();
         }
         if (context instanceof BridgeContext) {
@@ -217,7 +217,7 @@ public final class BridgeInflater extends LayoutInflater {
 
     private void setupViewInContext(View view, AttributeSet attrs) {
         Context context = getContext();
-        if (context instanceof ContextThemeWrapper) {
+        while (context instanceof ContextThemeWrapper) {
             context = ((ContextThemeWrapper) context).getBaseContext();
         }
         if (context instanceof BridgeContext) {

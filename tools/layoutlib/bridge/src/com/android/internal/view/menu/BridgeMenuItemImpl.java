@@ -42,7 +42,7 @@ public class BridgeMenuItemImpl extends MenuItemImpl {
             CharSequence title, int showAsAction) {
         super(menu, group, id, categoryOrder, ordering, title, showAsAction);
         Context context = menu.getContext();
-        if (context instanceof ContextThemeWrapper) {
+        while (context instanceof ContextThemeWrapper) {
             context = ((ContextThemeWrapper) context).getBaseContext();
         }
         if (context instanceof BridgeContext) {
