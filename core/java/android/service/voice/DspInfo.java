@@ -39,18 +39,18 @@ public class DspInfo {
     /**
      * Human readable voice detection engine version
      */
-    public final String voiceEngineVersion;
+    public final int voiceEngineVersion;
     /**
      * Rated power consumption when detection is active.
      */
     public final int powerConsumptionMw;
 
     public DspInfo(UUID voiceEngineId, String voiceEngineImplementor,
-            String voiceEngineDescription, String voiceEngineVersion, int powerConsumptionMw) {
+            String voiceEngineDescription, int version, int powerConsumptionMw) {
         this.voiceEngineId = voiceEngineId;
         this.voiceEngineImplementor = voiceEngineImplementor;
         this.voiceEngineDescription = voiceEngineDescription;
-        this.voiceEngineVersion = voiceEngineVersion;
+        this.voiceEngineVersion = version;
         this.powerConsumptionMw = powerConsumptionMw;
     }
 }

@@ -28,6 +28,7 @@ import android.os.ServiceManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+
 /**
  * Top-level service of the current global voice interactor, which is providing
  * support for hotwording, the back-end of a {@link android.app.VoiceInteractor}, etc.
@@ -52,6 +53,16 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.voice.VoiceInteractionService";
 
+    // TODO(sansid): Unhide these.
+    /** @hide */
+    public static final int KEYPHRASE_UNAVAILABLE = 0;
+    /** @hide */
+    public static final int KEYPHRASE_UNENROLLED = 1;
+    /** @hide */
+    public static final int KEYPHRASE_ENROLLED = 2;
+    /** @hide */
+    public static final int KEYPHRASE_ACTIVE = 3;
+
     /**
      * Name under which a VoiceInteractionService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
@@ -65,7 +76,7 @@ public class VoiceInteractionService extends Service {
 
     IVoiceInteractionManagerService mSystemService;
 
-    private DspInfo mDspInfo;
+    private SoundTriggerManager mSoundTriggerManager;
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
 
     public void startSession(Bundle args) {
@@ -81,7 +92,7 @@ public class VoiceInteractionService extends Service {
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
         mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
-        // TODO(sansid): Read mDspInfo from the SoundTriggerModel API.
+        mSoundTriggerManager = new SoundTriggerManager();
     }
 
     @Override
@@ -93,21 +104,34 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
-     * Indicates if always-on hotword detection is available for the given keyphrase and locale
+     * Gets the state of always-on hotword detection for the given keyphrase and locale
      * on this system.
      * Availability implies that the hardware on this system is capable of listening for
      * the given keyphrase or not.
+     * The return code is one of {@link #KEYPHRASE_UNAVAILABLE}, {@link #KEYPHRASE_UNENROLLED}
+     * {@link #KEYPHRASE_ENROLLED} or {@link #KEYPHRASE_ACTIVE}.
+     *
      * @param keyphrase The keyphrase whose availability is being checked.
      * @param locale The locale for which the availability is being checked.
      * @return Indicates if always-on hotword detection is available for the given keyphrase.
      * TODO(sansid): Unhide this.
      * @hide
      */
-    public final boolean isAlwaysOnHotwordAvailable(String keyphrase, String locale) {
+    public final int getAlwaysOnKeyphraseAvailability(String keyphrase, String locale) {
         // The available keyphrases is a combination of DSP availability and
         // the keyphrases that have an enrollment application for them.
-        return mDspInfo != null
-                && mKeyphraseEnrollmentInfo.isKeyphraseEnrollmentSupported(keyphrase, locale);
+        if (!mSoundTriggerManager.isKeyphraseSupported(keyphrase, locale)
+                || !mKeyphraseEnrollmentInfo.isKeyphraseEnrollmentSupported(keyphrase, locale)) {
+            return KEYPHRASE_UNAVAILABLE;
+        }
+        if (!mSoundTriggerManager.isKeyphraseEnrolled(keyphrase, locale)) {
+            return KEYPHRASE_UNENROLLED;
+        }
+        if (!mSoundTriggerManager.isKeyphraseActive(keyphrase, locale)) {
+            return KEYPHRASE_ENROLLED;
+        } else {
+            return KEYPHRASE_ACTIVE;
+        }
     }
 
     /**
