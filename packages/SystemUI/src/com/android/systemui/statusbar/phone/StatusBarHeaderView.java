@@ -335,6 +335,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     };
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
     public void setShowEmergencyCallsOnly(boolean show) {
         mShowEmergencyCallsOnly = show;
         if (mExpanded) {
