@@ -820,7 +820,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
             mOptions.add(opt);
         }
 
-        // Whether the profile should start upon app startup or be delayed by some random offset.
+        // Whether the profile should start upon app startup or be delayed by some random offset
+        // (in seconds) that is bound between 0 and a fixed value.
         property_get("dalvik.vm.profile.start-immediately", propBuf, "0");
         if (propBuf[0] == '1') {
             opt.optionString = "-Xprofile-start-immediately";
