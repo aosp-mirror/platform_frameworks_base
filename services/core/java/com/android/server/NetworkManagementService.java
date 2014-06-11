@@ -795,7 +795,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         final Command cmd = new Command("interface", "setcfg", iface,
                 linkAddr.getAddress().getHostAddress(),
-                linkAddr.getNetworkPrefixLength());
+                linkAddr.getPrefixLength());
         for (String flag : cfg.getFlags()) {
             cmd.appendArg(flag);
         }
@@ -884,7 +884,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
         final LinkAddress la = route.getDestinationLinkAddress();
         cmd.appendArg(route.getInterface());
-        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
+        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getPrefixLength());
         if (route.hasGateway()) {
             cmd.appendArg(route.getGateway().getHostAddress());
         }
@@ -1699,7 +1699,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             LinkAddress dest = route.getDestinationLinkAddress();
             mConnector.execute("interface", "fwmark", "route", "add", iface,
-                    dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
+                    dest.getAddress().getHostAddress(), dest.getPrefixLength());
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1711,7 +1711,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             LinkAddress dest = route.getDestinationLinkAddress();
             mConnector.execute("interface", "fwmark", "route", "remove", iface,
-                    dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
+                    dest.getAddress().getHostAddress(), dest.getPrefixLength());
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2000,7 +2000,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
         final LinkAddress la = routeInfo.getDestinationLinkAddress();
         cmd.appendArg(routeInfo.getInterface());
-        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getNetworkPrefixLength());
+        cmd.appendArg(la.getAddress().getHostAddress() + "/" + la.getPrefixLength());
         if (routeInfo.hasGateway()) {
             cmd.appendArg(routeInfo.getGateway().getHostAddress());
         }

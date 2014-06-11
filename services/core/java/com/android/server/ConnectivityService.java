@@ -1669,7 +1669,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         continue;
                     }
 
-                    int prefix = destination.getNetworkPrefixLength();
+                    int prefix = destination.getPrefixLength();
                     InetAddress addrMasked = NetworkUtils.getNetworkPart(address, prefix);
                     InetAddress destMasked = NetworkUtils.getNetworkPart(destination.getAddress(),
                             prefix);
