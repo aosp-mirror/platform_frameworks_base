@@ -5574,11 +5574,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
         insets = super.dispatchApplyWindowInsets(insets);
-        if (insets.hasInsets()) {
+        if (!insets.isConsumed()) {
             final int count = getChildCount();
             for (int i = 0; i < count; i++) {
                 insets = getChildAt(i).dispatchApplyWindowInsets(insets);
-                if (!insets.hasInsets()) {
+                if (insets.isConsumed()) {
                     break;
                 }
             }
