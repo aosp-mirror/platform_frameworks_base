@@ -33,6 +33,7 @@ import android.widget.OverScroller;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
@@ -1760,7 +1761,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * See {@link AmbientState#setActivatedChild}.
      */
-    public void setActivatedChild(View activatedChild) {
+    public void setActivatedChild(ActivatableNotificationView activatedChild) {
         mAmbientState.setActivatedChild(activatedChild);
         if (mAnimationsEnabled) {
             mActivateNeedsAnimation = true;
@@ -1769,7 +1770,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
     }
 
-    public View getActivatedChild() {
+    public ActivatableNotificationView getActivatedChild() {
         return mAmbientState.getActivatedChild();
     }
 

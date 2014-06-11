@@ -103,6 +103,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.CircularClipper;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -2917,7 +2918,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.setKeyguardShowing(false);
             mScrimController.setKeyguardShowing(false);
         }
-
         updateStackScrollerState();
         updatePublicMode();
         updateNotifications();
@@ -2933,6 +2933,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 ? View.INVISIBLE : View.VISIBLE);
         mStackScroller.setScrollingEnabled(!onKeyguard);
         mStackScroller.setExpandingEnabled(!onKeyguard);
+        ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
+        mStackScroller.setActivatedChild(null);
+        if (activatedChild != null) {
+            activatedChild.makeInactive(false /* animate */);
+        }
     }
 
     public void userActivity() {
@@ -2989,9 +2994,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onActivated(View view) {
+    public void onActivated(ActivatableNotificationView view) {
         userActivity();
         mKeyguardIndicationController.showTransientIndication(R.string.notification_tap_again);
+        ActivatableNotificationView previousView = mStackScroller.getActivatedChild();
+        if (previousView != null) {
+            previousView.makeInactive(true /* animate */);
+        }
         mStackScroller.setActivatedChild(view);
     }
 
@@ -3004,7 +3013,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onActivationReset(View view) {
+    public void onActivationReset(ActivatableNotificationView view) {
         if (view == mStackScroller.getActivatedChild()) {
             mKeyguardIndicationController.hideTransientIndication();
             mStackScroller.setActivatedChild(null);
