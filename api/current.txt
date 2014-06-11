@@ -26099,52 +26099,11 @@ package android.speech {
 
 package android.speech.tts {
 
-  public final class RequestConfig {
-    method public android.os.Bundle getAudioParams();
-    method public android.speech.tts.VoiceInfo getVoice();
-    method public android.os.Bundle getVoiceParams();
-  }
-
-  public static final class RequestConfig.Builder {
-    method public android.speech.tts.RequestConfig build();
-    method public static android.speech.tts.RequestConfig.Builder newBuilder();
-    method public static android.speech.tts.RequestConfig.Builder newBuilder(android.speech.tts.RequestConfig);
-    method public android.speech.tts.RequestConfig.Builder setAudioParam(java.lang.String, java.lang.Object);
-    method public void setAudioParamPan(float);
-    method public void setAudioParamStream(int);
-    method public void setAudioParamVolume(float);
-    method public android.speech.tts.RequestConfig.Builder setVoice(android.speech.tts.VoiceInfo);
-    method public android.speech.tts.RequestConfig.Builder setVoiceParam(java.lang.String, java.lang.Object);
-  }
-
-  public final class RequestConfigHelper {
-    method public static android.speech.tts.RequestConfig highestQuality(android.speech.tts.TextToSpeechClient.EngineStatus, boolean, android.speech.tts.RequestConfigHelper.VoiceScorer);
-    method public static android.speech.tts.RequestConfig highestQuality(android.speech.tts.TextToSpeechClient.EngineStatus, boolean);
-  }
-
-  public static final class RequestConfigHelper.ExactLocaleMatcher implements android.speech.tts.RequestConfigHelper.VoiceScorer {
-    ctor public RequestConfigHelper.ExactLocaleMatcher(java.util.Locale);
-    method public int scoreVoice(android.speech.tts.VoiceInfo);
-  }
-
-  public static final class RequestConfigHelper.LanguageMatcher implements android.speech.tts.RequestConfigHelper.VoiceScorer {
-    ctor public RequestConfigHelper.LanguageMatcher(java.util.Locale);
-    method public int scoreVoice(android.speech.tts.VoiceInfo);
-  }
-
-  public static abstract interface RequestConfigHelper.VoiceScorer {
-    method public abstract int scoreVoice(android.speech.tts.VoiceInfo);
-  }
-
   public abstract interface SynthesisCallback {
     method public abstract int audioAvailable(byte[], int, int);
     method public abstract int done();
     method public abstract void error();
-    method public abstract void error(int);
-    method public abstract int fallback();
     method public abstract int getMaxBufferSize();
-    method public abstract boolean hasFinished();
-    method public abstract boolean hasStarted();
     method public abstract int start(int, int, int);
   }
 
@@ -26160,18 +26119,7 @@ package android.speech.tts {
     method public java.lang.String getVariant();
   }
 
-  public final class SynthesisRequestV2 implements android.os.Parcelable {
-    ctor public SynthesisRequestV2(java.lang.String, java.lang.String, java.lang.String, android.os.Bundle, android.os.Bundle);
-    method public int describeContents();
-    method public android.os.Bundle getAudioParams();
-    method public java.lang.String getText();
-    method public java.lang.String getUtteranceId();
-    method public java.lang.String getVoiceName();
-    method public android.os.Bundle getVoiceParams();
-    method public void writeToParcel(android.os.Parcel, int);
-  }
-
-  public deprecated class TextToSpeech {
+  public class TextToSpeech {
     ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener);
     ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener, java.lang.String);
     method public int addEarcon(java.lang.String, java.lang.String, int);
@@ -26256,79 +26204,8 @@ package android.speech.tts {
     method public abstract void onUtteranceCompleted(java.lang.String);
   }
 
-  public class TextToSpeechClient {
-    ctor public TextToSpeechClient(android.content.Context, java.lang.String, boolean, android.speech.tts.TextToSpeechClient.RequestCallbacks, android.speech.tts.TextToSpeechClient.ConnectionCallbacks);
-    ctor public TextToSpeechClient(android.content.Context, android.speech.tts.TextToSpeechClient.RequestCallbacks, android.speech.tts.TextToSpeechClient.ConnectionCallbacks);
-    method public void connect();
-    method public void disconnect();
-    method public android.speech.tts.TextToSpeechClient.EngineStatus getEngineStatus();
-    method public boolean isConnected();
-    method public void queueAudio(android.net.Uri, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
-    method public void queueSilence(long, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.TextToSpeechClient.RequestCallbacks);
-    method public void queueSpeak(java.lang.String, android.speech.tts.TextToSpeechClient.UtteranceId, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
-    method public void queueSynthesizeToFile(java.lang.String, android.speech.tts.TextToSpeechClient.UtteranceId, java.io.File, android.speech.tts.RequestConfig, android.speech.tts.TextToSpeechClient.RequestCallbacks);
-    method public void stop();
-  }
-
-  public static abstract interface TextToSpeechClient.ConnectionCallbacks {
-    method public abstract void onConnectionFailure();
-    method public abstract void onConnectionSuccess();
-    method public abstract void onEngineStatusChange(android.speech.tts.TextToSpeechClient.EngineStatus);
-    method public abstract void onServiceDisconnected();
-  }
-
-  public static final class TextToSpeechClient.EngineStatus {
-    method public java.lang.String getEnginePackage();
-    method public java.util.List<android.speech.tts.VoiceInfo> getVoices();
-  }
-
-  public static final class TextToSpeechClient.Params {
-    field public static final java.lang.String AUDIO_PARAM_PAN = "pan";
-    field public static final java.lang.String AUDIO_PARAM_STREAM = "streamType";
-    field public static final java.lang.String AUDIO_PARAM_VOLUME = "volume";
-    field public static final java.lang.String FALLBACK_VOICE_NAME = "fallbackVoiceName";
-    field public static final java.lang.String NETWORK_RETRIES_COUNT = "networkRetriesCount";
-    field public static final java.lang.String NETWORK_TIMEOUT_MS = "networkTimeoutMs";
-    field public static final java.lang.String SPEECH_PITCH = "speechPitch";
-    field public static final java.lang.String SPEECH_SPEED = "speechSpeed";
-    field public static final java.lang.String TRACK_SUBUTTERANCE_PROGRESS = "trackSubutteranceProgress";
-  }
-
-  public static abstract class TextToSpeechClient.RequestCallbacks {
-    ctor public TextToSpeechClient.RequestCallbacks();
-    method public void onSynthesisFailure(android.speech.tts.TextToSpeechClient.UtteranceId, int);
-    method public void onSynthesisFallback(android.speech.tts.TextToSpeechClient.UtteranceId);
-    method public void onSynthesisProgress(android.speech.tts.TextToSpeechClient.UtteranceId, int, int);
-    method public void onSynthesisStart(android.speech.tts.TextToSpeechClient.UtteranceId);
-    method public void onSynthesisStop(android.speech.tts.TextToSpeechClient.UtteranceId);
-    method public void onSynthesisSuccess(android.speech.tts.TextToSpeechClient.UtteranceId);
-  }
-
-  public static final class TextToSpeechClient.Status {
-    field public static final int ERROR_DOWNLOADING_ADDITIONAL_DATA = 17; // 0x11
-    field public static final int ERROR_INVALID_REQUEST = 15; // 0xf
-    field public static final int ERROR_NETWORK = 13; // 0xd
-    field public static final int ERROR_NETWORK_TIMEOUT = 14; // 0xe
-    field public static final int ERROR_NON_UNIQUE_UTTERANCE_ID = 16; // 0x10
-    field public static final int ERROR_OUTPUT = 12; // 0xc
-    field public static final int ERROR_SERVICE = 11; // 0xb
-    field public static final int ERROR_SYNTHESIS = 10; // 0xa
-    field public static final int ERROR_UNKNOWN = -1; // 0xffffffff
-    field public static final int STOPPED = 100; // 0x64
-    field public static final int SUCCESS = 0; // 0x0
-  }
-
-  public static class TextToSpeechClient.UtteranceId {
-    ctor public TextToSpeechClient.UtteranceId();
-    method public final java.lang.String toUniqueString();
-  }
-
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
-    method protected java.util.List<android.speech.tts.VoiceInfo> checkVoicesInfo();
-    method public void forceVoicesInfoCheck();
-    method public android.speech.tts.VoiceInfo getVoicesInfoWithName(java.lang.String);
-    method protected boolean implementsV2API();
     method public android.os.IBinder onBind(android.content.Intent);
     method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
@@ -26336,8 +26213,6 @@ package android.speech.tts {
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract void onStop();
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
-    method protected void onSynthesizeTextV2(android.speech.tts.SynthesisRequestV2, android.speech.tts.VoiceInfo, android.speech.tts.SynthesisCallback);
-    method protected void onVoicesInfoChange();
   }
 
   public abstract class UtteranceProgressListener {
@@ -26345,44 +26220,6 @@ package android.speech.tts {
     method public abstract void onDone(java.lang.String);
     method public abstract void onError(java.lang.String);
     method public abstract void onStart(java.lang.String);
-  }
-
-  public final class VoiceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.os.Bundle getAdditionalFeatures();
-    method public int getLatency();
-    method public java.util.Locale getLocale();
-    method public java.lang.String getName();
-    method public android.os.Bundle getParamsWithDefaults();
-    method public int getQuality();
-    method public boolean getRequiresNetworkConnection();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String FEATURE_MAY_AUTOINSTALL = "mayAutoInstall";
-    field public static final java.lang.String FEATURE_SPEAKER_GENDER = "speakerGender";
-    field public static final java.lang.String FEATURE_WORDS_PER_MINUTE = "wordsPerMinute";
-    field public static final int LATENCY_HIGH = 400; // 0x190
-    field public static final int LATENCY_LOW = 200; // 0xc8
-    field public static final int LATENCY_NORMAL = 300; // 0x12c
-    field public static final int LATENCY_VERY_HIGH = 500; // 0x1f4
-    field public static final int LATENCY_VERY_LOW = 100; // 0x64
-    field public static final int QUALITY_HIGH = 400; // 0x190
-    field public static final int QUALITY_LOW = 200; // 0xc8
-    field public static final int QUALITY_NORMAL = 300; // 0x12c
-    field public static final int QUALITY_VERY_HIGH = 500; // 0x1f4
-    field public static final int QUALITY_VERY_LOW = 100; // 0x64
-  }
-
-  public static final class VoiceInfo.Builder {
-    ctor public VoiceInfo.Builder();
-    ctor public VoiceInfo.Builder(android.speech.tts.VoiceInfo);
-    method public android.speech.tts.VoiceInfo build();
-    method public android.speech.tts.VoiceInfo.Builder setAdditionalFeatures(android.os.Bundle);
-    method public android.speech.tts.VoiceInfo.Builder setLatency(int);
-    method public android.speech.tts.VoiceInfo.Builder setLocale(java.util.Locale);
-    method public android.speech.tts.VoiceInfo.Builder setName(java.lang.String);
-    method public android.speech.tts.VoiceInfo.Builder setParamsWithDefaults(android.os.Bundle);
-    method public android.speech.tts.VoiceInfo.Builder setQuality(int);
-    method public android.speech.tts.VoiceInfo.Builder setRequiresNetworkConnection(boolean);
   }
 
 }

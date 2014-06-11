@@ -71,6 +71,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * In the rare case of a change to the set of available voices, the service will call to the
  * {@link ConnectionCallbacks#onEngineStatusChange} with new set of available voices as argument.
  * In response, the client HAVE to recreate all {@link RequestConfig} instances in use.
+ * @hide
  */
 public class TextToSpeechClient {
     private static final String TAG = TextToSpeechClient.class.getSimpleName();

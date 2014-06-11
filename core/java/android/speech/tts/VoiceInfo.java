@@ -16,6 +16,7 @@ import java.util.Locale;
  * callback. The name can be used to reference a VoiceInfo in an instance of {@link RequestConfig};
  * the {@link TextToSpeechClient.Params#FALLBACK_VOICE_NAME} voice parameter is an example of this.
  * It is recommended that the voice name never change during the TTS service lifetime.
+ * @hide
  */
 public final class VoiceInfo implements Parcelable {
     /** Very low, but still intelligible quality of speech synthesis */
