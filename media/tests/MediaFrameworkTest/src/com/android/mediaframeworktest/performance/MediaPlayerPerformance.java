@@ -417,6 +417,21 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         assertTrue("H264 playback memory test", memoryResult);
     }
 
+    // Test case 3: Capture the memory usage after every 20 hevc playback
+    @LargeTest
+    public void testHEVCVideoPlaybackMemoryUsage() throws Exception {
+        boolean memoryResult = false;
+
+        mStartPid = getMediaserverPid();
+        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+            mediaStressPlayback(MediaNames.VIDEO_HEVC_AAC);
+            getMemoryWriteToLog(i);
+            writeProcmemInfo();
+        }
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, DECODER_LIMIT);
+        assertTrue("HEVC playback memory test", memoryResult);
+    }
+
     // Test case 4: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testH263RecordVideoOnlyMemoryUsage() throws Exception {
