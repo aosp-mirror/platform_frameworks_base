@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
+import android.media.ClosedCaptionRenderer;
 import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -316,6 +317,7 @@ public class VideoView extends SurfaceView
                     context, mMediaPlayer.getMediaTimeProvider(), mMediaPlayer);
             controller.registerRenderer(new WebVttRenderer(context));
             controller.registerRenderer(new TtmlRenderer(context));
+            controller.registerRenderer(new ClosedCaptionRenderer(context));
             mMediaPlayer.setSubtitleAnchor(controller, this);
 
             if (mAudioSession != 0) {
