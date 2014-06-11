@@ -225,17 +225,11 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                List<AccessibilityWindowInfo> windows = sAccessibilityCache.getWindows();
-                if (windows != null) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Window cache hit");
-                    }
-                    return windows;
-                }
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Window cache miss");
-                }
-                windows = connection.getWindows();
+                // The system is just sending data for windows that we introspected
+                // and changed but not ones that appeared, so we have to always call
+                // into the system process. This is less expensice as opposed to
+                // sending all windows on every window change.
+                List<AccessibilityWindowInfo> windows = connection.getWindows();
                 if (windows != null) {
                     final int windowCount = windows.size();
                     for (int i = 0; i < windowCount; i++) {
