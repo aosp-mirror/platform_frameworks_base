@@ -70,28 +70,46 @@ public final class Typeface_Delegate {
         return sManager.getDelegate(nativeTypeface);
     }
 
+    /**
+     * Return a list of fonts that match the style and variant. The list is ordered according to
+     * preference of fonts.
+     *
+     * @param variant The variant preferred. Can only be {@link FontVariant#COMPACT} or
+     *                {@link FontVariant#ELEGANT}
+     */
     public List<Font> getFonts(FontVariant variant) {
+        assert variant != FontVariant.NONE;
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
-        // If we are unable to find fonts matching the variant, we return the fonts from the
-        // other variant since we always want to draw something, rather than nothing.
-        // TODO: check this behaviour with platform.
-        List<Font> otherVariantFonts = new ArrayList<Font>();
-        for (FontFamily_Delegate ffd : mFontFamilies) {
+        for (int i = 0; i < mFontFamilies.length; i++) {
+            FontFamily_Delegate ffd = mFontFamilies[i];
             if (ffd != null) {
                 Font font = ffd.getFont(mStyle);
                 if (font != null) {
-                    if (ffd.getVariant() == variant || ffd.getVariant() == FontVariant.NONE) {
+                    FontVariant ffdVariant = ffd.getVariant();
+                    if (ffdVariant == FontVariant.NONE) {
+                        fonts.add(font);
+                        continue;
+                    }
+                    // We cannot open each font and get locales supported, etc to match the fonts.
+                    // As a workaround, we hardcode certain assumptions like Elegant and Compact
+                    // always appear in pairs.
+                    assert i < mFontFamilies.length - 1;
+                    FontFamily_Delegate ffd2 = mFontFamilies[++i];
+                    assert ffd2 != null;
+                    FontVariant ffd2Variant = ffd2.getVariant();
+                    Font font2 = ffd2.getFont(mStyle);
+                    assert ffd2Variant != FontVariant.NONE && ffd2Variant != ffdVariant
+                            && font2 != null;
+                    // Add the font with the matching variant to the list.
+                    if (variant == ffd.getVariant()) {
                         fonts.add(font);
                     } else {
-                        otherVariantFonts.add(font);
+                        fonts.add(font2);
                     }
                 }
             }
         }
-        if (fonts.size() > 0) {
-            return fonts;
-        }
-        return otherVariantFonts;
+        return fonts;
     }
 
     // ---- native methods ----

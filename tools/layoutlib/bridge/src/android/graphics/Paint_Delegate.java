@@ -81,8 +81,8 @@ public class Paint_Delegate {
     private float mTextScaleX;
     private float mTextSkewX;
     private int mHintingMode = Paint.HINTING_ON;
-    // Variant of the font.
-    private FontVariant mFontVariant = FontVariant.NONE;
+    // Variant of the font. A paint's variant can only be compact or elegant.
+    private FontVariant mFontVariant = FontVariant.COMPACT;
 
     private Xfermode_Delegate mXfermode;
     private ColorFilter_Delegate mColorFilter;
