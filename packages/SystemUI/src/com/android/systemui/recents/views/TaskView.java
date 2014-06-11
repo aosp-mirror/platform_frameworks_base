@@ -142,8 +142,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
                                              TaskViewTransform toTransform, int duration) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        int minZ = config.taskViewTranslationZMinPx;
-        int incZ = config.taskViewTranslationZIncrementPx;
 
         // Update the bar view
         mBarView.updateViewPropertiesToTaskTransform(animateFromTransform, toTransform, duration);
@@ -153,14 +151,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             if (animateFromTransform != null) {
                 setTranslationY(animateFromTransform.translationY);
                 if (Constants.DebugFlags.App.EnableShadows) {
-                    setTranslationZ(Math.max(minZ, minZ + (animateFromTransform.t * incZ)));
+                    setTranslationZ(animateFromTransform.translationZ);
                 }
                 setScaleX(animateFromTransform.scale);
                 setScaleY(animateFromTransform.scale);
                 setAlpha(animateFromTransform.alpha);
             }
             if (Constants.DebugFlags.App.EnableShadows) {
-                animate().translationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
+                animate().translationZ(toTransform.translationZ);
             }
             animate().translationY(toTransform.translationY)
                     .scaleX(toTransform.scale)
@@ -179,7 +177,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else {
             setTranslationY(toTransform.translationY);
             if (Constants.DebugFlags.App.EnableShadows) {
-                setTranslationZ(Math.max(minZ, minZ + (toTransform.t * incZ)));
+                setTranslationZ(toTransform.translationZ);
             }
             setScaleX(toTransform.scale);
             setScaleY(toTransform.scale);

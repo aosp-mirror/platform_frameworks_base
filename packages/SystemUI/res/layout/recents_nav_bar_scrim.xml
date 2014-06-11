@@ -20,4 +20,4 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal|bottom"
     android:scaleType="fitXY"
-    android:src="@drawable/recents_nav_bar_background" />
+    android:src="@drawable/recents_lower_gradient" />

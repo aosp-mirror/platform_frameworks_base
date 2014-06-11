@@ -106,7 +106,7 @@ public class Constants {
             // The height of the peek space relative to the stack height
             public static final float StackPeekHeightPct = 0.1f;
             // The min scale of the last card in the peek area
-            public static final float StackPeekMinScale = 0.9f;
+            public static final float StackPeekMinScale = 0.8f;
             // The number of cards we see in the peek space
             public static final int StackPeekNumCards = 3;
         }
