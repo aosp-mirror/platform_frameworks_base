@@ -293,7 +293,7 @@ public class VoiceInteractor {
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
-            return interactor.startConfirmation(packageName, callback, mCommand, mArgs);
+            return interactor.startCommand(packageName, callback, mCommand, mArgs);
         }
    }
 
