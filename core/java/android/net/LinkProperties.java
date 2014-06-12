@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Describes the properties of a network link.
@@ -334,15 +335,17 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
-     * Adds a {@link RouteInfo} to this {@code LinkProperties}.  If the {@link RouteInfo}
-     * had an interface name set and that differs from the interface set for this
-     * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.  The
-     * proper course is to add either un-named or properly named {@link RouteInfo}.
+     * Adds a {@link RouteInfo} to this {@code LinkProperties}, if not present. If the
+     * {@link RouteInfo} had an interface name set and that differs from the interface set for this
+     * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.  The proper
+     * course is to add either un-named or properly named {@link RouteInfo}.
      *
      * @param route A {@link RouteInfo} to add to this object.
+     * @return {@code false} if the route was already present, {@code true} if it was added.
+     *
      * @hide
      */
-    public void addRoute(RouteInfo route) {
+    public boolean addRoute(RouteInfo route) {
         if (route != null) {
             String routeIface = route.getInterface();
             if (routeIface != null && !routeIface.equals(mIfaceName)) {
@@ -350,8 +353,28 @@ public final class LinkProperties implements Parcelable {
                    "Route added with non-matching interface: " + routeIface +
                    " vs. " + mIfaceName);
             }
-            mRoutes.add(routeWithInterface(route));
+            route = routeWithInterface(route);
+            if (!mRoutes.contains(route)) {
+                mRoutes.add(route);
+                return true;
+            }
         }
+        return false;
+    }
+
+    /**
+     * Removes a {@link RouteInfo} from this {@code LinkProperties}, if present. The route must
+     * specify an interface and the interface must match the interface of this
+     * {@code LinkProperties}, or it will not be removed.
+     *
+     * @return {@code true} if the route was removed, {@code false} if it was not present.
+     *
+     * @hide
+     */
+    public boolean removeRoute(RouteInfo route) {
+        return route != null &&
+                Objects.equals(mIfaceName, route.getInterface()) &&
+                mRoutes.remove(route);
     }
 
     /**
