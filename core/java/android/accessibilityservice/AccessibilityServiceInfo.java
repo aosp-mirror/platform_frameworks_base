@@ -286,8 +286,8 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * This flag indicates to the system that the accessibility service wants
      * to access content of all interactive windows. An interactive window is a
-     * window that can be touched by a sighted user when explore by touch is not
-     * enabled. If this flag is not set your service will not receive
+     * window that has input focus or can be touched by a sighted user when explore
+     * by touch is not enabled. If this flag is not set your service will not receive
      * {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED}
      * events, calling AccessibilityService{@link AccessibilityService#getWindows()
      * AccessibilityService.getWindows()} will return an empty list, and {@link

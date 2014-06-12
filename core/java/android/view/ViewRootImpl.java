@@ -6215,7 +6215,7 @@ public final class ViewRootImpl implements ViewParent,
             mTempRect.offset(0, -mCurScrollY);
             mTempRect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
             try {
-                mWindowSession.onRectangleOnScreenRequested(mWindow, mTempRect, immediate);
+                mWindowSession.onRectangleOnScreenRequested(mWindow, mTempRect);
             } catch (RemoteException re) {
                 /* ignore */
             }

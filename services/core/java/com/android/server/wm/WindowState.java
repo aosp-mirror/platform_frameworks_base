@@ -1364,7 +1364,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             //TODO (multidisplay): Accessibility supported only for the default display.
             if (mService.mAccessibilityController != null
                     && getDisplayId() == Display.DEFAULT_DISPLAY) {
-                mService.mAccessibilityController.onSomeWindowResizedOrMoved();
+                mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
 
             mOverscanInsetsChanged = false;
