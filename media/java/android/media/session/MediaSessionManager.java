@@ -96,10 +96,13 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Get a list of controllers for all ongoing sessions. This requires the
-     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
-     * the calling app. You may also retrieve this list if your app is an
-     * enabled notification listener using the
+     * Get a list of controllers for all ongoing sessions. The controllers will
+     * be provided in priority order with the most important controller at index
+     * 0.
+     * <p>
+     * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL
+     * permission be held by the calling app. You may also retrieve this list if
+     * your app is an enabled notification listener using the
      * {@link NotificationListenerService} APIs, in which case you must pass the
      * {@link ComponentName} of your enabled listener.
      *
@@ -239,7 +242,8 @@ public final class MediaSessionManager {
         /**
          * Called when the list of active sessions has changed. This can be due
          * to a session being added or removed or the order of sessions
-         * changing.
+         * changing. The controllers will be provided in priority order with the
+         * most important controller at index 0.
          *
          * @param controllers The updated list of controllers for the user that
          *            changed.

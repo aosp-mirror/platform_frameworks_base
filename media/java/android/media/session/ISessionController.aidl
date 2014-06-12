@@ -37,6 +37,7 @@ interface ISessionController {
     boolean isTransportControlEnabled();
     void showRoutePicker();
     MediaSessionInfo getSessionInfo();
+    long getFlags();
 
     // These commands are for the TransportController
     void play();

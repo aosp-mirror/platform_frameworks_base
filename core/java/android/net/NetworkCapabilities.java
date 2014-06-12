@@ -44,6 +44,9 @@ public final class NetworkCapabilities implements Parcelable {
     private static final String TAG = "NetworkCapabilities";
     private static final boolean DBG = false;
 
+    /**
+     * @hide
+     */
     public NetworkCapabilities() {
     }
 
@@ -154,58 +157,64 @@ public final class NetworkCapabilities implements Parcelable {
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
      *
-     * @param networkCapability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be added.
+     * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be added.
+     * @return This NetworkCapability to facilitate chaining.
+     * @hide
      */
-    public void addNetworkCapability(int networkCapability) {
-        if (networkCapability < MIN_NET_CAPABILITY ||
-                networkCapability > MAX_NET_CAPABILITY) {
+    public NetworkCapabilities addCapability(int capability) {
+        if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             throw new IllegalArgumentException("NetworkCapability out of range");
         }
-        mNetworkCapabilities |= 1 << networkCapability;
+        mNetworkCapabilities |= 1 << capability;
+        return this;
     }
 
     /**
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
      *
-     * @param networkCapability the {@code NetworkCapabilities.NET_CAPABILTIY_*} to be removed.
+     * @param capability the {@code NetworkCapabilities.NET_CAPABILTIY_*} to be removed.
+     * @return This NetworkCapability to facilitate chaining.
+     * @hide
      */
-    public void removeNetworkCapability(int networkCapability) {
-        if (networkCapability < MIN_NET_CAPABILITY ||
-                networkCapability > MAX_NET_CAPABILITY) {
+    public NetworkCapabilities removeCapability(int capability) {
+        if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             throw new IllegalArgumentException("NetworkCapability out of range");
         }
-        mNetworkCapabilities &= ~(1 << networkCapability);
+        mNetworkCapabilities &= ~(1 << capability);
+        return this;
     }
 
     /**
      * Gets all the capabilities set on this {@code NetworkCapability} instance.
      *
-     * @return a {@link Collection} of {@code NetworkCapabilities.NET_CAPABILITY_*} values
+     * @return an array of {@code NetworkCapabilities.NET_CAPABILITY_*} values
      *         for this instance.
+     * @hide
      */
-    public Collection<Integer> getNetworkCapabilities() {
+    public int[] getCapabilities() {
         return enumerateBits(mNetworkCapabilities);
     }
 
     /**
      * Tests for the presence of a capabilitity on this instance.
      *
-     * @param networkCapability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be tested for.
+     * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be tested for.
      * @return {@code true} if set on this instance.
      */
-    public boolean hasCapability(int networkCapability) {
-        if (networkCapability < MIN_NET_CAPABILITY ||
-                networkCapability > MAX_NET_CAPABILITY) {
+    public boolean hasCapability(int capability) {
+        if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             return false;
         }
-        return ((mNetworkCapabilities & (1 << networkCapability)) != 0);
+        return ((mNetworkCapabilities & (1 << capability)) != 0);
     }
 
-    private Collection<Integer> enumerateBits(long val) {
-        ArrayList<Integer> result = new ArrayList<Integer>();
+    private int[] enumerateBits(long val) {
+        int size = Long.bitCount(val);
+        int[] result = new int[size];
+        int index = 0;
         int resource = 0;
         while (val > 0) {
-            if ((val & 1) == 1) result.add(resource);
+            if ((val & 1) == 1) result[index++] = resource;
             val = val >> 1;
             resource++;
         }
@@ -265,33 +274,40 @@ public final class NetworkCapabilities implements Parcelable {
      * {@code NetworkCapabilities.NET_CAPABILITY_*} listed above.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be added.
+     * @return This NetworkCapability to facilitate chaining.
+     * @hide
      */
-    public void addTransportType(int transportType) {
+    public NetworkCapabilities addTransportType(int transportType) {
         if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
             throw new IllegalArgumentException("TransportType out of range");
         }
         mTransportTypes |= 1 << transportType;
+        return this;
     }
 
     /**
      * Removes (if found) the given transport from this {@code NetworkCapability} instance.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be removed.
+     * @return This NetworkCapability to facilitate chaining.
+     * @hide
      */
-    public void removeTransportType(int transportType) {
+    public NetworkCapabilities removeTransportType(int transportType) {
         if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
             throw new IllegalArgumentException("TransportType out of range");
         }
         mTransportTypes &= ~(1 << transportType);
+        return this;
     }
 
     /**
      * Gets all the transports set on this {@code NetworkCapability} instance.
      *
-     * @return a {@link Collection} of {@code NetworkCapabilities.TRANSPORT_*} values
+     * @return an array of {@code NetworkCapabilities.TRANSPORT_*} values
      *         for this instance.
+     * @hide
      */
-    public Collection<Integer> getTransportTypes() {
+    public int[] getTransportTypes() {
         return enumerateBits(mTransportTypes);
     }
 
@@ -340,6 +356,7 @@ public final class NetworkCapabilities implements Parcelable {
      * fast backhauls and slow backhauls.
      *
      * @param upKbps the estimated first hop upstream (device to network) bandwidth.
+     * @hide
      */
     public void setLinkUpstreamBandwidthKbps(int upKbps) {
         mLinkUpBandwidthKbps = upKbps;
@@ -368,6 +385,7 @@ public final class NetworkCapabilities implements Parcelable {
      * fast backhauls and slow backhauls.
      *
      * @param downKbps the estimated first hop downstream (network to device) bandwidth.
+     * @hide
      */
     public void setLinkDownstreamBandwidthKbps(int downKbps) {
         mLinkDownBandwidthKbps = downKbps;
@@ -464,24 +482,22 @@ public final class NetworkCapabilities implements Parcelable {
         };
 
     public String toString() {
-        Collection<Integer> types = getTransportTypes();
-        String transports = (types.size() > 0 ? " Transports: " : "");
-        Iterator<Integer> i = types.iterator();
-        while (i.hasNext()) {
-            switch (i.next()) {
+        int[] types = getTransportTypes();
+        String transports = (types.length > 0 ? " Transports: " : "");
+        for (int i = 0; i < types.length;) {
+            switch (types[i]) {
                 case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
                 case TRANSPORT_WIFI:        transports += "WIFI"; break;
                 case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
                 case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
             }
-            if (i.hasNext()) transports += "|";
+            if (++i < types.length) transports += "|";
         }
 
-        types = getNetworkCapabilities();
-        String capabilities = (types.size() > 0 ? " Capabilities: " : "");
-        i = types.iterator();
-        while (i.hasNext()) {
-            switch (i.next().intValue()) {
+        types = getCapabilities();
+        String capabilities = (types.length > 0 ? " Capabilities: " : "");
+        for (int i = 0; i < types.length; ) {
+            switch (types[i]) {
                 case NET_CAPABILITY_MMS:            capabilities += "MMS"; break;
                 case NET_CAPABILITY_SUPL:           capabilities += "SUPL"; break;
                 case NET_CAPABILITY_DUN:            capabilities += "DUN"; break;
@@ -497,7 +513,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case NET_CAPABILITY_INTERNET:       capabilities += "INTERNET"; break;
                 case NET_CAPABILITY_NOT_RESTRICTED: capabilities += "NOT_RESTRICTED"; break;
             }
-            if (i.hasNext()) capabilities += "&";
+            if (++i < types.length) capabilities += "&";
         }
 
         String upBand = ((mLinkUpBandwidthKbps > 0) ? " LinkUpBandwidth>=" +
