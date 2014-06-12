@@ -16096,28 +16096,25 @@ package android.net {
     method public deprecated int getNetworkPreference();
     method public static android.net.Network getProcessDefaultNetwork();
     method public boolean isActiveNetworkMetered();
-    method public boolean isNetworkActive();
+    method public boolean isDefaultNetworkActive();
     method public static boolean isNetworkTypeValid(int);
-    method public android.net.NetworkRequest listenForNetwork(android.net.NetworkCapabilities, android.net.ConnectivityManager.NetworkCallbackListener);
-    method public void registerNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
-    method public void releaseNetworkRequest(android.net.NetworkRequest);
+    method public void registerDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
+    method public void registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void reportBadNetwork(android.net.Network);
-    method public android.net.NetworkRequest requestNetwork(android.net.NetworkCapabilities, android.net.ConnectivityManager.NetworkCallbackListener);
-    method public android.net.NetworkRequest requestNetwork(android.net.NetworkCapabilities, android.app.PendingIntent);
+    method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
     method public static boolean setProcessDefaultNetwork(android.net.Network);
     method public deprecated int startUsingNetworkFeature(int, java.lang.String);
     method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
-    method public void unregisterNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
+    method public void unregisterDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
+    method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
-    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
-    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK_CAPABILITIES = "networkRequestNetworkCapabilities";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
@@ -16134,14 +16131,13 @@ package android.net {
     field public static final int TYPE_WIMAX = 6; // 0x6
   }
 
-  public static class ConnectivityManager.NetworkCallbackListener {
-    ctor public ConnectivityManager.NetworkCallbackListener();
-    method public void onAvailable(android.net.NetworkRequest, android.net.Network);
-    method public void onLinkPropertiesChanged(android.net.NetworkRequest, android.net.Network, android.net.LinkProperties);
-    method public void onLosing(android.net.NetworkRequest, android.net.Network, int);
-    method public void onLost(android.net.NetworkRequest, android.net.Network);
-    method public void onNetworkCapabilitiesChanged(android.net.NetworkRequest, android.net.Network, android.net.NetworkCapabilities);
-    method public void onReleased(android.net.NetworkRequest);
+  public static class ConnectivityManager.NetworkCallback {
+    ctor public ConnectivityManager.NetworkCallback();
+    method public void onAvailable(android.net.Network);
+    method public void onCapabilitiesChanged(android.net.Network, android.net.NetworkCapabilities);
+    method public void onLinkPropertiesChanged(android.net.Network, android.net.LinkProperties);
+    method public void onLosing(android.net.Network, int);
+    method public void onLost(android.net.Network);
   }
 
   public static abstract interface ConnectivityManager.OnNetworkActiveListener {

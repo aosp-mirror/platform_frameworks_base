@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
  * to request a network via {@link ConnectivityManager#requestNetwork} or listen for changes
- * via {@link ConnectivityManager#listenForNetwork}.
+ * via {@link ConnectivityManager#registerNetworkCallback}.
  */
 public class NetworkRequest implements Parcelable {
     /**
