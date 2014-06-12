@@ -513,6 +513,9 @@ please see themes_device_defaults.xml.
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
         <item name="navigationBarColor">@color/black</item>
+        <item name="windowEnterTransition">@transition/fade</item>
+        <item name="windowSharedElementEnterTransition">@transition/move</item>
+        <item name="windowSharedElementExitTransition">@transition/move</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/Theme.Material.Light.Dialog</item>
