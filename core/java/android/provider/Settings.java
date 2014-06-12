@@ -4576,6 +4576,16 @@ public final class Settings {
         public static final String DISPLAY_INTERCEPTED_NOTIFICATIONS = "display_intercepted_notifications";
 
         /**
+         * If enabled, apps should try to skip any introductory hints on first launch. This might
+         * apply to users that are already familiar with the environment or temporary users, like
+         * guests.
+         * <p>
+         * Type : int (0 to show hints, 1 to skip showing hints)
+         * @hide
+         */
+        public static final String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -6214,6 +6224,14 @@ public final class Settings {
          * @hide
          */
         public static final String DEVICE_NAME = "device_name";
+
+        /**
+         * Whether it should be possible to create a guest user on the device.
+         * <p>
+         * Type: int (0 for disabled, 1 for enabled)
+         * @hide
+         */
+        public static final String GUEST_USER_ENABLED = "guest_user_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

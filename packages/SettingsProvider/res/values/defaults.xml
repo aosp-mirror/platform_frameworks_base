@@ -195,4 +195,7 @@
     <!-- Default for Settings.Secure.WAKE_GESTURE_ENABLED -->
     <bool name="def_wake_gesture_enabled">true</bool>
 
+    <!-- Default for Settings.Global.GUEST_USER_ENABLED -->
+    <bool name="def_guest_user_enabled">true</bool>
+
 </resources>

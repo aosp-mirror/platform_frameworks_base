@@ -161,7 +161,6 @@ public class UserManagerService extends IUserManager.Stub {
     private final SparseBooleanArray mRemovingUserIds = new SparseBooleanArray();
 
     private int[] mUserIds;
-    private boolean mGuestEnabled;
     private int mNextSerialNumber;
     private int mUserVersion = 0;
 
@@ -427,43 +426,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    @Override
-    public void setGuestEnabled(boolean enable) {
-        checkManageUsersPermission("enable guest users");
-        synchronized (mPackagesLock) {
-            if (mGuestEnabled != enable) {
-                mGuestEnabled = enable;
-                // Erase any guest user that currently exists
-                for (int i = 0; i < mUsers.size(); i++) {
-                    UserInfo user = mUsers.valueAt(i);
-                    if (!user.partial && user.isGuest()) {
-                        if (!enable) {
-                            removeUser(user.id);
-                        }
-                        return;
-                    }
-                }
-                // No guest was found
-                if (enable) {
-                    createUser("Guest", UserInfo.FLAG_GUEST);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean isGuestEnabled() {
-        synchronized (mPackagesLock) {
-            return mGuestEnabled;
-        }
-    }
-
-    @Override
-    public void wipeUser(int userHandle) {
-        checkManageUsersPermission("wipe user");
-        // TODO:
-    }
-
     public void makeInitialized(int userId) {
         checkManageUsersPermission("makeInitialized");
         synchronized (mPackagesLock) {
@@ -583,7 +545,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void readUserListLocked() {
-        mGuestEnabled = false;
         if (!mUserListFile.exists()) {
             fallbackToSingleUserLocked();
             return;
@@ -625,9 +586,6 @@ public class UserManagerService extends IUserManager.Stub {
 
                     if (user != null) {
                         mUsers.put(user.id, user);
-                        if (user.isGuest()) {
-                            mGuestEnabled = true;
-                        }
                         if (mNextSerialNumber < 0 || mNextSerialNumber <= user.id) {
                             mNextSerialNumber = user.id + 1;
                         }

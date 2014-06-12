@@ -25,6 +25,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -361,6 +362,16 @@ public class UserManager {
     }
 
     /**
+     * Checks if the calling app is running as a guest user.
+     * @return whether the caller is a guest user.
+     * @hide
+     */
+    public boolean isGuestUser() {
+        UserInfo user = getUserInfo(UserHandle.myUserId());
+        return user != null ? user.isGuest() : false;
+    }
+
+    /**
      * Return whether the given user is actively running.  This means that
      * the user is in the "started" state, not "stopped" -- it is currently
      * allowed to run code through scheduled alarms, receiving broadcasts,
@@ -547,6 +558,21 @@ public class UserManager {
             Log.w(TAG, "Could not create a user", re);
             return null;
         }
+    }
+
+    /**
+     * Creates a guest user and configures it.
+     * @param context an application context
+     * @param name the name to set for the user
+     * @hide
+     */
+    public UserInfo createGuest(Context context, String name) {
+        UserInfo guest = createUser(name, UserInfo.FLAG_GUEST);
+        if (guest != null) {
+            Settings.Secure.putStringForUser(context.getContentResolver(),
+                    Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
+        }
+        return guest;
     }
 
     /**
@@ -823,50 +849,6 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get the user icon ", re);
             return null;
-        }
-    }
-
-    /**
-     * Enable or disable the use of a guest account. If disabled, the existing guest account
-     * will be wiped.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param enable whether to enable a guest account.
-     * @hide
-     */
-    public void setGuestEnabled(boolean enable) {
-        try {
-            mService.setGuestEnabled(enable);
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not change guest account availability to " + enable);
-        }
-    }
-
-    /**
-     * Checks if a guest user is enabled for this device.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @return whether a guest user is enabled
-     * @hide
-     */
-    public boolean isGuestEnabled() {
-        try {
-            return mService.isGuestEnabled();
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not retrieve guest enabled state");
-            return false;
-        }
-    }
-
-    /**
-     * Wipes all the data for a user, but doesn't remove the user.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @param userHandle
-     * @hide
-     */
-    public void wipeUser(int userHandle) {
-        try {
-            mService.wipeUser(userHandle);
-        } catch (RemoteException re) {
-            Log.w(TAG, "Could not wipe user " + userHandle);
         }
     }
 

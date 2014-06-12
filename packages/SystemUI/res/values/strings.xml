@@ -596,6 +596,13 @@
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
 
+    <!-- Related to user switcher --><skip/>
+    <!-- Name for the guest user -->
+    <string name="guest_nickname">Guest</string>
+
+    <!-- Label for adding a new guest -->
+    <string name="guest_new_guest">+ Guest</string>
+
     <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes">
         <item quantity="one">For one minute</item>
