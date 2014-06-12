@@ -89,6 +89,9 @@
     <color name="material_teal_A200">#ff18ffff</color>
     <color name="material_teal_A400">#ff00e5ff</color>
 
+    <!-- Accent color used by Settings -->
+    <color name="material_dark_teal_A400">#ff009688</color>
+
     <color name="material_green_100">#ffb7e1cd</color>
     <color name="material_green_300">#ff57bb8a</color>
     <color name="material_green_500">#ff0f9d58</color>
@@ -143,7 +146,10 @@
     <color name="material_blue_grey_600">#ff546e7a</color>
     <color name="material_blue_grey_700">#ff455a64</color>
     <color name="material_blue_grey_800">#ff37474f</color>
+    <!-- Primary color used by Settings -->
     <color name="material_blue_grey_900">#ff263238</color>
+    <!-- Primary dark color used by Settings -->
+    <color name="material_blue_grey_950">#ff21272b</color>
 
     <color name="material_brown_100">#ffd7ccc8</color>
     <color name="material_brown_300">#ffa1887f</color>

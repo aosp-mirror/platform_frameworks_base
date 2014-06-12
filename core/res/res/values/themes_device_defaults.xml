@@ -555,4 +555,7 @@ easier.
 
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar" />
 
+    <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
+    <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings" />
+
 </resources>

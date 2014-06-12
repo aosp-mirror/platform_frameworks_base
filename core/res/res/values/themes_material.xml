@@ -154,7 +154,7 @@ please see themes_device_defaults.xml.
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@style/WindowTitle.Material</item>
-        <item name="windowTitleSize">25dip</item>
+        <item name="windowTitleSize">@dimen/action_bar_default_height_material</item>
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Material</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Activity</item>
@@ -503,7 +503,7 @@ please see themes_device_defaults.xml.
         <item name="windowContentOverlay">@drawable/ab_solid_shadow_material</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@style/WindowTitle.Material</item>
-        <item name="windowTitleSize">25dip</item>
+        <item name="windowTitleSize">@dimen/action_bar_default_height_material</item>
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Material</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Activity</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
@@ -1006,7 +1006,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
-        <item name="windowBackground">@drawable/dialog_background_material</item>
+        <item name="windowBackground">@drawable/dialog_background_shadow_material</item>
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
@@ -1102,18 +1102,15 @@ please see themes_device_defaults.xml.
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
-    <style name="Theme.Material.DialogWhenLarge" parent="@style/Theme.Material">
-    </style>
+    <style name="Theme.Material.DialogWhenLarge" parent="@style/Theme.Material" />
 
     <!-- Theme for a window without a title bar that will be displayed either
          full-screen on smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
-    <style name="Theme.Material.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.NoActionBar">
-    </style>
+    <style name="Theme.Material.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.NoActionBar" />
 
     <!-- Theme for a presentation window on a secondary display. -->
-    <style name="Theme.Material.Dialog.Presentation" parent="@style/Theme.Material.NoActionBar.Fullscreen">
-    </style>
+    <style name="Theme.Material.Dialog.Presentation" parent="@style/Theme.Material.NoActionBar.Fullscreen" />
 
     <!-- Light material dialog themes -->
 
@@ -1125,7 +1122,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
-        <item name="windowBackground">?attr/colorBackground</item>
+        <item name="windowBackground">@drawable/dialog_background_shadow_material</item>
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
@@ -1189,15 +1186,12 @@ please see themes_device_defaults.xml.
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
-    <style name="Theme.Material.Light.DialogWhenLarge" parent="@style/Theme.Material.Light">
-    </style>
+    <style name="Theme.Material.Light.DialogWhenLarge" parent="@style/Theme.Material.Light" />
 
     <!-- Theme for a window without an action bar that will be displayed either full-screen
          on smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
-    <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar"
-            parent="@style/Theme.Material.Light.NoActionBar">
-    </style>
+    <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Light.NoActionBar" />
 
     <!-- Material light theme for alert dialog windows, which is used by the
          {@link android.app.AlertDialog} class.  This is basically a dialog
@@ -1219,8 +1213,7 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Theme for a presentation window on a secondary display. -->
-    <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" >
-    </style>
+    <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" />
 
     <!-- Default material (dark) for windows that want to have the user's selected
          wallpaper appear behind them.  -->
@@ -1234,6 +1227,13 @@ please see themes_device_defaults.xml.
          wallpaper appear behind them and without an action bar. -->
     <style name="Theme.Material.Wallpaper.NoTitleBar">
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Default theme for Settings and activities launched from Settings. -->
+    <style name="Theme.Material.Settings" parent="@style/Theme.Material.Light.DarkActionBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_dark_teal_A400</item>
     </style>
 
 </resources>

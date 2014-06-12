@@ -23,6 +23,7 @@ This is a custom layout for a dialog.
     android:fitsSystemWindows="true">
     <FrameLayout android:id="@android:id/title_container"
         android:layout_width="match_parent"
+        android:layout_height="?android:attr/windowTitleSize"
         android:layout_weight="0"
         android:gravity="center_vertical|start"
         style="?android:attr/windowTitleBackgroundStyle" />
