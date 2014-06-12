@@ -273,6 +273,13 @@ public class Recents extends SystemUI implements RecentsComponent {
         }
     }
 
+    @Override
+    public void setCallback(Callbacks cb) {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.setRecentsComponentCallback(cb);
+        }
+    }
+
     /**
      * Send broadcast only if BOOT_COMPLETED
      */
