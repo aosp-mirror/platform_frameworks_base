@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,16 +34,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.R;
 
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -129,8 +124,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static int MSG_TOGGLE_RECENTS = 6;
     final public static int MSG_START_ENTER_ANIMATION = 7;
 
-    final public static String EXTRA_ANIMATING_WITH_THUMBNAIL = "recents.animatingWithThumbnail";
-    final public static String EXTRA_FROM_ALT_TAB = "recents.triggeredFromAltTab";
+    final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
+    final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
+    final public static String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
+    final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String KEY_CONFIGURATION_DATA = "recents.data.updateForConfiguration";
     final public static String KEY_WINDOW_RECT = "recents.windowRect";
     final public static String KEY_SYSTEM_INSETS = "recents.systemInsets";
@@ -138,13 +135,14 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String KEY_TWO_TASK_STACK_RECT = "recents.twoCountTaskRect";
     final public static String KEY_MULTIPLE_TASK_STACK_RECT = "recents.multipleCountTaskRect";
 
-
     final static int sMinToggleDelay = 425;
 
     final static String sToggleRecentsAction = "com.android.systemui.recents.SHOW_RECENTS";
     final static String sRecentsPackage = "com.android.systemui";
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
     final static String sRecentsService = "com.android.systemui.recents.RecentsService";
+
+    static Bitmap sLastScreenshot;
 
     Context mContext;
     SystemServicesProxy mSystemServicesProxy;
@@ -213,15 +211,19 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (Console.Enabled) {
             Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
         }
+
         if (mServiceIsBound && mBootCompleted) {
-            // Notify recents to close it
-            try {
-                Bundle data = new Bundle();
-                Message msg = Message.obtain(null, MSG_HIDE_RECENTS, triggeredFromAltTab ? 1 : 0, 0);
-                msg.setData(data);
-                mService.send(msg);
-            } catch (RemoteException re) {
-                re.printStackTrace();
+            if (isRecentsTopMost(null)) {
+                // Notify recents to close it
+                try {
+                    Bundle data = new Bundle();
+                    Message msg = Message.obtain(null, MSG_HIDE_RECENTS,
+                            triggeredFromAltTab ? 1 : 0, 0);
+                    msg.setData(data);
+                    mService.send(msg);
+                } catch (RemoteException re) {
+                    re.printStackTrace();
+                }
             }
         }
     }
@@ -343,80 +345,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
     }
 
-    /** Converts from the device rotation to the degree */
-    float getDegreesForRotation(int value) {
-        switch (value) {
-            case Surface.ROTATION_90:
-                return 360f - 90f;
-            case Surface.ROTATION_180:
-                return 360f - 180f;
-            case Surface.ROTATION_270:
-                return 360f - 270f;
-        }
-        return 0f;
-    }
-
-    /** Takes a screenshot of the surface */
-    Bitmap takeScreenshot(Display display) {
-        DisplayMetrics dm = new DisplayMetrics();
-        display.getRealMetrics(dm);
-        float[] dims = {dm.widthPixels, dm.heightPixels};
-        float degrees = getDegreesForRotation(display.getRotation());
-        boolean requiresRotation = (degrees > 0);
-        if (requiresRotation) {
-            // Get the dimensions of the device in its native orientation
-            Matrix m = new Matrix();
-            m.preRotate(-degrees);
-            m.mapPoints(dims);
-            dims[0] = Math.abs(dims[0]);
-            dims[1] = Math.abs(dims[1]);
-        }
-        return SurfaceControl.screenshot((int) dims[0], (int) dims[1]);
-    }
-
-    /** Creates the activity options for a thumbnail transition. */
-    ActivityOptions getThumbnailTransitionActivityOptions(Rect taskRect) {
-        // Loading from thumbnail
-        Bitmap thumbnail;
-        Bitmap firstThumbnail = loadFirstTaskThumbnail();
-        if (firstThumbnail != null) {
-            // Create the thumbnail
-            thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
-                    Bitmap.Config.ARGB_8888);
-            int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
-            Canvas c = new Canvas(thumbnail);
-            c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                    new Rect(0, 0, taskRect.width(), taskRect.height()), null);
-            c.setBitmap(null);
-            // Recycle the old thumbnail
-            firstThumbnail.recycle();
-        } else {
-            // Load the thumbnail from the screenshot if can't get one from the system
-            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            Display display = wm.getDefaultDisplay();
-            Bitmap screenshot = takeScreenshot(display);
-            if (screenshot != null) {
-                Resources res = mContext.getResources();
-                int size = Math.min(screenshot.getWidth(), screenshot.getHeight());
-                int statusBarHeight = res.getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height);
-                thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas c = new Canvas(thumbnail);
-                c.drawBitmap(screenshot, new Rect(0, statusBarHeight, size, statusBarHeight +
-                        size), new Rect(0, 0, taskRect.width(), taskRect.height()), null);
-                c.setBitmap(null);
-                // Recycle the temporary screenshot
-                screenshot.recycle();
-            } else {
-                return null;
-            }
-        }
-
-        return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView, thumbnail,
-                taskRect.left, taskRect.top, this);
-    }
-
     /** Returns whether the recents is currently running */
     boolean isRecentsTopMost(AtomicBoolean isHomeTopMost) {
         SystemServicesProxy ssp = mSystemServicesProxy;
@@ -462,10 +390,12 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 mService.send(msg);
 
                 // Time this path
-                Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                        Constants.Log.App.TimeRecentsStartupKey, "sendToggleRecents");
-                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                        Constants.Log.App.TimeRecentsLaunchKey, "sendToggleRecents");
+                if (Console.Enabled) {
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                            Constants.Log.App.TimeRecentsStartupKey, "sendToggleRecents");
+                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                            Constants.Log.App.TimeRecentsLaunchKey, "sendToggleRecents");
+                }
             } catch (RemoteException re) {
                 re.printStackTrace();
             }
@@ -486,6 +416,68 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
     }
 
+    /**
+     * Creates the activity options for a unknown state->recents transition.
+     */
+    ActivityOptions getUnknownTransitionActivityOptions() {
+        // Reset the last screenshot
+        consumeLastScreenshot();
+        return ActivityOptions.makeCustomAnimation(mContext,
+                R.anim.recents_from_unknown_enter,
+                R.anim.recents_from_unknown_exit, mHandler, this);
+    }
+
+    /**
+     * Creates the activity options for a home->recents transition.
+     */
+    ActivityOptions getHomeTransitionActivityOptions() {
+        // Reset the last screenshot
+        consumeLastScreenshot();
+        return ActivityOptions.makeCustomAnimation(mContext,
+                R.anim.recents_from_launcher_enter,
+                R.anim.recents_from_launcher_exit, mHandler, this);
+    }
+
+    /**
+     * Creates the activity options for an app->recents transition.  If this method sets the static
+     * screenshot, then we will use that for the transition.
+     */
+    ActivityOptions getThumbnailTransitionActivityOptions(Rect taskRect) {
+        // Recycle the last screenshot
+        consumeLastScreenshot();
+
+        // Take the full screenshot
+        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
+            sLastScreenshot = mSystemServicesProxy.takeScreenshot();
+            if (sLastScreenshot != null) {
+                return ActivityOptions.makeCustomAnimation(mContext,
+                        R.anim.recents_from_app_enter,
+                        R.anim.recents_from_app_exit, mHandler, this);
+            }
+        }
+
+        // If the screenshot fails, then load the first task thumbnail and use that
+        Bitmap firstThumbnail = loadFirstTaskThumbnail();
+        if (firstThumbnail != null) {
+            // Create the new thumbnail for the animation down
+            // XXX: We should find a way to optimize this so we don't need to create a new bitmap
+            Bitmap thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
+                    Bitmap.Config.ARGB_8888);
+            int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
+            Canvas c = new Canvas(thumbnail);
+            c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
+                    new Rect(0, 0, taskRect.width(), taskRect.height()), null);
+            c.setBitmap(null);
+            // Recycle the old thumbnail
+            firstThumbnail.recycle();
+            return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
+                    thumbnail, taskRect.left, taskRect.top, this);
+        }
+
+        // If both the screenshot and thumbnail fails, then just fall back to the default transition
+        return getUnknownTransitionActivityOptions();
+    }
+
     /** Starts the recents activity */
     void startRecentsActivity(boolean isTopTaskHome) {
         // If Recents is not the front-most activity and we should animate into it.  If
@@ -503,7 +495,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(taskRect);
             if (opts != null) {
-                startAlternateRecentsActivity(opts, true);
+                if (sLastScreenshot != null) {
+                    startAlternateRecentsActivity(opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
+                } else {
+                    startAlternateRecentsActivity(opts, EXTRA_FROM_APP_THUMBNAIL);
+                }
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -512,25 +508,33 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
         // If there is no thumbnail transition, then just use a generic transition
         if (!useThumbnailTransition) {
-            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                    R.anim.recents_from_launcher_enter,
-                    R.anim.recents_from_launcher_exit, mHandler, this);
-            startAlternateRecentsActivity(opts, false);
+            if (Constants.DebugFlags.App.EnableHomeTransition) {
+                ActivityOptions opts = getHomeTransitionActivityOptions();
+                startAlternateRecentsActivity(opts, EXTRA_FROM_HOME);
+            } else {
+                ActivityOptions opts = getUnknownTransitionActivityOptions();
+                startAlternateRecentsActivity(opts, null);
+            }
         }
 
-        Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                Constants.Log.App.TimeRecentsStartupKey, "startRecentsActivity");
+        if (Console.Enabled) {
+            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                    Constants.Log.App.TimeRecentsStartupKey, "startRecentsActivity");
+        }
         mLastToggleTime = System.currentTimeMillis();
     }
 
     /** Starts the recents activity */
-    void startAlternateRecentsActivity(ActivityOptions opts, boolean animatingWithThumbnail) {
+    void startAlternateRecentsActivity(ActivityOptions opts, String extraFlag) {
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        intent.putExtra(EXTRA_ANIMATING_WITH_THUMBNAIL, animatingWithThumbnail);
-        intent.putExtra(EXTRA_FROM_ALT_TAB, mTriggeredFromAltTab);
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+        if (extraFlag != null) {
+            intent.putExtra(extraFlag, true);
+        }
+        intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
                     UserHandle.USER_CURRENT));
@@ -539,6 +543,18 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
     }
 
+    /** Returns the last screenshot taken, this will be called by the RecentsActivity. */
+    public static Bitmap getLastScreenshot() {
+        return sLastScreenshot;
+    }
+
+    /** Recycles the last screenshot taken, this will be called by the RecentsActivity. */
+    public static void consumeLastScreenshot() {
+        if (sLastScreenshot != null) {
+            sLastScreenshot.recycle();
+            sLastScreenshot = null;
+        }
+    }
 
     /**** OnAnimationStartedListener Implementation ****/
 

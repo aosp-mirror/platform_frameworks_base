@@ -47,7 +47,8 @@ public class TaskViewTransform {
 
     @Override
     public String toString() {
-        return "TaskViewTransform y: " + translationY + " scale: " + scale + " alpha: " + alpha +
-                " visible: " + visible + " rect: " + rect + " dismissAlpha: " + dismissAlpha;
+        return "TaskViewTransform y: " + translationY + " z: " + translationZ + " scale: " + scale +
+                " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
+                " dismissAlpha: " + dismissAlpha;
     }
 }

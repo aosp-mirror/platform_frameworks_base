@@ -1708,7 +1708,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if (mStatusBarWindow != null) {
-
             // release focus immediately to kick off focus change transition
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
@@ -3134,4 +3133,30 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     };
+
+    // Recents
+
+    @Override
+    protected void showRecents(boolean triggeredFromAltTab) {
+        // Set the recents visibility flag
+        mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+        super.showRecents(triggeredFromAltTab);
+    }
+
+    @Override
+    protected void hideRecents(boolean triggeredFromAltTab) {
+        // Unset the recents visibility flag
+        mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+        super.hideRecents(triggeredFromAltTab);
+    }
+
+    @Override
+    protected void toggleRecents() {
+        // Toggle the recents visibility flag
+        mSystemUiVisibility ^= View.RECENT_APPS_VISIBLE;
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+        super.toggleRecents();
+    }
 }

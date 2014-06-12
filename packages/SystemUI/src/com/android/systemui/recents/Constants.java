@@ -25,6 +25,10 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
+            // Enables the home->Recents transition
+            public static final boolean EnableHomeTransition = false;
+            // Enables the screenshot app->Recents transition
+            public static final boolean EnableScreenshotAppTransition = false;
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
             // Enables clipping of tasks against each other
@@ -52,8 +56,11 @@ public class Constants {
         public static class App {
             public static final String TimeRecentsStartupKey = "startup";
             public static final String TimeRecentsLaunchKey = "launchTask";
-            public static final boolean TimeRecentsStartup = false;
-            public static final boolean TimeRecentsLaunchTask = false;
+            public static final String TimeRecentsScreenshotTransitionKey = "screenshot";
+            public static final boolean TimeRecentsStartup = true;
+            public static final boolean TimeRecentsLaunchTask = true;
+            public static final boolean TimeRecentsScreenshotTransition = true;
+
 
             public static final boolean RecentsComponent = false;
             public static final boolean TaskDataLoader = false;

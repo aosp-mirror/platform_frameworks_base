@@ -134,10 +134,12 @@ class SystemUIMessageHandler extends Handler {
             context.sendBroadcast(intent);
 
             // Time this path
-            Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                    Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
-            Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                    Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
+            if (Console.Enabled) {
+                Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                        Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
+                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                        Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
+            }
         } else if (msg.what == AlternateRecentsComponent.MSG_START_ENTER_ANIMATION) {
             // Send a broadcast to start the enter animation
             Intent intent = new Intent(RecentsService.ACTION_START_ENTER_ANIMATION);
