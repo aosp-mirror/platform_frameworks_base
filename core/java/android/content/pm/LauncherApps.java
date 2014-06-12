@@ -67,7 +67,6 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that was removed.
-         * @hide remove before ship
          */
         void onPackageRemoved(UserHandle user, String packageName);
 
@@ -76,7 +75,6 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that was added.
-         * @hide remove before ship
          */
         void onPackageAdded(UserHandle user, String packageName);
 
@@ -85,7 +83,6 @@ public class LauncherApps {
          *
          * @param user The UserHandle of the profile that generated the change.
          * @param packageName The name of the package that has changed.
-         * @hide remove before ship
          */
         void onPackageChanged(UserHandle user, String packageName);
 
@@ -99,7 +96,6 @@ public class LauncherApps {
          *            available.
          * @param replacing Indicates whether these packages are replacing
          *            existing ones.
-         * @hide remove before ship
          */
         void onPackagesAvailable(UserHandle user, String[] packageNames, boolean replacing);
 
@@ -113,59 +109,9 @@ public class LauncherApps {
          *            unavailable.
          * @param replacing Indicates whether the packages are about to be
          *            replaced with new versions.
-         * @hide remove before ship
          */
         void onPackagesUnavailable(UserHandle user, String[] packageNames, boolean replacing);
 
-        /**
-         * Indicates that a package was removed from the specified profile.
-         *
-         * @param packageName The name of the package that was removed.
-         * @param user The UserHandle of the profile that generated the change.
-         */
-        void onPackageRemoved(String packageName, UserHandle user);
-
-        /**
-         * Indicates that a package was added to the specified profile.
-         *
-         * @param packageName The name of the package that was added.
-         * @param user The UserHandle of the profile that generated the change.
-         */
-        void onPackageAdded(String packageName, UserHandle user);
-
-        /**
-         * Indicates that a package was modified in the specified profile.
-         *
-         * @param packageName The name of the package that has changed.
-         * @param user The UserHandle of the profile that generated the change.
-         */
-        void onPackageChanged(String packageName, UserHandle user);
-
-        /**
-         * Indicates that one or more packages have become available. For
-         * example, this can happen when a removable storage card has
-         * reappeared.
-         *
-         * @param packageNames The names of the packages that have become
-         *            available.
-         * @param user The UserHandle of the profile that generated the change.
-         * @param replacing Indicates whether these packages are replacing
-         *            existing ones.
-         */
-        void onPackagesAvailable(String [] packageNames, UserHandle user, boolean replacing);
-
-        /**
-         * Indicates that one or more packages have become unavailable. For
-         * example, this can happen when a removable storage card has been
-         * removed.
-         *
-         * @param packageNames The names of the packages that have become
-         *            unavailable.
-         * @param user The UserHandle of the profile that generated the change.
-         * @param replacing Indicates whether the packages are about to be
-         *            replaced with new versions.
-         */
-        void onPackagesUnavailable(String[] packageNames, UserHandle user, boolean replacing);
     }
 
     /** @hide */
@@ -361,8 +307,7 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageRemoved(user, packageName); // TODO: Remove before ship
-                    listener.onPackageRemoved(packageName, user);
+                    listener.onPackageRemoved(user, packageName);
                 }
             }
         }
@@ -374,8 +319,7 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageChanged(user, packageName); // TODO: Remove before ship
-                    listener.onPackageChanged(packageName, user);
+                    listener.onPackageChanged(user, packageName);
                 }
             }
         }
@@ -387,8 +331,7 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackageAdded(user, packageName); // TODO: Remove before ship
-                    listener.onPackageAdded(packageName, user);
+                    listener.onPackageAdded(user, packageName);
                 }
             }
         }
@@ -401,8 +344,7 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackagesAvailable(user, packageNames, replacing); // TODO: Remove
-                    listener.onPackagesAvailable(packageNames, user, replacing);
+                    listener.onPackagesAvailable(user, packageNames, replacing);
                 }
             }
         }
@@ -415,8 +357,7 @@ public class LauncherApps {
             }
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
-                    listener.onPackagesUnavailable(user, packageNames, replacing); // TODO: Remove
-                    listener.onPackagesUnavailable(packageNames, user, replacing);
+                    listener.onPackagesUnavailable(user, packageNames, replacing);
                 }
             }
         }

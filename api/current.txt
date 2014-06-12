@@ -8247,11 +8247,11 @@ package android.content.pm {
   }
 
   public static abstract interface LauncherApps.OnAppsChangedListener {
-    method public abstract void onPackageAdded(java.lang.String, android.os.UserHandle);
-    method public abstract void onPackageChanged(java.lang.String, android.os.UserHandle);
-    method public abstract void onPackageRemoved(java.lang.String, android.os.UserHandle);
-    method public abstract void onPackagesAvailable(java.lang.String[], android.os.UserHandle, boolean);
-    method public abstract void onPackagesUnavailable(java.lang.String[], android.os.UserHandle, boolean);
+    method public abstract void onPackageAdded(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackageChanged(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackageRemoved(android.os.UserHandle, java.lang.String);
+    method public abstract void onPackagesAvailable(android.os.UserHandle, java.lang.String[], boolean);
+    method public abstract void onPackagesUnavailable(android.os.UserHandle, java.lang.String[], boolean);
   }
 
   public class PackageInfo implements android.os.Parcelable {
