@@ -429,6 +429,11 @@ public class ConnectivityManager {
      */
     public final static int INVALID_NET_ID = 0;
 
+    /**
+     * @hide
+     */
+    public final static int REQUEST_ID_UNSET = 0;
+
     private final IConnectivityManager mService;
 
     private final String mPackageName;
@@ -883,8 +888,8 @@ public class ConnectivityManager {
      * @hide
      */
     public static void maybeMarkCapabilitiesRestricted(NetworkCapabilities nc) {
-        for (Integer capability : nc.getNetworkCapabilities()) {
-            switch (capability.intValue()) {
+        for (int capability : nc.getCapabilities()) {
+            switch (capability) {
                 case NetworkCapabilities.NET_CAPABILITY_CBS:
                 case NetworkCapabilities.NET_CAPABILITY_DUN:
                 case NetworkCapabilities.NET_CAPABILITY_EIMS:
@@ -903,7 +908,7 @@ public class ConnectivityManager {
         }
         // All the capabilities are typically provided by restricted networks.
         // Conclude that this network is restricted.
-        nc.removeNetworkCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
     }
 
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
@@ -927,15 +932,14 @@ public class ConnectivityManager {
                 return null;
             }
             NetworkCapabilities netCap = new NetworkCapabilities();
-            netCap.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-            netCap.addNetworkCapability(cap);
+            netCap.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).addCapability(cap);
             maybeMarkCapabilitiesRestricted(netCap);
             return netCap;
         } else if (networkType == TYPE_WIFI) {
             if ("p2p".equals(feature)) {
                 NetworkCapabilities netCap = new NetworkCapabilities();
                 netCap.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-                netCap.addNetworkCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
+                netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
                 maybeMarkCapabilitiesRestricted(netCap);
                 return netCap;
             }
