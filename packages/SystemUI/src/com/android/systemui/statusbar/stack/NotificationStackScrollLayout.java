@@ -1723,7 +1723,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (!isExpanded) {
             mOwnScrollY = 0;
-            mSpeedBumpView.collapse();
         }
     }
 
@@ -1792,7 +1791,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             int newVisibility = visible ? VISIBLE : GONE;
             mSpeedBumpView.setVisibility(newVisibility);
             if (visible) {
-                mSpeedBumpView.collapse();
                 // Make invisible to ensure that the appear animation is played.
                 mSpeedBumpView.setInvisible();
                 if (!mIsExpansionChanging) {
