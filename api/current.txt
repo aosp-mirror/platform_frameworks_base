@@ -15825,8 +15825,11 @@ package android.media.tv {
     field public static final int TYPE_ISDB_S = 262656; // 0x40200
     field public static final int TYPE_ISDB_T = 262144; // 0x40000
     field public static final int TYPE_ISDB_TB = 262400; // 0x40100
+    field public static final int TYPE_NTSC = 1; // 0x1
     field public static final int TYPE_OTHER = 0; // 0x0
+    field public static final int TYPE_PAL = 2; // 0x2
     field public static final int TYPE_PASSTHROUGH = 65536; // 0x10000
+    field public static final int TYPE_SECAM = 3; // 0x3
     field public static final int TYPE_S_DMB = 393472; // 0x60100
     field public static final int TYPE_T_DMB = 393216; // 0x60000
   }

@@ -272,6 +272,15 @@ public final class TvContract {
         /** A generic channel type. */
         public static final int TYPE_OTHER = 0x0;
 
+        /** The channel type for NTSC. */
+        public static final int TYPE_NTSC = 0x1;
+
+        /** The channel type for PAL. */
+        public static final int TYPE_PAL = 0x2;
+
+        /** The channel type for SECAM. */
+        public static final int TYPE_SECAM = 0x3;
+
         /** The special channel type used for pass-through inputs such as HDMI. */
         public static final int TYPE_PASSTHROUGH = 0x00010000;
 
