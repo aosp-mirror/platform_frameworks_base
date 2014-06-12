@@ -144,9 +144,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean ENABLE_CAR_DOCK_HOME_CAPTURE = true;
     static final boolean ENABLE_DESK_DOCK_HOME_CAPTURE = false;
 
-    // Whether to use the new Session APIs
-    static final boolean USE_SESSIONS = true;
-
     static final int SHORT_PRESS_POWER_NOTHING = 0;
     static final int SHORT_PRESS_POWER_GO_TO_SLEEP = 1;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
@@ -3974,49 +3971,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      *    controlled by this device, or through remote submix).
      */
     boolean isMusicActive() {
+
         final AudioManager am = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
         if (am == null) {
             Log.w(TAG, "isMusicActive: couldn't get AudioManager reference");
             return false;
         }
         return am.isLocalOrRemoteMusicActive();
-    }
-
-    /**
-     * Tell the audio service to adjust the volume appropriate to the event.
-     * @param keycode
-     */
-    void handleVolumeKey(int stream, int keycode) {
-        IAudioService audioService = getAudioService();
-        if (audioService == null) {
-            return;
-        }
-        try {
-            // when audio is playing locally, we shouldn't have to hold a wake lock
-            // during the call, but we do it as a precaution for the rare possibility
-            // that the music stops right before we call this.
-            // Otherwise we might also be in a remote playback case.
-            // TODO: Actually handle MUTE.
-            mBroadcastWakeLock.acquire();
-            if (stream == AudioSystem.STREAM_MUSIC) {
-                audioService.adjustLocalOrRemoteStreamVolume(stream,
-                        keycode == KeyEvent.KEYCODE_VOLUME_UP
-                                ? AudioManager.ADJUST_RAISE
-                                : AudioManager.ADJUST_LOWER,
-                        mContext.getOpPackageName());
-            } else {
-                audioService.adjustStreamVolume(stream,
-                        keycode == KeyEvent.KEYCODE_VOLUME_UP
-                                ? AudioManager.ADJUST_RAISE
-                                : AudioManager.ADJUST_LOWER,
-                        0,
-                        mContext.getOpPackageName());
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "IAudioService.adjust*StreamVolume() threw RemoteException " + e);
-        } finally {
-            mBroadcastWakeLock.release();
-        }
     }
 
     final Object mScreenshotLock = new Object();
@@ -4201,16 +4162,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (telephonyManager.isOffhook()
                                 && (result & ACTION_PASS_TO_USER) == 0) {
                             // If we are in call but we decided not to pass the key to
-                            // the application, handle the volume change here.
-                            handleVolumeKey(AudioManager.STREAM_VOICE_CALL, keyCode);
+                            // the application, just pass it to the session service.
+
+                            MediaSessionLegacyHelper.getHelper(mContext)
+                                    .sendMediaButtonEvent(event, true);
                             break;
                         }
                     }
 
-                    if (isMusicActive() && (result & ACTION_PASS_TO_USER) == 0) {
-                        // If music is playing but we decided not to pass the key to the
-                        // application, handle the volume change here.
-                        handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                    if ((result & ACTION_PASS_TO_USER) == 0) {
+                        // If we aren't passing to the user and no one else
+                        // handled it send it to the session manager to figure
+                        // out.
+                        MediaSessionLegacyHelper.getHelper(mContext)
+                                .sendMediaButtonEvent(event, true);
                         break;
                     }
                 }
@@ -4459,18 +4424,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     void dispatchMediaKeyWithWakeLockToAudioService(KeyEvent event) {
         if (ActivityManagerNative.isSystemReady()) {
-            if (USE_SESSIONS) {
-                MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true);
-            } else {
-                IAudioService audioService = getAudioService();
-                if (audioService != null) {
-                    try {
-                        audioService.dispatchMediaKeyEventUnderWakelock(event);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
-                    }
-                }
-            }
+            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true);
         }
     }
 

@@ -40,9 +40,6 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     private static String TAG = "PhoneFallbackEventHandler";
     private static final boolean DEBUG = false;
 
-    // Use the new sessions APIs
-    private static final boolean USE_SESSIONS = true;
-
     Context mContext;
     View mView;
 
@@ -294,21 +291,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     }
 
     private void handleMediaKeyEvent(KeyEvent keyEvent) {
-        if (USE_SESSIONS) {
-            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
-        } else {
-            IAudioService audioService = IAudioService.Stub.asInterface(
-                    ServiceManager.checkService(Context.AUDIO_SERVICE));
-            if (audioService != null) {
-                try {
-                    audioService.dispatchMediaKeyEvent(keyEvent);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
-                }
-            } else {
-                Slog.w(TAG, "Unable to find IAudioService for media key event.");
-            }
-        }
+        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
     }
 }
 
