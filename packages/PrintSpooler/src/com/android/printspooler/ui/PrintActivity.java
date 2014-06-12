@@ -1735,10 +1735,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             } else if (spinner == mOrientationSpinner) {
                 SpinnerItem<Integer> orientationItem = mOrientationSpinnerAdapter.getItem(position);
                 PrintAttributes attributes = mPrintJob.getAttributes();
-                if (orientationItem.value == ORIENTATION_PORTRAIT) {
-                    attributes.copyFrom(attributes.asPortrait());
-                } else {
-                    attributes.copyFrom(attributes.asLandscape());
+                if (mMediaSizeSpinner.getSelectedItem() != null) {
+                    if (orientationItem.value == ORIENTATION_PORTRAIT) {
+                        attributes.copyFrom(attributes.asPortrait());
+                    } else {
+                        attributes.copyFrom(attributes.asLandscape());
+                    }
                 }
             }
 
