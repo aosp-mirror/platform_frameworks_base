@@ -111,12 +111,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    static boolean shouldBlank(int state) {
-        return state == Display.STATE_OFF;
-    }
-
-    static boolean shouldUnblank(int state) {
-        return state == Display.STATE_ON || state == Display.STATE_DOZING;
+    static int getPowerModeForState(int state) {
+        switch (state) {
+            case Display.STATE_OFF:
+                return SurfaceControl.POWER_MODE_OFF;
+            case Display.STATE_DOZING:
+                return SurfaceControl.POWER_MODE_DOZE;
+            default:
+                return SurfaceControl.POWER_MODE_NORMAL;
+        }
     }
 
     private final class LocalDisplayDevice extends DisplayDevice {
@@ -204,11 +207,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void requestDisplayStateLocked(int state) {
             if (mState != state) {
-                if (shouldBlank(state) && !shouldBlank(mState)) {
-                    SurfaceControl.blankDisplay(getDisplayTokenLocked());
-                } else if (shouldUnblank(state) && !shouldUnblank(mState)) {
-                    SurfaceControl.unblankDisplay(getDisplayTokenLocked());
-                }
+                SurfaceControl.setDisplayPowerMode(getDisplayTokenLocked(),
+                        getPowerModeForState(state));
                 mState = state;
                 updateDeviceInfoLocked();
             }

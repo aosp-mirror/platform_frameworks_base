@@ -78,8 +78,8 @@ public class SurfaceControl {
             IBinder displayToken);
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
-    private static native void nativeBlankDisplay(IBinder displayToken);
-    private static native void nativeUnblankDisplay(IBinder displayToken);
+    private static native void nativeSetDisplayPowerMode(
+            IBinder displayToken, int mode);
 
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -209,6 +209,25 @@ public class SurfaceControl {
      */
     public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
 
+    /* Display power modes * /
+
+    /**
+     * Display power mode off: used while blanking the screen.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     */
+    public static final int POWER_MODE_OFF = 0;
+
+    /**
+     * Display power mode doze: used while putting the screen into low power mode.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     */
+    public static final int POWER_MODE_DOZE = 1;
+
+    /**
+     * Display power mode normal: used while unblanking the screen.
+     * Use only with {@link SurfaceControl#setDisplayPowerMode()}.
+     */
+    public static final int POWER_MODE_NORMAL = 2;
 
 
     /**
@@ -487,18 +506,11 @@ public class SurfaceControl {
         }
     }
 
-    public static void unblankDisplay(IBinder displayToken) {
+    public static void setDisplayPowerMode(IBinder displayToken, int mode) {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
-        nativeUnblankDisplay(displayToken);
-    }
-
-    public static void blankDisplay(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        nativeBlankDisplay(displayToken);
+        nativeSetDisplayPowerMode(displayToken, mode);
     }
 
     public static SurfaceControl.PhysicalDisplayInfo[] getDisplayConfigs(IBinder displayToken) {
