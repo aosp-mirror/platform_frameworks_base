@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -88,6 +89,10 @@ public class ZenModeHelper {
     private static final Set<String> ALARM_PACKAGES = new HashSet<String>(Arrays.asList(
             "com.google.android.deskclock"
             ));
+    private static final Set<String> SYSTEM_PACKAGES = new HashSet<String>(Arrays.asList(
+            "android",
+            "com.android.systemui"
+            ));
 
     public ZenModeHelper(Context context, Handler handler) {
         mContext = context;
@@ -128,6 +133,9 @@ public class ZenModeHelper {
         if (mZenMode != Global.ZEN_MODE_OFF) {
             if (previouslySeen && !record.isIntercepted()) {
                 // notifications never transition from not intercepted to intercepted
+                return false;
+            }
+            if (isSystem(record)) {
                 return false;
             }
             if (isAlarm(record)) {
@@ -237,6 +245,11 @@ public class ZenModeHelper {
         for (Callback callback : mCallbacks) {
             callback.onZenModeChanged();
         }
+    }
+
+    private boolean isSystem(NotificationRecord record) {
+        return SYSTEM_PACKAGES.contains(record.sbn.getPackageName())
+                && Notification.CATEGORY_SYSTEM.equals(record.getNotification().category);
     }
 
     private boolean isAlarm(NotificationRecord record) {
