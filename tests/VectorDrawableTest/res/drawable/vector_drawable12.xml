@@ -23,11 +23,15 @@
         android:viewportHeight="600"
         android:viewportWidth="600" />
 
-    <group>
+    <group
+        android:name="rotationGroup"
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
         <path
             android:name="pie1"
-            android:pathData="M300,70 a230,230 0 1,0 1,0 z"
             android:fill="#00000000"
+            android:pathData="M300,70 a230,230 0 1,0 1,0 z"
             android:stroke="#FF00FF00"
             android:strokeWidth="70"
             android:trimPathEnd=".75"
@@ -36,7 +40,66 @@
         <path
             android:name="v"
             android:fill="#FF00FF00"
-            android:pathData="M300,70 l 0,-70 70,70 -70,70z"/>
+            android:pathData="M300,70 l 0,-70 70,70 -70,70z" />
+
+        <group
+            android:name="translateToCenterGroup"
+            android:rotation="0.0"
+            android:translateX="200.0"
+            android:translateY="200.0" >
+            <path
+                android:name="twoLines"
+                android:pathData="@string/twoLinePathData"
+                android:stroke="#FFFF0000"
+                android:strokeWidth="20" />
+
+            <group
+                android:name="rotationGroup2"
+                android:pivotX="0.0"
+                android:pivotY="0.0"
+                android:rotation="-45.0" >
+                <path
+                    android:name="twoLines1"
+                    android:pathData="@string/twoLinePathData"
+                    android:stroke="#FF00FF00"
+                    android:strokeWidth="20" />
+
+                <group
+                    android:name="translateGroupHalf"
+                    android:translateX="65.0"
+                    android:translateY="80.0" >
+                    <group
+                        android:name="rotationGroup3"
+                        android:pivotX="-65.0"
+                        android:pivotY="-80.0"
+                        android:rotation="-45.0" >
+                        <path
+                            android:name="twoLines2"
+                            android:fill="#FF00FF00"
+                            android:pathData="@string/twoLinePathData"
+                            android:stroke="#FF00FF00"
+                            android:strokeWidth="20" />
+
+                        <group
+                            android:name="translateGroup"
+                            android:translateX="65.0"
+                            android:translateY="80.0" >
+                            <group
+                                android:name="rotationGroupBlue"
+                                android:pivotX="-65.0"
+                                android:pivotY="-80.0"
+                                android:rotation="-45.0" >
+                                <path
+                                    android:name="twoLines3"
+                                    android:pathData="@string/twoLinePathData"
+                                    android:stroke="#FF0000FF"
+                                    android:strokeWidth="20" />
+                            </group>
+                        </group>
+                    </group>
+                </group>
+            </group>
+        </group>
     </group>
 
 </vector>

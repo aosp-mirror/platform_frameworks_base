@@ -17,6 +17,8 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
@@ -62,7 +64,17 @@ public class AnticipateOvershootInterpolator implements Interpolator, NativeInte
     }
 
     public AnticipateOvershootInterpolator(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, AnticipateOvershootInterpolator);
+        this(context.getResources(), context.getTheme(), attrs);
+    }
+
+    /** @hide */
+    public AnticipateOvershootInterpolator(Resources res, Theme theme, AttributeSet attrs) {
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, AnticipateOvershootInterpolator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, AnticipateOvershootInterpolator);
+        }
 
         mTension = a.getFloat(AnticipateOvershootInterpolator_tension, 2.0f) *
                 a.getFloat(AnticipateOvershootInterpolator_extraTension, 1.5f);

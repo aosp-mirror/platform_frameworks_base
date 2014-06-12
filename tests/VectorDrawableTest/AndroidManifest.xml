@@ -17,13 +17,13 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.test.dynamic" >
+
     <uses-sdk android:minSdkVersion="20" />
 
     <application
         android:hardwareAccelerated="true"
         android:label="vector" >
-
-         <activity
+        <activity
             android:name="VectorDrawablePerformance"
             android:label="Vector Performance" >
             <intent-filter>
@@ -31,13 +31,13 @@
 
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
-
         </activity>
         <activity
             android:name="VectorDrawableAnimation"
             android:label="VectorTestAnimation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
@@ -49,6 +49,15 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="AnimatedVectorDrawableTest"
+            android:label="AnimatedVectorDrawableTest" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
         <activity
@@ -68,7 +77,6 @@
 
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
-
         </activity>
         <activity
             android:name="VectorDrawableStaticPerf"
@@ -78,9 +86,7 @@
 
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
-
         </activity>
-
         <activity
             android:name="VectorCheckbox"
             android:label="On a Checkbox" >
@@ -89,7 +95,6 @@
 
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
-
         </activity>
         <activity
             android:name="VectorPathChecking"
@@ -99,7 +104,6 @@
 
                 <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
-
         </activity>
     </application>
 

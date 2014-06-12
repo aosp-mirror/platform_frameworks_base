@@ -27,6 +27,7 @@ import android.graphics.PathMeasure;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -40,7 +41,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Stack;
 
 /**
@@ -135,6 +135,8 @@ public class VectorDrawable extends Drawable {
 
     private final VectorDrawableState mVectorState;
 
+    private final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
+
     public VectorDrawable() {
         mVectorState = new VectorDrawableState(null);
     }
@@ -145,6 +147,10 @@ public class VectorDrawable extends Drawable {
         if (theme != null && canApplyTheme()) {
             applyTheme(theme);
         }
+    }
+
+    Object getTargetByName(String name) {
+        return mVGTargetsMap.get(name);
     }
 
     @Override
@@ -159,6 +165,11 @@ public class VectorDrawable extends Drawable {
         canvas.translate(bounds.left, bounds.top);
         mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
         canvas.restoreToCount(saveCount);
+    }
+
+    @Override
+    public int getAlpha() {
+        return mVectorState.mVPathRenderer.getRootAlpha();
     }
 
     @Override
@@ -302,6 +313,9 @@ public class VectorDrawable extends Drawable {
                     final VPath path = new VPath();
                     path.inflate(res, attrs, theme);
                     currentGroup.add(path);
+                    if (path.getPathName() != null) {
+                        mVGTargetsMap.put(path.getPathName(), path);
+                    }
                     noPathTag = false;
                 } else if (SHAPE_SIZE.equals(tagName)) {
                     pathRenderer.parseSize(res, attrs);
@@ -314,6 +328,9 @@ public class VectorDrawable extends Drawable {
                     newChildGroup.inflate(res, attrs, theme);
                     currentGroup.mChildGroupList.add(newChildGroup);
                     groupStack.push(newChildGroup);
+                    if (newChildGroup.getGroupName() != null) {
+                        mVGTargetsMap.put(newChildGroup.getGroupName(), newChildGroup);
+                    }
                     noGroupTag = false;
                 }
             } else if (eventType == XmlPullParser.END_TAG) {
@@ -363,7 +380,7 @@ public class VectorDrawable extends Drawable {
             indent += "    ";
         }
         // Print the current node
-        Log.v(LOGTAG, indent + "current group is :" +  currentGroup.getName()
+        Log.v(LOGTAG, indent + "current group is :" +  currentGroup.getGroupName()
                 + " rotation is " + currentGroup.mRotate);
         Log.v(LOGTAG, indent + "matrix is :" +  currentGroup.getLocalMatrix().toString());
         // Then print all the children
@@ -672,8 +689,7 @@ public class VectorDrawable extends Drawable {
 
     }
 
-    private static class VGroup {
-        private final HashMap<String, VPath> mVGPathMap = new HashMap<String, VPath>();
+    static class VGroup {
         private final ArrayList<VPath> mPathList = new ArrayList<VPath>();
         private final ArrayList<VGroup> mChildGroupList = new ArrayList<VGroup>();
 
@@ -694,10 +710,98 @@ public class VectorDrawable extends Drawable {
 
         private int[] mThemeAttrs;
 
-        private String mName = null;
+        private String mGroupName = null;
 
-        public String getName() {
-            return mName;
+        /* Getter and Setter */
+        public float getRotation() {
+            return mRotate;
+        }
+
+        public void setRotation(float rotation) {
+            if (rotation != mRotate) {
+                mRotate = rotation;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getPivotX() {
+            return mPivotX;
+        }
+
+        public void setPivotX(float pivotX) {
+            if (pivotX != mPivotX) {
+                mPivotX = pivotX;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getPivotY() {
+            return mPivotY;
+        }
+
+        public void setPivotY(float pivotY) {
+            if (pivotY != mPivotY) {
+                mPivotY = pivotY;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getScaleX() {
+            return mScaleX;
+        }
+
+        public void setScaleX(float scaleX) {
+            if (scaleX != mScaleX) {
+                mScaleX = scaleX;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getScaleY() {
+            return mScaleY;
+        }
+
+        public void setScaleY(float scaleY) {
+            if (scaleY != mScaleY) {
+                mScaleY = scaleY;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getTranslateX() {
+            return mTranslateX;
+        }
+
+        public void setTranslateX(float translateX) {
+            if (translateX != mTranslateX) {
+                mTranslateX = translateX;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getTranslateY() {
+            return mTranslateY;
+        }
+
+        public void setTranslateY(float translateY) {
+            if (translateY != mTranslateY) {
+                mTranslateY = translateY;
+                updateLocalMatrix();
+            }
+        }
+
+        public float getAlpha() {
+            return mGroupAlpha;
+        }
+
+        public void setAlpha(float groupAlpha) {
+            if (groupAlpha != mGroupAlpha) {
+                mGroupAlpha = groupAlpha;
+            }
+        }
+
+        public String getGroupName() {
+            return mGroupName;
         }
 
         public Matrix getLocalMatrix() {
@@ -705,8 +809,6 @@ public class VectorDrawable extends Drawable {
         }
 
         public void add(VPath path) {
-            String id = path.getID();
-            mVGPathMap.put(id, path);
             mPathList.add(path);
          }
 
@@ -732,7 +834,7 @@ public class VectorDrawable extends Drawable {
             mGroupAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mGroupAlpha);
             updateLocalMatrix();
             if (a.hasValue(R.styleable.VectorDrawableGroup_name)) {
-                mName = a.getString(R.styleable.VectorDrawableGroup_name);
+                mGroupName = a.getString(R.styleable.VectorDrawableGroup_name);
             }
             a.recycle();
         }
@@ -774,7 +876,7 @@ public class VectorDrawable extends Drawable {
             }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_name] == 0) {
-                mName = a.getString(R.styleable.VectorDrawableGroup_name);
+                mGroupName = a.getString(R.styleable.VectorDrawableGroup_name);
             }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawableGroup_alpha] == 0) {
@@ -805,19 +907,15 @@ public class VectorDrawable extends Drawable {
 
     }
 
-    private static class VPath {
-        private static final int MAX_STATES = 10;
-
+    static class VPath {
         private int[] mThemeAttrs;
 
         int mStrokeColor = 0;
         float mStrokeWidth = 0;
         float mStrokeOpacity = Float.NaN;
-
         int mFillColor = Color.BLACK;
         int mFillRule;
         float mFillOpacity = Float.NaN;
-
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
         float mTrimPathOffset = 0;
@@ -828,7 +926,7 @@ public class VectorDrawable extends Drawable {
         float mStrokeMiterlimit = 4;
 
         private VNode[] mNode = null;
-        private String mId;
+        private String mPathName;
 
         public VPath() {
             // Empty constructor.
@@ -841,8 +939,8 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public String getID() {
-            return mId;
+        public String getPathName() {
+            return mPathName;
         }
 
         private Paint.Cap getStrokeLineCap(int id, Paint.Cap defValue) {
@@ -871,6 +969,71 @@ public class VectorDrawable extends Drawable {
             }
         }
 
+        /* Setters and Getters */
+        int getStroke() {
+            return mStrokeColor;
+        }
+
+        void setStroke(int strokeColor) {
+            mStrokeColor = strokeColor;
+        }
+
+        float getStrokeWidth() {
+            return mStrokeWidth;
+        }
+
+        void setStrokeWidth(float strokeWidth) {
+            mStrokeWidth = strokeWidth;
+        }
+
+        float getStrokeOpacity() {
+            return mStrokeOpacity;
+        }
+
+        void setStrokeOpacity(float strokeOpacity) {
+            mStrokeOpacity = strokeOpacity;
+        }
+
+        int getFill() {
+            return mFillColor;
+        }
+
+        void setFill(int fillColor) {
+            mFillColor = fillColor;
+        }
+
+        float getFillOpacity() {
+            return mFillOpacity;
+        }
+
+        void setFillOpacity(float fillOpacity) {
+            mFillOpacity = fillOpacity;
+        }
+
+        float getTrimPathStart() {
+            return mTrimPathStart;
+        }
+
+        void setTrimPathStart(float trimPathStart) {
+            mTrimPathStart = trimPathStart;
+        }
+
+        float getTrimPathEnd() {
+            return mTrimPathEnd;
+        }
+
+        void setTrimPathEnd(float trimPathEnd) {
+            mTrimPathEnd = trimPathEnd;
+        }
+
+        float getTrimPathOffset() {
+            return mTrimPathOffset;
+        }
+
+        void setTrimPathOffset(float trimPathOffset) {
+            mTrimPathOffset = trimPathOffset;
+        }
+
         public void inflate(Resources r, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.VectorDrawablePath);
             final int[] themeAttrs = a.extractThemeAttrs();
@@ -883,7 +1046,7 @@ public class VectorDrawable extends Drawable {
             }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_name] == 0) {
-                mId = a.getString(R.styleable.VectorDrawablePath_name);
+                mPathName = a.getString(R.styleable.VectorDrawablePath_name);
             }
 
             if (themeAttrs == null || themeAttrs[R.styleable.VectorDrawablePath_pathData] == 0) {
@@ -966,7 +1129,7 @@ public class VectorDrawable extends Drawable {
             mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, mClip);
 
             if (a.hasValue(R.styleable.VectorDrawablePath_name)) {
-                mId = a.getString(R.styleable.VectorDrawablePath_name);
+                mPathName = a.getString(R.styleable.VectorDrawablePath_name);
             }
 
             if (a.hasValue(R.styleable.VectorDrawablePath_pathData)) {

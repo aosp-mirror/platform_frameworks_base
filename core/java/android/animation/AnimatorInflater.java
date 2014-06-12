@@ -17,6 +17,7 @@ package android.animation;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
@@ -25,6 +26,9 @@ import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.animation.AnimationUtils;
+
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -66,11 +70,26 @@ public class AnimatorInflater {
      */
     public static Animator loadAnimator(Context context, int id)
             throws NotFoundException {
+        return loadAnimator(context.getResources(), context.getTheme(), id);
+    }
+
+    /**
+     * Loads an {@link Animator} object from a resource
+     *
+     * @param resources The resources
+     * @param theme The theme
+     * @param id The resource id of the animation to load
+     * @return The animator object reference by the specified id
+     * @throws android.content.res.Resources.NotFoundException when the animation cannot be loaded
+     * @hide
+     */
+    public static Animator loadAnimator(Resources resources, Theme theme, int id)
+            throws NotFoundException {
 
         XmlResourceParser parser = null;
         try {
-            parser = context.getResources().getAnimation(id);
-            return createAnimatorFromXml(context, parser);
+            parser = resources.getAnimation(id);
+            return createAnimatorFromXml(resources, theme, parser);
         } catch (XmlPullParserException ex) {
             Resources.NotFoundException rnf =
                     new Resources.NotFoundException("Can't load animation resource ID #0x" +
@@ -150,7 +169,8 @@ public class AnimatorInflater {
 
                         }
                         if (animator == null) {
-                            animator = createAnimatorFromXml(context, parser);
+                            animator = createAnimatorFromXml(context.getResources(),
+                                    context.getTheme(), parser);
                         }
 
                         if (animator == null) {
@@ -166,103 +186,8 @@ public class AnimatorInflater {
         }
     }
 
-    private static Animator createAnimatorFromXml(Context c, XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        return createAnimatorFromXml(c, parser, Xml.asAttributeSet(parser), null, 0);
-    }
 
-    private static Animator createAnimatorFromXml(Context c, XmlPullParser parser,
-            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering)
-            throws XmlPullParserException, IOException {
-
-        Animator anim = null;
-        ArrayList<Animator> childAnims = null;
-
-        // Make sure we are on a start tag.
-        int type;
-        int depth = parser.getDepth();
-
-        while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
-               && type != XmlPullParser.END_DOCUMENT) {
-
-            if (type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            String  name = parser.getName();
-
-            if (name.equals("objectAnimator")) {
-                anim = loadObjectAnimator(c, attrs);
-            } else if (name.equals("animator")) {
-                anim = loadAnimator(c, attrs, null);
-            } else if (name.equals("set")) {
-                anim = new AnimatorSet();
-                TypedArray a = c.obtainStyledAttributes(attrs,
-                        com.android.internal.R.styleable.AnimatorSet);
-                int ordering = a.getInt(com.android.internal.R.styleable.AnimatorSet_ordering,
-                        TOGETHER);
-                createAnimatorFromXml(c, parser, attrs, (AnimatorSet) anim,  ordering);
-                a.recycle();
-            } else {
-                throw new RuntimeException("Unknown animator name: " + parser.getName());
-            }
-
-            if (parent != null) {
-                if (childAnims == null) {
-                    childAnims = new ArrayList<Animator>();
-                }
-                childAnims.add(anim);
-            }
-        }
-        if (parent != null && childAnims != null) {
-            Animator[] animsArray = new Animator[childAnims.size()];
-            int index = 0;
-            for (Animator a : childAnims) {
-                animsArray[index++] = a;
-            }
-            if (sequenceOrdering == TOGETHER) {
-                parent.playTogether(animsArray);
-            } else {
-                parent.playSequentially(animsArray);
-            }
-        }
-
-        return anim;
-
-    }
-
-    private static ObjectAnimator loadObjectAnimator(Context context, AttributeSet attrs)
-            throws NotFoundException {
-
-        ObjectAnimator anim = new ObjectAnimator();
-
-        loadAnimator(context, attrs, anim);
-
-        TypedArray a =
-                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.PropertyAnimator);
-
-        String propertyName = a.getString(com.android.internal.R.styleable.PropertyAnimator_propertyName);
-
-        anim.setPropertyName(propertyName);
-
-        a.recycle();
-
-        return anim;
-    }
-
-    /**
-     * Creates a new animation whose parameters come from the specified context and
-     * attributes set.
-     *
-     * @param context the application environment
-     * @param attrs the set of attributes holding the animation parameters
-     */
-    private static ValueAnimator loadAnimator(Context context, AttributeSet attrs, ValueAnimator anim)
-            throws NotFoundException {
-
-        TypedArray a =
-                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animator);
-
+    private static void parseAnimatorFromTypeArray(ValueAnimator anim, TypedArray a) {
         long duration = a.getInt(com.android.internal.R.styleable.Animator_duration, 300);
 
         long startDelay = a.getInt(com.android.internal.R.styleable.Animator_startOffset, 0);
@@ -378,11 +303,123 @@ public class AnimatorInflater {
         if (evaluator != null) {
             anim.setEvaluator(evaluator);
         }
+    }
+
+    private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        return createAnimatorFromXml(res, theme, parser, Xml.asAttributeSet(parser), null, 0);
+    }
+
+    private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
+            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering)
+            throws XmlPullParserException, IOException {
+
+        Animator anim = null;
+        ArrayList<Animator> childAnims = null;
+
+        // Make sure we are on a start tag.
+        int type;
+        int depth = parser.getDepth();
+
+        while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
+                && type != XmlPullParser.END_DOCUMENT) {
+
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            String name = parser.getName();
+
+            if (name.equals("objectAnimator")) {
+                anim = loadObjectAnimator(res, theme, attrs);
+            } else if (name.equals("animator")) {
+                anim = loadAnimator(res, theme, attrs, null);
+            } else if (name.equals("set")) {
+                anim = new AnimatorSet();
+                TypedArray a;
+                if (theme != null) {
+                    a = theme.obtainStyledAttributes(attrs, com.android.internal.R.styleable.AnimatorSet, 0, 0);
+                } else {
+                    a = res.obtainAttributes(attrs, com.android.internal.R.styleable.AnimatorSet);
+                }
+                int ordering = a.getInt(com.android.internal.R.styleable.AnimatorSet_ordering,
+                        TOGETHER);
+                createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering);
+                a.recycle();
+            } else {
+                throw new RuntimeException("Unknown animator name: " + parser.getName());
+            }
+
+            if (parent != null) {
+                if (childAnims == null) {
+                    childAnims = new ArrayList<Animator>();
+                }
+                childAnims.add(anim);
+            }
+        }
+        if (parent != null && childAnims != null) {
+            Animator[] animsArray = new Animator[childAnims.size()];
+            int index = 0;
+            for (Animator a : childAnims) {
+                animsArray[index++] = a;
+            }
+            if (sequenceOrdering == TOGETHER) {
+                parent.playTogether(animsArray);
+            } else {
+                parent.playSequentially(animsArray);
+            }
+        }
+
+        return anim;
+
+    }
+
+    private static ObjectAnimator loadObjectAnimator(Resources res, Theme theme, AttributeSet attrs)
+            throws NotFoundException {
+        ObjectAnimator anim = new ObjectAnimator();
+
+        loadAnimator(res, theme, attrs, anim);
+
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.PropertyAnimator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.PropertyAnimator);
+        }
+
+        String propertyName = a.getString(R.styleable.PropertyAnimator_propertyName);
+
+        anim.setPropertyName(propertyName);
+
+        a.recycle();
+
+        return anim;
+    }
+
+    /**
+     * Creates a new animation whose parameters come from the specified context
+     * and attributes set.
+     *
+     * @param res The resources
+     * @param attrs The set of attributes holding the animation parameters
+     */
+    private static ValueAnimator loadAnimator(Resources res, Theme theme,
+            AttributeSet attrs, ValueAnimator anim)
+            throws NotFoundException {
+
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.Animator, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.Animator);
+        }
+
+        parseAnimatorFromTypeArray(anim, a);
 
         final int resID =
                 a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
         if (resID > 0) {
-            anim.setInterpolator(AnimationUtils.loadInterpolator(context, resID));
+            anim.setInterpolator(AnimationUtils.loadInterpolator(res, theme, resID));
         }
         a.recycle();
 

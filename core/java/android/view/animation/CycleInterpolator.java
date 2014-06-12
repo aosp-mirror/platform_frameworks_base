@@ -17,9 +17,12 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 
+import com.android.internal.R;
 import com.android.internal.view.animation.HasNativeInterpolator;
 import com.android.internal.view.animation.NativeInterpolatorFactory;
 import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
@@ -34,20 +37,29 @@ public class CycleInterpolator implements Interpolator, NativeInterpolatorFactor
     public CycleInterpolator(float cycles) {
         mCycles = cycles;
     }
-    
+
     public CycleInterpolator(Context context, AttributeSet attrs) {
-        TypedArray a =
-            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.CycleInterpolator);
-        
-        mCycles = a.getFloat(com.android.internal.R.styleable.CycleInterpolator_cycles, 1.0f);
-        
+        this(context.getResources(), context.getTheme(), attrs);
+    }
+
+    /** @hide */
+    public CycleInterpolator(Resources resources, Theme theme, AttributeSet attrs) {
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.CycleInterpolator, 0, 0);
+        } else {
+            a = resources.obtainAttributes(attrs, R.styleable.CycleInterpolator);
+        }
+
+        mCycles = a.getFloat(R.styleable.CycleInterpolator_cycles, 1.0f);
+
         a.recycle();
     }
-    
+
     public float getInterpolation(float input) {
         return (float)(Math.sin(2 * mCycles * Math.PI * input));
     }
-    
+
     private float mCycles;
 
     /** @hide */
