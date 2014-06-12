@@ -460,7 +460,7 @@
     <string name="user_owner_label">Personal apps</string>
 
     <!-- Label for a corporate profile in the intent forwarding app. -->
-    <string name="managed_profile_label">Android for Work</string>
+    <string name="managed_profile_label">Android Work</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
