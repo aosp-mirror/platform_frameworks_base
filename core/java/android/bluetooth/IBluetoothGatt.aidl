@@ -35,8 +35,6 @@ interface IBluetoothGatt {
 
     void startScan(in int appIf, in boolean isServer);
     void startScanWithUuids(in int appIf, in boolean isServer, in ParcelUuid[] ids);
-    void startScanWithUuidsScanParam(in int appIf, in boolean isServer,
-                    in ParcelUuid[] ids, int scanWindow, int scanInterval);
     void startScanWithFilters(in int appIf, in boolean isServer,
                               in ScanSettings settings, in List<ScanFilter> filters);
     void stopScan(in int appIf, in boolean isServer);
