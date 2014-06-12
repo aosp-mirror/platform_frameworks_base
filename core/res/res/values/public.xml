@@ -2189,6 +2189,7 @@
   <public type="attr" name="searchKeyphrase" />
   <public type="attr" name="searchKeyphraseSupportedLocales" />
   <public type="attr" name="windowTransitionBackgroundFadeDuration" />
+  <public type="attr" name="overlapAnchor" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

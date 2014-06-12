@@ -3870,8 +3870,11 @@
         <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
+        <!-- The background to use for the popup window. -->
         <attr name="popupBackground" format="reference|color" />
+        <!-- The animation style to use for the popup window. -->
         <attr name="popupAnimationStyle" format="reference" />
+        <!-- Whether the popup window should overlap its anchor view. -->
         <attr name="overlapAnchor" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
