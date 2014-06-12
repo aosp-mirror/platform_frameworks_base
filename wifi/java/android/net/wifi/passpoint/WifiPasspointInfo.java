@@ -286,10 +286,11 @@ public class WifiPasspointInfo implements Parcelable {
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("BSSID: ").append(bssid);
+        sb.append("BSSID: ").append("(").append(bssid).append(")");
 
         if (venueName != null)
-            sb.append(" venueName: ").append(venueName.replace("\n", "\\n"));
+            sb.append(" venueName: ").append("(")
+              .append(venueName.replace("\n", "\\n")).append(")");
 
         if (networkAuthType != null) {
             sb.append(" networkAuthType: ");

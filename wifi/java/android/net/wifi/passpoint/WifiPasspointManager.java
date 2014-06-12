@@ -22,6 +22,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -45,58 +47,53 @@ public class WifiPasspointManager {
 
     /* Passpoint states values */
 
-    /** Passpoint is in an known state. This should only occur in boot time @hide */
+    /** Passpoint is in an unknown state. This should only occur in boot time */
     public static final int PASSPOINT_STATE_UNKNOWN = 0;
 
-    /** Passpoint is disabled. This occurs when wifi is disabled. @hide */
+    /** Passpoint is disabled. This occurs when wifi is disabled */
     public static final int PASSPOINT_STATE_DISABLED = 1;
 
-    /** Passpoint is enabled and in discovery state. @hide */
+    /** Passpoint is enabled and in discovery state */
     public static final int PASSPOINT_STATE_DISCOVERY = 2;
 
-    /** Passpoint is enabled and in access state. @hide */
+    /** Passpoint is enabled and in access state */
     public static final int PASSPOINT_STATE_ACCESS = 3;
 
-    /** Passpoint is enabled and in provisioning state. @hide */
+    /** Passpoint is enabled and in provisioning state */
     public static final int PASSPOINT_STATE_PROVISION = 4;
 
     /* Passpoint callback error codes */
 
-    /** Indicates that the operation failed due to an internal error @hide */
-    public static final int ERROR = 0;
+    /** Indicates that the operation failed due to an internal error */
+    public static final int REASON_ERROR = 0;
 
-    /** Indicates that the operation failed because wifi is disabled @hide */
-    public static final int WIFI_DISABLED = 1;
+    /** Indicates that the operation failed because wifi is disabled */
+    public static final int REASON_WIFI_DISABLED = 1;
 
-    /** Indicates that the operation failed because the framework is busy @hide */
-    public static final int BUSY = 2;
+    /** Indicates that the operation failed because the framework is busy */
+    public static final int REASON_BUSY = 2;
+
+    /** Indicates that the operation failed because parameter is invalid */
+    public static final int REASON_INVALID_PARAMETER = 3;
+
+    /** Indicates that the operation failed because the server is not trusted */
+    public static final int REASON_NOT_TRUSTED = 4;
 
     /**
      * protocol supported for Passpoint
-     * @hide
      */
     public static final String PROTOCOL_DM = "OMA-DM-ClientInitiated";
 
     /**
      * protocol supported for Passpoint
-     * @hide
      */
     public static final String PROTOCOL_SOAP = "SPP-ClientInitiated";
 
     /* Passpoint broadcasts */
 
     /**
-     * Broadcast intent action indicating that Passpoint online sign up is
-     * avaiable.
-     * @hide
-     */
-    public static final String PASSPOINT_OSU_AVAILABLE =
-            "android.net.wifi.passpoint.OSU_AVAILABLE";
-
-    /**
      * Broadcast intent action indicating that the state of Passpoint
      * connectivity has changed
-     * @hide
      */
     public static final String PASSPOINT_STATE_CHANGED_ACTION =
             "android.net.wifi.passpoint.STATE_CHANGE";
@@ -104,7 +101,6 @@ public class WifiPasspointManager {
     /**
      * Broadcast intent action indicating that the saved Passpoint credential
      * list has changed
-     * @hide
      */
     public static final String PASSPOINT_CRED_CHANGED_ACTION =
             "android.net.wifi.passpoint.CRED_CHANGE";
@@ -112,21 +108,18 @@ public class WifiPasspointManager {
     /**
      * Broadcast intent action indicating that Passpoint online sign up is
      * avaiable.
-     * @hide
      */
     public static final String PASSPOINT_OSU_AVAILABLE_ACTION =
             "android.net.wifi.passpoint.OSU_AVAILABLE";
 
     /**
      * Broadcast intent action indicating that user remediation is required
-     * @hide
      */
     public static final String PASSPOINT_USER_REM_REQ_ACTION =
             "android.net.wifi.passpoint.USER_REM_REQ";
 
     /**
      * Interface for callback invocation when framework channel is lost
-     * @hide
      */
     public interface ChannelListener {
         /**
@@ -138,14 +131,13 @@ public class WifiPasspointManager {
 
     /**
      * Interface for callback invocation on an application action
-     * @hide
      */
     public interface ActionListener {
         /** The operation succeeded */
         public void onSuccess();
 
         /**
-         * * The operation failed
+         * The operation failed
          *
          * @param reason The reason for failure could be one of
          *            {@link #WIFI_DISABLED}, {@link #ERROR} or {@link #BUSY}
@@ -155,7 +147,6 @@ public class WifiPasspointManager {
 
     /**
      * Interface for callback invocation when doing OSU or user remediation
-     * @hide
      */
     public interface OsuRemListener {
         /** The operation succeeded */
@@ -171,11 +162,11 @@ public class WifiPasspointManager {
 
         /**
          * Browser launch is requried for user interaction. When this callback
-         * is called, app should launch browser / webview to the given URL.
+         * is called, app should launch browser / webview to the given URI.
          *
-         * @param url URL for browser launch
+         * @param uri URI for browser launch
          */
-        public void onBrowserLaunch(String url);
+        public void onBrowserLaunch(String uri);
 
         /**
          * When this is called, app should dismiss the previously lanched browser.
@@ -187,7 +178,6 @@ public class WifiPasspointManager {
      * A channel that connects the application to the wifi passpoint framework.
      * Most passpoint operations require a Channel as an argument.
      * An instance of Channel is obtained by doing a call on {@link #initialize}
-     * @hide
      */
     public static class Channel {
         private final static int INVALID_LISTENER_KEY = 0;
@@ -288,7 +278,8 @@ public class WifiPasspointManager {
 
             @Override
             public void handleMessage(Message message) {
-                Object listener = getListener(message.arg2, false);
+                Object listener = null;
+
                 switch (message.what) {
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                         if (mChannelListener != null) {
@@ -300,6 +291,7 @@ public class WifiPasspointManager {
                     case REQUEST_ANQP_INFO_SUCCEEDED:
                         WifiPasspointInfo result = (WifiPasspointInfo) message.obj;
                         anqpRequestFinish(result);
+                        listener = getListener(message.arg2, false);
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -307,10 +299,36 @@ public class WifiPasspointManager {
 
                     case REQUEST_ANQP_INFO_FAILED:
                         anqpRequestFinish((ScanResult) message.obj);
+                        listener = getListener(message.arg2, false);
                         if (listener == null)
                             getListener(message.arg2, true);
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
+                        }
+                        break;
+
+                    case START_OSU_SUCCEEDED:
+                        listener = getListener(message.arg2, true);
+                        if (listener != null) {
+                            ((OsuRemListener) listener).onSuccess();
+                        }
+                        break;
+
+                    case START_OSU_FAILED:
+                        listener = getListener(message.arg2, true);
+                        if (listener != null) {
+                            ((OsuRemListener) listener).onFailure(message.arg1);
+                        }
+                        break;
+
+                    case START_OSU_BROWSER:
+                        listener = getListener(message.arg2, true);
+                        if (listener != null) {
+                            ParcelableString str = (ParcelableString) message.obj;
+                            if (str.string == null)
+                                ((OsuRemListener) listener).onBrowserDismiss();
+                            else
+                                ((OsuRemListener) listener).onBrowserLaunch(str.string);
                         }
                         break;
 
@@ -323,25 +341,46 @@ public class WifiPasspointManager {
 
     }
 
+    public static class ParcelableString implements Parcelable {
+        public String string;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeString(string);
+        }
+
+        public static final Parcelable.Creator<ParcelableString> CREATOR =
+                new Parcelable.Creator<ParcelableString>() {
+                    @Override
+                    public ParcelableString createFromParcel(Parcel in) {
+                        ParcelableString ret = new ParcelableString();
+                        ret.string = in.readString();
+                        return ret;
+                    }
+                    @Override
+                    public ParcelableString[] newArray(int size) {
+                        return new ParcelableString[size];
+                    }
+        };
+    }
+
     private static final int BASE = Protocol.BASE_WIFI_PASSPOINT_MANAGER;
 
-    /** @hide */
-    public static final int REQUEST_ANQP_INFO = BASE + 1;
-
-    /** @hide */
-    public static final int REQUEST_ANQP_INFO_FAILED = BASE + 2;
-
-    /** @hide */
-    public static final int REQUEST_ANQP_INFO_SUCCEEDED = BASE + 3;
-
-    /** @hide */
-    public static final int REQUEST_OSU_INFO = BASE + 4;
-
-    /** @hide */
-    public static final int REQUEST_OSU_INFO_FAILED = BASE + 5;
-
-    /** @hide */
-    public static final int REQUEST_OSU_INFO_SUCCEEDED = BASE + 6;
+    public static final int REQUEST_ANQP_INFO                   = BASE + 1;
+    public static final int REQUEST_ANQP_INFO_FAILED            = BASE + 2;
+    public static final int REQUEST_ANQP_INFO_SUCCEEDED         = BASE + 3;
+    public static final int REQUEST_OSU_ICON                    = BASE + 4;
+    public static final int REQUEST_OSU_ICON_FAILED             = BASE + 5;
+    public static final int REQUEST_OSU_ICON_SUCCEEDED          = BASE + 6;
+    public static final int START_OSU                           = BASE + 7;
+    public static final int START_OSU_BROWSER                   = BASE + 8;
+    public static final int START_OSU_FAILED                    = BASE + 9;
+    public static final int START_OSU_SUCCEEDED                 = BASE + 10;
 
     private Context mContext;
     IWifiPasspointManager mService;
@@ -350,7 +389,6 @@ public class WifiPasspointManager {
      * TODO: doc
      * @param context
      * @param service
-     * @hide
      */
     public WifiPasspointManager(Context context, IWifiPasspointManager service) {
         mContext = context;
@@ -368,7 +406,6 @@ public class WifiPasspointManager {
      * @return Channel instance that is necessary for performing any further
      *         passpoint operations
      *
-     * @hide
      */
     public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
         Messenger messenger = getMessenger();
@@ -387,8 +424,6 @@ public class WifiPasspointManager {
     /**
      * STOPSHIP: temp solution, should use supplicant manager instead, check
      * with b/13931972
-     *
-     * @hide
      */
     public Messenger getMessenger() {
         try {
@@ -398,7 +433,6 @@ public class WifiPasspointManager {
         }
     }
 
-    /** @hide */
     public int getPasspointState() {
         try {
             return mService.getPasspointState();
@@ -407,7 +441,6 @@ public class WifiPasspointManager {
         }
     }
 
-    /** @hide */
     public void requestAnqpInfo(Channel c, List<ScanResult> requested, int mask,
             ActionListener listener) {
         Log.d(TAG, "requestAnqpInfo start");
@@ -434,14 +467,16 @@ public class WifiPasspointManager {
         Log.d(TAG, "requestAnqpInfo end");
     }
 
-    /** @hide */
     public void requestOsuIcons(Channel c, List<WifiPasspointOsuProvider> requested,
             int resolution, ActionListener listener) {
     }
 
-    /** @hide */
     public List<WifiPasspointPolicy> requestCredentialMatch(List<ScanResult> requested) {
-        return null;
+        try {
+            return mService.requestCredentialMatch(requested);
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 
     /**
@@ -486,21 +521,21 @@ public class WifiPasspointManager {
         return true;
     }
 
-    /** @hide */
-    public void startOsu(Channel c, WifiPasspointOsuProvider selected, OsuRemListener listener) {
-
+    public void startOsu(Channel c, WifiPasspointOsuProvider osu, OsuRemListener listener) {
+        Log.d(TAG, "startOsu start");
+        checkChannel(c);
+        int key = c.putListener(listener);
+        c.mAsyncChannel.sendMessage(START_OSU, 0, key, osu);
+        Log.d(TAG, "startOsu end");
     }
 
-    /** @hide */
     public void startUserRemediation(Channel c, OsuRemListener listener) {
     }
 
-    /** @hide */
-    public void connect(WifiPasspointPolicy selected) {
+    public void connect(WifiPasspointPolicy policy) {
     }
 
     private static void checkChannel(Channel c) {
-        if (c == null)
-            throw new IllegalArgumentException("Channel needs to be initialized");
+        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
     }
 }

@@ -16,6 +16,8 @@
 
 package android.net.wifi.passpoint;
 
+import android.net.wifi.ScanResult;
+import android.net.wifi.passpoint.WifiPasspointPolicy;
 import android.os.Messenger;
 
 /**
@@ -27,5 +29,6 @@ interface IWifiPasspointManager
 {
     Messenger getMessenger();
     int getPasspointState();
+    List<WifiPasspointPolicy> requestCredentialMatch(in List<ScanResult> requested);
 }
 

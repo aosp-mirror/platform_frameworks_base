@@ -87,12 +87,12 @@ public class WifiPasspointOsuProvider implements Parcelable {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("SSID: ").append(ssid);
+        sb.append("SSID: ").append("<").append(ssid).append(">");
         if (friendlyName != null)
-            sb.append(" friendlyName: ").append(friendlyName);
+            sb.append(" friendlyName: ").append("<").append(friendlyName).append(">");
         if (serverUri != null)
-            sb.append(" serverUri: ").append(serverUri);
-        sb.append(" osuMethod: ").append(osuMethod);
+            sb.append(" serverUri: ").append("<").append(serverUri).append(">");
+        sb.append(" osuMethod: ").append("<").append(osuMethod).append(">");
         if (iconFileName != null) {
             sb.append(" icon: <").append(iconWidth).append("x")
                     .append(iconHeight).append(" ")
@@ -100,9 +100,9 @@ public class WifiPasspointOsuProvider implements Parcelable {
                     .append(iconFileName).append(">");
         }
         if (osuNai != null)
-            sb.append(" osuNai: ").append(osuNai);
+            sb.append(" osuNai: ").append("<").append(osuNai).append(">");
         if (osuService != null)
-            sb.append(" osuService: ").append(osuService);
+            sb.append(" osuService: ").append("<").append(osuService).append(">");
         return sb.toString();
     }
 
