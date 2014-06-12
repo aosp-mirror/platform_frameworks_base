@@ -2707,7 +2707,8 @@
                 android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
-                android:multiprocess="true">
+                android:multiprocess="true"
+                android:documentLaunchMode="never">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />
