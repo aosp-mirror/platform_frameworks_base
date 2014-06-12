@@ -33053,7 +33053,7 @@ package android.view {
     method public abstract boolean onTouch(android.view.View, android.view.MotionEvent);
   }
 
-  public class ViewAnimationUtils {
+  public final class ViewAnimationUtils {
     method public static final android.animation.ValueAnimator createCircularReveal(android.view.View, int, int, float, float);
   }
 
