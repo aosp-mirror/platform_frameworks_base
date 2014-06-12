@@ -587,6 +587,7 @@ public class StackScrollAlgorithm {
                     algorithmState.itemsInTopStack += algorithmState.partialInTop;
                     newSize = Math.max(mCollapsedSize, newSize);
                     if (i == 0) {
+                        algorithmState.itemsInTopStack = 1.0f;
                         childViewState.height = (int) newSize;
                     }
                     algorithmState.lastTopStackIndex = i;
@@ -617,6 +618,20 @@ public class StackScrollAlgorithm {
             if (i < algorithmState.itemsInTopStack) {
                 float stackIndex = algorithmState.itemsInTopStack - i;
                 stackIndex = Math.min(stackIndex, MAX_ITEMS_IN_TOP_STACK + 2);
+                if (i == 0 && algorithmState.itemsInTopStack < 2.0f) {
+
+                    // We only have the top item and an additional item in the top stack,
+                    // Interpolate the index from 0 to 2 while the second item is
+                    // translating in.
+                    stackIndex -= 1.0f;
+                    if (algorithmState.scrollY > mCollapsedSize) {
+
+                        // Since there is a shadow treshhold, we cant just interpolate from 0 to
+                        // 2 but we interpolate from 0.1f to 2.0f when scrolled in. The jump in
+                        // height will not be noticable since we have padding in between.
+                        stackIndex = 0.1f + stackIndex * 1.9f;
+                    }
+                }
                 childViewState.zTranslation = mZBasicHeight
                         + stackIndex * mZDistanceBetweenElements;
             } else if (i > (childCount - 1 - algorithmState.itemsInBottomStack)) {
