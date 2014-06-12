@@ -34,7 +34,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -303,6 +302,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     @Override
     public void dismissInvalidChargerWarning() {
+        dismissInvalidChargerNotification();
+        mFallbackDialogs.dismissInvalidChargerWarning();
+    }
+
+    private void dismissInvalidChargerNotification() {
+        Slog.i(TAG, "dismissing invalid charger notification");
         mInvalidCharger = false;
         updateNotification();
     }
@@ -346,10 +351,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            Log.d(TAG, "got " + action);
+            Slog.i(TAG, "Received " + action);
             if (action.equals(ACTION_SHOW_FALLBACK_WARNING)) {
+                dismissLowBatteryNotification();
                 mFallbackDialogs.showLowBatteryWarning(false /*playSound*/);
             } else if (action.equals(ACTION_SHOW_FALLBACK_CHARGER)) {
+                dismissInvalidChargerNotification();
                 mFallbackDialogs.showInvalidChargerWarning();
             } else if (action.equals(ACTION_SHOW_BATTERY_SETTINGS)) {
                 dismissLowBatteryNotification();
