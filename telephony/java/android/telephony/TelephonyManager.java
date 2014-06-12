@@ -19,15 +19,12 @@ package android.telephony;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telephony.Rlog;
+import android.telecomm.Subscription;
 import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
@@ -40,7 +37,6 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -300,6 +296,17 @@ public class TelephonyManager {
      * {@link android.content.Intent#getStringExtra(String)}.
      */
     public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
+
+    /**
+     * The lookup key used with an {@link android.content.Intent#ACTION_CALL} or
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} for a {@link Subscription}
+     * object indicating a preference when making a phone connection.
+     *
+     * <p class="note">
+     * Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_SUBSCRIPTION = "subscription";
 
     /**
      * Broadcast intent action indicating that a precise call state
@@ -3111,5 +3118,41 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
         }
         return false;
+    }
+
+    /**
+     * Return a list of Subscriptions that can be used to indicate a preference when making
+     * a phone call.
+     *
+     * @see #EXTRA_SUBSCRIPTION
+     * @return A list of {@code Subscription} objects.
+     */
+    public List<Subscription> getSubscriptions() {
+        try {
+            return getTelecommService().getSubscriptions();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getSubscriptions", e);
+        }
+        return null;
+    }
+
+    /** @hide */
+    @SystemApi
+    public void setEnabled(Subscription subscription, boolean enabled) {
+        try {
+            getTelecommService().setEnabled(subscription, enabled);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setEnabled", e);
+        }
+    }
+
+    /** @hide */
+    @SystemApi
+    public void setSystemDefault(Subscription subscription) {
+        try {
+            getTelecommService().setSystemDefault(subscription);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setSystemDefault", e);
+        }
     }
 }

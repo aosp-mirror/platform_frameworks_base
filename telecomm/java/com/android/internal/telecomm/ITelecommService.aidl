@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.telecomm.Subscription;
 import android.content.ComponentName;
 
 /**
@@ -45,4 +46,19 @@ interface ITelecommService {
      * Returns the component name of the phone application installed on the system partition.
      */
     ComponentName getSystemPhoneApplication();
+
+    /**
+     * Gets a list of Subscriptions.
+     */
+    List<Subscription> getSubscriptions();
+
+    /**
+     * Sets the enabled state of a given Subscription.
+     */
+    void setEnabled(in Subscription subscription, boolean enabled);
+
+    /**
+     * Sets a given Subscription as the system default.
+     */
+    void setSystemDefault(in Subscription subscription);
 }

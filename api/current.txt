@@ -27665,8 +27665,17 @@ package android.telecomm {
   }
 
   public class Subscription implements android.os.Parcelable {
-    ctor public Subscription();
+    ctor public Subscription(android.content.ComponentName, java.lang.String, android.net.Uri, int, int, int, boolean, boolean);
     method public int describeContents();
+    method public android.content.ComponentName getComponentName();
+    method public android.net.Uri getHandle();
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context, int);
+    method public java.lang.String getId();
+    method public java.lang.String getLabel(android.content.Context);
+    method public java.lang.String getShortDescription(android.content.Context);
+    method public boolean isEnabled();
+    method public boolean isSystemDefault();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -28129,6 +28138,7 @@ package android.telephony {
     method public java.lang.String getSimSerialNumber();
     method public int getSimState();
     method public java.lang.String getSubscriberId();
+    method public java.util.List<android.telecomm.Subscription> getSubscriptions();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
     method public boolean hasIccCard();
@@ -28153,6 +28163,7 @@ package android.telephony {
     field public static final java.lang.String EXTRA_STATE_IDLE;
     field public static final java.lang.String EXTRA_STATE_OFFHOOK;
     field public static final java.lang.String EXTRA_STATE_RINGING;
+    field public static final java.lang.String EXTRA_SUBSCRIPTION = "subscription";
     field public static final int NETWORK_TYPE_1xRTT = 7; // 0x7
     field public static final int NETWORK_TYPE_CDMA = 4; // 0x4
     field public static final int NETWORK_TYPE_EDGE = 2; // 0x2
