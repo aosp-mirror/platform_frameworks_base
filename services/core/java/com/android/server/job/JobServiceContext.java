@@ -481,11 +481,10 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          */
         private void closeAndCleanupJobH(boolean reschedule) {
             removeMessages(MSG_TIMEOUT);
+            mCompletedListener.onJobCompleted(mRunningJob, reschedule);
             synchronized (mLock) {
                 mWakeLock.release();
                 mContext.unbindService(JobServiceContext.this);
-                mCompletedListener.onJobCompleted(mRunningJob, reschedule);
-
                 mWakeLock = null;
                 mRunningJob = null;
                 mParams = null;
