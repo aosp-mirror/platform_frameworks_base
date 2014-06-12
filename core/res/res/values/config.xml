@@ -1597,5 +1597,12 @@
         <item>"1,sim,0,modem"</item>
     </string-array>
 
+    <!-- This string array can be overriden to add an additional DRM support for WebView EME. -->
+    <!-- Array of "[keySystemName],[UuidOfMediaDrm]" -->
+    <string-array name="config_keySystemUuidMapping" translatable="false">
+        <!-- Example:
+        <item>"x-com.microsoft.playready,9A04F079-9840-4286-AB92-E65BE0885F95"</item>
+        -->
+    </string-array>
 
 </resources>
