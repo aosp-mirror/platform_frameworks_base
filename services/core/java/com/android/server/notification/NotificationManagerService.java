@@ -2264,15 +2264,14 @@ public class NotificationManagerService extends SystemService {
 
     // lock on mNotificationList
     int indexOfNotificationLocked(String key) {
-        NotificationRecord r = mNotificationsByKey.get(key);
-        if (r == null) {
-            return -1;
+        final int N = mNotificationList.size();
+        for (int i = 0; i < N; i++) {
+            if (key.equals(mNotificationList.get(i).getKey())) {
+                return i;
+            }
         }
-        int index = Collections.binarySearch(mNotificationList, r, mRankingComparator);
-        // Guarantee to return -1 when not found.
-        return (index >= 0) ? index : -1;
+        return -1;
     }
-
 
     private void updateNotificationPulse() {
         synchronized (mNotificationList) {
