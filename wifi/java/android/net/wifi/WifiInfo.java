@@ -216,16 +216,6 @@ public class WifiInfo implements Parcelable {
         mLinkSpeed = -1;
         mFrequency = -1;
         txBad = 0;
-        txSuccess = 0;
-        rxSuccess = 0;
-        txRetries = 0;
-        txBadRate = 0;
-        txSuccessRate = 0;
-        rxSuccessRate = 0;
-        txRetriesRate = 0;
-        lowRssiCount = 0;
-        badRssiCount = 0;
-        score = 0;
     }
 
     /** @hide */
@@ -238,6 +228,16 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(-1);
         setFrequency(-1);
         setMeteredHint(false);
+        txSuccess = 0;
+        rxSuccess = 0;
+        txRetries = 0;
+        txBadRate = 0;
+        txSuccessRate = 0;
+        rxSuccessRate = 0;
+        txRetriesRate = 0;
+        lowRssiCount = 0;
+        badRssiCount = 0;
+        score = 0;
     }
 
     /**
