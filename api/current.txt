@@ -16163,12 +16163,13 @@ package android.net {
     field public int serverAddress;
   }
 
-  public class IpPrefix implements android.os.Parcelable {
+  public final class IpPrefix implements android.os.Parcelable {
     method public int describeContents();
     method public java.net.InetAddress getAddress();
     method public int getPrefixLength();
     method public byte[] getRawAddress();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class LinkAddress implements android.os.Parcelable {
@@ -16180,7 +16181,7 @@ package android.net {
     method public void writeToParcel(android.os.Parcel, int);
   }
 
-  public class LinkProperties implements android.os.Parcelable {
+  public final class LinkProperties implements android.os.Parcelable {
     method public int describeContents();
     method public java.util.List<java.net.InetAddress> getDnsServers();
     method public java.lang.String getDomains();
@@ -16386,7 +16387,7 @@ package android.net {
     method public void writeToParcel(android.os.Parcel, int);
   }
 
-  public class RouteInfo implements android.os.Parcelable {
+  public final class RouteInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.net.IpPrefix getDestination();
     method public java.net.InetAddress getGateway();
@@ -16394,6 +16395,7 @@ package android.net {
     method public boolean isDefaultRoute();
     method public boolean matches(java.net.InetAddress);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
