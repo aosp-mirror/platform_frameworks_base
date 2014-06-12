@@ -133,7 +133,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     // for heads up notifications
     protected HeadsUpNotificationView mHeadsUpNotificationView;
     protected int mHeadsUpNotificationDecay;
-    protected long mInterruptingNotificationTime;
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
@@ -1420,6 +1419,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && !TextUtils.equals(notification.getNotification().tickerText,
                 oldEntry.notification.getNotification().tickerText);
 
+        final boolean shouldInterrupt = shouldInterrupt(notification);
+        final boolean alertAgain = alertAgain(oldEntry);
+        boolean updateSuccessful = false;
         if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged
                 && publicUnchanged) {
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
@@ -1439,8 +1441,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     }
                 }
 
-                final boolean shouldInterrupt = shouldInterrupt(notification);
-                final boolean alertAgain = alertAgain(oldEntry);
                 if (wasHeadsUp) {
                     if (shouldInterrupt) {
                         updateHeadsUpViews(oldEntry, notification);
@@ -1462,24 +1462,52 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
                 mNotificationData.updateRanking(ranking);
                 updateNotifications();
+                updateSuccessful = true;
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
                 Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
-                removeNotificationViews(key, ranking);
-                addNotificationViews(notification, ranking);
             }
-        } else {
+        }
+        if (!updateSuccessful) {
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
-            if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
-            removeNotificationViews(key, ranking);
-            addNotificationViews(notification, ranking);
-            final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
-            final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
-            if (userChangedExpansion) {
-                boolean userExpanded = oldEntry.row.isUserExpanded();
-                newEntry.row.setUserExpanded(userExpanded);
-                newEntry.row.notifyHeightChanged();
+            if (wasHeadsUp) {
+                if (shouldInterrupt) {
+                    if (DEBUG) Log.d(TAG, "rebuilding heads up for key: " + key);
+                    Entry newEntry = new Entry(notification, null);
+                    ViewGroup holder = mHeadsUpNotificationView.getHolder();
+                    if (inflateViewsForHeadsUp(newEntry, holder)) {
+                        mHeadsUpNotificationView.showNotification(newEntry);
+                        if (alertAgain) {
+                            resetHeadsUpDecayTimer();
+                        }
+                    } else {
+                        Log.w(TAG, "Couldn't create new updated headsup for package "
+                                + contentView.getPackage());
+                    }
+                } else {
+                    if (DEBUG) Log.d(TAG, "releasing heads up for key: " + key);
+                    oldEntry.notification = notification;
+                    mHeadsUpNotificationView.releaseAndClose();
+                    return;
+                }
+            } else {
+                if (shouldInterrupt && alertAgain) {
+                    if (DEBUG) Log.d(TAG, "reposting to invoke heads up for key: " + key);
+                    removeNotificationViews(key, ranking);
+                    addNotificationInternal(notification, ranking);  //this will pop the headsup
+                } else {
+                    if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
+                    removeNotificationViews(key, ranking);
+                    addNotificationViews(notification, ranking);
+                    final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
+                    final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
+                    if (userChangedExpansion) {
+                        boolean userExpanded = oldEntry.row.isUserExpanded();
+                        newEntry.row.setUserExpanded(userExpanded);
+                        newEntry.row.notifyHeightChanged();
+                    }
+                }
             }
         }
 

@@ -78,8 +78,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     public boolean showNotification(NotificationData.Entry headsUp) {
-        // bump any previous heads up back to the shade
-        release();
+        if (mHeadsUp != null && headsUp != null && !mHeadsUp.key.equals(headsUp.key)) {
+            // bump any previous heads up back to the shade
+            release();
+        }
 
         mHeadsUp = headsUp;
         if (mContentHolder != null) {
