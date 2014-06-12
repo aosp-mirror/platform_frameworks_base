@@ -42,7 +42,7 @@ import java.util.Arrays;
  *
  * Objects of this class are immutable.
  */
-public class IpPrefix implements Parcelable {
+public final class IpPrefix implements Parcelable {
     private final byte[] address;  // network byte order
     private final int prefixLength;
 
@@ -139,7 +139,6 @@ public class IpPrefix implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public int describeContents() {
         return 0;
@@ -147,7 +146,6 @@ public class IpPrefix implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(address);
@@ -156,7 +154,6 @@ public class IpPrefix implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public static final Creator<IpPrefix> CREATOR =
             new Creator<IpPrefix>() {
