@@ -350,11 +350,12 @@ void TessellationCache::setMaxSize(uint32_t maxSize) {
 
 
 void TessellationCache::trim() {
-    uint32_t size = getSize();
-    while (size > mMaxSize) {
-        size -= mCache.peekOldestValue()->getSize();
-        mCache.removeOldest();
-    }
+    // uint32_t size = getSize();
+    // while (size > mMaxSize) {
+    //     size -= mCache.peekOldestValue()->getSize();
+    //     mCache.removeOldest();
+    // }
+    mCache.clear(); // Workaround caching tessellation corruption
     mShadowCache.clear();
 }
 
