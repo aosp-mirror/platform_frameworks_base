@@ -7,7 +7,7 @@ page.tags=studio
 
 <div style="position:relative;min-height:660px;">
 
-<h3 style="color:#f80">EARLY ACCESS PREVIEW</h3>
+<h3 style="color:#f80">BETA RELEASE</h3>
 
 <div id="tos" style="position:absolute;display:none;width:inherit;">
 <div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
@@ -183,8 +183,6 @@ This is the Android Software Development Kit License Agreement
 
 
 
-
-
 <div id="main">
 
 <div class="figure" style="width:400px;margin-top:-20px">
@@ -298,7 +296,7 @@ version by installing a patch. From within Android Studio, select
 Check for updates</strong>) to see whether an update is available.</p>
 
 <p>If an update is not available,
-follow the <a href="#Installing">installation instructions</a> below and replace your existing
+click the button above to download and replace your existing
 installation.</p>
 
 <div class="caution">
@@ -310,100 +308,6 @@ before installing the update. Then move them back once the update is complete.
 If you fail to copy these packages, then you can instead download them again through
 the Android SDK Manager.</p>
 </div>
-
-
-<h2 id="Installing">Installing Android Studio</h2>
-<p>Android Studio requires JDK 6 or greater (JRE alone is not sufficient). To check if you
-have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
-If JDK is not available or the version is lower than 6,
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">download
-JDK from here</a>.</p>
-<p>To install Android Studio:</p>
-<ol>
-<li>Download the <strong>Android Studio</strong> package from above.</li>
-<li>Install Android Studio and the SDK tools:
-  <p><b>Windows:</b></p>
-  <ol>
-    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.</li>
-    <li>Follow the setup wizard to install Android Studio.
-
-    <div class="caution"><p><strong>Known issue:</strong>
-      On some Windows systems, the launcher script does not find where Java is installed.
-      If you encounter this problem,
-      you need to set an environment variable indicating the correct location.</p>
-      <p>Select <strong>Start menu > Computer > System Properties >
-      Advanced System Properties</strong>. Then open <strong>Advanced tab > Environment
-      Variables</strong> and add a new system variable <code>JAVA_HOME</code> that points to
-      your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
-    </div>
-    </li>
-
-  </ol>
-  <p><b>Mac OS X:</b></p>
-  <ol>
-    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.</li>
-    <li>Drag and drop Android Studio into the Applications folder.
-
-    <div class="caution"><p><strong>Known issue:</strong>
-      Depending on your security settings, when you attempt to open Android Studio, you might
-      see a warning that says the package is damaged and should be moved to the trash. If this
-      happens, go to <strong>System Preferences > Security &amp; Privacy</strong> and under
-      <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
-      Then open Android Studio again.</p>
-    </div>
-    </li>
-
-  </ol>
-  <p><b>Linux:</b></p>
-  <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an appropriate
-    location for your applications.
-    <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
-    in a terminal and execute {@code studio.sh}.
-      <p>You may want to add {@code android-studio/bin/} to your PATH environmental
-      variable so that you can start Android Studio from any directory.</p>
-    </li>
-  </ol>
-</li>
-</ol>
-
-<p>That's it! You're ready to start developing apps with Android Studio.</p>
-
-<div class="note">
-<p><strong>Note:</strong> On Windows and Mac, the individual tools and
-other SDK packages are saved within the Android Studio application directory.
-To access the tools directly, use a terminal to navigate into the application and locate
-the {@code sdk/} directory. For example:</p>
-<p>Windows: <code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
-<p>Mac: <code>/Applications/Android\ Studio.app/sdk/</code></p>
-</div>
-
-<p>For a list of some known issues, see <a
-href="http://tools.android.com/knownissues">tools.android.com/knownissues</a>.</p>
-
-
-<h2 id="Start">Starting a Project</h2>
-
-<p>When you launch Android Studio for the first time, you'll see a Welcome
-screen that offers several ways to get started:</p>
-
-<ul>
-  <li>To start building a new app, click <strong>New Project</strong>.
-    <p>This starts the New Project wizard, which helps you set up a project using an app template.
-  </li>
-  <li>To import an existing Android app project, click <strong>Import Project</strong>.
-    <p class="note"><strong>Note:</strong> If you previously developed your Android project
-    with Eclipse, you should first use the new export feature in the ADT plugin to prepare
-    your project with the new Gradle build system. For more information, read
-    <a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a> and
-    <a href="{@docRoot}sdk/installing/studio-build.html">Building Your Project with
-    Gradle</a>.</p>
-  </li>
-</ul>
-
-<p>For additional help using Android Studio, read <a
-href="{@docRoot}sdk/installing/studio-tips.html">Tips and Tricks</a>.</p>
-
 
 <p>As you continue developing apps, you may need to install additional versions
 of Android for the emulator and other packages such as the <a
@@ -644,9 +548,13 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("#tos").hide();
-      $("#main").show();
-      location.hash = "Updating";
+      $("h1").text('Now downloading Android Studio...');
+      $("#tos").slideUp();
+      $("#jd-content .jd-descr").fadeOut('slow', function() {
+        setTimeout(function() {
+          window.location = "/sdk/installing/index.html?pkg=studio";
+        }, 1000);
+      });
       _gaq.push(['_trackEvent', 'SDK', 'Android Studio', $("#downloadForRealz").html()]);
       return true;
     } else {
