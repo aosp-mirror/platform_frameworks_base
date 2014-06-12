@@ -82,6 +82,7 @@
         </nameset>
         <fileset>
             <file>Roboto-Black.ttf</file>
+            <file>Roboto-BlackItalic.ttf</file>
         </fileset>
     </family>
 
