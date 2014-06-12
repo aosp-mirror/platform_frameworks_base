@@ -126,25 +126,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
-    private void cancelOther(int showing) {
-        if (mShowing != SHOWING_NOTHING && mShowing != showing) {
-            mNoMan.cancel(TAG_NOTIFICATION, ID_NOTIFICATION);  // workaround no HUN on updates
-        }
-    }
-
     private void updateNotification() {
         Slog.d(TAG, "updateNotification mWarning=" + mWarning
                 + " mSaver=" + mSaver + " mInvalidCharger=" + mInvalidCharger);
         if (mInvalidCharger) {
-            cancelOther(SHOWING_INVALID_CHARGER);
             showInvalidChargerNotification();
             mShowing = SHOWING_INVALID_CHARGER;
         } else if (mWarning) {
-            cancelOther(SHOWING_WARNING);
             showWarningNotification();
             mShowing = SHOWING_WARNING;
         } else if (mSaver) {
-            cancelOther(SHOWING_SAVER);
             showSaverNotification();
             mShowing = SHOWING_SAVER;
         } else {
