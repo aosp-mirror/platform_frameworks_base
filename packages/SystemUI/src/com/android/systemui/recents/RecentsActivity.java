@@ -140,6 +140,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // Mark recents as no longer visible
+            AlternateRecentsComponent.notifyVisibilityChanged(false);
+            // Finish without an animations
             finish();
         }
     };
@@ -148,6 +151,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     Runnable mFinishRunnable = new Runnable() {
         @Override
         public void run() {
+            // Mark recents as no longer visible
+            AlternateRecentsComponent.notifyVisibilityChanged(false);
+            // Finish with an animations
             finish();
             overridePendingTransition(R.anim.recents_to_launcher_enter,
                     R.anim.recents_to_launcher_exit);
@@ -589,6 +595,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     .withLayer()
                     .start();
         }
+
+        // Mark recents as no longer visible
+        AlternateRecentsComponent.notifyVisibilityChanged(false);
     }
 
     @Override

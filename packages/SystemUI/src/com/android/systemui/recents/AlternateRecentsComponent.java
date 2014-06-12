@@ -38,6 +38,7 @@ import android.os.UserHandle;
 import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.R;
+import com.android.systemui.RecentsComponent;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -143,6 +144,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final static String sRecentsService = "com.android.systemui.recents.RecentsService";
 
     static Bitmap sLastScreenshot;
+    static RecentsComponent.Callbacks sRecentsComponentCallbacks;
 
     Context mContext;
     SystemServicesProxy mSystemServicesProxy;
@@ -553,6 +555,18 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (sLastScreenshot != null) {
             sLastScreenshot.recycle();
             sLastScreenshot = null;
+        }
+    }
+
+    /** Sets the RecentsComponent callbacks. */
+    public void setRecentsComponentCallback(RecentsComponent.Callbacks cb) {
+        sRecentsComponentCallbacks = cb;
+    }
+
+    /** Notifies the callbacks that the visibility of Recents has changed. */
+    public static void notifyVisibilityChanged(boolean visible) {
+        if (sRecentsComponentCallbacks != null) {
+            sRecentsComponentCallbacks.onVisibilityChanged(visible);
         }
     }
 

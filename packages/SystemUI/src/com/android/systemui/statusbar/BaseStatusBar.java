@@ -89,7 +89,8 @@ import java.util.Locale;
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
-        CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener {
+        CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
+        RecentsComponent.Callbacks {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -386,6 +387,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         mRecents = getComponent(RecentsComponent.class);
+        mRecents.setCallback(this);
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -767,6 +769,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mRecents != null) {
             mRecents.cancelPreloadingRecents();
         }
+    }
+
+    @Override
+    public void onVisibilityChanged(boolean visible) {
+        // Do nothing
     }
 
     public abstract void resetHeadsUpDecayTimer();
