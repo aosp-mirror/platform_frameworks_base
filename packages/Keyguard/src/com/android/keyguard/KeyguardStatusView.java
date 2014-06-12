@@ -130,6 +130,11 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     private void updateOwnerInfo() {
         String ownerInfo = getOwnerInfo();
         if (!TextUtils.isEmpty(ownerInfo)) {
