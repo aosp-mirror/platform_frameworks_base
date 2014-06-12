@@ -15,19 +15,16 @@ of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
 
-<p>If you need to install Eclipse, you can download it from <a href=
-"http://www.eclipse.org/downloads/">eclipse.org/downloads/</a>.</p>
-
-
-<p class="note"><strong>Note:</strong> If you prefer to work in a different IDE, you do not need to
-install Eclipse or ADT. Instead, you can directly use the SDK tools to build and
-debug your application.</p>
+<p class="note"><strong>Note:</strong> You should install the ADT plugin
+only if you already have an Eclipse installation that you want to continue using. If you do not
+have Eclipse installed, you should instead <b><a href="{@docRoot}sdk/index.html">install
+the complete Android SDK</a></b>, which includes the latest IDE for Android developers.</p>
 
 
 
 <h2 id="Download">Download the ADT Plugin</h2>
 
-
+<p>To add the ADT plugin to Eclipse:</p>
 <ol>
     <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
 Software</strong>.</li>

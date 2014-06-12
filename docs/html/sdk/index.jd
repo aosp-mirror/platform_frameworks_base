@@ -206,12 +206,10 @@ This is the Android Software Development Kit License Agreement
 
 
 <div id="next-steps" style="display:none;position:absolute;width:inherit">
-  <p>Now that you've downloaded the Android SDK, you don't need to return here
-  for SDK updates. The SDK tools allow you to
-  install additional packages and future updates from the SDK Manager.</p>
-  <p>For instructions about setting up your Android SDK for the first time,
-  read <a id="next-link" href="{@docRoot}sdk/installing/bundle.html">Setting
-  Up the ADT Bundle</a>.</p>
+  <p>You're just a few steps away from building apps for Android!</p>
+  <p>In a moment, you'll be redirected to <a
+  id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the
+  Android SDK</a>.</p>
 
 </div><!-- end next-steps -->
 
