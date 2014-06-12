@@ -60,6 +60,7 @@ static struct {
     jmethodID constructor;
     jmethodID deviceId;
     jmethodID type;
+    jmethodID hdmiPortId;
     jmethodID audioType;
     jmethodID audioAddress;
     jmethodID build;
@@ -250,6 +251,10 @@ void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
             builder, gTvInputHardwareInfoBuilderClassInfo.deviceId, info.device_id);
     env->CallObjectMethod(
             builder, gTvInputHardwareInfoBuilderClassInfo.type, info.type);
+    if (info.type == TV_INPUT_TYPE_HDMI) {
+        env->CallObjectMethod(
+                builder, gTvInputHardwareInfoBuilderClassInfo.hdmiPortId, info.hdmi.port_id);
+    }
     env->CallObjectMethod(
             builder, gTvInputHardwareInfoBuilderClassInfo.audioType, info.audio_type);
     if (info.audio_type != AUDIO_DEVICE_NONE) {
@@ -431,6 +436,10 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
             gTvInputHardwareInfoBuilderClassInfo.type,
             gTvInputHardwareInfoBuilderClassInfo.clazz,
             "type", "(I)Landroid/media/tv/TvInputHardwareInfo$Builder;");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.hdmiPortId,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "hdmiPortId", "(I)Landroid/media/tv/TvInputHardwareInfo$Builder;");
     GET_METHOD_ID(
             gTvInputHardwareInfoBuilderClassInfo.audioType,
             gTvInputHardwareInfoBuilderClassInfo.clazz,
