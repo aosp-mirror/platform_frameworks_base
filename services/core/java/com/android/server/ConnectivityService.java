@@ -20,7 +20,6 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
-import static android.net.ConnectivityManager.NetworkCallbackListener;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_DUMMY;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
@@ -5401,7 +5400,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
-            Messenger messenger, int timeoutSec, IBinder binder, int legacyType) {
+            Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
         if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
                 == false) {
             enforceConnectivityInternalPermission();
@@ -5409,7 +5408,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             enforceChangePermission();
         }
 
-        if (timeoutSec < 0 || timeoutSec > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_SEC) {
+        if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
             throw new IllegalArgumentException("Bad timeout specified");
         }
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
@@ -5419,9 +5418,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 NetworkRequestInfo.REQUEST);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST, nri));
-        if (timeoutSec > 0) {
+        if (timeoutMs > 0) {
             mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_TIMEOUT_NETWORK_REQUEST,
-                    nri), timeoutSec * 1000);
+                    nri), timeoutMs);
         }
         return networkRequest;
     }
@@ -5685,7 +5684,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int a2 = 0;
         switch (notificationType) {
             case ConnectivityManager.CALLBACK_LOSING:
-                a1 = 30; // TODO - read this from NetworkMonitor
+                a1 = 30 * 1000; // TODO - read this from NetworkMonitor
                 // fall through
             case ConnectivityManager.CALLBACK_PRECHECK:
             case ConnectivityManager.CALLBACK_AVAILABLE:

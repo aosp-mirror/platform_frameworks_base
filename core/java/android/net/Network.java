@@ -29,8 +29,9 @@ import javax.net.SocketFactory;
 
 /**
  * Identifies a {@code Network}.  This is supplied to applications via
- * {@link ConnectivityManager.NetworkCallbackListener} in response to
- * {@link ConnectivityManager#requestNetwork} or {@link ConnectivityManager#listenForNetwork}.
+ * {@link ConnectivityManager.NetworkCallback} in response to the active
+ * {@link ConnectivityManager#requestNetwork} or passive
+ * {@link ConnectivityManager#registerNetworkCallback} calls.
  * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
  * through a targeted {@link SocketFactory} or process-wide via
  * {@link ConnectivityManager#setProcessDefaultNetwork}.
