@@ -2244,6 +2244,8 @@
   <public type="style" name="TextAppearance.Material.Widget.TextView.PopupMenu" />
   <public type="style" name="TextAppearance.Material.Widget.TextView.SpinnerItem" />
 
+  <public type="style" name="Theme.DeviceDefault.Settings" />
+
   <public type="style" name="Theme.Material" />
   <public type="style" name="Theme.Material.Dialog" />
   <public type="style" name="Theme.Material.Dialog.MinWidth" />
@@ -2257,6 +2259,7 @@
   <public type="style" name="Theme.Material.NoActionBar.Overscan" />
   <public type="style" name="Theme.Material.NoActionBar.TranslucentDecor" />
   <public type="style" name="Theme.Material.Panel" />
+  <public type="style" name="Theme.Material.Settings" />
   <public type="style" name="Theme.Material.Voice" />
   <public type="style" name="Theme.Material.Wallpaper" />
   <public type="style" name="Theme.Material.Wallpaper.NoTitleBar" />

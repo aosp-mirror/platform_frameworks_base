@@ -22,7 +22,7 @@ enabled.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
-    <TextView android:id="@+id/alertTitle"
+    <TextView android:id="@+id/title"
         style="?android:attr/windowTitleStyle"
         android:singleLine="true"
         android:ellipsize="end"
