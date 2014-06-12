@@ -696,6 +696,11 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected boolean hasNotifications() {
+        return mNotificationStackScroller.getNotGoneChildCount() > 0;
+    }
+
+    @Override
     protected int getMaxPanelHeight() {
         // TODO: Figure out transition for collapsing when QS is open, adjust height here.
         int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
