@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
@@ -68,6 +69,13 @@ public final class TelecommConstants {
      * @see #ACTION_CHANGE_DEFAULT_PHONE
      */
     public static final String EXTRA_PACKAGE_NAME = "package";
+
+    /**
+     * Optional extra for {@link Intent#ACTION_CALL} containing a boolean that determines whether
+     * the speakerphone should be automatically turned on for an outgoing call.
+     */
+    public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE =
+            "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
 
     /**
      * Extra for {@link #ACTION_INCOMING_CALL} containing the {@link CallServiceDescriptor} that
