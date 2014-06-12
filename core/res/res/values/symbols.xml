@@ -1509,7 +1509,7 @@
   <java-symbol type="integer" name="config_defaultNotificationLedOn" />
   <java-symbol type="integer" name="config_deskDockKeepsScreenOn" />
   <java-symbol type="integer" name="config_lightSensorWarmupTime" />
-  <java-symbol type="integer" name="config_lowBatteryCloseWarningLevel" />
+  <java-symbol type="integer" name="config_lowBatteryCloseWarningBump" />
   <java-symbol type="integer" name="config_lowBatteryWarningLevel" />
   <java-symbol type="integer" name="config_networkPolicyDefaultWarning" />
   <java-symbol type="integer" name="config_networkTransitionTimeout" />

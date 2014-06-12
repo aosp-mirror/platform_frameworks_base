@@ -409,6 +409,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Current state of the low power mode setting.
     private boolean mLowPowerModeSetting;
 
+    // Current state of whether the settings are allowing auto low power mode.
+    private boolean mAutoLowPowerModeEnabled;
+
     // True if the battery level is currently considered low.
     private boolean mBatteryLevelLow;
 
@@ -558,6 +561,9 @@ public final class PowerManagerService extends com.android.server.SystemService
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -645,8 +651,12 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
-        if (lowPowerModeEnabled != mLowPowerModeSetting) {
+        final boolean autoLowPowerModeEnabled = Settings.Global.getInt(resolver,
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 15) != 0;
+        if (lowPowerModeEnabled != mLowPowerModeSetting
+                || autoLowPowerModeEnabled != mAutoLowPowerModeEnabled) {
             mLowPowerModeSetting = lowPowerModeEnabled;
+            mAutoLowPowerModeEnabled = autoLowPowerModeEnabled;
             updateLowPowerModeLocked();
         }
 
@@ -654,7 +664,8 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     void updateLowPowerModeLocked() {
-        final boolean lowPowerModeEnabled = mLowPowerModeSetting || mBatteryLevelLow;
+        final boolean lowPowerModeEnabled = !mIsPowered
+                && (mLowPowerModeSetting || (mAutoLowPowerModeEnabled && mBatteryLevelLow));
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
@@ -1197,7 +1208,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 }
             }
 
-            if (oldLevelLow != mBatteryLevelLow) {
+            if (wasPowered != mIsPowered || oldLevelLow != mBatteryLevelLow) {
                 updateLowPowerModeLocked();
             }
         }
@@ -2168,6 +2179,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mRequestWaitForNegativeProximity=" + mRequestWaitForNegativeProximity);
             pw.println("  mSandmanScheduled=" + mSandmanScheduled);
             pw.println("  mSandmanSummoned=" + mSandmanSummoned);
+            pw.println("  mLowPowerModeEnabled=" + mLowPowerModeEnabled);
+            pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
@@ -2204,6 +2217,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
+            pw.println("  mLowPowerModeSetting=" + mLowPowerModeSetting);
+            pw.println("  mAutoLowPowerModeEnabled=" + mAutoLowPowerModeEnabled);
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
             pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
             pw.println("  mMaximumScreenDimRatioConfig=" + mMaximumScreenDimRatioConfig);
