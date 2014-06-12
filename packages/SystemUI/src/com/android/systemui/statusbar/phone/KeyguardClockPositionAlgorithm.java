@@ -88,13 +88,15 @@ public class KeyguardClockPositionAlgorithm {
 
     public void run(Result result) {
         int y = getClockY() - mKeyguardStatusHeight/2;
-        float clockAdjustment = getClockYExpansionAdjustment();
+        float topAdjustment = getTopExpansionAdjustment();
         float topPaddingAdjMultiplier = getTopPaddingAdjMultiplier();
-        result.stackScrollerPaddingAdjustment = (int) (clockAdjustment*topPaddingAdjMultiplier);
+        result.stackScrollerPaddingAdjustment = (int) (topAdjustment*topPaddingAdjMultiplier);
         int clockNotificationsPadding = getClockNotificationsPadding()
                 + result.stackScrollerPaddingAdjustment;
         int padding = y + clockNotificationsPadding;
-        y += clockAdjustment;
+        if (mNotificationCount == 0) {
+            y += topAdjustment;
+        }
         result.clockY = y;
         result.stackScrollerPadding = mKeyguardStatusHeight + padding;
         result.clockAlpha = getClockAlpha(result.stackScrollerPadding
@@ -117,8 +119,8 @@ public class KeyguardClockPositionAlgorithm {
         return (int) (getClockYFraction() * mHeight);
     }
 
-    private float getClockYExpansionAdjustment() {
-        float rubberbandFactor = getClockYExpansionRubberbandFactor();
+    private float getTopExpansionAdjustment() {
+        float rubberbandFactor = getTopExpansionRubberbandFactor();
         float value = (rubberbandFactor * (mMaxPanelHeight - mExpandedHeight));
         float t = value / mMaxPanelHeight;
         float slowedDownValue = -sSlowDownInterpolator.getInterpolation(t) * SLOW_DOWN_FACTOR
@@ -130,7 +132,7 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    private float getClockYExpansionRubberbandFactor() {
+    private float getTopExpansionRubberbandFactor() {
         float t = getNotificationAmountT();
         t = Math.min(t, 1.0f);
         t = (float) Math.pow(t, 0.3f);

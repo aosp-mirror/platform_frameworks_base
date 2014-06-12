@@ -30,6 +30,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -42,6 +44,8 @@ import java.io.PrintWriter;
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
+
+    private static final long KEYGUARD_MOVE_UP_LENGTH = 300;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -62,6 +66,9 @@ public abstract class PanelView extends FrameLayout {
     protected int mTouchSlop;
     protected boolean mHintAnimationRunning;
     private boolean mOverExpandedBeforeFling;
+    private boolean mKeyguardMovingUp;
+    private int mKeyguardMoveUpDistance;
+    private float mKeyguardFingerHeight;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -82,6 +89,8 @@ public abstract class PanelView extends FrameLayout {
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mBounceInterpolator;
+    private Interpolator mKeyguardMoveUpInterpolator;
+    private final Interpolator mLinearInterpolator = new LinearInterpolator();
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
@@ -109,6 +118,7 @@ public abstract class PanelView extends FrameLayout {
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mBounceInterpolator = new BounceInterpolator();
+        mKeyguardMoveUpInterpolator = new PathInterpolator(0.6f, 0f, 0.4f, 1f);
     }
 
     protected void loadDimens() {
@@ -120,6 +130,8 @@ public abstract class PanelView extends FrameLayout {
         mTouchSlop = configuration.getScaledTouchSlop();
         mHintDistance = res.getDimension(R.dimen.hint_move_distance);
         mEdgeTapAreaWidth = res.getDimensionPixelSize(R.dimen.edge_tap_area_width);
+        mKeyguardMoveUpDistance =
+                res.getDimensionPixelSize(R.dimen.keyguard_panel_move_up_distance);
     }
 
     private void trackMovement(MotionEvent event) {
@@ -217,8 +229,13 @@ public abstract class PanelView extends FrameLayout {
                     mJustPeeked = false;
                 }
                 if (!mJustPeeked && (!waitForTouchSlop || mTracking)) {
-                    setExpandedHeightInternal(newHeight);
-                    mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
+                    if (mStatusBar.getBarState() == StatusBarState.KEYGUARD &&
+                            !hasNotifications()) {
+                        setExpandedHeightKeyguard(newHeight);
+                    } else {
+                        setExpandedHeightInternal(newHeight);
+                        mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
+                    }
                 }
 
                 trackMovement(event);
@@ -247,10 +264,56 @@ public abstract class PanelView extends FrameLayout {
         return !waitForTouchSlop || mTracking;
     }
 
+    protected abstract boolean hasNotifications();
+
+    private void setExpandedHeightKeyguard(float newHeight) {
+        mKeyguardFingerHeight = newHeight;
+        if (newHeight < getMaxPanelHeight() && !mKeyguardMovingUp) {
+            mKeyguardMovingUp = true;
+            ValueAnimator anim = createHeightAnimator(
+                    getMaxPanelHeight() - mKeyguardMoveUpDistance);
+            anim.setDuration(KEYGUARD_MOVE_UP_LENGTH);
+            anim.setInterpolator(mKeyguardMoveUpInterpolator);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mHeightAnimator = null;
+                }
+            });
+            mHeightAnimator = anim;
+            anim.start();
+            postOnAnimationDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mKeyguardFingerHeight < mExpandedHeight && mHeightAnimator != null
+                            && mKeyguardMovingUp) {
+                        mHeightAnimator.cancel();
+                        float target = getMaxPanelHeight() - 1.75f * mKeyguardMoveUpDistance;
+                        float diff = mExpandedHeight - target;
+                        ValueAnimator anim = createHeightAnimator(target);
+                        float velocity = 2.5f * mKeyguardMoveUpDistance /
+                                (KEYGUARD_MOVE_UP_LENGTH / 1000f);
+                        anim.setInterpolator(mLinearInterpolator);
+                        anim.setDuration(Math.max(0, (long) (diff / velocity * 1000f)));
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                mHeightAnimator = null;
+                            }
+                        });
+                        mHeightAnimator = anim;
+                        anim.start();
+                    }
+                }
+            }, KEYGUARD_MOVE_UP_LENGTH / 2);
+        }
+    }
+
     protected abstract boolean hasConflictingGestures();
 
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
+        mKeyguardMovingUp = false;
         mBar.onTrackingStopped(PanelView.this, expand);
     }
 
@@ -381,6 +444,9 @@ public abstract class PanelView extends FrameLayout {
 
     protected void fling(float vel, boolean expand) {
         cancelPeek();
+        if (mHeightAnimator != null) {
+            mHeightAnimator.cancel();
+        }
         float target = expand ? getMaxPanelHeight() : 0.0f;
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             onExpandingFinished();
