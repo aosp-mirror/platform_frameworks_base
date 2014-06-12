@@ -479,8 +479,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                   mContext,
                   mLocationHandler,
                   flpHardwareProvider.getLocationHardware(),
-                  com.android.internal.R.bool.config_enableFusedLocationOverlay,
-                  com.android.internal.R.string.config_fusedLocationProviderPackageName,
+                  com.android.internal.R.bool.config_enableHardwareFlpOverlay,
+                  com.android.internal.R.string.config_hardwareFlpPackageName,
                   com.android.internal.R.array.config_locationProviderPackageNames);
           if(fusedProxy == null) {
               Slog.e(TAG, "Unable to bind FusedProxy.");
