@@ -30,7 +30,7 @@ import java.util.List;
  *
  * <p>These properties are fixed for a given CameraDevice, and can be queried
  * through the {@link CameraManager CameraManager}
- * interface in addition to through the CameraDevice interface.</p>
+ * interface with {@link CameraManager#getCameraCharacteristics}.</p>
  *
  * <p>{@link CameraCharacteristics} objects are immutable.</p>
  *
@@ -555,7 +555,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>List containing a subset of the optical image
      * stabilization (OIS) modes specified in
      * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}.</p>
-     * <p>If OIS is not implemented for a given camera device, this should
+     * <p>If OIS is not implemented for a given camera device, this will
      * contain only OFF.</p>
      *
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
@@ -612,7 +612,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Direction the camera faces relative to
-     * device screen</p>
+     * device screen.</p>
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
      */
@@ -622,7 +622,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The set of noise reduction modes supported by this camera device.</p>
      * <p>This tag lists the valid modes for {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}.</p>
-     * <p>Full-capability camera devices must laways support OFF and FAST.</p>
+     * <p>Full-capability camera devices must always support OFF and FAST.</p>
      *
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
@@ -778,18 +778,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Byte>("android.request.pipelineMaxDepth", byte.class);
 
     /**
-     * <p>Optional. Defaults to 1. Defines how many sub-components
+     * <p>Defines how many sub-components
      * a result will be composed of.</p>
      * <p>In order to combat the pipeline latency, partial results
      * may be delivered to the application layer from the camera device as
      * soon as they are available.</p>
-     * <p>A value of 1 means that partial results are not supported.</p>
+     * <p>Optional; defaults to 1. A value of 1 means that partial
+     * results are not supported, and only the final TotalCaptureResult will
+     * be produced by the camera device.</p>
      * <p>A typical use case for this might be: after requesting an
      * auto-focus (AF) lock the new AF state might be available 50%
      * of the way through the pipeline.  The camera device could
      * then immediately dispatch this state via a partial result to
-     * the framework/application layer, and the rest of the
-     * metadata via later partial results.</p>
+     * the application, and the rest of the metadata via later
+     * partial results.</p>
      */
     public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
             new Key<Integer>("android.request.partialResultCount", int.class);
@@ -806,8 +808,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to do this query each of android.request.availableRequestKeys,
      * android.request.availableResultKeys,
      * android.request.availableCharacteristicsKeys.</p>
-     * <p>XX: Maybe these should go into {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}
-     * as a table instead?</p>
      * <p>The following capabilities are guaranteed to be available on
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL devices:</p>
      * <ul>
@@ -815,14 +815,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>MANUAL_POST_PROCESSING</li>
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
-     * devices, but the app. should query this field to be sure.</p>
+     * devices, but the application should query this field to be sure.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_ZSL
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
      */
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -838,7 +835,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * at a more granular level than capabilities. This is especially
      * important for optional keys that are not listed under any capability
      * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
-     * <p>TODO: This should be used by #getAvailableCaptureRequestKeys.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
@@ -863,7 +859,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * at a more granular level than capabilities. This is especially
      * important for optional keys that are not listed under any capability
      * in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
-     * <p>TODO: This should be used by #getAvailableCaptureResultKeys.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
@@ -879,7 +874,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.request.availableResultKeys (except that it applies for
      * CameraCharacteristics instead of CaptureResult). See above for more
      * details.</p>
-     * <p>TODO: This should be used by CameraCharacteristics#getKeys.</p>
      * @hide
      */
     public static final Key<int[]> REQUEST_AVAILABLE_CHARACTERISTICS_KEYS =
@@ -927,10 +921,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.util.Size[]>("android.scaler.availableJpegSizes", android.util.Size[].class);
 
     /**
-     * <p>The maximum ratio between active area width
-     * and crop region width, or between active area height and
-     * crop region height, if the crop region height is larger
-     * than width</p>
+     * <p>The maximum ratio between both active area width
+     * and crop region width, and active area height and
+     * crop region height.</p>
+     * <p>This represents the maximum amount of zooming possible by
+     * the camera device, or equivalently, the minimum cropping
+     * window size.</p>
+     * <p>Crop regions that have a width or height that is smaller
+     * than this ratio allows will be rounded up to the minimum
+     * allowed size by the camera device.</p>
      */
     public static final Key<Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM =
             new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
@@ -1339,9 +1338,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
-     * <p>Arrangement of color filters on sensor;
+     * <p>The arrangement of color filters on sensor;
      * represents the colors in the top-left 2x2 section of
-     * the sensor, in reading order</p>
+     * the sensor, in reading order.</p>
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG
@@ -1666,10 +1665,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
 
     /**
-     * <p>Which face detection modes are available,
-     * if any.</p>
-     * <p>OFF means face detection is disabled, it must
-     * be included in the list.</p>
+     * <p>The face detection modes that are available
+     * for this camera device.</p>
+     * <p>OFF is always supported.</p>
      * <p>SIMPLE means the device supports the
      * android.statistics.faceRectangles and
      * android.statistics.faceScores outputs.</p>
@@ -1681,8 +1679,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.statistics.info.availableFaceDetectModes", int[].class);
 
     /**
-     * <p>Maximum number of simultaneously detectable
-     * faces</p>
+     * <p>The maximum number of simultaneously detectable
+     * faces.</p>
      */
     public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
             new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
@@ -1691,7 +1689,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The set of hot pixel map output modes supported by this camera device.</p>
      * <p>This tag lists valid output modes for {@link CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE android.statistics.hotPixelMapMode}.</p>
      * <p>If no hotpixel map is available for this camera device, this will contain
-     * only OFF.  If the hotpixel map is available, this should include both
+     * only OFF.  If the hotpixel map is available, this will include both
      * the ON and OFF options.</p>
      *
      * @see CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE
