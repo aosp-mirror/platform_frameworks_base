@@ -61,7 +61,7 @@ public class LightingColorFilter_Delegate extends ColorFilter_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nCreateLightingFilter(long nativeFilter, int mul, int add) {
+    /*package*/ static long nCreateLightingFilter(long nativeFilter, int mul, int add) {
         // pass
         return 0;
     }

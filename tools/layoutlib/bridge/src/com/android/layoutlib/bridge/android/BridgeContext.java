@@ -58,6 +58,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -101,6 +102,7 @@ public final class BridgeContext extends Context {
     private final ApplicationInfo mApplicationInfo;
     private final IProjectCallback mProjectCallback;
     private final WindowManager mWindowManager;
+    private final DisplayManager mDisplayManager;
 
     private Resources.Theme mTheme;
 
@@ -149,6 +151,7 @@ public final class BridgeContext extends Context {
         }
 
         mWindowManager = new WindowManagerImpl(mMetrics);
+        mDisplayManager = new DisplayManager(this);
     }
 
     /**
@@ -453,6 +456,10 @@ public final class BridgeContext extends Context {
 
         if (POWER_SERVICE.equals(service)) {
             return new PowerManager(this, new BridgePowerManager(), new Handler());
+        }
+
+        if (DISPLAY_SERVICE.equals(service)) {
+            return mDisplayManager;
         }
 
         throw new UnsupportedOperationException("Unsupported Service: " + service);

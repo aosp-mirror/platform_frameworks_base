@@ -183,6 +183,16 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static String localeForLanguageTag(String languageTag, boolean strict) {
+        return "";
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String languageTagForLocale(String locale) {
+        return "";
+    }
+
+    @LayoutlibDelegate
     /*package*/ static boolean initLocaleDataNative(String locale, LocaleData result) {
 
         // Used by Calendar.

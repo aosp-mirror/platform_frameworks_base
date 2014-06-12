@@ -344,7 +344,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_saveLayer(long nativeCanvas, RectF bounds,
+    /*package*/ static int native_saveLayer(long nativeCanvas, RectF bounds,
                                                long paint, int layerFlags) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
@@ -361,7 +361,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_saveLayer(long nativeCanvas, float l,
+    /*package*/ static int native_saveLayer(long nativeCanvas, float l,
                                                float t, float r, float b,
                                                long paint, int layerFlags) {
         // get the delegate from the native int.
@@ -380,7 +380,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_saveLayerAlpha(long nativeCanvas,
+    /*package*/ static int native_saveLayerAlpha(long nativeCanvas,
                                                     RectF bounds, int alpha,
                                                     int layerFlags) {
         // get the delegate from the native int.
@@ -393,7 +393,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long native_saveLayerAlpha(long nativeCanvas, float l,
+    /*package*/ static int native_saveLayerAlpha(long nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags) {
         // get the delegate from the native int.
