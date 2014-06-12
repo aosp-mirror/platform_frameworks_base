@@ -19,7 +19,10 @@ package android.telecomm;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +38,8 @@ public abstract class Connection {
         void onDisconnected(Connection c, int cause, String message);
         void onRequestingRingback(Connection c, boolean ringback);
         void onDestroyed(Connection c);
+        void onConferenceCapableChanged(Connection c, boolean isConferenceCapable);
+        void onParentConnectionChanged(Connection c, Connection parent);
     }
 
     public static class ListenerBase implements Listener {
@@ -65,6 +70,14 @@ public abstract class Connection {
         /** {@inheritDoc} */
         @Override
         public void onRequestingRingback(Connection c, boolean ringback) {}
+
+        /** ${inheritDoc} */
+        @Override
+        public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {}
+
+        /** ${inheritDoc} */
+        @Override
+        public void onParentConnectionChanged(Connection c, Connection parent) {}
     }
 
     public final class State {
@@ -79,10 +92,14 @@ public abstract class Connection {
     }
 
     private final Set<Listener> mListeners = new HashSet<>();
+    private final List<Connection> mChildConnections = new ArrayList<>();
+
     private int mState = State.NEW;
     private CallAudioState mCallAudioState;
     private Uri mHandle;
     private boolean mRequestingRingback = false;
+    private boolean mIsConferenceCapable = false;
+    private Connection mParentConnection;
 
     /**
      * Create a new Connection.
@@ -176,6 +193,16 @@ public abstract class Connection {
     }
 
     /**
+     * Separates this Connection from a parent connection.
+     *
+     * @hide
+     */
+    public final void separate() {
+        Log.d(this, "separate");
+        onSeparate();
+    }
+
+    /**
      * Abort this Connection. The Connection will immediately transition to
      * the {@link State#DISCONNECTED} state, and send no notifications of this
      * or any other future events.
@@ -240,6 +267,14 @@ public abstract class Connection {
     }
 
     /**
+     * TODO(santoscordon): Needs updated documentation.
+     */
+    public final void conference() {
+        Log.d(this, "conference");
+        onConference();
+    }
+
+    /**
      * Inform this Connection that the state of its audio output has been changed externally.
      *
      * @param state The new audio state.
@@ -274,11 +309,43 @@ public abstract class Connection {
     }
 
     /**
-     * @return Whether this connection is requesting that the system play a ringback tone
+     * Returns whether this connection is requesting that the system play a ringback tone
      * on its behalf.
      */
     public boolean isRequestingRingback() {
         return mRequestingRingback;
+    }
+
+    /**
+     * Returns whether this connection is a conference connection (has child connections).
+     */
+    public boolean isConferenceConnection() {
+        return !mChildConnections.isEmpty();
+    }
+
+    public void setParentConnection(Connection parentConnection) {
+        Log.d(this, "parenting %s to %s", this, parentConnection);
+        if (mParentConnection != parentConnection) {
+            if (mParentConnection != null) {
+                mParentConnection.removeChild(this);
+            }
+            mParentConnection = parentConnection;
+            if (mParentConnection != null) {
+                mParentConnection.addChild(this);
+                // do something if the child connections goes down to ZERO.
+            }
+            for (Listener l : mListeners) {
+                l.onParentConnectionChanged(this, mParentConnection);
+            }
+        }
+    }
+
+    public Connection getParentConnection() {
+        return mParentConnection;
+    }
+
+    public List<Connection> getChildConnections() {
+        return mChildConnections;
     }
 
     /**
@@ -359,6 +426,32 @@ public abstract class Connection {
     }
 
     /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    protected void setIsConferenceCapable(boolean isConferenceCapable) {
+        if (mIsConferenceCapable != isConferenceCapable) {
+            mIsConferenceCapable = isConferenceCapable;
+            for (Listener l : mListeners) {
+                l.onConferenceCapableChanged(this, mIsConferenceCapable);
+            }
+        }
+    }
+
+    /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    protected void setDestroyed() {
+        // It is possible that onDestroy() will trigger the listener to remove itself which will
+        // result in a concurrent modification exception. To counteract this we make a copy of the
+        // listeners and iterate on that.
+        for (Listener l : new ArrayList<>(mListeners)) {
+            if (mListeners.contains(l)) {
+                l.onDestroyed(this);
+            }
+        }
+    }
+
+    /**
      * Notifies this Connection and listeners that the {@link #getCallAudioState()} property
      * has a new value.
      *
@@ -418,6 +511,11 @@ public abstract class Connection {
     protected void onDisconnect() {}
 
     /**
+     * Notifies this Connection of a request to disconnect.
+     */
+    protected void onSeparate() {}
+
+    /**
      * Notifies this Connection of a request to abort.
      */
     protected void onAbort() {}
@@ -448,6 +546,28 @@ public abstract class Connection {
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     protected void onPostDialContinue(boolean proceed) {}
+
+    /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    protected void onConference() {}
+
+    /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    protected void onChildrenChanged(List<Connection> children) {}
+
+    private void addChild(Connection connection) {
+        Log.d(this, "adding child %s", connection);
+        mChildConnections.add(connection);
+        onChildrenChanged(mChildConnections);
+    }
+
+    private void removeChild(Connection connection) {
+        Log.d(this, "removing child %s", connection);
+        mChildConnections.remove(connection);
+        onChildrenChanged(mChildConnections);
+    }
 
     private void setState(int state) {
         Log.d(this, "setState: %s", stateToString(state));
