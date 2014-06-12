@@ -71,4 +71,24 @@ final class HdmiUtils {
         return cmd.getParams().length > 0
                 && cmd.getParams()[0] == HdmiConstants.SYSTEM_AUDIO_STATUS_ON;
     }
+
+    /**
+     * Assemble two bytes into single integer value.
+     *
+     * @param data to be assembled
+     * @return assembled value
+     */
+    static int twoBytesToInt(byte[] data) {
+        return ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+    }
+
+    /**
+     * Assemble three bytes into single integer value.
+     *
+     * @param data to be assembled
+     * @return assembled value
+     */
+    static int threeBytesToInt(byte[] data) {
+        return ((data[0] & 0xFF) << 16) | ((data[1] & 0xFF) << 8) | (data[2] & 0xFF);
+    }
 }

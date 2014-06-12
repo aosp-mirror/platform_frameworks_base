@@ -239,6 +239,13 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
+     * Returns version of CEC.
+     */
+    int getCecVersion() {
+        return mCecController.getVersion();
+    }
+
+    /**
      * Returns a list of {@link HdmiCecDeviceInfo}.
      *
      * @param includeLocalDevice whether to include local devices
@@ -277,7 +284,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     // See if we have an action of a given type in progress.
-    private <T extends FeatureAction> boolean hasAction(final Class<T> clazz) {
+    <T extends FeatureAction> boolean hasAction(final Class<T> clazz) {
         for (FeatureAction action : mActions) {
             if (action.getClass().equals(clazz)) {
                 return true;
@@ -335,10 +342,13 @@ public final class HdmiControlService extends SystemService {
      * @return {@code true} if ARC was in "Enabled" status
      */
     boolean setArcStatus(boolean enabled) {
+        assertRunOnServiceThread();
         synchronized (mLock) {
             boolean oldStatus = mArcStatusEnabled;
             // 1. Enable/disable ARC circuit.
-            // TODO: call set_audio_return_channel of hal interface.
+            mCecController.setAudioReturnChannel(enabled);
+
+            // TODO: notify arc mode change to AudioManager.
 
             // 2. Update arc status;
             mArcStatusEnabled = enabled;
@@ -366,30 +376,13 @@ public final class HdmiControlService extends SystemService {
 
         // Commands that queries system information replies directly instead
         // of creating FeatureAction because they are state-less.
+        // TODO: move the leftover message to local device.
         switch (message.getOpcode()) {
-            case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
-                handleGetMenuLanguage(message);
-                return true;
-            case HdmiCec.MESSAGE_GIVE_OSD_NAME:
-                handleGiveOsdName(message);
-                return true;
-            case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
-                handleGivePhysicalAddress(message);
-                return true;
-            case HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID:
-                handleGiveDeviceVendorId(message);
-                return true;
-            case HdmiCec.MESSAGE_GET_CEC_VERSION:
-                handleGetCecVersion(message);
-                return true;
             case HdmiCec.MESSAGE_INITIATE_ARC:
                 handleInitiateArc(message);
                 return true;
             case HdmiCec.MESSAGE_TERMINATE_ARC:
                 handleTerminateArc(message);
-                return true;
-            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
-                handleReportPhysicalAddress(message);
                 return true;
             case HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE:
                 handleSetSystemAudioMode(message);
@@ -398,8 +391,22 @@ public final class HdmiControlService extends SystemService {
                 handleSystemAudioModeStatus(message);
                 return true;
             default:
-                return dispatchMessageToAction(message);
+                if (dispatchMessageToAction(message)) {
+                    return true;
+                }
+                break;
         }
+
+        return dispatchMessageToLocalDevice(message);
+    }
+
+    private boolean dispatchMessageToLocalDevice(HdmiCecMessage message) {
+        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+            if (device.dispatchMessage(message)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -446,9 +453,8 @@ public final class HdmiControlService extends SystemService {
     void launchDeviceDiscovery(final int sourceAddress) {
         // At first, clear all existing device infos.
         mCecController.clearDeviceInfoList();
-        mCecMessageCache.flushAll();
+        // TODO: flush cec message cache when CEC is turned off.
 
-        // TODO: check whether TV is one of local devices.
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
                 new DeviceDiscoveryCallback() {
                     @Override
@@ -476,22 +482,6 @@ public final class HdmiControlService extends SystemService {
                 getPhysicalAddress(), deviceType, getVendorId(), displayName);
     }
 
-    private void handleReportPhysicalAddress(HdmiCecMessage message) {
-        // At first, try to consume it.
-        if (dispatchMessageToAction(message)) {
-            return;
-        }
-
-        // Ignore if [Device Discovery Action] is going on.
-        if (hasAction(DeviceDiscoveryAction.class)) {
-            Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
-                    + "because Device Discovery Action is on-going:" + message);
-            return;
-        }
-
-        // TODO: start new device action.
-    }
-
     private void handleInitiateArc(HdmiCecMessage message){
         // In case where <Initiate Arc> is started by <Request ARC Initiation>
         // need to clean up RequestArcInitiationAction.
@@ -510,64 +500,6 @@ public final class HdmiControlService extends SystemService {
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getDestination(), message.getSource(), false);
         addAndStartAction(action);
-    }
-
-    private void handleGetCecVersion(HdmiCecMessage message) {
-        int version = mCecController.getVersion();
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildCecVersion(message.getDestination(),
-                message.getSource(),
-                version);
-        sendCecCommand(cecMessage);
-    }
-
-    private void handleGiveDeviceVendorId(HdmiCecMessage message) {
-        int vendorId = mCecController.getVendorId();
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
-                message.getDestination(), vendorId);
-        sendCecCommand(cecMessage);
-    }
-
-    private void handleGivePhysicalAddress(HdmiCecMessage message) {
-        int physicalAddress = mCecController.getPhysicalAddress();
-        int deviceType = HdmiCec.getTypeFromAddress(message.getDestination());
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                message.getDestination(), physicalAddress, deviceType);
-        sendCecCommand(cecMessage);
-    }
-
-    private void handleGiveOsdName(HdmiCecMessage message) {
-        // TODO: read device name from settings or property.
-        String name = HdmiCec.getDefaultDeviceName(message.getDestination());
-        HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                message.getDestination(), message.getSource(), name);
-        if (cecMessage != null) {
-            sendCecCommand(cecMessage);
-        } else {
-            Slog.w(TAG, "Failed to build <Get Osd Name>:" + name);
-        }
-    }
-
-    private void handleGetMenuLanguage(HdmiCecMessage message) {
-        // Only 0 (TV), 14 (specific use) can answer.
-        if (message.getDestination() != HdmiCec.ADDR_TV
-                && message.getDestination() != HdmiCec.ADDR_SPECIFIC_USE) {
-            Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
-            sendCecCommand(
-                    HdmiCecMessageBuilder.buildFeatureAbortCommand(message.getDestination(),
-                            message.getSource(), HdmiCec.MESSAGE_GET_MENU_LANGUAGE,
-                            HdmiConstants.ABORT_UNRECOGNIZED_MODE));
-            return;
-        }
-
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
-                message.getDestination(),
-                Locale.getDefault().getISO3Language());
-        // TODO: figure out how to handle failed to get language code.
-        if (command != null) {
-            sendCecCommand(command);
-        } else {
-            Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
-        }
     }
 
     private boolean dispatchMessageToAction(HdmiCecMessage message) {

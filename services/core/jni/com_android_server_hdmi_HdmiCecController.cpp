@@ -57,6 +57,12 @@ public:
     int getVersion();
     // Get vendor id used for vendor command.
     uint32_t getVendorId();
+    // Set a flag and its value.
+    void setOption(int flag, int value);
+    // Set audio return channel status.
+    void setAudioReturnChannel(bool flag);
+    // Whether to hdmi device is connected to the given port.
+    bool isConnected(int port);
 
     jobject getCallbacksObj() const {
         return mCallbacksObj;
@@ -222,6 +228,20 @@ uint32_t HdmiCecController::getVendorId() {
     return vendorId;
 }
 
+void HdmiCecController::setOption(int flag, int value) {
+    mDevice->set_option(mDevice, flag, value);
+}
+
+// Set audio return channel status.
+void HdmiCecController::setAudioReturnChannel(bool enabled) {
+    mDevice->set_audio_return_channel(mDevice, enabled ? 1 : 0);
+}
+
+// Whether to hdmi device is connected to the given port.
+bool HdmiCecController::isConnected(int port) {
+    return mDevice->is_connected(mDevice, port) == HDMI_CONNECTED;
+}
+
 
 // static
 void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
@@ -326,6 +346,26 @@ static jint nativeGetVendorId(JNIEnv* env, jclass clazz, jlong controllerPtr) {
     return controller->getVendorId();
 }
 
+static void nativeSetOption(JNIEnv* env, jclass clazz, jlong controllerPtr, jint flag,
+        jint value) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->setOption(flag, value);
+}
+
+static void nativeSetAudioReturnChannel(JNIEnv* env, jclass clazz, jlong controllerPtr,
+        jboolean enabled) {
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->setAudioReturnChannel(enabled == JNI_TRUE);
+}
+
+static jboolean nativeIsConnected(JNIEnv* env, jclass clazz, jlong controllerPtr, jint port) {
+    HdmiCecController* controller =
+                reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->isConnected(port) ? JNI_TRUE : JNI_FALSE ;
+}
+
 static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit",
@@ -337,6 +377,9 @@ static JNINativeMethod sMethods[] = {
     { "nativeGetPhysicalAddress", "(J)I", (void *) nativeGetPhysicalAddress },
     { "nativeGetVersion", "(J)I", (void *) nativeGetVersion },
     { "nativeGetVendorId", "(J)I", (void *) nativeGetVendorId },
+    { "nativeSetOption", "(JII)V", (void *) nativeSetOption },
+    { "nativeSetAudioReturnChannel", "(JZ)V", (void *) nativeSetAudioReturnChannel },
+    { "nativeIsConnected", "(JI)Z", (void *) nativeIsConnected },
 };
 
 #define CLASS_PATH "com/android/server/hdmi/HdmiCecController"
