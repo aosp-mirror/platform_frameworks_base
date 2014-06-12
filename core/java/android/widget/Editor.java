@@ -96,7 +96,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
-import android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -3013,7 +3012,7 @@ public class Editor {
      * {@link InputMethodManager#isWatchingCursor(View)} returns false.
      */
     private final class CursorAnchorInfoNotifier implements TextViewPositionListener {
-        final CursorAnchorInfoBuilder mSelectionInfoBuilder = new CursorAnchorInfoBuilder();
+        final CursorAnchorInfo.Builder mSelectionInfoBuilder = new CursorAnchorInfo.Builder();
         final int[] mTmpIntOffset = new int[2];
         final Matrix mViewToScreenMatrix = new Matrix();
 
@@ -3037,7 +3036,7 @@ public class Editor {
                 return;
             }
 
-            final CursorAnchorInfoBuilder builder = mSelectionInfoBuilder;
+            final CursorAnchorInfo.Builder builder = mSelectionInfoBuilder;
             builder.reset();
 
             final int selectionStart = mTextView.getSelectionStart();
