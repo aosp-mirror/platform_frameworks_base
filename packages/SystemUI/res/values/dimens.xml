@@ -341,4 +341,7 @@
 
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
+
+    <!-- the distance the panel moves up when starting the up motion on Keyguard -->
+    <dimen name="keyguard_panel_move_up_distance">100dp</dimen>
 </resources>
