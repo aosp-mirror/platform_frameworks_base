@@ -1,0 +1,45 @@
+page.title=Promote Your App with Ads
+page.metaDescription=Promote your app through AdMob, AdWords, and YouTube to find new users at the right moment.
+page.image=/images/gp-ads-console.jpg
+page.tags="users, ads, analytics"
+
+@jd:body
+
+<p>
+  AdMob is Google's advertising platform for mobile apps. You can use it to
+  monetize your app and promote your apps, and you can link your Google
+  Analytics account to AdMob so you can analyze your apps &mdash; all in one
+  place.
+</p>
+
+<p>
+  <a href="http://www.google.com/ads/admob/">AdMob</a> is the largest mobile ad
+  app network. But you get more than just massive scale: AdMob will soon help
+  you find the right users in related apps. If your app is for bicycling, AdMob
+  can promote your app on other fitness and cycling-related apps worldwide.
+  <a href=
+  "https://apps.admob.com/admob/signup?subid=us-en-et-dac&_adc=ww-ww-et-admob2&hl=en">
+  Sign up for AdMob</a>.
+</p>
+
+<p>
+  AdMob also offers new solutions to help you achieve app-related goals such as
+  downloads, re-engagement and in-app purchases using Google search and the
+  Google Display Network. These solutions include streamlined campaign creation
+  flows and tools to track performance across the entire app lifecycle.
+  <a href="https://support.google.com/adwords/answer/2549053?hl=en">Learn
+  More</a>.
+</p>
+<div style="margin-top:2em;">
+  <img src="{@docRoot}images/gp-ads-console.jpg">
+</div>
+
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/promotewithads"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
