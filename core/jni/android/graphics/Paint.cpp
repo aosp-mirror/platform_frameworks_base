@@ -936,31 +936,61 @@ public:
         return paint->getLooper() && paint->getLooper()->asABlurShadow(NULL);
     }
 
-    static int breakText(JNIEnv* env, SkPaint& paint, const jchar text[],
+    static int breakText(JNIEnv* env, const SkPaint& paint, TypefaceImpl* typeface, const jchar text[],
                          int count, float maxWidth, jint bidiFlags, jfloatArray jmeasured,
-                         SkPaint::TextBufferDirection tbd) {
+                         SkPaint::TextBufferDirection textBufferDirection) {
+        size_t measuredCount = 0;
+        float measured = 0;
+
+#ifdef USE_MINIKIN
+        Layout layout;
+        std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
+        layout.doLayout(text, 0, count, count, css);
+        float* advances = new float[count];
+        layout.getAdvances(advances);
+        const bool forwardScan = (textBufferDirection == SkPaint::kForward_TextBufferDirection);
+        for (int i = 0; i < count; i++) {
+            // traverse in the given direction
+            int index = forwardScan ? i : (count - i - 1);
+            float width = advances[index];
+            if (measured + width > maxWidth) {
+                break;
+            }
+            // properly handle clusters when scanning backwards
+            if (forwardScan || width != 0.0f) {
+                measuredCount = i + 1;
+            }
+            measured += width;
+        }
+        delete[] advances;
+#else
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
                 text, 0, count, count, bidiFlags);
         if (value == NULL) {
             return 0;
         }
-        SkScalar     measured;
-        size_t       bytes = paint.breakText(value->getGlyphs(), value->getGlyphsCount() << 1,
-                maxWidth, &measured, tbd);
+        SkScalar m;
+        size_t bytes = paint.breakText(value->getGlyphs(), value->getGlyphsCount() << 1,
+                maxWidth, &m, textBufferDirection);
         SkASSERT((bytes & 1) == 0);
+        measuredCount = bytes >> 1;
+        measured = SkScalarToFloat(m);
+#endif
 
         if (jmeasured && env->GetArrayLength(jmeasured) > 0) {
             AutoJavaFloatArray autoMeasured(env, jmeasured, 1);
             jfloat* array = autoMeasured.ptr();
-            array[0] = SkScalarToFloat(measured);
+            array[0] = measured;
         }
-        return bytes >> 1;
+        return measuredCount;
     }
 
-    static jint breakTextC(JNIEnv* env, jobject jpaint, jcharArray jtext,
+    static jint breakTextC(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jcharArray jtext,
             jint index, jint count, jfloat maxWidth, jint bidiFlags, jfloatArray jmeasuredWidth) {
-        NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, jtext);
+
+        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
         SkPaint::TextBufferDirection tbd;
         if (count < 0) {
@@ -976,28 +1006,28 @@ public:
             return 0;
         }
 
-        SkPaint*     paint = GraphicsJNI::getNativePaint(env, jpaint);
         const jchar* text = env->GetCharArrayElements(jtext, NULL);
-        count = breakText(env, *paint, text + index, count, maxWidth,
+        count = breakText(env, *paint, typeface, text + index, count, maxWidth,
                           bidiFlags, jmeasuredWidth, tbd);
         env->ReleaseCharArrayElements(jtext, const_cast<jchar*>(text),
                                       JNI_ABORT);
         return count;
     }
 
-    static jint breakTextS(JNIEnv* env, jobject jpaint, jstring jtext,
+    static jint breakTextS(JNIEnv* env, jobject clazz, jlong paintHandle, jlong typefaceHandle, jstring jtext,
                 jboolean forwards, jfloat maxWidth, jint bidiFlags, jfloatArray jmeasuredWidth) {
-        NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, jtext);
+
+        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
         SkPaint::TextBufferDirection tbd = forwards ?
                                         SkPaint::kForward_TextBufferDirection :
                                         SkPaint::kBackward_TextBufferDirection;
 
-        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         int count = env->GetStringLength(jtext);
         const jchar* text = env->GetStringChars(jtext, NULL);
-        count = breakText(env, *paint, text, count, maxWidth, bidiFlags, jmeasuredWidth, tbd);
+        count = breakText(env, *paint, typeface, text, count, maxWidth, bidiFlags, jmeasuredWidth, tbd);
         env->ReleaseStringChars(jtext, text);
         return count;
     }
@@ -1108,8 +1138,8 @@ static JNINativeMethod methods[] = {
     {"native_measureText","([CIII)F", (void*) SkPaintGlue::measureText_CIII},
     {"native_measureText","(Ljava/lang/String;I)F", (void*) SkPaintGlue::measureText_StringI},
     {"native_measureText","(Ljava/lang/String;III)F", (void*) SkPaintGlue::measureText_StringIII},
-    {"native_breakText","([CIIFI[F)I", (void*) SkPaintGlue::breakTextC},
-    {"native_breakText","(Ljava/lang/String;ZFI[F)I", (void*) SkPaintGlue::breakTextS},
+    {"native_breakText","(JJ[CIIFI[F)I", (void*) SkPaintGlue::breakTextC},
+    {"native_breakText","(JJLjava/lang/String;ZFI[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(JJ[CIII[F)I", (void*) SkPaintGlue::getTextWidths___CIII_F},
     {"native_getTextWidths","(JJLjava/lang/String;III[F)I", (void*) SkPaintGlue::getTextWidths__StringIII_F},
     {"native_getTextRunAdvances","(JJ[CIIIIZ[FI)F",

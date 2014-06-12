@@ -1532,20 +1532,22 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_breakText(text, index, count, maxWidth, mBidiFlags, measuredWidth);
+            return native_breakText(mNativePaint, mNativeTypeface, text, index, count, maxWidth,
+                    mBidiFlags, measuredWidth);
         }
 
         final float oldSize = getTextSize();
-        setTextSize(oldSize*mCompatScaling);
-        int res = native_breakText(text, index, count, maxWidth*mCompatScaling, mBidiFlags,
-                measuredWidth);
+        setTextSize(oldSize * mCompatScaling);
+        int res = native_breakText(mNativePaint, mNativeTypeface, text, index, count,
+                maxWidth * mCompatScaling, mBidiFlags, measuredWidth);
         setTextSize(oldSize);
         if (measuredWidth != null) measuredWidth[0] *= mInvCompatScaling;
         return res;
     }
 
-    private native int native_breakText(char[] text, int index, int count,
-                                        float maxWidth, int bidiFlags, float[] measuredWidth);
+    private static native int native_breakText(long native_object, long native_typeface,
+                                               char[] text, int index, int count,
+                                               float maxWidth, int bidiFlags, float[] measuredWidth);
 
     /**
      * Measure the text, stopping early if the measured width exceeds maxWidth.
@@ -1622,19 +1624,21 @@ public class Paint {
             return 0;
         }
         if (!mHasCompatScaling) {
-            return native_breakText(text, measureForwards, maxWidth, mBidiFlags, measuredWidth);
+            return native_breakText(mNativePaint, mNativeTypeface, text, measureForwards,
+                    maxWidth, mBidiFlags, measuredWidth);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
-        int res = native_breakText(text, measureForwards, maxWidth*mCompatScaling, mBidiFlags,
-                measuredWidth);
+        int res = native_breakText(mNativePaint, mNativeTypeface, text, measureForwards,
+                maxWidth*mCompatScaling, mBidiFlags, measuredWidth);
         setTextSize(oldSize);
         if (measuredWidth != null) measuredWidth[0] *= mInvCompatScaling;
         return res;
     }
 
-    private native int native_breakText(String text, boolean measureForwards,
+    private static native int native_breakText(long native_object, long native_typeface,
+                                        String text, boolean measureForwards,
                                         float maxWidth, int bidiFlags, float[] measuredWidth);
 
     /**
