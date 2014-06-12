@@ -18,6 +18,7 @@
 
 #include <utils/Timers.h>
 
+#include "DamageAccumulator.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -25,7 +26,6 @@ namespace uirenderer {
 
 class BaseRenderNodeAnimator;
 class AnimationListener;
-class DamageAccumulator;
 
 class AnimationHook {
 public:
@@ -62,7 +62,7 @@ public:
         , frameTimeMs(0)
         , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
-        , damageAccumulator(0)
+        , damageAccumulator(NullDamageAccumulator::instance())
     {}
 
     const TraversalMode mode;
@@ -71,7 +71,8 @@ public:
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;
-    DamageAccumulator* damageAccumulator;
+    // Must not be null
+    IDamageAccumulator* damageAccumulator;
 
     struct Out {
         Out()

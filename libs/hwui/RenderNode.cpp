@@ -15,6 +15,7 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_VIEW
+#define LOG_TAG "RenderNode"
 
 #include "RenderNode.h"
 
@@ -111,26 +112,20 @@ void RenderNode::prepareTree(TreeInfo& info) {
     prepareTreeImpl(info);
 }
 
-static inline void pushNode(RenderNode* self, TreeInfo& info) {
-    if (info.damageAccumulator) {
-        info.damageAccumulator->pushNode(self);
-    }
-}
-
-static inline void popNode(TreeInfo& info) {
-    if (info.damageAccumulator) {
-        info.damageAccumulator->popNode();
-    }
-}
-
 void RenderNode::damageSelf(TreeInfo& info) {
-    if (info.damageAccumulator && isRenderable() && properties().getAlpha() > 0) {
-        info.damageAccumulator->dirty(0, 0, properties().getWidth(), properties().getHeight());
+    if (isRenderable() && properties().getAlpha() > 0) {
+        if (properties().getClipToBounds()) {
+            info.damageAccumulator->dirty(0, 0, properties().getWidth(), properties().getHeight());
+        } else {
+            // Hope this is big enough?
+            // TODO: Get this from the display list ops or something
+            info.damageAccumulator->dirty(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+        }
     }
 }
 
 void RenderNode::prepareTreeImpl(TreeInfo& info) {
-    pushNode(this, info);
+    info.damageAccumulator->pushTransform(this);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingChanges(info);
         evaluateAnimations(info);
@@ -140,7 +135,7 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
         evaluateAnimations(info);
     }
     prepareSubTree(info, mDisplayListData);
-    popNode(info);
+    info.damageAccumulator->popTransform();
 }
 
 class PushAnimatorsFunctor {
@@ -173,14 +168,14 @@ void RenderNode::pushStagingChanges(TreeInfo& info) {
     if (mDirtyPropertyFields) {
         mDirtyPropertyFields = 0;
         damageSelf(info);
-        popNode(info);
+        info.damageAccumulator->popTransform();
         mProperties = mStagingProperties;
-        pushNode(this, info);
         // We could try to be clever and only re-damage if the matrix changed.
         // However, we don't need to worry about that. The cost of over-damaging
         // here is only going to be a single additional map rect of this node
         // plus a rect join(). The parent's transform (and up) will only be
         // performed once.
+        info.damageAccumulator->pushTransform(this);
         damageSelf(info);
     }
     if (mNeedsDisplayListDataSync) {
@@ -217,7 +212,7 @@ void RenderNode::evaluateAnimations(TreeInfo& info) {
     // property push and just damage self before and after animators are run
 
     damageSelf(info);
-    popNode(info);
+    info.damageAccumulator->popTransform();
 
     AnimateFunctor functor(this, info);
     std::vector< sp<BaseRenderNodeAnimator> >::iterator newEnd;
@@ -226,7 +221,7 @@ void RenderNode::evaluateAnimations(TreeInfo& info) {
     mProperties.updateMatrix();
     info.out.hasAnimations |= mAnimators.size();
 
-    pushNode(this, info);
+    info.damageAccumulator->pushTransform(this);
     damageSelf(info);
 }
 
@@ -243,8 +238,11 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
             info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
         }
         for (size_t i = 0; i < subtree->children().size(); i++) {
-            RenderNode* childNode = subtree->children()[i]->mDisplayList;
+            DrawDisplayListOp* op = subtree->children()[i];
+            RenderNode* childNode = op->mDisplayList;
+            info.damageAccumulator->pushTransform(&op->mTransformFromParent);
             childNode->prepareTreeImpl(info);
+            info.damageAccumulator->popTransform();
         }
     }
 }

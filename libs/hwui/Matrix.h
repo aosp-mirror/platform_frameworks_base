@@ -147,6 +147,7 @@ public:
             data[kTranslateX] += x;
             data[kTranslateY] += y;
             data[kTranslateZ] += z;
+            mType |= kTypeUnknown;
         } else {
             // Doing a translation will only affect the translate bit of the type
             // Save the type

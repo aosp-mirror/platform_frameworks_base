@@ -366,22 +366,6 @@ public:
         return false;
     }
 
-    bool setScrollX(int scrollX) {
-        return RP_SET(mPrimitiveFields.mScrollX, scrollX);
-    }
-
-    bool setScrollY(int scrollY) {
-        return RP_SET(mPrimitiveFields.mScrollY, scrollY);
-    }
-
-    int getScrollX() const {
-        return mPrimitiveFields.mScrollX;
-    }
-
-    int getScrollY() const {
-        return mPrimitiveFields.mScrollY;
-    }
-
     bool setCaching(bool caching) {
         return RP_SET(mPrimitiveFields.mCaching, caching);
     }
@@ -481,7 +465,6 @@ private:
         float mPivotX, mPivotY;
         int mLeft, mTop, mRight, mBottom;
         int mWidth, mHeight;
-        int mScrollX, mScrollY;
         bool mPivotExplicitlySet;
         bool mMatrixOrPivotDirty;
         bool mCaching;

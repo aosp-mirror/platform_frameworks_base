@@ -275,13 +275,6 @@ static jboolean android_view_RenderNode_offsetTopAndBottom(JNIEnv* env,
     return SET_AND_DIRTY(offsetTopBottom, offset, RenderNode::Y);
 }
 
-static void android_view_RenderNode_setScrollPosition(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, jint scrollX, jint scrollY) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    SET_AND_DIRTY(setScrollX, scrollX, RenderNode::GENERIC);
-    SET_AND_DIRTY(setScrollY, scrollY, RenderNode::GENERIC);
-}
-
 // ----------------------------------------------------------------------------
 // RenderProperties - getters
 // ----------------------------------------------------------------------------
@@ -517,7 +510,6 @@ static JNINativeMethod gMethods[] = {
     { "nSetLeftTopRightBottom","(JIIII)Z", (void*) android_view_RenderNode_setLeftTopRightBottom },
     { "nOffsetLeftAndRight",   "(JF)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
     { "nOffsetTopAndBottom",   "(JF)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
-    { "nSetScrollPosition",    "(JII)V", (void*) android_view_RenderNode_setScrollPosition },
 
     { "nHasOverlappingRendering", "(J)Z",  (void*) android_view_RenderNode_hasOverlappingRendering },
     { "nGetClipToOutline",        "(J)Z",  (void*) android_view_RenderNode_getClipToOutline },

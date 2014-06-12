@@ -39,6 +39,7 @@
 
 #include <androidfw/ResourceTypes.h>
 
+#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "Matrix.h"
 #include "DeferredDisplayList.h"
@@ -123,6 +124,10 @@ public:
 
     bool isRenderable() const {
         return mDisplayListData && mDisplayListData->hasDrawOps;
+    }
+
+    bool hasProjectionReceiver() const {
+        return mDisplayListData && mDisplayListData->projectionReceiveIndex >= 0;
     }
 
     const char* getName() const {

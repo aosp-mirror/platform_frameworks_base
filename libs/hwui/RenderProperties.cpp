@@ -44,7 +44,6 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
         , mPivotX(0), mPivotY(0)
         , mLeft(0), mTop(0), mRight(0), mBottom(0)
         , mWidth(0), mHeight(0)
-        , mScrollX(0), mScrollY(0)
         , mPivotExplicitlySet(false)
         , mMatrixOrPivotDirty(false)
         , mCaching(false) {

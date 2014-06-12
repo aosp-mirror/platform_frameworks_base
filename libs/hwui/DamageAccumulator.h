@@ -16,6 +16,7 @@
 #ifndef DAMAGEACCUMULATOR_H
 #define DAMAGEACCUMULATOR_H
 
+#include <cutils/compiler.h>
 #include <utils/LinearAllocator.h>
 
 #include <SkMatrix.h>
@@ -28,8 +29,19 @@ namespace uirenderer {
 
 struct DirtyStack;
 class RenderNode;
+class Matrix4;
 
-class DamageAccumulator {
+class IDamageAccumulator {
+public:
+    virtual void pushTransform(const RenderNode* transform) = 0;
+    virtual void pushTransform(const Matrix4* transform) = 0;
+    virtual void popTransform() = 0;
+    virtual void dirty(float left, float top, float right, float bottom) = 0;
+protected:
+    virtual ~IDamageAccumulator() {}
+};
+
+class DamageAccumulator : public IDamageAccumulator {
     PREVENT_COPY_AND_ASSIGN(DamageAccumulator);
 public:
     DamageAccumulator();
@@ -37,18 +49,42 @@ public:
 
     // Push a transform node onto the stack. This should be called prior
     // to any dirty() calls. Subsequent calls to dirty()
-    // will be affected by the node's transform when popNode() is called.
-    void pushNode(const RenderNode* node);
+    // will be affected by the transform when popTransform() is called.
+    virtual void pushTransform(const RenderNode* transform);
+    virtual void pushTransform(const Matrix4* transform);
+
     // Pops a transform node from the stack, propagating the dirty rect
-    // up to the parent node.
-    void popNode();
-    void dirty(float left, float top, float right, float bottom);
+    // up to the parent node. Returns the IDamageTransform that was just applied
+    virtual void popTransform();
+
+    virtual void dirty(float left, float top, float right, float bottom);
 
     void finish(SkRect* totalDirty);
 
 private:
+    void pushCommon();
+    void applyMatrix4Transform(DirtyStack* frame);
+    void applyRenderNodeTransform(DirtyStack* frame);
+
     LinearAllocator mAllocator;
     DirtyStack* mHead;
+};
+
+class NullDamageAccumulator : public IDamageAccumulator {
+    PREVENT_COPY_AND_ASSIGN(NullDamageAccumulator);
+public:
+    virtual void pushTransform(const RenderNode* transform) { }
+    virtual void pushTransform(const Matrix4* transform) { }
+    virtual void popTransform() { }
+    virtual void dirty(float left, float top, float right, float bottom) { }
+
+    ANDROID_API static NullDamageAccumulator* instance();
+
+private:
+    NullDamageAccumulator() {}
+    ~NullDamageAccumulator() {}
+
+    static NullDamageAccumulator sInstance;
 };
 
 } /* namespace uirenderer */

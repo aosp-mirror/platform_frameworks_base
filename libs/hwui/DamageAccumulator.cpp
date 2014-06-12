@@ -26,8 +26,23 @@
 namespace android {
 namespace uirenderer {
 
+NullDamageAccumulator NullDamageAccumulator::sInstance;
+
+NullDamageAccumulator* NullDamageAccumulator::instance() {
+    return &sInstance;
+}
+
+enum TransformType {
+    TransformRenderNode,
+    TransformMatrix4,
+};
+
 struct DirtyStack {
-    const RenderNode* node;
+    TransformType type;
+    union {
+        const RenderNode* renderNode;
+        const Matrix4* matrix4;
+    };
     // When this frame is pop'd, this rect is mapped through the above transform
     // and applied to the previous (aka parent) frame
     SkRect pendingDirty;
@@ -42,7 +57,7 @@ DamageAccumulator::DamageAccumulator() {
     mHead->prev = mHead;
 }
 
-void DamageAccumulator::pushNode(const RenderNode* node) {
+void DamageAccumulator::pushCommon() {
     if (!mHead->next) {
         DirtyStack* nextFrame = (DirtyStack*) mAllocator.alloc(sizeof(DirtyStack));
         nextFrame->next = 0;
@@ -50,42 +65,120 @@ void DamageAccumulator::pushNode(const RenderNode* node) {
         mHead->next = nextFrame;
     }
     mHead = mHead->next;
-    mHead->node = node;
     mHead->pendingDirty.setEmpty();
 }
 
-void DamageAccumulator::popNode() {
+void DamageAccumulator::pushTransform(const RenderNode* transform) {
+    pushCommon();
+    mHead->type = TransformRenderNode;
+    mHead->renderNode = transform;
+}
+
+void DamageAccumulator::pushTransform(const Matrix4* transform) {
+    pushCommon();
+    mHead->type = TransformMatrix4;
+    mHead->matrix4 = transform;
+}
+
+void DamageAccumulator::popTransform() {
     LOG_ALWAYS_FATAL_IF(mHead->prev == mHead, "Cannot pop the root frame!");
     DirtyStack* dirtyFrame = mHead;
     mHead = mHead->prev;
-    if (!dirtyFrame->pendingDirty.isEmpty()) {
-        SkRect mappedDirty;
-        const RenderProperties& props = dirtyFrame->node->properties();
-        const SkMatrix* transform = props.getTransformMatrix();
-        if (transform && !transform->isIdentity()) {
-            transform->mapRect(&mappedDirty, dirtyFrame->pendingDirty);
-        } else {
-            mappedDirty = dirtyFrame->pendingDirty;
+    if (dirtyFrame->type == TransformRenderNode) {
+        applyRenderNodeTransform(dirtyFrame);
+    } else {
+        applyMatrix4Transform(dirtyFrame);
+    }
+}
+
+static inline void mapRect(const Matrix4* matrix, const SkRect& in, SkRect* out) {
+    if (in.isEmpty()) return;
+    Rect temp(in);
+    matrix->mapRect(temp);
+    out->join(RECT_ARGS(temp));
+}
+
+void DamageAccumulator::applyMatrix4Transform(DirtyStack* frame) {
+    mapRect(frame->matrix4, frame->pendingDirty, &mHead->pendingDirty);
+}
+
+static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRect* out) {
+    if (in.isEmpty()) return;
+    const SkMatrix* transform = props.getTransformMatrix();
+    SkRect temp(in);
+    if (transform && !transform->isIdentity()) {
+        transform->mapRect(&temp);
+    }
+    temp.offset(props.getLeft(), props.getTop());
+    out->join(temp);
+}
+
+static DirtyStack* findParentRenderNode(DirtyStack* frame) {
+    while (frame->prev != frame) {
+        frame = frame->prev;
+        if (frame->type == TransformRenderNode) {
+            return frame;
         }
-        if (CC_LIKELY(mHead->node)) {
-            const RenderProperties& parentProps = mHead->node->properties();
-            mappedDirty.offset(props.getLeft() - parentProps.getScrollX(),
-                    props.getTop() - parentProps.getScrollY());
-            if (props.getClipToBounds()) {
-                if (!mappedDirty.intersect(0, 0, parentProps.getWidth(), parentProps.getHeight())) {
-                    mappedDirty.setEmpty();
-                }
+    }
+    return NULL;
+}
+
+static DirtyStack* findProjectionReceiver(DirtyStack* frame) {
+    if (frame) {
+        while (frame->prev != frame) {
+            frame = frame->prev;
+            if (frame->type == TransformRenderNode
+                    && frame->renderNode->hasProjectionReceiver()) {
+                return frame;
             }
-            if (CC_UNLIKELY(!MathUtils::isZero(props.getTranslationZ()))) {
-                // TODO: Can we better bound the shadow damage area? For now
-                // match the old damageShadowReceiver() path and just dirty
-                // the entire parent bounds
-                mappedDirty.join(0, 0, parentProps.getWidth(), parentProps.getHeight());
-            }
-        } else {
-            mappedDirty.offset(props.getLeft(), props.getTop());
         }
-        dirty(mappedDirty.fLeft, mappedDirty.fTop, mappedDirty.fRight, mappedDirty.fBottom);
+    }
+    return NULL;
+}
+
+static void applyTransforms(DirtyStack* frame, DirtyStack* end) {
+    SkRect* rect = &frame->pendingDirty;
+    while (frame != end) {
+        if (frame->type == TransformRenderNode) {
+            mapRect(frame->renderNode->properties(), *rect, rect);
+        } else {
+            mapRect(frame->matrix4, *rect, rect);
+        }
+        frame = frame->prev;
+    }
+}
+
+void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
+    if (frame->pendingDirty.isEmpty()) {
+        return;
+    }
+
+    const RenderProperties& props = frame->renderNode->properties();
+
+    // Perform clipping
+    if (props.getClipToBounds() && !frame->pendingDirty.isEmpty()) {
+        if (!frame->pendingDirty.intersect(0, 0, props.getWidth(), props.getHeight())) {
+            frame->pendingDirty.setEmpty();
+        }
+    }
+
+    // apply all transforms
+    mapRect(props, frame->pendingDirty, &mHead->pendingDirty);
+
+    // project backwards if necessary
+    if (props.getProjectBackwards() && !frame->pendingDirty.isEmpty()) {
+        // First, find our parent RenderNode:
+        DirtyStack* parentNode = findParentRenderNode(frame);
+        // Find our parent's projection receiver, which is what we project onto
+        DirtyStack* projectionReceiver = findProjectionReceiver(parentNode);
+        if (projectionReceiver) {
+            applyTransforms(frame, projectionReceiver);
+            projectionReceiver->pendingDirty.join(frame->pendingDirty);
+        } else {
+            ALOGW("Failed to find projection receiver? Dropping on the floor...");
+        }
+
+        frame->pendingDirty.setEmpty();
     }
 }
 

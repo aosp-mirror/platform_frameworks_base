@@ -842,13 +842,6 @@ public class RenderNode {
     }
 
     /**
-     * Sets the scroll position, this is used for damage calculations
-     */
-    public void setScrollPosition(int x, int y) {
-        nSetScrollPosition(mNativeRenderNode, x, y);
-    }
-
-    /**
      * Outputs the display list to the log. This method exists for use by
      * tools to output display lists for selected nodes to the log.
      *
@@ -906,7 +899,6 @@ public class RenderNode {
     private static native boolean nSetRight(long renderNode, int right);
     private static native boolean nSetTop(long renderNode, int top);
     private static native boolean nSetLeft(long renderNode, int left);
-    private static native void nSetScrollPosition(long renderNode, int scrollX, int scrollY);
     private static native boolean nSetCameraDistance(long renderNode, float distance);
     private static native boolean nSetPivotY(long renderNode, float pivotY);
     private static native boolean nSetPivotX(long renderNode, float pivotX);
