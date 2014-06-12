@@ -31,12 +31,14 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.PatternMatcher;
 import android.util.LogPrinter;
+
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.PackageManagerService.DumpState;
 
 import java.util.Collection;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -134,6 +136,10 @@ final class Settings {
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
+    private static final String TAG_CROSS_PROFILE_PACKAGE_INFO = "cross-profile-package-info";
+    private static final String CROSS_PROFILE_PACKAGE_INFO_ATTR_TARGET_USER_ID = "target-user-id";
+    private static final String CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME = "package-name";
+    private static final String CROSS_PROFILE_PACKAGE_INFO_ATTR_PACKAGE_NAME = "value";
     //Old name. Kept for compatibility
     static final String TAG_FORWARDING_INTENT_FILTERS =
             "forwarding-intent-filters";
@@ -240,6 +246,11 @@ final class Settings {
 
     public final KeySetManager mKeySetManager = new KeySetManager(mPackages);
 
+    // A mapping of (sourceUserId, targetUserId, packageNames) for forwarding the intents of a
+    // package.
+    final SparseArray<SparseArray<ArrayList<String>>>
+            mCrossProfilePackageInfo = new SparseArray<SparseArray<ArrayList<String>>>();
+
     Settings(Context context) {
         this(context, Environment.getDataDirectory());
     }
@@ -260,6 +271,47 @@ final class Settings {
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
+    }
+
+    public void addCrossProfilePackage(
+            String packageName, int sourceUserId, int targetUserId) {
+        synchronized(mCrossProfilePackageInfo) {
+            SparseArray<ArrayList<String>> sourceForwardingInfo =
+                    mCrossProfilePackageInfo.get(sourceUserId);
+            if (sourceForwardingInfo == null) {
+                sourceForwardingInfo = new SparseArray<ArrayList<String>>();
+                mCrossProfilePackageInfo.put(sourceUserId, sourceForwardingInfo);
+            }
+            ArrayList<String> packageNames = sourceForwardingInfo.get(targetUserId);
+            if (packageNames == null) {
+                packageNames = new ArrayList<String>();
+                sourceForwardingInfo.put(targetUserId, packageNames);
+            }
+            if (!packageNames.contains(packageName)) {
+                packageNames.add(packageName);
+            }
+        }
+    }
+
+    public void removeCrossProfilePackage(
+            String packageName, int sourceUserId, int targetUserId) {
+        synchronized(mCrossProfilePackageInfo) {
+            SparseArray<ArrayList<String>> sourceForwardingInfo =
+                    mCrossProfilePackageInfo.get(sourceUserId);
+            if (sourceForwardingInfo == null) {
+                return;
+            }
+            ArrayList<String> packageNames = sourceForwardingInfo.get(targetUserId);
+            if (packageNames != null && packageNames.contains(packageName)) {
+                packageNames.remove(packageName);
+                if (packageNames.isEmpty()) {
+                    sourceForwardingInfo.remove(targetUserId);
+                    if (sourceForwardingInfo.size() == 0) {
+                        mCrossProfilePackageInfo.remove(sourceUserId);
+                    }
+                }
+            }
+        }
     }
 
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
@@ -1005,6 +1057,68 @@ final class Settings {
         }
     }
 
+    private void readCrossProfilePackageInfoLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_ITEM)) {
+                String targetUserIdString = parser.getAttributeValue(null,
+                        CROSS_PROFILE_PACKAGE_INFO_ATTR_TARGET_USER_ID);
+                if (targetUserIdString == null) {
+                    String msg = "Missing element under " + TAG +": "
+                            + CROSS_PROFILE_PACKAGE_INFO_ATTR_TARGET_USER_ID + " at " +
+                            parser.getPositionDescription();
+                    PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                    continue;
+                }
+                int targetUserId = Integer.parseInt(targetUserIdString);
+                readCrossProfilePackageInfoForTargetLPw(parser, userId, targetUserId);
+            } else {
+                String msg = "Unknown element under " +  TAG_CROSS_PROFILE_PACKAGE_INFO + ": " +
+                        parser.getName();
+                PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+
+    private void readCrossProfilePackageInfoForTargetLPw(
+            XmlPullParser parser, int sourceUserId, int targetUserId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME)) {
+                String packageName = parser.getAttributeValue(
+                        null, CROSS_PROFILE_PACKAGE_INFO_ATTR_PACKAGE_NAME);
+                if (packageName == null) {
+                    String msg = "Missing element under " + TAG +": "
+                            + CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME + " at " +
+                            parser.getPositionDescription();
+                    PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                    continue;
+                }
+                addCrossProfilePackage(packageName, sourceUserId, targetUserId);
+            } else {
+                String msg = "Unknown element under " +  TAG_ITEM + ": " +
+                        parser.getName();
+                PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+
     void readPackageRestrictionsLPr(int userId) {
         if (DEBUG_MU) {
             Log.i(TAG, "Reading package restrictions for user=" + userId);
@@ -1136,6 +1250,8 @@ final class Settings {
                 } else if (tagName.equals(TAG_FORWARDING_INTENT_FILTERS)
                         || tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
                     readCrossProfileIntentFiltersLPw(parser, userId);
+                } else if (tagName.equals(TAG_CROSS_PROFILE_PACKAGE_INFO)){
+                    readCrossProfilePackageInfoLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -1225,6 +1341,32 @@ final class Settings {
             }
         }
         serializer.endTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
+    }
+
+    void writeCrossProfilePackageInfoLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        SparseArray<ArrayList<String>> sourceForwardingInfo = mCrossProfilePackageInfo.get(userId);
+        if (sourceForwardingInfo == null) {
+            return;
+        }
+        serializer.startTag(null, TAG_CROSS_PROFILE_PACKAGE_INFO);
+        int NI = sourceForwardingInfo.size();
+        for (int i = 0; i < NI; i++) {
+            int targetUserId = sourceForwardingInfo.keyAt(i);
+            ArrayList<String> packageNames = sourceForwardingInfo.valueAt(i);
+            serializer.startTag(null, TAG_ITEM);
+            serializer.attribute(null, CROSS_PROFILE_PACKAGE_INFO_ATTR_TARGET_USER_ID,
+                    Integer.toString(targetUserId));
+            int NJ = packageNames.size();
+            for (int j = 0; j < NJ; j++) {
+                serializer.startTag(null, CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME);
+                serializer.attribute(null, CROSS_PROFILE_PACKAGE_INFO_ATTR_PACKAGE_NAME,
+                        packageNames.get(j));
+                serializer.endTag(null, CROSS_PROFILE_PACKAGE_INFO_TAG_PACKAGE_NAME);
+            }
+            serializer.endTag(null, TAG_ITEM);
+        }
+        serializer.endTag(null, TAG_CROSS_PROFILE_PACKAGE_INFO);
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1326,6 +1468,8 @@ final class Settings {
             writePersistentPreferredActivitiesLPr(serializer, userId);
 
             writeCrossProfileIntentFiltersLPr(serializer, userId);
+
+            writeCrossProfilePackageInfoLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 

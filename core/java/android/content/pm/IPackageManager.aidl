@@ -251,6 +251,9 @@ interface IPackageManager {
     void addCrossProfileIntentFilter(in IntentFilter intentFilter, int sourceUserId, int targetUserId,
             int flags);
 
+    void addCrossProfileIntentsForPackage(in String packageName, int sourceUserId,
+            int targetUserId);
+
     void clearCrossProfileIntentFilters(int sourceUserId);
 
     /**
@@ -438,7 +441,7 @@ interface IPackageManager {
             int flags, in String installerPackageName,
             in VerificationParams verificationParams,
             in ContainerEncryptionParams encryptionParams,
-	    in String packageAbiOverride);
+        in String packageAbiOverride);
 
     int installExistingPackageAsUser(String packageName, int userId);
 

@@ -53,7 +53,6 @@ import com.android.server.ServiceThread;
 import com.android.server.Watchdog;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
-import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -91,7 +90,6 @@ import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
-import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageParserException;
@@ -3363,6 +3361,26 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
+
+        ArrayList<String> packageNames = null;
+        SparseArray<ArrayList<String>> fromSource =
+                mSettings.mCrossProfilePackageInfo.get(sourceUserId);
+        if (fromSource != null) {
+            packageNames = fromSource.get(targetUserId);
+        }
+        if (packageNames.contains(intent.getPackage())) {
+            return true;
+        }
+        // We need the package name, so we try to resolve with the loosest flags possible
+        List<ResolveInfo> resolveInfos = mActivities.queryIntent(
+                intent, resolvedType, PackageManager.GET_UNINSTALLED_PACKAGES, targetUserId);
+        int count = resolveInfos.size();
+        for (int i = 0; i < count; i++) {
+            ResolveInfo resolveInfo = resolveInfos.get(i);
+            if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -3403,6 +3421,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final String pkgName = intent.getPackage();
             if (pkgName == null) {
+                //Check if the intent needs to be forwarded to another user for this package
+                ArrayList<ResolveInfo> crossProfileResult =
+                        queryIntentActivitiesCrossProfilePackage(
+                                intent, resolvedType, flags, userId);
+                if (!crossProfileResult.isEmpty()) {
+                    // Skip the current profile
+                    return crossProfileResult;
+                }
                 List<ResolveInfo> result;
                 List<CrossProfileIntentFilter> matchingFilters =
                         getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
@@ -3426,6 +3452,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
+                ArrayList<ResolveInfo> crossProfileResult =
+                        queryIntentActivitiesCrossProfilePackage(
+                                intent, resolvedType, flags, userId, pkg, pkgName);
+                if (!crossProfileResult.isEmpty()) {
+                    // Skip the current profile
+                    return crossProfileResult;
+                }
                 return mActivities.queryIntentForPackage(intent, resolvedType, flags,
                         pkg.activities, userId);
             }
@@ -3446,12 +3479,63 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ResolveInfo resolveInfo = checkTargetCanHandle(filter, intent, resolvedType,
                             flags, sourceUserId);
                     if (resolveInfo != null) {
-                        return createForwardingResolveInfo(filter, sourceUserId);
+                        return createForwardingResolveInfo(
+                                filter, sourceUserId, filter.getTargetUserId());
                     }
                 }
             }
         }
         return null;
+    }
+
+    private ArrayList<ResolveInfo> queryIntentActivitiesCrossProfilePackage(
+            Intent intent, String resolvedType, int flags, int userId) {
+        ArrayList<ResolveInfo> matchingResolveInfos = new ArrayList<ResolveInfo>();
+        SparseArray<ArrayList<String>> sourceForwardingInfo =
+                mSettings.mCrossProfilePackageInfo.get(userId);
+        if (sourceForwardingInfo != null) {
+            int NI = sourceForwardingInfo.size();
+            for (int i = 0; i < NI; i++) {
+                int targetUserId = sourceForwardingInfo.keyAt(i);
+                ArrayList<String> packageNames = sourceForwardingInfo.valueAt(i);
+                List<ResolveInfo> resolveInfos = mActivities.queryIntent(
+                        intent, resolvedType, flags, targetUserId);
+                int NJ = resolveInfos.size();
+                for (int j = 0; j < NJ; j++) {
+                    ResolveInfo resolveInfo = resolveInfos.get(j);
+                    if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
+                        matchingResolveInfos.add(createForwardingResolveInfo(
+                                resolveInfo.filter, userId, targetUserId));
+                    }
+                }
+            }
+        }
+        return matchingResolveInfos;
+    }
+
+    private ArrayList<ResolveInfo> queryIntentActivitiesCrossProfilePackage(
+            Intent intent, String resolvedType, int flags, int userId, PackageParser.Package pkg,
+            String packageName) {
+        ArrayList<ResolveInfo> matchingResolveInfos = new ArrayList<ResolveInfo>();
+        SparseArray<ArrayList<String>> sourceForwardingInfo =
+                mSettings.mCrossProfilePackageInfo.get(userId);
+        if (sourceForwardingInfo != null) {
+            int NI = sourceForwardingInfo.size();
+            for (int i = 0; i < NI; i++) {
+                int targetUserId = sourceForwardingInfo.keyAt(i);
+                if (sourceForwardingInfo.valueAt(i).contains(packageName)) {
+                    List<ResolveInfo> resolveInfos = mActivities.queryIntentForPackage(
+                            intent, resolvedType, flags, pkg.activities, targetUserId);
+                    int NJ = resolveInfos.size();
+                    for (int j = 0; j < NJ; j++) {
+                        ResolveInfo resolveInfo = resolveInfos.get(j);
+                        matchingResolveInfos.add(createForwardingResolveInfo(
+                                resolveInfo.filter, userId, targetUserId));
+                    }
+                }
+            }
+        }
+        return matchingResolveInfos;
     }
 
     // Return matching ResolveInfo if any for skip current profile intent filters.
@@ -3486,15 +3570,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         List<ResolveInfo> resultTargetUser = mActivities.queryIntent(intent,
                 resolvedType, flags, filter.getTargetUserId());
         if (resultTargetUser != null) {
-            return createForwardingResolveInfo(filter, sourceUserId);
+            return createForwardingResolveInfo(filter, sourceUserId, filter.getTargetUserId());
         }
         return null;
     }
 
-    private ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter filter,
-            int sourceUserId) {
+    private ResolveInfo createForwardingResolveInfo(IntentFilter filter,
+            int sourceUserId, int targetUserId) {
         String className;
-        int targetUserId = filter.getTargetUserId();
         if (targetUserId == UserHandle.USER_OWNER) {
             className = FORWARD_INTENT_TO_USER_OWNER;
         } else {
@@ -11600,6 +11683,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSettings.editCrossProfileIntentResolverLPw(sourceUserId).addFilter(filter);
             mSettings.writePackageRestrictionsLPr(sourceUserId);
         }
+    }
+
+    public void addCrossProfileIntentsForPackage(String packageName,
+            int sourceUserId, int targetUserId) {
+        mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        mSettings.addCrossProfilePackage(packageName, sourceUserId, targetUserId);
+        mSettings.writePackageRestrictionsLPr(sourceUserId);
+    }
+
+    public void removeCrossProfileIntentsForPackage(String packageName,
+            int sourceUserId, int targetUserId) {
+        mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        mSettings.removeCrossProfilePackage(packageName, sourceUserId, targetUserId);
+        mSettings.writePackageRestrictionsLPr(sourceUserId);
     }
 
     @Override
