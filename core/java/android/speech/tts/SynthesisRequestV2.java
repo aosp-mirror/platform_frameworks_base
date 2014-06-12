@@ -14,6 +14,7 @@ import android.speech.tts.TextToSpeechClient.UtteranceId;
  *   <li>Voice parameters (Bundle of parameters)</li>
  *   <li>Audio parameters (Bundle of parameters)</li>
  * </ul>
+ * @hide
  */
 public final class SynthesisRequestV2 implements Parcelable {
     /** Synthesis utterance. */

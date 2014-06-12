@@ -74,26 +74,6 @@ import java.util.Set;
  *
  * {@link #onGetLanguage} is not required as of JELLYBEAN_MR2 (API 18) and later, it is only
  * called on earlier versions of Android.
- * <p>
- * In order to fully support the V2 API ({@link TextToSpeechClient}),
- * these methods must be implemented:
- * <ul>
- * <li>{@link #onSynthesizeTextV2}</li>
- * <li>{@link #checkVoicesInfo}</li>
- * <li>{@link #onVoicesInfoChange}</li>
- * <li>{@link #implementsV2API}</li>
- * </ul>
- * In addition {@link #implementsV2API} has to return true.
- * <p>
- * If the service does not implement these methods and {@link #implementsV2API} returns false,
- * then the V2 API will be provided by converting V2 requests ({@link #onSynthesizeTextV2})
- * to V1 requests ({@link #onSynthesizeText}). On service setup, all of the available device
- * locales will be fed to {@link #onIsLanguageAvailable} to check if they are supported.
- * If they are, embedded and/or network voices will be created depending on the result of
- * {@link #onGetFeaturesForLanguage}.
- * <p>
- * Note that a V2 service will still receive requests from V1 clients and has to implement all
- * of the V1 API methods.
  */
 public abstract class TextToSpeechService extends Service {
 
@@ -245,6 +225,7 @@ public abstract class TextToSpeechService extends Service {
      * The result of this method will be saved and served to all TTS clients. If a TTS service wants
      * to update the set of available voices, it should call the {@link #forceVoicesInfoCheck()}
      * method.
+     * @hide
      */
     protected List<VoiceInfo> checkVoicesInfo() {
         if (implementsV2API()) {
@@ -312,6 +293,7 @@ public abstract class TextToSpeechService extends Service {
      * Tells the synthesis thread that it should reload voice data.
      * There's a high probability that the underlying set of available voice data has changed.
      * Called only on the synthesis thread.
+     * @hide
      */
     protected void onVoicesInfoChange() {
 
@@ -326,6 +308,7 @@ public abstract class TextToSpeechService extends Service {
      * @param request The synthesis request.
      * @param callback The callback the the engine must use to make data
      *            available for playback or for writing to a file.
+     * @hide
      */
     protected void onSynthesizeTextV2(SynthesisRequestV2 request,
             VoiceInfo selectedVoice,
@@ -367,6 +350,7 @@ public abstract class TextToSpeechService extends Service {
     /**
      * If true, this service implements proper V2 TTS API service. If it's false,
      * V2 API will be provided through adapter.
+     * @hide
      */
     protected boolean implementsV2API() {
         return false;
@@ -405,6 +389,9 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
+   /**
+    * @hide
+    */
     public VoiceInfo getVoicesInfoWithName(String name) {
         synchronized (mVoicesInfoLock) {
             if (mVoicesInfoLookup != null) {
@@ -424,6 +411,7 @@ public abstract class TextToSpeechService extends Service {
      * Use this method only if you know that set of available languages changed.
      *
      * Can be called on multiple threads.
+     * @hide
      */
     public void forceVoicesInfoCheck() {
         synchronized (mVoicesInfoLock) {

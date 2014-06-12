@@ -43,16 +43,13 @@ public interface SynthesisCallback {
      * request.
      *
      * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText} or
-     * {@link TextToSpeechService#onSynthesizeTextV2}.
+     * while in {@link TextToSpeechService#onSynthesizeText}.
      *
      * @param sampleRateInHz Sample rate in HZ of the generated audio.
      * @param audioFormat Audio format of the generated audio. Must be one of
      *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
      * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
      * @return {@link TextToSpeech#SUCCESS}, {@link TextToSpeech#ERROR}.
-     *          {@link TextToSpeechClient.Status#STOPPED} is also possible if called in context of
-     *          {@link TextToSpeechService#onSynthesizeTextV2}.
      */
     public int start(int sampleRateInHz, int audioFormat, int channelCount);
 
@@ -60,8 +57,7 @@ public interface SynthesisCallback {
      * The service should call this method when synthesized audio is ready for consumption.
      *
      * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText} or
-     * {@link TextToSpeechService#onSynthesizeTextV2}.
+     * while in {@link TextToSpeechService#onSynthesizeText}.
      *
      * @param buffer The generated audio data. This method will not hold on to {@code buffer},
      *         so the caller is free to modify it after this method returns.
@@ -69,8 +65,6 @@ public interface SynthesisCallback {
      * @param length The number of bytes of audio data in {@code buffer}. This must be
      *         less than or equal to the return value of {@link #getMaxBufferSize}.
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     *          {@link TextToSpeechClient.Status#STOPPED} is also possible if called in context of
-     *          {@link TextToSpeechService#onSynthesizeTextV2}.
      */
     public int audioAvailable(byte[] buffer, int offset, int length);
 
@@ -79,14 +73,11 @@ public interface SynthesisCallback {
      * been passed to {@link #audioAvailable}.
      *
      * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText} or
-     * {@link TextToSpeechService#onSynthesizeTextV2}.
+     * while in {@link TextToSpeechService#onSynthesizeText}.
      *
      * This method has to be called if {@link #start} and/or {@link #error} was called.
      *
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     *          {@link TextToSpeechClient.Status#STOPPED} is also possible if called in context of
-     *          {@link TextToSpeechService#onSynthesizeTextV2}.
      */
     public int done();
 
@@ -108,6 +99,7 @@ public interface SynthesisCallback {
      *
      * @param errorCode Error code to pass to the client. One of the ERROR_ values from
      *      {@link TextToSpeechClient.Status}
+     * @hide
      */
     public void error(int errorCode);
 
@@ -128,6 +120,7 @@ public interface SynthesisCallback {
      * @return {@link TextToSpeech#SUCCESS}, {@link TextToSpeech#ERROR} if client already
      *          called {@link #start(int, int, int)}, {@link TextToSpeechClient.Status#STOPPED}
      *          if stop was requested.
+     * @hide
      */
     public int fallback();
 
@@ -139,6 +132,7 @@ public interface SynthesisCallback {
      * {@link TextToSpeechService#onSynthesizeTextV2}.
      *
      * Useful for checking if a fallback from network request is possible.
+     * @hide
      */
     public boolean hasStarted();
 
@@ -150,6 +144,7 @@ public interface SynthesisCallback {
      * {@link TextToSpeechService#onSynthesizeTextV2}.
      *
      * Useful for checking if a fallback from network request is possible.
+     * @hide
      */
     public boolean hasFinished();
 }

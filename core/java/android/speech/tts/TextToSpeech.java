@@ -53,10 +53,7 @@ import java.util.Set;
  * notified of the completion of the initialization.<br>
  * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
  * to release the native resources used by the TextToSpeech engine.
- *
- * @deprecated Use {@link TextToSpeechClient} instead
  */
-@Deprecated
 public class TextToSpeech {
 
     private static final String TAG = "TextToSpeech";
