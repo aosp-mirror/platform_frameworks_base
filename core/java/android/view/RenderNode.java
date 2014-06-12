@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Outline;
+import android.graphics.Paint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -322,11 +323,13 @@ public class RenderNode {
      * handled in the drawLayer operation directly (and more efficiently).
      *
      * @param caching true if the display list represents a hardware layer, false otherwise.
-     *
-     * @hide
      */
-    public boolean setCaching(boolean caching) {
-        return nSetCaching(mNativeRenderNode, caching);
+    public boolean setLayerType(int layerType) {
+        return nSetLayerType(mNativeRenderNode, layerType);
+    }
+
+    public boolean setLayerPaint(Paint paint) {
+        return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.mNativePaint : 0);
     }
 
     /**
@@ -902,7 +905,8 @@ public class RenderNode {
     private static native boolean nSetCameraDistance(long renderNode, float distance);
     private static native boolean nSetPivotY(long renderNode, float pivotY);
     private static native boolean nSetPivotX(long renderNode, float pivotX);
-    private static native boolean nSetCaching(long renderNode, boolean caching);
+    private static native boolean nSetLayerType(long renderNode, int layerType);
+    private static native boolean nSetLayerPaint(long renderNode, long paint);
     private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
     private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);

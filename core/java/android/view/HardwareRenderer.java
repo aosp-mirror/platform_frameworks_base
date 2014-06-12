@@ -374,16 +374,6 @@ public abstract class HardwareRenderer {
     abstract HardwareLayer createTextureLayer();
 
     /**
-     * Creates a new hardware layer.
-     *
-     * @param width The minimum width of the layer
-     * @param height The minimum height of the layer
-     *
-     * @return A hardware layer
-     */
-    abstract HardwareLayer createDisplayListLayer(int width, int height);
-
-    /**
      * Creates a new {@link SurfaceTexture} that can be used to render into the
      * specified hardware layer.
      *

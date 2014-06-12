@@ -4386,10 +4386,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // Make sure we do not set both flags at the same time
             int opaqueFlag = isOpaque ? PFLAG_DIRTY_OPAQUE : PFLAG_DIRTY;
 
-            if (child.mLayerType != LAYER_TYPE_NONE) {
+            if (child.mLayerType == LAYER_TYPE_SOFTWARE) {
                 mPrivateFlags |= PFLAG_INVALIDATED;
                 mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-                child.mLocalDirtyRect.union(dirty);
             }
 
             final int[] location = attachInfo.mInvalidateChildLocation;
@@ -4498,9 +4497,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 location[CHILD_LEFT_INDEX] = left;
                 location[CHILD_TOP_INDEX] = top;
 
-                if (mLayerType != LAYER_TYPE_NONE) {
+                if (mLayerType == LAYER_TYPE_SOFTWARE) {
                     mPrivateFlags |= PFLAG_INVALIDATED;
-                    mLocalDirtyRect.union(dirty);
                 }
 
                 return mParent;
@@ -4517,9 +4515,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
                 }
 
-                if (mLayerType != LAYER_TYPE_NONE) {
+                if (mLayerType == LAYER_TYPE_SOFTWARE) {
                     mPrivateFlags |= PFLAG_INVALIDATED;
-                    mLocalDirtyRect.union(dirty);
                 }
 
                 return mParent;
@@ -4567,10 +4564,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            if (child.mLayerType != LAYER_TYPE_NONE) {
-                child.mLocalDirtyRect.union(dirty);
-            }
-
             int left = child.mLeft;
             int top = child.mTop;
             if (!child.getMatrix().isIdentity()) {
@@ -4618,9 +4611,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0 ||
                     dirty.intersect(0, 0, mRight - mLeft, mBottom - mTop)) {
 
-                if (mLayerType != LAYER_TYPE_NONE) {
-                    mLocalDirtyRect.union(dirty);
-                }
                 if (!getMatrix().isIdentity()) {
                     transformRect(dirty);
                 }

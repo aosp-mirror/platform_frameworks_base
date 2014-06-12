@@ -440,6 +440,7 @@ void CanvasContext::prepareTree(TreeInfo& info) {
 
     info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     info.damageAccumulator = &mDamageAccumulator;
+    info.renderer = mCanvas;
     mRootRenderNode->prepareTree(info);
 
     int runningBehind = 0;

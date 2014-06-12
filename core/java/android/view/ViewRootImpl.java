@@ -631,27 +631,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void destroyHardwareLayers() {
-        if (mThread != Thread.currentThread()) {
-            if (mAttachInfo.mHardwareRenderer != null &&
-                    mAttachInfo.mHardwareRenderer.isEnabled()) {
-                HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
-            }
-        } else {
-            destroyHardwareLayer(mView);
-        }
-    }
-
-    private static void destroyHardwareLayer(View view) {
-        view.destroyLayer(true);
-
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-
-            int count = group.getChildCount();
-            for (int i = 0; i < count; i++) {
-                destroyHardwareLayer(group.getChildAt(i));
-            }
-        }
+        // TODO Implement
     }
 
     void flushHardwareLayerUpdates() {
@@ -1520,54 +1500,55 @@ public final class ViewRootImpl implements ViewParent,
 
                         disposeResizeBuffer();
 
-                        if (mResizeBuffer == null) {
-                            mResizeBuffer = mAttachInfo.mHardwareRenderer.createDisplayListLayer(
-                                    mWidth, mHeight);
-                        }
-                        mResizeBuffer.prepare(mWidth, mHeight, false);
-                        RenderNode layerRenderNode = mResizeBuffer.startRecording();
-                        HardwareCanvas layerCanvas = layerRenderNode.start(mWidth, mHeight);
-                        try {
-                            final int restoreCount = layerCanvas.save();
-
-                            int yoff;
-                            final boolean scrolling = mScroller != null
-                                    && mScroller.computeScrollOffset();
-                            if (scrolling) {
-                                yoff = mScroller.getCurrY();
-                                mScroller.abortAnimation();
-                            } else {
-                                yoff = mScrollY;
-                            }
-
-                            layerCanvas.translate(0, -yoff);
-                            if (mTranslator != null) {
-                                mTranslator.translateCanvas(layerCanvas);
-                            }
-
-                            RenderNode renderNode = mView.mRenderNode;
-                            if (renderNode != null && renderNode.isValid()) {
-                                layerCanvas.drawDisplayList(renderNode, null,
-                                        RenderNode.FLAG_CLIP_CHILDREN);
-                            } else {
-                                mView.draw(layerCanvas);
-                            }
-
-                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
-
-                            mResizeBufferStartTime = SystemClock.uptimeMillis();
-                            mResizeBufferDuration = mView.getResources().getInteger(
-                                    com.android.internal.R.integer.config_mediumAnimTime);
-
-                            layerCanvas.restoreToCount(restoreCount);
-                            layerRenderNode.end(layerCanvas);
-                            layerRenderNode.setCaching(true);
-                            layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
-                            mTempRect.set(0, 0, mWidth, mHeight);
-                        } finally {
-                            mResizeBuffer.endRecording(mTempRect);
-                        }
-                        mAttachInfo.mHardwareRenderer.flushLayerUpdates();
+// TODO: Again....
+//                        if (mResizeBuffer == null) {
+//                            mResizeBuffer = mAttachInfo.mHardwareRenderer.createDisplayListLayer(
+//                                    mWidth, mHeight);
+//                        }
+//                        mResizeBuffer.prepare(mWidth, mHeight, false);
+//                        RenderNode layerRenderNode = mResizeBuffer.startRecording();
+//                        HardwareCanvas layerCanvas = layerRenderNode.start(mWidth, mHeight);
+//                        try {
+//                            final int restoreCount = layerCanvas.save();
+//
+//                            int yoff;
+//                            final boolean scrolling = mScroller != null
+//                                    && mScroller.computeScrollOffset();
+//                            if (scrolling) {
+//                                yoff = mScroller.getCurrY();
+//                                mScroller.abortAnimation();
+//                            } else {
+//                                yoff = mScrollY;
+//                            }
+//
+//                            layerCanvas.translate(0, -yoff);
+//                            if (mTranslator != null) {
+//                                mTranslator.translateCanvas(layerCanvas);
+//                            }
+//
+//                            RenderNode renderNode = mView.mRenderNode;
+//                            if (renderNode != null && renderNode.isValid()) {
+//                                layerCanvas.drawDisplayList(renderNode, null,
+//                                        RenderNode.FLAG_CLIP_CHILDREN);
+//                            } else {
+//                                mView.draw(layerCanvas);
+//                            }
+//
+//                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
+//
+//                            mResizeBufferStartTime = SystemClock.uptimeMillis();
+//                            mResizeBufferDuration = mView.getResources().getInteger(
+//                                    com.android.internal.R.integer.config_mediumAnimTime);
+//
+//                            layerCanvas.restoreToCount(restoreCount);
+//                            layerRenderNode.end(layerCanvas);
+//                            layerRenderNode.setCaching(true);
+//                            layerRenderNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
+//                            mTempRect.set(0, 0, mWidth, mHeight);
+//                        } finally {
+//                            mResizeBuffer.endRecording(mTempRect);
+//                        }
+//                        mAttachInfo.mHardwareRenderer.flushLayerUpdates();
                     }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "

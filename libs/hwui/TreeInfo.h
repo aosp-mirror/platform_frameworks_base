@@ -26,6 +26,7 @@ namespace uirenderer {
 
 class BaseRenderNodeAnimator;
 class AnimationListener;
+class OpenGLRenderer;
 
 class AnimationHook {
 public:
@@ -63,6 +64,7 @@ public:
         , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
         , damageAccumulator(NullDamageAccumulator::instance())
+        , renderer(0)
     {}
 
     const TraversalMode mode;
@@ -73,6 +75,9 @@ public:
     bool prepareTextures;
     // Must not be null
     IDamageAccumulator* damageAccumulator;
+    // The renderer that will be drawing the next frame. Use this to push any
+    // layer updates or similar. May be NULL.
+    OpenGLRenderer* renderer;
 
     struct Out {
         Out()

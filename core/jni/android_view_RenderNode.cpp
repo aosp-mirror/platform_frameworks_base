@@ -87,9 +87,16 @@ static void android_view_RenderNode_setDisplayListData(JNIEnv* env,
 // RenderProperties - setters
 // ----------------------------------------------------------------------------
 
-static jboolean android_view_RenderNode_setCaching(JNIEnv* env,
-        jobject clazz, jlong renderNodePtr, jboolean caching) {
-    return SET_AND_DIRTY(setCaching, caching, RenderNode::GENERIC);
+static jboolean android_view_RenderNode_setLayerType(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, jint jlayerType) {
+    LayerType layerType = static_cast<LayerType>(jlayerType);
+    return SET_AND_DIRTY(mutateLayerProperties().setType, layerType, RenderNode::GENERIC);
+}
+
+static jboolean android_view_RenderNode_setLayerPaint(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, jlong paintPtr) {
+    SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    return SET_AND_DIRTY(mutateLayerProperties().setFromPaint, paint, RenderNode::GENERIC);
 }
 
 static jboolean android_view_RenderNode_setStaticMatrix(JNIEnv* env,
@@ -475,7 +482,8 @@ static JNINativeMethod gMethods[] = {
     { "nOutput",               "(J)V",  (void*) android_view_RenderNode_output },
     { "nGetDebugSize",         "(J)I",  (void*) android_view_RenderNode_getDebugSize },
 
-    { "nSetCaching",           "(JZ)Z",  (void*) android_view_RenderNode_setCaching },
+    { "nSetLayerType",         "(JI)Z",  (void*) android_view_RenderNode_setLayerType },
+    { "nSetLayerPaint",        "(JJ)Z",  (void*) android_view_RenderNode_setLayerPaint },
     { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_setAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)Z",  (void*) android_view_RenderNode_setClipToBounds },

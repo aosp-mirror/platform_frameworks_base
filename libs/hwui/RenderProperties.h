@@ -32,6 +32,7 @@
 #include "Outline.h"
 
 class SkBitmap;
+class SkColorFilter;
 class SkPaint;
 
 namespace android {
@@ -39,15 +40,95 @@ namespace uirenderer {
 
 class Matrix4;
 class RenderNode;
+class RenderProperties;
 
 // The __VA_ARGS__ will be executed if a & b are not equal
 #define RP_SET(a, b, ...) (a != b ? (a = b, ##__VA_ARGS__, true) : false)
 #define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
 
+// Keep in sync with View.java:LAYER_TYPE_*
+enum LayerType {
+    kLayerTypeNone = 0,
+    // Although we cannot build the software layer directly (must be done at
+    // record time), this information is used when applying alpha.
+    kLayerTypeSoftware = 1,
+    kLayerTypeRenderLayer = 2,
+    // TODO: LayerTypeSurfaceTexture? Maybe?
+};
+
+class ANDROID_API LayerProperties {
+public:
+    bool setType(LayerType type) {
+        if (RP_SET(mType, type)) {
+            reset();
+            return true;
+        }
+        return false;
+    }
+
+    LayerType type() const {
+        return mType;
+    }
+
+    bool setOpaque(bool opaque) {
+        return RP_SET(mOpaque, opaque);
+    }
+
+    bool opaque() const {
+        return mOpaque;
+    }
+
+    bool setAlpha(uint8_t alpha) {
+        return RP_SET(mAlpha, alpha);
+    }
+
+    uint8_t alpha() const {
+        return mAlpha;
+    }
+
+    bool setXferMode(SkXfermode::Mode mode) {
+        return RP_SET(mMode, mode);
+    }
+
+    SkXfermode::Mode xferMode() const {
+        return mMode;
+    }
+
+    bool setColorFilter(SkColorFilter* filter);
+
+    SkColorFilter* colorFilter() const {
+        return mColorFilter;
+    }
+
+    // Sets alpha, xfermode, and colorfilter from an SkPaint
+    // paint may be NULL, in which case defaults will be set
+    bool setFromPaint(const SkPaint* paint);
+
+    bool needsBlending() const {
+        return !opaque() || alpha() < 255;
+    }
+
+    LayerProperties& operator=(const LayerProperties& other);
+
+private:
+    LayerProperties();
+    ~LayerProperties();
+    void reset();
+
+    friend class RenderProperties;
+
+    LayerType mType;
+    // Whether or not that Layer's content is opaque, doesn't include alpha
+    bool mOpaque;
+    uint8_t mAlpha;
+    SkXfermode::Mode mMode;
+    SkColorFilter* mColorFilter;
+};
+
 /*
  * Data structure that holds the properties for a RenderNode
  */
-class RenderProperties {
+class ANDROID_API RenderProperties {
 public:
     RenderProperties();
     virtual ~RenderProperties();
@@ -366,10 +447,6 @@ public:
         return false;
     }
 
-    bool setCaching(bool caching) {
-        return RP_SET(mPrimitiveFields.mCaching, caching);
-    }
-
     int getWidth() const {
         return mPrimitiveFields.mWidth;
     }
@@ -396,10 +473,6 @@ public:
         return mComputedFields.mTransformMatrix;
     }
 
-    bool getCaching() const {
-        return mPrimitiveFields.mCaching;
-    }
-
     bool getClipToBounds() const {
         return mPrimitiveFields.mClipToBounds;
     }
@@ -422,7 +495,7 @@ public:
 
     void debugOutputProperties(const int level) const;
 
-    ANDROID_API void updateMatrix();
+    void updateMatrix();
 
     bool hasClippingPath() const {
         return mPrimitiveFields.mRevealClip.willClip();
@@ -443,6 +516,14 @@ public:
 
     RevealClip& mutableRevealClip() {
         return mPrimitiveFields.mRevealClip;
+    }
+
+    const LayerProperties& layerProperties() const {
+        return mLayerProperties;
+    }
+
+    LayerProperties& mutateLayerProperties() {
+        return mLayerProperties;
     }
 
 private:
@@ -467,11 +548,11 @@ private:
         int mWidth, mHeight;
         bool mPivotExplicitlySet;
         bool mMatrixOrPivotDirty;
-        bool mCaching;
     } mPrimitiveFields;
 
     SkMatrix* mStaticMatrix;
     SkMatrix* mAnimationMatrix;
+    LayerProperties mLayerProperties;
 
     /**
      * These fields are all generated from other properties and are not set directly.
