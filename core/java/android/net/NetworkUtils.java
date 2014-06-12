@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.Locale;
 
 import android.util.Log;
+import android.util.Pair;
+
 
 /**
  * Native methods for managing network interfaces.
@@ -218,24 +220,17 @@ public class NetworkUtils {
     }
 
     /**
-     * Get InetAddress masked with prefixLength.  Will never return null.
-     * @param IP address which will be masked with specified prefixLength
-     * @param prefixLength the prefixLength used to mask the IP
+     *  Masks a raw IP address byte array with the specified prefix length.
      */
-    public static InetAddress getNetworkPart(InetAddress address, int prefixLength) {
-        if (address == null) {
-            throw new RuntimeException("getNetworkPart doesn't accept null address");
-        }
-
-        byte[] array = address.getAddress();
-
+    public static void maskRawAddress(byte[] array, int prefixLength) {
         if (prefixLength < 0 || prefixLength > array.length * 8) {
-            throw new RuntimeException("getNetworkPart - bad prefixLength");
+            throw new RuntimeException("IP address with " + array.length +
+                    " bytes has invalid prefix length " + prefixLength);
         }
 
         int offset = prefixLength / 8;
-        int reminder = prefixLength % 8;
-        byte mask = (byte)(0xFF << (8 - reminder));
+        int remainder = prefixLength % 8;
+        byte mask = (byte)(0xFF << (8 - remainder));
 
         if (offset < array.length) array[offset] = (byte)(array[offset] & mask);
 
@@ -244,6 +239,16 @@ public class NetworkUtils {
         for (; offset < array.length; offset++) {
             array[offset] = 0;
         }
+    }
+
+    /**
+     * Get InetAddress masked with prefixLength.  Will never return null.
+     * @param address the IP address to mask with
+     * @param prefixLength the prefixLength used to mask the IP
+     */
+    public static InetAddress getNetworkPart(InetAddress address, int prefixLength) {
+        byte[] array = address.getAddress();
+        maskRawAddress(array, prefixLength);
 
         InetAddress netPart = null;
         try {
@@ -252,6 +257,30 @@ public class NetworkUtils {
             throw new RuntimeException("getNetworkPart error - " + e.toString());
         }
         return netPart;
+    }
+
+    /**
+     * Utility method to parse strings such as "192.0.2.5/24" or "2001:db8::cafe:d00d/64".
+     * @hide
+     */
+    public static Pair<InetAddress, Integer> parseIpAndMask(String ipAndMaskString) {
+        InetAddress address = null;
+        int prefixLength = -1;
+        try {
+            String[] pieces = ipAndMaskString.split("/", 2);
+            prefixLength = Integer.parseInt(pieces[1]);
+            address = InetAddress.parseNumericAddress(pieces[0]);
+        } catch (NullPointerException e) {            // Null string.
+        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
+        } catch (NumberFormatException e) {           // Non-numeric prefix.
+        } catch (IllegalArgumentException e) {        // Invalid IP address.
+        }
+
+        if (address == null || prefixLength == -1) {
+            throw new IllegalArgumentException("Invalid IP address and mask " + ipAndMaskString);
+        }
+
+        return new Pair<InetAddress, Integer>(address, prefixLength);
     }
 
     /**

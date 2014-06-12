@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Pair;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -166,23 +167,9 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     public LinkAddress(String address, int flags, int scope) {
-        InetAddress inetAddress = null;
-        int prefixLength = -1;
-        try {
-            String [] pieces = address.split("/", 2);
-            prefixLength = Integer.parseInt(pieces[1]);
-            inetAddress = InetAddress.parseNumericAddress(pieces[0]);
-        } catch (NullPointerException e) {            // Null string.
-        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
-        } catch (NumberFormatException e) {           // Non-numeric prefix.
-        } catch (IllegalArgumentException e) {        // Invalid IP address.
-        }
-
-        if (inetAddress == null || prefixLength == -1) {
-            throw new IllegalArgumentException("Bad LinkAddress params " + address);
-        }
-
-        init(inetAddress, prefixLength, flags, scope);
+        // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
+        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(address);
+        init(ipAndMask.first, ipAndMask.second, flags, scope);
     }
 
     /**
