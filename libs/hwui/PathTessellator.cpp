@@ -975,11 +975,14 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
 // Bezier approximation
 ///////////////////////////////////////////////////////////////////////////////
 
+// Depth at which recursion is aborted
+#define ABORT_DEPTH 20
+
 void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
         float p2x, float p2y, float c2x, float c2y,
         float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-        Vector<Vertex>& outputVertices) {
+        Vector<Vertex>& outputVertices, int depth) {
     float dx = p2x - p1x;
     float dy = p2y - p1y;
     float d1 = fabs((c1x - p2x) * dy - (c1y - p2y) * dx);
@@ -988,7 +991,7 @@ void PathTessellator::recursiveCubicBezierVertices(
 
     // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
 
-    if (d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    if (depth >= ABORT_DEPTH || d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, p2x, p2y);
     } else {
@@ -1012,11 +1015,11 @@ void PathTessellator::recursiveCubicBezierVertices(
         recursiveCubicBezierVertices(
                 p1x, p1y, p1c1x, p1c1y,
                 mx, my, p1c1c2x, p1c1c2y,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
         recursiveCubicBezierVertices(
                 mx, my, p2c1c2x, p2c1c2y,
                 p2x, p2y, p2c2x, p2c2y,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
     }
 }
 
@@ -1025,12 +1028,12 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float bx, float by,
         float cx, float cy,
         float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-        Vector<Vertex>& outputVertices) {
+        Vector<Vertex>& outputVertices, int depth) {
     float dx = bx - ax;
     float dy = by - ay;
     float d = (cx - bx) * dy - (cy - by) * dx;
 
-    if (d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    if (depth >= ABORT_DEPTH || d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, bx, by);
     } else {
@@ -1044,9 +1047,9 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float my = (acy + bcy) * 0.5f;
 
         recursiveQuadraticBezierVertices(ax, ay, mx, my, acx, acy,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
         recursiveQuadraticBezierVertices(mx, my, bx, by, bcx, bcy,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
     }
 }
 

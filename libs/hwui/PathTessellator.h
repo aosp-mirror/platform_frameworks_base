@@ -105,7 +105,7 @@ private:
             float bx, float by,
             float cx, float cy,
             float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-            Vector<Vertex> &outputVertices);
+            Vector<Vertex> &outputVertices, int depth = 0);
 
 /*
   endpoints p1, p2
@@ -117,7 +117,7 @@ private:
             float p2x, float p2y,
             float c2x, float c2y,
             float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-            Vector<Vertex> &outputVertices);
+            Vector<Vertex> &outputVertices, int depth = 0);
 };
 
 }; // namespace uirenderer
