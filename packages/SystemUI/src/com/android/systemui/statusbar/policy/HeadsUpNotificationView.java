@@ -101,6 +101,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             mSwipeHelper.snapChild(mContentHolder, 1f);
             mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
 
+            mHeadsUp.setInterruption();
+
             // 2. Animate mHeadsUpNotificationView in
             mBar.scheduleHeadsUpOpen();
 
@@ -108,6 +110,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             mBar.resetHeadsUpDecayTimer();
         }
         return true;
+    }
+
+    public boolean isShowing(String key) {
+        return mHeadsUp != null && mHeadsUp.key.equals(key);
     }
 
     /** Discard the Heads Up notification. */
@@ -134,6 +140,11 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             mBar.displayNotificationFromHeadsUp(mHeadsUp.notification);
         }
         mHeadsUp = null;
+    }
+
+    public void releaseAndClose() {
+        release();
+        mBar.scheduleHeadsUpClose();
     }
 
     public NotificationData.Entry getEntry() {
