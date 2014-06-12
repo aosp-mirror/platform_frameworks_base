@@ -55,9 +55,6 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
     private static final int DEVICE_POLLING_RETRY = 1;
 
-    // TODO: Move this to common place
-    private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
-
     /**
      * Interface used to report result of device discovery.
      */
@@ -75,7 +72,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
     private static final class DeviceInfo {
         private final int mLogicalAddress;
 
-        private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+        private int mPhysicalAddress = HdmiConstants.INVALID_PHYSICAL_ADDRESS;
         private int mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
         private String mDisplayName = "";
         private int mDeviceType = HdmiCec.DEVICE_INACTIVE;

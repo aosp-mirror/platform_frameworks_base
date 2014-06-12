@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
@@ -37,7 +38,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
-import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
 import java.util.ArrayList;
@@ -296,7 +296,7 @@ public final class HdmiControlService extends SystemService {
         HdmiPortInfo portInfo = getPortInfo(portId);
         if (portInfo == null) {
             Slog.e(TAG, "Cannot find the port info: " + portId);
-            return 0xFFFF;  // Use HdmiConstants.INVALID_PHYSICAL_ADDRESS;
+            return HdmiConstants.INVALID_PHYSICAL_ADDRESS;
         }
         return portInfo.getAddress();
     }
@@ -314,7 +314,7 @@ public final class HdmiControlService extends SystemService {
                 return info.getId();
             }
         }
-        return -1;  // Use HdmiConstants.INVALID_PORT_ID;
+        return HdmiConstants.INVALID_PORT_ID;
     }
 
     /**
@@ -446,7 +446,12 @@ public final class HdmiControlService extends SystemService {
 
     void setSystemAudioMode(boolean on) {
         synchronized (mLock) {
-            mSystemAudioMode = on;
+            if (on != mSystemAudioMode) {
+                mSystemAudioMode = on;
+                // TODO: Need to set the preference for SystemAudioMode.
+                // TODO: Need to handle the notification of changing the mode and
+                // to identify the notification should be handled in the service or TvSettings.
+            }
         }
     }
 
@@ -454,6 +459,19 @@ public final class HdmiControlService extends SystemService {
         synchronized (mLock) {
             return mSystemAudioMode;
         }
+    }
+
+    /**
+     * Whether a device of the specified physical address is connected to ARC enabled port.
+     */
+    boolean isConnectedToArcPort(int physicalAddress) {
+        for (HdmiPortInfo portInfo : mPortInfo) {
+            if (hasSameTopPort(portInfo.getAddress(), physicalAddress)
+                    && portInfo.isArcSupported()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // See if we have an action of a given type in progress.
@@ -464,6 +482,17 @@ public final class HdmiControlService extends SystemService {
             }
         }
         return false;
+    }
+
+    // Returns all actions matched with given class type.
+    <T extends FeatureAction> List<T> getActions(final Class<T> clazz) {
+        ArrayList<T> actions = new ArrayList<>();
+        for (FeatureAction action : mActions) {
+            if (action.getClass().equals(clazz)) {
+                actions.add((T) action);
+            }
+        }
+        return actions;
     }
 
     /**
@@ -530,6 +559,15 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
+     * Returns whether ARC is enabled or not.
+     */
+    boolean getArcStatus() {
+        synchronized (mLock) {
+            return mArcStatusEnabled;
+        }
+    }
+
+    /**
      * Transmit a CEC command to CEC bus.
      *
      * @param command CEC command to send out
@@ -573,12 +611,23 @@ public final class HdmiControlService extends SystemService {
         return dispatchMessageToLocalDevice(message);
     }
 
+    private boolean dispatchMessageToAction(HdmiCecMessage message) {
+        for (FeatureAction action : mActions) {
+            if (action.processCommand(message)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean dispatchMessageToLocalDevice(HdmiCecMessage message) {
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             if (device.dispatchMessage(message)) {
                 return true;
             }
         }
+
+        Slog.w(TAG, "Unhandled cec command:" + message);
         return false;
     }
 
@@ -589,7 +638,18 @@ public final class HdmiControlService extends SystemService {
      * @param connected whether to be plugged in or not
      */
     void onHotplug(int portNo, boolean connected) {
-        // TODO: Start "RequestArcInitiationAction" if ARC port.
+        assertRunOnServiceThread();
+        // TODO: delegate onHotplug event to each local device.
+
+        // Tv device will have permanent HotplugDetectionAction.
+        List<HotplugDetectionAction> hotplugActions = getActions(HotplugDetectionAction.class);
+        if (!hotplugActions.isEmpty()) {
+            // Note that hotplug action is single action running on a machine.
+            // "pollAllDevicesNow" cleans up timer and start poll action immediately.
+            hotplugActions.get(0).pollAllDevicesNow();
+        }
+
+        announceHotplugEvent(portNo, connected);
     }
 
     /**
@@ -617,35 +677,32 @@ public final class HdmiControlService extends SystemService {
         return strategy | iterationStrategy;
     }
 
-    /**
-     * Launch device discovery sequence. It starts with clearing the existing device info list.
-     * Note that it assumes that logical address of all local devices is already allocated.
-     *
-     * @param sourceAddress a logical address of tv
-     */
-    void launchDeviceDiscovery(final int sourceAddress) {
-        // At first, clear all existing device infos.
+    void clearAllDeviceInfo() {
+        assertRunOnServiceThread();
         mCecController.clearDeviceInfoList();
-        // TODO: flush cec message cache when CEC is turned off.
+    }
 
-        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this, sourceAddress,
-                new DeviceDiscoveryCallback() {
-                    @Override
-                    public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
-                        for (HdmiCecDeviceInfo info : deviceInfos) {
-                            addCecDevice(info);
-                        }
+    List<HdmiCecLocalDevice> getAllLocalDevices() {
+        assertRunOnServiceThread();
+        return mCecController.getLocalDeviceList();
+    }
 
-                        // Add device info of all local devices.
-                        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-                            addCecDevice(device.getDeviceInfo());
-                        }
-
-                        addAndStartAction(new HotplugDetectionAction(HdmiControlService.this,
-                                sourceAddress));
-                    }
-                });
-        addAndStartAction(action);
+    /**
+     * Whether a device of the specified physical address and logical address exists
+     * in a device info list. However, both are minimal condition and it could
+     * be different device from the original one.
+     *
+     * @param physicalAddress physical address of a device to be searched
+     * @param logicalAddress logical address of a device to be searched
+     * @return true if exist; otherwise false
+     */
+    boolean isInDeviceList(int physicalAddress, int logicalAddress) {
+        assertRunOnServiceThread();
+        HdmiCecDeviceInfo device = mCecController.getDeviceInfo(logicalAddress);
+        if (device == null) {
+            return false;
+        }
+        return device.getPhysicalAddress() == physicalAddress;
     }
 
     private HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
@@ -673,16 +730,6 @@ public final class HdmiControlService extends SystemService {
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getDestination(), message.getSource(), false);
         addAndStartAction(action);
-    }
-
-    private boolean dispatchMessageToAction(HdmiCecMessage message) {
-        for (FeatureAction action : mActions) {
-            if (action.processCommand(message)) {
-                return true;
-            }
-        }
-        Slog.w(TAG, "Unsupported cec command:" + message);
-        return false;
     }
 
     private void handleSetSystemAudioMode(HdmiCecMessage message) {
@@ -730,10 +777,6 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void addCecDevice(HdmiCecDeviceInfo info) {
-        mCecController.addDeviceInfo(info);
-    }
-
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -767,7 +810,6 @@ public final class HdmiControlService extends SystemService {
                 }
             });
         }
-
 
         @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
@@ -911,6 +953,17 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
+     * Called when a device is newly added or a new device is detected.
+     *
+     * @param info device info of a new device.
+     */
+    void addCecDevice(HdmiCecDeviceInfo info) {
+        mCecController.addDeviceInfo(info);
+
+        // TODO: announce new device detection.
+    }
+
+    /**
      * Called when a device is removed or removal of device is detected.
      *
      * @param address a logical address of a device to be removed
@@ -918,9 +971,61 @@ public final class HdmiControlService extends SystemService {
     void removeCecDevice(int address) {
         mCecController.removeDeviceInfo(address);
         mCecMessageCache.flushMessagesFrom(address);
+
+        // TODO: announce a device removal.
+    }
+
+    private void announceHotplugEvent(int portNo, boolean connected) {
+        HdmiHotplugEvent event = new HdmiHotplugEvent(portNo, connected);
+        synchronized (mLock) {
+            for (IHdmiHotplugEventListener listener : mHotplugEventListeners) {
+                invokeHotplugEventListener(listener, event);
+            }
+        }
+    }
+
+    private void invokeHotplugEventListener(IHdmiHotplugEventListener listener,
+            HdmiHotplugEvent event) {
+        try {
+            listener.onReceived(event);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to report hotplug event:" + event.toString(), e);
+        }
     }
 
     HdmiCecMessageCache getCecMessageCache() {
         return mCecMessageCache;
+    }
+
+    private static boolean hasSameTopPort(int path1, int path2) {
+        return (path1 & HdmiConstants.ROUTING_PATH_TOP_MASK)
+                == (path2 & HdmiConstants.ROUTING_PATH_TOP_MASK);
+    }
+
+    /**
+     * Whether the given path is located in the tail of current active path.
+     *
+     * @param path to be tested
+     * @return true if the given path is located in the tail of current active path; otherwise,
+     *         false
+     */
+    // TODO: move this to local device tv.
+    boolean isTailOfActivePath(int path) {
+        // If active routing path is internal source, return false.
+        if (mActiveRoutingPath == 0) {
+            return false;
+        }
+        for (int i = 12; i >= 0; i -= 4) {
+            int curActivePath = (mActiveRoutingPath >> i) & 0xF;
+            if (curActivePath == 0) {
+                return true;
+            } else {
+                int curPath = (path >> i) & 0xF;
+                if (curPath != curActivePath) {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }

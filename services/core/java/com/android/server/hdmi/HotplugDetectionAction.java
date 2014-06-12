@@ -90,6 +90,20 @@ final class HotplugDetectionAction extends FeatureAction {
         }
     }
 
+    /**
+     * Start device polling immediately.
+     */
+    void pollAllDevicesNow() {
+        // Clear existing timer to avoid overlapped execution
+        mActionTimer.clearTimerMessage();
+
+        mTimeoutCount = 0;
+        mState = STATE_WAIT_FOR_NEXT_POLLING;
+        pollAllDevices();
+
+        addTimer(mState, POLLING_INTERVAL_MS);
+    }
+
     // This method is called every 5 seconds.
     private void pollDevices() {
         // All device check called every 15 seconds.
@@ -180,15 +194,56 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void addDevice(int addedAddress) {
-        // TODO: implement this.
+        // Send <Give Physical Address>.
+        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(mSourceAddress, addedAddress));
     }
 
     private void removeDevice(int removedAddress) {
+        // TODO: move the following logic to local device once move many logic to
+        //       local device.
+        mayChangeRoutingPath(removedAddress);
+        mayCancelDeviceSelect(removedAddress);
+        mayCancelOneTouchRecord(removedAddress);
+        mayDisableSystemAudioAndARC(removedAddress);
+
         mService.removeCecDevice(removedAddress);
-        // TODO: implements following steps.
-        // 1. Launch routing control sequence
-        // 2. Stop one touch play sequence if removed device is the device to be selected.
-        // 3. If audio system, start system audio off and arc off
-        // 4. Inform device remove to others
+    }
+
+    private void mayChangeRoutingPath(int address) {
+        // TODO: if removed address is current active source, it should change active source
+        // path new one. we can keep previous selection or can choose default input,
+        // such as internal tuner. Consider send intent to app so that app
+        // can handle it.
+    }
+
+    private void mayCancelDeviceSelect(int address) {
+        List<DeviceSelectAction> actions = mService.getActions(DeviceSelectAction.class);
+        if (actions.isEmpty()) {
+            return;
+        }
+
+        // Should ave only one Device Select Action
+        DeviceSelectAction action = actions.get(0);
+        if (action.getTargetAddress() == address) {
+            mService.removeAction(DeviceSelectAction.class);
+        }
+    }
+
+    private void mayCancelOneTouchRecord(int address) {
+        // TODO: implement this.
+    }
+
+    private void mayDisableSystemAudioAndARC(int address) {
+        if (HdmiCec.getTypeFromAddress(address) != HdmiCec.DEVICE_AUDIO_SYSTEM) {
+            return;
+        }
+
+        // Turn off system audio mode.
+        mService.setSystemAudioMode(false);
+        if (mService.getArcStatus()) {
+            mService.addAndStartAction(
+                    new RequestArcTerminationAction(mService, mSourceAddress, address));
+        }
+
     }
 }

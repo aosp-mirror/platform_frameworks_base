@@ -75,5 +75,8 @@ final class HdmiConstants {
      */
     static final int FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL = 3;
 
+    static final int INVALID_PORT_ID = -1;
+    static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
     private HdmiConstants() { /* cannot be instantiated */ }
 }

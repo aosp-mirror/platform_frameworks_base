@@ -220,4 +220,8 @@ final class DeviceSelectAction extends FeatureAction {
             Slog.e(TAG, "Callback failed:" + e);
         }
     }
+
+    int getTargetAddress() {
+        return mTarget.getLogicalAddress();
+    }
 }
