@@ -118,6 +118,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private final static String TAG = "PhoneWindow";
 
     private final static boolean SWEEP_OPEN_MENU = false;
+
+    private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
+
     /**
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
@@ -246,6 +249,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Transition mSharedElementExitTransition;
     private Boolean mAllowExitTransitionOverlap;
     private Boolean mAllowEnterTransitionOverlap;
+    private long mBackgroundFadeDurationMillis = -1;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -3419,6 +3423,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             com.android.internal.R.styleable.
                                     Window_windowAllowExitTransitionOverlap, true);
                 }
+                if (mBackgroundFadeDurationMillis < 0) {
+                    mBackgroundFadeDurationMillis = getWindowStyle().getInteger(
+                            com.android.internal.R.styleable.
+                                    Window_windowTransitionBackgroundFadeDuration,
+                            DEFAULT_BACKGROUND_FADE_DURATION_MS);
+                }
             }
         }
     }
@@ -3823,6 +3833,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public boolean getAllowExitTransitionOverlap() {
         return (mAllowExitTransitionOverlap == null) ? true : mAllowExitTransitionOverlap;
+    }
+
+    @Override
+    public long getTransitionBackgroundFadeDuration() {
+        return (mBackgroundFadeDurationMillis < 0) ? DEFAULT_BACKGROUND_FADE_DURATION_MS
+                : mBackgroundFadeDurationMillis;
+    }
+
+    @Override
+    public void setTransitionBackgroundFadeDuration(long fadeDurationMillis) {
+        if (fadeDurationMillis < 0) {
+            throw new IllegalArgumentException("negative durations are not allowed");
+        }
+        mBackgroundFadeDurationMillis = fadeDurationMillis;
     }
 
     private static final class DrawableFeatureState {
