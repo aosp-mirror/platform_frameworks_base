@@ -29,7 +29,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.ArrayMap;
 import android.util.Log;
 
 import java.util.List;
@@ -410,28 +409,20 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Provides access to ranking information on a currently active
-     * notification.
+     * Stores ranking related information on a currently active notification.
      *
      * <p>
-     * Note that this object is not updated on notification events (such as
-     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)},
-     * {@link #onNotificationRemoved(StatusBarNotification)}, etc.). Make sure
-     * to retrieve a new Ranking from the current {@link RankingMap} whenever
-     * a notification event occurs.
+     * Ranking objects aren't automatically updated as notification events
+     * occur. Instead, ranking information has to be retrieved again via the
+     * current {@link RankingMap}.
      */
     public static class Ranking {
-        private final String mKey;
-        private final int mRank;
-        private final boolean mIsAmbient;
-        private final boolean mIsInterceptedByDnd;
+        private String mKey;
+        private int mRank = -1;
+        private boolean mIsAmbient;
+        private boolean mMeetsInterruptionFilter;
 
-        private Ranking(String key, int rank, boolean isAmbient, boolean isInterceptedByDnd) {
-            mKey = key;
-            mRank = rank;
-            mIsAmbient = isAmbient;
-            mIsInterceptedByDnd = isInterceptedByDnd;
-        }
+        public Ranking() {}
 
         /**
          * Returns the key of the notification this Ranking applies to.
@@ -459,11 +450,19 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns whether the notification was intercepted by
-         * &quot;Do not disturb&quot;.
+         * Returns whether the notification meets the user's interruption
+         * filter.
          */
-        public boolean isInterceptedByDoNotDisturb() {
-            return mIsInterceptedByDnd;
+        public boolean meetsInterruptionFilter() {
+            return mMeetsInterruptionFilter;
+        }
+
+        private void populate(String key, int rank, boolean isAmbient,
+                boolean meetsInterruptionFilter) {
+            mKey = key;
+            mRank = rank;
+            mIsAmbient = isAmbient;
+            mMeetsInterruptionFilter = meetsInterruptionFilter;
         }
     }
 
@@ -477,12 +476,9 @@ public abstract class NotificationListenerService extends Service {
      */
     public static class RankingMap implements Parcelable {
         private final NotificationRankingUpdate mRankingUpdate;
-        private final ArrayMap<String, Ranking> mRankingCache;
-        private boolean mRankingCacheInitialized;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
-            mRankingCache = new ArrayMap<>(rankingUpdate.getOrderedKeys().length);
         }
 
         /**
@@ -496,37 +492,42 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns the Ranking for the notification with the given key.
+         * Populates outRanking with ranking information for the notification
+         * with the given key.
          *
-         * @return the Ranking of the notification with the given key;
-         *     <code>null</code> when the key is unknown.
+         * @return true if a valid key has been passed and outRanking has
+         *     been populated; false otherwise
          */
-        public Ranking getRanking(String key) {
-            synchronized (mRankingCache) {
-                if (!mRankingCacheInitialized) {
-                    initializeRankingCache();
-                    mRankingCacheInitialized = true;
-                }
-            }
-            return mRankingCache.get(key);
+        public boolean getRanking(String key, Ranking outRanking) {
+            int rank = getRank(key);
+            outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key));
+            return rank >= 0;
         }
 
-        private void initializeRankingCache() {
+        private int getRank(String key) {
+            // TODO: Optimize.
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            int firstAmbientIndex = mRankingUpdate.getFirstAmbientIndex();
             for (int i = 0; i < orderedKeys.length; i++) {
-                String key = orderedKeys[i];
-                boolean isAmbient = firstAmbientIndex > -1 && firstAmbientIndex <= i;
-                boolean isInterceptedByDnd = false;
-                // TODO: Optimize.
-                for (String s : mRankingUpdate.getDndInterceptedKeys()) {
-                    if (s.equals(key)) {
-                        isInterceptedByDnd = true;
-                        break;
-                    }
+                if (orderedKeys[i].equals(key)) {
+                    return i;
                 }
-                mRankingCache.put(key, new Ranking(key, i, isAmbient, isInterceptedByDnd));
             }
+            return -1;
+        }
+
+        private boolean isAmbient(String key) {
+            int rank = getRank(key);
+            return rank >= 0 && rank >= mRankingUpdate.getFirstAmbientIndex();
+        }
+
+        private boolean isIntercepted(String key) {
+            // TODO: Optimize.
+            for (String interceptedKey : mRankingUpdate.getInterceptedKeys()) {
+                if (interceptedKey.equals(key)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // ----------- Parcelable

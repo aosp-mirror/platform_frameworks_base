@@ -26336,16 +26336,17 @@ package android.service.notification {
   }
 
   public static class NotificationListenerService.Ranking {
+    ctor public NotificationListenerService.Ranking();
     method public java.lang.String getKey();
     method public int getRank();
     method public boolean isAmbient();
-    method public boolean isInterceptedByDoNotDisturb();
+    method public boolean meetsInterruptionFilter();
   }
 
   public static class NotificationListenerService.RankingMap implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.String[] getOrderedKeys();
-    method public android.service.notification.NotificationListenerService.Ranking getRanking(java.lang.String);
+    method public boolean getRanking(java.lang.String, android.service.notification.NotificationListenerService.Ranking);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }

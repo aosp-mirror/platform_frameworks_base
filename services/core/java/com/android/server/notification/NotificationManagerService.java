@@ -2301,7 +2301,7 @@ public class NotificationManagerService extends SystemService {
         int speedBumpIndex = -1;
         final int N = mNotificationList.size();
         ArrayList<String> keys = new ArrayList<String>(N);
-        ArrayList<String> dndKeys = new ArrayList<String>(N);
+        ArrayList<String> interceptedKeys = new ArrayList<String>(N);
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!info.enabledAndUserMatches(record.sbn.getUserId())) {
@@ -2309,7 +2309,7 @@ public class NotificationManagerService extends SystemService {
             }
             keys.add(record.sbn.getKey());
             if (record.isIntercepted()) {
-                dndKeys.add(record.sbn.getKey());
+                interceptedKeys.add(record.sbn.getKey());
             }
             if (speedBumpIndex == -1 &&
                     record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
@@ -2317,8 +2317,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
         String[] keysAr = keys.toArray(new String[keys.size()]);
-        String[] dndKeysAr = dndKeys.toArray(new String[dndKeys.size()]);
-        return new NotificationRankingUpdate(keysAr, dndKeysAr, speedBumpIndex);
+        String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
+        return new NotificationRankingUpdate(keysAr, interceptedKeysAr, speedBumpIndex);
     }
 
     public class NotificationListeners extends ManagedServices {

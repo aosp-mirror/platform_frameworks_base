@@ -75,16 +75,18 @@ public class NotificationData {
     }
 
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    private RankingMap mRanking;
+    private RankingMap mRankingMap;
+    private final Ranking mTmpRanking = new Ranking();
     private final Comparator<Entry> mRankingComparator = new Comparator<Entry>() {
+        private final Ranking mRankingA = new Ranking();
+        private final Ranking mRankingB = new Ranking();
+
         @Override
         public int compare(Entry a, Entry b) {
-            if (mRanking != null) {
-                Ranking aRanking = mRanking.getRanking(a.key);
-                Ranking bRanking = mRanking.getRanking(b.key);
-                int aRank = aRanking != null ? aRanking.getRank() : -1;
-                int bRank = bRanking != null ? bRanking.getRank() : -1;
-                return aRank - bRank;
+            if (mRankingMap != null) {
+                mRankingMap.getRanking(a.key, mRankingA);
+                mRankingMap.getRanking(b.key, mRankingB);
+                return mRankingA.getRank() - mRankingB.getRank();
             }
 
             final StatusBarNotification na = a.notification;
@@ -138,7 +140,7 @@ public class NotificationData {
 
     public boolean isAmbient(String key) {
         // TODO: Remove when switching to NotificationListener.
-        if (mRanking == null) {
+        if (mRankingMap == null) {
             for (Entry entry : mEntries) {
                 if (key.equals(entry.key)) {
                     return entry.notification.getNotification().priority ==
@@ -146,15 +148,15 @@ public class NotificationData {
                 }
             }
         } else {
-            Ranking ranking = mRanking.getRanking(key);
-            return ranking != null && ranking.isAmbient();
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.isAmbient();
         }
         return false;
     }
 
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
-            mRanking = ranking;
+            mRankingMap = ranking;
         }
         Collections.sort(mEntries, mRankingComparator);
     }

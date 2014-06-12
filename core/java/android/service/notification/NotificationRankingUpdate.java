@@ -24,20 +24,20 @@ import android.os.Parcelable;
 public class NotificationRankingUpdate implements Parcelable {
     // TODO: Support incremental updates.
     private final String[] mKeys;
-    private final String[] mDndInterceptedKeys;
+    private final String[] mInterceptedKeys;
     private final int mFirstAmbientIndex;
 
-    public NotificationRankingUpdate(String[] keys, String[] dndInterceptedKeys,
+    public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
                                      int firstAmbientIndex) {
         mKeys = keys;
         mFirstAmbientIndex = firstAmbientIndex;
-        mDndInterceptedKeys = dndInterceptedKeys;
+        mInterceptedKeys = interceptedKeys;
     }
 
     public NotificationRankingUpdate(Parcel in) {
         mKeys = in.readStringArray();
         mFirstAmbientIndex = in.readInt();
-        mDndInterceptedKeys = in.readStringArray();
+        mInterceptedKeys = in.readStringArray();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class NotificationRankingUpdate implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeStringArray(mKeys);
         out.writeInt(mFirstAmbientIndex);
-        out.writeStringArray(mDndInterceptedKeys);
+        out.writeStringArray(mInterceptedKeys);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -71,7 +71,7 @@ public class NotificationRankingUpdate implements Parcelable {
         return mFirstAmbientIndex;
     }
 
-    public String[] getDndInterceptedKeys() {
-        return mDndInterceptedKeys;
+    public String[] getInterceptedKeys() {
+        return mInterceptedKeys;
     }
 }
