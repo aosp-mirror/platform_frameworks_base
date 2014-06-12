@@ -569,12 +569,11 @@ public:
         canvas->drawRectCoords(left, top, right, bottom, *paint);
     }
 
-    static void drawOval(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
-                         jlong paintHandle) {
+    static void drawOval(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jlong paintHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkRect oval;
-        GraphicsJNI::jrectf_to_rect(env, joval, &oval);
+        SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
         canvas->drawOval(oval, *paint);
     }
 
@@ -585,13 +584,12 @@ public:
         canvas->drawCircle(cx, cy, radius, *paint);
     }
 
-    static void drawArc(JNIEnv* env, jobject, jlong canvasHandle, jobject joval,
-                        jfloat startAngle, jfloat sweepAngle,
-                        jboolean useCenter, jlong paintHandle) {
+    static void drawArc(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jfloat startAngle, jfloat sweepAngle, jboolean useCenter,
+            jlong paintHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        SkRect oval;
-        GraphicsJNI::jrectf_to_rect(env, joval, &oval);
+        SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
         canvas->drawArc(oval, startAngle, sweepAngle, useCenter, *paint);
     }
 
@@ -1241,11 +1239,9 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_drawLines", "(J[FIIJ)V", (void*) SkCanvasGlue::drawLines},
     {"native_drawLine","(JFFFFJ)V", (void*) SkCanvasGlue::drawLine__FFFFPaint},
     {"native_drawRect","(JFFFFJ)V", (void*) SkCanvasGlue::drawRect__FFFFPaint},
-    {"native_drawOval","(JLandroid/graphics/RectF;J)V",
-        (void*) SkCanvasGlue::drawOval},
+    {"native_drawOval","(JFFFFJ)V", (void*) SkCanvasGlue::drawOval},
     {"native_drawCircle","(JFFFJ)V", (void*) SkCanvasGlue::drawCircle},
-    {"native_drawArc","(JLandroid/graphics/RectF;FFZJ)V",
-        (void*) SkCanvasGlue::drawArc},
+    {"native_drawArc","(JFFFFFFZJ)V", (void*) SkCanvasGlue::drawArc},
     {"native_drawRoundRect","(JFFFFFFJ)V",
         (void*) SkCanvasGlue::drawRoundRect},
     {"native_drawPath","(JJJ)V", (void*) SkCanvasGlue::drawPath},

@@ -1091,7 +1091,15 @@ public class Canvas {
         if (oval == null) {
             throw new NullPointerException();
         }
-        native_drawOval(mNativeCanvasWrapper, oval, paint.mNativePaint);
+        drawOval(oval.left, oval.top, oval.right, oval.bottom, paint);
+    }
+
+    /**
+     * Draw the specified oval using the specified paint. The oval will be
+     * filled or framed based on the Style in the paint.
+     */
+    public void drawOval(float left, float top, float right, float bottom, @NonNull Paint paint) {
+        native_drawOval(mNativeCanvasWrapper, left, top, right, bottom, paint.mNativePaint);
     }
 
     /**
@@ -1133,10 +1141,34 @@ public class Canvas {
      */
     public void drawArc(@NonNull RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             @NonNull Paint paint) {
-        if (oval == null) {
-            throw new NullPointerException();
-        }
-        native_drawArc(mNativeCanvasWrapper, oval, startAngle, sweepAngle,
+        drawArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, useCenter,
+                paint);
+    }
+
+    /**
+     * <p>Draw the specified arc, which will be scaled to fit inside the
+     * specified oval.</p>
+     *
+     * <p>If the start angle is negative or >= 360, the start angle is treated
+     * as start angle modulo 360.</p>
+     *
+     * <p>If the sweep angle is >= 360, then the oval is drawn
+     * completely. Note that this differs slightly from SkPath::arcTo, which
+     * treats the sweep angle modulo 360. If the sweep angle is negative,
+     * the sweep angle is treated as sweep angle modulo 360</p>
+     *
+     * <p>The arc is drawn clockwise. An angle of 0 degrees correspond to the
+     * geometric angle of 0 degrees (3 o'clock on a watch.)</p>
+     *
+     * @param startAngle Starting angle (in degrees) where the arc begins
+     * @param sweepAngle Sweep angle (in degrees) measured clockwise
+     * @param useCenter If true, include the center of the oval in the arc, and
+                        close it if it is being stroked. This will draw a wedge
+     * @param paint      The paint used to draw the arc
+     */
+    public void drawArc(float left, float top, float right, float bottom, float startAngle,
+            float sweepAngle, boolean useCenter, @NonNull Paint paint) {
+        native_drawArc(mNativeCanvasWrapper, left, top, right, bottom, startAngle, sweepAngle,
                 useCenter, paint.mNativePaint);
     }
 
@@ -1908,14 +1940,14 @@ public class Canvas {
                                                float top, float right,
                                                float bottom,
                                                long nativePaint);
-    private static native void native_drawOval(long nativeCanvas, RectF oval,
-                                               long nativePaint);
+    private static native void native_drawOval(long nativeCanvas, float left, float top,
+                                               float right, float bottom, long nativePaint);
     private static native void native_drawCircle(long nativeCanvas, float cx,
                                                  float cy, float radius,
                                                  long nativePaint);
-    private static native void native_drawArc(long nativeCanvas, RectF oval,
-                                              float startAngle, float sweep,
-                                              boolean useCenter,
+    private static native void native_drawArc(long nativeCanvas, float left, float top,
+                                              float right, float bottom,
+                                              float startAngle, float sweep, boolean useCenter,
                                               long nativePaint);
     private static native void native_drawRoundRect(long nativeCanvas,
             float left, float top, float right, float bottom,

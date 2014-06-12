@@ -2,22 +2,22 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
 // This file was generated from the C++ include file: SkPath.h
 // Any changes made to this file will be discarded by the build.
-// To change this file, either edit the include, or device/tools/gluemaker/main.cpp, 
+// To change this file, either edit the include, or device/tools/gluemaker/main.cpp,
 // or one of the auxilary file specifications in device/tools/gluemaker.
 
 #include "jni.h"
@@ -92,7 +92,7 @@ public:
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         return obj->isEmpty();
     }
- 
+
     static jboolean isRect(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect) {
         SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
@@ -100,65 +100,66 @@ public:
         GraphicsJNI::rect_to_jrectf(rect, env, jrect);
         return result;
     }
- 
+
     static void computeBounds(JNIEnv* env, jobject clazz, jlong objHandle, jobject jbounds) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         const SkRect& bounds = obj->getBounds();
         GraphicsJNI::rect_to_jrectf(bounds, env, jbounds);
     }
- 
+
     static void incReserve(JNIEnv* env, jobject clazz, jlong objHandle, jint extraPtCount) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->incReserve(extraPtCount);
     }
- 
+
     static void moveTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->moveTo(x, y);
     }
- 
+
     static void rMoveTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rMoveTo(dx, dy);
     }
- 
+
     static void lineTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->lineTo(x, y);
     }
- 
+
     static void rLineTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rLineTo(dx, dy);
     }
- 
+
     static void quadTo__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->quadTo(x1, y1, x2, y2);
     }
- 
+
     static void rQuadTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx1, jfloat dy1, jfloat dx2, jfloat dy2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rQuadTo(dx1, dy1, dx2, dy2);
     }
- 
+
     static void cubicTo__FFFFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->cubicTo(x1, y1, x2, y2, x3, y3);
     }
- 
+
     static void rCubicTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rCubicTo(x1, y1, x2, y2, x3, y3);
     }
- 
-    static void arcTo(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jfloat startAngle, jfloat sweepAngle, jboolean forceMoveTo) {
+
+    static void arcTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jfloat startAngle, jfloat sweepAngle,
+            jboolean forceMoveTo) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkRect oval_;
-        GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
-        obj->arcTo(oval_, startAngle, sweepAngle, forceMoveTo);
+        SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
+        obj->arcTo(oval, startAngle, sweepAngle, forceMoveTo);
     }
- 
+
     static void close(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->close();
@@ -185,28 +186,26 @@ public:
         obj->addCircle(x, y, radius, dir);
     }
 
-    static void addArc(JNIEnv* env, jobject clazz, jlong objHandle, jobject oval, jfloat startAngle, jfloat sweepAngle) {
-        SkRect oval_;
+    static void addArc(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jfloat startAngle, jfloat sweepAngle) {
+        SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        GraphicsJNI::jrectf_to_rect(env, oval, &oval_);
-        obj->addArc(oval_, startAngle, sweepAngle);
+        obj->addArc(oval, startAngle, sweepAngle);
     }
 
-    static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect,
-            jfloat rx, jfloat ry, jint dirHandle) {
-        SkRect rect;
+    static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jfloat rx, jfloat ry, jint dirHandle) {
+        SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
         obj->addRoundRect(rect, rx, ry, dir);
     }
-    
-    static void addRoundRect8(JNIEnv* env, jobject, jlong objHandle, jobject jrect,
-            jfloatArray array, jint dirHandle) {
-        SkRect rect;
+
+    static void addRoundRect8(JNIEnv* env, jobject, jlong objHandle, jfloat left, jfloat top,
+            jfloat right, jfloat bottom, jfloatArray array, jint dirHandle) {
+        SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
-        GraphicsJNI::jrectf_to_rect(env, jrect, &rect);
         AutoJavaFloatArray  afa(env, array, 8);
 #ifdef SK_SCALAR_IS_FLOAT
         const float* src = afa.ptr();
@@ -215,32 +214,32 @@ public:
 #endif
         obj->addRoundRect(rect, src, dir);
     }
-    
+
     static void addPath__PathFF(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         obj->addPath(*src, dx, dy);
     }
- 
+
     static void addPath__Path(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         obj->addPath(*src);
     }
- 
+
     static void addPath__PathMatrix(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle, jlong matrixHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         obj->addPath(*src, *matrix);
     }
- 
+
     static void offset__FFPath(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy, jlong dstHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
         obj->offset(dx, dy, dst);
     }
- 
+
     static void offset__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->offset(dx, dy);
@@ -250,14 +249,14 @@ public:
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->setLastPt(dx, dy);
     }
- 
+
     static void transform__MatrixPath(JNIEnv* env, jobject clazz, jlong objHandle, jlong matrixHandle, jlong dstHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
         obj->transform(*matrix, dst);
     }
- 
+
     static void transform__Matrix(JNIEnv* env, jobject clazz, jlong objHandle, jlong matrixHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
@@ -487,14 +486,14 @@ static JNINativeMethod methods[] = {
     {"native_rQuadTo","(JFFFF)V", (void*) SkPathGlue::rQuadTo},
     {"native_cubicTo","(JFFFFFF)V", (void*) SkPathGlue::cubicTo__FFFFFF},
     {"native_rCubicTo","(JFFFFFF)V", (void*) SkPathGlue::rCubicTo},
-    {"native_arcTo","(JLandroid/graphics/RectF;FFZ)V", (void*) SkPathGlue::arcTo},
+    {"native_arcTo","(JFFFFFFZ)V", (void*) SkPathGlue::arcTo},
     {"native_close","(J)V", (void*) SkPathGlue::close},
     {"native_addRect","(JFFFFI)V", (void*) SkPathGlue::addRect},
     {"native_addOval","(JFFFFI)V", (void*) SkPathGlue::addOval},
     {"native_addCircle","(JFFFI)V", (void*) SkPathGlue::addCircle},
-    {"native_addArc","(JLandroid/graphics/RectF;FF)V", (void*) SkPathGlue::addArc},
-    {"native_addRoundRect","(JLandroid/graphics/RectF;FFI)V", (void*) SkPathGlue::addRoundRectXY},
-    {"native_addRoundRect","(JLandroid/graphics/RectF;[FI)V", (void*) SkPathGlue::addRoundRect8},
+    {"native_addArc","(JFFFFFF)V", (void*) SkPathGlue::addArc},
+    {"native_addRoundRect","(JFFFFFFI)V", (void*) SkPathGlue::addRoundRectXY},
+    {"native_addRoundRect","(JFFFF[FI)V", (void*) SkPathGlue::addRoundRect8},
     {"native_addPath","(JJFF)V", (void*) SkPathGlue::addPath__PathFF},
     {"native_addPath","(JJ)V", (void*) SkPathGlue::addPath__Path},
     {"native_addPath","(JJJ)V", (void*) SkPathGlue::addPath__PathMatrix},
