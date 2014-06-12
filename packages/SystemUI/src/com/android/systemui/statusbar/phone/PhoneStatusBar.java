@@ -1081,8 +1081,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             Entry interruptionCandidate = new Entry(notification, null);
             ViewGroup holder = mHeadsUpNotificationView.getHolder();
             if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
-                mInterruptingNotificationTime = System.currentTimeMillis();
-
                 // 1. Populate mHeadsUpNotificationView
                 mHeadsUpNotificationView.showNotification(interruptionCandidate);
 
