@@ -42,6 +42,7 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     private static final String seappContextsPath = "seapp_contexts";
     private static final String versionPath = "selinux_version";
     private static final String macPermissionsPath = "mac_permissions.xml";
+    private static final String serviceContextsPath = "service_contexts";
 
     public SELinuxPolicyInstallReceiver() {
         super("/data/security/bundle", "sepolicy_bundle", "metadata/", "version");
@@ -65,6 +66,9 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
 
         new File(contexts, sepolicyPath).renameTo(
                 new File(contexts, sepolicyPath + "_backup"));
+
+        new File(contexts, serviceContextsPath).renameTo(
+                new File(contexts, serviceContextsPath + "_backup"));
     }
 
     private void copyUpdate(File contexts) {
@@ -74,6 +78,7 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
         new File(updateDir, propertyContextsPath).renameTo(new File(contexts, propertyContextsPath));
         new File(updateDir, fileContextsPath).renameTo(new File(contexts, fileContextsPath));
         new File(updateDir, sepolicyPath).renameTo(new File(contexts, sepolicyPath));
+        new File(updateDir, serviceContextsPath).renameTo(new File(contexts, serviceContextsPath));
     }
 
     private int readInt(BufferedInputStream reader) throws IOException {
@@ -85,13 +90,14 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
     }
 
     private int[] readChunkLengths(BufferedInputStream bundle) throws IOException {
-        int[] chunks = new int[6];
+        int[] chunks = new int[7];
         chunks[0] = readInt(bundle);
         chunks[1] = readInt(bundle);
         chunks[2] = readInt(bundle);
         chunks[3] = readInt(bundle);
         chunks[4] = readInt(bundle);
         chunks[5] = readInt(bundle);
+        chunks[6] = readInt(bundle);
         return chunks;
     }
 
@@ -112,6 +118,7 @@ public class SELinuxPolicyInstallReceiver extends ConfigUpdateInstallReceiver {
             installFile(new File(updateDir, propertyContextsPath), stream, chunkLengths[3]);
             installFile(new File(updateDir, fileContextsPath), stream, chunkLengths[4]);
             installFile(new File(updateDir, sepolicyPath), stream, chunkLengths[5]);
+            installFile(new File(updateDir, serviceContextsPath), stream, chunkLengths[6]);
         } finally {
             IoUtils.closeQuietly(stream);
         }
