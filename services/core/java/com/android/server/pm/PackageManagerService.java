@@ -136,6 +136,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -411,9 +412,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // etc/permissions.xml file.
     final HashMap<String, SharedLibraryEntry> mSharedLibraries
             = new HashMap<String, SharedLibraryEntry>();
-
-    // Temporary for building the final shared libraries for an .apk.
-    String[] mTmpSharedLibraries = null;
 
     // These are the features this devices supports that were read from the
     // etc/permissions.xml file.
@@ -4805,11 +4803,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
-    private int addSharedLibraryLPw(final SharedLibraryEntry file, int num,
+    private void addSharedLibraryLPw(ArraySet<String> usesLibraryFiles, SharedLibraryEntry file,
             PackageParser.Package changingLib) {
         if (file.path != null) {
-            mTmpSharedLibraries[num] = file.path;
-            return num+1;
+            usesLibraryFiles.add(file.path);
+            return;
         }
         PackageParser.Package p = mPackages.get(file.apk);
         if (changingLib != null && changingLib.packageName.equals(file.apk)) {
@@ -4822,16 +4820,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if (p != null) {
-            String path = p.mPath;
-            for (int i=0; i<num; i++) {
-                if (mTmpSharedLibraries[i].equals(path)) {
-                    return num;
-                }
-            }
-            mTmpSharedLibraries[num] = p.mPath;
-            return num+1;
+            usesLibraryFiles.add(p.mPath);
         }
-        return num;
     }
 
     private boolean updateSharedLibrariesLPw(PackageParser.Package pkg,
@@ -4845,11 +4835,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
-            if (mTmpSharedLibraries == null ||
-                    mTmpSharedLibraries.length < mSharedLibraries.size()) {
-                mTmpSharedLibraries = new String[mSharedLibraries.size()];
-            }
-            int num = 0;
+            final ArraySet<String> usesLibraryFiles = new ArraySet<>();
             int N = pkg.usesLibraries != null ? pkg.usesLibraries.size() : 0;
             for (int i=0; i<N; i++) {
                 final SharedLibraryEntry file = mSharedLibraries.get(pkg.usesLibraries.get(i));
@@ -4860,7 +4846,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mLastScanError = PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
                     return false;
                 }
-                num = addSharedLibraryLPw(file, num, changingLib);
+                addSharedLibraryLPw(usesLibraryFiles, file, changingLib);
             }
             N = pkg.usesOptionalLibraries != null ? pkg.usesOptionalLibraries.size() : 0;
             for (int i=0; i<N; i++) {
@@ -4870,13 +4856,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " desires unavailable shared library "
                             + pkg.usesOptionalLibraries.get(i) + "; ignoring!");
                 } else {
-                    num = addSharedLibraryLPw(file, num, changingLib);
+                    addSharedLibraryLPw(usesLibraryFiles, file, changingLib);
                 }
             }
-            if (num > 0) {
-                pkg.usesLibraryFiles = new String[num];
-                System.arraycopy(mTmpSharedLibraries, 0,
-                        pkg.usesLibraryFiles, 0, num);
+            N = usesLibraryFiles.size();
+            if (N > 0) {
+                pkg.usesLibraryFiles = usesLibraryFiles.toArray(new String[N]);
             } else {
                 pkg.usesLibraryFiles = null;
             }
