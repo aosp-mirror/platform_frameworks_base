@@ -111,6 +111,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_STATES = DEBUG || false;
     static final boolean DEBUG_IDLE = DEBUG || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
+    static final boolean DEBUG_CONTAINERS = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
 
@@ -135,6 +136,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
+    static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 12;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -239,7 +241,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // TODO: Add listener for removal of references.
     /** Mapping from (ActivityStack/TaskStack).mStackId to their current state */
-    SparseArray<ActivityContainer> mActivityContainers = new SparseArray<ActivityContainer>();
+    private SparseArray<ActivityContainer> mActivityContainers = new SparseArray<ActivityContainer>();
 
     /** Mapping from displayId to display current state */
     private final SparseArray<ActivityDisplay> mActivityDisplays =
@@ -2255,8 +2257,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     ActivityContainer createActivityContainer(ActivityRecord parentActivity,
             IActivityContainerCallback callback) {
-        ActivityContainer activityContainer = new VirtualActivityContainer(parentActivity, callback);
+        ActivityContainer activityContainer =
+                new VirtualActivityContainer(parentActivity, callback);
         mActivityContainers.put(activityContainer.mStackId, activityContainer);
+        if (DEBUG_CONTAINERS) Slog.d(TAG, "createActivityContainer: " + activityContainer);
         parentActivity.mChildContainers.add(activityContainer);
         return activityContainer;
     }
@@ -2265,6 +2269,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ArrayList<ActivityContainer> childStacks = parentActivity.mChildContainers;
         for (int containerNdx = childStacks.size() - 1; containerNdx >= 0; --containerNdx) {
             ActivityContainer container = childStacks.remove(containerNdx);
+            if (DEBUG_CONTAINERS) Slog.d(TAG, "removeChildActivityContainers: removing " +
+                    container);
             container.release();
         }
     }
@@ -2272,11 +2278,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void deleteActivityContainer(IActivityContainer container) {
         ActivityContainer activityContainer = (ActivityContainer)container;
         if (activityContainer != null) {
-            activityContainer.mStack.finishAllActivitiesLocked();
-            final ActivityRecord parent = activityContainer.mParentActivity;
-            if (parent != null) {
-                parent.mChildContainers.remove(activityContainer);
-            }
+            if (DEBUG_CONTAINERS) Slog.d(TAG, "deleteActivityContainer: ",
+                    new RuntimeException("here").fillInStackTrace());
             final int stackId = activityContainer.mStackId;
             mActivityContainers.remove(stackId);
             mWindowManager.removeStack(stackId);
@@ -3128,6 +3131,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                     }
                 } break;
+                case CONTAINER_TASK_LIST_EMPTY_TIMEOUT: {
+                    synchronized (mService) {
+                        Slog.w(TAG, "Timeout waiting for all activities in task to finish. " +
+                                msg.obj);
+                        ((ActivityContainer) msg.obj).onTaskListEmptyLocked();
+                    }
+                } break;
             }
         }
     }
@@ -3184,8 +3194,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         @Override
         public int getDisplayId() {
-            if (mActivityDisplay != null) {
-                return mActivityDisplay.mDisplayId;
+            synchronized (mService) {
+                if (mActivityDisplay != null) {
+                    return mActivityDisplay.mDisplayId;
+                }
             }
             return -1;
         }
@@ -3194,10 +3206,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         public boolean injectEvent(InputEvent event) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                if (mActivityDisplay != null) {
-                    return mInputManagerInternal.injectInputEvent(event,
-                            mActivityDisplay.mDisplayId,
-                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+                synchronized (mService) {
+                    if (mActivityDisplay != null) {
+                        return mInputManagerInternal.injectInputEvent(event,
+                                mActivityDisplay.mDisplayId,
+                                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+                    }
                 }
                 return false;
             } finally {
@@ -3207,10 +3221,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         @Override
         public void release() {
-            mContainerState = CONTAINER_STATE_FINISHING;
-            mStack.finishAllActivitiesLocked();
-            detachLocked();
-            mWindowManager.removeStack(mStackId);
+            synchronized (mService) {
+                if (mContainerState == CONTAINER_STATE_FINISHING) {
+                    return;
+                }
+                mContainerState = CONTAINER_STATE_FINISHING;
+                final Message msg =
+                        mHandler.obtainMessage(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
+                mHandler.sendMessageDelayed(msg, 1000);
+                mStack.finishAllActivitiesLocked();
+            }
         }
 
         private void detachLocked() {
@@ -3301,15 +3321,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return ActivityStackSupervisor.this;
         }
 
-        boolean isAttached() {
+        boolean isAttachedLocked() {
             return mActivityDisplay != null;
         }
 
         void getBounds(Point outBounds) {
-            if (mActivityDisplay != null) {
-                mActivityDisplay.getBounds(outBounds);
-            } else {
-                outBounds.set(0, 0);
+            synchronized (mService) {
+                    if (mActivityDisplay != null) {
+                    mActivityDisplay.getBounds(outBounds);
+                } else {
+                    outBounds.set(0, 0);
+                }
             }
         }
 
@@ -3332,7 +3354,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return true;
         }
 
-        void onTaskListEmpty() {
+        void onTaskListEmptyLocked() {
+            mHandler.removeMessages(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
+            if (!mStack.isHomeStack()) {
+                detachLocked();
+                deleteActivityContainer(this);
+            }
             mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 
@@ -3351,7 +3378,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mParentActivity = parent;
             mCallback = callback;
             mContainerState = CONTAINER_STATE_NO_SURFACE;
-            mIdString = "VirtualActivtyContainer{" + mStackId + ", parent=" + mParentActivity + "}";
+            mIdString = "VirtualActivityContainer{" + mStackId + ", parent=" + mParentActivity + "}";
         }
 
         @Override
@@ -3397,22 +3424,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
-            setSurfaceIfReady();
+            setSurfaceIfReadyLocked();
 
             if (DEBUG_STACK) Slog.d(TAG, "setSurface: " + this + " to display="
                     + virtualActivityDisplay);
         }
 
         @Override
-        boolean isAttached() {
-            return mSurface != null && super.isAttached();
+        boolean isAttachedLocked() {
+            return mSurface != null && super.isAttachedLocked();
         }
 
         @Override
         void setDrawn() {
             synchronized (mService) {
                 mDrawn = true;
-                setSurfaceIfReady();
+                setSurfaceIfReadyLocked();
             }
         }
 
@@ -3422,8 +3449,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        private void setSurfaceIfReady() {
-            if (DEBUG_STACK) Slog.v(TAG, "setSurfaceIfReady: mDrawn=" + mDrawn +
+        private void setSurfaceIfReadyLocked() {
+            if (DEBUG_STACK) Slog.v(TAG, "setSurfaceIfReadyLocked: mDrawn=" + mDrawn +
                     " mContainerState=" + mContainerState + " mSurface=" + mSurface);
             if (mDrawn && mSurface != null && mContainerState == CONTAINER_STATE_NO_SURFACE) {
                 ((VirtualActivityDisplay) mActivityDisplay).setSurface(mSurface);
