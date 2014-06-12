@@ -44,6 +44,7 @@ import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
+import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerInternal.MagnificationCallbacks;
@@ -113,13 +114,13 @@ final class AccessibilityController {
             mDisplayMagnifier.setMagnificationSpecLocked(spec);
         }
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
-    public void onRectangleOnScreenRequestedLocked(Rect rectangle, boolean immediate) {
+    public void onRectangleOnScreenRequestedLocked(Rect rectangle) {
         if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onRectangleOnScreenRequestedLocked(rectangle, immediate);
+            mDisplayMagnifier.onRectangleOnScreenRequestedLocked(rectangle);
         }
         // Not relevant for the window observer.
     }
@@ -129,7 +130,7 @@ final class AccessibilityController {
             mDisplayMagnifier.onWindowLayersChangedLocked();
         }
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
@@ -138,7 +139,7 @@ final class AccessibilityController {
             mDisplayMagnifier.onRotationChangedLocked(displayContent, rotation);
         }
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
@@ -154,7 +155,7 @@ final class AccessibilityController {
             mDisplayMagnifier.onWindowTransitionLocked(windowState, transition);
         }
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
@@ -162,16 +163,16 @@ final class AccessibilityController {
         // Not relevant for the display magnifier.
 
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
 
-    public void onSomeWindowResizedOrMoved() {
+    public void onSomeWindowResizedOrMovedLocked() {
         // Not relevant for the display magnifier.
 
         if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.computeChangedWindows();
+            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
@@ -256,7 +257,7 @@ final class AccessibilityController {
             mWindowManagerService.scheduleAnimationLocked();
         }
 
-        public void onRectangleOnScreenRequestedLocked(Rect rectangle, boolean immediate) {
+        public void onRectangleOnScreenRequestedLocked(Rect rectangle) {
             if (DEBUG_RECTANGLE_REQUESTED) {
                 Slog.i(LOG_TAG, "Rectangle on screen requested: " + rectangle);
             }
@@ -889,13 +890,30 @@ final class AccessibilityController {
 
         private final WindowsForAccessibilityCallback mCallback;
 
+        private final long mRecurringAccessibilityEventsIntervalMillis;
+
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 WindowsForAccessibilityCallback callback) {
             mContext = windowManagerService.mContext;
             mWindowManagerService = windowManagerService;
             mCallback = callback;
             mHandler = new MyHandler(mWindowManagerService.mH.getLooper());
+            mRecurringAccessibilityEventsIntervalMillis = ViewConfiguration
+                    .getSendRecurringAccessibilityEventsInterval();
             computeChangedWindows();
+        }
+
+        public void scheduleComputeChangedWindowsLocked() {
+            // If focus changed, compute changed windows immediately as the focused window
+            // is used by the accessibility manager service to determine the active window.
+            if (mWindowManagerService.mCurrentFocus != null
+                    && mWindowManagerService.mCurrentFocus != mWindowManagerService.mLastFocus) {
+                mHandler.removeMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS);
+                computeChangedWindows();
+            } else if (!mHandler.hasMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS)) {
+                mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS,
+                        mRecurringAccessibilityEventsIntervalMillis);
+            }
         }
 
         public void computeChangedWindows() {
@@ -904,6 +922,13 @@ final class AccessibilityController {
             }
 
             synchronized (mWindowManagerService.mWindowMap) {
+                // Do not send the windows if there is no current focus as
+                // the window manager is still looking for where to put it.
+                // We will do the work when we get a focus change callback.
+                if (mWindowManagerService.mCurrentFocus == null) {
+                    return;
+                }
+
                 WindowManager windowManager = (WindowManager)
                         mContext.getSystemService(Context.WINDOW_SERVICE);
                 windowManager.getDefaultDisplay().getRealSize(mTempPoint);
@@ -921,37 +946,21 @@ final class AccessibilityController {
                 Set<IBinder> addedWindows = mTempBinderSet;
                 addedWindows.clear();
 
+                boolean focusedWindowAdded = false;
+
                 final int visibleWindowCount = visibleWindows.size();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     WindowState windowState = visibleWindows.valueAt(i);
-                    // Compute the window touchable frame as shown on the screen.
 
-                    // Get the touchable frame.
-                    Region touchableRegion = mTempRegion1;
-                    windowState.getTouchableRegion(touchableRegion);
-                    Rect touchableFrame = mTempRect;
-                    touchableRegion.getBounds(touchableFrame);
-
-                    // Move to origin as all transforms are captured by the matrix.
-                    RectF windowFrame = mTempRectF;
-                    windowFrame.set(touchableFrame);
-                    windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
-
-                    // Map the frame to get what appears on the screen.
-                    Matrix matrix = mTempMatrix;
-                    populateTransformationMatrixLocked(windowState, matrix);
-                    matrix.mapRect(windowFrame);
-
-                    // Got the bounds.
+                    // Compute the bounds in the screen.
                     Rect boundsInScreen = mTempRect;
-                    boundsInScreen.set((int) windowFrame.left, (int) windowFrame.top,
-                            (int) windowFrame.right, (int) windowFrame.bottom);
+                    computeWindowBoundsInScreen(windowState, boundsInScreen);
 
                     final int flags = windowState.mAttrs.flags;
 
                     // If the window is not touchable, do not report it but take into account
                     // the space it takes since the content behind it cannot be touched.
-                    if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) == 1) {
+                    if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
                         unaccountedSpace.op(boundsInScreen, unaccountedSpace,
                                 Region.Op.DIFFERENCE);
                         continue;
@@ -965,33 +974,12 @@ final class AccessibilityController {
                     // Add windows of certain types not covered by modal windows.
                     if (isReportedWindowType(windowState.mAttrs.type)) {
                         // Add the window to the ones to be reported.
-                        WindowInfo window = WindowInfo.obtain();
-                        window.type = windowState.mAttrs.type;
-                        window.layer = windowState.mLayer;
-                        window.token = windowState.mClient.asBinder();
-
+                        WindowInfo window = obtainPopulatedWindowInfo(windowState, boundsInScreen);
                         addedWindows.add(window.token);
-
-                        WindowState attachedWindow = windowState.mAttachedWindow;
-                        if (attachedWindow != null) {
-                            window.parentToken = attachedWindow.mClient.asBinder();
-                        }
-
-                        window.focused = windowState.isFocused();
-                        window.boundsInScreen.set(boundsInScreen);
-
-                        final int childCount = windowState.mChildWindows.size();
-                        if (childCount > 0) {
-                            if (window.childTokens == null) {
-                                window.childTokens = new ArrayList<IBinder>();
-                            }
-                            for (int j = 0; j < childCount; j++) {
-                                WindowState child = windowState.mChildWindows.get(j);
-                                window.childTokens.add(child.mClient.asBinder());
-                            }
-                        }
-
                         windows.add(window);
+                        if (windowState.isFocused()) {
+                            focusedWindowAdded = true;
+                        }
                     }
 
                     // Account for the space this window takes.
@@ -1007,6 +995,25 @@ final class AccessibilityController {
                     if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
                         break;
+                    }
+                }
+
+                // Always report the focused window.
+                if (!focusedWindowAdded) {
+                    for (int i = visibleWindowCount - 1; i >= 0; i--) {
+                        WindowState windowState = visibleWindows.valueAt(i);
+                        if (windowState.isFocused()) {
+                            // Compute the bounds in the screen.
+                            Rect boundsInScreen = mTempRect;
+                            computeWindowBoundsInScreen(windowState, boundsInScreen);
+
+                            // Add the window to the ones to be reported.
+                            WindowInfo window = obtainPopulatedWindowInfo(windowState,
+                                    boundsInScreen);
+                            addedWindows.add(window.token);
+                            windows.add(window);
+                            break;
+                        }
                     }
                 }
 
@@ -1072,6 +1079,57 @@ final class AccessibilityController {
             }
         }
 
+        private void computeWindowBoundsInScreen(WindowState windowState, Rect outBounds) {
+            // Get the touchable frame.
+            Region touchableRegion = mTempRegion1;
+            windowState.getTouchableRegion(touchableRegion);
+            Rect touchableFrame = mTempRect;
+            touchableRegion.getBounds(touchableFrame);
+
+            // Move to origin as all transforms are captured by the matrix.
+            RectF windowFrame = mTempRectF;
+            windowFrame.set(touchableFrame);
+            windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+
+            // Map the frame to get what appears on the screen.
+            Matrix matrix = mTempMatrix;
+            populateTransformationMatrixLocked(windowState, matrix);
+            matrix.mapRect(windowFrame);
+
+            // Got the bounds.
+            outBounds.set((int) windowFrame.left, (int) windowFrame.top,
+                    (int) windowFrame.right, (int) windowFrame.bottom);
+        }
+
+        private static WindowInfo obtainPopulatedWindowInfo(WindowState windowState,
+                Rect boundsInScreen) {
+            WindowInfo window = WindowInfo.obtain();
+            window.type = windowState.mAttrs.type;
+            window.layer = windowState.mLayer;
+            window.token = windowState.mClient.asBinder();
+
+            WindowState attachedWindow = windowState.mAttachedWindow;
+            if (attachedWindow != null) {
+                window.parentToken = attachedWindow.mClient.asBinder();
+            }
+
+            window.focused = windowState.isFocused();
+            window.boundsInScreen.set(boundsInScreen);
+
+            final int childCount = windowState.mChildWindows.size();
+            if (childCount > 0) {
+                if (window.childTokens == null) {
+                    window.childTokens = new ArrayList<IBinder>();
+                }
+                for (int j = 0; j < childCount; j++) {
+                    WindowState child = windowState.mChildWindows.get(j);
+                    window.childTokens.add(child.mClient.asBinder());
+                }
+            }
+
+            return window;
+        }
+
         private void cacheWindows(List<WindowInfo> windows) {
             final int oldWindowCount = mOldWindows.size();
             for (int i = oldWindowCount - 1; i >= 0; i--) {
@@ -1088,10 +1146,10 @@ final class AccessibilityController {
             if (oldWindow == newWindow) {
                 return false;
             }
-            if (oldWindow == null && newWindow != null) {
+            if (oldWindow == null) {
                 return true;
             }
-            if (oldWindow != null && newWindow == null) {
+            if (newWindow == null) {
                 return true;
             }
             if (oldWindow.type != newWindow.type) {
@@ -1160,7 +1218,8 @@ final class AccessibilityController {
         }
 
         private class MyHandler extends Handler {
-            public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED = 1;
+            public static final int MESSAGE_COMPUTE_CHANGED_WINDOWS = 1;
+            public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED = 2;
 
             public MyHandler(Looper looper) {
                 super(looper, null, false);
@@ -1170,6 +1229,10 @@ final class AccessibilityController {
             @SuppressWarnings("unchecked")
             public void handleMessage(Message message) {
                 switch (message.what) {
+                    case MESSAGE_COMPUTE_CHANGED_WINDOWS: {
+                        computeChangedWindows();
+                    } break;
+
                     case MESSAGE_NOTIFY_WINDOWS_CHANGED: {
                         List<WindowInfo> windows = (List<WindowInfo>) message.obj;
                         mCallback.onWindowsForAccessibilityChanged(windows);

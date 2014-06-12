@@ -3302,7 +3302,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 for (int i = 0; i < windowCount; i++) {
                     AccessibilityWindowInfo window = mWindows.get(i);
                     if (window.getId() == mActiveWindowId) {
-                       window.setActive(true);
+                        window.setActive(true);
                     }
                 }
             }

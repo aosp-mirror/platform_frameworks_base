@@ -111,6 +111,7 @@ public class WindowInfo implements Parcelable {
         builder.append("type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
+        builder.append(", bounds=").append(boundsInScreen);
         builder.append(", parent=").append(parentToken);
         builder.append(", focused=").append(focused);
         builder.append(", children=").append(childTokens);

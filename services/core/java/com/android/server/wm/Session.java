@@ -446,11 +446,11 @@ final class Session extends IWindowSession.Stub
         }
     }
 
-    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
+    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized(mService.mWindowMap) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mService.onRectangleOnScreenRequested(token, rectangle, immediate);
+                mService.onRectangleOnScreenRequested(token, rectangle);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

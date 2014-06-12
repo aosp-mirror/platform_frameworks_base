@@ -2811,14 +2811,13 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
-    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
+    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized (mWindowMap) {
             if (mAccessibilityController != null) {
                 WindowState window = mWindowMap.get(token);
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (window != null && window.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    mAccessibilityController.onRectangleOnScreenRequestedLocked(rectangle,
-                            immediate);
+                    mAccessibilityController.onRectangleOnScreenRequestedLocked(rectangle);
                 }
             }
         }
@@ -9231,7 +9230,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         //TODO (multidisplay): Accessibility supported only for the default display.
                         if (mAccessibilityController != null
                                 && displayId == Display.DEFAULT_DISPLAY) {
-                            mAccessibilityController.onSomeWindowResizedOrMoved();
+                            mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                         }
 
                         try {
@@ -9872,7 +9871,9 @@ public class WindowManagerService extends IWindowManager.Stub
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
 
-            if (mAccessibilityController != null) {
+            // TODO(multidisplay): Accessibilty supported only of default desiplay.
+            if (mAccessibilityController != null
+                    && displayContent.getDisplayId() == Display.DEFAULT_DISPLAY) {
                 mAccessibilityController.onWindowFocusChangedLocked();
             }
 
