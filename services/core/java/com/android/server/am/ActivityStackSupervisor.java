@@ -2768,16 +2768,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     @Override
     public void onDisplayAdded(int displayId) {
+        Slog.v(TAG, "Display added displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_ADDED, displayId, 0));
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
+        Slog.v(TAG, "Display removed displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_REMOVED, displayId, 0));
     }
 
     @Override
     public void onDisplayChanged(int displayId) {
+        Slog.v(TAG, "Display changed displayId=" + displayId);
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
@@ -3048,10 +3051,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     return;
                 }
                 mContainerState = CONTAINER_STATE_FINISHING;
+
                 final Message msg =
                         mHandler.obtainMessage(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
                 mHandler.sendMessageDelayed(msg, 1000);
-                mStack.finishAllActivitiesLocked();
+
+                long origId = Binder.clearCallingIdentity();
+                try {
+                    mStack.finishAllActivitiesLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
             }
         }
 

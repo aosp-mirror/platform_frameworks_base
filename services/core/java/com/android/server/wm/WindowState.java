@@ -715,7 +715,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     public DisplayContent getDisplayContent() {
-        return mAppToken == null ? mDisplayContent : getStack().getDisplayContent();
+        if (mAppToken == null) {
+            return mDisplayContent;
+        }
+        final TaskStack stack = getStack();
+        return stack == null ? mDisplayContent : stack.getDisplayContent();
     }
 
     public int getDisplayId() {
