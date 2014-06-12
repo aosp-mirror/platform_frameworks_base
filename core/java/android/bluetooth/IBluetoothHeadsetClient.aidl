@@ -17,15 +17,15 @@
 package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHandsfreeClientCall;
+import android.bluetooth.BluetoothHeadsetClientCall;
 import android.os.Bundle;
 
 /**
- * API for Bluetooth Handsfree Client service (HFP HF Role)
+ * API for Bluetooth Headset Client service (HFP HF Role)
  *
  * {@hide}
  */
-interface IBluetoothHandsfreeClient {
+interface IBluetoothHeadsetClient {
     boolean connect(in BluetoothDevice device);
     boolean disconnect(in BluetoothDevice device);
 
@@ -41,7 +41,7 @@ interface IBluetoothHandsfreeClient {
     boolean startVoiceRecognition(in BluetoothDevice device);
     boolean stopVoiceRecognition(in BluetoothDevice device);
 
-    List<BluetoothHandsfreeClientCall> getCurrentCalls(in BluetoothDevice device);
+    List<BluetoothHeadsetClientCall> getCurrentCalls(in BluetoothDevice device);
     Bundle getCurrentAgEvents(in BluetoothDevice device);
 
     boolean acceptCall(in BluetoothDevice device, int flag);

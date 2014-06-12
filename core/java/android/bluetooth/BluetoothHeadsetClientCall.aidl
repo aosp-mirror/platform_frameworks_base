@@ -15,4 +15,4 @@
  */
 package android.bluetooth;
 
-parcelable BluetoothHandsfreeClientCall;
+parcelable BluetoothHeadsetClientCall;

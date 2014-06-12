@@ -24,7 +24,7 @@ import android.os.Parcelable;
  * It implements {@link Parcelable} for inter-process message passing.
  * @hide
  */
-public final class BluetoothHandsfreeClientCall implements Parcelable {
+public final class BluetoothHeadsetClientCall implements Parcelable {
 
     /* Call state */
     /**
@@ -68,9 +68,9 @@ public final class BluetoothHandsfreeClientCall implements Parcelable {
     private final boolean mOutgoing;
 
     /**
-     * Creates BluetoothHandsfreeClientCall instance.
+     * Creates BluetoothHeadsetClientCall instance.
      */
-    public BluetoothHandsfreeClientCall(int id, int state, String number, boolean multiParty,
+    public BluetoothHeadsetClientCall(int id, int state, String number, boolean multiParty,
             boolean outgoing) {
         mId = id;
         mState = state;
@@ -163,17 +163,17 @@ public final class BluetoothHandsfreeClientCall implements Parcelable {
     /**
      * {@link Parcelable.Creator} interface implementation.
      */
-    public static final Parcelable.Creator<BluetoothHandsfreeClientCall> CREATOR =
-            new Parcelable.Creator<BluetoothHandsfreeClientCall>() {
+    public static final Parcelable.Creator<BluetoothHeadsetClientCall> CREATOR =
+            new Parcelable.Creator<BluetoothHeadsetClientCall>() {
                 @Override
-                public BluetoothHandsfreeClientCall createFromParcel(Parcel in) {
-                    return new BluetoothHandsfreeClientCall(in.readInt(), in.readInt(),
+                public BluetoothHeadsetClientCall createFromParcel(Parcel in) {
+                    return new BluetoothHeadsetClientCall(in.readInt(), in.readInt(),
                             in.readString(), in.readInt() == 1, in.readInt() == 1);
                 }
 
                 @Override
-                public BluetoothHandsfreeClientCall[] newArray(int size) {
-                    return new BluetoothHandsfreeClientCall[size];
+                public BluetoothHeadsetClientCall[] newArray(int size) {
+                    return new BluetoothHeadsetClientCall[size];
                 }
             };
 

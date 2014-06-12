@@ -37,8 +37,8 @@ import java.util.List;
  *
  * @hide
  * */
-public final class BluetoothHandsfreeClient implements BluetoothProfile {
-    private static final String TAG = "BluetoothHandsfreeClient";
+public final class BluetoothHeadsetClient implements BluetoothProfile {
+    private static final String TAG = "BluetoothHeadsetClient";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -69,7 +69,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * and not supported ones are <strong>not</strong> being sent at all.</p>
      */
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.handsfreeclient.profile.action.CONNECTION_STATE_CHANGED";
+        "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Intent sent whenever audio state changes.
@@ -87,7 +87,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * indicating wide band speech support.</p>
      */
     public static final String ACTION_AUDIO_STATE_CHANGED =
-        "android.bluetooth.handsfreeclient.profile.action.AUDIO_STATE_CHANGED";
+        "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
 
     /**
      * Intent sending updates of the Audio Gateway state.
@@ -103,18 +103,18 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * {@link #EXTRA_IN_BAND_RING}</p>
      */
     public static final String ACTION_AG_EVENT =
-            "android.bluetooth.handsfreeclient.profile.action.AG_EVENT";
+            "android.bluetooth.headsetclient.profile.action.AG_EVENT";
 
     /**
      * Intent sent whenever state of a call changes.
      *
      * <p>It includes:
      * {@link #EXTRA_CALL},
-     * with value of {@link BluetoothHandsfreeClientCall} instance,
+     * with value of {@link BluetoothHeadsetClientCall} instance,
      * representing actual call state.</p>
      */
     public static final String ACTION_CALL_CHANGED =
-            "android.bluetooth.handsfreeclient.profile.action.AG_CALL_CHANGED";
+            "android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED";
 
     /**
      * Intent that notifies about the result of the last issued action.
@@ -124,7 +124,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * when for example user started voice recognition from HF unit.
      */
     public static final String ACTION_RESULT =
-            "android.bluetooth.handsfreeclient.profile.action.RESULT";
+            "android.bluetooth.headsetclient.profile.action.RESULT";
 
     /**
      * Intent that notifies about the number attached to the last voice tag
@@ -135,7 +135,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * with a <code>String</code> value representing phone number.</p>
      */
     public static final String ACTION_LAST_VTAG =
-            "android.bluetooth.handsfreeclient.profile.action.LAST_VTAG";
+            "android.bluetooth.headsetclient.profile.action.LAST_VTAG";
 
     public static final int STATE_AUDIO_DISCONNECTED = 0;
     public static final int STATE_AUDIO_CONNECTING = 1;
@@ -147,7 +147,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      *                     <code>false</code>.</p>
      */
     public static final String EXTRA_AUDIO_WBS =
-            "android.bluetooth.handsfreeclient.extra.AUDIO_WBS";
+            "android.bluetooth.headsetclient.extra.AUDIO_WBS";
 
     /**
      * Extra for AG_EVENT indicates network status.
@@ -155,32 +155,32 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      *           1 - network available </p>
      */
     public static final String EXTRA_NETWORK_STATUS =
-            "android.bluetooth.handsfreeclient.extra.NETWORK_STATUS";
+            "android.bluetooth.headsetclient.extra.NETWORK_STATUS";
     /**
      * Extra for AG_EVENT intent indicates network signal strength.
      * <p>Value: <code>Integer</code> representing signal strength.</p>
      */
     public static final String EXTRA_NETWORK_SIGNAL_STRENGTH =
-            "android.bluetooth.handsfreeclient.extra.NETWORK_SIGNAL_STRENGTH";
+            "android.bluetooth.headsetclient.extra.NETWORK_SIGNAL_STRENGTH";
     /**
      * Extra for AG_EVENT intent indicates roaming state.
      * <p>Value: 0 - no roaming
      *           1 - active roaming</p>
      */
     public static final String EXTRA_NETWORK_ROAMING =
-            "android.bluetooth.handsfreeclient.extra.NETWORK_ROAMING";
+            "android.bluetooth.headsetclient.extra.NETWORK_ROAMING";
     /**
      * Extra for AG_EVENT intent indicates the battery level.
      * <p>Value: <code>Integer</code> representing signal strength.</p>
      */
     public static final String EXTRA_BATTERY_LEVEL =
-            "android.bluetooth.handsfreeclient.extra.BATTERY_LEVEL";
+            "android.bluetooth.headsetclient.extra.BATTERY_LEVEL";
     /**
      * Extra for AG_EVENT intent indicates operator name.
      * <p>Value: <code>String</code> representing operator name.</p>
      */
     public static final String EXTRA_OPERATOR_NAME =
-            "android.bluetooth.handsfreeclient.extra.OPERATOR_NAME";
+            "android.bluetooth.headsetclient.extra.OPERATOR_NAME";
     /**
      * Extra for AG_EVENT intent indicates voice recognition state.
      * <p>Value:
@@ -188,7 +188,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      *          1 - voice recognition started.</p>
      */
     public static final String EXTRA_VOICE_RECOGNITION =
-            "android.bluetooth.handsfreeclient.extra.VOICE_RECOGNITION";
+            "android.bluetooth.headsetclient.extra.VOICE_RECOGNITION";
     /**
      * Extra for AG_EVENT intent indicates in band ring state.
      * <p>Value:
@@ -196,21 +196,21 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      *          1 - in band ring tone supported.</p>
      */
     public static final String EXTRA_IN_BAND_RING =
-            "android.bluetooth.handsfreeclient.extra.IN_BAND_RING";
+            "android.bluetooth.headsetclient.extra.IN_BAND_RING";
 
     /**
      * Extra for AG_EVENT intent indicates subscriber info.
      * <p>Value: <code>String</code> containing subscriber information.</p>
      */
     public static final String EXTRA_SUBSCRIBER_INFO =
-            "android.bluetooth.handsfreeclient.extra.SUBSCRIBER_INFO";
+            "android.bluetooth.headsetclient.extra.SUBSCRIBER_INFO";
 
     /**
      *  Extra for AG_CALL_CHANGED intent indicates the
-     *  {@link BluetoothHandsfreeClientCall} object that has changed.
+     *  {@link BluetoothHeadsetClientCall} object that has changed.
      */
     public static final String EXTRA_CALL =
-            "android.bluetooth.handsfreeclient.extra.CALL";
+            "android.bluetooth.headsetclient.extra.CALL";
 
     /**
      * Extra for ACTION_LAST_VTAG intent.
@@ -218,7 +218,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * corresponding to last voice tag recorded on AG</p>
      */
     public static final String EXTRA_NUMBER =
-            "android.bluetooth.handsfreeclient.extra.NUMBER";
+            "android.bluetooth.headsetclient.extra.NUMBER";
 
     /**
      * Extra for ACTION_RESULT intent that shows the result code of
@@ -234,7 +234,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * {@link #ACTION_RESULT_ERROR_CME}</p>
      */
     public static final String EXTRA_RESULT_CODE =
-            "android.bluetooth.handsfreeclient.extra.RESULT_CODE";
+            "android.bluetooth.headsetclient.extra.RESULT_CODE";
 
     /**
      * Extra for ACTION_RESULT intent that shows the extended result code of
@@ -242,7 +242,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * <p>Value: <code>Integer</code> - error code.</p>
      */
     public static final String EXTRA_CME_CODE =
-            "android.bluetooth.handsfreeclient.extra.CME_CODE";
+            "android.bluetooth.headsetclient.extra.CME_CODE";
 
     /* Extras for AG_FEATURES, extras type is boolean */
     // TODO verify if all of those are actually useful
@@ -250,53 +250,53 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * AG feature: three way calling.
      */
     public final static String EXTRA_AG_FEATURE_3WAY_CALLING =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
     /**
      * AG feature: voice recognition.
      */
     public final static String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
     /**
      * AG feature: fetching phone number for voice tagging procedure.
      */
     public final static String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
     /**
      * AG feature: ability to reject incoming call.
      */
     public final static String EXTRA_AG_FEATURE_REJECT_CALL =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
     /**
      * AG feature: enhanced call handling (terminate specific call, private consultation).
      */
     public final static String EXTRA_AG_FEATURE_ECC =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_ECC";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ECC";
     /**
      * AG feature: response and hold.
      */
     public final static String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
     /**
      * AG call handling feature: accept held or waiting call in three way calling scenarios.
      */
     public final static String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release held or waiting call in three way calling scenarios.
      */
     public final static String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release active call and accept held or waiting call in three way
      * calling scenarios.
      */
     public final static String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
     /**
      * AG call handling feature: merge two calls, held and active - multi party conference mode.
      */
     public final static String EXTRA_AG_FEATURE_MERGE =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_MERGE";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE";
     /**
      * AG call handling feature: merge calls and disconnect from multi party
      * conversation leaving peers connected to each other.
@@ -304,7 +304,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * as it requires connection and billing transfer.
      */
     public final static String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
-            "android.bluetooth.handsfreeclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
 
     /* Action result codes */
     public final static int ACTION_RESULT_OK = 0;
@@ -366,7 +366,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
 
     private Context mContext;
     private ServiceListener mServiceListener;
-    private IBluetoothHandsfreeClient mService;
+    private IBluetoothHeadsetClient mService;
     private BluetoothAdapter mAdapter;
 
     final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
@@ -389,12 +389,8 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) Log.d(TAG,"Binding service...");
-                                    if (!mContext.bindService(
-                                            new Intent(IBluetoothHandsfreeClient.class.getName()),
-                                                    mConnection, 0)) {
-                                        Log.e(TAG,
-                                            "Could not bind to Bluetooth Handsfree Client Service");
-                                    }
+                                    Intent intent = new Intent(IBluetoothHeadsetClient.class.getName());
+                                    doBind();
                                 }
                             } catch (Exception re) {
                                 Log.e(TAG,"",re);
@@ -405,9 +401,9 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
         };
 
     /**
-     * Create a BluetoothHandsfreeClient proxy object.
+     * Create a BluetoothHeadsetClient proxy object.
      */
-    /*package*/ BluetoothHandsfreeClient(Context context, ServiceListener l) {
+    /*package*/ BluetoothHeadsetClient(Context context, ServiceListener l) {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -421,15 +417,24 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
             }
         }
 
-        if (!context.bindService(
-                new Intent(IBluetoothHandsfreeClient.class.getName()), mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth Handsfree Client Service");
+        doBind();
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothHeadsetClient.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
+                 android.os.Process.myUserHandle())) {
+            Log.e(TAG, "Could not bind to Bluetooth Headset Client Service with " + intent);
+            return false;
         }
+        return true;
     }
 
     /**
      * Close the connection to the backing service.
-     * Other public functions of BluetoothHandsfreeClient will return default error
+     * Other public functions of BluetoothHeadsetClient will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
      */
@@ -677,7 +682,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
      * @param device    remote device
      * @return          list of calls; empty list if none call exists
      */
-    public List<BluetoothHandsfreeClientCall> getCurrentCalls(BluetoothDevice device) {
+    public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
         if (mService != null && isEnabled() &&
                 isValidDevice(device)) {
@@ -1050,7 +1055,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
-        return BluetoothHandsfreeClient.STATE_AUDIO_DISCONNECTED;
+        return BluetoothHeadsetClient.STATE_AUDIO_DISCONNECTED;
     }
 
     /**
@@ -1127,11 +1132,11 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHandsfreeClient.Stub.asInterface(service);
+            mService = IBluetoothHeadsetClient.Stub.asInterface(service);
 
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.HANDSFREE_CLIENT,
-                        BluetoothHandsfreeClient.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.HEADSET_CLIENT,
+                        BluetoothHeadsetClient.this);
             }
         }
         @Override
@@ -1139,7 +1144,7 @@ public final class BluetoothHandsfreeClient implements BluetoothProfile {
             if (DBG) Log.d(TAG, "Proxy object disconnected");
             mService = null;
             if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.HANDSFREE_CLIENT);
+                mServiceListener.onServiceDisconnected(BluetoothProfile.HEADSET_CLIENT);
             }
         }
     };

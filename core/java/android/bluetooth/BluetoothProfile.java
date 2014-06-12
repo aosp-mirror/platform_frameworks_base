@@ -110,10 +110,10 @@ public interface BluetoothProfile {
     public static final int A2DP_SINK = 10;
 
     /**
-     * Handsfree Client - HFP HF Role
+     * Headset Client - HFP HF Role
      * @hide
      */
-    public static final int HANDSFREE_CLIENT = 16;
+    public static final int HEADSET_CLIENT = 16;
 
     /**
      * Default priority for devices that we try to auto-connect to and

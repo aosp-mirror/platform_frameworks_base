@@ -1402,8 +1402,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.MAP) {
             BluetoothMap map = new BluetoothMap(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.HANDSFREE_CLIENT) {
-            BluetoothHandsfreeClient hfpclient = new BluetoothHandsfreeClient(context, listener);
+        } else if (profile == BluetoothProfile.HEADSET_CLIENT) {
+            BluetoothHeadsetClient headsetClient = new BluetoothHeadsetClient(context, listener);
             return true;
         } else {
             return false;
@@ -1457,9 +1457,9 @@ public final class BluetoothAdapter {
                 BluetoothMap map = (BluetoothMap)proxy;
                 map.close();
                 break;
-            case BluetoothProfile.HANDSFREE_CLIENT:
-                BluetoothHandsfreeClient hfpclient = (BluetoothHandsfreeClient)proxy;
-                hfpclient.close();
+            case BluetoothProfile.HEADSET_CLIENT:
+                BluetoothHeadsetClient headsetClient = (BluetoothHeadsetClient)proxy;
+                headsetClient.close();
                 break;
         }
     }

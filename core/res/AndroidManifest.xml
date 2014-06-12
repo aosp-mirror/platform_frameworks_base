@@ -123,6 +123,18 @@
     <protected-broadcast
         android:name="android.bluetooth.headset.action.VENDOR_SPECIFIC_HEADSET_EVENT" />
     <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.AG_EVENT" />
+    <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.RESULT" />
+    <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.LAST_VTAG" />
+    <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED" />
