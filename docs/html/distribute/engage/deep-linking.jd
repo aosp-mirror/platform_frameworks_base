@@ -1,13 +1,13 @@
 page.title=Deep Link to Bring Users Back
-page.metaDescription=Use deep links to bring your users into your apps from social posts or search.
+page.metaDescription=Use deep links to bring your users into your apps from social posts, search, or ads.
 page.tags="app indexing, google+ signin"
 page.image=/images/gp-listing-4.jpg
 
 @jd:body
 
 <p>
-  Use deep links to bring your users into your apps from social posts or
-  search.
+  Use deep links to bring your users into your apps from social posts,
+  search, or ads.
 </p>
 
 <div class="headerLine">
@@ -47,6 +47,11 @@ page.image=/images/gp-listing-4.jpg
 <h2>Deep Linking from Google Search &mdash; App Indexing</h2>
 </div>
 
+
+<div style="float:right;">
+  <img src="/images/gp-listing-4.jpg" style="padding-top:1em;padding-left:2em;">
+</div>
+
 <p>
   Another way to bring users back to your apps is to apply for app indexing.
 </p>
@@ -60,11 +65,29 @@ page.image=/images/gp-listing-4.jpg
   content</a>.
 </p>
 
-<div>
-  <img src="{@docRoot}images/gp-listing-4.jpg" style="padding-top:1em;">
+<div class="clearfloat" style="margin-top:2em;"></div>
+
+<div style="float:right;width:340px;padding-left:2em;">
+  <img src="/images/gp-ads-linking2.jpg" style="padding-top:1em;">
 </div>
 
-<div class="headerLine">
+<div class="headerLine ">
+<h2>Deep Linking from Google Ads</h2>
+</div>
+<p>
+  Ads can remind users about the apps they already have.
+</p>
+
+<p>
+  As with deep links from Google's organic search results, AdWords deep links
+  send users directly to the relevant pages in apps they already have on their
+  mobile device. A mobile search for "flights to London," for instance, could
+  take a user straight to the London page in a travel app. <a href=
+  "http://www.thinkwithgoogle.com/products/ads-apps.html"
+  class="external-link">Learn more</a>.
+</p>
+
+<div class="headerLine clearfloat">
   <h2 id="related-resources">
     Related Resources
   </h2>

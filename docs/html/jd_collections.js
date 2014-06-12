@@ -49,7 +49,8 @@ var RESOURCE_COLLECTIONS = {
       "distribute/users/your-listing.html",
       "distribute/users/build-buzz.html",
       "distribute/users/build-community.html",
-      "distribute/users/expand-to-new-markets.html"
+      "distribute/users/expand-to-new-markets.html",
+      "distribute/users/promote-with-ads.html"
     ]
   },
   "distribute/engagelanding": {
@@ -60,6 +61,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/engage/deep-linking.html",
       "distribute/engage/game-services.html",
+      "distribute/engage/analytics.html",
       "distribute/engage/app-updates.html",
       "distribute/engage/community.html",
       "distribute/engage/video.html"
@@ -212,6 +214,13 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/optimizing-your-app.html",
       "http://www.youtube.com/watch?v=RRelFvc6Czo",
       "distribute/stories/localization.html"
+    ]
+  },
+  "distribute/users/promotewithads": {
+    "title": "",
+    "resources": [
+      "http://www.google.com/ads/admob/#subid=us-en-et-dac",
+      "distribute/essentials/optimizing-your-app.html"
     ]
   },
   "distribute/users/buildbuzz": {
@@ -392,6 +401,14 @@ var RESOURCE_COLLECTIONS = {
       "design/patterns/notifications.html",
       "distribute/engage/gcm.html",
       "http://play.google.com/about/developer-content-policy.html"
+    ]
+  },
+  "distribute/engage/analytics": {
+    "title": "",
+    "resources": [
+      "http://www.google.com/analytics/mobile/",
+      "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html",
+      "https://developers.google.com/analytics/devguides/collection/android/"
     ]
   },
   "distribute/engage/widgets": {

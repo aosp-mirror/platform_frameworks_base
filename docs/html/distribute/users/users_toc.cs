@@ -28,7 +28,12 @@
         </a>
     </div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/promote-with-ads.html">
+          <span class="en">Promote with Ads</span>
+        </a>
+    </div>
+  </li>
 </ul>
 
 

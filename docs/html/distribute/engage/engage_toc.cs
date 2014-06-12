@@ -37,6 +37,12 @@
   </li>
   <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/analytics.html">
+        <span class="en">Understand User Behavior</span></a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/app-updates.html">
         <span class="en">Update Regularly</span></a>
     </div>
