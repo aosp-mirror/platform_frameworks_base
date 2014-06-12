@@ -160,6 +160,31 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
         return mOutgoing;
     }
 
+    public String toString() {
+        StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mId: ");
+        builder.append(mId);
+        builder.append(", mState: ");
+        switch (mState) {
+            case CALL_STATE_ACTIVE: builder.append("ACTIVE"); break;
+            case CALL_STATE_HELD: builder.append("HELD"); break;
+            case CALL_STATE_DIALING: builder.append("DIALING"); break;
+            case CALL_STATE_ALERTING: builder.append("ALERTING"); break;
+            case CALL_STATE_INCOMING: builder.append("INCOMING"); break;
+            case CALL_STATE_WAITING: builder.append("WAITING"); break;
+            case CALL_STATE_HELD_BY_RESPONSE_AND_HOLD: builder.append("HELD_BY_RESPONSE_AND_HOLD"); break;
+            case CALL_STATE_TERMINATED: builder.append("TERMINATED"); break;
+            default: builder.append(mState); break;
+        }
+        builder.append(", mNumber: ");
+        builder.append(mNumber);
+        builder.append(", mMultiParty: ");
+        builder.append(mMultiParty);
+        builder.append(", mOutgoing: ");
+        builder.append(mOutgoing);
+        builder.append("}");
+        return builder.toString();
+    }
+
     /**
      * {@link Parcelable.Creator} interface implementation.
      */
