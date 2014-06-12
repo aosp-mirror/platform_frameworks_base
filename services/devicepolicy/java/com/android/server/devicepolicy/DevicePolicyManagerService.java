@@ -818,12 +818,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (who != null) {
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
+                throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
+                         + " does not own the device");
+            }
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
+                throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
+                        + " does not own the profile");
+            }
             throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
                     + " did not specify uses-policy for: "
                     + candidates.get(0).info.getTagForPolicy(reqPolicy));
         } else {
             throw new SecurityException("No active admin owned by uid "
-                    + Binder.getCallingUid() + " for policy:" + reqPolicy);
+                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
         }
     }
 
