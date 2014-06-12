@@ -186,12 +186,12 @@ public final class CursorAnchorInfo implements Parcelable {
     /**
      * Builder for {@link CursorAnchorInfo}. This class is not designed to be thread-safe.
      */
-    public static final class CursorAnchorInfoBuilder {
+    public static final class Builder {
         /**
          * Sets the text range of the selection. Calling this can be skipped if there is no
          * selection.
          */
-        public CursorAnchorInfoBuilder setSelectionRange(final int newStart, final int newEnd) {
+        public Builder setSelectionRange(final int newStart, final int newEnd) {
             mSelectionStart = newStart;
             mSelectionEnd = newEnd;
             return this;
@@ -205,8 +205,7 @@ public final class CursorAnchorInfo implements Parcelable {
          * @param index index where the composing text starts.
          * @param composingText the entire composing text.
          */
-        public CursorAnchorInfoBuilder setComposingText(final int index,
-                final CharSequence composingText) {
+        public Builder setComposingText(final int index, final CharSequence composingText) {
             mComposingTextStart = index;
             if (composingText == null) {
                 mComposingText = null;
@@ -236,9 +235,8 @@ public final class CursorAnchorInfo implements Parcelable {
          * that will be transformed with the transformation matrix when rendered on the screen. This
          * should be calculated or compatible with {@link Layout#getLineBottom(int)}.
          */
-        public CursorAnchorInfoBuilder setInsertionMarkerLocation(
-                final float horizontalPosition, final float lineTop, final float lineBaseline,
-                final float lineBottom){
+        public Builder setInsertionMarkerLocation(final float horizontalPosition,
+                final float lineTop, final float lineBaseline, final float lineBottom){
             mInsertionMarkerHorizontal = horizontalPosition;
             mInsertionMarkerTop = lineTop;
             mInsertionMarkerBaseline = lineBaseline;
@@ -269,9 +267,8 @@ public final class CursorAnchorInfo implements Parcelable {
          * @throws IllegalArgumentException If the index is a negative value, or not greater than
          * all of the previously called indices.
          */
-        public CursorAnchorInfoBuilder addCharacterRect(final int index,
-                final float leadingEdgeX, final float leadingEdgeY, final float trailingEdgeX,
-                final float trailingEdgeY) {
+        public Builder addCharacterRect(final int index, final float leadingEdgeX,
+                final float leadingEdgeY, final float trailingEdgeX, final float trailingEdgeY) {
             if (index < 0) {
                 throw new IllegalArgumentException("index must not be a negative integer.");
             }
@@ -289,7 +286,7 @@ public final class CursorAnchorInfo implements Parcelable {
          * @param matrix transformation matrix from local coordinates into screen coordinates. null
          * is interpreted as an identity matrix.
          */
-        public CursorAnchorInfoBuilder setMatrix(final Matrix matrix) {
+        public Builder setMatrix(final Matrix matrix) {
             mMatrix.set(matrix != null ? matrix : Matrix.IDENTITY_MATRIX);
             return this;
         }
@@ -297,7 +294,7 @@ public final class CursorAnchorInfo implements Parcelable {
 
         /**
          * @return {@link CursorAnchorInfo} using parameters in this
-         * {@link CursorAnchorInfoBuilder}.
+         * {@link Builder}.
          */
         public CursorAnchorInfo build() {
             return new CursorAnchorInfo(this);
@@ -323,7 +320,7 @@ public final class CursorAnchorInfo implements Parcelable {
         }
     }
 
-    private CursorAnchorInfo(final CursorAnchorInfoBuilder builder) {
+    private CursorAnchorInfo(final Builder builder) {
         mSelectionStart = builder.mSelectionStart;
         mSelectionEnd = builder.mSelectionEnd;
         mComposingTextStart = builder.mComposingTextStart;

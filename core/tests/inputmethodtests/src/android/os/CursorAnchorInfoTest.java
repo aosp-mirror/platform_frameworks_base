@@ -21,7 +21,7 @@ import android.graphics.RectF;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.CursorAnchorInfo;
-import android.view.inputmethod.CursorAnchorInfo.CursorAnchorInfoBuilder;
+import android.view.inputmethod.CursorAnchorInfo.Builder;
 
 public class CursorAnchorInfoTest extends InstrumentationTestCase {
     // null represents a character that is invisible, for example because it's overlapped by some
@@ -64,7 +64,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         Matrix TRANSFORM_MATRIX = new Matrix(Matrix.IDENTITY_MATRIX);
         TRANSFORM_MATRIX.setScale(10.0f, 20.0f);
 
-        final CursorAnchorInfoBuilder builder = new CursorAnchorInfoBuilder();
+        final Builder builder = new Builder();
         builder.setSelectionRange(SELECTION_START, SELECTION_END)
                 .setComposingText(COMPOSING_TEXT_START, COMPOSING_TEXT)
                 .setInsertionMarkerLocation(INSERTION_MARKER_HORIZONTAL, INSERTION_MARKER_TOP,
@@ -148,7 +148,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final Matrix MATRIX3 = new Matrix();
         MATRIX3.setTranslate(210.0f, 220.0f);
         final Matrix matrix = new Matrix();
-        final CursorAnchorInfoBuilder builder = new CursorAnchorInfoBuilder();
+        final Builder builder = new Builder();
 
         matrix.set(MATRIX1);
         builder.setMatrix(matrix);
@@ -171,7 +171,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
     public void testBuilderAdd() throws Exception {
         // A negative index should be rejected.
         try {
-            new CursorAnchorInfoBuilder().addCharacterRect(-1, 0.0f, 0.0f, 0.0f, 0.0f);
+            new Builder().addCharacterRect(-1, 0.0f, 0.0f, 0.0f, 0.0f);
         } catch (IllegalArgumentException ex) {
             assertTrue(true);
         }
@@ -191,4 +191,3 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         }
     }
 }
-
