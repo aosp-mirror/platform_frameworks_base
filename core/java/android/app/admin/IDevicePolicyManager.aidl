@@ -136,6 +136,7 @@ interface IDevicePolicyManager {
     boolean isApplicationBlocked(in ComponentName admin, in String packageName);
 
     UserHandle createUser(in ComponentName who, in String name);
+    UserHandle createAndInitializeUser(in ComponentName who, in String name, in String profileOwnerName, in ComponentName profileOwnerComponent, in Bundle adminExtras);
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
 
     void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);

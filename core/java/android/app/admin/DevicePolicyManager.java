@@ -2111,6 +2111,41 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to create a user with the specified name. The UserHandle returned
+     * by this method should not be persisted as user handles are recycled as users are removed and
+     * created. If you need to persist an identifier for this user, use
+     * {@link UserManager#getSerialNumberForUser}.  The new user will be started in the background
+     * immediately.
+     *
+     * <p> profileOwnerComponent is the {@link DeviceAdminReceiver} to be the profile owner as well
+     * as registered as an active admin on the new user.  The profile owner package will be
+     * installed on the new user if it already is installed on the device.
+     *
+     * <p>If the optionalInitializeData is not null, then the extras will be passed to the
+     * profileOwnerComponent when onEnable is called.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param name the user's name
+     * @param ownerName the human readable name of the organisation associated with this DPM.
+     * @param profileOwnerComponent The {@link DeviceAdminReceiver} that will be an active admin on
+     *      the user.
+     * @param adminExtras Extras that will be passed to onEnable of the admin receiver
+     *      on the new user.
+     * @see UserHandle
+     * @return the UserHandle object for the created user, or null if the user could not be created.
+     */
+    public UserHandle createAndInitializeUser(ComponentName admin, String name, String ownerName,
+            ComponentName profileOwnerComponent, Bundle adminExtras) {
+        try {
+            return mService.createAndInitializeUser(admin, name, ownerName, profileOwnerComponent,
+                    adminExtras);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not create a user", re);
+        }
+        return null;
+    }
+
+    /**
      * Called by a device owner to remove a user and all associated data. The primary user can
      * not be removed.
      *
