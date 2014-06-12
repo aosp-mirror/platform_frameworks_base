@@ -146,6 +146,8 @@ public class Toolbar extends ViewGroup {
     private ActionMenuPresenter mOuterActionMenuPresenter;
     private ExpandedActionViewMenuPresenter mExpandedMenuPresenter;
 
+    private boolean mCollapsible;
+
     public Toolbar(Context context) {
         this(context, null);
     }
@@ -969,6 +971,23 @@ public class Toolbar extends ViewGroup {
         return child.getMeasuredWidth() + hMargins;
     }
 
+    /**
+     * Returns true if the Toolbar is collapsible and has no child views with a measured size > 0.
+     */
+    private boolean shouldCollapse() {
+        if (!mCollapsible) return false;
+
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
+            if (shouldLayout(child) && child.getMeasuredWidth() > 0 &&
+                    child.getMeasuredHeight() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = 0;
@@ -1093,7 +1112,8 @@ public class Toolbar extends ViewGroup {
         final int measuredHeight = resolveSizeAndState(
                 Math.max(height, getSuggestedMinimumHeight()),
                 heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT);
-        setMeasuredDimension(measuredWidth, measuredHeight);
+
+        setMeasuredDimension(measuredWidth, shouldCollapse() ? 0 : measuredHeight);
     }
 
     @Override
@@ -1487,6 +1507,16 @@ public class Toolbar extends ViewGroup {
                 child.setVisibility(expand ? GONE : VISIBLE);
             }
         }
+    }
+
+    /**
+     * Force the toolbar to collapse to zero-height during measurement if
+     * it could be considered "empty" (no visible elements with nonzero measured size)
+     * @hide
+     */
+    public void setCollapsible(boolean collapsible) {
+        mCollapsible = collapsible;
+        requestLayout();
     }
 
     /**

@@ -424,7 +424,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     @Override
     public void setCollapsible(boolean collapsible) {
-        // Ignore
+        mToolbar.setCollapsible(collapsible);
     }
 
     @Override
