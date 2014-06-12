@@ -186,7 +186,7 @@ public class StackScrollAlgorithm {
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
-                previousNotificationStart = newYTranslation + child.getClipTopAmount();
+                previousNotificationStart = newYTranslation + state.clipTopAmount;
                 previousNotificationEnd = newNotificationEnd;
                 previousNotificationIsSwiped = child.getTranslationX() != 0;
             }
