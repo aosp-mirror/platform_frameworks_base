@@ -859,6 +859,7 @@ package android {
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
+    field public static final int overlapAnchor = 16843876; // 0x1010464
     field public static final int overridesImplicitlyEnabledSubtype = 16843682; // 0x10103a2
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
