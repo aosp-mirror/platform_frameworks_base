@@ -15,8 +15,8 @@ nonavpage=true
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/engagelanding"
-    data-cardSizes="6x6"
-    data-maxResults="9">
+    data-cardSizes="9x6,9x6,6x6,6x6,6x6,9x6,9x6,6x6,6x6,6x6"
+    data-maxResults="10">
   </div>
 
   <h3>Related Resources</h3>

@@ -726,6 +726,21 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#engagement",
     ],
+    "url": "http://www.google.com/analytics/mobile/",
+    "timestamp": 1383243492000,
+    "image": "http://www.google.com//analytics/images/heros/mobile-index.jpg",
+    "title": "Google Mobile App Analytics",
+    "summary": "Mobile App Analytics measures what matters most at all key stages: from first discovery and download to in-app purchases. ",
+    "keywords": ["analytics,user behavior"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [
+      "#engagement",
+    ],
     "url": "https://developers.google.com/app-indexing/",
     "timestamp": 1383243492000,
     "image": "https://developers.google.com/app-indexing/images/allthecooks_srp.png",
@@ -1101,4 +1116,17 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "Google+",
     "titleFriendly": ""
   },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": ["analytics"],
+    "url": "https://developers.google.com/analytics/devguides/collection/android/",
+    "timestamp": null,
+    "image": "https://developers.google.com/analytics/images/home/gear-logo.png",
+    "title": "Google Mobile App Analytics SDK",
+    "summary": "The Google Analytics for Mobile Apps SDKs make it easy for you to implement Google Analytics in your mobile application.",
+    "keywords": ["analytics, user behavior"],
+    "type": "sdk",
+    "titleFriendly": ""
+  }
 ]); 
