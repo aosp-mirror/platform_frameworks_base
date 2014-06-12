@@ -111,7 +111,7 @@ public class InterceptedNotifications {
             return;
         }
         final Notification n = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_qs_zen_on)
+                .setSmallIcon(R.drawable.ic_notify_zen)
                 .setContentTitle(mContext.getResources().getQuantityString(
                         R.plurals.zen_mode_notification_title,
                         mIntercepted.size(), mIntercepted.size()))

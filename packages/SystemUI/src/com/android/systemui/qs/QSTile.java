@@ -287,6 +287,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public boolean activityIn;
         public boolean activityOut;
         public int overlayIconId;
+        public boolean filter;
 
         @Override
         public boolean copyTo(State other) {
@@ -300,6 +301,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             o.activityIn = activityIn;
             o.activityOut = activityOut;
             o.overlayIconId = overlayIconId;
+            o.filter = filter;
             return super.copyTo(other) || changed;
         }
 
@@ -311,6 +313,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             rt.insert(rt.length() - 1, ",activityIn=" + activityIn);
             rt.insert(rt.length() - 1, ",activityOut=" + activityOut);
             rt.insert(rt.length() - 1, ",overlayIconId=" + overlayIconId);
+            rt.insert(rt.length() - 1, ",filter=" + filter);
             return rt;
         }
     }
