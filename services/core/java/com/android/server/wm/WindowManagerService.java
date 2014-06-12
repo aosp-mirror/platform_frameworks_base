@@ -8442,7 +8442,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     win.mLayoutNeeded = false;
                     win.prelayout();
-                    mPolicy.layoutWindowLw(win, win.mAttrs, null);
+                    mPolicy.layoutWindowLw(win, null);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
                             + win.mFrame + " mContainingFrame="
@@ -8494,7 +8494,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     win.mLayoutNeeded = false;
                     win.prelayout();
-                    mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
+                    mPolicy.layoutWindowLw(win, win.mAttachedWindow);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
                             + win.mFrame + " mContainingFrame="

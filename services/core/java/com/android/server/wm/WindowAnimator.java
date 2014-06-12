@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
@@ -227,7 +228,7 @@ public class WindowAnimator {
                     continue;
                 }
                 final WindowStateAnimator winAnimator = win.mWinAnimator;
-                if (mPolicy.doesForceHide(win.mAttrs)) {
+                if ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     if (!winAnimator.mAnimating) {
                         // Create a new animation to delay until keyguard is gone on its own.
                         winAnimator.mAnimation = new AlphaAnimation(1.0f, 1.0f);
@@ -268,7 +269,7 @@ public class WindowAnimator {
                     }
                 }
 
-                if (mPolicy.doesForceHide(win.mAttrs)) {
+                if (mPolicy.isForceHiding(win.mAttrs)) {
                     if (!wasAnimating && nowAnimating) {
                         if (WindowManagerService.DEBUG_ANIM ||
                                 WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,

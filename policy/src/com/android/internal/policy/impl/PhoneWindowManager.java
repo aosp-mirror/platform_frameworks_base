@@ -435,6 +435,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * be done once per window. */
     private WindowState mWinDismissingKeyguard;
 
+    /** The window that is currently showing "over" the keyguard. If there is an app window
+     * belonging to another app on top of this the keyguard shows. If there is a fullscreen
+     * app window under this, still dismiss the keyguard but don't show the app underneath. Show
+     * the wallpaper. */
+    private WindowState mWinShowWhenLocked;
+
     boolean mShowingLockscreen;
     boolean mShowingDream;
     boolean mDreamingLockscreen;
@@ -1669,8 +1675,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean doesForceHide(WindowManager.LayoutParams attrs) {
-        return (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+    public boolean isForceHiding(WindowManager.LayoutParams attrs) {
+        return (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
+                (isKeyguardHostWindow(attrs) && isKeyguardSecureIncludingHidden());
     }
 
     @Override
@@ -3119,10 +3126,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs,
-            WindowState attached) {
+    public void layoutWindowLw(WindowState win, WindowState attached) {
         // we've already done the status bar
-        if ((win == mStatusBar && !doesForceHide(attrs)) || win == mNavigationBar) {
+        final WindowManager.LayoutParams attrs = win.getAttrs();
+        if ((win == mStatusBar && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) == 0) ||
+                win == mNavigationBar) {
             return;
         }
         final boolean isDefaultDisplay = win.isDefaultDisplay();
@@ -3603,12 +3611,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDismissKeyguard = DISMISS_KEYGUARD_NONE;
         mShowingLockscreen = false;
         mShowingDream = false;
+        mWinShowWhenLocked = null;
     }
 
     /** {@inheritDoc} */
     @Override
-    public void applyPostLayoutPolicyLw(WindowState win,
-                                WindowManager.LayoutParams attrs) {
+    public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs) {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
         final int fl = PolicyControl.getWindowFlags(win, attrs);
@@ -3646,9 +3654,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             final boolean showWhenLocked = (fl & FLAG_SHOW_WHEN_LOCKED) != 0;
             final boolean dismissKeyguard = (fl & FLAG_DISMISS_KEYGUARD) != 0;
+            final boolean secureKeyguard = isKeyguardSecure();
             if (appWindow) {
-                if (showWhenLocked || (dismissKeyguard && !isKeyguardSecure())) {
+                if (showWhenLocked || (dismissKeyguard && !secureKeyguard)) {
+                    // Remove any previous windows with the same appToken.
                     mAppsToBeHidden.remove(win.getAppToken());
+                    if (mAppsToBeHidden.isEmpty() && showWhenLocked &&
+                            isKeyguardSecureIncludingHidden()) {
+                        mWinShowWhenLocked = win;
+                        mHideLockScreen = true;
+                        mForceStatusBarFromKeyguard = false;
+                    }
                 } else {
                     mAppsToBeHidden.add(win.getAppToken());
                 }
@@ -3670,12 +3686,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mDismissKeyguard = mWinDismissingKeyguard == win ?
                                     DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
                             mWinDismissingKeyguard = win;
-                            mForceStatusBarFromKeyguard = mShowingLockscreen && isKeyguardSecure();
+                            mForceStatusBarFromKeyguard = mShowingLockscreen && secureKeyguard;
                         }
                     }
                     if ((fl & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                         mAllowLockscreenWhenOn = true;
                     }
+                }
+
+                if (mWinShowWhenLocked != null &&
+                        mWinShowWhenLocked.getAppToken() != win.getAppToken()) {
+                    win.hideLw(false);
                 }
             }
         }
@@ -3684,6 +3705,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public int finishPostLayoutPolicyLw() {
+        if (mWinShowWhenLocked != null &&
+                mWinShowWhenLocked != mTopFullscreenOpaqueWindowState) {
+            // A dialog is dismissing the keyguard. Put the wallpaper behind it and hide the
+            // fullscreen window.
+            // TODO: Make sure FLAG_SHOW_WALLPAPER is restored when dialog is dismissed. Or not.
+            mWinShowWhenLocked.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            mTopFullscreenOpaqueWindowState.hideLw(false);
+            mTopFullscreenOpaqueWindowState = mWinShowWhenLocked;
+        }
+
         int changes = 0;
         boolean topIsFullscreen = false;
 
@@ -4637,6 +4668,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean isKeyguardSecure() {
         if (mKeyguardDelegate == null) return false;
         return mKeyguardDelegate.isSecure();
+    }
+
+    // Returns true if keyguard is currently locked whether or not it is currently hidden.
+    private boolean isKeyguardSecureIncludingHidden() {
+        return mKeyguardDelegate.isSecure() && mKeyguardDelegate.isShowing();
     }
 
     /** {@inheritDoc} */
