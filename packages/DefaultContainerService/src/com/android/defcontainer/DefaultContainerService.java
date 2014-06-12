@@ -50,6 +50,7 @@ import android.util.Slog;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.content.NativeLibraryHelper.ApkHandle;
 import com.android.internal.content.PackageHelper;
 
 import java.io.BufferedInputStream;
@@ -107,8 +108,27 @@ public class DefaultContainerService extends IntentService {
                 return null;
             }
 
-            return copyResourceInner(packageURI, cid, key, resFileName, publicResFileName,
-                    isExternal, isForwardLocked, abiOverride);
+
+            if (isExternal) {
+                // Make sure the sdcard is mounted.
+                String status = Environment.getExternalStorageState();
+                if (!status.equals(Environment.MEDIA_MOUNTED)) {
+                    Slog.w(TAG, "Make sure sdcard is mounted.");
+                    return null;
+                }
+            }
+
+            ApkHandle handle = null;
+            try {
+                handle = ApkHandle.create(packageURI.getPath());
+                return copyResourceInner(packageURI, cid, key, resFileName, publicResFileName,
+                        isExternal, isForwardLocked, handle, abiOverride);
+            } catch (IOException ioe) {
+                Slog.w(TAG, "Problem opening APK: " + packageURI.getPath());
+                return null;
+            } finally {
+                IoUtils.closeQuietly(handle);
+            }
         }
 
         /**
@@ -329,21 +349,11 @@ public class DefaultContainerService extends IntentService {
 
     private String copyResourceInner(Uri packageURI, String newCid, String key, String resFileName,
             String publicResFileName, boolean isExternal, boolean isForwardLocked,
-            String abiOverride) {
-
-        if (isExternal) {
-            // Make sure the sdcard is mounted.
-            String status = Environment.getExternalStorageState();
-            if (!status.equals(Environment.MEDIA_MOUNTED)) {
-                Slog.w(TAG, "Make sure sdcard is mounted.");
-                return null;
-            }
-        }
-
+            ApkHandle handle, String abiOverride) {
         // The .apk file
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
-        NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codePath);
+
         String[] abiList = Build.SUPPORTED_ABIS;
         if (abiOverride != null) {
             abiList = new String[] { abiOverride };
@@ -850,14 +860,14 @@ public class DefaultContainerService extends IntentService {
 
     private int calculateContainerSize(File apkFile, boolean forwardLocked,
             String abiOverride) throws IOException {
-        NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(apkFile);
-        final int abi = NativeLibraryHelper.findSupportedAbi(handle,
-                (abiOverride != null) ? new String[] { abiOverride } : Build.SUPPORTED_ABIS);
-
+        ApkHandle handle = null;
         try {
+            handle = ApkHandle.create(apkFile);
+            final int abi = NativeLibraryHelper.findSupportedAbi(handle,
+                    (abiOverride != null) ? new String[] { abiOverride } : Build.SUPPORTED_ABIS);
             return calculateContainerSize(handle, apkFile, abi, forwardLocked);
         } finally {
-            handle.close();
+            IoUtils.closeQuietly(handle);
         }
     }
 

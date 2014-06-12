@@ -5332,8 +5332,9 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         if (pkg.applicationInfo.nativeLibraryDir != null) {
             // TODO: extend to extract native code from split APKs
-            final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
+            ApkHandle handle = null;
             try {
+                handle = ApkHandle.create(scanFile.getPath());
                 // Enable gross and lame hacks for apps that are built with old
                 // SDK tools. We must scan their APKs for renderscript bitcode and
                 // not launch them if it's present. Don't bother checking on devices
@@ -5448,7 +5449,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (IOException ioe) {
                 Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
             } finally {
-                handle.close();
+                IoUtils.closeQuietly(handle);
             }
         }
 
@@ -9160,10 +9161,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 nativeLibraryFile.delete();
             }
 
-            final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(codeFile);
             String[] abiList = (abiOverride != null) ?
                     new String[] { abiOverride } : Build.SUPPORTED_ABIS;
+            ApkHandle handle = null;
             try {
+                handle = ApkHandle.create(codeFile);
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
                         abiOverride == null &&
                         NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
@@ -9178,7 +9180,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             } finally {
-                handle.close();
+                IoUtils.closeQuietly(handle);
             }
 
             return ret;
@@ -12841,23 +12843,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final File newNativeDir = new File(newNativePath);
 
                                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
-                                        // NOTE: We do not report any errors from the APK scan and library
-                                        // copy at this point.
-                                        NativeLibraryHelper.ApkHandle handle =
-                                                new NativeLibraryHelper.ApkHandle(newCodePath);
-                                        final int abi = NativeLibraryHelper.findSupportedAbi(
-                                                handle, Build.SUPPORTED_ABIS);
-                                        if (abi >= 0) {
-                                            NativeLibraryHelper.copyNativeBinariesIfNeededLI(
-                                                    handle, newNativeDir, Build.SUPPORTED_ABIS[abi]);
+                                        ApkHandle handle = null;
+                                        try {
+                                            handle = ApkHandle.create(newCodePath);
+                                            final int abi = NativeLibraryHelper.findSupportedAbi(
+                                                    handle, Build.SUPPORTED_ABIS);
+                                            if (abi >= 0) {
+                                                NativeLibraryHelper.copyNativeBinariesIfNeededLI(
+                                                        handle, newNativeDir, Build.SUPPORTED_ABIS[abi]);
+                                            }
+                                        } catch (IOException ioe) {
+                                            Slog.w(TAG, "Unable to extract native libs for package :"
+                                                    + mp.packageName, ioe);
+                                            returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
+                                        } finally {
+                                            IoUtils.closeQuietly(handle);
                                         }
-                                        handle.close();
                                     }
                                     final int[] users = sUserManager.getUserIds();
-                                    for (int user : users) {
-                                        if (mInstaller.linkNativeLibraryDirectory(pkg.packageName,
-                                                newNativePath, user) < 0) {
-                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
+                                        for (int user : users) {
+                                            if (mInstaller.linkNativeLibraryDirectory(pkg.packageName,
+                                                    newNativePath, user) < 0) {
+                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                            }
                                         }
                                     }
 
