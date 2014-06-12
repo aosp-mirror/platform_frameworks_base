@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -246,6 +247,13 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        init(getContext());
+        requestApplyInsets();
+    }
+
+    @Override
     public void onWindowSystemUiVisibilityChanged(int visible) {
         super.onWindowSystemUiVisibilityChanged(visible);
         pullChildren();
@@ -329,7 +337,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         // insets in all cases, we need to know the measured size of the various action
         // bar elements.  onApplyWindowInsets() happens before the measure pass, so we can't
         // do that here.  Instead we will take this up in onMeasure().
-        return WindowInsets.EMPTY;
+        return WindowInsets.CONSUMED;
     }
 
     @Override

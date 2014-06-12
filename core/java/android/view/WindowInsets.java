@@ -46,7 +46,13 @@ public final class WindowInsets {
      * since it would allow them to inadvertently consume unknown insets by returning it.
      * @hide
      */
-    public static final WindowInsets EMPTY = new WindowInsets(EMPTY_RECT, EMPTY_RECT);
+    public static final WindowInsets CONSUMED;
+
+    static {
+        CONSUMED = new WindowInsets(EMPTY_RECT, EMPTY_RECT);
+        CONSUMED.mSystemWindowInsetsConsumed = true;
+        CONSUMED.mWindowDecorInsetsConsumed = true;
+    }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets) {
