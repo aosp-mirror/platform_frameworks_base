@@ -93,6 +93,7 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.ViewStub;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -2631,15 +2632,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
-        protected boolean fitSystemWindows(Rect insets) {
-            mFrameOffsets.set(insets);
+        public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+            mFrameOffsets.set(insets.getSystemWindowInsets());
             updateColorViews(insets);
-            updateStatusGuard(insets);
+            insets = updateStatusGuard(insets);
             updateNavigationGuard(insets);
             if (getForeground() != null) {
                 drawableChanged();
             }
-            return super.fitSystemWindows(insets);
+            return insets;
         }
 
         @Override
@@ -2647,14 +2648,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return false;
         }
 
-        private void updateColorViews(Rect insets) {
+        private void updateColorViews(WindowInsets insets) {
             if (mIsFloating || !ActivityManager.isHighEndGfx()) {
                 // No colors on floating windows or low end devices :(
                 return;
             }
             if (insets != null) {
-                mLastTopInset = insets.top;
-                mLastBottomInset = insets.bottom;
+                mLastTopInset = insets.getSystemWindowInsetTop();
+                mLastBottomInset = insets.getSystemWindowInsetBottom();
             }
             mStatusColorView = updateColorViewInt(mStatusColorView,
                     SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
@@ -2693,7 +2694,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return view;
         }
 
-        private void updateStatusGuard(Rect insets) {
+        private WindowInsets updateStatusGuard(WindowInsets insets) {
             boolean showStatusGuard = false;
             // Show the status guard when the non-overlay contextual action bar is showing
             if (mActionModeView != null) {
@@ -2705,9 +2706,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             && mActionModeView.isShown();
                     if (nonOverlayShown) {
                         // set top margin to top insets, show status guard
-                        if (mlp.topMargin != insets.top) {
+                        if (mlp.topMargin != insets.getSystemWindowInsetTop()) {
                             mlpChanged = true;
-                            mlp.topMargin = insets.top;
+                            mlp.topMargin = insets.getSystemWindowInsetTop();
                             if (mStatusGuard == null) {
                                 mStatusGuard = new View(mContext);
                                 mStatusGuard.setBackgroundColor(mContext.getResources()
@@ -2723,7 +2724,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                 }
                             }
                         }
-                        insets.top = 0;  // consume top insets
+                        insets = insets.consumeSystemWindowInsets(
+                                false, true /* top */, false, false);
                         showStatusGuard = true;
                     } else {
                         // reset top margin
@@ -2740,9 +2742,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mStatusGuard != null) {
                 mStatusGuard.setVisibility(showStatusGuard ? View.VISIBLE : View.GONE);
             }
+            return insets;
         }
 
-        private void updateNavigationGuard(Rect insets) {
+        private void updateNavigationGuard(WindowInsets insets) {
             // IMEs lay out below the nav bar, but the content view must not (for back compat)
             if (getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
                 // prevent the content view from including the nav bar height
@@ -2750,7 +2753,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (mContentParent.getLayoutParams() instanceof MarginLayoutParams) {
                         MarginLayoutParams mlp =
                                 (MarginLayoutParams) mContentParent.getLayoutParams();
-                        mlp.bottomMargin = insets.bottom;
+                        mlp.bottomMargin = insets.getSystemWindowInsetBottom();
                         mContentParent.setLayoutParams(mlp);
                     }
                 }
@@ -2760,11 +2763,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mNavigationGuard.setBackgroundColor(mContext.getResources()
                             .getColor(R.color.input_method_navigation_guard));
                     addView(mNavigationGuard, indexOfChild(mNavigationColorView), new LayoutParams(
-                            LayoutParams.MATCH_PARENT, insets.bottom,
+                            LayoutParams.MATCH_PARENT, insets.getSystemWindowInsetBottom(),
                             Gravity.START | Gravity.BOTTOM));
                 } else {
                     LayoutParams lp = (LayoutParams) mNavigationGuard.getLayoutParams();
-                    lp.height = insets.bottom;
+                    lp.height = insets.getSystemWindowInsetBottom();
                     mNavigationGuard.setLayoutParams(lp);
                 }
             }
