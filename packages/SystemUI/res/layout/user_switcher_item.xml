@@ -21,10 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         tools:context=".settings.UserSwitcherDialog">
     <ImageView
-            android:layout_width="64dp"
-            android:layout_height="match_parent"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
             android:id="@+id/user_picture"
             tools:src="@drawable/dessert_zombiegingerbread"/>
     <TextView
@@ -37,4 +39,11 @@
             android:gravity="center_vertical"
             tools:text="Hiroshi Lockheimer"
             />
+    <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
+            android:src="@*android:drawable/ic_menu_delete"
+            android:id="@+id/user_delete"
+            android:background="?android:attr/selectableItemBackground"/>
 </LinearLayout>

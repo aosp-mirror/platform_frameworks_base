@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 104;
+    private static final int DATABASE_VERSION = 105;
 
     private Context mContext;
     private int mUserHandle;
@@ -1677,6 +1677,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 104;
         }
 
+        if (upgradeVersion < 105) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadBooleanSetting(stmt, Settings.Global.GUEST_USER_ENABLED,
+                            R.bool.def_guest_user_enabled);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 105;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2410,6 +2428,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadSetting(stmt, Settings.Global.DEVICE_NAME, getDefaultDeviceName());
 
+            loadBooleanSetting(stmt, Settings.Global.GUEST_USER_ENABLED,
+                    R.bool.def_guest_user_enabled);
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();

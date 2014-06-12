@@ -39,9 +39,6 @@ interface IUserManager {
     UserInfo getProfileParent(int userHandle);
     UserInfo getUserInfo(int userHandle);
     boolean isRestricted();
-    void setGuestEnabled(boolean enable);
-    boolean isGuestEnabled();
-    void wipeUser(int userHandle);
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
