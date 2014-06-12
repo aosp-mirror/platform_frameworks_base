@@ -24,6 +24,7 @@
 #include <SkBitmap.h>
 #include <media/IMediaHTTPService.h>
 #include <media/mediametadataretriever.h>
+#include <media/mediascanner.h>
 #include <private/media/VideoFrame.h>
 
 #include "jni.h"
@@ -337,17 +338,13 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
         return NULL;
     }
 
-    unsigned int len = mediaAlbumArt->mSize;
-    char* data = (char*) mediaAlbumArt + sizeof(MediaAlbumArt);
-    jbyteArray array = env->NewByteArray(len);
+    jbyteArray array = env->NewByteArray(mediaAlbumArt->size());
     if (!array) {  // OutOfMemoryError exception has already been thrown.
         ALOGE("getEmbeddedPicture: OutOfMemoryError is thrown.");
     } else {
-        jbyte* bytes = env->GetByteArrayElements(array, NULL);
-        if (bytes != NULL) {
-            memcpy(bytes, data, len);
-            env->ReleaseByteArrayElements(array, bytes, 0);
-        }
+        const jbyte* data =
+                reinterpret_cast<const jbyte*>(mediaAlbumArt->data());
+        env->SetByteArrayRegion(array, 0, mediaAlbumArt->size(), data);
     }
 
     // No need to delete mediaAlbumArt here
