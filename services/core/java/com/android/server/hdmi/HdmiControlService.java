@@ -24,6 +24,7 @@ import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Provides a service for sending and processing HDMI control messages,
@@ -476,8 +476,8 @@ public final class HdmiControlService extends SystemService {
     }
 
     private HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
-        // TODO: get device name read from system configuration.
-        String displayName = HdmiCec.getDefaultDeviceName(logicalAddress);
+        // TODO: find better name instead of model name.
+        String displayName = Build.MODEL;
         return new HdmiCecDeviceInfo(logicalAddress,
                 getPhysicalAddress(), deviceType, getVendorId(), displayName);
     }
