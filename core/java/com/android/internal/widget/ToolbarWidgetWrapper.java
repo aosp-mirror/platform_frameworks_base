@@ -569,7 +569,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     @Override
     public void setNavigationIcon(int resId) {
-        setNavigationIcon(mToolbar.getContext().getDrawable(resId));
+        setNavigationIcon(resId != 0 ? mToolbar.getContext().getDrawable(resId) : null);
     }
 
     @Override
