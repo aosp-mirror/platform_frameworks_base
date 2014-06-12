@@ -71,13 +71,15 @@ public class RouteInfoTest extends TestCase {
     }
 
     public void testMatches() {
-        class PatchedRouteInfo extends RouteInfo {
+        class PatchedRouteInfo {
+            private final RouteInfo mRouteInfo;
+
             public PatchedRouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
-                super(destination, gateway, iface);
+                mRouteInfo = new RouteInfo(destination, gateway, iface);
             }
 
             public boolean matches(InetAddress destination) {
-                return super.matches(destination);
+                return mRouteInfo.matches(destination);
             }
         }
 
