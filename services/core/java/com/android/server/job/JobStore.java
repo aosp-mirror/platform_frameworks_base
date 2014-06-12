@@ -262,16 +262,23 @@ public class JobStore {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
+            List<JobStatus> mStoreCopy = new ArrayList<JobStatus>();
             synchronized (JobStore.this) {
-                writeJobsMapImpl();
+                // Copy over the jobs so we can release the lock before writing.
+                for (JobStatus jobStatus : mJobSet) {
+                    JobStatus copy = new JobStatus(jobStatus.getJob(), jobStatus.getUid(),
+                            jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
+                    mStoreCopy.add(copy);
+                }
             }
+            writeJobsMapImpl(mStoreCopy);
             if (JobSchedulerService.DEBUG) {
                 Slog.v(TAG, "Finished writing, took " + (SystemClock.elapsedRealtime()
                         - startElapsed) + "ms");
             }
         }
 
-        private void writeJobsMapImpl() {
+        private void writeJobsMapImpl(List<JobStatus> jobList) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
@@ -281,8 +288,7 @@ public class JobStore {
 
                 out.startTag(null, "job-info");
                 out.attribute(null, "version", Integer.toString(JOBS_FILE_VERSION));
-                for (int i = 0; i < mJobSet.size(); i++) {
-                    final JobStatus jobStatus = mJobSet.valueAt(i);
+                for (JobStatus jobStatus : jobList) {
                     if (DEBUG) {
                         Slog.d(TAG, "Saving job " + jobStatus.getJobId());
                     }
