@@ -39,6 +39,7 @@ namespace uirenderer {
 
 TessellationCache::Description::Description()
         : type(kNone)
+        , aa(false)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
         , strokeWidth(1.0f) {
@@ -47,6 +48,7 @@ TessellationCache::Description::Description()
 
 TessellationCache::Description::Description(Type type)
         : type(type)
+        , aa(false)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
         , strokeWidth(1.0f) {
@@ -55,6 +57,7 @@ TessellationCache::Description::Description(Type type)
 
 TessellationCache::Description::Description(Type type, const SkPaint* paint)
         : type(type)
+        , aa(paint->isAntiAlias())
         , cap(paint->getStrokeCap())
         , style(paint->getStyle())
         , strokeWidth(paint->getStrokeWidth()) {
@@ -63,6 +66,7 @@ TessellationCache::Description::Description(Type type, const SkPaint* paint)
 
 hash_t TessellationCache::Description::hash() const {
     uint32_t hash = JenkinsHashMix(0, type);
+    hash = JenkinsHashMix(hash, aa);
     hash = JenkinsHashMix(hash, cap);
     hash = JenkinsHashMix(hash, style);
     hash = JenkinsHashMix(hash, android::hash_type(strokeWidth));

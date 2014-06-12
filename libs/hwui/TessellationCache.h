@@ -55,6 +55,7 @@ public:
         };
 
         Type type;
+        bool aa;
         SkPaint::Cap cap;
         SkPaint::Style style;
         float strokeWidth;
