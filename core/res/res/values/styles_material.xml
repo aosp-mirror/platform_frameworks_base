@@ -37,8 +37,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="PreferenceFragment.Material">
-        <item name="paddingStart">@dimen/preference_fragment_padding_side</item>
-        <item name="paddingEnd">@dimen/preference_fragment_padding_side</item>
+        <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
     </style>
 
     <style name="Preference.Material.Information">
@@ -84,6 +84,38 @@ please see styles_device_defaults.xml.
         <item name="ringtoneType">ringtone</item>
         <item name="showSilent">true</item>
         <item name="showDefault">true</item>
+    </style>
+
+    <!-- No margins or background by default. Could be different for x-large screens -->
+    <style name="PreferencePanel.Material">
+    </style>
+
+    <!-- The attributes are overridden here because the x-large or large resources may have
+         changed the margins and background in the parent PreferencePanel style. -->
+    <style name="PreferencePanel.Material.Dialog">
+        <item name="layout_marginStart">0dip</item>
+        <item name="layout_marginEnd">0dip</item>
+        <item name="layout_marginTop">0dip</item>
+        <item name="layout_marginBottom">0dip</item>
+        <item name="background">@null</item>
+    </style>
+
+    <style name="PreferenceHeaderPanel.Material">
+        <item name="layout_marginStart">@dimen/preference_screen_side_margin</item>
+        <item name="layout_marginEnd">@dimen/preference_screen_side_margin_negative</item>
+        <item name="paddingTop">@dimen/preference_screen_header_vertical_padding</item>
+        <item name="paddingBottom">@dimen/preference_screen_header_vertical_padding</item>
+    </style>
+
+    <style name="PreferenceHeaderList.Material">
+        <item name="paddingStart">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="paddingEnd">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="scrollbarStyle">@integer/preference_screen_header_scrollbarStyle</item>
+    </style>
+
+    <style name="PreferenceFragmentList.Material">
+        <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
     </style>
 
     <!-- Begin Material theme styles -->

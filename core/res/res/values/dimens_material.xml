@@ -15,6 +15,11 @@
 -->
 <resources>
 
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side_material">0dp</dimen>
+
+    <dimen name="preference_screen_header_padding_side_material">0dp</dimen>
+
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height_material">56dp</dimen>
     <!-- Default padding of an action bar. -->
