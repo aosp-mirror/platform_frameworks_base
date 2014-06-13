@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Անվտանգ ռեժիմ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Անձնական ​​ծրագրեր"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android for Work"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Ծառայություններ, որոնց համար կգանձվեք"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Կատարել գործողություններ, որի դիմաց ձեր հաշվից գումար կծախսվի:"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ձեր հաղորդագրությունները"</string>
@@ -400,6 +401,10 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Թույլ է տալիս սեփականատիրոջը միանալ պաստառի վերին մակարդակի ինտերֆեյսին: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"կապվել ձայնային փոխազդիչին"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Թույլ է տալիս սեփականատիրոջը միանալ ձայնային փոխազդիչի բազային միջերեսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
+    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
+    <skip />
+    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"միանալ հեռակա էկրանին"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Թույլ է տալիս սեփականատիրոջը միանալ հեռակա էկրանի վերին մակարդակի ինտերֆեյսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"միանալ վիջեթ ծառայությանը"</string>
@@ -445,8 +450,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Թույլ է տալիս հավելվածին օգտագործել ցանկացած տեղադրված մեդիա վերծանիչ` նվագարկումը ապակոդավորելու համար:"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"կառավարել վստահելի հավաստագրերը"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Թույլատրում է հավելվածին տեղադրել և ապատեղադրել CA վկայագրերը՝ որպես վստահելի հավաստագրեր:"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"գործադրել ծրագրեր պարապուրդի ժամանակ"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Այս թույլտվությունը հնարավորություն է տալիս, որ Android համակարգը ծրագրեր գործադրի ֆոնային ռեժիմում, երբ սարքը չի օգտագործվում:"</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"աշխատեցնել ծրագրի ֆոնային ռեժիմում պլանավորված աշխատանքը"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Այս թույլտվության շնորհիվ Android համակարգն անհրաժեշտության դեպքում կարող է աշխատեցնել ծրագիրը ֆոնային ռեժիմում:"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"կարդալ կամ գրել ախտորոշիչին պատկանող ռեսուրսները"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Թույլ է տալիս հավելվածին կարդալ և գրել ախտորոշիչ խմբին պատկանող ցանկացած ռեսուրսում, ինչպես օրինակ ֆայլերը /dev-ում: Դա կարող է ազդել համակարգի կայունության և անվտանգության վրա: Սա պետք է օգտագործել միայն արտադրողի կամ օպերատորի կողմից սարքին հատուկ ախտորոշման համար:"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"միացնել կամ անջատել հավելվածի բաղադրիչները"</string>

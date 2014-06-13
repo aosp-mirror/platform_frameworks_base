@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Ứng dụng cá nhân"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android dành cho công việc"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dịch vụ tính tiền của bạn"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Thực hiện những tác vụ mà bạn có thể phải trả tiền."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tin nhắn của bạn"</string>
@@ -400,6 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của hình nền. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"liên kết với trình tương tác bằng giọng nói"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ tương tác bằng giọng nói. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"quản lý cụm từ khóa bằng giọng nói"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Cho phép chủ sở hữu quản lý các cụm từ khóa để phát hiện từ nóng bằng giọng nói. Không bao giờ cần cho ứng dụng thông thường."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"liên kết với màn hình từ xa"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của màn hình từ xa. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"liên kết với dịch vụ tiện ích con"</string>
@@ -445,8 +448,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Cho phép ứng dụng sử dụng bất kỳ trình giải mã phương tiện nào đã cài đặt nhằm giải mã để phát lại."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"quản lý thông tin xác thực đáng tin cậy"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Cho phép ứng dụng cài đặt và gỡ cài đặt chứng chỉ CA dưới dạng thông tin xác thực đáng tin cậy."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"chạy ứng dụng trong thời gian rảnh"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Quyền này cho phép hệ thống Android chạy ứng dụng trong nền khi thiết bị không được sử dụng."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"chạy công việc trong nền đã lên lịch của ứng dụng"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Quyền này cho phép hệ thống Android chạy ứng dụng trong nền khi được yêu cầu."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"đọc/ghi vào tài nguyên do chẩn đoán sở hữu"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và tính bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể của nhà sản xuất hoặc nhà cung cấp."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"bật hoặc tắt cấu phần ứng dụng"</string>

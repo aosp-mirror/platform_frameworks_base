@@ -248,7 +248,7 @@
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <!-- no translation found for user_owner_label (6465364741001216388) -->
     <skip />
-    <!-- no translation found for managed_profile_label (3022906847647343112) -->
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
     <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servetschs che custan"</string>
     <!-- no translation found for permgroupdesc_costMoney (3293301903409869495) -->
@@ -634,6 +634,10 @@
     <skip />
     <!-- no translation found for permdesc_bindVoiceInteraction (2345721766501778101) -->
     <skip />
+    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
+    <skip />
+    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
+    <skip />
     <!-- no translation found for permlab_bindRemoteDisplay (1782923938029941960) -->
     <skip />
     <!-- no translation found for permdesc_bindRemoteDisplay (1261242718727295981) -->
@@ -722,9 +726,9 @@
     <skip />
     <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
     <skip />
-    <!-- no translation found for permlab_bindIdleService (816311765497613780) -->
+    <!-- no translation found for permlab_bindJobService (3637568367978271086) -->
     <skip />
-    <!-- no translation found for permdesc_bindIdleService (1767538493214100612) -->
+    <!-- no translation found for permdesc_bindJobService (3473288460524119838) -->
     <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->

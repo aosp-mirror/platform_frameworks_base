@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Uhlelo lwe-Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Izinhlelo zokusebenza zomuntu siqu"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"I-Android yomsebenzi"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"I-Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Amasevisi abiza imali"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Yenza izinto ezingakudla imali."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Imiyalezo yakho"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwephephadonga. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"hlanganisa kusisebenzisani sezwi"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ivumela umbambi ukuhlanganisa isixhumi esibonakalayo sesevisi yokusebenzisana yezwi. Akufanele kudingekele izinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"phatha amabinzana angukhiye wezwi"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ivumela isibambi ukuthi siphathe amabinzana angukhiye wokutholwa kwe-hotword yezwi. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bophezela kusibonisi sesilawuli kude"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ivumela umbambi ukuhlanganisa isixhumi esibonakalayo esisezingeni eliphezulu sesibonisi sesilawuli kude. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bophezela kube isevisi yesinqunjana"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ivumela uhlelo lokusebenza ukusebenzisa noma isiphi isiqophi semidiya esifakiwe ukuqopha ukudlala."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"phatha ukuqinisekisa okuthenjiwe"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ivumela uhlelo lokusebenza ukuthi lifake liphinde likhiphe izitifiketi ze-CA njengokuqinisekiswa okuthenjiwe."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"qalisa uhlelo lokusebenza ngesikhathi sokungenzi lutho"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Le mvume ivumela isistimu ye-Android ukuthi iqalise uhlelo lokusebenza ngemuva ngenkathi idivayisi ingasebenzi."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"qalisa umsebenzi ongemuva oshejuliwe wohlelo lokusebenza"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Le mvume ivumela isistimu ye-Android ukuthi iqalise uhlelo lokusebenza ngemuva uma icelwa."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"funda/bhalela emithombweni ephethwe idayegi"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ivumela uhlelo lokusebenza ukufunda nokubhala kunoma yimuphi umthombo weqembu ledayegi; ngokwesibonelo, amafayela akwi/dev. Lokhu kungase kuthinte kakhulu ukuba nokuphepha kohlelo. Lokhu kumele kusebenziselwe KUPHELA ukuhlola ihadiwe okucacile ngumkhiqizi noma u-opheretha."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"vumela noma vimbela izingxenye zensiza"</string>

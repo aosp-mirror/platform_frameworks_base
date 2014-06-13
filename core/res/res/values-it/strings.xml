@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"App personali"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android for Work"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servizi che prevedono un costo"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Svolgono operazioni che possono comportare un costo."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"I tuoi messaggi"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Consente l\'associazione di uno sfondo all\'interfaccia principale. Non dovrebbe mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"collegamento a un servizio di interazione vocale"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un servizio di interazione vocale. Non dovrebbe essere mai necessaria per le normali app."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gestione delle frasi chiave vocali"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Consente al titolare di gestire le frasi chiave per il rilevamento hotword vocale. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"collega a un display remoto"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un display remoto. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associazione a un servizio widget"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Consente all\'applicazione di utilizzare qualsiasi decoder multimediale installato per la decodifica ai fini della riproduzione."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestione di credenziali attendibili"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Consente all\'app di installare e disinstallare certificati CA come credenziali attendibili."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"esegui l\'applicazione nel tempo di inattività del sistema"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Questa autorizzazione consente al sistema Android di eseguire l\'applicazione in background mentre il dispositivo non è in uso."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"esegui operazioni pianificate in background dell\'applicazione"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Questa autorizzazione consente al sistema Android di eseguire l\'applicazione in background quando richiesto."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lettura/scrittura risorse di proprietà di diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Consente all\'applicazione di leggere le risorse del gruppo diag e scrivere in esse, ad esempio i file in /dev. Ciò potrebbe influire su stabilità e sicurezza del sistema. Dovrebbe essere utilizzata SOLTANTO per diagnostiche specifiche dell\'hardware effettuate dal produttore o dall\'operatore."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"attivazione/disattivazione componenti applicazioni"</string>

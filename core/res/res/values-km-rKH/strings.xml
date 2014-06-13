@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"កម្មវិធី​ផ្ទាល់​ខ្លួន"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android សម្រាប់​ការងារ"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"សេវាកម្ម​ដែល​កាត់​លុយ​របស់​អ្នក"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ធ្វើ​អ្វី​ដែល​អាច​កាត់​លុយ​របស់​អ្នក។"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"សារ​របស់​អ្នក"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ឲ្យ​ម្ចាស់​ចង​ចំណុចប្រទាក់​កម្រិត​កំពូល​នៃ​ផ្ទាំង​រូបភាព។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"ភ្ជាប់​ទៅ​​អ្នក​សហការ​សំឡេង"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​អន្តរកម្ម​សំឡេង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"គ្រប់គ្រង​ឃ្លា​សំឡេង"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​គ្រប់គ្រង​ឃ្លា​​សម្រាប់​​ការ​រក​ឃើញ​​​ពាក្យ​​ជា​សំឡេង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក​"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​ឌិកូដ​មេឌៀ​ដែល​បាន​ដំឡើង ដើម្បី​ឌិកូដ​សម្រាប់​ការ​ចាក់​ឡើងវិញ។"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"គ្រប់គ្រង​ព័ត៌មាន​សម្ងាត់​ដែល​ទុកចិត្ត"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ដំឡើង និង​លុប​វិញ្ញាបនបត្រ CA នៅ​ពេល​មាន​ព័ត៌មាន​សម្ងាត់​ដែល​ទុកចិត្ត។"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"ដំណើរការ​កម្មវិធី​អំឡុង​ពេល​ទំនេរ"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​ប្រព័ន្ធ Android ដំណើរការ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ ខណៈ​ដែល​ឧបករណ៍​មិន​កំពុង​ប្រើ។"</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"ដំណើរការ​ការងារ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ​ដែល​បាន​កំណត់​ពេលវេលា​សម្រាប់​​កម្មវិធី"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​ប្រព័ន្ធ Android ​ដំណើរ​ការ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ​ពេល​បាន​ស្នើ។"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"អាន/សរសេរ​ធនធាន​គ្រប់គ្រង​ប្រអប់"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រភព​ណាមួយ​ដែល​គ្រប់គ្រង​ដោយ​ក្រុម​អ្នក​វិនិច្ឆ័យ ឧទាហរណ៍ ឯកសារ​នៅ​ក្នុង /dev ។ វា​អាច​ប៉ះពាល់​យ៉ាង​ខ្លាំង​ដល់​ស្ថេរ​ភាព​ និង​សុវត្ថិភាព​ប្រព័ន្ធ។ វា​គួរ​ត្រូវ​បាន​ប្រើ​សម្រាប់​វិនិច្ឆ័យ​ផ្នែក​រឹង​ជាក់​លាក់​ដោយ​ក្រុមហ៊ុន​ផលិត ឬ​ប្រតិបត្តិ​ករ។"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"បិទ ឬ​បើក​សមាសធាតុ​កម្មវិធី"</string>

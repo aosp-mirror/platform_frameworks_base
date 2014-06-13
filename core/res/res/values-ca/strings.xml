@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicacions personals"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android per a la feina"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Lloc a Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Dur a terme activitats de pagament."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Missatges"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"enllaçar amb una eina d\'interacció de veu"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet enllaçar amb la interfície de nivell superior d\'un servei d\'interacció de veu. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gestiona les frases clau en veu alta"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permet que l\'usuari gestioni les frases clau per detectar paraules actives que es diguin en veu alta. Mai no hauria de ser necessari per a les aplicacions habituals."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincula a una pantalla remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permet que el titular es vinculi a la interfície de nivell superior d\'una pantalla remota. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permet que l\'aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestiona les credencials de confiança"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet que l\'aplicació instal·li i desinstal·li certificats de CA com a credencials de confiança."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"executar l\'aplicació durant el temps d\'inactivitat"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Aquest permís permet que el sistema Android executi l\'aplicació en segon pla mentre el dispositiu no està en ús."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"executa les tasques programades de l\'aplicació en segon pla"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Mitjançant aquest permís, el sistema Android pot executar l\'aplicació en segon pla quan se li ho sol·liciti."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>

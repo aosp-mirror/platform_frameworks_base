@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ລະບົບ Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"​ແອັບຯ​ສ່ວນ​ໂຕ"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android ​ສຳ​ລັບ​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ບໍລິການທີ່ເຮັດໃຫ້ທ່ານເສຍເງິນ"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ເຮັດສິ່ງທີ່ທ່ານຕ້ອງເສຍຄ່າໃຊ້ຈ່າຍ."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ຂໍ້ຄວາມຂອງທ່ານ"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ອະນຸຍາດໃຫ້ຜູ່ໃຊ້ເຊື່ອມໂຍງກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງພາບພື້ນຫຼັງໃດນຶ່ງ. ແອັບຯທຳມະດາບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"​ເຊື່ອມ​ໂຍງ​ກັບ​ຕົວ​ຕິດ​ຕໍ່​ດ້ວຍ​ສຽງ"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າ​ຂອງ​ເຊື່ອມ​ໂຍງ​ສ່ວນ​ຕິດ​ຕໍ່​ລະ​ດັບ​ສູງ​ສຸດຂອງ​ບໍ​ລິ​ການ​ການ​ຕິດ​ຕໍ່​ດ້ວຍ​ສຽງ."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ຈັດການລະຫັດສຽງ"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"ອະນຸຍາດ​ໃຫ້​ຈັດການລະຫັດ​ສຳລັບ​ການ​ກວດ​ພົບ​ຄຳ​ສັ່ງ​ສຽງ. ແອັບຯ​ທົ່ວໄປ​ບໍ່​ຄວນ​ຕ້ອງ​ໃຊ້."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ຜູກກັນເພື່ອສະແດງຜົນທາງໄກ."</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"ອະນຸຍາດໃຫ້ຜູ່ຖືຜູກກັບສ່ວນຕິດຕໍ່ລະດັບສູງສຸດ ຂອງການສະແດງຜົນທາງໄກ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ເຊື່ອມໂຍງໄປຫາບໍລິການວິດເຈັດ"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ທຸກຕົວຖອດລະຫັດສື່ທີ່ຕິດຕັ້ງໄວ້ແລ້ວ ເພື່ອການຖອດລະຫັດການຫຼິ້ນໄຟລ໌ຕ່າງໆ."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"ຈັດການໜັງສືຮັບຮອງທີ່ເຊື່ອຖືໄດ້."</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"ອະ​ນຸ​ຍາດ​ໃຫ້ແອັບຯ ຕິດຕັ້ງ ແລະ ຖອນການຕິດຕັ້ງໃບຢັ້ງຢືນ CA ທີ່ເປັນໃບຮັບຮອງທີ່ເຊື່ອຖືໄດ້."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"ເປີດ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ໃນ​ເວ​ລາ​ທີ່​ບໍ່​ເຮັດ​ວຽກ"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"ນີ້​ຈະ​ເປັນ​ການອ​ະ​ນຸ​ຍາດ​​ໃຫ້​ລະ​ບົບ Android ສາ​ມາດ​ເປີດ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ໃນ​ພື້ນຫຼັງໄດ້​ໃນ​ຂະ​ນະ​ທີ່​ອຸ​ປະ​ກອນບໍ່​​ຖືກ​ນຳ​ໃຊ້."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"ເປີດ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​​ເພື່ອ​ເຮັດ​ວຽກ​ຕາມ​ເວ​ລາ​ຢູ່ໃນ​ພື້ນຫຼັງ"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"​ສິດ​ນີ້​ອະ​ນຸ​ຍາດ​ໃຫ້​ລະ​ບົບ Android ສາ​ມາດ​ເປີດ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ໃນ​ພື້ນຫຼັງ​ເມື່ອ​ຖືກ​ຮ້ອງ​ຂໍ​ໄດ້."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ອ່ານ/ຂຽນ ໃສ່ຊັບພະຍາກອນທີ່ເປັນຂອງກຸ່ມວິໄຈ"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນອ່ານ ແລະຂຽນ ໃສ່ທຸກຊັບພະຍາກອນທີ່ເປັນຂອງກຸ່ມວິນິໄສ; ຕົວຢ່າງ: ໄຟລ໌ໃນ /dev. ສິ່ງນີ້ອາດສົ່ງຜົນກະທົບຕໍ່ຄວາມສະຖຽນ ແລະຄວາມປອດໄພຂອງລະບົບ. ສິ່ງນີ້ຄວນໃຊ້ສຳຫຼັບການວິເຄາະບັນຫາຈຳເພາະ ຂອງບາງຮາດແວໂດຍຜູ່ຜະລິດ ຫຼືຜູ່ປະຕິບັດການເທົ່ານັ້ນ."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ເປີດ ຫຼືປິດນຳໃຊ້ອົງປະກອບຂອງແອັບຯ"</string>

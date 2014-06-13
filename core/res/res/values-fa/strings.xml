@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"حالت ایمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"برنامه‌های شخصی"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"‏Android برای کار"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"سرویس‌های غیر رایگان"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"انجام کارهایی که برای شما هزینه دارد."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"پیام‌های شما"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"‏به دارنده اجازه می‎دهد تا به رابط سطح بالای تصویر زمینه متصل شود. برنامه‎های معمولی هرگز به این ویژگی نیاز ندارند."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"مقید بودن به سرویس تعامل صوتی"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"به دارنده امکان می‌دهد به واسط سطح بالای سرویس تعامل صوتی مقید باشد. برای برنامه‌های عادی هرگز نباید لازم باشد."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"مدیریت عبارات کلیدی صوتی"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"به دارنده امکان می‌دهد عبارات کلیدی برای شناسایی کلیدگفته صوتی را مدیریت کند. هرگز نباید برای برنامه‌های معمولی مورد نیاز باشد."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"اتصال به نمایشگر راه دور"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"به دارنده ام‍ک‍ان می‌دهد تا به رابط سطح بالای نمایشگر راه دور وصل شود. نباید هرگز برای برنامه‌های عادی لازم باشد."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"‏اجازه می‎دهد برنامه از هر رمزگشای رسانه نصب شده‌ای استفاده کند تا برای پخش رمزگشایی شود."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"مدیریت اطلاعات کاربری مورد اعتماد"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏به برنامه امکان می‌دهد گواهینامه‌های CA را به عنوان اطلاعات کاربری مورد اعتماد نصب یا حذف نصب کند."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"اجرای برنامه در هنگام بدون فعالیت بودن دستگاه"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏این مجوز به سیستم Android امکان می‌دهد تا وقتی دستگاه استفاده نمی‌شود برنامه را در پس‌زمینه اجرا کند."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"اجرای کار پس‌زمینه زمان‌بندی شده برای برنامه"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"‏این مجوز، به سیستم Android امکان می‌دهد در صورت تقاضا، برنامه را در پس‌زمینه اجرا کند."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"خواندن/نوشتن منابع متعلق به تشخیص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏به برنامه اجازه می‌دهد هر منبعی را که متعلق به گروه تشخیص است بخواند و در آن بنویسد؛ به‌عنوان مثال، فایل‌های /dev. این امر به‌صورت بالقوه می‌تواند بر پایدار بودن و امنیت سیستم تأثیر بگذارد. این تنها باید برای تشخیص‎‌های مختص سخت‌افزار توسط تولیدکننده یا اپراتور استفاده شود."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"فعال یا غیر فعال کردن اجزای برنامه"</string>

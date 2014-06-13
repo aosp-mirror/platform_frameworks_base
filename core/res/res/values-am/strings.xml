@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"የሚያስተማምን ሁነታ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android ስርዓት"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"የግል መተግበሪያዎች"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android ለስራ"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android ስራ"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ገንዘብ የሚያስወጥዎ አገልግሎቶች"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ገንዘብ የሚያስወጡህን ነገሮች አድርግ።"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"መልዕክቶችዎ"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ ልጣፍ ለመጠረዝ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"ከአንድ የድምጽ በይነተገናኝ ጋር ይሰሩ"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"ያዢው የአንድ የድምጽ በይነግንኙነት አገልግሎት የከፍተኛ ደረጃ በይነገጽ እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ድምጽ የቁልፍ ሃረጎችን አስተዳድር"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"መያዣው የቁልፍ ሃረጎችን ለድምጽ ትኩስ ቃል ለይቶ ማወቂያ እንዲያስተዳድር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች ማስፈለግ የለበትም።"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ከአንድ የርቀት ማሳያ ጋር ይጠርዛል"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"ያዢው ከአንድ የርቀት ማሳያ ከፍተኛ-ደረጃ በይነገጽ ጋር እንዲጠርዝ ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ወደ ፍርግም አገልግሎት አያይዝ"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ለመልሰህ አጫውት ፍታን በማንኛውም የተጫኑ በማህደረ መረጃ ዲኮደር ለመጠቀም  ለመተግበሪያ ይፈቅዳል።"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"የታመኑ ምስክርነቶችን ያስተዳድሩ"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"መተግበሪያው CA የምስክር ወረቀቶችን እንደሚታመኑ ምስክርነቶች አንዲጭን እና እንዲያራግፍ ይፍቀዱ።"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"ስራ በተፈታበት ጊዜ ላይ መተግበሪያውን አሂድ"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"ይህ ፍቃድ መሣሪያው ስራ ላይ ባልሆነ ጊዜ የAndroid ስርዓቱ መተግበሪያውን በጀርባ ውስጥ እንዲያሂደው ያስችለዋል።"</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"መርሐግብር የተያዘለት የመተግበሪያ የጀርባ ስራ አሂድ"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"ይህ ፍቃድ የAndroid ስርዓቱ ሲጠየቅ መተግበሪያውን በጀርባ እንዲያሂደው ይፈቅድለታል።"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"በdiag ባለቤትነት ያሉ ንብረቶችን አንብብ/ፃፍ"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"በዲያግ ቡድን ባለቤትነት ወደ አለ ማንኛውም ንብረት ለምሳሌ በ/dev ያሉ ፋይሎች ለማንበብ እና ለመፃፍ ለመተግበሪያው ይፈቅዳሉ። ይህ በመሰረቱ የስርዓት መረጋጋትን እና ደህንነትን ሊጎዳ ይችላል። ይህ ውስን የሀርድዌር-ተኮር ዲያግኖስቲክስ በአምራቹ ወይም ከዋኙ ብቻ መሆን አለበት።"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"የመተግበሪያ ምንዝሮችን አንቃ ወይም አቦዝን"</string>

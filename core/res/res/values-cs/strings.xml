@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Nouzový režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobní aplikace"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android pro práci"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android pro práci"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Zpoplatněné služby"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Provádět činnosti, které vás mohou stát peníze."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše zprávy"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"navázání na hlasovou interakci"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby hlasové interakce. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"správa klíčových hlasových frází"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Umožňuje držiteli spravovat klíčové hlasové fráze pro detekci hlasových klíčových slov. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"připojit se ke vzdálenému displeji"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Umožňuje držiteli připojit se k vysokoúrovňovému rozhraní vzdáleného displeje. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"navázat se na službu widgetu"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Umožňuje aplikaci používat libovolný nainstalovaný dekodér médií k dekódování při přehrávání."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"správa důvěryhodných identifikačních údajů"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikaci instalovat a odinstalovat certifikáty CA jako důvěryhodné identifikační údaje."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"spustit aplikaci během nečinnosti"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Toto oprávnění umožňuje systému Android spustit aplikaci na pozadí, když zařízení není používáno."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"spustit naplánovanou práci aplikace na pozadí"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Toto oprávnění umožňuje systému Android spustit aplikaci na pozadí, když je to požadováno."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat POUZE výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>

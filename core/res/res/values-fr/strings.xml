@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Applications personnelles"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android pour les activités professionnelles"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Services payants"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Effectuer des opérations payantes"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vos messages"</string>
@@ -400,6 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un fond d\'écran. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"s\'associer à un service d\'interaction vocale"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service d\'interaction vocale. Ne devrait pas être nécessaire pour les applications standards."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gérer les expressions clés vocales"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permettre à l\'application autorisée de gérer les expressions clés pour la détection de mots clés vocaux. Ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"s\'associer à un écran à distance"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permettre à l\'application autorisée de s\'associer à l\'interface de niveau supérieur d\'un écran à distance. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associer à un service widget"</string>
@@ -445,8 +448,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permet à une application d\'utiliser n\'importe quel décodeur installé pour lire les fichiers multimédias."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gérer les certificats de confiance"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet à l\'application d\'installer et de désinstaller les certificats CA en tant que certificats de confiance."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"exécuter l\'application lorsque l\'appareil est inactif"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Cette autorisation permet au système Android d\'exécuter l\'application en arrière-plan lorsque l\'appareil est inactif."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"exécuter les tâches en arrière-plan planifiées de l\'application"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Cette autorisation permet au système Android d\'exécuter l\'application en arrière-plan sur demande."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lecture/écriture dans les ressources appartenant aux diagnostics"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet à l\'application d\'obtenir des droits en lecture/écriture concernant toute ressource appartenant au groupe de diagnostics (par exemple, les fichiers du répertoire /dev). Ceci peut affecter la stabilité et la sécurité du système. Cette fonctionnalité est UNIQUEMENT réservée aux diagnostics matériels effectués par le fabricant ou l\'opérateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activer ou désactiver les composants de l\'application"</string>

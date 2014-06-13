@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicações pessoais"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android para trabalho"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Trabalho Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serviços que implicam pagamento"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Efetuar ações que implicam pagamento."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"As suas mensagens"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite ao titular vincular-se à interface de nível superior de uma imagem de fundo. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"vincular a um interlocutor de voz"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite que o titular vincule a interface de nível superior de um serviço de interação de voz. Nunca deverá ser necessário para aplicações normais."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gerir expressões-chave de voz"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permite ao proprietário gerir as expressões-chave para a deteção de palavras de ativação de voz. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"associar a um ecrã remoto"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite ao detentor associar a interface de nível superior a um ecrã remoto. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a um serviço de widget"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que a aplicação utilize qualquer descodificador de multimédia instalado para descodificar a reprodução."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gerir credenciais fidedignas"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que a aplicação instale e desinstale certificados da AC (Autoridade de certificação) como credenciais fidedignas."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"executar aplicação durante o tempo de inatividade"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Esta autorização permite ao sistema Android executar a aplicação em segundo plano enquanto o dispositivo não estiver a ser utilizado."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"executar o trabalho em segundo plano da aplicação"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Esta autorização permite ao sistema Android executar a aplicação em segundo plano quando solicitado."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/escrever em recursos propriedade de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite à aplicação ler e escrever em qualquer recurso que seja propriedade do grupo diag; por exemplo, ficheiros em /dev. Isto pode potencialmente afetar a estabilidade e a segurança do sistema e deve ser utilizado APENAS para diagnósticos específicos do hardware pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar componentes da aplicação"</string>

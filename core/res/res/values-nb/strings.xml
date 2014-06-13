@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Personlige apper"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android for arbeidsplassen"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Betaltjenester"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gjøre ting som kan koste deg penger."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Meldinger"</string>
@@ -400,6 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Lar innehaveren binde det øverste nivået av grensesnittet til en bakgrunn. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"binde seg til en tjeneste for talehandlinger"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en tjeneste for talehandlinger. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"administrer nøkkelfraser for stemmebruk"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Tillater innehaveren å administrere nøkkelfraser for gjenkjennelse av talekommandoord. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"binde til ekstern skjerm"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Lar innehaveren binde seg til det øverste grensesnittnivået for ekstern skjerm. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"binde til modultjenste"</string>
@@ -445,8 +448,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Lar appen bruke en hvilken som helst installert mediedekoder for å dekode for avspilling."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrer pålitelig legitimasjon"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lar appen installere og avinstallere CA-sertifikater som pålitelig legitimasjon."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"kjør appen når den ikke er i bruk"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Denne tillatelsen gjør at Android-systemet kan kjøre appen i bakgrunnen mens enheten ikke er i bruk."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"kjøre appens planlagte bakgrunnsprosesser"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Denne tillatelsen gjør at Android-systemet kan kjøre appen i bakgrunnen når det bes om det."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lar appen lese og skrive til alle ressurser som eies av gruppen «diag», som for eksempel filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør BARE brukes av produsenten eller operatøren til maskinvarespesifikk diagnostikk."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>

@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ระบบแอนดรอยด์"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"แอปส่วนตัว"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"แอนดรอยด์สำหรับการทำงาน"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"แอนดรอยด์สำหรับการทำงาน"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"บริการที่ต้องเสียค่าใช้จ่าย"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ทำสิ่งที่คุณต้องเสียค่าใช้จ่าย"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ข้อความของคุณ"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของวอลเปเปอร์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"เชื่อมโยงกับโปรแกรมโต้ตอบด้วยเสียง"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"อนุญาตให้ผู้ใช้อุปกรณ์เชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการโต้ตอบด้วยเสียง ไม่จำเป็นสำหรับแอปทั่วไป"</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"จัดการเสียงพูดวลีคำหลัก"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"ให้ผู้ใช้อุปกรณ์สามารถจัดการวลีคำหลักสำหรับการตรวจหาเสียงพูดคำที่นิยม ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ผูกกับจอแสดงผลระยะไกล"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"อนุญาตให้ผู้ใช้ผูกกับอินเทอร์เฟซระดับสูงสุดของจอแสดงผลระยะไกล ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"เชื่อมโยงกับบริการวิดเจ็ต"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"อนุญาตให้แอปพลิเคชันใช้ตัวถอดรหัสสื่อใดก็ได้ที่ติดตั้งไว้เพื่อถอดรหัสสำหรับการเล่น"</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"จัดการข้อมูลรับรองที่เชื่อถือได้"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"อนุญาตให้แอปติดตั้งและถอนการติดตั้งใบรับรอง CA ในฐานะข้อมูลรับรองที่เชื่อถือได้"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"เรียกใช้แอปพลิเคชันในระหว่างที่ไม่ได้ใช้งาน"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"สิทธิ์นี้ช่วยให้ระบบแอนดรอยด์สามารถเรียกใช้แอปพลิเคชันในพื้นหลังขณะไม่ได้ใช้งานอุปกรณ์อยู่"</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"เรียกใช้งานเบื้องหลังที่กำหนดเวลาไว้ของแอปพลิเคชัน"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"การอนุญาตนี้ช่วยให้ระบบแอนดรอยด์สามารถเรียกใช้แอปพลิเคชันในเบื้องหลังเมื่อได้รับคำขอ"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"อ่าน/เขียนไปยังรีซอร์สที่เป็นเจ้าของโดยกลุ่มวินิจฉัย"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"อนุญาตให้แอปพลิเคชันอ่านและเขียนไปยังทรัพยากรที่เป็นของกลุ่มวินิจฉัย เช่น ไฟล์ใน /dev การทำเช่นนี้อาจส่งผลต่อความเสถียรและความปลอดภัยของระบบ และควรใช้สำหรับการวินิจฉัยเกี่ยวกับฮาร์ดแวร์โดยเฉพาะที่ทำโดยผู้ผลิตหรือผู้ให้บริการเท่านั้น"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"เปิดหรือปิดใช้งานคอมโพเนนต์ของแอปพลิเคชัน"</string>
