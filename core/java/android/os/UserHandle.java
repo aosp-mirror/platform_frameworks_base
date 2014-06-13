@@ -16,7 +16,10 @@
 
 package android.os;
 
+import android.util.SparseArray;
+
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * Representation of a user on the device.
@@ -65,6 +68,8 @@ public final class UserHandle implements Parcelable {
     public static final boolean MU_ENABLED = true;
 
     final int mHandle;
+
+    private static final SparseArray<UserHandle> userHandles = new SparseArray<UserHandle>();
 
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
@@ -122,6 +127,18 @@ public final class UserHandle implements Parcelable {
     /** @hide */
     public static final int getCallingUserId() {
         return getUserId(Binder.getCallingUid());
+    }
+
+    /** @hide */
+    public static final UserHandle getCallingUserHandle() {
+        int userId = getUserId(Binder.getCallingUid());
+        UserHandle userHandle = userHandles.get(userId);
+        // Intentionally not synchronized to save time
+        if (userHandle == null) {
+            userHandle = new UserHandle(userId);
+            userHandles.put(userId, userHandle);
+        }
+        return userHandle;
     }
 
     /**
