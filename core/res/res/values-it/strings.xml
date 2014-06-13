@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"App personali"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servizi che prevedono un costo"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Svolgono operazioni che possono comportare un costo."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"I tuoi messaggi"</string>

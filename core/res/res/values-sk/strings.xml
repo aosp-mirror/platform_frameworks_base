@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Núdzový režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobné aplikácie"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android na prácu"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Spoplatnené služby"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Vykonávanie činností, ktoré vás môžu stáť peniaze."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše správy"</string>
@@ -447,7 +446,7 @@
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"spravovať dôveryhodné poverenia"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikácii inštalovať a odinštalovať certifikáty CA ako dôveryhodné poverenia."</string>
     <string name="permlab_bindJobService" msgid="3637568367978271086">"spustenie naplánovanej práce aplikácie na pozadí"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Toto povolenie umožňuje systému Android spustiť na základe požiadavky aplikáciu na pozadí"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Toto povolenie umožňuje systému Android spustiť na základe požiadavky aplikáciu na pozadí."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čítanie alebo zápis do prostriedkov funkcie diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikácii čítať ľubovoľné prostriedky v skupine diag, napr. súbory v priečinku /dev, a zapisovať do nich. Môže dôjsť k ovplyvneniu stability a bezpečnosti systému. Toto nastavenie by mal používať IBA výrobca či operátor na diagnostiku hardvéru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"povoliť alebo zakázať súčasti aplikácie"</string>
