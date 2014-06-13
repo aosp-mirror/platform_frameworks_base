@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -357,9 +358,13 @@ public class TextToSpeechClient {
         /** Name of the TTS engine package */
         private final String mPackageName;
 
-        private EngineStatus(String packageName, List<VoiceInfo> voices) {
+        /** Engine default locale */
+        private final Locale mDefaultLocale;
+
+        private EngineStatus(String packageName, List<VoiceInfo> voices, Locale defaultLocale) {
             this.mVoices =  Collections.unmodifiableList(voices);
             this.mPackageName = packageName;
+            this.mDefaultLocale = defaultLocale;
         }
 
         /**
@@ -374,6 +379,16 @@ public class TextToSpeechClient {
          */
         public String getEnginePackage() {
             return mPackageName;
+        }
+
+        /**
+         * Get the default locale to use for TTS with this TTS engine.
+         * Unless the user changed the TTS settings for this engine, the value returned should be
+         * the same as the system default locale for the current user
+         * ({@link Locale#getDefault()}).
+         */
+        public Locale getDefaultLocale() {
+            return mDefaultLocale;
         }
     }
 
@@ -638,7 +653,9 @@ public class TextToSpeechClient {
             return null;
         }
 
-        return new EngineStatus(mServiceConnection.getEngineName(), voices);
+        return new EngineStatus(mServiceConnection.getEngineName(), voices,
+                mEnginesHelper.getLocalePrefForEngine(
+                        mServiceConnection.getEngineName()));
     }
 
     private class Connection implements ServiceConnection {
@@ -696,7 +713,9 @@ public class TextToSpeechClient {
             public void onVoicesInfoChange(List<VoiceInfo> voicesInfo) {
                 synchronized (mLock) {
                     mEngineStatus = new EngineStatus(mServiceConnection.getEngineName(),
-                            voicesInfo);
+                            voicesInfo,
+                            mEnginesHelper.getLocalePrefForEngine(
+                                    mServiceConnection.getEngineName()));
                     mMainHandler.obtainMessage(InternalHandler.WHAT_ENGINE_STATUS_CHANGED,
                             mEngineStatus).sendToTarget();
                 }

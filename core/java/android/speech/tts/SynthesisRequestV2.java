@@ -167,9 +167,7 @@ public final class SynthesisRequestV2 implements Parcelable {
         }
     };
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;

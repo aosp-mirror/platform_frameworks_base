@@ -46,7 +46,8 @@ public final class RequestConfigHelper {
 
         /**
          * Score positively voices that exactly match the given locale
-         * @param locale Reference locale. If null, the default locale will be used.
+         * @param locale Reference locale. If null, the system default locale for the
+         * current user will be used ({@link Locale#getDefault()}).
          */
         public ExactLocaleMatcher(Locale locale) {
             if (locale == null) {
@@ -70,7 +71,8 @@ public final class RequestConfigHelper {
 
         /**
          * Score positively voices with similar locale.
-         * @param locale Reference locale. If null, default will be used.
+         * @param locale Reference locale.  If null, the system default locale for the
+         * current user will be used ({@link Locale#getDefault()}).
          */
         public LanguageMatcher(Locale locale) {
             if (locale == null) {
@@ -164,10 +166,10 @@ public final class RequestConfigHelper {
     }
 
     /**
-     * Get highest quality voice for the default locale.
+     * Get highest quality voice for the TTS default locale.
      *
      * Call {@link #highestQuality(EngineStatus, boolean, VoiceScorer)} with
-     * {@link LanguageMatcher} set to device default locale.
+     * {@link LanguageMatcher} set to the {@link EngineStatus#getDefaultLocale()}.
      *
      * @param engineStatus
      *            Voices status received from a {@link TextToSpeechClient#getEngineStatus()} call.
@@ -179,7 +181,7 @@ public final class RequestConfigHelper {
     public static RequestConfig highestQuality(EngineStatus engineStatus,
             boolean hasToBeEmbedded) {
         return highestQuality(engineStatus, hasToBeEmbedded,
-                new LanguageMatcher(Locale.getDefault()));
+                new LanguageMatcher(engineStatus.getDefaultLocale()));
     }
 
 }
