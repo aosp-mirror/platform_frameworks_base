@@ -26,7 +26,7 @@ public class Constants {
 
         public static class App {
             // Enables the home->Recents transition
-            public static final boolean EnableHomeTransition = false;
+            public static final boolean EnableHomeTransition = true;
             // Enables the screenshot app->Recents transition
             public static final boolean EnableScreenshotAppTransition = false;
             // Enables the filtering of tasks according to their grouping

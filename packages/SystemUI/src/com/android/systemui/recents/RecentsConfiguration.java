@@ -70,6 +70,7 @@ public class RecentsConfiguration {
     /** Task view animation and styles */
     public int taskViewEnterFromHomeDuration;
     public int taskViewEnterFromHomeDelay;
+    public int taskViewExitToHomeDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
@@ -174,6 +175,8 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
         taskViewEnterFromHomeDelay =
                 res.getInteger(R.integer.recents_animate_task_enter_from_home_delay);
+        taskViewExitToHomeDuration =
+                res.getInteger(R.integer.recents_animate_task_exit_to_home_duration);
         taskViewRemoveAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_remove_duration);
         taskViewRemoveAnimTranslationXPx =

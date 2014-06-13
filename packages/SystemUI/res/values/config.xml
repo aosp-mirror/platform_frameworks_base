@@ -120,11 +120,13 @@
      duration of the transition in to recents. -->
     <integer name="recents_animate_task_bar_enter_delay">225</integer>
     <!-- The min animation duration for animating the task bar out. -->
+    <integer name="recents_animate_task_exit_to_home_duration">225</integer>
+    <!-- The min animation duration for animating the task bar out. -->
     <integer name="recents_animate_task_bar_exit_duration">125</integer>
     <!-- The min animation duration for animating the task in when transitioning from home. -->
-    <integer name="recents_animate_task_enter_from_home_duration">325</integer>
+    <integer name="recents_animate_task_enter_from_home_duration">275</integer>
     <!-- The animation stagger to apply to each task animation when transitioning from home. -->
-    <integer name="recents_animate_task_enter_from_home_delay">16</integer>
+    <integer name="recents_animate_task_enter_from_home_delay">10</integer>
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
     <!-- The animation duration for animating the removal of a task view. -->

@@ -327,8 +327,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         animate()
                 .translationY(ctx.offscreenTranslationY)
                 .setStartDelay(0)
-                .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                .setDuration(mConfig.taskViewEnterFromHomeDuration)
+                .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                .setDuration(mConfig.taskViewExitToHomeDuration)
                 .withLayer()
                 .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
                 .start();
