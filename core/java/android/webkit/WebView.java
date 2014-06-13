@@ -1486,11 +1486,11 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Clears the client certificate preferences table stored in response
-     * to proceeding/cancelling client cert requests. Note that webview
+     * Clears the client certificate preferences stored in response
+     * to proceeding/cancelling client cert requests. Note that Webview
      * automatically clears these preferences when it receives a
-     * {@link KeyChain#ACTION_STORAGE_CHANGED} intent. The client certificate
-     * preferences are global for all Webviews.
+     * {@link KeyChain#ACTION_STORAGE_CHANGED} intent. The preferences are
+     * shared by all the webviews that are created by the embedder application.
      *
      * @param onCleared  A runnable to be invoked when client certs are cleared.
      *                   The embedder can pass null if not interested in the
