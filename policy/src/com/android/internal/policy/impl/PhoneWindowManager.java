@@ -3921,11 +3921,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " policyFlags=" + Integer.toHexString(policyFlags));
         }
 
-        if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
-                && event.getRepeatCount() == 0) {
-            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
-        }
-
         // Basic policy based on interactive state.
         int result;
         boolean isWakeKey = (policyFlags & (WindowManagerPolicy.FLAG_WAKE
@@ -3947,6 +3942,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             return result;
         }
+
+        boolean useHapticFeedback = down
+                && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
+                && event.getRepeatCount() == 0;
 
         // Handle special keys.
         switch (keyCode) {
@@ -4103,6 +4102,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_SLEEP: {
                 result &= ~ACTION_PASS_TO_USER;
+                if (!mPowerManager.isInteractive()) {
+                    useHapticFeedback = false; // suppress feedback if already non-interactive
+                }
                 mPowerManager.goToSleep(event.getEventTime());
                 isWakeKey = false;
                 break;
@@ -4175,6 +4177,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
+        }
+
+        if (useHapticFeedback) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
         }
 
         if (isWakeKey) {
