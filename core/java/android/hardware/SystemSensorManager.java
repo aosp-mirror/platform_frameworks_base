@@ -99,7 +99,7 @@ public class SystemSensorManager extends SensorManager {
             return false;
         }
         // Trigger Sensors should use the requestTriggerSensor call.
-        if (Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
             Log.e(TAG, "Trigger Sensors should use the requestTriggerSensor.");
             return false;
         }
@@ -133,7 +133,7 @@ public class SystemSensorManager extends SensorManager {
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
         // Trigger Sensors should use the cancelTriggerSensor call.
-        if (sensor != null && Sensor.getReportingMode(sensor) == Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor != null && sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
             return;
         }
 
@@ -159,7 +159,7 @@ public class SystemSensorManager extends SensorManager {
     protected boolean requestTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
         if (sensor == null) throw new IllegalArgumentException("sensor cannot be null");
 
-        if (Sensor.getReportingMode(sensor) != Sensor.REPORTING_MODE_ONE_SHOT) return false;
+        if (sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) return false;
 
         synchronized (mTriggerListeners) {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
@@ -181,7 +181,7 @@ public class SystemSensorManager extends SensorManager {
     @Override
     protected boolean cancelTriggerSensorImpl(TriggerEventListener listener, Sensor sensor,
             boolean disable) {
-        if (sensor != null && Sensor.getReportingMode(sensor) != Sensor.REPORTING_MODE_ONE_SHOT) {
+        if (sensor != null && sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) {
             return false;
         }
         synchronized (mTriggerListeners) {

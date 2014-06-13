@@ -708,6 +708,7 @@ public final class Sensor {
      * is generated if the direction of the 2-seconds window average gravity changed by at
      * least 35 degrees since the activation of the sensor. It is a wake up sensor.
      *
+     * @hide
      * @see #isWakeUpSensor()
      */
     public static final int TYPE_WAKE_UP_TILT_DETECTOR = 41;
@@ -715,6 +716,7 @@ public final class Sensor {
     /**
      * A constant string describing a wake up tilt detector sensor type.
      *
+     * @hide
      * @see #TYPE_WAKE_UP_TILT_DETECTOR
      */
     public static final String SENSOR_STRING_TYPE_WAKE_UP_TILT_DETECTOR =
@@ -752,16 +754,47 @@ public final class Sensor {
      */
     public static final int TYPE_ALL = -1;
 
-    /* Reporting mode constants for sensors. Each sensor will have exactly one
-       reporting mode associated with it. */
-    // Events are reported at a constant rate.
-    static int REPORTING_MODE_CONTINUOUS = 1;
+    // If this flag is set, the sensor defined as a wake up sensor. This field and REPORTING_MODE_*
+    // constants are defined as flags in sensors.h. Modify at both places if needed.
+    private static final int SENSOR_FLAG_WAKE_UP_SENSOR = 1;
 
-    // Events are reported only when the value changes.
-    static int REPORTING_MODE_ON_CHANGE = 2;
+    /**
+     * Events are reported at a constant rate which is set by the rate parameter of
+     * {@link SensorManager#registerListener(SensorEventListener, Sensor, int)}. Note: If other
+     * applications are requesting a higher rate, the sensor data might be delivered at faster rates
+     * than requested.
+     */
+    public static final int REPORTING_MODE_CONTINUOUS = 0;
 
-    // Upon detection of an event, the sensor deactivates itself and then sends a single event.
-    static int REPORTING_MODE_ONE_SHOT = 3;
+    /**
+     * Events are reported only when the value changes. Event delivery rate can be limited by
+     * setting appropriate value for rate parameter of
+     * {@link SensorManager#registerListener(SensorEventListener, Sensor, int)} Note: If other
+     * applications are requesting a higher rate, the sensor data might be delivered at faster rates
+     * than requested.
+     */
+    public static final int REPORTING_MODE_ON_CHANGE = 1;
+
+    /**
+     * Events are reported in one-shot mode. Upon detection of an event, the sensor deactivates
+     * itself and then sends a single event. Sensors of this reporting mode must be registered to
+     * using {@link SensorManager#requestTriggerSensor(TriggerEventListener, Sensor)}.
+     */
+    public static final int REPORTING_MODE_ONE_SHOT = 2;
+
+    /**
+     * Events are reported as described in the description of the sensor. The rate passed to
+     * registerListener might not have an impact on the rate of event delivery. See the sensor
+     * definition for more information on when and how frequently the events are reported. For
+     * example, step detectors report events when a step is detected.
+     *
+     * @see SensorManager#registerListener(SensorEventListener, Sensor, int, int)
+     */
+    public static final int REPORTING_MODE_SPECIAL_TRIGGER = 3;
+
+    // Mask for the LSB 2nd, 3rd and fourth bits.
+    private static final int REPORTING_MODE_MASK = 0xE;
+    private static final int REPORTING_MODE_SHIFT = 1;
 
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
@@ -770,80 +803,74 @@ public final class Sensor {
     // associated with
     // {@link SensorEvent} or {@link TriggerEvent} for the Sensor
     private static final int[] sSensorReportingModes = {
-            0, 0, // padding because sensor types start at 1
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_ACCELEROMETER
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GEOMAGNETIC_FIELD
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_ORIENTATION
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GYROSCOPE
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_LIGHT
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_PRESSURE
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_TEMPERATURE
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_PROXIMITY
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GRAVITY
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_LINEAR_ACCELERATION
-            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_ROTATION_VECTOR
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_RELATIVE_HUMIDITY
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_AMBIENT_TEMPERATURE
-            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED
-            REPORTING_MODE_CONTINUOUS, 4, // SENSOR_TYPE_GAME_ROTATION_VECTOR
-            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_GYROSCOPE_UNCALIBRATED
-            REPORTING_MODE_ONE_SHOT,   1, // SENSOR_TYPE_SIGNIFICANT_MOTION
-            // added post 4.3
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_DETECTOR
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_COUNTER
-            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_HEART_RATE_MONITOR
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR
+            0, // padding because sensor types start at 1
+            3, // SENSOR_TYPE_ACCELEROMETER
+            3, // SENSOR_TYPE_GEOMAGNETIC_FIELD
+            3, // SENSOR_TYPE_ORIENTATION
+            3, // SENSOR_TYPE_GYROSCOPE
+            3, // SENSOR_TYPE_LIGHT
+            3, // SENSOR_TYPE_PRESSURE
+            3, // SENSOR_TYPE_TEMPERATURE
+            3, // SENSOR_TYPE_PROXIMITY
+            3, // SENSOR_TYPE_GRAVITY
+            3, // SENSOR_TYPE_LINEAR_ACCELERATION
+            5, // SENSOR_TYPE_ROTATION_VECTOR
+            3, // SENSOR_TYPE_RELATIVE_HUMIDITY
+            3, // SENSOR_TYPE_AMBIENT_TEMPERATURE
+            6, // SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED
+            4, // SENSOR_TYPE_GAME_ROTATION_VECTOR
+            6, // SENSOR_TYPE_GYROSCOPE_UNCALIBRATED
+            1, // SENSOR_TYPE_SIGNIFICANT_MOTION
+            1, // SENSOR_TYPE_STEP_DETECTOR
+            1, // SENSOR_TYPE_STEP_COUNTER
+            5, // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
+            1, // SENSOR_TYPE_HEART_RATE_MONITOR
+            3, // SENSOR_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR
             // wake up variants of base sensors
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_ACCELEROMETER
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_ORIENTATION
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_GYROSCOPE
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_WAKE_UP_LIGHT
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_PRESSURE
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_GRAVITY
-            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_WAKE_UP_LINEAR_ACCELERATION
-            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_WAKE_UP_ROTATION_VECTOR
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_WAKE_UP_RELATIVE_HUMIDITY
-            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_WAKE_UP_AMBIENT_TEMPERATURE
-            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED
-            REPORTING_MODE_CONTINUOUS, 4, // SENSOR_TYPE_WAKE_UP_GAME_ROTATION_VECTOR
-            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_WAKE_UP_STEP_DETECTOR
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_WAKE_UP_STEP_COUNTER
-            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_WAKE_UP_HEART_RATE_MONITOR
-            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_WAKE_UP_TILT_DETECTOR
-            REPORTING_MODE_ONE_SHOT,   1, // SENSOR_TYPE_WAKE_GESTURE
+            3, // SENSOR_TYPE_WAKE_UP_ACCELEROMETER
+            3, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD
+            3, // SENSOR_TYPE_WAKE_UP_ORIENTATION
+            3, // SENSOR_TYPE_WAKE_UP_GYROSCOPE
+            3, // SENSOR_TYPE_WAKE_UP_LIGHT
+            3, // SENSOR_TYPE_WAKE_UP_PRESSURE
+            3, // SENSOR_TYPE_WAKE_UP_GRAVITY
+            3, // SENSOR_TYPE_WAKE_UP_LINEAR_ACCELERATION
+            5, // SENSOR_TYPE_WAKE_UP_ROTATION_VECTOR
+            3, // SENSOR_TYPE_WAKE_UP_RELATIVE_HUMIDITY
+            3, // SENSOR_TYPE_WAKE_UP_AMBIENT_TEMPERATURE
+            6, // SENSOR_TYPE_WAKE_UP_MAGNETIC_FIELD_UNCALIBRATED
+            4, // SENSOR_TYPE_WAKE_UP_GAME_ROTATION_VECTOR
+            6, // SENSOR_TYPE_WAKE_UP_GYROSCOPE_UNCALIBRATED
+            1, // SENSOR_TYPE_WAKE_UP_STEP_DETECTOR
+            1, // SENSOR_TYPE_WAKE_UP_STEP_COUNTER
+            5, // SENSOR_TYPE_WAKE_UP_GEOMAGNETIC_ROTATION_VECTOR
+            1, // SENSOR_TYPE_WAKE_UP_HEART_RATE_MONITOR
+            1, // SENSOR_TYPE_WAKE_UP_TILT_DETECTOR
+            1, // SENSOR_TYPE_WAKE_GESTURE
     };
 
-    static int getReportingMode(Sensor sensor) {
-        int offset = sensor.mType * 2;
-        if (offset >= sSensorReportingModes.length) {
-            // we don't know about this sensor, so this is probably a
-            // vendor-defined sensor, in that case, we figure out the reporting
-            // mode from the sensor meta-data.
-            int minDelay = sensor.mMinDelay;
-            if (minDelay == 0) {
-                return REPORTING_MODE_ON_CHANGE;
-            } else if (minDelay < 0) {
-                return REPORTING_MODE_ONE_SHOT;
-            } else {
-                return REPORTING_MODE_CONTINUOUS;
-            }
-        }
-        return sSensorReportingModes[offset];
+    /**
+     * Each sensor has exactly one reporting mode associated with it. This method returns the
+     * reporting mode constant for this sensor type.
+     *
+     * @return Reporting mode for the input sensor, one of REPORTING_MODE_* constants.
+     * @see #REPORTING_MODE_CONTINUOUS
+     * @see #REPORTING_MODE_ON_CHANGE
+     * @see #REPORTING_MODE_ONE_SHOT
+     * @see #REPORTING_MODE_SPECIAL_TRIGGER
+     */
+    public int getReportingMode() {
+        return ((mFlags & REPORTING_MODE_MASK) >> REPORTING_MODE_SHIFT);
     }
 
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
-        int type = sensor.mType;
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
-        if (type == Sensor.TYPE_ROTATION_VECTOR &&
+        if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR &&
                 sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return 3;
         }
-        int offset = type * 2 + 1;
+        int offset = sensor.mType;
         if (offset >= sSensorReportingModes.length) {
             // we don't know about this sensor, so this is probably a
             // vendor-defined sensor, in that case, we don't know how many value
@@ -873,7 +900,7 @@ public final class Sensor {
     private String  mStringType;
     private String  mRequiredPermission;
     private int     mMaxDelay;
-    private boolean mWakeUpSensor;
+    private int     mFlags;
 
     Sensor() {
     }
@@ -1016,7 +1043,7 @@ public final class Sensor {
      * @return true if this is a wake up sensor, false otherwise.
      */
     public boolean isWakeUpSensor() {
-        return mWakeUpSensor;
+        return (mFlags & SENSOR_FLAG_WAKE_UP_SENSOR) != 0;
     }
 
     void setRange(float max, float res) {

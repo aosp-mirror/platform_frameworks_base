@@ -11965,14 +11965,18 @@ package android.hardware {
     method public int getMinDelay();
     method public java.lang.String getName();
     method public float getPower();
+    method public int getReportingMode();
     method public float getResolution();
     method public java.lang.String getStringType();
     method public int getType();
     method public java.lang.String getVendor();
     method public int getVersion();
     method public boolean isWakeUpSensor();
+    field public static final int REPORTING_MODE_CONTINUOUS = 0; // 0x0
+    field public static final int REPORTING_MODE_ONE_SHOT = 2; // 0x2
+    field public static final int REPORTING_MODE_ON_CHANGE = 1; // 0x1
+    field public static final int REPORTING_MODE_SPECIAL_TRIGGER = 3; // 0x3
     field public static final java.lang.String SENSOR_STRING_TYPE_NON_WAKE_UP_PROXIMITY_SENSOR = "android.sensor.non_wake_up_proximity_sensor";
-    field public static final java.lang.String SENSOR_STRING_TYPE_WAKE_UP_TILT_DETECTOR = "android.sensor.wake_up_tilt_detector";
     field public static final java.lang.String STRING_TYPE_ACCELEROMETER = "android.sensor.accelerometer";
     field public static final java.lang.String STRING_TYPE_AMBIENT_TEMPERATURE = "android.sensor.ambient_temperature";
     field public static final java.lang.String STRING_TYPE_GAME_ROTATION_VECTOR = "android.sensor.game_rotation_vector";
@@ -12053,7 +12057,6 @@ package android.hardware {
     field public static final int TYPE_WAKE_UP_ROTATION_VECTOR = 31; // 0x1f
     field public static final int TYPE_WAKE_UP_STEP_COUNTER = 38; // 0x26
     field public static final int TYPE_WAKE_UP_STEP_DETECTOR = 37; // 0x25
-    field public static final int TYPE_WAKE_UP_TILT_DETECTOR = 41; // 0x29
   }
 
   public class SensorEvent {
