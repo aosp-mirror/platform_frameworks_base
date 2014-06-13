@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ni obvestil"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Priključite polnilnik"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Baterija je skoraj prazna."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Akumulator je skoraj izpraznjen"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Še <xliff:g id="NUMBER">%d%%</xliff:g>. Varčevanje z energijo akumulatorja je vklopljeno."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto.\nUporabite priloženi polnilnik."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Uporaba baterije"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Polnjenje prek USB-ja ni podprto."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Uporabljajte samo priloženi polnilnik."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Nastavitve"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Želite zagnati varčevanje z energijo akumulatorja?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Začni"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Zaženi varčevanje z energijo akumulatorja"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Zaradi podaljšanja delovanja akumulatorja funkcija Varčevanje z energijo akumulatorja zmanjša zmogljivost delovanja naprave.\n\nVarčevanje z energijo akumulatorja se onemogoči, ko je naprava priklopljena na zunanje napajanje."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavitve"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Način za letalo"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Za eno uro"</item>
     <item quantity="other" msgid="5408537517529822157">"Za %d h"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Varčevanje z energijo akumulatorja je vklopljeno"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Zmogljivost delovanja naprave je zmanjšana."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Odpri nastavitve varčevanja z energijo akumulatorja"</string>
 </resources>

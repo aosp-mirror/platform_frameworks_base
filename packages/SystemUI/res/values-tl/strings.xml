@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Walang mga notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Nagpapatuloy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Mga Notification"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Ikabit ang charger"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Humihina na ang baterya."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Mahina na ang baterya"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> natitira"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> ang natitira. Naka-on ang tagatipid ng baterya."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Hindi sinusuportahan ang pag-charge sa USB.\nGamitin lang ang ibinigay na charger."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Paggamit ng baterya"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Hindi sinusuportahan ang pagtsa-charge gamit ang USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Gamitin lang ang ibinigay na charger."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Mga Setting"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Simulan ang tagatipid ng baterya?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Magsimula"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Simulan ang tagatipid ng baterya"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Upang makatulong na patagalin ang baterya, babawasan ng Tagatipid ng baterya ang pagganap ng iyong device.\n\nIdi-disable ang tagatipid ng baterya kapag naka-plug in ang iyong device."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mga Setting"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Airplane mode"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Sa loob ng isang oras"</item>
     <item quantity="other" msgid="5408537517529822157">"Sa loob ng %d (na) oras"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Naka-on ang tagatipid ng baterya"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Binawasan ang pagganap ng device."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Buksan ang mga setting ng tagatipid ng baterya"</string>
 </resources>

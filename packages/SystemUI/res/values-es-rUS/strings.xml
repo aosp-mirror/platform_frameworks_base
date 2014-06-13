@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No hay notificaciones"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continuo"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Conecta el cargador."</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Hay poca batería."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Batería baja"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Quedan <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> restante. El ahorro de batería está activado."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"No admite la carga USB.\nUsa sólo el cargador provisto."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Uso de la batería"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"No se admite la carga por USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Usa solo el cargador suministrado."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Configuración"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"¿Quieres iniciar el ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Iniciar"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Iniciar ahorro de batería"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reducirá el rendimiento del dispositivo.\n\nEsta función se inhabilitará cuando el dispositivo esté conectado."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configuración"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Modo avión"</string>
@@ -243,4 +249,7 @@
     <item quantity="one" msgid="3480040795582254384">"Durante una hora"</item>
     <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Rendimiento del dispositivo reducido"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Abrir configuración del ahorro de batería"</string>
 </resources>
