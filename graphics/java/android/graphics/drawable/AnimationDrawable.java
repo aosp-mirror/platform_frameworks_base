@@ -28,7 +28,6 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 
 /**
- * 
  * An object used to create frame-by-frame animations, defined by a series of Drawable objects,
  * which can be used as a View object's background.
  * <p>
@@ -114,6 +113,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      * @see #isRunning()
      * @see #stop()
      */
+    @Override
     public void start() {
         if (!isRunning()) {
             run();
@@ -127,6 +127,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      * @see #isRunning()
      * @see #start()
      */
+    @Override
     public void stop() {
         if (isRunning()) {
             unscheduleSelf(this);
@@ -138,6 +139,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      *
      * @return true if the animation is running, false otherwise
      */
+    @Override
     public boolean isRunning() {
         return mAnimating;
     }
@@ -148,6 +150,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      *
      * @see #start()
      */
+    @Override
     public void run() {
         nextFrame(false);
     }
@@ -165,41 +168,41 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     public int getNumberOfFrames() {
         return mAnimationState.getChildCount();
     }
-    
+
     /**
      * @return The Drawable at the specified frame index
      */
     public Drawable getFrame(int index) {
         return mAnimationState.getChild(index);
     }
-    
+
     /**
-     * @return The duration in milliseconds of the frame at the 
+     * @return The duration in milliseconds of the frame at the
      * specified index
      */
     public int getDuration(int i) {
         return mAnimationState.mDurations[i];
     }
-    
+
     /**
      * @return True of the animation will play once, false otherwise
      */
     public boolean isOneShot() {
         return mAnimationState.mOneShot;
     }
-    
+
     /**
      * Sets whether the animation should play once or repeat.
-     * 
+     *
      * @param oneShot Pass true if the animation should only play once
      */
     public void setOneShot(boolean oneShot) {
         mAnimationState.mOneShot = oneShot;
     }
-    
+
     /**
      * Add a frame to the animation
-     * 
+     *
      * @param frame The frame to add
      * @param duration How long in milliseconds the frame should appear
      */
@@ -209,7 +212,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
             setFrame(0, true, false);
         }
     }
-    
+
     private void nextFrame(boolean unschedule) {
         int next = mCurFrame+1;
         final int N = mAnimationState.getChildCount();
@@ -239,21 +242,21 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        
+
         TypedArray a = r.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AnimationDrawable);
 
         super.inflateWithAttributes(r, parser, a,
                 com.android.internal.R.styleable.AnimationDrawable_visible);
-        
+
         mAnimationState.setVariablePadding(a.getBoolean(
                 com.android.internal.R.styleable.AnimationDrawable_variablePadding, false));
-            
+
         mAnimationState.mOneShot = a.getBoolean(
                 com.android.internal.R.styleable.AnimationDrawable_oneshot, false);
-        
+
         a.recycle();
-        
+
         int type;
 
         final int innerDepth = parser.getDepth()+1;
@@ -267,7 +270,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
             if (depth > innerDepth || !parser.getName().equals("item")) {
                 continue;
             }
-            
+
             a = r.obtainAttributes(attrs, com.android.internal.R.styleable.AnimationDrawableItem);
             int duration = a.getInt(
                     com.android.internal.R.styleable.AnimationDrawableItem_duration, -1);
@@ -278,9 +281,9 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
             }
             int drawableRes = a.getResourceId(
                     com.android.internal.R.styleable.AnimationDrawableItem_drawable, 0);
-            
+
             a.recycle();
-            
+
             Drawable dr;
             if (drawableRes != 0) {
                 dr = r.getDrawable(drawableRes);
@@ -295,7 +298,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 }
                 dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
-            
+
             mAnimationState.addFrame(dr, duration);
             if (dr != null) {
                 dr.setCallback(this);
@@ -342,7 +345,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         }
 
         public void addFrame(Drawable dr, int dur) {
-            // Do not combine the following. The array index must be evaluated before 
+            // Do not combine the following. The array index must be evaluated before
             // the array is accessed because super.addChild(dr) has a side effect on mDurations.
             int pos = super.addChild(dr);
             mDurations[pos] = dur;
