@@ -32,10 +32,11 @@ import static com.android.server.am.ActivityManagerService.VALIDATE_TOKENS;
 
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_APP;
-import static com.android.server.am.ActivityStackSupervisor.DEBUG_CONTAINERS;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+
+import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.CONTAINER_STATE_HAS_SURFACE;
 
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
@@ -1275,7 +1276,7 @@ final class ActivityStack {
 
         ActivityRecord parent = mActivityContainer.mParentActivity;
         if ((parent != null && parent.state != ActivityState.RESUMED) ||
-                !mActivityContainer.isAttachedLocked()) {
+                !mActivityContainer.isAttached()) {
             // Do not resume this stack if its parent is not resumed.
             // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
             return false;
@@ -2539,14 +2540,11 @@ final class ActivityStack {
                 || prevState == ActivityState.INITIALIZING) {
             // If this activity is already stopped, we can just finish
             // it right now.
-            r.makeFinishing();
-            boolean activityRemoved = destroyActivityLocked(r, true, oomAdj, "finish-imm");
+            boolean activityRemoved = destroyActivityLocked(r, true,
+                    oomAdj, "finish-imm");
             if (activityRemoved) {
                 mStackSupervisor.resumeTopActivitiesLocked();
             }
-            if (DEBUG_CONTAINERS) Slog.d(TAG, 
-                    "destroyActivityLocked: finishCurrentActivityLocked r=" + r +
-                    " destroy returned removed=" + activityRemoved);
             return activityRemoved ? null : r;
         }
 
@@ -2918,7 +2916,6 @@ final class ActivityStack {
             if (r != null) {
                 mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
             }
-            if (DEBUG_CONTAINERS) Slog.d(TAG, "activityDestroyedLocked: r=" + r);
 
             if (isInStackLocked(token) != null) {
                 if (r.state == ActivityState.DESTROYING) {
@@ -3676,7 +3673,7 @@ final class ActivityStack {
                 mStacks.remove(this);
                 mStacks.add(0, this);
             }
-            mActivityContainer.onTaskListEmptyLocked();
+            mActivityContainer.onTaskListEmpty();
         }
     }
 
