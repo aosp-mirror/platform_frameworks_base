@@ -22,7 +22,9 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -353,6 +355,81 @@ public final class TvContract {
         /** The service type for radio channels that have audio only. */
         public static final int SERVICE_TYPE_AUDIO = 0x2;
 
+        /** The video format for 240p. */
+        public static final String VIDEO_FORMAT_240P = "VIDEO_FORMAT_240P";
+
+        /** The video format for 360p. */
+        public static final String VIDEO_FORMAT_360P = "VIDEO_FORMAT_360P";
+
+        /** The video format for 480i. */
+        public static final String VIDEO_FORMAT_480I = "VIDEO_FORMAT_480I";
+
+        /** The video format for 480p. */
+        public static final String VIDEO_FORMAT_480P = "VIDEO_FORMAT_480P";
+
+        /** The video format for 576i. */
+        public static final String VIDEO_FORMAT_576I = "VIDEO_FORMAT_576I";
+
+        /** The video format for 576p. */
+        public static final String VIDEO_FORMAT_576P = "VIDEO_FORMAT_576P";
+
+        /** The video format for 720p. */
+        public static final String VIDEO_FORMAT_720P = "VIDEO_FORMAT_720P";
+
+        /** The video format for 1080i. */
+        public static final String VIDEO_FORMAT_1080I = "VIDEO_FORMAT_1080I";
+
+        /** The video format for 1080p. */
+        public static final String VIDEO_FORMAT_1080P = "VIDEO_FORMAT_1080P";
+
+        /** The video format for 2160p. */
+        public static final String VIDEO_FORMAT_2160P = "VIDEO_FORMAT_2160P";
+
+        /** The video format for 4320p. */
+        public static final String VIDEO_FORMAT_4320P = "VIDEO_FORMAT_4320P";
+
+        /** The video resolution for standard-definition. */
+        public static final String VIDEO_RESOLUTION_SD = "VIDEO_RESOLUTION_SD";
+
+        /** The video resolution for enhanced-definition. */
+        public static final String VIDEO_RESOLUTION_ED = "VIDEO_RESOLUTION_ED";
+
+        /** The video resolution for high-definition. */
+        public static final String VIDEO_RESOLUTION_HD = "VIDEO_RESOLUTION_HD";
+
+        /** The video resolution for full high-definition. */
+        public static final String VIDEO_RESOLUTION_FHD = "VIDEO_RESOLUTION_FHD";
+
+        /** The video resolution for ultra high-definition. */
+        public static final String VIDEO_RESOLUTION_UHD = "VIDEO_RESOLUTION_UHD";
+
+        private static final Map<String, String> VIDEO_FORMAT_TO_RESOLUTION_MAP =
+                new HashMap<String, String>();
+
+        static {
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_480I, VIDEO_RESOLUTION_SD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_480P, VIDEO_RESOLUTION_ED);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_576I, VIDEO_RESOLUTION_SD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_576P, VIDEO_RESOLUTION_ED);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_720P, VIDEO_RESOLUTION_HD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_1080I, VIDEO_RESOLUTION_HD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_1080P, VIDEO_RESOLUTION_FHD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_2160P, VIDEO_RESOLUTION_UHD);
+            VIDEO_FORMAT_TO_RESOLUTION_MAP.put(VIDEO_FORMAT_4320P, VIDEO_RESOLUTION_UHD);
+        }
+
+        /**
+         * Returns the video resolution (definition) for a given video format.
+         *
+         * @param videoFormat The video format defined in {@link Channels}.
+         * @return the corresponding video resolution string. {@code null} if the resolution string
+         *         is not defined for the given video format.
+         * @see #COLUMN_VIDEO_FORMAT
+         */
+        public static final String getVideoResolution(String videoFormat) {
+            return VIDEO_FORMAT_TO_RESOLUTION_MAP.get(videoFormat);
+        }
+
         /**
          * The name of the {@link TvInputService} subclass that provides this TV channel. This
          * should be a fully qualified class name (such as, "com.example.project.TvInputService").
@@ -484,6 +561,24 @@ public final class TvContract {
          * </p>
          */
         public static final String COLUMN_DESCRIPTION = "description";
+
+        /**
+         * The typical video format for programs from this TV channel.
+         * <p>
+         * This is primarily used to filter out channels based on video format by applications. The
+         * value should match one of the followings: {@link #VIDEO_FORMAT_240P},
+         * {@link #VIDEO_FORMAT_360P}, {@link #VIDEO_FORMAT_480I}, {@link #VIDEO_FORMAT_480P},
+         * {@link #VIDEO_FORMAT_576I}, {@link #VIDEO_FORMAT_576P}, {@link #VIDEO_FORMAT_720P},
+         * {@link #VIDEO_FORMAT_1080I}, {@link #VIDEO_FORMAT_1080P}, {@link #VIDEO_FORMAT_2160P},
+         * {@link #VIDEO_FORMAT_4320P}. Note that the actual video resolution of each program from a
+         * given channel can vary thus one should use {@link Programs#COLUMN_VIDEO_WIDTH} and
+         * {@link Programs#COLUMN_VIDEO_HEIGHT} to get more accurate video resolution.
+         * </p><p>
+         * Type: TEXT
+         * </p><p>
+         * @see #getVideoResolution
+         */
+        public static final String COLUMN_VIDEO_FORMAT = "video_format";
 
         /**
          * The flag indicating whether this TV channel is browsable or not.
@@ -690,6 +785,32 @@ public final class TvContract {
          * </p>
          */
         public static final String COLUMN_LONG_DESCRIPTION = "long_description";
+
+        /**
+         * The width of the video for this TV program, in the unit of pixels.
+         * <p>
+         * Together with {@link #COLUMN_VIDEO_HEIGHT} this is used to determine the video resolution
+         * of the current TV program. Can be empty if it is not known initially or the program does
+         * not convey any video such as the programs from type {@link Channels#SERVICE_TYPE_AUDIO}
+         * channels.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_VIDEO_WIDTH = "video_width";
+
+        /**
+         * The height of the video for this TV program, in the unit of pixels.
+         * <p>
+         * Together with {@link #COLUMN_VIDEO_WIDTH} this is used to determine the video resolution
+         * of the current TV program. Can be empty if it is not known initially or the program does
+         * not convey any video such as the programs from type {@link Channels#SERVICE_TYPE_AUDIO}
+         * channels.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_VIDEO_HEIGHT = "video_height";
 
         /**
          * The comma-separated audio languages of this TV program.
