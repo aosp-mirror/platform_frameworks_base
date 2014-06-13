@@ -20,11 +20,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
 import android.telephony.CellInfo;
+import android.telephony.VoLteServiceState;
 import android.telephony.Rlog;
+import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
+import android.telephony.SubscriptionManager;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 
@@ -48,6 +50,7 @@ import java.util.List;
  * appropriate LISTEN_ flags.
  */
 public class PhoneStateListener {
+    private static final String TAG = "PhoneStateListener";
 
     /**
      * Stop listening for updates.
@@ -200,18 +203,42 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
 
+    /**
+     * Listen for changes to LTE network state
+     *
+     * @see #onLteNetworkStateChanged
+     * @hide
+     */
+    public static final int LISTEN_VOLTE_STATE                              = 0x00004000;
+
+     /*
+     * Subscription used to listen to the phone state changes
+     * @hide
+     */
+    /** @hide */
+    protected long mSubId = 0;
+
     private final Handler mHandler;
 
     public PhoneStateListener() {
-        this(Looper.myLooper());
+        this(SubscriptionManager.DEFAULT_SUB_ID, Looper.myLooper());
+    }
+
+    /**
+     * @hide
+     */
+    public PhoneStateListener(long subId) {
+        this(subId, Looper.myLooper());
     }
 
     /** @hide */
-    public PhoneStateListener(Looper looper) {
+    public PhoneStateListener(long subId, Looper looper) {
+        Rlog.d(TAG, "ctor: subId=" + subId + " looper=" + looper);
+        mSubId = subId;
         mHandler = new Handler(looper) {
             public void handleMessage(Message msg) {
-                //Rlog.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what)
-                // + " msg=" + msg);
+                Rlog.d(TAG, "mSubId=" + mSubId + " what=0x" + Integer.toHexString(msg.what)
+                 + " msg=" + msg);
                 switch (msg.what) {
                     case LISTEN_SERVICE_STATE:
                         PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);
@@ -257,6 +284,9 @@ public class PhoneStateListener {
                     case LISTEN_DATA_CONNECTION_REAL_TIME_INFO:
                         PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
                                 (DataConnectionRealTimeInfo)msg.obj);
+                        break;
+                    case LISTEN_VOLTE_STATE:
+                        PhoneStateListener.this.onVoLteServiceStateChanged((VoLteServiceState)msg.obj);
                         break;
                 }
             }
@@ -417,6 +447,15 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the service state of LTE network
+     * related to the VoLTE service has changed.
+     * @param stateInfo is the current LTE network information
+     * @hide
+     */
+    public void onVoLteServiceStateChanged(VoLteServiceState stateInfo) {
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      */
@@ -483,6 +522,10 @@ public class PhoneStateListener {
                 DataConnectionRealTimeInfo dcRtInfo) {
             Message.obtain(mHandler, LISTEN_DATA_CONNECTION_REAL_TIME_INFO, 0, 0,
                     dcRtInfo).sendToTarget();
+        }
+
+        public void onVoLteServiceStateChanged(VoLteServiceState lteState) {
+            Message.obtain(mHandler, LISTEN_VOLTE_STATE, 0, 0, lteState).sendToTarget();
         }
     };
 }

@@ -61,6 +61,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
+import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -237,7 +238,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mThread = new Thread(mConnector, NETD_TAG);
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
-        mPhoneStateListener = new PhoneStateListener(mDaemonHandler.getLooper()) {
+        mPhoneStateListener = new PhoneStateListener(
+                SubscriptionManager.DEFAULT_SUB_ID, // FIXME: What Subscription should be used??
+                mDaemonHandler.getLooper()) {
             public void onDataConnectionRealTimeInfoChanged(
                     DataConnectionRealTimeInfo dcRtInfo) {
                 notifyInterfaceClassActivity(ConnectivityManager.TYPE_MOBILE,

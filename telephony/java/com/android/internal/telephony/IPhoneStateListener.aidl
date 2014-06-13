@@ -23,6 +23,7 @@ import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.VoLteServiceState;
 
 oneway interface IPhoneStateListener {
     void onServiceStateChanged(in ServiceState serviceState);
@@ -41,5 +42,6 @@ oneway interface IPhoneStateListener {
     void onPreciseCallStateChanged(in PreciseCallState callState);
     void onPreciseDataConnectionStateChanged(in PreciseDataConnectionState dataConnectionState);
     void onDataConnectionRealTimeInfoChanged(in DataConnectionRealTimeInfo dcRtInfo);
+    void onVoLteServiceStateChanged(in VoLteServiceState lteState);
 }
 
