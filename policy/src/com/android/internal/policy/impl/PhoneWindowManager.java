@@ -306,6 +306,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mSystemBooted;
     boolean mHdmiPlugged;
+    IUiModeManager mUiModeManager;
     int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
@@ -4984,6 +4985,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext, null);
         mKeyguardDelegate.onSystemReady();
 
+        updateUiMode();
         synchronized (mLock) {
             updateOrientationListenerLp();
             mSystemReady = true;
@@ -5172,6 +5174,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    void updateUiMode() {
+        if (mUiModeManager == null) {
+            mUiModeManager = IUiModeManager.Stub.asInterface(
+                    ServiceManager.getService(Context.UI_MODE_SERVICE));
+        }
+        try {
+            mUiMode = mUiModeManager.getCurrentModeType();
+        } catch (RemoteException e) {
+        }
+    }
+
     void updateRotation(boolean alwaysSendConfiguration) {
         try {
             //set orientation on WindowManager
@@ -5217,6 +5230,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (ENABLE_DESK_DOCK_HOME_CAPTURE) {
                 intent = mDeskDockIntent;
             }
+        } else if (mUiMode == Configuration.UI_MODE_TYPE_WATCH
+                && (mDockMode == Intent.EXTRA_DOCK_STATE_DESK
+                        || mDockMode == Intent.EXTRA_DOCK_STATE_HE_DESK
+                        || mDockMode == Intent.EXTRA_DOCK_STATE_LE_DESK)) {
+            // Always launch dock home from home when watch is docked, if it exists.
+            intent = mDeskDockIntent;
         }
 
         if (intent == null) {
