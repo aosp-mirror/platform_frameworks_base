@@ -287,7 +287,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Updates each of the task animation rects. */
     void updateAnimationRects() {
-        if (mServiceIsBound && mBootCompleted) {
+        if (mServiceIsBound) {
             Resources res = mContext.getResources();
             int statusBarHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_height);
