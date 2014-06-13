@@ -38,15 +38,18 @@ import java.util.ArrayList;
  */
 class Ripple {
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final TimeInterpolator DECEL_INTERPOLATOR = new DecelerateInterpolator(4);
+    private static final TimeInterpolator DECEL_INTERPOLATOR = new LogInterpolator();
 
     private static final float GLOBAL_SPEED = 1.0f;
     private static final float WAVE_TOUCH_DOWN_ACCELERATION = 1024.0f * GLOBAL_SPEED;
-    private static final float WAVE_TOUCH_UP_ACCELERATION = 3096.0f * GLOBAL_SPEED;
-    private static final float WAVE_OPACITY_DECAY_VELOCITY = 1.9f / GLOBAL_SPEED;
-    private static final float WAVE_OUTER_OPACITY_VELOCITY = 1.2f * GLOBAL_SPEED;
+    private static final float WAVE_TOUCH_UP_ACCELERATION = 3400.0f * GLOBAL_SPEED;
+    private static final float WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
+    private static final float WAVE_OUTER_OPACITY_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
+    private static final float WAVE_OUTER_OPACITY_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
+    private static final float WAVE_OUTER_SIZE_INFLUENCE_MAX = 200f;
+    private static final float WAVE_OUTER_SIZE_INFLUENCE_MIN = 40f;
 
-    private static final long RIPPLE_ENTER_DELAY = 100;
+    private static final long RIPPLE_ENTER_DELAY = 80;
 
     // Hardware animators.
     private final ArrayList<RenderNodeAnimator> mRunningAnimations = new ArrayList<>();
@@ -311,7 +314,7 @@ class Ripple {
     public void enter() {
         final int radiusDuration = (int)
                 (1000 * Math.sqrt(mOuterRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensity) + 0.5);
-        final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_VELOCITY);
+        final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_VELOCITY_MIN);
 
         final ObjectAnimator radius = ObjectAnimator.ofFloat(this, "radiusGravity", 1);
         radius.setAutoCancel(true);
@@ -355,7 +358,6 @@ class Ripple {
      */
     public void exit() {
         cancelSoftwareAnimations();
-
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         final float remaining;
         if (mAnimRadius != null && mAnimRadius.isRunning()) {
@@ -368,13 +370,23 @@ class Ripple {
                 + WAVE_TOUCH_DOWN_ACCELERATION) * mDensity) + 0.5);
         final int opacityDuration = (int) (1000 * mOpacity / WAVE_OPACITY_DECAY_VELOCITY + 0.5f);
 
+        // Scale the outer max opacity and opacity velocity based
+        // on the size of the outer radius
+
+        float outerSizeInfluence = MathUtils.constrain(
+                (mOuterRadius - WAVE_OUTER_SIZE_INFLUENCE_MIN * mDensity)
+                / (WAVE_OUTER_SIZE_INFLUENCE_MAX * mDensity), 0, 1);
+        float outerOpacityVelocity = MathUtils.lerp(WAVE_OUTER_OPACITY_VELOCITY_MIN,
+                WAVE_OUTER_OPACITY_VELOCITY_MAX, outerSizeInfluence);
+
         // Determine at what time the inner and outer opacity intersect.
         // inner(t) = mOpacity - t * WAVE_OPACITY_DECAY_VELOCITY / 1000
         // outer(t) = mOuterOpacity + t * WAVE_OUTER_OPACITY_VELOCITY / 1000
+
         final int outerInflection = Math.max(0, (int) (1000 * (mOpacity - mOuterOpacity)
-                / (WAVE_OPACITY_DECAY_VELOCITY + WAVE_OUTER_OPACITY_VELOCITY) + 0.5f));
+                / (WAVE_OPACITY_DECAY_VELOCITY + outerOpacityVelocity) + 0.5f));
         final int inflectionOpacity = (int) (255 * (mOuterOpacity + outerInflection
-                * WAVE_OUTER_OPACITY_VELOCITY / 1000) + 0.5f);
+                * outerOpacityVelocity * outerSizeInfluence / 1000) + 0.5f);
 
         if (mCanUseHardware) {
             exitHardware(radiusDuration, opacityDuration, outerInflection, inflectionOpacity);
@@ -606,4 +618,14 @@ class Ripple {
             removeSelf();
         }
     };
+
+    /**
+    * Interpolator with a smooth log deceleration
+    */
+    private static final class LogInterpolator implements TimeInterpolator {
+        @Override
+        public float getInterpolation(float input) {
+            return 1 - (float) Math.pow(400, -input * 1.4);
+        }
+    }
 }
