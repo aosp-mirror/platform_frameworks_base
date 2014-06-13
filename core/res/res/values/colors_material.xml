@@ -27,10 +27,10 @@
 
     <color name="bright_foreground_material_dark">@color/white</color>
     <color name="bright_foreground_material_light">@color/black</color>
-    <!-- Black 50% -->
-    <color name="bright_foreground_disabled_material_dark">#80000000</color>
     <!-- White 50% -->
-    <color name="bright_foreground_disabled_material_light">#80ffffff</color>
+    <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
+    <!-- Black 50% -->
+    <color name="bright_foreground_disabled_material_light">#80000000</color>
     <color name="bright_foreground_inverse_material_dark">@color/bright_foreground_material_light</color>
     <color name="bright_foreground_inverse_material_light">@color/bright_foreground_material_dark</color>
 
