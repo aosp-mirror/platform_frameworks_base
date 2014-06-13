@@ -485,7 +485,7 @@ public class TtsEngines {
     /**
      * Serialize the locale to a string and store it as a default locale for the given engine. If
      * the passed locale is null, an empty string will be serialized; that empty string, when
-     * read back, will evaluate to {@line Locale#getDefault()}.
+     * read back, will evaluate to {@link Locale#getDefault()}.
      */
     public synchronized void updateLocalePrefForEngine(String engineName, Locale newLocale) {
         final String prefList = Settings.Secure.getString(mContext.getContentResolver(),
