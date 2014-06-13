@@ -564,7 +564,11 @@
       <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
             <span class="en">Supporting Tablets and Handsets</span>
           </a></li>
-
+      <li>
+        <a href="<?cs var:toroot ?>guide/practices/verifying-apps-art.html">
+          <span class="en">Verifying App Behavior on ART</span>
+        </a>
+      </li>
     </ul>
   </li>
 
