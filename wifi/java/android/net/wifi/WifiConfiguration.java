@@ -342,6 +342,12 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Uid of app owning the BSSID
+     */
+    public int bssidOwnerUid;
+
+    /**
+     * @hide
      * BSSID list on which this configuration was seen.
      * TODO: prevent this list to grow infinitely, age-out the results
      */
@@ -1105,6 +1111,7 @@ public class WifiConfiguration implements Parcelable {
             didSelfAdd = source.didSelfAdd;
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
+            bssidOwnerUid = source.bssidOwnerUid;
             creatorUid = source.creatorUid;
             peerWifiConfiguration = source.peerWifiConfiguration;
             blackListTimestamp = source.blackListTimestamp;
@@ -1153,6 +1160,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
+        dest.writeInt(bssidOwnerUid);
         dest.writeLong(blackListTimestamp);
     }
 
@@ -1192,6 +1200,7 @@ public class WifiConfiguration implements Parcelable {
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
+                config.bssidOwnerUid = in.readInt();
                 config.blackListTimestamp = in.readLong();
                 return config;
             }
