@@ -1104,7 +1104,7 @@ public class UserManagerService extends IUserManager.Stub {
             final UserInfo user;
             synchronized (mPackagesLock) {
                 user = mUsers.get(userHandle);
-                if (userHandle == 0 || user == null) {
+                if (userHandle == 0 || user == null || mRemovingUserIds.get(userHandle)) {
                     return false;
                 }
                 mRemovingUserIds.put(userHandle, true);
