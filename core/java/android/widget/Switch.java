@@ -962,6 +962,20 @@ public class Switch extends CompoundButton {
         invalidate();
     }
 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        if (mThumbDrawable != null) {
+            mThumbDrawable.setHotspot(x, y);
+        }
+
+        if (mTrackDrawable != null) {
+            mTrackDrawable.setHotspot(x, y);
+        }
+    }
+
     @Override
     public void invalidateDrawable(Drawable drawable) {
         super.invalidateDrawable(drawable);

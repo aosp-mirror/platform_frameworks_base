@@ -90,6 +90,7 @@ import static java.lang.Math.max;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -4794,14 +4795,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param v previous or the next focus holder, or null if none
      */
     private void manageFocusHotspot(boolean focused, View v) {
-        if (mBackground == null) {
-            return;
-        }
-
         final Rect r = new Rect();
         if (!focused && v != null) {
             v.getBoundsOnScreen(r);
-            final int[] location = new int[2];
+            final int[] location = mAttachInfo.mTmpLocation;
             getLocationOnScreen(location);
             r.offset(-location[0], -location[1]);
         } else {
@@ -4810,7 +4807,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final float x = r.exactCenterX();
         final float y = r.exactCenterY();
-        mBackground.setHotspot(x, y);
+        setDrawableHotspot(x, y);
+    }
+
+    /**
+     * Sets the hotspot position for this View's drawables.
+     *
+     * @param x hotspot x coordinate
+     * @param y hotspot y coordinate
+     * @hide
+     */
+    protected void setDrawableHotspot(float x, float y) {
+        if (mBackground != null) {
+            mBackground.setHotspot(x, y);
+        }
     }
 
     /**
@@ -6767,7 +6777,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void setPressed(boolean pressed, float x, float y) {
         if (pressed) {
-            setHotspot(x, y);
+            setDrawableHotspot(x, y);
         }
 
         setPressed(pressed);
@@ -9106,8 +9116,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
-                        setHotspot(x, y);
-                        setPressed(true);
+                        setPressed(true, x, y);
                         checkForLongClick(0);
                     }
                     break;
@@ -9119,7 +9128,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    setHotspot(x, y);
+                    setDrawableHotspot(x, y);
 
                     // Be lenient about moving outside of buttons
                     if (!pointInView(x, y, mTouchSlop)) {
@@ -9139,12 +9148,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return false;
-    }
-
-    private void setHotspot(float x, float y) {
-        if (mBackground != null) {
-            mBackground.setHotspot(x, y);
-        }
     }
 
     /**
@@ -19761,6 +19764,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         final int[] mInvalidateChildLocation = new int[2];
 
+        /**
+         * Global to the view hierarchy used as a temporary for dealng with
+         * computing absolute on-screen location.
+         */
+        final int[] mTmpLocation = new int[2];
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

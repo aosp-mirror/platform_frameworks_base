@@ -2551,7 +2551,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             r = c.getResources();
 
         setRawTextSize(TypedValue.applyDimension(
-            unit, size, r.getDisplayMetrics()));
+                unit, size, r.getDisplayMetrics()));
     }
 
     private void setRawTextSize(float size) {
@@ -3501,6 +3501,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (dr.mDrawableEnd != null && dr.mDrawableEnd.isStateful()) {
                 dr.mDrawableEnd.setState(state);
+            }
+        }
+    }
+
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        final Drawables dr = mDrawables;
+        if (dr != null) {
+            if (dr.mDrawableTop != null) {
+                dr.mDrawableTop.setHotspot(x, y);
+            }
+            if (dr.mDrawableBottom != null) {
+                dr.mDrawableBottom.setHotspot(x, y);
+            }
+            if (dr.mDrawableLeft != null) {
+                dr.mDrawableLeft.setHotspot(x, y);
+            }
+            if (dr.mDrawableRight != null) {
+                dr.mDrawableRight.setHotspot(x, y);
+            }
+            if (dr.mDrawableStart != null) {
+                dr.mDrawableStart.setHotspot(x, y);
+            }
+            if (dr.mDrawableEnd != null) {
+                dr.mDrawableEnd.setHotspot(x, y);
             }
         }
     }
