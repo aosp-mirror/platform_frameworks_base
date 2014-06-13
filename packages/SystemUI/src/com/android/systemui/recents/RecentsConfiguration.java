@@ -255,6 +255,11 @@ public class RecentsConfiguration {
         return searchBarAppWidgetId >= 0;
     }
 
+    /** Returns whether the nav bar scrim should be animated when shown for the first time. */
+    public boolean shouldAnimateNavBarScrim() {
+        return !launchedFromHome && !launchedFromAppWithScreenshot;
+    }
+
     /** Returns whether the nav bar scrim should be visible. */
     public boolean hasNavBarScrim() {
         return !transposeRecentsLayoutWithOrientation || !isLandscape;

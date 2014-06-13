@@ -73,7 +73,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         super(context);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
-        setWillNotDraw(false);
     }
 
     /** Sets the callbacks */

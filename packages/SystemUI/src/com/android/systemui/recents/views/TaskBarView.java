@@ -144,9 +144,6 @@ class TaskBarView extends FrameLayout {
             setBackgroundColor(mConfig.taskBarViewDefaultBackgroundColor);
             mActivityDescription.setTextColor(mConfig.taskBarViewDefaultTextColor);
         }
-        if (animate) {
-            // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
-        }
     }
 
     /** Unbinds the bar view from the task */
@@ -163,7 +160,7 @@ class TaskBarView extends FrameLayout {
     }
 
     /** Animates this task bar as it enters recents */
-    public void animateOnEnterRecents(int delay) {
+    public void animateOnEnterRecents(int delay, Runnable postAnimRunnable) {
         // Animate the task bar of the first task view
         setVisibility(View.VISIBLE);
         setTranslationY(-getMeasuredHeight());
@@ -173,11 +170,12 @@ class TaskBarView extends FrameLayout {
                 .setInterpolator(mConfig.fastOutSlowInInterpolator)
                 .setDuration(mConfig.taskBarEnterAnimDuration)
                 .withLayer()
+                .withEndAction(postAnimRunnable)
                 .start();
     }
 
     /** Animates this task bar as it exits recents */
-    public void animateOnLaunchingTask(final Runnable r) {
+    public void animateOnLaunchingTask(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
         // Animate the task bar out of the first task view
         animate()
                 .translationY(-getMeasuredHeight())
@@ -185,10 +183,11 @@ class TaskBarView extends FrameLayout {
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
                 .setDuration(mConfig.taskBarExitAnimDuration)
                 .withLayer()
+                .withStartAction(preAnimRunnable)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        post(r);
+                        post(postAnimRunnable);
                     }
                 })
                 .start();

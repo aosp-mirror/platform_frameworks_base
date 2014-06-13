@@ -179,8 +179,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mRecentsView.setBSP(root);
         }
 
-        // Hide the scrim by default when we enter recents
-        mNavBarScrimView.setVisibility(View.INVISIBLE);
+        if (mConfig.shouldAnimateNavBarScrim()) {
+            // Hide the scrim if we animate into Recents with window transitions
+            mNavBarScrimView.setVisibility(View.INVISIBLE);
+        } else {
+            // Show the scrim if we animate into Recents without window transitions
+            mNavBarScrimView.setVisibility(View.VISIBLE);
+        }
 
         // Add the default no-recents layout
         if (stacks.size() == 1 && stacks.get(0).getTaskCount() == 0) {
@@ -560,7 +565,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public void onEnterAnimationTriggered() {
         // Fade in the scrim
-        if (mConfig.hasNavBarScrim()) {
+        if (mConfig.shouldAnimateNavBarScrim() && mConfig.hasNavBarScrim()) {
             mNavBarScrimView.setVisibility(View.VISIBLE);
             mNavBarScrimView.setAlpha(0f);
             mNavBarScrimView.animate().alpha(1f)

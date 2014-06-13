@@ -492,6 +492,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         Rect taskRect = getAnimationTaskRect(recentTasks);
         boolean useThumbnailTransition = !isTopTaskHome &&
                 hasValidTaskRects();
+        boolean hasRecentTasks = !recentTasks.isEmpty();
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
@@ -506,14 +507,14 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
             }
-        }
-
-        // If there is no thumbnail transition, then just use a generic transition
-        if (!useThumbnailTransition) {
-            if (Constants.DebugFlags.App.EnableHomeTransition) {
+        } else {
+            // If there is no thumbnail transition, but is launching from home into recents, then
+            // use a quick home transition and do the animation from home
+            if (hasRecentTasks && Constants.DebugFlags.App.EnableHomeTransition) {
                 ActivityOptions opts = getHomeTransitionActivityOptions();
                 startAlternateRecentsActivity(opts, EXTRA_FROM_HOME);
             } else {
+                // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
                 startAlternateRecentsActivity(opts, null);
             }

@@ -175,7 +175,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackViewsDirty = true;
     }
 
-    // XXX: Optimization: Use a mapping of Task -> View
+    /** Finds the child view given a specific task */
     private TaskView getChildViewForTask(Task t) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
