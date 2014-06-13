@@ -834,6 +834,8 @@
         <attr name="preferenceFragmentPaddingSide" format="dimension" />
         <!-- Default style for switch preferences. -->
         <attr name="switchPreferenceStyle" format="reference" />
+        <!-- Default style for seekbar preferences. -->
+        <attr name="seekBarPreferenceStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- Text selection handle styles -->
@@ -6605,6 +6607,10 @@
         <!-- The state (true for on, or false for off) that causes dependents to be disabled. By default,
              dependents will be disabled when this is unchecked, so the value of this preference is false. -->
         <attr name="disableDependentsState" />
+    </declare-styleable>
+
+    <declare-styleable name="SeekBarPreference">
+        <attr name="layout" />
     </declare-styleable>
 
     <!-- Use <code>tts-engine</code> as the root tag of the XML resource that

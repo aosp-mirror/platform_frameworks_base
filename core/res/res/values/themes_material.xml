@@ -282,6 +282,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceInformationStyle">@style/Preference.Material.Information</item>
         <item name="checkBoxPreferenceStyle">@style/Preference.Material.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@style/Preference.Material.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Material.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.Material.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.Material.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>
@@ -634,6 +635,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceInformationStyle">@style/Preference.Material.Information</item>
         <item name="checkBoxPreferenceStyle">@style/Preference.Material.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@style/Preference.Material.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Material.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.Material.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.Material.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>

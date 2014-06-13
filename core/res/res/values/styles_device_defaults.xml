@@ -254,6 +254,7 @@ easier.
     <style name="Preference.DeviceDefault.PreferenceScreen" parent="Preference.Material.PreferenceScreen"/>
     <style name="Preference.DeviceDefault.RingtonePreference" parent="Preference.Material.RingtonePreference"/>
     <style name="Preference.DeviceDefault.SwitchPreference" parent="Preference.Material.SwitchPreference"/>
+    <style name="Preference.DeviceDefault.SeekBarPreference" parent="Preference.Material.SeekBarPreference"/>
 
     <!-- AlertDialog Styles -->
     <style name="AlertDialog.DeviceDefault" parent="AlertDialog.Material"/>

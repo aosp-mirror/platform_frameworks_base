@@ -980,6 +980,10 @@ please see styles_device_defaults.xml.
         <item name="android:switchTextOff">@android:string/capital_off</item>
     </style>
 
+    <style name="Preference.SeekBarPreference">
+        <item name="android:layout">@android:layout/preference_widget_seekbar</item>
+    </style>
+
     <style name="Preference.PreferenceScreen">
     </style>
 
@@ -1033,6 +1037,10 @@ please see styles_device_defaults.xml.
         <item name="android:widgetLayout">@android:layout/preference_widget_switch</item>
         <item name="android:switchTextOn">@android:string/capital_on</item>
         <item name="android:switchTextOff">@android:string/capital_off</item>
+    </style>
+
+    <style name="Preference.Holo.SeekBarPreference">
+        <item name="android:layout">@android:layout/preference_widget_seekbar</item>
     </style>
 
     <style name="Preference.Holo.PreferenceScreen">

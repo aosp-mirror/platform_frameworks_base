@@ -1893,5 +1893,6 @@
   <java-symbol type="color" name="timepicker_default_selector_color_material" />
   <java-symbol type="color" name="timepicker_default_numbers_background_color_material" />
   <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
+  <java-symbol type="attr" name="seekBarPreferenceStyle" />
 
 </resources>
