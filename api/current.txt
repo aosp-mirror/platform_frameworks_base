@@ -34114,7 +34114,8 @@ package android.view.textservice {
 
 package android.webkit {
 
-  public abstract interface ClientCertRequest {
+  public abstract class ClientCertRequest {
+    ctor public ClientCertRequest();
     method public abstract void cancel();
     method public abstract java.lang.String getHost();
     method public abstract java.lang.String[] getKeyTypes();
