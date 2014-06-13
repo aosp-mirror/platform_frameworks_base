@@ -2529,7 +2529,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    private void removeWindowInnerLocked(Session session, WindowState win) {
+    void removeWindowInnerLocked(Session session, WindowState win) {
         if (win.mRemoved) {
             // Nothing to do.
             return;
