@@ -133,8 +133,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             public void onTransitionEnd(Transition transition) {
                 setViewVisibility(mSharedElements, View.INVISIBLE);
                 ViewGroupOverlay overlay = getDecor().getOverlay();
-                for (int i = 0; i < mSharedElementSnapshots.size(); i++) {
-                    overlay.add(mSharedElementSnapshots.get(i));
+                if (mSharedElementSnapshots != null) {
+                    for (int i = 0; i < mSharedElementSnapshots.size(); i++) {
+                        overlay.add(mSharedElementSnapshots.get(i));
+                    }
                 }
             }
         });
