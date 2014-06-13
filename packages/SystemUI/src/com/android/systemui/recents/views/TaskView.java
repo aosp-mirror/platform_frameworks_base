@@ -29,7 +29,6 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -76,6 +75,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     updateDimOverlayFromScale();
                 }
             };
+    Runnable mEnableThumbnailClip = new Runnable() {
+        @Override
+        public void run() {
+            mThumbnailView.updateTaskBarClip(mBarView);
+        }
+    };
+    Runnable mDisableThumbnailClip = new Runnable() {
+        @Override
+        public void run() {
+            mThumbnailView.disableClipTaskBarView();
+        }
+    };
 
 
     public TaskView(Context context) {
@@ -105,8 +116,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mClipViewInStack = true;
 
         // Bind the views
-        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
         mBarView = (TaskBarView) findViewById(R.id.task_view_bar);
+        mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
 
         if (mTaskDataLoaded) {
             onTaskDataLoaded(false);
@@ -276,7 +287,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     @Override
                     public void run() {
                         // Animate the task bar of the first task view
-                        mBarView.animateOnEnterRecents(0);
+                        mBarView.animateOnEnterRecents(0, mEnableThumbnailClip);
                         setVisibility(View.VISIBLE);
                     }
                 });
@@ -290,19 +301,23 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         .setInterpolator(mConfig.linearOutSlowInInterpolator)
                         .setDuration(475)
                         .withLayer()
+                        .withEndAction(mEnableThumbnailClip)
                         .start();
             }
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (ctx.isFrontMost) {
                 // Animate the task bar of the first task view
-                mBarView.animateOnEnterRecents(mConfig.taskBarEnterAnimDelay);
+                mBarView.animateOnEnterRecents(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
+
                 // Animate the dim into view as well
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimOverlayFromScale());
                 anim.setStartDelay(mConfig.taskBarEnterAnimDelay);
                 anim.setDuration(mConfig.taskBarEnterAnimDuration);
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
                 anim.start();
+            } else {
+                mEnableThumbnailClip.run();
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -318,6 +333,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .setDuration(mConfig.taskViewEnterFromHomeDuration)
                     .withLayer()
+                    .withEndAction(mEnableThumbnailClip)
                     .start();
         }
     }
@@ -347,7 +363,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Animates this task view as it exits recents */
     public void animateOnLaunchingTask(final Runnable r) {
-        mBarView.animateOnLaunchingTask(r);
+        // Disable the thumbnail clip and animate the bar out
+        mBarView.animateOnLaunchingTask(mDisableThumbnailClip, r);
 
         // Animate the dim
         if (mDim > 0) {

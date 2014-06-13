@@ -17,14 +17,22 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 import com.android.systemui.recents.model.Task;
 
 
 /** The task thumbnail view */
 public class TaskThumbnailView extends ImageView {
+
     Task mTask;
+
+    // Task bar clipping
+    Rect mClipRect;
+    boolean mClipTaskBar = true;
 
     public TaskThumbnailView(Context context) {
         this(context, null);
@@ -43,14 +51,39 @@ public class TaskThumbnailView extends ImageView {
         setScaleType(ScaleType.FIT_XY);
     }
 
+    @Override
+    public void draw(Canvas canvas) {
+        if (mClipTaskBar && (mClipRect != null)) {
+            // Apply the clip rect
+            canvas.clipRect(mClipRect);
+        }
+        super.draw(canvas);
+    }
+
+    /** Updates the clip rect based on the given task bar. */
+    void updateTaskBarClip(View taskBar) {
+        // If mClipTaskBar is unset first, then we don't bother setting mTaskBar
+        if (mClipTaskBar) {
+            int top = (int) Math.max(0, taskBar.getTranslationY() +
+                    taskBar.getMeasuredHeight() - 1);
+            mClipRect = new Rect(0, top, getMeasuredWidth(), getMeasuredHeight());
+            invalidate(0, 0, taskBar.getMeasuredWidth(), taskBar.getMeasuredHeight() + 1);
+        }
+    }
+
+    /** Disables the task bar clipping. */
+    void disableClipTaskBarView() {
+        mClipTaskBar = false;
+        if (mClipRect != null) {
+            invalidate(0, 0, mClipRect.width(), mClipRect.top);
+        }
+    }
+
     /** Binds the thumbnail view to the task */
     void rebindToTask(Task t, boolean animate) {
         mTask = t;
         if (t.thumbnail != null) {
             setImageBitmap(t.thumbnail);
-            if (animate) {
-                // XXX: Investigate how expensive it will be to create a second bitmap and crossfade
-            }
         }
     }
 
