@@ -5,6 +5,7 @@ page.title=Using Hardware Devices
 <div id="qv">
   <h2>In this document</h2>
   <ol>
+    <li><a href="#device-developer-options">Enabling On-device Developer Options</a></li>
     <li><a href="#setting-up">Setting up a Device for Development</a>
       <ol>
         <li><a href="#VendorIds">USB Vendor IDs</a></li>
@@ -41,6 +42,29 @@ on configurations that are not equivalent to those of your real device. Although
 does not allow you to test every device feature (such as the accelerometer), it does
 allow you to verify that your application functions properly on different versions of the Android
 platform, in different screen sizes and orientations, and more.</p>
+
+
+<h2 id="developer-device-options" style="margin-bottom: 0px;">Enabling On-device Developer Options</h2>
+
+<img src="/images/tools/dev-options-inmilk.png" alt="" style="float:right;margin-left:30px">
+
+<p>Android-powered devices have a host of developer options that you can
+access on the phone, which let you:</p>
+<ul>
+  <li>Enable debugging over USB.</li>
+  <li>Quickly capture bug reports onto the device.</li>
+  <li>Show CPU usage on screen.</li>
+  <li>Draw debugging information on screen such as layout bounds,
+    updates on GPU views and hardware layers, and other information.</li>
+  <li>Plus many more options to simulate app stresses or enable debugging options.</li>
+</ul>
+<p>To access these settings, open the <em>Developer options</em> in the
+system Settings. On Android 4.2 and higher, the Developer options screen is
+hidden by default. To make it visible, go to
+<b>Settings &gt; About phone</b> and tap <b>Build number</b> seven times. Return to the previous
+screen to find Developer options at the bottom.</p>
+
+
 
 
 <h2 id="setting-up">Setting up a Device for Development</h2>
