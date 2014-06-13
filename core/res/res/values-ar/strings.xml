@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"عمل"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"التطبيقات الشخصية"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"يمكنك تنفيذ إجراءات يمكن أن تكلفك مالاً."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"رسائلك"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"السماح للتطبيق باستخدام أي برنامج فك تشفير وسائط مثبت لفك التشفير من أجل التشغيل."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"إدارة بيانات الاعتماد الموثوقة"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏السماح للتطبيق بتثبيت شهادات CA وإلغاء تثبيتها باعتبارها بيانات اعتماد محل ثقة."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"تشغيل التطبيق أثناء وقت الخمول"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية في حين أن الجهاز ليس قيد الاستخدام."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"تشغيل عمل الخلفية المجدول للتطبيق"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية عند طلبه."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"قراءة/كتابة إلى الموارد المملوكة بواسطة التشخيص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏للسماح للتطبيق بالقراءة والكتابة إلى أي مورد مملوك بواسطة مجموعة التشخيصات؛ على سبيل المثال، الملفات في /dev. من المحتمل أن يؤثر ذلك في استقرار النظام وأمانه. يجب ألا يستخدم ذلك سوى للتشخيصات الخاصة بالنظام من قِبل المصنِّع أو المشغِّل."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"تمكين مكونات التطبيق أو تعطيلها"</string>

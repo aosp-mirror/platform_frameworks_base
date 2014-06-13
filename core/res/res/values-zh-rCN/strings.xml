@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"企业"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"个人应用"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"执行可能需要您付费的操作。"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"您的信息"</string>
@@ -443,10 +444,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允许应用从系统的各个日志文件中读取信息。这样，应用就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒体解码器进行播放"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允许该应用使用任何已安装的媒体解码器进行解码，以便播放媒体。"</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理受信任的凭据"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载 CA 证书（作为受信任的凭据）。"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"在设备处于闲置状态时运行应用"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"当设备处于闲置状态时，此权限允许Android系统在后台运行该应用。"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理信任的凭据"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载CA证书（作为信任的凭据）。"</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"运行应用的排定后台工作"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Android系统收到请求后会在后台运行具有此权限的应用。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用组件"</string>
@@ -521,7 +522,7 @@
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音启动指令。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"音频路由"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"允许应用直接控制音频路由以及覆盖音频政策决策。"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"允许应用直接控制音频路由以及覆盖音频规范决策。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
@@ -768,7 +769,7 @@
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"住宅"</item>
-    <item msgid="1359644565647383708">"单位"</item>
+    <item msgid="1359644565647383708">"工作"</item>
     <item msgid="7868549401053615677">"其他"</item>
     <item msgid="3145118944639869809">"自定义"</item>
   </string-array>
@@ -823,7 +824,7 @@
     <string name="postalTypeOther" msgid="2726111966623584341">"其他"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"自定义"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"住宅"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"单位"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"工作"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"其他"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"自定义"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>

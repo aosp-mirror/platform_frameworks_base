@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt; 999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Trabajo"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Aplicaciones personales"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicios por los que tienes que pagar"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Hacer acciones por las que puede que tengas que pagar"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tus mensajes"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que la aplicación use cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrar credenciales de confianza"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que la aplicación instale y desinstale certificados de CA como credenciales de confianza."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"ejecutar la aplicación durante el tiempo de inactividad"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Esto permite que el sistema Android ejecute la aplicación en segundo plano mientras el dispositivo no se utiliza."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"ejecutar el trabajo en segundo plano programado de la aplicación"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Esto permite que el sistema Android ejecute la aplicación en segundo plano cuando se solicite."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación consulte y escriba en cualquier recurso del grupo de diagnóstico como, por ejemplo, archivos en /dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SOLO se debe usar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"habilitar o inhabilitar componentes de la aplicación"</string>

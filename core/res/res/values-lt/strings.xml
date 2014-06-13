@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Asmeninė"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Darbo"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Asmeninės programos"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Paslaugos, už kurias mokėjote"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Atlikite mokamus veiksmus."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsų pranešimai"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"tvarkyti patikimus prisijungimo duomenis"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Programoje galima įdiegti ir iš jos pašalinti CA sertifikatus kaip patikimus prisijungimo duomenis."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"paleisti programą, kai įrenginys yra neaktyvus"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Šiuo leidimu sistemai „Android“ leidžiama fone paleisti programą, kai įrenginys yra nenaudojamas."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"vykdyti suplanuotą programos darbą fone"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Šiuo leidimu sistemai „Android“ leidžiama fone vykdyti programą, kai to prašoma."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>

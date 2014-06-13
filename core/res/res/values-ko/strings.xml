@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"개인"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"직장"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"개인 앱"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"요금이 부과될 수 있는 작업을 수행할 수 있도록 합니다."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"메시지"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"애플리케이션에서 설치된 모든 미디어 디코더를 사용하여 재생하는 데 디코딩할 수 있도록 허용합니다."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"신뢰할 수 있는 자격증명 관리"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"앱에서 CA 인증서를 신뢰할 수 있는 자격증명으로 설치 및 제거하도록 허용합니다."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"유휴 시간 동안 애플리케이션 실행"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"이 권한을 부여하면 기기를 사용하지 않는 동안 Android 시스템이 백그라운드에서 애플리케이션을 실행할 수 있게 됩니다."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"애플리케이션의 예약된 백그라운드 작업 실행"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"이 권한을 부여하면 요청이 있을 경우 Android 시스템이 백그라운드에서 애플리케이션을 실행할 수 있게 됩니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"앱이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 허용합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"앱 구성요소 사용 또는 사용 안함"</string>

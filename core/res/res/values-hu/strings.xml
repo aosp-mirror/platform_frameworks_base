@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Biztonsági üzemmód"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android rendszer"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Személyes"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Munkahelyi"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Személyes alkalmazások"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Fizetős szolgáltatások"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Olyan dolgok végrehajtása, amelyek pénzbe kerülnek."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Saját üzenetek"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Lehetővé teszi egy alkalmazás számára bármely telepített médiadekóder használatát a lejátszás dekódolásához."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"megbízható tanúsítványok kezelése"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Lehetővé teszi az alkalmazás számára a CA tanúsítványok telepítését és eltávolítását."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"alkalmazás futtatása tétlen időszakban"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ezzel az engedéllyel az Android a háttérben futtathatja az alkalmazást, amikor az eszközt nem használják."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"az alkalmazás ütemezett műveleteinek futtatása a háttérben"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Az engedély lehetővé teszi az Android számára, hogy kérés esetén a háttérben futtassa az alkalmazást."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"a diag tulajdonában lévő erőforrások olvasása és írása"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lehetővé teszi egy alkalmazás számára, hogy olvassa és írja a diagnosztikai csoport minden erőforrását, például a /dev könyvtárban lévő fájlokat. Ez potenciálisan befolyásolhatja a rendszer stabilitását és biztonságát, ezért CSAK a gyártó vagy a szolgáltató használhatja hardverspecifikus diagnosztizálásra."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"alkalmazáskomponensek be- és kikapcsolása"</string>
