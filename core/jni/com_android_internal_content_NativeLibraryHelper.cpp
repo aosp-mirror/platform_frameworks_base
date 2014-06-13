@@ -324,6 +324,7 @@ public:
 
             // Exception: If we find the gdbserver binary, return it.
             if (!strncmp(lastSlash + 1, GDBSERVER, GDBSERVER_LEN)) {
+                mLastSlash = lastSlash;
                 break;
             }
 
