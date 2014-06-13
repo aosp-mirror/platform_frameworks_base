@@ -1,12 +1,6 @@
 <ul id="nav">
 
   <li class="nav-section">
-    <div class="nav-section-header empty">
-        <a href="<?cs var:toroot ?>tools/index.html"><span class="en">Developer Tools</span></a>
-    </div>
-  </li>
-
-  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>

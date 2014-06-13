@@ -230,7 +230,6 @@ This is the Android Software Development Kit License Agreement
 </div>
 
 
-
 </div><!-- end TOS -->
 
 
@@ -253,15 +252,29 @@ Android SDK components and a version of the Eclipse IDE with built-in
 <b>ADT (Android Developer Tools)</b> to
 streamline your Android app development.</p>
 
-<p>With a single download, the ADT Bundle
+
+<!-- this appears when viewing the online docs -->
+<div class="online" style="margin-bottom:85px">
+
+<a class="big button subtitle" id="download-bundle-button"
+href="" style="width:295px;display:block;margin:25px 0" ></a>
+
+<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
+
+
+  <p>With a single download, the Eclipse ADT bundle
 includes everything you need to begin developing apps:</p>
 <ul>
 <li>Eclipse + ADT plugin</li>
 <li>Android SDK Tools</li>
 <li>Android Platform-tools</li>
-<li>The latest Android platform</li>
-<li>The latest Android system image for the emulator</li>
+<li>A version of the Android platform</li>
+<li>A version of the Android system image for the emulator</li>
 </ul>
+
+</div>
+<!-- end online -->
+
 
 
 <!-- this appears when viewing the offline docs -->
@@ -275,52 +288,44 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 
 
 <div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/sdk-cube.png" alt="" height=264 />
+  <img src="{@docRoot}images/tools-home.png" alt="" height="347" width="400" />
 
-<!-- this appears when viewing the online docs -->
-<div class="online">
-
-<a class="big button subtitle" id="download-bundle-button"
-href="" style="display:none;width:265px;margin:0 auto;display:block" ></a>
-
-
-
-
-<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
-
-</div>
-<!-- end online -->
 
 </div><!-- end col-7 -->
 
 
 
 
+<div class="col-7" style="background: #ddd;
+    padding: 30px 20px; width:350px; margin:20px 0 0 20px;">
+
+  <h3 style="margin-top:0">
+  <a href="/sdk/installing/studio.html">Get Android Studio Beta</a>
+  </h3>
+
+  <p>
+  Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
+  over ADT. It's currently in beta but will be the official Android IDE once it's ready.</p>
+  <p style="margin: 0;">
+  <a href="/sdk/installing/studio.html">Learn more about Android Studio</a></p>
+  </div>
+
+
 
 
 <!-- alternative SDK options -->
-<div class="col-13" style="margin:0;">
+<div class="col-13" style="margin:-70px 0 0;">
 
 
-<!-- this appears only when viewing the online docs -->
-<div class="online caution">
-<h3 style="margin:0 0 10px 0;font-size:14px">Android Studio Early Access Preview</h3>
+<p style="width:340px">If you prefer to use an existing version of Eclipse or another IDE,
+you can instead download the stand-alone Android SDK Tools:</p>
 
-<p>A new Android development environment called Android Studio,
-based on IntelliJ IDEA, is now available as an <strong>early access preview</strong>.
-For more information, see
-<a href="{@docRoot}sdk/installing/studio.html">Getting Started with Android Studio</a>.</p>
 
-</div>
-
-<p>If you prefer to use an existing version of Eclipse or another IDE,
-you can instead take a more customized approach to installing
-the Android SDK. See the following instructions:</p>
 
 
 <h4 id="ExistingIDE"><a href='' class="expandable"
   onclick="toggleExpandable(this,'.myide');hideExpandable('.pax,.reqs');return false;"
-  >USE AN EXISTING IDE</a></h4>
+  >GET THE SDK FOR AN EXISTING IDE</a></h4>
 
 <div class="col-13 myide" style="margin:0 0 15px;display:none;">
 
@@ -333,9 +338,7 @@ the ADT plugin to it.</p>
 <a class="button subtitle" id="download-tools-button" href="" style="display:none" ></a>
   </p>
 
-
 </div>
-
 
 
 
@@ -359,23 +362,9 @@ the ADT plugin to it.</p>
 </ul>
 </div>
 
-<div class="col-6 reqs" style="margin:0 0 15px 20px;display:none;">
-<h5>Eclipse IDE</h5>
-    <ul>
-      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
-<p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
-supported with the latest version of ADT.</p></li>
-      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
-in most Eclipse IDE packages) </li>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
-        (JRE alone is not sufficient)</li>
-      <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Development Tools plugin</a>
-(recommended)</li>
-      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
-    </ul>
+<div class="col-7 reqs" style="margin:0 0 80px 20px;display:none;">
 
-
-<h5>Other development environments</h5>
+<h5>Development tools</h5>
     <ul>
       <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
         (JRE alone is not sufficient)</li>
@@ -385,6 +374,4 @@ in most Eclipse IDE packages) </li>
 
 <p class="note"><strong>Note:</strong> Some Linux distributions may include JDK 1.4 or Gnu Compiler
 for Java, both of which are <em>not</em> supported for Android development. </p>
-</div><!-- end col-7 reqs -->
-
-
+</div><!-- end reqs -->
