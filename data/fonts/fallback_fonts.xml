@@ -219,6 +219,26 @@
     </family>
     <family>
         <fileset>
+            <file lang="zh-CN">NotoSansHans-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="zh-TW">NotoSansHant-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="ja">NotoSansJP-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file lang="ko">NotoSansKR-Regular.otf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NanumGothic.ttf</file>
         </fileset>
     </family>
