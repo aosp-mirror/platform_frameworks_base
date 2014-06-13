@@ -30,6 +30,7 @@ import java.util.List;
 import android.net.LinkAddress;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
+import static android.test.MoreAsserts.assertNotEqual;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import static android.system.OsConstants.IFA_F_DEPRECATED;
@@ -49,6 +50,17 @@ public class LinkAddressTest extends AndroidTestCase {
     private static final String V6 = "2001:db8::1";
     private static final InetAddress V4_ADDRESS = NetworkUtils.numericToInetAddress(V4);
     private static final InetAddress V6_ADDRESS = NetworkUtils.numericToInetAddress(V6);
+
+    public void testConstants() {
+        // RT_SCOPE_UNIVERSE = 0, but all the other constants should be nonzero.
+        assertNotEqual(0, RT_SCOPE_HOST);
+        assertNotEqual(0, RT_SCOPE_LINK);
+        assertNotEqual(0, RT_SCOPE_SITE);
+
+        assertNotEqual(0, IFA_F_DEPRECATED);
+        assertNotEqual(0, IFA_F_PERMANENT);
+        assertNotEqual(0, IFA_F_TENTATIVE);
+    }
 
     public void testConstructors() throws SocketException {
         LinkAddress address;
