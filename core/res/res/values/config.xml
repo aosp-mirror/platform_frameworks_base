@@ -791,6 +791,19 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
+    <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
+         replaced by an app at run-time. When disabled, only the
+         config_hardwareFlpPackageName package will be searched for Hardware Flp,
+         otherwise packages whose signature matches the signatures of
+         config_locationProviderPackageNames will be searched, and the service
+         with the highest version number will be picked. Anyone who wants to
+         disable the overlay mechanism can set it to false.
+         -->
+    <bool name="config_enableHardwareFlpOverlay" translatable="false">true</bool>
+    <!-- Package name providing Hardware Flp. Used only when
+         config_enableHardwareFlpOverlay is false. -->
+    <string name="config_hardwareFlpPackageName" translatable="false">com.android.location.fused</string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
