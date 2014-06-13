@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Personlig"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Arbejde"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Personlige apps"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Tjenester, der koster dig penge"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gør ting, der kan koste dig penge."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Dine beskeder"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Tillader, at appen bruger enhver installeret medieafkoder til at afkode til afspilning."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrer pålidelige logonoplysninger"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Tillader, at appen installerer og afinstallerer CA-certifikater som pålidelige loginoplysninger."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"kør applikation, mens enheden er i dvale"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Med denne tilladelse kan Android-systemet køre applikationen i baggrunden, mens enheden ikke er i brug."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"kør applikationens planlagte baggrundsarbejde"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Med denne tilladelse kan Android-systemet køre applikationen i baggrunden, når det er nødvendigt."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Tillader, at appen kan læse og skrive til alle ressourcer, der ejes af diag-gruppen,  f.eks. filer i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifik diagnosticering, som foretages af producenten eller udbyderen."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
@@ -521,7 +522,7 @@
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Registrering af kommandoord"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Tillader, at appen optager lyd til registrering af kommandoord. Optagelsen kan ske i baggrunden, men forhindrer ikke andre lydoptagelser (f.eks. videokamera)."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Lydhåndtering"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tillader, at appen direkte kontrollerer lydhåndteringen og tilsidesætter beslutninger, som foretages af lydpolitikker."</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tillader, at appen direkte kontrollerer lydhåndteringen og tilsidesætter beslutninger, baseret på af lydpolitikker."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"opfang et videooutput"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tillader, at appen opfanger og omdirigerer et videooutput."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"opfang et sikkert videooutput"</string>

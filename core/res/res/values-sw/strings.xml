@@ -188,8 +188,9 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Binafsi"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Kazini"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Programu binafsi"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Huduma ambazo zinakugharimu pesa"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Fanya mambo ambayo yanaweza kukugharimu pesa."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ujumbe wako"</string>
@@ -445,8 +446,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Huruhusu programu kutumia vyombo vyovyote vya habari vilivyosakinishwa ili kusimbua kwa ajili ya kucheza tena."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"dhibiti vitambulisho vinavyoaminika"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Huruhusu programu kusakinisha na kusanidua vyeti vya CA kama vitambulisho vinavyoaminika."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"endesha programu wakati kifaa hakifanyi kitu"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ruhusa hii huwezesha mfumo wa Android kuendesha programu chini kwa chini wakati kifaa hakitumiki."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"endesha kazi ya chini chini iliyopangwa ya programu"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Idhini hii huruhusu mfumo wa Android kuendesha programu chini chini ikipokea ombi."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"soma/andika kwa vyanzo vinavyomilikiwa na diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Inaruhusu programu kusoma na kuandika kwa chanzo chochote kinachomilikiwa na kikundi cha diag; kwa mfano, faili katika /dev. Hii inaweza kuathiri udhabiti na usalama wa mfumo. Hii inapaswa kutumiwa TU kwa utambuzi mahsusi wa maunzi na mtengenezaji au opareta."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"wezesha au lemeza vijenzi vya programu"</string>
