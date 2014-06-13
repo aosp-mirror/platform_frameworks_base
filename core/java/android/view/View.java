@@ -6116,6 +6116,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected boolean fitSystemWindows(Rect insets) {
         if ((mPrivateFlags3 & PFLAG3_APPLYING_INSETS) == 0) {
+            if (insets == null) {
+                // Null insets by definition have already been consumed.
+                // This call cannot apply insets since there are none to apply,
+                // so return false.
+                return false;
+            }
             // If we're not in the process of dispatching the newer apply insets call,
             // that means we're not in the compatibility path. Dispatch into the newer
             // apply insets path and take things from there.
