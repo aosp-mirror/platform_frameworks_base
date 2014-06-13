@@ -233,7 +233,7 @@ uint32_t HdmiCecController::getVendorId() {
 
 jobjectArray HdmiCecController::getPortInfos() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jclass hdmiPortInfo = env->FindClass("com/android/server/hdmi/HdmiPortInfo");
+    jclass hdmiPortInfo = env->FindClass("android/hardware/hdmi/HdmiPortInfo");
     if (hdmiPortInfo == NULL) {
         return NULL;
     }
@@ -400,7 +400,7 @@ static JNINativeMethod sMethods[] = {
     { "nativeGetVersion", "(J)I", (void *) nativeGetVersion },
     { "nativeGetVendorId", "(J)I", (void *) nativeGetVendorId },
     { "nativeGetPortInfos",
-      "(J)[Lcom/android/server/hdmi/HdmiPortInfo;",
+      "(J)[Landroid/hardware/hdmi/HdmiPortInfo;",
       (void *) nativeGetPortInfos },
     { "nativeSetOption", "(JII)V", (void *) nativeSetOption },
     { "nativeSetAudioReturnChannel", "(JZ)V", (void *) nativeSetAudioReturnChannel },
