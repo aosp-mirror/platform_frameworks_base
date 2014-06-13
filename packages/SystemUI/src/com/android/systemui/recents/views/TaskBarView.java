@@ -105,7 +105,7 @@ class TaskBarView extends FrameLayout {
     /** Synchronizes this bar view's properties with the task's transform */
     void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
                                              TaskViewTransform toTransform, int duration) {
-        if (duration > 0) {
+        if (duration > 0 && (mDismissButton.getVisibility() == View.VISIBLE)) {
             if (animateFromTransform != null) {
                 mDismissButton.setAlpha(animateFromTransform.dismissAlpha);
             }
@@ -169,7 +169,7 @@ class TaskBarView extends FrameLayout {
         setTranslationY(-getMeasuredHeight());
         animate()
                 .translationY(0)
-                .setStartDelay(delay > -1 ? delay : mConfig.taskBarEnterAnimDelay)
+                .setStartDelay(delay)
                 .setInterpolator(mConfig.fastOutSlowInInterpolator)
                 .setDuration(mConfig.taskBarEnterAnimDuration)
                 .withLayer()
@@ -178,6 +178,7 @@ class TaskBarView extends FrameLayout {
 
     /** Animates this task bar as it exits recents */
     public void animateOnLaunchingTask(final Runnable r) {
+        // Animate the task bar out of the first task view
         animate()
                 .translationY(-getMeasuredHeight())
                 .setStartDelay(0)
@@ -191,6 +192,28 @@ class TaskBarView extends FrameLayout {
                     }
                 })
                 .start();
+    }
+
+    /** Animates this task bar if the user does not interact with the stack after a certain time. */
+    public void animateOnNoUserInteraction() {
+        mDismissButton.setVisibility(View.VISIBLE);
+        mDismissButton.setAlpha(0f);
+        mDismissButton.animate()
+                .alpha(1f)
+                .setStartDelay(0)
+                .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                .setDuration(mConfig.taskBarEnterAnimDuration)
+                .withLayer()
+                .start();
+    }
+
+    /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+    public void setOnNoUserInteraction() {
+        if (mDismissButton.getVisibility() != View.VISIBLE) {
+            mDismissButton.animate().cancel();
+            mDismissButton.setVisibility(View.VISIBLE);
+            mDismissButton.setAlpha(1f);
+        }
     }
 
     /** Enable the hw layers on this task view */
