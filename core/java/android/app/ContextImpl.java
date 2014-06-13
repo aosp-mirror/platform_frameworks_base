@@ -513,6 +513,9 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(POWER_SERVICE);
                     IPowerManager service = IPowerManager.Stub.asInterface(b);
+                    if (service == null) {
+                        Log.wtf(TAG, "Failed to get power manager service.");
+                    }
                     return new PowerManager(ctx.getOuterContext(),
                             service, ctx.mMainThread.getHandler());
                 }});

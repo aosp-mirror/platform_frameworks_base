@@ -227,14 +227,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * receivers to launch an activity and get that to run before the device
      * goes back to sleep.
      */
-    final PowerManager.WakeLock mLaunchingActivity;
+    PowerManager.WakeLock mLaunchingActivity;
 
     /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
      * At that point the system is allowed to actually sleep.
      */
-    final PowerManager.WakeLock mGoingToSleep;
+    PowerManager.WakeLock mGoingToSleep;
 
     /** Stack id of the front stack when user switched, indexed by userId. */
     SparseIntArray mUserStackInFront = new SparseIntArray(2);
@@ -255,12 +255,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
+        mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
+    }
+
+    /**
+     * At the time when the constructor runs, the power manager has not yet been
+     * initialized.  So we initialize our wakelocks afterwards.
+     */
+    void initPowerManagement() {
         PowerManager pm = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
         mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
-        mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
-        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
-            throw new IllegalStateException("Calling must be system uid");
-        }
         mLaunchingActivity =
                 pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);

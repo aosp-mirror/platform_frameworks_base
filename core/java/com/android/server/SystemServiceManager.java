@@ -50,8 +50,19 @@ public class SystemServiceManager {
      * @return The service instance.
      */
     @SuppressWarnings("unchecked")
-    public SystemService startService(String className) throws ClassNotFoundException {
-        return startService((Class<SystemService>) Class.forName(className));
+    public SystemService startService(String className) {
+        final Class<SystemService> serviceClass;
+        try {
+            serviceClass = (Class<SystemService>)Class.forName(className);
+        } catch (ClassNotFoundException ex) {
+            Slog.i(TAG, "Starting " + className);
+            throw new RuntimeException("Failed to create service " + className
+                    + ": service class not found, usually indicates that the caller should "
+                    + "have called PackageManager.hasSystemFeature() to check whether the "
+                    + "feature is available on this device before trying to start the "
+                    + "services that implement it", ex);
+        }
+        return startService(serviceClass);
     }
 
     /**

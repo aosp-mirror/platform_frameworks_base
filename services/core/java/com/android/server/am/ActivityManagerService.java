@@ -2194,6 +2194,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
     }
 
+    public void initPowerManagement() {
+        mStackSupervisor.initPowerManagement();
+        mBatteryStatsService.initPowerManagement();
+    }
+
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {

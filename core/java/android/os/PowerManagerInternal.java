@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.view.WindowManagerPolicy;
-
 /**
  * Power manager local system service interface.
  *
@@ -57,12 +55,9 @@ public abstract class PowerManagerInternal {
 
     public abstract boolean getLowPowerModeEnabled();
 
+    public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);
+
     public interface LowPowerModeListener {
         public void onLowPowerModeChanged(boolean enabled);
     }
-
-    public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);
-
-    // TODO: Remove this and retrieve as a local service instead.
-    public abstract void setPolicy(WindowManagerPolicy policy);
 }

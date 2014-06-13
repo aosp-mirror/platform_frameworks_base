@@ -1248,7 +1248,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    public static final IPackageManager main(Context context, Installer installer,
+    public static final PackageManagerService main(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);

@@ -74,12 +74,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
                 * 1000L);
+    }
+
+    /**
+     * At the time when the constructor runs, the power manager has not yet been
+     * initialized.  So we initialize the low power observer later.
+     */
+    public void initPowerManagement() {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mPowerManagerInternal.registerLowPowerModeObserver(this);
         mStats.noteLowPowerMode(mPowerManagerInternal.getLowPowerModeEnabled());
         (new WakeupReasonThread()).start();
-     }
-    
+    }
+
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
         synchronized (mStats) {

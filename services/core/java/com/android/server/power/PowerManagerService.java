@@ -23,6 +23,7 @@ import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.Watchdog;
@@ -163,13 +164,14 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static final int POWER_HINT_LOW_POWER_MODE = 5;
 
     private final Context mContext;
+    private final ServiceThread mHandlerThread;
+    private final PowerManagerHandler mHandler;
+
     private LightsManager mLightsManager;
     private BatteryService mBatteryService;
     private DisplayManagerInternal mDisplayManagerInternal;
     private IBatteryStats mBatteryStats;
     private IAppOpsService mAppOps;
-    private ServiceThread mHandlerThread;
-    private PowerManagerHandler mHandler;
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
     private WirelessChargerDetector mWirelessChargerDetector;
@@ -429,6 +431,11 @@ public final class PowerManagerService extends com.android.server.SystemService
     public PowerManagerService(Context context) {
         super(context);
         mContext = context;
+        mHandlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
+        mHandlerThread.start();
+        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
+
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
             mDisplaySuspendBlocker = createSuspendBlockerLocked("PowerManagerService.Display");
@@ -451,39 +458,19 @@ public final class PowerManagerService extends com.android.server.SystemService
     public void onStart() {
         publishBinderService(Context.POWER_SERVICE, new BinderService());
         publishLocalService(PowerManagerInternal.class, new LocalService());
-    }
-
-    /**
-     * Initialize the power manager.
-     * Must be called before any other functions within the power manager are called.
-     */
-    public void init(LightsManager ls,
-            BatteryService bs, IBatteryStats bss,
-            IAppOpsService appOps) {
-        mLightsManager = ls;
-        mBatteryService = bs;
-        mBatteryStats = bss;
-        mAppOps = appOps;
-        mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
-        mHandlerThread = new ServiceThread(TAG,
-                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
-        mHandlerThread.start();
-        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
     }
 
-    void setPolicy(WindowManagerPolicy policy) {
-        synchronized (mLock) {
-            mPolicy = policy;
-        }
-    }
-
-    public void systemReady() {
+    public void systemReady(BatteryService batteryService, IAppOpsService appOps) {
         synchronized (mLock) {
             mSystemReady = true;
-            mDreamManager = LocalServices.getService(DreamManagerInternal.class);
+            mBatteryService = batteryService;
+            mAppOps = appOps;
+            mDreamManager = getLocalService(DreamManagerInternal.class);
+            mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
+            mPolicy = getLocalService(WindowManagerPolicy.class);
 
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
@@ -494,6 +481,7 @@ public final class PowerManagerService extends com.android.server.SystemService
 
             // The notifier runs on the system server's main looper so as not to interfere
             // with the animations and other critical functions of the power manager.
+            mBatteryStats = BatteryStatsService.getService();
             mNotifier = new Notifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     mAppOps, createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
                     mScreenOnBlocker, mPolicy);
@@ -502,6 +490,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                     createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
                     mHandler);
             mSettingsObserver = new SettingsObserver(mHandler);
+
+            mLightsManager = getLocalService(LightsManager.class);
             mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
 
             // Initialize display power management.
@@ -3075,11 +3065,6 @@ public final class PowerManagerService extends com.android.server.SystemService
             synchronized (mLock) {
                 mLowPowerModeListeners.add(listener);
             }
-        }
-
-        @Override
-        public void setPolicy(WindowManagerPolicy policy) {
-            PowerManagerService.this.setPolicy(policy);
         }
     }
 }

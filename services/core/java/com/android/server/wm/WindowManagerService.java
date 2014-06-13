@@ -766,6 +766,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplaySettings = new DisplaySettings(context);
         mDisplaySettings.readSettingsLocked();
 
+        LocalServices.addService(WindowManagerPolicy.class, mPolicy);
+
         mPointerEventDispatcher = new PointerEventDispatcher(mInputManager.monitorInput(TAG));
 
         mFxSession = new SurfaceSession();
@@ -779,7 +781,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mPowerManagerInternal.setPolicy(mPolicy); // TODO: register as local service instead
         mPowerManagerInternal.registerLowPowerModeObserver(
                 new PowerManagerInternal.LowPowerModeListener() {
             @Override

@@ -148,7 +148,13 @@ public final class SystemServer {
     private PowerManagerService mPowerManagerService;
     private ActivityManagerService mActivityManagerService;
     private DisplayManagerService mDisplayManagerService;
+    private PackageManagerService mPackageManagerService;
+    private PackageManager mPackageManager;
+    private BatteryService mBatteryService;
     private ContentResolver mContentResolver;
+
+    private boolean mOnlyCore;
+    private boolean mFirstBoot;
 
     /**
      * Called to initialize native system services.
@@ -163,6 +169,7 @@ public final class SystemServer {
     }
 
     public SystemServer() {
+        // Check for factory test mode.
         mFactoryTestMode = FactoryTest.getMode();
     }
 
@@ -245,7 +252,7 @@ public final class SystemServer {
             startBootstrapServices();
             startCoreServices();
             startOtherServices();
-        } catch (RuntimeException ex) {
+        } catch (Throwable ex) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting system services", ex);
             throw ex;
@@ -289,36 +296,87 @@ public final class SystemServer {
         mSystemContext.setTheme(android.R.style.Theme_DeviceDefault_Light_DarkActionBar);
     }
 
+    /**
+     * Starts the small tangle of critical services that are needed to get
+     * the system off the ground.  These services have complex mutual dependencies
+     * which is why we initialize them all in one place here.  Unless your service
+     * is also entwined in these dependencies, it should be initialized in one of
+     * the other functions.
+     */
     private void startBootstrapServices() {
         // Wait for installd to finish starting up so that it has a chance to
         // create critical directories such as /data/user with the appropriate
         // permissions.  We need this to complete before we initialize other services.
         mInstaller = mSystemServiceManager.startService(Installer.class);
 
-        // Power manager needs to be started early because other services need it.
-        // TODO: The conversion to the new pattern is incomplete.  We need to switch
-        // the power manager's dependencies over then we can use boot phases to arrange
-        // initialization order and remove the mPowerManagerService field.
-        mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
-
         // Activity manager runs the show.
         mActivityManagerService = mSystemServiceManager.startService(
                 ActivityManagerService.Lifecycle.class).getService();
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
-    }
 
-    private void startCoreServices() {
+        // Power manager needs to be started early because other services need it.
+        // Native daemons may be watching for it to be registered so it must be ready
+        // to handle incoming binder calls immediately (including being able to verify
+        // the permissions for those calls).
+        mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+
+        // Now that the power manager has been started, let the activity manager
+        // initialize power management features.
+        mActivityManagerService.initPowerManagement();
+
         // Display manager is needed to provide display metrics before package manager
         // starts up.
         mDisplayManagerService = mSystemServiceManager.startService(DisplayManagerService.class);
+
+        // We need the default display before we can initialize the package manager.
+        mSystemServiceManager.startBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        // Only run "core" apps if we're encrypting the device.
+        String cryptState = SystemProperties.get("vold.decrypt");
+        if (ENCRYPTING_STATE.equals(cryptState)) {
+            Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
+            mOnlyCore = true;
+        } else if (ENCRYPTED_STATE.equals(cryptState)) {
+            Slog.w(TAG, "Device encrypted - only parsing core apps");
+            mOnlyCore = true;
+        }
+
+        // Start the package manager.
+        Slog.i(TAG, "Package Manager");
+        mPackageManagerService = PackageManagerService.main(mSystemContext, mInstaller,
+                mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+        mFirstBoot = mPackageManagerService.isFirstBoot();
+        mPackageManager = mSystemContext.getPackageManager();
+
+        // Initialize attribute cache used to cache resources from packages.
+        AttributeCache.init(mSystemContext);
+
+        // Set up the Application instance for the system process and get started.
+        mActivityManagerService.setSystemProcess();
     }
 
+    /**
+     * Starts some essential services that are not tangled up in the bootstrap process.
+     */
+    private void startCoreServices() {
+        // Manages LEDs and display backlight.
+        mSystemServiceManager.startService(LightsService.class);
+
+        // Tracks the battery level.
+        Slog.i(TAG, "Battery Service");
+        mBatteryService = new BatteryService(mSystemContext,
+                LocalServices.getService(LightsManager.class));
+        ServiceManager.addService("battery", mBatteryService);
+    }
+
+    /**
+     * Starts a miscellaneous grab bag of stuff that has yet to be refactored
+     * and organized.
+     */
     private void startOtherServices() {
         final Context context = mSystemContext;
         AccountManagerService accountManager = null;
         ContentService contentService = null;
-        LightsManager lights = null;
-        BatteryService battery = null;
         VibratorService vibrator = null;
         IAlarmManager alarm = null;
         MountService mountService = null;
@@ -328,7 +386,6 @@ public final class SystemServer {
         ConnectivityService connectivity = null;
         NetworkScoreService networkScore = null;
         NsdService serviceDiscovery= null;
-        IPackageManager pm = null;
         WindowManagerService wm = null;
         BluetoothManagerService bluetooth = null;
         UsbService usb = null;
@@ -341,8 +398,6 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         AudioService audioService = null;
 
-        boolean onlyCore = false;
-        boolean firstBoot = false;
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -354,38 +409,12 @@ public final class SystemServer {
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
-            Slog.i(TAG, "Telephony Registry");
-            telephonyRegistry = new TelephonyRegistry(context);
-            ServiceManager.addService("telephony.registry", telephonyRegistry);
-
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
 
-            AttributeCache.init(context);
-
-            // We need the default display before we can initialize the package manager.
-            mSystemServiceManager.startBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
-
-            Slog.i(TAG, "Package Manager");
-            // Only run "core" apps if we're encrypting the device.
-            String cryptState = SystemProperties.get("vold.decrypt");
-            if (ENCRYPTING_STATE.equals(cryptState)) {
-                Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
-                onlyCore = true;
-            } else if (ENCRYPTED_STATE.equals(cryptState)) {
-                Slog.w(TAG, "Device encrypted - only parsing core apps");
-                onlyCore = true;
-            }
-
-            pm = PackageManagerService.main(context, mInstaller,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
-                    onlyCore);
-            try {
-                firstBoot = pm.isFirstBoot();
-            } catch (RemoteException e) {
-            }
-
-            mActivityManagerService.setSystemProcess();
+            Slog.i(TAG, "Telephony Registry");
+            telephonyRegistry = new TelephonyRegistry(context);
+            ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Entropy Mixer");
             ServiceManager.addService("entropy", new EntropyMixer(context));
@@ -413,23 +442,9 @@ public final class SystemServer {
             Slog.i(TAG, "System Content Providers");
             mActivityManagerService.installSystemProviders();
 
-            mSystemServiceManager.startService(LightsService.class);
-            lights = LocalServices.getService(LightsManager.class);
-
-            Slog.i(TAG, "Battery Service");
-            battery = new BatteryService(context, lights);
-            ServiceManager.addService("battery", battery);
-
             Slog.i(TAG, "Vibrator Service");
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
-
-            // TODO: use boot phase
-            // only initialize the power service after we have started the
-            // lights service, content providers and the battery service.
-            mPowerManagerService.init(lights, battery,
-                    BatteryStatsService.getService(),
-                    mActivityManagerService.getAppOpsService());
 
             Slog.i(TAG, "Consumer IR Service");
             consumerIr = new ConsumerIrService(context);
@@ -449,7 +464,7 @@ public final class SystemServer {
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, inputManager,
                     mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
-                    !firstBoot, onlyCore);
+                    !mFirstBoot, mOnlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
@@ -523,7 +538,7 @@ public final class SystemServer {
         }
 
         try {
-            pm.performBootDexOpt();
+            mPackageManagerService.performBootDexOpt();
         } catch (Throwable e) {
             reportWtf("performing boot dexopt", e);
         }
@@ -561,13 +576,9 @@ public final class SystemServer {
                     reportWtf("starting LockSettingsService service", e);
                 }
 
-                try {
-                    // Always start the Device Policy Manager, so that the API is compatible with
-                    // API8.
-                    mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
-                } catch (Throwable e) {
-                    reportWtf("starting DevicePolicyService", e);
-                }
+                // Always start the Device Policy Manager, so that the API is compatible with
+                // API8.
+                mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
             }
 
             if (!disableSystemUI) {
@@ -638,39 +649,17 @@ public final class SystemServer {
                     reportWtf("starting NetworkPolicy Service", e);
                 }
 
-                try {
-                    mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi P2pService", e);
-                }
+                mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
 
-                try {
-                    mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi PasspointService", e);
-                }
+                mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
 
-                try {
-                    mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi Service", e);
-                }
+                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
 
-                try {
-                    Slog.i(TAG, "Wi-Fi Scanning Service");
-                    mSystemServiceManager.startService(
+                mSystemServiceManager.startService(
                             "com.android.server.wifi.WifiScanningService");
 
-                } catch (Throwable e) {
-                    reportWtf("starting Wi-Fi Scanning Service", e);
-                }
-
                 if (!isEmulator) {
-                    try {
-                        mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
-                    } catch (Throwable e) {
-                        reportWtf("starting Ethernet Service", e);
-                    }
+                    mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 } else {
                     // Don't start the Ethernet service on the emulator because
                     // it interferes with qemu's SLIRP emulation, which uses
@@ -714,7 +703,7 @@ public final class SystemServer {
              * AppWidget Provider. Make sure MountService is completely started
              * first before continuing.
              */
-            if (mountService != null && !onlyCore) {
+            if (mountService != null && !mOnlyCore) {
                 mountService.waitForAsecScan();
             }
 
@@ -812,14 +801,11 @@ public final class SystemServer {
             }
 
             if (!disableNonCoreServices) {
-                try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST) ||
-                            pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY)) {
-                        // Manage USB host and device support
-                        mSystemServiceManager.startService(USB_SERVICE_CLASS);
-                    }
-                } catch (Throwable e) {
-                    reportWtf("starting UsbService", e);
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
+                        || mPackageManager.hasSystemFeature(
+                                PackageManager.FEATURE_USB_ACCESSORY)) {
+                    // Manage USB host and device support
+                    mSystemServiceManager.startService(USB_SERVICE_CLASS);
                 }
 
                 try {
@@ -839,20 +825,12 @@ public final class SystemServer {
             mSystemServiceManager.startService(JobSchedulerService.class);
 
             if (!disableNonCoreServices) {
-                try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
-                        mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
-                    }
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting Backup Service", e);
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
+                    mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
                 }
 
-                try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
-                        mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
-                    }
-                } catch (Throwable e) {
-                    reportWtf("starting AppWidget Service", e);
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
+                    mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 }
 
                 try {
@@ -862,13 +840,8 @@ public final class SystemServer {
                     reportWtf("starting Recognition Service", e);
                 }
 
-                try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
-                        Slog.i(TAG, "Voice Recognition Service");
-                        mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
-                    }
-                } catch (Throwable e) {
-                    reportWtf("starting Voice Recognition Service", e);
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
+                    mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
                 }
             }
 
@@ -934,38 +907,17 @@ public final class SystemServer {
                 }
             }
 
-            try {
-                if (pm.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
-                    mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
-                }
-            } catch (Throwable e) {
-                reportWtf("starting Print Service", e);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
+                mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
             }
 
-            try {
-                mSystemServiceManager.startService(RestrictionsManagerService.class);
-            } catch (Throwable e) {
-                reportWtf("starting RestrictionsManagerService", e);
-            }
+            mSystemServiceManager.startService(RestrictionsManagerService.class);
 
-            try {
-                mSystemServiceManager.startService(MediaSessionService.class);
-            } catch (Throwable e) {
-                reportWtf("starting MediaSessionService", e);
-            }
+            mSystemServiceManager.startService(MediaSessionService.class);
 
-            try {
-                mSystemServiceManager.startService(HdmiControlService.class);
-            } catch (Throwable e) {
-                reportWtf("starting HdmiControlService", e);
-            }
+            mSystemServiceManager.startService(HdmiControlService.class);
 
-            try {
-                Slog.i(TAG, "TvInputManagerService");
-                mSystemServiceManager.startService(TvInputManagerService.class);
-            } catch (Throwable e) {
-                reportWtf("starting TvInputManagerService", e);
-            }
+            mSystemServiceManager.startService(TvInputManagerService.class);
 
             if (!disableNonCoreServices) {
                 try {
@@ -976,19 +928,9 @@ public final class SystemServer {
                     reportWtf("starting MediaRouterService", e);
                 }
 
-                try {
-                    Slog.i(TAG, "Trust Manager");
-                    mSystemServiceManager.startService(TrustManagerService.class);
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting TrustManagerService", e);
-                }
+                mSystemServiceManager.startService(TrustManagerService.class);
 
-                try {
-                    Slog.i(TAG, "Fingerprint Manager");
-                    mSystemServiceManager.startService(FingerprintService.class);
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting FingerprintService", e);
-                }
+                mSystemServiceManager.startService(FingerprintService.class);
 
                 try {
                     Slog.i(TAG, "BackgroundDexOptService");
@@ -999,12 +941,7 @@ public final class SystemServer {
 
             }
 
-            try {
-                Slog.i(TAG, "LauncherAppsService");
-                mSystemServiceManager.startService(LauncherAppsService.class);
-            } catch (Throwable t) {
-                reportWtf("starting LauncherAppsService", t);
-            }
+            mSystemServiceManager.startService(LauncherAppsService.class);
         }
 
         // Before things start rolling, be sure we have decided whether
@@ -1061,27 +998,27 @@ public final class SystemServer {
 
         try {
             // TODO: use boot phase
-            mPowerManagerService.systemReady();
+            mPowerManagerService.systemReady(mBatteryService,
+                    mActivityManagerService.getAppOpsService());
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }
 
         try {
-            pm.systemReady();
+            mPackageManagerService.systemReady();
         } catch (Throwable e) {
             reportWtf("making Package Manager Service ready", e);
         }
 
         try {
             // TODO: use boot phase and communicate these flags some other way
-            mDisplayManagerService.systemReady(safeMode, onlyCore);
+            mDisplayManagerService.systemReady(safeMode, mOnlyCore);
         } catch (Throwable e) {
             reportWtf("making Display Manager Service ready", e);
         }
 
         // These are needed to propagate to the runnable below.
         final MountService mountServiceF = mountService;
-        final BatteryService batteryF = battery;
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
@@ -1130,7 +1067,7 @@ public final class SystemServer {
                     reportWtf("making Mount Service ready", e);
                 }
                 try {
-                    if (batteryF != null) batteryF.systemReady();
+                    mBatteryService.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Battery Service ready", e);
                 }
