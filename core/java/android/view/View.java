@@ -13529,6 +13529,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new IllegalStateException("This view must be attached to a window first");
         }
 
+        if (getWidth() == 0 || getHeight() == 0) {
+            return;
+        }
+
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
                 // The only part of a hardware layer we can build in response to
