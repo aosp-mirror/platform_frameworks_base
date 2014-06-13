@@ -18,6 +18,7 @@ package com.android.server.net;
 
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.util.Log;
 
 /**
@@ -84,6 +85,12 @@ public class NetlinkTracker extends BaseNetworkObserver {
         }
     }
 
+    private void maybeLog(String operation, Object o) {
+        if (DBG) {
+            Log.d(TAG, operation + ": " + o.toString());
+        }
+    }
+
     @Override
     public void addressUpdated(String iface, LinkAddress address) {
         if (mInterfaceName.equals(iface)) {
@@ -105,6 +112,34 @@ public class NetlinkTracker extends BaseNetworkObserver {
             boolean changed;
             synchronized (this) {
                 changed = mLinkProperties.removeLinkAddress(address);
+            }
+            if (changed) {
+                mCallback.update();
+            }
+        }
+    }
+
+    @Override
+    public void routeUpdated(RouteInfo route) {
+        if (mInterfaceName.equals(route.getInterface())) {
+            maybeLog("routeUpdated", route);
+            boolean changed;
+            synchronized (this) {
+                changed = mLinkProperties.addRoute(route);
+            }
+            if (changed) {
+                mCallback.update();
+            }
+        }
+    }
+
+    @Override
+    public void routeRemoved(RouteInfo route) {
+        if (mInterfaceName.equals(route.getInterface())) {
+            maybeLog("routeRemoved", route);
+            boolean changed;
+            synchronized (this) {
+                changed = mLinkProperties.removeRoute(route);
             }
             if (changed) {
                 mCallback.update();

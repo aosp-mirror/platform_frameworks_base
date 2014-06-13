@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.LinkAddress;
+import android.net.RouteInfo;
 
 /**
  * Callback class for receiving events from an INetworkManagementService
@@ -98,4 +99,14 @@ interface INetworkManagementEventObserver {
      * @param servers The IP addresses of the DNS servers.
      */
     void interfaceDnsServerInfo(String iface, long lifetime, in String[] servers);
+
+    /**
+     * A route has been added or updated.
+     */
+    void routeUpdated(in RouteInfo route);
+
+    /**
+     * A route has been removed.
+     */
+    void routeRemoved(in RouteInfo route);
 }
