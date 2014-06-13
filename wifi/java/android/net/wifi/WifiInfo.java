@@ -137,7 +137,7 @@ public class WifiInfo implements Parcelable {
     public int lowRssiCount;
 
     /**
-     * @hide *
+     * @hide
      */
     public int score;
 
@@ -215,7 +215,6 @@ public class WifiInfo implements Parcelable {
         mRssi = INVALID_RSSI;
         mLinkSpeed = -1;
         mFrequency = -1;
-        txBad = 0;
     }
 
     /** @hide */
@@ -228,6 +227,7 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(-1);
         setFrequency(-1);
         setMeteredHint(false);
+        txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
         txRetries = 0;
