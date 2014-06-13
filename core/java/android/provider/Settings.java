@@ -4589,11 +4589,9 @@ public final class Settings {
 
         /**
          * If enabled, apps should try to skip any introductory hints on first launch. This might
-         * apply to users that are already familiar with the environment or temporary users, like
-         * guests.
+         * apply to users that are already familiar with the environment or temporary users.
          * <p>
          * Type : int (0 to show hints, 1 to skip showing hints)
-         * @hide
          */
         public static final String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
 
