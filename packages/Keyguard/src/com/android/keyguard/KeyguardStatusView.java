@@ -166,6 +166,11 @@ public class KeyguardStatusView extends GridLayout {
         return info;
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
     // This is an optimization to ensure we only recompute the patterns when the inputs change.
     private static final class Patterns {

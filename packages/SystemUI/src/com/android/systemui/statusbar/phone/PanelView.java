@@ -62,6 +62,7 @@ public abstract class PanelView extends FrameLayout {
     protected int mTouchSlop;
     protected boolean mHintAnimationRunning;
     private boolean mOverExpandedBeforeFling;
+    private float mOriginalIndicationY;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -82,6 +83,7 @@ public abstract class PanelView extends FrameLayout {
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mBounceInterpolator;
+    protected KeyguardBottomAreaView mKeyguardBottomArea;
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
@@ -652,6 +654,22 @@ public abstract class PanelView extends FrameLayout {
         });
         animator.start();
         mHeightAnimator = animator;
+        mOriginalIndicationY = mKeyguardBottomArea.getIndicationView().getY();
+        mKeyguardBottomArea.getIndicationView().animate()
+                .y(mOriginalIndicationY - mHintDistance)
+                .setDuration(250)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardBottomArea.getIndicationView().animate()
+                                .y(mOriginalIndicationY)
+                                .setDuration(450)
+                                .setInterpolator(mBounceInterpolator)
+                                .start();
+                    }
+                })
+                .start();
     }
 
     /**

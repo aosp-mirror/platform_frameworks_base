@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.res.Resources;
 import android.graphics.Path;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
@@ -31,6 +32,10 @@ public class KeyguardClockPositionAlgorithm {
 
     private static final float CLOCK_RUBBERBAND_FACTOR_MIN = 0.08f;
     private static final float CLOCK_RUBBERBAND_FACTOR_MAX = 0.8f;
+    private static final float CLOCK_SCALE_FADE_START = 0.95f;
+    private static final float CLOCK_SCALE_FADE_END = 0.75f;
+    private static final float CLOCK_SCALE_FADE_END_NO_NOTIFS = 0.5f;
+
 
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MIN = 1.4f;
     private static final float CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MAX = 3.2f;
@@ -61,6 +66,8 @@ public class KeyguardClockPositionAlgorithm {
         sSlowDownInterpolator = new PathInterpolator(path);
     }
 
+    private AccelerateInterpolator mAccelerateInterpolator = new AccelerateInterpolator();
+
     /**
      * Refreshes the dimension values.
      */
@@ -87,18 +94,29 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void run(Result result) {
-        int y = getClockY() - mKeyguardStatusHeight/2;
+        int y = getClockY() - mKeyguardStatusHeight / 2;
         float clockAdjustment = getClockYExpansionAdjustment();
         float topPaddingAdjMultiplier = getTopPaddingAdjMultiplier();
         result.stackScrollerPaddingAdjustment = (int) (clockAdjustment*topPaddingAdjMultiplier);
         int clockNotificationsPadding = getClockNotificationsPadding()
                 + result.stackScrollerPaddingAdjustment;
         int padding = y + clockNotificationsPadding;
-        y += clockAdjustment;
         result.clockY = y;
         result.stackScrollerPadding = mKeyguardStatusHeight + padding;
-        result.clockAlpha = getClockAlpha(result.stackScrollerPadding
-                - (y + mKeyguardStatusHeight));
+        result.clockScale = getClockScale(result.stackScrollerPadding,
+                result.clockY,
+                y + getClockNotificationsPadding() + mKeyguardStatusHeight);
+        result.clockAlpha = getClockAlpha(result.clockScale);
+    }
+
+    private float getClockScale(int notificationPadding, int clockY, int startPadding) {
+        float scaleMultiplier = getNotificationAmountT() == 0 ? 6.0f : 5.0f;
+        float scaleEnd = clockY - mKeyguardStatusHeight * scaleMultiplier;
+        float distanceToScaleEnd = notificationPadding - scaleEnd;
+        float progress = distanceToScaleEnd / (startPadding - scaleEnd);
+        progress = Math.max(0.0f, Math.min(progress, 1.0f));
+        progress = mAccelerateInterpolator.getInterpolation(progress);
+        return progress;
     }
 
     private int getClockNotificationsPadding() {
@@ -144,11 +162,12 @@ public class KeyguardClockPositionAlgorithm {
                 + t * CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MAX;
     }
 
-    private float getClockAlpha(int clockNotificationPadding) {
-        float t = getNotificationAmountT();
-        t = (float) Math.pow(t, 0.3f);
-        float multiplier = 1 + 2 * (1 - t);
-        float alpha = 1 + (float) clockNotificationPadding * multiplier / mKeyguardStatusHeight * 3;
+    private float getClockAlpha(float scale) {
+        float fadeEnd = getNotificationAmountT() == 0.0f
+                ? CLOCK_SCALE_FADE_END_NO_NOTIFS
+                : CLOCK_SCALE_FADE_END;
+        float alpha = (scale - fadeEnd)
+                / (CLOCK_SCALE_FADE_START - fadeEnd);
         return Math.max(0, Math.min(1, alpha));
     }
 
@@ -166,6 +185,11 @@ public class KeyguardClockPositionAlgorithm {
          * The y translation of the clock.
          */
         public int clockY;
+
+        /**
+         * The scale of the Clock
+         */
+        public float clockScale;
 
         /**
          * The alpha value of the clock.

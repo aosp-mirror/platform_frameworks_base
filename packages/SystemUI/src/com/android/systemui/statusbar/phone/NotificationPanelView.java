@@ -32,6 +32,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
@@ -48,6 +49,11 @@ public class NotificationPanelView extends PanelView implements
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardPageSwipeHelper.Callback {
 
+    // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
+    // changed.
+    private static final int CAP_HEIGHT = 1456;
+    private static final int FONT_HEIGHT = 2163;
+
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
     private KeyguardPageSwipeHelper mPageSwiper;
@@ -56,7 +62,7 @@ public class NotificationPanelView extends PanelView implements
     private View mQsPanel;
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
-    private View mStackScrollerContainer;
+    private TextView mClockView;
 
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int mNotificationTopPadding;
@@ -105,7 +111,7 @@ public class NotificationPanelView extends PanelView implements
             new KeyguardClockPositionAlgorithm.Result();
     private boolean mIsSwipedHorizontally;
     private boolean mIsExpanding;
-    private KeyguardBottomAreaView mKeyguardBottomArea;
+
     private boolean mBlockTouches;
     private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
     private int mNotificationScrimWaitDistance;
@@ -137,9 +143,9 @@ public class NotificationPanelView extends PanelView implements
         mHeader.getBackgroundView().setOnClickListener(this);
         mHeader.setOverlayParent(this);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
-        mStackScrollerContainer = findViewById(R.id.notification_container_parent);
         mQsContainer = findViewById(R.id.quick_settings_container);
         mQsPanel = findViewById(R.id.quick_settings_panel);
+        mClockView = (TextView) findViewById(R.id.clock_view);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
         mNotificationStackScroller = (NotificationStackScrollLayout)
@@ -179,6 +185,11 @@ public class NotificationPanelView extends PanelView implements
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
+        // Update Clock Pivot
+        mKeyguardStatusView.setPivotX(getWidth() / 2);
+        mKeyguardStatusView.setPivotY(
+                (FONT_HEIGHT - CAP_HEIGHT) / 2048f * mClockView.getTextSize());
+
         // Calculate quick setting heights.
         mQsMinExpansionHeight = mHeader.getCollapsedHeight() + mQsPeekHeight;
         mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
@@ -201,7 +212,7 @@ public class NotificationPanelView extends PanelView implements
      * showing.
      */
     private void positionClockAndNotifications() {
-        boolean animateClock = mNotificationStackScroller.isAddOrRemoveAnimationPending();
+        boolean animate = mNotificationStackScroller.isAddOrRemoveAnimationPending();
         int stackScrollerPadding;
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
             int bottom = mStackScrollerOverscrolling
@@ -219,17 +230,17 @@ public class NotificationPanelView extends PanelView implements
                     getHeight(),
                     mKeyguardStatusView.getHeight());
             mClockPositionAlgorithm.run(mClockPositionResult);
-            if (animateClock || mClockAnimator != null) {
+            if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockY);
             } else {
                 mKeyguardStatusView.setY(mClockPositionResult.clockY);
             }
-            applyClockAlpha(mClockPositionResult.clockAlpha);
+            updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
             mTopPaddingAdjustment = mClockPositionResult.stackScrollerPaddingAdjustment;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        requestScrollerTopPaddingUpdate(animateClock);
+        requestScrollerTopPaddingUpdate(animate);
     }
 
     private void startClockAnimation(int y) {
@@ -262,13 +273,10 @@ public class NotificationPanelView extends PanelView implements
         });
     }
 
-    private void applyClockAlpha(float alpha) {
-        if (alpha != 1.0f) {
-            mKeyguardStatusView.setLayerType(LAYER_TYPE_HARDWARE, null);
-        } else {
-            mKeyguardStatusView.setLayerType(LAYER_TYPE_NONE, null);
-        }
+    private void updateClock(float alpha, float scale) {
         mKeyguardStatusView.setAlpha(alpha);
+        mKeyguardStatusView.setScaleX(scale);
+        mKeyguardStatusView.setScaleY(scale);
     }
 
     public void animateToFullShade() {

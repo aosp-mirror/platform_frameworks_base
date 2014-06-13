@@ -58,6 +58,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ImageView mCameraImageView;
     private ImageView mPhoneImageView;
     private ImageView mLockIcon;
+    private View mIndicationText;
 
     private ActivityStarter mActivityStarter;
     private UnlockMethodCache mUnlockMethodCache;
@@ -87,6 +88,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mCameraImageView = (ImageView) findViewById(R.id.camera_button);
         mPhoneImageView = (ImageView) findViewById(R.id.phone_button);
         mLockIcon = (ImageView) findViewById(R.id.lock_icon);
+        mIndicationText = findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
@@ -229,6 +231,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public ImageView getLockIcon() {
         return mLockIcon;
+    }
+
+    public View getIndicationView() {
+        return mIndicationText;
     }
 
     @Override
