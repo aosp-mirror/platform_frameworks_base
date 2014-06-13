@@ -91,10 +91,10 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        boolean changed = super.setVisible(visible, restart);
+        final boolean changed = super.setVisible(visible, restart);
         if (visible) {
             if (changed || restart) {
-                setFrame(0, true, restart || mCurFrame >= 0);
+                setFrame(0, true, mAnimating);
             }
         } else {
             unscheduleSelf(this);
