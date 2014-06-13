@@ -882,7 +882,9 @@ public class UserManager {
                 ++switchableUserCount;
             }
         }
-        return switchableUserCount > 1;
+        final boolean guestEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.GUEST_USER_ENABLED, 0) == 1;
+        return switchableUserCount > 1 || guestEnabled;
     }
 
     /**
