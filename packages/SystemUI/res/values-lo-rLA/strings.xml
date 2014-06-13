@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ດຳເນີນຢູ່"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ການແຈ້ງເຕືອນ"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"ເຊື່ອມຕໍ່ສາຍສາກ"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"ແບັດເຕີຣີເຫຼືອໜ້ອຍແລ້ວ."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"ແບັດເຕີຣີ​ເຫຼືອ​ໜ້ອຍ"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"ຍັງເຫຼືອອີກ <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"ຍັງເຫຼືອ <xliff:g id="NUMBER">%d%%</xliff:g>. ເປີດ​ນຳໃຊ້​ໂຕປະຢັດ​ແບັດເຕີຣີ​ຢູ່."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"ບໍ່ຮອງຮັບການສາກໄຟດ້ວຍ USB.\nຕ້ອງໃຊ້ສະເພາະເຄື່ອງສາກທີ່ແຖມມານຳເທົ່ານັ້ນ."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"ການນຳໃຊ້ແບັດເຕີຣີ"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"ບໍ່​ຮອງຮັບ​ການ​ສາກ​ຜ່ານ USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"ໃຊ້​ສະເພາະ​ສາຍ​ສາກ​ທີ່​ມາ​ກັບ​ເຄື່ອງ."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"​ການ​ຕັ້ງ​ຄ່າ"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"ເລີ່ມ​ໂຕປະຢັດ​ແບັດເຕີຣີ​ບໍ?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"ເລີ່ມ"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"ເລີ່ມ​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"ເພື່ອ​ຊ່ວຍ​ຢືດ​ອາຍຸ​ແບັດເຕີຣີ, ໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ຈະ​ຫຼຸດ​ປະສິດທິພາບ​ຂອງ​ອຸປະກອນ​ທ່ານ​ລົງ.\n\nໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ຈະ​ຖືກ​ປິດ​ການນຳໃຊ້​ໂດຍ​ອັດຕະໂນມັດ​ເມື່ອ​ທ່ານ​ສຽບ​ສາຍ​ສາກ​ອຸປະກອນ​ຂອງ​ທ່ານ."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ການຕັ້ງຄ່າ"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"ໂໝດເທິງຍົນ"</string>
@@ -215,6 +221,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"ບໍ່​ມີ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ສາກເຕັມແລ້ວ."</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"ກຳລັງສາກໄຟ"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ຈຶ່ງ​ຈະ​ເຕັມ"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"ເຄືອຄ່າຍອາດ\nຖືກຕິດຕາມ"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ຊອກຫາ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"ເລື່ອນຂຶ້ນເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -233,6 +243,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"ປັດ​ຊ້າຍ​ເພື່ອ​ໃຊ້​ກ້ອງ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
     <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
@@ -241,4 +253,7 @@
     <item quantity="one" msgid="3480040795582254384">"ເປັນ​ເວລາ​ນຶ່ງ​ຊົ່ວ​ໂມງ"</item>
     <item quantity="other" msgid="5408537517529822157">"ເປັນ​ເວລາ %d ຊົ່ວ​ໂມງ"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"ເປີດ​ໃຊ້​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ​ແລ້ວ"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"ປະສິດທິພາບ​ຂອງ​ອຸປະກອນ​ຖືກ​ຫຼຸດ​ລົງ​ແລ້ວ."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"ເປີດ​ການ​ຕັ້ງຄ່າ​ໂຕ​ປະຢັດ​ແບັດເຕີຣີ"</string>
 </resources>

@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Keine Benachrichtigungen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktuell"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Benachrichtigungen"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Ladegerät anschließen"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Akku ist fast leer."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Akku ist schwach"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Noch <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Noch <xliff:g id="NUMBER">%d%%</xliff:g>. Energiesparmodus ist aktiviert."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB-Aufladung wird nicht unterstützt.\nVerwenden Sie das mitgelieferte Aufladegerät."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Akkuverbrauch"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Laden per USB wird nicht unterstützt."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Verwenden Sie nur das im Lieferumfang enthaltene Ladegerät."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Einstellungen"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Energiesparmodus starten?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Starten"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Energiesparmodus starten"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Im Energiesparmodus wird zur Schonung des Akkus die Leistung des Geräts herabgesetzt.\n\nSobald Ihr Gerät an eine Stromquelle angeschlossen ist, wird der Energiesparmodus deaktiviert."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Einstellungen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flugmodus"</string>
@@ -217,6 +223,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"Keine neuen Apps"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-Info"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Aufgeladen"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Wird aufgeladen"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Voll in <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Wird nicht aufgeladen"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Netzwerk wird\neventuell überwacht."</string>
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
@@ -235,6 +245,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"Zum Öffnen der Kamera nach links wischen"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Bis zur Deaktivierung"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Wird aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Gast"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ Gast"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Für eine Minute"</item>
     <item quantity="other" msgid="6924190729213550991">"Für %d Minuten"</item>
@@ -243,4 +255,7 @@
     <item quantity="one" msgid="3480040795582254384">"Für eine Stunde"</item>
     <item quantity="other" msgid="5408537517529822157">"Für %d Stunden"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Die Geräteleistung wurde herabgesetzt."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Einstellungen für den Energiesparmodus öffnen"</string>
 </resources>

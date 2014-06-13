@@ -35,15 +35,28 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nagins avis"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actual"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Avis"</string>
-    <!-- no translation found for battery_low_title (2783104807551211639) -->
-    <skip />
-    <!-- no translation found for battery_low_subtitle (1752040062087829196) -->
+    <!-- no translation found for battery_low_title (6456385927409742437) -->
     <skip />
     <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
     <skip />
+    <!-- no translation found for battery_low_percent_format_saver_started (6534746636002666456) -->
+    <skip />
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
-    <string name="battery_low_why" msgid="7279169609518386372">"Consum dad accu"</string>
+    <!-- no translation found for invalid_charger_title (3515740382572798460) -->
+    <skip />
+    <!-- no translation found for invalid_charger_text (5474997287953892710) -->
+    <skip />
+    <!-- no translation found for battery_low_why (4553600287639198111) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_title (5987726159603849352) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7283108887345688413) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (7245333922937402896) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_text (8417584516834617662) -->
+    <skip />
     <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
     <skip />
     <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
@@ -400,6 +413,14 @@
     <skip />
     <!-- no translation found for recents_search_bar_label (8074997400187836677) -->
     <skip />
+    <!-- no translation found for expanded_header_battery_charged (5945855970267657951) -->
+    <skip />
+    <!-- no translation found for expanded_header_battery_charging (205623198487189724) -->
+    <skip />
+    <!-- no translation found for expanded_header_battery_charging_with_time (457559884275395376) -->
+    <skip />
+    <!-- no translation found for expanded_header_battery_not_charging (4798147152367049732) -->
+    <skip />
     <!-- no translation found for ssl_ca_cert_warning (9005954106902053641) -->
     <skip />
     <!-- no translation found for description_target_search (3091587249776033139) -->
@@ -430,8 +451,18 @@
     <skip />
     <!-- no translation found for keyguard_indication_charging_time (1757251776872835768) -->
     <skip />
+    <!-- no translation found for guest_nickname (8059989128963789678) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (4259024453643879653) -->
+    <skip />
     <!-- no translation found for zen_mode_duration_minutes:one (9040808414992812341) -->
     <!-- no translation found for zen_mode_duration_minutes:other (6924190729213550991) -->
     <!-- no translation found for zen_mode_duration_hours:one (3480040795582254384) -->
     <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
+    <!-- no translation found for battery_saver_notification_title (237918726750955859) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_text (7796554871101546872) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (7546297220816993504) -->
+    <skip />
 </resources>

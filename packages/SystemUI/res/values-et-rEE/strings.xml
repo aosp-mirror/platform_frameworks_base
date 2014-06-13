@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Teatisi pole"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Jätkuv"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Teadistused"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Ühendage laadija"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Aku hakkab tühjenema."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Aku hakkab tühjaks saama"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> on alles"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Alles: <xliff:g id="NUMBER">%d%%</xliff:g>. Akusäästja on sisse lülitatud."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB laadimist ei toetata.\nKasutage ainult tootja laadija."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Akukasutus"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"USB-ga laadimist ei toetata."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Kasutage ainult kaasasolevat laadijat."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Seaded"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Kas käivitada akusäästja?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Käivita"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Käivita akusäästja"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Aku tööea parandamiseks vähendab akusäästja teie seadme jõudlust.\n\nKui seade ühendatakse toiteallikaga, keelatakse akusäästja."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Seaded"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Lennurežiim"</string>
@@ -215,6 +221,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"Hiljutisi rakendusi pole"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduste teave"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"otsing"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Laetud"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Laadimine"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Täislaadimiseks kulub <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ei laadi"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Võrku võidakse\njälgida"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Otsing"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lohistage üles: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -231,6 +241,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"Kaamera kasutamiseks pühkige vasakule"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kuni lülitate selle välja"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Külaline"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ külaline"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Üheks minutiks"</item>
     <item quantity="other" msgid="6924190729213550991">"%d minutiks"</item>
@@ -239,4 +251,7 @@
     <item quantity="one" msgid="3480040795582254384">"Üheks tunniks"</item>
     <item quantity="other" msgid="5408537517529822157">"%d tunniks"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Akusäästja on sisse lülitatud"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Seadme jõudlust on vähendatud."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Ava akusäästja seaded"</string>
 </resources>

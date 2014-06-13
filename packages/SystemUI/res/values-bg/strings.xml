@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Няма известия"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"В момента"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известия"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Включете зарядното устройство"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Батерията се изтощава."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Батерията е изтощена"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Остава: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Остава: <xliff:g id="NUMBER">%d%%</xliff:g>. Режимът за запазване на батерията е включен."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Не се поддържа зареждане през USB.\nИзползвайте само доставеното зарядно устройство."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Използване на батерията"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Зареждането през USB не се поддържа."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Използвайте само предоставеното зарядно устройство."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Настройки"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Да се стартира ли режимът за запазване на батерията?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Стартиране"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Стартиране на режима за запазване на батерията"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"С цел удължаване на живота на батерията режимът за запазването й ще намали ефективността на устройството ви.\n\nКогато то е включено в захранването, режимът ще се деактивира."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Настройки"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Самолетен режим"</string>
@@ -215,6 +221,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"Няма скорошни приложения"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информация за приложението"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"търсене"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Заредена"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Зарежда се"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> до пълно зареждане"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Не се зарежда"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Мрежата може\nда се наблюдава"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Търсене"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Плъзнете нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -233,6 +243,10 @@
     <string name="camera_hint" msgid="5241441720959174226">"Прекарайте пръст наляво, за да включите камерата"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
+    <!-- no translation found for guest_nickname (8059989128963789678) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (4259024453643879653) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"За една минута"</item>
     <item quantity="other" msgid="6924190729213550991">"За %d минути"</item>
@@ -241,4 +255,7 @@
     <item quantity="one" msgid="3480040795582254384">"За един час"</item>
     <item quantity="other" msgid="5408537517529822157">"За %d часа"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режимът за запазване на батерията е включен"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Ефективността на устройството е намалена."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отваряне на настройките за режима за запазване на батерията"</string>
 </resources>

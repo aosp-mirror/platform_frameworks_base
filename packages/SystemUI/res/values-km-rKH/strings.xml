@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"គ្មាន​ការ​ជូន​ដំណឹង"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"ភ្ជាប់​ឧបករណ៍​បញ្ចូល​ថ្ម"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"ជិត​អស់​ថ្ម​ហើយ។"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"ជិត​អស់​ថ្ម​ហើយ"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"នៅ​សល់ <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"នៅ​សល់ <xliff:g id="NUMBER">%d%%</xliff:g> ។ កម្មវិធី​សន្សំ​ថ្ម​គឺ​បើក។"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"មិន​គាំទ្រ​ការ​បញ្ចូល​តាម​យូអេសប៊ី។\nប្រើ​តែ​ឧបករណ៍​បញ្ចូល​ថ្ម​ដែល​បាន​ផ្ដល់។"</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"ការ​ប្រើ​ថ្ម"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"មិន​គាំទ្រ​ការ​បញ្ចូល​ថ្ម​តាម​យូអេសប៊ី​ទេ។"</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"ប្រើ​តែ​ឧបករណ៍​បញ្ចូល​ថ្ម​ដែល​បាន​ផ្ដល់​ឲ្យ។"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"ការកំណត់"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"ចាប់ផ្ដើម​កម្មវិធី​សន្សំ​ថ្ម?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"ចាប់ផ្ដើម"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"ចាប់ផ្ដើម​កម្មវិធី​សន្សំ​ថ្ម"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"ដើម្បី​ជួយ​បង្កើន​អាយុកាល​ថ្ម កម្មវិធី​សន្សំ​ថ្ម​នឹង​កាត់បន្ថយ​ការ​អនុវត្ត​​នៃ​ឧបករណ៍​របស់​អ្នក។\n\nកម្មវិធី​សន្សំ​ថ្ម​នឹង​បិទ​នៅ​ពេល​ឧបករណ៍​របស់​អ្នក​ត្រូវ​បាន​ដោត​បញ្ចូល​ថ្ម។"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ការ​កំណត់"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"វ៉ាយហ្វាយ"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"ពេល​ជិះ​យន្តហោះ"</string>
@@ -215,6 +221,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"មិនមាន​​កម្មវិធី​ថ្មីៗ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម​​"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
@@ -233,6 +243,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"អូស​ទៅ​ឆ្វេង​​ដើម្បី​ប្រើ​​ម៉ាស៊ីន​ថត"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"កំពុង​បញ្ចូល​ថ្ម (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើប​ពេញ)"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"ភ្ញៀវ"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ ភ្ញៀវ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
     <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
@@ -241,4 +253,7 @@
     <item quantity="one" msgid="3480040795582254384">"សម្រាប់​មួយ​ម៉ោង"</item>
     <item quantity="other" msgid="5408537517529822157">"សម្រាប់ %d ម៉ោង"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"កម្មវិធី​សន្សំ​ថ្ម​គឺ​បើក"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"ការ​អនុវត្ត​ឧបករណ៍​ត្រូវ​បាន​កាត់​បន្ថយ។"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"បើក​ការ​កំណត់​កម្មវិធី​សន្សំ​ថ្ម"</string>
 </resources>

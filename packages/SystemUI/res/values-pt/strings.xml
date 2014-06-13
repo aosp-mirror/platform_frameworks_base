@@ -32,11 +32,26 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em andamento"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Conecte o carregador"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"A bateria está ficando baixa."</string>
+    <!-- no translation found for battery_low_title (6456385927409742437) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restante"</string>
+    <!-- no translation found for battery_low_percent_format_saver_started (6534746636002666456) -->
+    <skip />
     <string name="invalid_charger" msgid="4549105996740522523">"O carregamento via USB não é suportado.\nUse apenas o carregador fornecido."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Uso da bateria"</string>
+    <!-- no translation found for invalid_charger_title (3515740382572798460) -->
+    <skip />
+    <!-- no translation found for invalid_charger_text (5474997287953892710) -->
+    <skip />
+    <!-- no translation found for battery_low_why (4553600287639198111) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_title (5987726159603849352) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_ok (7283108887345688413) -->
+    <skip />
+    <!-- no translation found for battery_saver_start_action (7245333922937402896) -->
+    <skip />
+    <!-- no translation found for battery_saver_confirmation_text (8417584516834617662) -->
+    <skip />
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configurações"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Modo avião"</string>
@@ -217,6 +232,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"Nenhum app recente"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informações do aplicativo"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Carregando"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> até concluir"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Não está carregando"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"A rede pode estar\nsob monitoração"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Pesquisar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>, deslize para cima."</string>
@@ -235,6 +254,10 @@
     <string name="camera_hint" msgid="5241441720959174226">"Deslize para a esquerda para usar a câmera"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Até você desativar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até concluir)"</string>
+    <!-- no translation found for guest_nickname (8059989128963789678) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (4259024453643879653) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Por 1 minuto"</item>
     <item quantity="other" msgid="6924190729213550991">"Por %d minutos"</item>
@@ -243,4 +266,10 @@
     <item quantity="one" msgid="3480040795582254384">"Por 1 hora"</item>
     <item quantity="other" msgid="5408537517529822157">"Por %d horas"</item>
   </plurals>
+    <!-- no translation found for battery_saver_notification_title (237918726750955859) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_text (7796554871101546872) -->
+    <skip />
+    <!-- no translation found for battery_saver_notification_action_text (7546297220816993504) -->
+    <skip />
 </resources>

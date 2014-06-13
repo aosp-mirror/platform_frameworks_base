@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Brancher le chargeur"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Le niveau de la batterie est faible."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Batterie faible"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> restant(s)"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Il reste <xliff:g id="NUMBER">%d%%</xliff:g>. L\'économiseur de batterie est activé."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non disponible.\nVous devez utiliser le chargeur fourni."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Utilisation de la batterie"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Chargeur USB non compatible."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Veuillez n\'utiliser que le chargeur fourni."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Paramètres"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Démarrer l\'économiseur de batterie ?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Démarrer"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Démarrer l\'économiseur de batterie"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Pour vous aider à prolonger l\'autonomie de la batterie, les performances de l\'appareil sont réduites.\n\nL\'économiseur de batterie est désactivé lorsque l\'appareil est branché."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mode Avion"</string>
@@ -217,6 +223,10 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"Aucune application récente"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informations sur l\'application"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Chargé"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"En charge"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Chargé dans <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
+    <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"N\'est pas en charge"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
     <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faites glisser vers le haut pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -235,6 +245,10 @@
     <string name="camera_hint" msgid="5241441720959174226">"Balayer l\'écran vers la gauche pour accéder à l\'appareil photo"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Jusqu\'à la désactivation"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charge en cours… (chargé à 100 % dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <!-- no translation found for guest_nickname (8059989128963789678) -->
+    <skip />
+    <!-- no translation found for guest_new_guest (4259024453643879653) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Pendant une minute"</item>
     <item quantity="other" msgid="6924190729213550991">"Pendant %d minutes"</item>
@@ -243,4 +257,7 @@
     <item quantity="one" msgid="3480040795582254384">"Pendant une heure"</item>
     <item quantity="other" msgid="5408537517529822157">"Pendant %d heures"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"L\'économiseur de batterie est activé"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Les performances de l\'appareil sont réduites."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Ouvrir les paramètres de l\'économiseur de batterie"</string>
 </resources>
