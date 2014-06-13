@@ -38,6 +38,7 @@ import android.widget.OverScroller;
 import com.android.systemui.R;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.DozeTrigger;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsPackageMonitor;
 import com.android.systemui.recents.RecentsTaskLoader;
@@ -70,6 +71,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStackViewCallbacks mCb;
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mTaskTransforms = new ArrayList<TaskViewTransform>();
+    DozeTrigger mDozeTrigger;
 
     // The various rects that define the stack view
     Rect mRect = new Rect();
@@ -107,6 +109,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTouchHandler = new TaskStackViewTouchHandler(context, this);
         mViewPool = new ViewPool<TaskView, Task>(context, this);
         mInflater = LayoutInflater.from(context);
+        mDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
+            @Override
+            public void run() {
+                // Show the task bar dismiss buttons
+                int childCount = getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    TaskView tv = (TaskView) getChildAt(i);
+                    tv.animateOnNoUserInteraction();
+                }
+            }
+        });
         mHwLayersTrigger = new ReferenceCountedTrigger(getContext(), new Runnable() {
             @Override
             public void run() {
@@ -797,6 +810,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Mark that we have completely the first layout
             mAwaitingFirstLayout = false;
 
+            // Start dozing
+            mDozeTrigger.startDozing();
+
             // Prepare the first view for its enter animation
             int offsetTopAlign = -mTaskRect.top;
             int offscreenY = mRect.bottom - (mTaskRect.top - mRect.top);
@@ -865,6 +881,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
         return isTransformedTouchPointInView(x, y, child, null);
+    }
+
+    /** Pokes the dozer on user interaction. */
+    void onUserInteraction() {
+        // If the dozer is not running, then either we have not yet laid out, or it has already
+        // fallen asleep, so just let it rest.
+        if (mDozeTrigger.isDozing()) {
+            mDozeTrigger.poke();
+        }
     }
 
     /**** TaskStackCallbacks Implementation ****/
@@ -1151,6 +1176,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Sanity check, the task view should always be clipping against the stack at this point,
         // but just in case, re-enable it here
         tv.setClipViewInStack(true);
+
+        // If the doze trigger has already fired, then update the state for this task view
+        if (mDozeTrigger.hasTriggered()) {
+            tv.setOnNoUserInteraction();
+        }
 
         // Add/attach the view to the hierarchy
         if (Console.Enabled) {

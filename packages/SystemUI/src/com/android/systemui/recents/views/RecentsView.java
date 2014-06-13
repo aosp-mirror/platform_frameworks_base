@@ -307,6 +307,20 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
+    /** Notifies each task view of the user interaction. */
+    public void onUserInteraction() {
+        // Get the first stack view
+        TaskStackView stackView = null;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                stackView = (TaskStackView) child;
+                stackView.onUserInteraction();
+            }
+        }
+    }
+
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
         // Get the first stack view

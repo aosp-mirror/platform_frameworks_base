@@ -89,6 +89,7 @@ public class RecentsConfiguration {
     public int taskBarEnterAnimDuration;
     public int taskBarEnterAnimDelay;
     public int taskBarExitAnimDuration;
+    public int taskBarDismissDozeDelaySeconds;
 
     /** Nav bar scrim */
     public int navBarScrimEnterDuration;
@@ -205,6 +206,8 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_animate_task_bar_enter_delay);
         taskBarExitAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
+        taskBarDismissDozeDelaySeconds =
+                res.getInteger(R.integer.recents_task_bar_dismiss_delay_seconds);
 
         // Nav bar scrim
         navBarScrimEnterDuration =

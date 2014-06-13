@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -93,6 +94,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         setWillNotDraw(false);
+        setDim(getDim());
     }
 
     @Override
@@ -206,7 +208,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         setScaleX(1f);
         setScaleY(1f);
         setAlpha(1f);
-        mDim = 0;
+        setDim(0);
         invalidate();
     }
 
@@ -251,6 +253,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             if (isTaskViewFrontMost) {
                 // Hide the front most task bar view so we can animate it in
                 mBarView.prepareAnimateEnterRecents();
+                // Set the dim to 0 so we can animate it in
+                setDim(0);
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -292,7 +296,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (ctx.isFrontMost) {
                 // Animate the task bar of the first task view
-                mBarView.animateOnEnterRecents(-1);
+                mBarView.animateOnEnterRecents(mConfig.taskBarEnterAnimDelay);
+                // Animate the dim into view as well
+                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimOverlayFromScale());
+                anim.setStartDelay(mConfig.taskBarEnterAnimDelay);
+                anim.setDuration(mConfig.taskBarEnterAnimDuration);
+                anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
+                anim.start();
             }
 
         } else if (mConfig.launchedFromHome) {
@@ -325,9 +335,27 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         ctx.postAnimationTrigger.increment();
     }
 
+    /** Animates this task view if the user does not interact with the stack after a certain time. */
+    public void animateOnNoUserInteraction() {
+        mBarView.animateOnNoUserInteraction();
+    }
+
+    /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+    public void setOnNoUserInteraction() {
+        mBarView.setOnNoUserInteraction();
+    }
+
     /** Animates this task view as it exits recents */
     public void animateOnLaunchingTask(final Runnable r) {
         mBarView.animateOnLaunchingTask(r);
+
+        // Animate the dim
+        if (mDim > 0) {
+            ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
+            anim.setDuration(mConfig.taskBarExitAnimDuration);
+            anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
+            anim.start();
+        }
     }
 
     /** Animates the deletion of this task view */
@@ -398,13 +426,29 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         }
     }
 
-    /** Update the dim as a function of the scale of this view. */
-    void updateDimOverlayFromScale() {
+    /** Returns the current dim. */
+    public void setDim(int dim) {
+        mDim = dim;
+        postInvalidateOnAnimation();
+    }
+
+    /** Returns the current dim. */
+    public int getDim() {
+        return mDim;
+    }
+
+    /** Compute the dim as a function of the scale of this view. */
+    int getDimOverlayFromScale() {
         float minScale = Constants.Values.TaskStackView.StackPeekMinScale;
         float scaleRange = 1f - minScale;
         float dim = (1f - getScaleX()) / scaleRange;
         dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));
-        mDim = Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
+        return Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
+    }
+
+    /** Update the dim as a function of the scale of this view. */
+    void updateDimOverlayFromScale() {
+        setDim(getDimOverlayFromScale());
     }
 
     @Override

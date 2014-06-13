@@ -108,6 +108,8 @@
     <!-- milliseconds before the heads up notification accepts touches. -->
     <integer name="heads_up_sensitivity_delay">700</integer>
 
+    <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
+    <integer name="recents_task_bar_dismiss_delay_seconds">3</integer>
     <!-- The min animation duration for animating views that are currently visible. -->
     <integer name="recents_filter_animate_current_views_min_duration">175</integer>
     <!-- The min animation duration for animating views that are newly visible. -->

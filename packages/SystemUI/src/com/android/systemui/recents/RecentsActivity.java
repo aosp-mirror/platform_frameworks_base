@@ -527,6 +527,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
+    public void onUserInteraction() {
+        mRecentsView.onUserInteraction();
+    }
+
+    @Override
     public void onBackPressed() {
         // If we are mid-animation into Recents, then reverse it and finish
         if (mFullScreenshotView == null ||
