@@ -197,7 +197,7 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void onRectangleOnScreenRequested(IBinder window, Rect rectangle, boolean immediate) {
+    public void onRectangleOnScreenRequested(IBinder window, Rect rectangle) {
         // pass for now.
     }
 
