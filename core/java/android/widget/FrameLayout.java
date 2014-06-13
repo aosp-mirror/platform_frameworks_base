@@ -205,6 +205,16 @@ public class FrameLayout extends ViewGroup {
         }
     }
 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        if (mForeground != null) {
+            mForeground.setHotspot(x, y);
+        }
+    }
+
     /**
      * Returns a set of layout parameters with a width of
      * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},

@@ -255,6 +255,22 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
     }
 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        final Drawable progressDrawable = getProgressDrawable();
+        if (progressDrawable != null) {
+            progressDrawable.setHotspot(x, y);
+        }
+
+        final Drawable thumb = mThumb;
+        if (thumb != null) {
+            thumb.setHotspot(x, y);
+        }
+    }
+
     @Override
     public void invalidateDrawable(Drawable dr) {
         super.invalidateDrawable(dr);

@@ -1010,7 +1010,17 @@ public class ImageView extends View {
         }
     }
 
-    @Override 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        if (mDrawable != null) {
+            mDrawable.setHotspot(x, y);
+        }
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 

@@ -320,6 +320,16 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
     }
 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        if (mButtonDrawable != null) {
+            mButtonDrawable.setHotspot(x, y);
+        }
+    }
+
     @Override
     protected boolean verifyDrawable(Drawable who) {
         return super.verifyDrawable(who) || who == mButtonDrawable;

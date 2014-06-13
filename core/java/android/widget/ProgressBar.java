@@ -1144,6 +1144,20 @@ public class ProgressBar extends View {
         }
     }
 
+    /** @hide */
+    @Override
+    protected void setDrawableHotspot(float x, float y) {
+        super.setDrawableHotspot(x, y);
+
+        if (mProgressDrawable != null) {
+            mProgressDrawable.setHotspot(x, y);
+        }
+
+        if (mIndeterminateDrawable != null) {
+            mIndeterminateDrawable.setHotspot(x, y);
+        }
+    }
+
     static class SavedState extends BaseSavedState {
         int progress;
         int secondaryProgress;
