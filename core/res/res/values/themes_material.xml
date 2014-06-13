@@ -277,7 +277,6 @@ please see themes_device_defaults.xml.
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Material</item>
-        <item name="preferenceFragmentPaddingSide">0dip</item>
         <item name="preferenceCategoryStyle">@style/Preference.Material.Category</item>
         <item name="preferenceStyle">@style/Preference.Material</item>
         <item name="preferenceInformationStyle">@style/Preference.Material.Information</item>
@@ -288,6 +287,11 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Material.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_material</item>
+        <item name="preferencePanelStyle">@style/PreferencePanel.Material</item>
+        <item name="preferenceHeaderPanelStyle">@style/PreferenceHeaderPanel.Material</item>
+        <item name="preferenceListStyle">@style/PreferenceHeaderList.Material</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Material</item>
+        <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side_material</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
 
         <!-- Search widget styles -->
@@ -625,7 +629,6 @@ please see themes_device_defaults.xml.
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment.Material</item>
-        <item name="preferenceFragmentPaddingSide">0dip</item>
         <item name="preferenceCategoryStyle">@style/Preference.Material.Category</item>
         <item name="preferenceStyle">@style/Preference.Material</item>
         <item name="preferenceInformationStyle">@style/Preference.Material.Information</item>
@@ -636,6 +639,11 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Material.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Material.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_material</item>
+        <item name="preferencePanelStyle">@style/PreferencePanel.Material</item>
+        <item name="preferenceHeaderPanelStyle">@style/PreferenceHeaderPanel.Material</item>
+        <item name="preferenceListStyle">@style/PreferenceHeaderList.Material</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Material</item>
+        <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side_material</item>
         <item name="detailsElementBackground">?attr/colorBackground</item>
 
         <!-- PreferenceFrameLayout attributes -->
