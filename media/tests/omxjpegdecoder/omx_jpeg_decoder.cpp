@@ -104,7 +104,9 @@ bool OmxJpegImageDecoder::onDecode(SkStream* stream,
     int height;
     meta->findInt32(kKeyWidth, &width);
     meta->findInt32(kKeyHeight, &height);
-    configBitmapSize(bm, getPrefConfig(k32Bit_SrcDepth, false), width, height);
+    configBitmapSize(
+            bm, SkColorTypeToBitmapConfig(getPrefColorType(k32Bit_SrcDepth, false)),
+            width, height);
 
     // mode == DecodeBounds
     if (mode == SkImageDecoder::kDecodeBounds_Mode) {
