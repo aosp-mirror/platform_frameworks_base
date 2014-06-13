@@ -354,11 +354,9 @@ public class ActivityView extends ViewGroup {
     private static class ActivityContainerWrapper {
         private final IActivityContainer mIActivityContainer;
         private final CloseGuard mGuard = CloseGuard.get();
-        boolean mOpened; // Protected by mGuard.
 
         ActivityContainerWrapper(IActivityContainer container) {
             mIActivityContainer = container;
-            mOpened = true;
             mGuard.open("release");
         }
 
@@ -426,16 +424,11 @@ public class ActivityView extends ViewGroup {
         }
 
         void release() {
-            synchronized (mGuard) {
-                if (mOpened) {
-                    if (DEBUG) Log.v(TAG, "ActivityContainerWrapper: release called");
-                    try {
-                        mIActivityContainer.release();
-                        mGuard.close();
-                    } catch (RemoteException e) {
-                    }
-                    mOpened = false;
-                }
+            if (DEBUG) Log.v(TAG, "ActivityContainerWrapper: release called");
+            try {
+                mIActivityContainer.release();
+                mGuard.close();
+            } catch (RemoteException e) {
             }
         }
 
