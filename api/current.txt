@@ -27358,8 +27358,8 @@ package android.telecomm {
     field public final int supportedRouteMask;
   }
 
-  public class CallCapabilities {
-    ctor public CallCapabilities();
+  public final class CallCapabilities {
+    method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
     field public static final int ALL = 511; // 0x1ff
     field public static final int CONNECTION_HANDOFF = 256; // 0x100
@@ -27418,6 +27418,7 @@ package android.telecomm {
   }
 
   public final class CallServiceAdapter {
+    method public void addConferenceCall(java.lang.String);
     method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
     method public void handleSuccessfulOutgoingCall(java.lang.String);
     method public void handoffCall(java.lang.String);
@@ -27492,16 +27493,23 @@ package android.telecomm {
 
   public abstract class Connection {
     ctor protected Connection();
+    method public final void conference();
     method public final android.telecomm.CallAudioState getCallAudioState();
+    method public java.util.List<android.telecomm.Connection> getChildConnections();
     method public final android.net.Uri getHandle();
+    method public android.telecomm.Connection getParentConnection();
+    method public boolean isConferenceConnection();
     method public boolean isRequestingRingback();
     method protected void onAbort();
     method protected void onAnswer();
+    method protected void onChildrenChanged(java.util.List<android.telecomm.Connection>);
+    method protected void onConference();
     method protected void onDisconnect();
     method protected void onHold();
     method protected void onPlayDtmfTone(char);
     method protected void onPostDialContinue(boolean);
     method protected void onReject();
+    method protected void onSeparate();
     method protected void onSetAudioState(android.telecomm.CallAudioState);
     method protected void onSetSignal(android.os.Bundle);
     method protected void onSetState(int);
@@ -27509,10 +27517,13 @@ package android.telecomm {
     method protected void onUnhold();
     method protected void setActive();
     method public void setAudioState(android.telecomm.CallAudioState);
+    method protected void setDestroyed();
     method protected void setDialing();
     method protected void setDisconnected(int, java.lang.String);
     method protected void setHandle(android.net.Uri);
+    method protected void setIsConferenceCapable(boolean);
     method protected void setOnHold();
+    method public void setParentConnection(android.telecomm.Connection);
     method protected void setRequestingRingback(boolean);
     method protected void setRinging();
     method public static java.lang.String stateToString(int);
@@ -27520,9 +27531,11 @@ package android.telecomm {
 
   public static abstract interface Connection.Listener {
     method public abstract void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
+    method public abstract void onConferenceCapableChanged(android.telecomm.Connection, boolean);
     method public abstract void onDestroyed(android.telecomm.Connection);
     method public abstract void onDisconnected(android.telecomm.Connection, int, java.lang.String);
     method public abstract void onHandleChanged(android.telecomm.Connection, android.net.Uri);
+    method public abstract void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
     method public abstract void onRequestingRingback(android.telecomm.Connection, boolean);
     method public abstract void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
     method public abstract void onStateChanged(android.telecomm.Connection, int);
@@ -27531,9 +27544,11 @@ package android.telecomm {
   public static class Connection.ListenerBase implements android.telecomm.Connection.Listener {
     ctor public Connection.ListenerBase();
     method public void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
+    method public void onConferenceCapableChanged(android.telecomm.Connection, boolean);
     method public void onDestroyed(android.telecomm.Connection);
     method public void onDisconnected(android.telecomm.Connection, int, java.lang.String);
     method public void onHandleChanged(android.telecomm.Connection, android.net.Uri);
+    method public void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
     method public void onRequestingRingback(android.telecomm.Connection, boolean);
     method public void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
     method public void onStateChanged(android.telecomm.Connection, int);
@@ -27565,9 +27580,13 @@ package android.telecomm {
     method public final void answer(java.lang.String);
     method public final void call(android.telecomm.CallInfo);
     method public final void disconnect(java.lang.String);
+    method public java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
     method public final void isCompatibleWith(android.telecomm.CallInfo);
     method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
+    method public void onConnectionAdded(android.telecomm.Connection);
+    method public void onConnectionRemoved(android.telecomm.Connection);
+    method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public void onFindSubscriptions(android.net.Uri, android.telecomm.Response<android.net.Uri, android.telecomm.Subscription>);
