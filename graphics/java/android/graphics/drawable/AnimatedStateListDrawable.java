@@ -537,4 +537,3 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         }
     }
 }
-
