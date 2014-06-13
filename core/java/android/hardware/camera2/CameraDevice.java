@@ -154,10 +154,11 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <ul>
      *
-     * <li>For drawing to a {@link android.view.SurfaceView SurfaceView}: Set the size of the
-     *   Surface with {@link android.view.SurfaceHolder#setFixedSize} to be one of the sizes
-     *   returned by
-     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceView.class)}
+     * <li>For drawing to a {@link android.view.SurfaceView SurfaceView}: Once the SurfaceView's
+     *   Surface is {@link android.view.SurfaceHolder.Callback#surfaceCreated created}, set the
+     *   size of the Surface with {@link android.view.SurfaceHolder#setFixedSize} to be one of the
+     *   sizes returned by
+     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceHolder.class)}
      *   and then obtain the Surface by calling {@link android.view.SurfaceHolder#getSurface}.</li>
      *
      * <li>For accessing through an OpenGL texture via a
