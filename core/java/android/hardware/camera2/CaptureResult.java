@@ -2114,7 +2114,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     /**
      * <p>Time at start of exposure of first
-     * row of the image sensor, in nanoseconds.</p>
+     * row of the image sensor active array, in nanoseconds.</p>
      * <p>The timestamps are also included in all image
      * buffers produced for the same capture, and will be identical
      * on all the outputs. The timestamps measure time since an
@@ -2213,6 +2213,20 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     public static final Key<Integer> SENSOR_TEST_PATTERN_MODE =
             new Key<Integer>("android.sensor.testPatternMode", int.class);
+
+    /**
+     * <p>Duration between the start of first row exposure
+     * and the start of last row exposure.</p>
+     * <p>This is the exposure time skew (in the unit of nanosecond) between the first and
+     * last row exposure start times. The first row and the last row are the first
+     * and last rows inside of the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>For typical camera sensors that use rolling shutters, this is also equivalent
+     * to the frame readout time.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     */
+    public static final Key<Long> SENSOR_ROLLING_SHUTTER_SKEW =
+            new Key<Long>("android.sensor.rollingShutterSkew", long.class);
 
     /**
      * <p>Quality of lens shading correction applied
