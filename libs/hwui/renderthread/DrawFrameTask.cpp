@@ -130,9 +130,6 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         mContext->processLayerUpdate(mLayers[i].get(), info);
     }
     mLayers.clear();
-    if (info.out.hasAnimations) {
-        // TODO: Uh... crap?
-    }
     mContext->prepareTree(info);
 
     if (info.out.hasAnimations) {

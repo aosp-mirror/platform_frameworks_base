@@ -27,8 +27,7 @@ static void defaultLayerDestroyer(Layer* layer) {
 }
 
 DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, LayerDestroyer destroyer)
-        : mDisplayList(0)
-        , mSurfaceTexture(0)
+        : mSurfaceTexture(0)
         , mTransform(0)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
@@ -41,7 +40,6 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer, LayerDestroyer destroye
     mColorFilter = SkSafeRef(mLayer->getColorFilter());
     mAlpha = mLayer->getAlpha();
     mMode = mLayer->getMode();
-    mDirtyRect.setEmpty();
 
     if (!mDestroyer) {
         mDestroyer = defaultLayerDestroyer;
@@ -60,37 +58,13 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
-void DeferredLayerUpdater::setDisplayList(RenderNode* displayList,
-        int left, int top, int right, int bottom) {
-    mDisplayList = displayList;
-    if (mDirtyRect.isEmpty()) {
-        mDirtyRect.set(left, top, right, bottom);
-    } else {
-        mDirtyRect.unionWith(Rect(left, top, right, bottom));
-    }
-}
-
 bool DeferredLayerUpdater::apply(TreeInfo& info) {
     bool success = true;
     // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 
-    if (mDisplayList.get()) {
-        if (mWidth != mLayer->layer.getWidth() || mHeight != mLayer->layer.getHeight()) {
-            success = LayerRenderer::resizeLayer(mLayer, mWidth, mHeight);
-        }
-        mLayer->setBlend(mBlend);
-        // TODO: Use DamageAccumulator to get the damage area for the layer's
-        // subtree to only update that part of the layer. Do this as part of
-        // reworking layers to be a RenderProperty instead of a View-managed object
-        mDirtyRect.set(0, 0, mWidth, mHeight);
-        mDisplayList->prepareTree(info);
-        mLayer->updateDeferred(mDisplayList.get(),
-                mDirtyRect.left, mDirtyRect.top, mDirtyRect.right, mDirtyRect.bottom);
-        mDirtyRect.setEmpty();
-        mDisplayList = 0;
-    } else if (mSurfaceTexture.get()) {
+    if (mSurfaceTexture.get()) {
         if (mNeedsGLContextAttach) {
             mNeedsGLContextAttach = false;
             mSurfaceTexture->attachToContext(mLayer->getTexture());

@@ -21,15 +21,58 @@
 #include <utils/Trace.h>
 
 #include <SkCanvas.h>
+#include <SkColorFilter.h>
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
 
 #include "Matrix.h"
+#include "OpenGLRenderer.h"
 #include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
+
+LayerProperties::LayerProperties()
+        : mType(kLayerTypeNone)
+        , mColorFilter(NULL) {
+    reset();
+}
+
+LayerProperties::~LayerProperties() {
+    setType(kLayerTypeNone);
+}
+
+void LayerProperties::reset() {
+    mOpaque = false;
+    setFromPaint(NULL);
+}
+
+bool LayerProperties::setColorFilter(SkColorFilter* filter) {
+   if (mColorFilter == filter) return false;
+   SkRefCnt_SafeAssign(mColorFilter, filter);
+   return true;
+}
+
+bool LayerProperties::setFromPaint(const SkPaint* paint) {
+    bool changed = false;
+    SkXfermode::Mode mode;
+    int alpha;
+    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
+    changed |= setAlpha(static_cast<uint8_t>(alpha));
+    changed |= setXferMode(mode);
+    changed |= setColorFilter(paint ? paint->getColorFilter() : NULL);
+    return changed;
+}
+
+LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
+    setType(other.type());
+    setOpaque(other.opaque());
+    setAlpha(other.alpha());
+    setXferMode(other.xferMode());
+    setColorFilter(other.colorFilter());
+    return *this;
+}
 
 RenderProperties::PrimitiveFields::PrimitiveFields()
         : mClipToBounds(true)
@@ -45,8 +88,7 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
         , mLeft(0), mTop(0), mRight(0), mBottom(0)
         , mWidth(0), mHeight(0)
         , mPivotExplicitlySet(false)
-        , mMatrixOrPivotDirty(false)
-        , mCaching(false) {
+        , mMatrixOrPivotDirty(false) {
 }
 
 RenderProperties::ComputedFields::ComputedFields()
@@ -73,6 +115,7 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
         setStaticMatrix(other.getStaticMatrix());
         setAnimationMatrix(other.getAnimationMatrix());
         setCameraDistance(other.getCameraDistance());
+        mLayerProperties = other.layerProperties();
 
         // Force recalculation of the matrix, since other's dirty bit may be clear
         mPrimitiveFields.mMatrixOrPivotDirty = true;
@@ -103,9 +146,9 @@ void RenderProperties::debugOutputProperties(const int level) const {
         }
     }
 
-    bool clipToBoundsNeeded = mPrimitiveFields.mCaching ? false : mPrimitiveFields.mClipToBounds;
+    bool clipToBoundsNeeded = layerProperties().type() != kLayerTypeNone ? false : mPrimitiveFields.mClipToBounds;
     if (mPrimitiveFields.mAlpha < 1) {
-        if (mPrimitiveFields.mCaching) {
+        if (layerProperties().type() != kLayerTypeNone) {
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         } else if (!mPrimitiveFields.mHasOverlappingRendering) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);

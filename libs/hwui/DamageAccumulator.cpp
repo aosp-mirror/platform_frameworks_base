@@ -35,6 +35,7 @@ NullDamageAccumulator* NullDamageAccumulator::instance() {
 enum TransformType {
     TransformRenderNode,
     TransformMatrix4,
+    TransformNone,
 };
 
 struct DirtyStack {
@@ -80,14 +81,25 @@ void DamageAccumulator::pushTransform(const Matrix4* transform) {
     mHead->matrix4 = transform;
 }
 
+void DamageAccumulator::pushNullTransform() {
+    pushCommon();
+    mHead->type = TransformNone;
+}
+
 void DamageAccumulator::popTransform() {
     LOG_ALWAYS_FATAL_IF(mHead->prev == mHead, "Cannot pop the root frame!");
     DirtyStack* dirtyFrame = mHead;
     mHead = mHead->prev;
-    if (dirtyFrame->type == TransformRenderNode) {
+    switch (dirtyFrame->type) {
+    case TransformRenderNode:
         applyRenderNodeTransform(dirtyFrame);
-    } else {
+        break;
+    case TransformMatrix4:
         applyMatrix4Transform(dirtyFrame);
+        break;
+    case TransformNone:
+        mHead->pendingDirty.join(dirtyFrame->pendingDirty);
+        break;
     }
 }
 
@@ -184,6 +196,10 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
 
 void DamageAccumulator::dirty(float left, float top, float right, float bottom) {
     mHead->pendingDirty.join(left, top, right, bottom);
+}
+
+void DamageAccumulator::peekAtDirty(SkRect* dest) {
+    *dest = mHead->pendingDirty;
 }
 
 void DamageAccumulator::finish(SkRect* totalDirty) {

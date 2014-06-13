@@ -257,12 +257,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    HardwareLayer createDisplayListLayer(int width, int height) {
-        long layer = nCreateDisplayListLayer(mNativeProxy, width, height);
-        return HardwareLayer.adoptDisplayListLayer(this, layer);
-    }
-
-    @Override
     HardwareLayer createTextureLayer() {
         long layer = nCreateTextureLayer(mNativeProxy);
         return HardwareLayer.adoptTextureLayer(this, layer);

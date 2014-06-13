@@ -19,7 +19,6 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 
 import com.android.internal.util.VirtualRefBasePtr;
@@ -34,32 +33,16 @@ import com.android.internal.util.VirtualRefBasePtr;
  * @hide
  */
 final class HardwareLayer {
-    private static final int LAYER_TYPE_TEXTURE = 1;
-    private static final int LAYER_TYPE_DISPLAY_LIST = 2;
-
     private HardwareRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
-    private RenderNode mDisplayList;
-    private final int mLayerType;
 
-    private HardwareLayer(HardwareRenderer renderer, long deferredUpdater, int type) {
+    private HardwareLayer(HardwareRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
         }
         mRenderer = renderer;
-        mLayerType = type;
         mFinalizer = new VirtualRefBasePtr(deferredUpdater);
-    }
-
-    private void assertType(int type) {
-        if (mLayerType != type) {
-            throw new IllegalAccessError("Method not appropriate for this layer type! " + mLayerType);
-        }
-    }
-
-    boolean hasDisplayList() {
-        return mDisplayList != null;
     }
 
     /**
@@ -90,11 +73,6 @@ final class HardwareLayer {
             // Already destroyed
             return;
         }
-
-        if (mDisplayList != null) {
-            mDisplayList.destroyDisplayListData();
-            mDisplayList = null;
-        }
         mRenderer.onLayerDestroyed(this);
         mRenderer = null;
         mFinalizer.release();
@@ -103,21 +81,6 @@ final class HardwareLayer {
 
     public long getDeferredLayerUpdater() {
         return mFinalizer.get();
-    }
-
-    public RenderNode startRecording() {
-        assertType(LAYER_TYPE_DISPLAY_LIST);
-
-        if (mDisplayList == null) {
-            mDisplayList = RenderNode.create("HardwareLayer");
-        }
-        return mDisplayList;
-    }
-
-    public void endRecording(Rect dirtyRect) {
-        nUpdateRenderLayer(mFinalizer.get(), mDisplayList.getNativeDisplayList(),
-                dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
-        mRenderer.pushLayerUpdate(this);
     }
 
     /**
@@ -160,7 +123,6 @@ final class HardwareLayer {
      * Indicates that this layer has lost its texture.
      */
     public void detachSurfaceTexture(final SurfaceTexture surface) {
-        assertType(LAYER_TYPE_TEXTURE);
         mRenderer.safelyRun(new Runnable() {
             @Override
             public void run() {
@@ -177,13 +139,11 @@ final class HardwareLayer {
     }
 
     public void setSurfaceTexture(SurfaceTexture surface) {
-        assertType(LAYER_TYPE_TEXTURE);
         nSetSurfaceTexture(mFinalizer.get(), surface, false);
         mRenderer.pushLayerUpdate(this);
     }
 
     public void updateSurfaceTexture() {
-        assertType(LAYER_TYPE_TEXTURE);
         nUpdateSurfaceTexture(mFinalizer.get());
         mRenderer.pushLayerUpdate(this);
     }
@@ -192,18 +152,13 @@ final class HardwareLayer {
      * This should only be used by HardwareRenderer! Do not call directly
      */
     SurfaceTexture createSurfaceTexture() {
-        assertType(LAYER_TYPE_TEXTURE);
         SurfaceTexture st = new SurfaceTexture(nGetTexName(mFinalizer.get()));
         nSetSurfaceTexture(mFinalizer.get(), st, true);
         return st;
     }
 
     static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
-        return new HardwareLayer(renderer, layer, LAYER_TYPE_TEXTURE);
-    }
-
-    static HardwareLayer adoptDisplayListLayer(HardwareRenderer renderer, long layer) {
-        return new HardwareLayer(renderer, layer, LAYER_TYPE_DISPLAY_LIST);
+        return new HardwareLayer(renderer, layer);
     }
 
     private static native void nOnTextureDestroyed(long layerUpdater);

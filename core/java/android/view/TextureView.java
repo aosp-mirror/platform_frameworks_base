@@ -275,6 +275,11 @@ public class TextureView extends View {
         }
     }
 
+    @Override
+    public void setLayerPaint(Paint paint) {
+        setLayerType(/* ignored */ 0, paint);
+    }
+
     /**
      * Always returns {@link #LAYER_TYPE_HARDWARE}.
      */
@@ -330,11 +335,6 @@ public class TextureView extends View {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
             }
         }
-    }
-
-    @Override
-    boolean destroyLayer(boolean valid) {
-        return false;
     }
 
     /**

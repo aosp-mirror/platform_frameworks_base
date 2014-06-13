@@ -254,9 +254,13 @@ private:
     };
 
     void prepareTreeImpl(TreeInfo& info);
-    void pushStagingChanges(TreeInfo& info);
+    void pushStagingPropertiesChanges(TreeInfo& info);
+    void pushStagingDisplayListChanges(TreeInfo& info);
     void evaluateAnimations(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
+    void applyLayerPropertiesToLayer(TreeInfo& info);
+    void prepareLayer(TreeInfo& info);
+    void pushLayerUpdate(TreeInfo& info);
 
     String8 mName;
 
@@ -271,6 +275,10 @@ private:
     bool mNeedsAnimatorsSync;
     std::set< sp<BaseRenderNodeAnimator> > mStagingAnimators;
     std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
+
+    // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
+    // being in ~RenderNode() which may happen on any thread.
+    Layer* mLayer;
 
     /**
      * Draw time state - these properties are only set and used during rendering

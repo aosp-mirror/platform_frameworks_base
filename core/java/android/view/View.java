@@ -3472,8 +3472,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
-    Rect mLocalDirtyRect;
-    private HardwareLayer mHardwareLayer;
 
     /**
      * Set to true when drawing cache is enabled and cannot be created.
@@ -12938,7 +12936,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         stopNestedScroll();
 
         destroyDrawingCache();
-        destroyLayer(false);
 
         cleanupDraw();
         mCurrentAnimation = null;
@@ -13416,30 +13413,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         }
 
-        if (layerType == mLayerType) {
+        boolean typeChanged = mRenderNode.setLayerType(layerType);
+
+        if (!typeChanged) {
             setLayerPaint(paint);
             return;
         }
 
         // Destroy any previous software drawing cache if needed
-        switch (mLayerType) {
-            case LAYER_TYPE_HARDWARE:
-                destroyLayer(false);
-                // fall through - non-accelerated views may use software layer mechanism instead
-            case LAYER_TYPE_SOFTWARE:
-                destroyDrawingCache();
-                break;
-            default:
-                break;
+        if (mLayerType == LAYER_TYPE_SOFTWARE) {
+            destroyDrawingCache();
+            invalidateParentCaches();
+            invalidate(true);
         }
 
         mLayerType = layerType;
-        final boolean layerDisabled = mLayerType == LAYER_TYPE_NONE;
+        final boolean layerDisabled = (mLayerType == LAYER_TYPE_NONE);
         mLayerPaint = layerDisabled ? null : (paint == null ? new Paint() : paint);
-        mLocalDirtyRect = layerDisabled ? null : new Rect();
+        mRenderNode.setLayerPaint(mLayerPaint);
 
-        invalidateParentCaches();
-        invalidate(true);
+        if (mLayerType == LAYER_TYPE_SOFTWARE) {
+            // LAYER_TYPE_SOFTWARE is handled by View:draw(), so need to invalidate()
+            invalidateParentCaches();
+            invalidate(true);
+        } else {
+            invalidateViewProperty(false, false);
+        }
     }
 
     /**
@@ -13472,11 +13471,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (layerType != LAYER_TYPE_NONE) {
             mLayerPaint = paint == null ? new Paint() : paint;
             if (layerType == LAYER_TYPE_HARDWARE) {
-                HardwareLayer layer = getHardwareLayer();
-                if (layer != null) {
-                    layer.setLayerPaint(mLayerPaint);
+                if (mRenderNode.setLayerPaint(mLayerPaint)) {
+                    invalidateViewProperty(false, false);
                 }
-                invalidateViewProperty(false, false);
             } else {
                 invalidate();
             }
@@ -13534,16 +13531,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                getHardwareLayer();
-                // TODO: We need a better way to handle this case
-                // If views have registered pre-draw listeners they need
-                // to be notified before we build the layer. Those listeners
-                // may however rely on other events to happen first so we
-                // cannot just invoke them here until they don't cancel the
-                // current frame
-                if (!attachInfo.mTreeObserver.hasOnPreDrawListeners()) {
-                    attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
-                }
+                // The only part of a hardware layer we can build in response to
+                // this call is to ensure the display list is up to date.
+                // The actual rendering of the display list into the layer must
+                // be done at playback time
+                updateDisplayListIfDirty();
                 break;
             case LAYER_TYPE_SOFTWARE:
                 buildDrawingCache(true);
@@ -13552,70 +13544,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Returns a hardware layer that can be used to draw this view again
-     * without executing its draw method.</p>
+     * If this View draws with a HardwareLayer, returns it.
+     * Otherwise returns null
      *
-     * @return A HardwareLayer ready to render, or null if an error occurred.
+     * TODO: Only TextureView uses this, can we eliminate it?
      */
     HardwareLayer getHardwareLayer() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null ||
-                !mAttachInfo.mHardwareRenderer.isEnabled()) {
-            return null;
-        }
-
-        final int width = mRight - mLeft;
-        final int height = mBottom - mTop;
-
-        if (width == 0 || height == 0) {
-            return null;
-        }
-
-        if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || mHardwareLayer == null) {
-            if (mHardwareLayer == null) {
-                mHardwareLayer = mAttachInfo.mHardwareRenderer.createDisplayListLayer(
-                        width, height);
-                mLocalDirtyRect.set(0, 0, width, height);
-            } else if (mHardwareLayer.isValid()) {
-                // This should not be necessary but applications that change
-                // the parameters of their background drawable without calling
-                // this.setBackground(Drawable) can leave the view in a bad state
-                // (for instance isOpaque() returns true, but the background is
-                // not opaque.)
-                computeOpaqueFlags();
-
-                if (mHardwareLayer.prepare(width, height, isOpaque())) {
-                    mLocalDirtyRect.set(0, 0, width, height);
-                }
-            }
-
-            mHardwareLayer.setLayerPaint(mLayerPaint);
-            RenderNode displayList = mHardwareLayer.startRecording();
-            updateDisplayListIfDirty(displayList, true);
-            mHardwareLayer.endRecording(mLocalDirtyRect);
-            mLocalDirtyRect.setEmpty();
-        }
-
-        return mHardwareLayer;
-    }
-
-    /**
-     * Destroys this View's hardware layer if possible.
-     *
-     * @return True if the layer was destroyed, false otherwise.
-     *
-     * @see #setLayerType(int, android.graphics.Paint)
-     * @see #LAYER_TYPE_HARDWARE
-     */
-    boolean destroyLayer(boolean valid) {
-        if (mHardwareLayer != null) {
-            mHardwareLayer.destroy();
-            mHardwareLayer = null;
-
-            invalidate(true);
-            invalidateParentCaches();
-            return true;
-        }
-        return false;
+        return null;
     }
 
     /**
@@ -13631,7 +13566,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void destroyHardwareResources() {
         resetDisplayList();
-        destroyLayer(true);
     }
 
     /**
@@ -13726,20 +13660,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return !(mAttachInfo == null || mAttachInfo.mHardwareRenderer == null);
     }
 
-    /**
-     * Returns a DisplayList. If the incoming displayList is null, one will be created.
-     * Otherwise, the same display list will be returned (after having been rendered into
-     * along the way, depending on the invalidation state of the view).
-     *
-     * @param renderNode The previous version of this displayList, could be null.
-     * @param isLayer Whether the requester of the display list is a layer. If so,
-     * the view will avoid creating a layer inside the resulting display list.
-     * @return A new or reused DisplayList object.
-     */
-    private void updateDisplayListIfDirty(@NonNull RenderNode renderNode, boolean isLayer) {
-        if (renderNode == null) {
-            throw new IllegalArgumentException("RenderNode must not be null");
-        }
+    private void updateDisplayListIfDirty() {
+        final RenderNode renderNode = mRenderNode;
         if (!canHaveDisplayList()) {
             // can't populate RenderNode, don't try
             return;
@@ -13747,11 +13669,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
                 || !renderNode.isValid()
-                || (!isLayer && mRecreateDisplayList)) {
+                || (mRecreateDisplayList)) {
             // Don't need to recreate the display list, just need to tell our
             // children to restore/recreate theirs
             if (renderNode.isValid()
-                    && !isLayer
                     && !mRecreateDisplayList) {
                 mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
@@ -13760,13 +13681,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return; // no work needed
             }
 
-            if (!isLayer) {
-                // If we got here, we're recreating it. Mark it as such to ensure that
-                // we copy in child display lists into ours in drawChild()
-                mRecreateDisplayList = true;
-            }
+            // If we got here, we're recreating it. Mark it as such to ensure that
+            // we copy in child display lists into ours in drawChild()
+            mRecreateDisplayList = true;
 
-            boolean caching = false;
             int width = mRight - mLeft;
             int height = mBottom - mTop;
             int layerType = getLayerType();
@@ -13774,34 +13692,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final HardwareCanvas canvas = renderNode.start(width, height);
 
             try {
-                if (!isLayer && layerType != LAYER_TYPE_NONE) {
-                    if (layerType == LAYER_TYPE_HARDWARE) {
-                        final HardwareLayer layer = getHardwareLayer();
-                        if (layer != null && layer.isValid()) {
-                            canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
-                        } else {
-                            canvas.saveLayer(0, 0, mRight - mLeft, mBottom - mTop, mLayerPaint,
-                                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG |
-                                            Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-                        }
-                        caching = true;
-                    } else {
-                        buildDrawingCache(true);
-                        Bitmap cache = getDrawingCache(true);
-                        if (cache != null) {
-                            canvas.drawBitmap(cache, 0, 0, mLayerPaint);
-                            caching = true;
-                        }
+                final HardwareLayer layer = getHardwareLayer();
+                if (layer != null && layer.isValid()) {
+                    canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                } else if (layerType == LAYER_TYPE_SOFTWARE) {
+                    buildDrawingCache(true);
+                    Bitmap cache = getDrawingCache(true);
+                    if (cache != null) {
+                        canvas.drawBitmap(cache, 0, 0, mLayerPaint);
                     }
                 } else {
-
                     computeScroll();
 
                     canvas.translate(-mScrollX, -mScrollY);
-                    if (!isLayer) {
-                        mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
-                        mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                    }
+                    mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
+                    mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
@@ -13815,14 +13720,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             } finally {
                 renderNode.end(canvas);
-                renderNode.setCaching(caching);
-                if (isLayer) {
-                    renderNode.setLeftTopRightBottom(0, 0, width, height);
-                } else {
-                    setDisplayListProperties(renderNode);
-                }
+                setDisplayListProperties(renderNode);
             }
-        } else if (!isLayer) {
+        } else {
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
@@ -13837,7 +13737,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public RenderNode getDisplayList() {
-        updateDisplayListIfDirty(mRenderNode, false);
+        updateDisplayListIfDirty();
         return mRenderNode;
     }
 
