@@ -17,16 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Ispuli sephrinta"</string>
-    <!-- no translation found for more_options_button (2243228396432556771) -->
-    <skip />
+    <string name="more_options_button" msgid="2243228396432556771">"Izinketho eziningi"</string>
     <string name="label_destination" msgid="9132510997381599275">"Indawo"</string>
     <string name="label_copies" msgid="3634531042822968308">"Amakhophi"</string>
-    <!-- no translation found for label_copies_summary (3861966063536529540) -->
-    <skip />
-    <!-- no translation found for label_paper_size (908654383827777759) -->
-    <skip />
-    <!-- no translation found for label_paper_size_summary (5668204981332138168) -->
-    <skip />
+    <string name="label_copies_summary" msgid="3861966063536529540">"Amakhophi:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Usayizi wekhasi"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Usayizi wekhasi"</string>
     <string name="label_color" msgid="1108690305218188969">"Umbala"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Umumo"</string>
     <string name="label_pages" msgid="6300874667546617333">"Amakhasi (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -79,13 +75,9 @@
     <item msgid="7421377442011699994">"Konke"</item>
     <item msgid="6812869625222503603">"Ibanga"</item>
   </string-array>
-    <!-- no translation found for print_write_error_message (5787642615179572543) -->
-    <skip />
+    <string name="print_write_error_message" msgid="5787642615179572543">"Ayikwazanga ukubhala kufayela"</string>
     <string name="print_error_default_message" msgid="8568506918983980567">"Ayikwazanga ukukhiqiza umsebenzi wokuphrinta"</string>
-    <!-- no translation found for print_error_retry (1426421728784259538) -->
-    <skip />
-    <!-- no translation found for print_error_printer_unavailable (6653128543854282851) -->
-    <skip />
-    <!-- no translation found for print_operation_canceling (5274571823242489160) -->
-    <skip />
+    <string name="print_error_retry" msgid="1426421728784259538">"Zama futhi"</string>
+    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Iphrinta ayitholakali"</string>
+    <string name="print_operation_canceling" msgid="5274571823242489160">"Iyakhansela…"</string>
 </resources>

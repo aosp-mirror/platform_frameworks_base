@@ -17,16 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Nyomtatásisor-kezelő"</string>
-    <!-- no translation found for more_options_button (2243228396432556771) -->
-    <skip />
+    <string name="more_options_button" msgid="2243228396432556771">"További lehetőségek"</string>
     <string name="label_destination" msgid="9132510997381599275">"Cél"</string>
     <string name="label_copies" msgid="3634531042822968308">"Példányszám"</string>
-    <!-- no translation found for label_copies_summary (3861966063536529540) -->
-    <skip />
-    <!-- no translation found for label_paper_size (908654383827777759) -->
-    <skip />
-    <!-- no translation found for label_paper_size_summary (5668204981332138168) -->
-    <skip />
+    <string name="label_copies_summary" msgid="3861966063536529540">"Példányszám:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Papírméret"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Papírméret:"</string>
     <string name="label_color" msgid="1108690305218188969">"Szín"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Tájolás"</string>
     <string name="label_pages" msgid="6300874667546617333">"Oldalszám (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -79,13 +75,9 @@
     <item msgid="7421377442011699994">"Összes"</item>
     <item msgid="6812869625222503603">"Tartomány"</item>
   </string-array>
-    <!-- no translation found for print_write_error_message (5787642615179572543) -->
-    <skip />
+    <string name="print_write_error_message" msgid="5787642615179572543">"Nem sikerült írni a fájlba"</string>
     <string name="print_error_default_message" msgid="8568506918983980567">"Nem sikerült létrehozni a nyomtatási feladatot."</string>
-    <!-- no translation found for print_error_retry (1426421728784259538) -->
-    <skip />
-    <!-- no translation found for print_error_printer_unavailable (6653128543854282851) -->
-    <skip />
-    <!-- no translation found for print_operation_canceling (5274571823242489160) -->
-    <skip />
+    <string name="print_error_retry" msgid="1426421728784259538">"Újra"</string>
+    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"A nyomtató nem érhető el"</string>
+    <string name="print_operation_canceling" msgid="5274571823242489160">"Megszakítás..."</string>
 </resources>

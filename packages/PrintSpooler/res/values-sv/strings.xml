@@ -17,16 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Utskriftskö"</string>
-    <!-- no translation found for more_options_button (2243228396432556771) -->
-    <skip />
+    <string name="more_options_button" msgid="2243228396432556771">"Fler alternativ"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destination"</string>
     <string name="label_copies" msgid="3634531042822968308">"Kopior"</string>
-    <!-- no translation found for label_copies_summary (3861966063536529540) -->
-    <skip />
-    <!-- no translation found for label_paper_size (908654383827777759) -->
-    <skip />
-    <!-- no translation found for label_paper_size_summary (5668204981332138168) -->
-    <skip />
+    <string name="label_copies_summary" msgid="3861966063536529540">"Kopior:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Pappersstorlek"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Pappersstorlek:"</string>
     <string name="label_color" msgid="1108690305218188969">"Färg"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientering"</string>
     <string name="label_pages" msgid="6300874667546617333">"Sidor (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -79,13 +75,9 @@
     <item msgid="7421377442011699994">"Alla"</item>
     <item msgid="6812869625222503603">"Intervall"</item>
   </string-array>
-    <!-- no translation found for print_write_error_message (5787642615179572543) -->
-    <skip />
+    <string name="print_write_error_message" msgid="5787642615179572543">"Det gick inte att skriva till filen"</string>
     <string name="print_error_default_message" msgid="8568506918983980567">"Det gick inte att skapa utskriftsjobbet"</string>
-    <!-- no translation found for print_error_retry (1426421728784259538) -->
-    <skip />
-    <!-- no translation found for print_error_printer_unavailable (6653128543854282851) -->
-    <skip />
-    <!-- no translation found for print_operation_canceling (5274571823242489160) -->
-    <skip />
+    <string name="print_error_retry" msgid="1426421728784259538">"Försök igen"</string>
+    <string name="print_error_printer_unavailable" msgid="6653128543854282851">"Skrivaren är inte tillgänglig"</string>
+    <string name="print_operation_canceling" msgid="5274571823242489160">"Avbryter ..."</string>
 </resources>
