@@ -44,7 +44,7 @@ import java.util.List;
  * does not affect live networks.
  *
  */
-public class LinkProperties implements Parcelable {
+public final class LinkProperties implements Parcelable {
     // The interface described by the network link.
     private String mIfaceName;
     private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
@@ -463,7 +463,6 @@ public class LinkProperties implements Parcelable {
 
     /**
      * Implement the Parcelable interface
-     * @hide
      */
     public int describeContents() {
         return 0;

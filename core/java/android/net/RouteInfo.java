@@ -46,7 +46,7 @@ import java.util.Objects;
  * destination and gateway are both specified, they must be of the same address family
  * (IPv4 or IPv6).
  */
-public class RouteInfo implements Parcelable {
+public final class RouteInfo implements Parcelable {
     /**
      * The IP destination address for this route.
      * TODO: Make this an IpPrefix.
@@ -248,7 +248,7 @@ public class RouteInfo implements Parcelable {
      * Retrieves the gateway or next hop {@link InetAddress} for this route.
      *
      * @return {@link InetAddress} specifying the gateway or next hop.  This may be
-     &                             {@code null} for a directly-connected route."
+     *                             {@code null} for a directly-connected route."
      */
     public InetAddress getGateway() {
         return mGateway;
@@ -378,7 +378,6 @@ public class RouteInfo implements Parcelable {
 
     /**
      * Implement the Parcelable interface
-     * @hide
      */
     public int describeContents() {
         return 0;
@@ -386,7 +385,6 @@ public class RouteInfo implements Parcelable {
 
     /**
      * Implement the Parcelable interface
-     * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
         if (mDestination == null) {
@@ -409,7 +407,6 @@ public class RouteInfo implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public static final Creator<RouteInfo> CREATOR =
         new Creator<RouteInfo>() {
