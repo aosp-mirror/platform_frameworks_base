@@ -599,6 +599,42 @@ public final class Display {
     }
 
     /**
+     * Gets the app VSYNC offset, in nanoseconds.  This is a positive value indicating
+     * the phase offset of the VSYNC events provided by Choreographer relative to the
+     * display refresh.  For example, if Choreographer reports that the refresh occurred
+     * at time N, it actually occurred at (N - appVsyncOffset).
+     * <p>
+     * Apps generally do not need to be aware of this.  It's only useful for fine-grained
+     * A/V synchronization.
+     * @hide
+     */
+    public long getAppVsyncOffsetNanos() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.appVsyncOffsetNanos;
+        }
+    }
+
+    /**
+     * This is how far in advance a buffer must be queued for presentation at
+     * a given time.  If you want a buffer to appear on the screen at
+     * time N, you must submit the buffer before (N - presentationDeadline).
+     * <p>
+     * The desired presentation time for GLES rendering may be set with
+     * {@link android.opengl.EGLExt#eglPresentationTimeANDROID}.  For video decoding, use
+     * {@link android.media.MediaCodec#releaseOutputBuffer(int, long)}.  Times are
+     * expressed in nanoseconds, using the system monotonic clock
+     * ({@link System#nanoTime}).
+     * @hide
+     */
+    public long getPresentationDeadlineNanos() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.presentationDeadlineNanos;
+        }
+    }
+
+    /**
      * Gets display metrics that describe the size and density of this display.
      * <p>
      * The size is adjusted based on the current rotation of the display.

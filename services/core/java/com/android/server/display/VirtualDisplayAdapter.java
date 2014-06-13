@@ -171,6 +171,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
+                mInfo.presentationDeadlineNanos = 1000000000L / (int) mInfo.refreshRate; // 1 frame
                 mInfo.flags = 0;
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE

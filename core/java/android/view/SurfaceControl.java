@@ -458,6 +458,8 @@ public class SurfaceControl {
         public float xDpi;
         public float yDpi;
         public boolean secure;
+        public long appVsyncOffsetNanos;
+        public long presentationDeadlineNanos;
 
         public PhysicalDisplayInfo() {
         }
@@ -479,7 +481,9 @@ public class SurfaceControl {
                     && density == other.density
                     && xDpi == other.xDpi
                     && yDpi == other.yDpi
-                    && secure == other.secure;
+                    && secure == other.secure
+                    && appVsyncOffsetNanos == other.appVsyncOffsetNanos
+                    && presentationDeadlineNanos == other.presentationDeadlineNanos;
         }
 
         @Override
@@ -495,6 +499,8 @@ public class SurfaceControl {
             xDpi = other.xDpi;
             yDpi = other.yDpi;
             secure = other.secure;
+            appVsyncOffsetNanos = other.appVsyncOffsetNanos;
+            presentationDeadlineNanos = other.presentationDeadlineNanos;
         }
 
         // For debugging purposes
@@ -502,7 +508,8 @@ public class SurfaceControl {
         public String toString() {
             return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
                     + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
-                    + "}";
+                    + ", appVsyncOffset " + appVsyncOffsetNanos
+                    + ", bufferDeadline " + presentationDeadlineNanos + "}";
         }
     }
 

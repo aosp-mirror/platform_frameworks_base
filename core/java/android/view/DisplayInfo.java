@@ -180,6 +180,20 @@ public final class DisplayInfo implements Parcelable {
     public float physicalYDpi;
 
     /**
+     * This is a positive value indicating the phase offset of the VSYNC events provided by
+     * Choreographer relative to the display refresh.  For example, if Choreographer reports
+     * that the refresh occurred at time N, it actually occurred at (N - appVsyncOffsetNanos).
+     */
+    public long appVsyncOffsetNanos;
+
+    /**
+     * This is how far in advance a buffer must be queued for presentation at
+     * a given time.  If you want a buffer to appear on the screen at
+     * time N, you must submit the buffer before (N - bufferDeadlineNanos).
+     */
+    public long presentationDeadlineNanos;
+
+    /**
      * The state of the display, such as {@link android.view.Display#STATE_ON}.
      */
     public int state;
@@ -253,6 +267,8 @@ public final class DisplayInfo implements Parcelable {
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
+                && appVsyncOffsetNanos == other.appVsyncOffsetNanos
+                && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && state == other.state
                 && ownerUid == other.ownerUid
                 && Objects.equal(ownerPackageName, other.ownerPackageName);
@@ -286,6 +302,8 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
+        appVsyncOffsetNanos = other.appVsyncOffsetNanos;
+        presentationDeadlineNanos = other.presentationDeadlineNanos;
         state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
@@ -314,6 +332,8 @@ public final class DisplayInfo implements Parcelable {
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
+        appVsyncOffsetNanos = source.readLong();
+        presentationDeadlineNanos = source.readLong();
         state = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString();
@@ -343,6 +363,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
+        dest.writeLong(appVsyncOffsetNanos);
+        dest.writeLong(presentationDeadlineNanos);
         dest.writeInt(state);
         dest.writeInt(ownerUid);
         dest.writeString(ownerPackageName);
@@ -450,6 +472,10 @@ public final class DisplayInfo implements Parcelable {
         sb.append(physicalYDpi);
         sb.append(") dpi, layerStack ");
         sb.append(layerStack);
+        sb.append(", appVsyncOff ");
+        sb.append(appVsyncOffsetNanos);
+        sb.append(", presDeadline ");
+        sb.append(presentationDeadlineNanos);
         sb.append(", type ");
         sb.append(Display.typeToString(type));
         if (address != null) {

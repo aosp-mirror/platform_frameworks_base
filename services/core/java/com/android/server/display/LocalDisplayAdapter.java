@@ -161,6 +161,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mPhys.width;
                 mInfo.height = mPhys.height;
                 mInfo.refreshRate = mPhys.refreshRate;
+                mInfo.appVsyncOffsetNanos = mPhys.appVsyncOffsetNanos;
+                mInfo.presentationDeadlineNanos = mPhys.presentationDeadlineNanos;
                 mInfo.state = mState;
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
