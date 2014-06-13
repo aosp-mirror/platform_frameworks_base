@@ -519,17 +519,19 @@ final class ProcessList {
      * Set the out-of-memory badness adjustment for a process.
      *
      * @param pid The process identifier to set.
+     * @param uid The uid of the app
      * @param amt Adjustment value -- lmkd allows -16 to +15.
      *
      * {@hide}
      */
-    public static final void setOomAdj(int pid, int amt) {
+    public static final void setOomAdj(int pid, int uid, int amt) {
         if (amt == UNKNOWN_ADJ)
             return;
 
-        ByteBuffer buf = ByteBuffer.allocate(4 * 3);
+        ByteBuffer buf = ByteBuffer.allocate(4 * 4);
         buf.putInt(LMK_PROCPRIO);
         buf.putInt(pid);
+        buf.putInt(uid);
         buf.putInt(amt);
         writeLmkd(buf);
     }
