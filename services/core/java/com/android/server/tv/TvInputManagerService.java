@@ -19,12 +19,15 @@ package com.android.server.tv;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -66,11 +69,12 @@ import com.android.server.SystemService;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** This class provides a system service that manages television inputs. */
 public final class TvInputManagerService extends SystemService {
@@ -123,6 +127,44 @@ public final class TvInputManagerService extends SystemService {
                     buildTvInputListLocked(mCurrentUserId);
                 }
             }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(mCurrentUserId);
+                    if (!userState.packageList.contains(packageName)) {
+                        // Not a TV input package.
+                        return;
+                    }
+                }
+
+                ArrayList<ContentProviderOperation> operations =
+                        new ArrayList<ContentProviderOperation>();
+
+                String selection = TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME + "=?";
+                String[] selectionArgs = { packageName };
+
+                operations.add(ContentProviderOperation.newDelete(TvContract.Channels.CONTENT_URI)
+                        .withSelection(selection, selectionArgs).build());
+                operations.add(ContentProviderOperation.newDelete(TvContract.Programs.CONTENT_URI)
+                        .withSelection(selection, selectionArgs).build());
+                operations.add(ContentProviderOperation
+                        .newDelete(TvContract.WatchedPrograms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs).build());
+
+                ContentProviderResult[] results = null;
+                try {
+                    results = mContentResolver.applyBatch(TvContract.AUTHORITY, operations);
+                } catch (RemoteException | OperationApplicationException e) {
+                    Slog.e(TAG, "error in applyBatch" + e);
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "onPackageRemoved(packageName=" + packageName + ", uid=" + uid
+                            + ")");
+                    Slog.d(TAG, "results=" + results);
+                }
+            }
         };
         monitor.register(mContext, null, UserHandle.ALL, true);
 
@@ -145,6 +187,7 @@ public final class TvInputManagerService extends SystemService {
     private void buildTvInputListLocked(int userId) {
         UserState userState = getUserStateLocked(userId);
         userState.inputMap.clear();
+        userState.packageList.clear();
 
         if (DEBUG) Slog.d(TAG, "buildTvInputList");
         PackageManager pm = mContext.getPackageManager();
@@ -162,6 +205,7 @@ public final class TvInputManagerService extends SystemService {
                 TvInputInfo info = TvInputInfo.createTvInputInfo(mContext, ri);
                 if (DEBUG) Slog.d(TAG, "add " + info.getId());
                 userState.inputMap.put(info.getId(), info);
+                userState.packageList.add(si.packageName);
             } catch (IOException | XmlPullParserException e) {
                 Slog.e(TAG, "Can't load TV input " + si.name, e);
             }
@@ -348,7 +392,7 @@ public final class TvInputManagerService extends SystemService {
                     if (session == null) {
                         removeSessionStateLocked(sessionToken, userId);
                         sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId,
-                                null, null, sessionState.mSeq, userId);
+                                null, null, sessionState.mSeq);
                     } else {
                         try {
                             session.asBinder().linkToDeath(sessionState, 0);
@@ -364,7 +408,7 @@ public final class TvInputManagerService extends SystemService {
                         clientState.mSessionTokens.add(sessionState.mSessionToken);
 
                         sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId,
-                                sessionToken, channels[0], sessionState.mSeq, userId);
+                                sessionToken, channels[0], sessionState.mSeq);
                     }
                     channels[0].dispose();
                 }
@@ -449,13 +493,13 @@ public final class TvInputManagerService extends SystemService {
             Slog.e(TAG, "error in createSession", e);
             removeSessionStateLocked(sessionToken, userId);
             sendSessionTokenToClientLocked(sessionState.mClient, sessionState.mInputId, null, null,
-                    sessionState.mSeq, userId);
+                    sessionState.mSeq);
         }
         channels[1].dispose();
     }
 
     private void sendSessionTokenToClientLocked(ITvInputClient client, String inputId,
-            IBinder sessionToken, InputChannel channel, int seq, int userId) {
+            IBinder sessionToken, InputChannel channel, int seq) {
         try {
             client.onSessionCreated(inputId, sessionToken, channel, seq);
         } catch (RemoteException exception) {
@@ -672,7 +716,7 @@ public final class TvInputManagerService extends SystemService {
                     }
                     // Send a null token immediately while reconnecting.
                     if (serviceState.mReconnecting == true) {
-                        sendSessionTokenToClientLocked(client, inputId, null, null, seq, userId);
+                        sendSessionTokenToClientLocked(client, inputId, null, null, seq);
                         return;
                     }
 
@@ -784,7 +828,10 @@ public final class TvInputManagerService extends SystemService {
                         }
 
                         // Create a log entry and fill it later.
+                        String packageName = userState.inputMap.get(sessionState.mInputId)
+                                .getServiceInfo().packageName;
                         ContentValues values = new ContentValues();
+                        values.put(TvContract.WatchedPrograms.COLUMN_PACKAGE_NAME, packageName);
                         values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                                 currentTime);
                         values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, 0);
@@ -930,6 +977,9 @@ public final class TvInputManagerService extends SystemService {
     private static final class UserState {
         // A mapping from the TV input id to its TvInputInfo.
         private final Map<String, TvInputInfo> inputMap = new HashMap<String,TvInputInfo>();
+
+        // A list of all TV input packages.
+        private final Set<String> packageList = new HashSet<String>();
 
         // A mapping from the token of a client to its state.
         private final Map<IBinder, ClientState> clientStateMap =
@@ -1095,8 +1145,7 @@ public final class TvInputManagerService extends SystemService {
                         if (sessionState.mSession == null) {
                             removeSessionStateLocked(sessionToken, sessionState.mUserId);
                             sendSessionTokenToClientLocked(sessionState.mClient,
-                                    sessionState.mInputId, null, null, sessionState.mSeq,
-                                    sessionState.mUserId);
+                                    sessionState.mInputId, null, null, sessionState.mSeq);
                         }
                     }
 

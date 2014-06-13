@@ -848,7 +848,7 @@ public final class TvContract {
      *
      * @hide
      */
-    public static final class WatchedPrograms implements BaseColumns {
+    public static final class WatchedPrograms implements BaseTvColumns {
 
         /** The content:// style URI for this table. */
         public static final Uri CONTENT_URI =
