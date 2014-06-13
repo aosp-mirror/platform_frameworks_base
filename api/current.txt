@@ -27675,6 +27675,7 @@ package android.telecomm {
     field public static final java.lang.String ACTION_CALL_SERVICE;
     field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
     field public static final java.lang.String ACTION_CALL_SERVICE_SELECTOR;
+    field public static final java.lang.String ACTION_CHANGE_DEFAULT_PHONE = "android.telecomm.ACTION_CHANGE_DEFAULT_PHONE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
@@ -27682,6 +27683,7 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
+    field public static final java.lang.String EXTRA_PACKAGE_NAME = "package";
   }
 
 }

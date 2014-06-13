@@ -4537,6 +4537,12 @@ public final class Settings {
         public static final String SMS_DEFAULT_APPLICATION = "sms_default_application";
 
         /**
+         * Specifies the package name currently configured to be the primary phone application
+         * @hide
+         */
+        public static final String PHONE_DEFAULT_APPLICATION = "phone_default_application";
+
+        /**
          * Name of a package that the current user has explicitly allowed to see all of that
          * user's notifications.
          *
