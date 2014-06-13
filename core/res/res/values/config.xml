@@ -1574,4 +1574,28 @@
         <item>users</item>
     </string-array>
 
+    <!-- default telephony hardware configuration for this platform.
+    -->
+    <!-- this string array should be overridden by the device to present a list
+         telephony hardware resource.  this is used by the telephony device controller
+         (TDC) to offer the basic capabilities of the hardware to the telephony
+         framework
+    -->
+    <!-- an array of "[hardware type],[hardware-uuid],[state],[[hardware-type specific]]"
+         with, [[hardware-type specific]] in:
+            - "[[ril-model],[rat],[max-active-voice],[max-active-data],[max-active-standby]]"
+              for 'modem' hardware
+            - "[[associated-modem-uuid]]"
+              for 'sim' hardware.
+         refer to HardwareConfig in com.android.internal.telephony for specific details/values
+         those elements can carry.
+    -->
+    <string-array translatable="false" name="config_telephonyHardware">
+        <!-- modem -->
+        <item>"0,modem,0,0,0,1,1,1"</item>
+        <!-- sim -->
+        <item>"1,sim,0,modem"</item>
+    </string-array>
+
+
 </resources>

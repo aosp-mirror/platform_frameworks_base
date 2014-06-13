@@ -86,6 +86,22 @@ public class TelephonyManager {
 
     private final Context mContext;
 
+    private static String multiSimConfig =
+            SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
+
+    /** Enum indicating multisim variants
+     *  DSDS - Dual SIM Dual Standby
+     *  DSDA - Dual SIM Dual Active
+     *  TSTS - Triple SIM Triple Standby
+     **/
+    /** @hide */
+    public enum MultiSimVariants {
+        DSDS,
+        DSDA,
+        TSTS,
+        UNKNOWN
+    };
+
     /** @hide */
     public TelephonyManager(Context context) {
         Context appContext = context.getApplicationContext();
@@ -114,9 +130,59 @@ public class TelephonyManager {
         return sInstance;
     }
 
+
+    /**
+     * Returns the multi SIM variant
+     * Returns DSDS for Dual SIM Dual Standby
+     * Returns DSDA for Dual SIM Dual Active
+     * Returns TSTS for Triple SIM Triple Standby
+     * Returns UNKNOWN for others
+     */
+    /** {@hide} */
+    public MultiSimVariants getMultiSimConfiguration() {
+        String mSimConfig =
+            SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
+        if (mSimConfig.equals("dsds")) {
+            return MultiSimVariants.DSDS;
+        } else if (mSimConfig.equals("dsda")) {
+            return MultiSimVariants.DSDA;
+        } else if (mSimConfig.equals("tsts")) {
+            return MultiSimVariants.TSTS;
+        } else {
+            return MultiSimVariants.UNKNOWN;
+        }
+    }
+
+
+    /**
+     * Returns the number of phones available.
+     * Returns 1 for Single standby mode (Single SIM functionality)
+     * Returns 2 for Dual standby mode.(Dual SIM functionality)
+     */
+    /** {@hide} */
+    public int getPhoneCount() {
+        int phoneCount = 1;
+        switch (getMultiSimConfiguration()) {
+            case DSDS:
+            case DSDA:
+                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+                break;
+            case TSTS:
+                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
+                break;
+        }
+        return phoneCount;
+    }
+
     /** {@hide} */
     public static TelephonyManager from(Context context) {
         return (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+    }
+
+    /** {@hide} */
+    public boolean isMultiSimEnabled() {
+        return (multiSimConfig.equals("dsds") || multiSimConfig.equals("dsda") ||
+            multiSimConfig.equals("tsts"));
     }
 
     //
@@ -529,8 +595,23 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getDeviceId() {
+        return getDeviceId(getDefaultSim());
+    }
+
+    /**
+     * Returns the unique device ID of a subscription, for example, the IMEI for
+     * GSM and the MEID for CDMA phones. Return null if device ID is not available.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param slotId of which deviceID is returned
+     */
+    /** {@hide} */
+    public String getDeviceId(int slotId) {
+        long[] subId = SubscriptionManager.getSubId(slotId);
         try {
-            return getSubscriberInfo().getDeviceId();
+            return getSubscriberInfo().getDeviceIdUsingSubId(subId[0]);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -578,8 +659,23 @@ public class TelephonyManager {
      * @hide
      */
     public void enableLocationUpdates() {
+            enableLocationUpdates(getDefaultSubscription());
+    }
+
+    /**
+     * Enables location update notifications for a subscription.
+     * {@link PhoneStateListener#onCellLocationChanged
+     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#CONTROL_LOCATION_UPDATES
+     * CONTROL_LOCATION_UPDATES}
+     *
+     * @param subId for which the location updates are enabled
+     */
+    /** @hide */
+    public void enableLocationUpdates(long subId) {
         try {
-            getITelephony().enableLocationUpdates();
+            getITelephony().enableLocationUpdatesUsingSubId(subId);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -595,8 +691,13 @@ public class TelephonyManager {
      * @hide
      */
     public void disableLocationUpdates() {
+            disableLocationUpdates(getDefaultSubscription());
+    }
+
+    /** @hide */
+    public void disableLocationUpdates(long subId) {
         try {
-            getITelephony().disableLocationUpdates();
+            getITelephony().disableLocationUpdatesUsingSubId(subId);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -644,22 +745,37 @@ public class TelephonyManager {
      * {@hide}
      */
     public int getCurrentPhoneType() {
+        return getCurrentPhoneType(getDefaultSubscription());
+    }
+
+    /**
+     * Returns a constant indicating the device phone type for a subscription.
+     *
+     * @see #PHONE_TYPE_NONE
+     * @see #PHONE_TYPE_GSM
+     * @see #PHONE_TYPE_CDMA
+     *
+     * @param subId for which phone type is returned
+     */
+    /** {@hide} */
+    public int getCurrentPhoneType(long subId) {
+
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getActivePhoneType();
+                return telephony.getActivePhoneTypeUsingSubId(subId);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
-                return getPhoneTypeFromProperty();
+                return getPhoneTypeFromProperty(subId);
             }
         } catch (RemoteException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty();
+            return getPhoneTypeFromProperty(subId);
         } catch (NullPointerException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty();
+            return getPhoneTypeFromProperty(subId);
         }
     }
 
@@ -680,20 +796,35 @@ public class TelephonyManager {
     }
 
     private int getPhoneTypeFromProperty() {
-        int type =
-            SystemProperties.getInt(TelephonyProperties.CURRENT_ACTIVE_PHONE,
-                    getPhoneTypeFromNetworkType());
-        return type;
+        return getPhoneTypeFromProperty(getDefaultSubscription());
+    }
+
+    /** {@hide} */
+    private int getPhoneTypeFromProperty(long subId) {
+        String type =
+            getTelephonyProperty
+                (TelephonyProperties.CURRENT_ACTIVE_PHONE, subId, null);
+        if (type != null) {
+            return (Integer.parseInt(type));
+        } else {
+            return getPhoneTypeFromNetworkType(subId);
+        }
     }
 
     private int getPhoneTypeFromNetworkType() {
+        return getPhoneTypeFromNetworkType(getDefaultSubscription());
+    }
+
+    /** {@hide} */
+    private int getPhoneTypeFromNetworkType(long subId) {
         // When the system property CURRENT_ACTIVE_PHONE, has not been set,
         // use the system property for default network type.
         // This is a fail safe, and can only happen at first boot.
-        int mode = SystemProperties.getInt("ro.telephony.default_network", -1);
-        if (mode == -1)
-            return PHONE_TYPE_NONE;
-        return getPhoneType(mode);
+        String mode = getTelephonyProperty("ro.telephony.default_network", subId, null);
+        if (mode != null) {
+            return TelephonyManager.getPhoneType(Integer.parseInt(mode));
+        }
+        return TelephonyManager.PHONE_TYPE_NONE;
     }
 
     /**
@@ -828,7 +959,23 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkOperatorName() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ALPHA);
+        return getNetworkOperatorName(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the alphabetic name of current registered operator
+     * for a particular subscription.
+     * <p>
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
+     * @param subId
+     */
+    /** {@hide} */
+    public String getNetworkOperatorName(long subId) {
+
+        return getTelephonyProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
+                subId, "");
     }
 
     /**
@@ -839,8 +986,25 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkOperator() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
+        return getNetworkOperator(getDefaultSubscription());
     }
+
+    /**
+     * Returns the numeric name (MCC+MNC) of current registered operator
+     * for a particular subscription.
+     * <p>
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
+     *
+     * @param subId
+     */
+    /** {@hide} */
+   public String getNetworkOperator(long subId) {
+
+        return getTelephonyProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC,
+                subId, "");
+     }
 
     /**
      * Returns true if the device is considered roaming on the current
@@ -849,7 +1013,21 @@ public class TelephonyManager {
      * Availability: Only when user registered to a network.
      */
     public boolean isNetworkRoaming() {
-        return "true".equals(SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
+        return isNetworkRoaming(getDefaultSubscription());
+    }
+
+    /**
+     * Returns true if the device is considered roaming on the current
+     * network for a subscription.
+     * <p>
+     * Availability: Only when user registered to a network.
+     *
+     * @param subId
+     */
+    /** {@hide} */
+    public boolean isNetworkRoaming(long subId) {
+        return "true".equals(getTelephonyProperty(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
+                subId, null));
     }
 
     /**
@@ -861,7 +1039,23 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkCountryIso() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY);
+        return getNetworkCountryIso(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the ISO country code equivalent of the current registered
+     * operator's MCC (Mobile Country Code) of a subscription.
+     * <p>
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
+     *
+     * @param subId for which Network CountryIso is returned
+     */
+    /** {@hide} */
+    public String getNetworkCountryIso(long subId) {
+        return getTelephonyProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
+                subId, "");
     }
 
     /** Network type is unknown */
@@ -908,6 +1102,49 @@ public class TelephonyManager {
 
     /**
      * Returns a constant indicating the radio technology (network type)
+     * currently in use on the device for a subscription.
+     * @return the network type
+     *
+     * @param subId for which network type is returned
+     *
+     * @see #NETWORK_TYPE_UNKNOWN
+     * @see #NETWORK_TYPE_GPRS
+     * @see #NETWORK_TYPE_EDGE
+     * @see #NETWORK_TYPE_UMTS
+     * @see #NETWORK_TYPE_HSDPA
+     * @see #NETWORK_TYPE_HSUPA
+     * @see #NETWORK_TYPE_HSPA
+     * @see #NETWORK_TYPE_CDMA
+     * @see #NETWORK_TYPE_EVDO_0
+     * @see #NETWORK_TYPE_EVDO_A
+     * @see #NETWORK_TYPE_EVDO_B
+     * @see #NETWORK_TYPE_1xRTT
+     * @see #NETWORK_TYPE_IDEN
+     * @see #NETWORK_TYPE_LTE
+     * @see #NETWORK_TYPE_EHRPD
+     * @see #NETWORK_TYPE_HSPAP
+     */
+    /** {@hide} */
+   public int getNetworkType(long subId) {
+       try {
+           ITelephony telephony = getITelephony();
+           if (telephony != null) {
+               return telephony.getNetworkTypeUsingSubId(subId);
+           } else {
+               // This can happen when the ITelephony interface is not up yet.
+               return NETWORK_TYPE_UNKNOWN;
+           }
+       } catch(RemoteException ex) {
+           // This shouldn't happen in the normal case
+           return NETWORK_TYPE_UNKNOWN;
+       } catch (NullPointerException ex) {
+           // This could happen before phone restarts due to crashing
+           return NETWORK_TYPE_UNKNOWN;
+       }
+   }
+
+    /**
+     * Returns a constant indicating the radio technology (network type)
      * currently in use on the device for data transmission.
      * @return the network type
      *
@@ -931,10 +1168,22 @@ public class TelephonyManager {
      * @hide
      */
     public int getDataNetworkType() {
+        return getDataNetworkType(getDefaultSubscription());
+    }
+
+    /**
+     * Returns a constant indicating the radio technology (network type)
+     * currently in use on the device for data transmission for a subscription
+     * @return the network type
+     *
+     * @param subId for which network type is returned
+     */
+    /** {@hide} */
+    public int getDataNetworkType(long subId) {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getDataNetworkType();
+                return telephony.getDataNetworkTypeUsingSubId(subId);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -954,10 +1203,19 @@ public class TelephonyManager {
      * @hide
      */
     public int getVoiceNetworkType() {
+        return getVoiceNetworkType(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the NETWORK_TYPE_xxxx for voice for a subId
+     *
+     */
+    /** {@hide} */
+    public int getVoiceNetworkType(long subId) {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getVoiceNetworkType();
+                return telephony.getVoiceNetworkTypeUsingSubId(subId);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -1023,6 +1281,13 @@ public class TelephonyManager {
         return getNetworkTypeName(getNetworkType());
     }
 
+    /**
+     * Returns a string representation of the radio technology (network type)
+     * currently in use on the device.
+     * @param subId for which network type is returned
+     * @return the name of the radio technology
+     *
+     */
     /** {@hide} */
     public static String getNetworkTypeName(int type) {
         switch (type) {
@@ -1093,8 +1358,20 @@ public class TelephonyManager {
      * @return true if a ICC card is present
      */
     public boolean hasIccCard() {
+        return hasIccCard(getDefaultSim());
+    }
+
+    /**
+     * @return true if a ICC card is present for a subscription
+     *
+     * @param slotId for which icc card presence is checked
+     */
+    /** {@hide} */
+    // FIXME Input argument slotId should be of type int
+    public boolean hasIccCard(long slotId) {
+
         try {
-            return getITelephony().hasIccCard();
+            return getITelephony().hasIccCardUsingSlotId(slotId);
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return false;
@@ -1117,7 +1394,30 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      */
     public int getSimState() {
-        String prop = SystemProperties.get(TelephonyProperties.PROPERTY_SIM_STATE);
+        return getSimState(getDefaultSim());
+    }
+
+    /**
+     * Returns a constant indicating the state of the
+     * device SIM card in a slot.
+     *
+     * @param slotId
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_ABSENT
+     * @see #SIM_STATE_PIN_REQUIRED
+     * @see #SIM_STATE_PUK_REQUIRED
+     * @see #SIM_STATE_NETWORK_LOCKED
+     * @see #SIM_STATE_READY
+     */
+    /** {@hide} */
+    // FIXME the argument to pass is subId ??
+    public int getSimState(int slotId) {
+        long[] subId = SubscriptionManager.getSubId(slotId);
+        // FIXME Do not use a property to determine SIM_STATE, call
+        // appropriate method on some object.
+        String prop =
+            getTelephonyProperty(TelephonyProperties.PROPERTY_SIM_STATE, subId[0], "");
         if ("ABSENT".equals(prop)) {
             return SIM_STATE_ABSENT;
         }
@@ -1150,7 +1450,27 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC);
+        long subId = getDefaultSubscription();
+        Rlog.d(TAG, "getSimOperator(): default subId=" + subId);
+        return getSimOperator(subId);
+    }
+
+    /**
+     * Returns the MCC+MNC (mobile country code + mobile network code) of the
+     * provider of the SIM for a particular subscription. 5 or 6 decimal digits.
+     * <p>
+     * Availability: SIM state must be {@link #SIM_STATE_READY}
+     *
+     * @see #getSimState
+     *
+     * @param subId for which SimOperator is returned
+     */
+    /** {@hide} */
+    public String getSimOperator(long subId) {
+        String operator = getTelephonyProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC,
+                subId, "");
+        Rlog.d(TAG, "getSimOperator: subId=" + subId + " operator=" + operator);
+        return operator;
     }
 
     /**
@@ -1161,14 +1481,40 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperatorName() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA);
+        return getSimOperatorName(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the Service Provider Name (SPN).
+     * <p>
+     * Availability: SIM state must be {@link #SIM_STATE_READY}
+     *
+     * @see #getSimState
+     *
+     * @param subId for which SimOperatorName is returned
+     */
+    /** {@hide} */
+    public String getSimOperatorName(long subId) {
+        return getTelephonyProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA,
+                subId, "");
     }
 
     /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      */
     public String getSimCountryIso() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY);
+        return getSimCountryIso(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the ISO country code equivalent for the SIM provider's country code.
+     *
+     * @param subId for which SimCountryIso is returned
+     */
+    /** {@hide} */
+    public String getSimCountryIso(long subId) {
+        return getTelephonyProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY,
+                subId, "");
     }
 
     /**
@@ -1179,8 +1525,21 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getSimSerialNumber() {
+         return getSimSerialNumber(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the serial number for the given subscription, if applicable. Return null if it is
+     * unavailable.
+     * <p>
+     * @param subId for which Sim Serial number is returned
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    /** {@hide} */
+    public String getSimSerialNumber(long subId) {
         try {
-            return getSubscriberInfo().getIccSerialNumber();
+            return getSubscriberInfo().getIccSerialNumberUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1200,8 +1559,23 @@ public class TelephonyManager {
      * @hide
      */
     public int getLteOnCdmaMode() {
+        return getLteOnCdmaMode(getDefaultSubscription());
+    }
+
+    /**
+     * Return if the current radio is LTE on CDMA for Subscription. This
+     * is a tri-state return value as for a period of time
+     * the mode may be unknown.
+     *
+     * @param subId for which radio is LTE on CDMA is returned
+     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
+     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
+     *
+     */
+    /** {@hide} */
+    public int getLteOnCdmaMode(long subId) {
         try {
-            return getITelephony().getLteOnCdmaMode();
+            return getITelephony().getLteOnCdmaModeUsingSubId(subId);
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
@@ -1225,8 +1599,23 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getSubscriberId() {
+        return getSubscriberId(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the unique subscriber ID, for example, the IMSI for a GSM phone
+     * for a subscription.
+     * Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId whose subscriber id is returned
+     */
+    /** {@hide} */
+    public String getSubscriberId(long subId) {
         try {
-            return getSubscriberInfo().getSubscriberId();
+            return getSubscriberInfo().getSubscriberIdUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1254,6 +1643,27 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the Group Identifier Level1 for a GSM phone for a particular subscription.
+     * Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subscription whose subscriber id is returned
+     */
+    /** {@hide} */
+    public String getGroupIdLevel1(long subId) {
+        try {
+            return getSubscriberInfo().getGroupIdLevel1UsingSubId(subId);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
      * Returns the phone number string for line 1, for example, the MSISDN
      * for a GSM phone. Return null if it is unavailable.
      * <p>
@@ -1261,8 +1671,22 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getLine1Number() {
+        return getLine1Number(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the phone number string for line 1, for example, the MSISDN
+     * for a GSM phone for a particular subscription. Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId whose phone number for line 1 is returned
+     */
+    /** {@hide} */
+    public String getLine1Number(long subId) {
         try {
-            return getSubscriberInfo().getLine1Number();
+            return getSubscriberInfo().getLine1NumberUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1281,8 +1705,23 @@ public class TelephonyManager {
      * nobody seems to call this.
      */
     public String getLine1AlphaTag() {
+        return getLine1AlphaTag(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the alphabetic identifier associated with the line 1 number
+     * for a subscription.
+     * Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @param subId whose alphabetic identifier associated with line 1 is returned
+     * nobody seems to call this.
+     */
+    /** {@hide} */
+    public String getLine1AlphaTag(long subId) {
         try {
-            return getSubscriberInfo().getLine1AlphaTag();
+            return getSubscriberInfo().getLine1AlphaTagUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1301,8 +1740,22 @@ public class TelephonyManager {
      * @hide
      */
     public String getMsisdn() {
+        return getMsisdn(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the MSISDN string.
+     * for a GSM phone. Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId for which msisdn is returned
+     */
+    /** {@hide} */
+    public String getMsisdn(long subId) {
         try {
-            return getSubscriberInfo().getMsisdn();
+            return getSubscriberInfo().getMsisdnUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1318,8 +1771,21 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getVoiceMailNumber() {
+        return getVoiceMailNumber(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the voice mail number for a subscription.
+     * Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @param subId whose voice mail number is returned
+     */
+    /** {@hide} */
+    public String getVoiceMailNumber(long subId) {
         try {
-            return getSubscriberInfo().getVoiceMailNumber();
+            return getSubscriberInfo().getVoiceMailNumberUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1337,8 +1803,21 @@ public class TelephonyManager {
      * @hide
      */
     public String getCompleteVoiceMailNumber() {
+        return getCompleteVoiceMailNumber(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the complete voice mail number. Return null if it is unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#CALL_PRIVILEGED CALL_PRIVILEGED}
+     *
+     * @param subId
+     */
+    /** {@hide} */
+    public String getCompleteVoiceMailNumber(long subId) {
         try {
-            return getSubscriberInfo().getCompleteVoiceMailNumber();
+            return getSubscriberInfo().getCompleteVoiceMailNumberUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1355,8 +1834,20 @@ public class TelephonyManager {
      * @hide
      */
     public int getVoiceMessageCount() {
+        return getVoiceMessageCount(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the voice mail count for a subscription. Return 0 if unavailable.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @param subId whose voice message count is returned
+     */
+    /** {@hide} */
+    public int getVoiceMessageCount(long subId) {
         try {
-            return getITelephony().getVoiceMessageCount();
+            return getITelephony().getVoiceMessageCountUsingSubId(subId);
         } catch (RemoteException ex) {
             return 0;
         } catch (NullPointerException ex) {
@@ -1373,8 +1864,22 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getVoiceMailAlphaTag() {
+        return getVoiceMailAlphaTag(getDefaultSubscription());
+    }
+
+    /**
+     * Retrieves the alphabetic identifier associated with the voice
+     * mail number for a subscription.
+     * <p>
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @param subId whose alphabetic identifier associated with the
+     * voice mail number is returned
+     */
+    /** {@hide} */
+    public String getVoiceMailAlphaTag(long subId) {
         try {
-            return getSubscriberInfo().getVoiceMailAlphaTag();
+            return getSubscriberInfo().getVoiceMailAlphaTagUsingSubId(subId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1437,7 +1942,6 @@ public class TelephonyManager {
         return IPhoneSubInfo.Stub.asInterface(ServiceManager.getService("iphonesubinfo"));
     }
 
-
     /** Device call state: No activity. */
     public static final int CALL_STATE_IDLE = 0;
     /** Device call state: Ringing. A new call arrived and is
@@ -1453,8 +1957,19 @@ public class TelephonyManager {
      * Returns a constant indicating the call state (cellular) on the device.
      */
     public int getCallState() {
+        return getCallState(getDefaultSubscription());
+    }
+
+    /**
+     * Returns a constant indicating the call state (cellular) on the device
+     * for a subscription.
+     *
+     * @param subId whose call state is returned
+     */
+    /** {@hide} */
+    public int getCallState(long subId) {
         try {
-            return getITelephony().getCallState();
+            return getITelephony().getCallStateUsingSubId(subId);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
@@ -1575,8 +2090,8 @@ public class TelephonyManager {
     public void listen(PhoneStateListener listener, int events) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         try {
-            Boolean notifyNow = true;
-            sRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
+            Boolean notifyNow = (getITelephony() != null);
+            sRegistry.listenUsingSubId(listener.mSubId, pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
         } catch (NullPointerException ex) {
@@ -1590,8 +2105,16 @@ public class TelephonyManager {
      * @hide
      */
     public int getCdmaEriIconIndex() {
+        return getCdmaEriIconIndex(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the CDMA ERI icon index to display for a subscription
+     */
+    /** {@hide} */
+    public int getCdmaEriIconIndex(long subId) {
         try {
-            return getITelephony().getCdmaEriIconIndex();
+            return getITelephony().getCdmaEriIconIndexUsingSubId(subId);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -1608,8 +2131,18 @@ public class TelephonyManager {
      * @hide
      */
     public int getCdmaEriIconMode() {
+        return getCdmaEriIconMode(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode for a subscription.
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    /** {@hide} */
+    public int getCdmaEriIconMode(long subId) {
         try {
-            return getITelephony().getCdmaEriIconMode();
+            return getITelephony().getCdmaEriIconModeUsingSubId(subId);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -1624,8 +2157,17 @@ public class TelephonyManager {
      * @hide
      */
     public String getCdmaEriText() {
+        return getCdmaEriText(getDefaultSubscription());
+    }
+
+    /**
+     * Returns the CDMA ERI text, of a subscription
+     *
+     */
+    /** {@hide} */
+    public String getCdmaEriText(long subId) {
         try {
-            return getITelephony().getCdmaEriText();
+            return getITelephony().getCdmaEriTextUsingSubId(subId);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return null;
@@ -1921,6 +2463,286 @@ public class TelephonyManager {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
         }
         return false;
+    }
+
+    /**
+     * Returns Default subscription.
+     */
+    private static long getDefaultSubscription() {
+        return SubscriptionManager.getDefaultSubId();
+    }
+
+    /** {@hide} */
+    public int getDefaultSim() {
+        //TODO Need to get it from Telephony Devcontroller
+        return 0;
+    }
+
+    /**
+     * Sets the telephony property with the value specified.
+     *
+     * @hide
+     */
+    public static void setTelephonyProperty(String property, long subId, String value) {
+        String propVal = "";
+        String p[] = null;
+        String prop = SystemProperties.get(property);
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+
+        if (value == null) {
+            value = "";
+        }
+
+        if (prop != null) {
+            p = prop.split(",");
+        }
+
+        if (phoneId < 0) return;
+
+        for (int i = 0; i < phoneId; i++) {
+            String str = "";
+            if ((p != null) && (i < p.length)) {
+                str = p[i];
+            }
+            propVal = propVal + str + ",";
+        }
+
+        propVal = propVal + value;
+        if (p != null) {
+            for (int i = phoneId + 1; i < p.length; i++) {
+                propVal = propVal + "," + p[i];
+            }
+        }
+
+        // TODO: workaround for QC
+        if (property.length() > SystemProperties.PROP_NAME_MAX || propVal.length() > SystemProperties.PROP_VALUE_MAX) {
+            Rlog.d(TAG, "setTelephonyProperty length too long:" + property + ", " + propVal);
+            return;
+        }
+
+        Rlog.d(TAG, "setTelephonyProperty property=" + property + " propVal=" + propVal);
+        SystemProperties.set(property, propVal);
+    }
+
+    /**
+     * Convenience function for retrieving a value from the secure settings
+     * value list as an integer.  Note that internally setting values are
+     * always stored as strings; this function converts the string to an
+     * integer for you.
+     * <p>
+     * This version does not take a default value.  If the setting has not
+     * been set, or the string value is not a number,
+     * it throws {@link SettingNotFoundException}.
+     *
+     * @param cr The ContentResolver to access.
+     * @param name The name of the setting to retrieve.
+     * @param index The index of the list
+     *
+     * @throws SettingNotFoundException Thrown if a setting by the given
+     * name can't be found or the setting value is not an integer.
+     *
+     * @return The value at the given index of settings.
+     * @hide
+     */
+    public static int getIntAtIndex(android.content.ContentResolver cr,
+            String name, int index)
+            throws android.provider.Settings.SettingNotFoundException {
+        String v = android.provider.Settings.Global.getString(cr, name);
+        if (v != null) {
+            String valArray[] = v.split(",");
+            if ((index >= 0) && (index < valArray.length) && (valArray[index] != null)) {
+                try {
+                    return Integer.parseInt(valArray[index]);
+                } catch (NumberFormatException e) {
+                    //Log.e(TAG, "Exception while parsing Integer: ", e);
+                }
+            }
+        }
+        throw new android.provider.Settings.SettingNotFoundException(name);
+    }
+
+    /**
+     * Convenience function for updating settings value as coma separated
+     * integer values. This will either create a new entry in the table if the
+     * given name does not exist, or modify the value of the existing row
+     * with that name.  Note that internally setting values are always
+     * stored as strings, so this function converts the given value to a
+     * string before storing it.
+     *
+     * @param cr The ContentResolver to access.
+     * @param name The name of the setting to modify.
+     * @param index The index of the list
+     * @param value The new value for the setting to be added to the list.
+     * @return true if the value was set, false on database errors
+     * @hide
+     */
+    public static boolean putIntAtIndex(android.content.ContentResolver cr,
+            String name, int index, int value) {
+        String data = "";
+        String valArray[] = null;
+        String v = android.provider.Settings.Global.getString(cr, name);
+
+        if (v != null) {
+            valArray = v.split(",");
+        }
+
+        // Copy the elements from valArray till index
+        for (int i = 0; i < index; i++) {
+            String str = "";
+            if ((valArray != null) && (i < valArray.length)) {
+                str = valArray[i];
+            }
+            data = data + str + ",";
+        }
+
+        data = data + value;
+
+        // Copy the remaining elements from valArray if any.
+        if (valArray != null) {
+            for (int i = index+1; i < valArray.length; i++) {
+                data = data + "," + valArray[i];
+            }
+        }
+        return android.provider.Settings.Global.putString(cr, name, data);
+    }
+
+    /**
+     * Gets the telephony property.
+     *
+     * @hide
+     */
+    public static String getTelephonyProperty(String property, long subId, String defaultVal) {
+        String propVal = null;
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+        String prop = SystemProperties.get(property);
+        if ((prop != null) && (prop.length() > 0)) {
+            String values[] = prop.split(",");
+            if ((phoneId >= 0) && (phoneId < values.length) && (values[phoneId] != null)) {
+                propVal = values[phoneId];
+            }
+        }
+        return propVal == null ? defaultVal : propVal;
+    }
+
+    /** @hide */
+    public int getSimCount() {
+        if(isMultiSimEnabled()) {
+        //TODO Need to get it from Telephony Devcontroller
+            return 2;
+        } else {
+           return 1;
+        }
+    }
+
+    /**
+     * Returns the IMS Service Table (IST) that was loaded from the ISIM.
+     * @return IMS Service Table or null if not present or not loaded
+     * @hide
+     */
+    public String getIsimIst() {
+        try {
+            return getSubscriberInfo().getIsimIst();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the IMS Proxy Call Session Control Function(PCSCF) that were loaded from the ISIM.
+     * @return an array of PCSCF strings with one PCSCF per string, or null if
+     *         not present or not loaded
+     * @hide
+     */
+    public String[] getIsimPcscf() {
+        try {
+            return getSubscriberInfo().getIsimPcscf();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the response of ISIM Authetification through RIL.
+     * Returns null if the Authentification hasn't been successed or isn't present iphonesubinfo.
+     * @return the response of ISIM Authetification, or null if not available
+     * @hide
+     * @deprecated
+     * @see getIccSimChallengeResponse with appType=PhoneConstants.APPTYPE_ISIM
+     */
+    public String getIsimChallengeResponse(String nonce){
+        try {
+            return getSubscriberInfo().getIsimChallengeResponse(nonce);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the response of SIM Authentication through RIL.
+     * Returns null if the Authentication hasn't been successful
+     * @param subId subscription ID to be queried
+     * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
+     * @param data authentication challenge data
+     * @return the response of SIM Authentication, or null if not available
+     * @hide
+     */
+    public String getIccSimChallengeResponse(long subId, int appType, String data) {
+        try {
+            return getSubscriberInfo().getIccSimChallengeResponse(subId, appType, data);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone starts
+            return null;
+        }
+    }
+
+    /**
+     * Returns the response of SIM Authentication through RIL for the default subscription.
+     * Returns null if the Authentication hasn't been successful
+     * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
+     * @param data authentication challenge data
+     * @return the response of SIM Authentication, or null if not available
+     * @hide
+     */
+    public String getIccSimChallengeResponse(int appType, String data) {
+        return getIccSimChallengeResponse(getDefaultSubscription(), appType, data);
+    }
+
+    /**
+     * Get P-CSCF address from PCO after data connection is established or modified.
+     *
+     * @return array of P-CSCF address
+     * @hide
+     */
+    public String[] getPcscfAddress() {
+        try {
+            return getITelephony().getPcscfAddress();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * Set IMS registration state
+     *
+     * @param Registration state
+     * @hide
+     */
+    public void setImsRegistrationState(boolean registered) {
+        try {
+            getITelephony().setImsRegistrationState(registered);
+        } catch (RemoteException e) {
+        }
     }
 
     /**

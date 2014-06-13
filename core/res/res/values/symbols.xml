@@ -999,6 +999,7 @@
   <java-symbol type="array" name="config_sameNamedOperatorConsideredRoaming" />
   <java-symbol type="array" name="config_callBarringMMI" />
   <java-symbol type="array" name="config_globalActionsList" />
+  <java-symbol type="array" name="config_telephonyHardware" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="indicator_input_error" />
@@ -1121,6 +1122,15 @@
   <java-symbol type="drawable" name="cling_bg" />
   <java-symbol type="drawable" name="ic_corp_badge" />
   <java-symbol type="drawable" name="ic_corp_icon_badge" />
+
+  <java-symbol type="drawable" name="sim_light_blue" />
+  <java-symbol type="drawable" name="sim_light_green" />
+  <java-symbol type="drawable" name="sim_light_orange" />
+  <java-symbol type="drawable" name="sim_light_purple" />
+  <java-symbol type="drawable" name="sim_dark_blue" />
+  <java-symbol type="drawable" name="sim_dark_green" />
+  <java-symbol type="drawable" name="sim_dark_orange" />
+  <java-symbol type="drawable" name="sim_dark_purple" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />

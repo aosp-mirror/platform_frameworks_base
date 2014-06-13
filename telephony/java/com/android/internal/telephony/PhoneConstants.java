@@ -58,6 +58,7 @@ public class PhoneConstants {
     public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
     public static final int PHONE_TYPE_SIP = RILConstants.SIP_PHONE;
     public static final int PHONE_TYPE_THIRD_PARTY = RILConstants.THIRD_PARTY_PHONE;
+    public static final int PHONE_TYPE_IMS = RILConstants.IMS_PHONE;
 
     // Modes for LTE_ON_CDMA
     public static final int LTE_ON_CDMA_UNKNOWN = RILConstants.LTE_ON_CDMA_UNKNOWN;
@@ -133,4 +134,55 @@ public class PhoneConstants {
     /** APN type for IA Initial Attach APN */
     public static final String APN_TYPE_IA = "ia";
 
+    // FIXME: This looks to be used as default phoneId, rename
+    // or use SubscriptionManager.DEFAULT_SUB_ID
+    public static final int DEFAULT_SUBSCRIPTION = 0;
+
+    // FIXME: This looks to be used as invalid phoneId, rename
+    // or use SubscriptionManager.INVALID_SUB_ID
+    public static final int INVALID_SUBSCRIPTION = -1;
+
+    public static final int RIL_CARD_MAX_APPS    = 8;
+
+    public static final int DEFAULT_CARD_INDEX   = 0;
+
+    public static final int MAX_PHONE_COUNT_SINGLE_SIM = 1;
+
+    public static final int MAX_PHONE_COUNT_DUAL_SIM = 2;
+
+    public static final int MAX_PHONE_COUNT_TRI_SIM = 3;
+
+    public static final String SUBSCRIPTION_KEY  = "subscription";
+
+    public static final String SLOT_KEY  = "slot";
+
+    public static final String SUB_SETTING  = "subSettings";
+
+    public static final int SUB1 = 0;
+    public static final int SUB2 = 1;
+    public static final int SUB3 = 2;
+
+    public static final int EVENT_SUBSCRIPTION_ACTIVATED   = 500;
+    public static final int EVENT_SUBSCRIPTION_DEACTIVATED = 501;
+
+    // TODO: Remove these constants and use an int instead.
+    public static final int SIM_ID_1 = 0;
+    public static final int SIM_ID_2 = 1;
+    public static final int SIM_ID_3 = 2;
+    public static final int SIM_ID_4 = 3;
+
+    // ICC SIM Application Types
+    // TODO: Replace the IccCardApplicationStatus.AppType enums with these constants
+    public static final int APPTYPE_UNKNOWN = 0;
+    public static final int APPTYPE_SIM = 1;
+    public static final int APPTYPE_USIM = 2;
+    public static final int APPTYPE_RUIM = 3;
+    public static final int APPTYPE_CSIM = 4;
+    public static final int APPTYPE_ISIM = 5;
+
+    public enum CardUnavailableReason {
+        REASON_CARD_REMOVED,
+        REASON_RADIO_UNAVAILABLE,
+        REASON_SIM_REFRESH_RESET
+    };
 }

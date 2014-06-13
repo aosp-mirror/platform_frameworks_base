@@ -24,12 +24,15 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.telephony.Rlog;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 
 /**
  * Helper class to make it easier to run asynchronous caller-id lookup queries.
@@ -75,6 +78,8 @@ public class CallerInfoAsyncQuery {
         public Object cookie;
         public int event;
         public String number;
+
+        public long subId;
     }
 
 
@@ -207,11 +212,17 @@ public class CallerInfoAsyncQuery {
                 // However, if there is any code that calls this method, we should
                 // check the parameters to make sure they're viable.
                 if (DBG) Rlog.d(LOG_TAG, "Cookie is null, ignoring onQueryComplete() request.");
+                if (cursor != null) {
+                    cursor.close();
+                }
                 return;
             }
 
             if (cw.event == EVENT_END_OF_QUEUE) {
                 release();
+                if (cursor != null) {
+                    cursor.close();
+                }
                 return;
             }
 
@@ -232,7 +243,7 @@ public class CallerInfoAsyncQuery {
                     // comments at the top of CallerInfo class).
                     mCallerInfo = new CallerInfo().markAsEmergency(mQueryContext);
                 } else if (cw.event == EVENT_VOICEMAIL_NUMBER) {
-                    mCallerInfo = new CallerInfo().markAsVoiceMail();
+                    mCallerInfo = new CallerInfo().markAsVoiceMail(cw.subId);
                 } else {
                     mCallerInfo = CallerInfo.getCallerInfo(mQueryContext, mQueryUri, cursor);
                     if (DBG) Rlog.d(LOG_TAG, "==> Got mCallerInfo: " + mCallerInfo);
@@ -289,6 +300,10 @@ public class CallerInfoAsyncQuery {
                              " for token: " + token + mCallerInfo);
                 cw.listener.onQueryComplete(token, cw.cookie, mCallerInfo);
             }
+
+            if (cursor != null) {
+               cursor.close();
+            }
         }
     }
 
@@ -334,6 +349,25 @@ public class CallerInfoAsyncQuery {
      */
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
             OnQueryCompleteListener listener, Object cookie) {
+
+        long subId = SubscriptionManager.getDefaultSubId();
+        return startQuery(token, context, number, listener, cookie, subId);
+    }
+
+    /**
+     * Factory method to start the query based on a number with specific subscription.
+     *
+     * Note: if the number contains an "@" character we treat it
+     * as a SIP address, and look it up directly in the Data table
+     * rather than using the PhoneLookup table.
+     * TODO: But eventually we should expose two separate methods, one for
+     * numbers and one for SIP addresses, and then have
+     * PhoneUtils.startGetCallerInfo() decide which one to call based on
+     * the phone type of the incoming connection.
+     */
+    public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
+            OnQueryCompleteListener listener, Object cookie, long subId) {
+
         if (DBG) {
             Rlog.d(LOG_TAG, "##### CallerInfoAsyncQuery startQuery()... #####");
             Rlog.d(LOG_TAG, "- number: " + /*number*/ "xxxxxxx");
@@ -397,11 +431,12 @@ public class CallerInfoAsyncQuery {
         cw.listener = listener;
         cw.cookie = cookie;
         cw.number = number;
+        cw.subId = subId;
 
         // check to see if these are recognized numbers, and use shortcuts if we can.
         if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             cw.event = EVENT_EMERGENCY_NUMBER;
-        } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
+        } else if (PhoneNumberUtils.isVoiceMailNumber(subId, number)) {
             cw.event = EVENT_VOICEMAIL_NUMBER;
         } else {
             cw.event = EVENT_NEW_QUERY;

@@ -37,6 +37,9 @@ import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
 import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import android.telephony.SubscriptionManager;
+
+import android.telephony.TelephonyManager;
 
 import java.util.Locale;
 
@@ -233,6 +236,7 @@ public class CallerInfo {
                 info.contactExists = true;
             }
             cursor.close();
+            cursor = null;
         }
 
         info.needUpdate = false;
@@ -269,6 +273,23 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getCallerInfo() based on number...");
 
+        long subId = SubscriptionManager.getDefaultSubId();
+        return getCallerInfo(context, number, subId);
+    }
+
+    /**
+     * getCallerInfo given a phone number and subscription, look up in the call-log database
+     * for the matching caller id info.
+     * @param context the context used to get the ContentResolver
+     * @param number the phone number used to lookup caller id
+     * @param subId the subscription for checking for if voice mail number or not
+     * @return the CallerInfo which contains the caller id for the given
+     * number. The returned CallerInfo is null if no number is supplied. If
+     * a matching number is not found, then a generic caller info is returned,
+     * with all relevant fields empty or null.
+     */
+    public static CallerInfo getCallerInfo(Context context, String number, long subId) {
+
         if (TextUtils.isEmpty(number)) {
             return null;
         }
@@ -278,7 +299,7 @@ public class CallerInfo {
         // shortcut and skip the query.
         if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             return new CallerInfo().markAsEmergency(context);
-        } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
+        } else if (PhoneNumberUtils.isVoiceMailNumber(subId, number)) {
             return new CallerInfo().markAsVoiceMail();
         }
 
@@ -400,10 +421,17 @@ public class CallerInfo {
     // TODO: As in the emergency number handling, we end up writing a
     // string in the phone number field.
     /* package */ CallerInfo markAsVoiceMail() {
+
+        long subId = SubscriptionManager.getDefaultSubId();
+        return markAsVoiceMail(subId);
+
+    }
+
+    /* package */ CallerInfo markAsVoiceMail(long subId) {
         mIsVoiceMail = true;
 
         try {
-            String voiceMailLabel = TelephonyManager.getDefault().getVoiceMailAlphaTag();
+            String voiceMailLabel = TelephonyManager.getDefault().getVoiceMailAlphaTag(subId);
 
             phoneNumber = voiceMailLabel;
         } catch (SecurityException se) {
