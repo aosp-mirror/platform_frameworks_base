@@ -138,7 +138,8 @@ public final class HdmiControlService extends SystemService {
     private int mActiveSource;
 
     // Active routing path. Physical address of the active source but not all the time, such as
-    // when the new active source does not claim itself to be one.
+    // when the new active source does not claim itself to be one. Note that we don't keep
+    // the active port id (or active input) since it can be gotten by {@link #pathToPortId(int)}.
     @GuardedBy("mLock")
     private int mActiveRoutingPath;
 
@@ -288,6 +289,35 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
+     * Returns the routing path (physical address) of the HDMI port for the given
+     * port id.
+     */
+    int portIdToPath(int portId) {
+        HdmiPortInfo portInfo = getPortInfo(portId);
+        if (portInfo == null) {
+            Slog.e(TAG, "Cannot find the port info: " + portId);
+            return 0xFFFF;  // Use HdmiConstants.INVALID_PHYSICAL_ADDRESS;
+        }
+        return portInfo.getAddress();
+    }
+
+    /**
+     * Returns the id of HDMI port located at the top of the hierarchy of
+     * the specified routing path. For the routing path 0x1220 (1.2.2.0), for instance,
+     * the port id to be returned is the ID associated with the port address
+     * 0x1000 (1.0.0.0) which is the topmost path of the given routing path.
+     */
+    int pathToPortId(int path) {
+        int portAddress = path & HdmiConstants.ROUTING_PATH_TOP_MASK;
+        for (HdmiPortInfo info : mPortInfo) {
+            if (portAddress == info.getAddress()) {
+                return info.getId();
+            }
+        }
+        return -1;  // Use HdmiConstants.INVALID_PORT_ID;
+    }
+
+    /**
      * Returns {@link Looper} for IO operation.
      *
      * <p>Declared as package-private.
@@ -312,6 +342,9 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    /**
+     * Returns the active routing path.
+     */
     int getActivePath() {
         synchronized (mLock) {
             return mActiveRoutingPath;
@@ -319,12 +352,12 @@ public final class HdmiControlService extends SystemService {
     }
 
     /**
-     * Returns the path (physical address) of the device at the top of the currently active
-     * routing path. Used to get the corresponding port address of the HDMI input of the TV.
+     * Returns the ID of the active HDMI port. The active input is the port that has the active
+     * routing path connected directly or indirectly under the device hierarchy.
      */
     int getActiveInput() {
         synchronized (mLock) {
-            return mActiveRoutingPath & HdmiConstants.ROUTING_PATH_TOP_MASK;
+            return pathToPortId(mActiveRoutingPath);
         }
     }
 

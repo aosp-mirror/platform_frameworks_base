@@ -64,11 +64,11 @@ public class RoutingControlAction extends FeatureAction {
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
 
-    RoutingControlAction(HdmiControlService service, int sourceAddress, int portId,
+    RoutingControlAction(HdmiControlService service, int sourceAddress, int path,
             IHdmiControlCallback callback) {
         super(service, sourceAddress);
         mCallback = callback;
-        mCurrentRoutingPath = portToPath(portId);
+        mCurrentRoutingPath = path;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class RoutingControlAction extends FeatureAction {
                 && opcode == HdmiCec.MESSAGE_ROUTING_INFORMATION) {
             // Keep updating the physicalAddress as we receive <Routing Information>.
             // If the routing path doesn't belong to the currently active one, we should
-            // ignore it since it might have come from other, routing change sequence.
+            // ignore it since it might have come from other routing change sequence.
             int routingPath = HdmiUtils.twoBytesToInt(params);
             if (isInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
                 return true;
@@ -167,7 +167,7 @@ public class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
                 HdmiCecDeviceInfo device = mService.getDeviceInfoByPath(mCurrentRoutingPath);
                 if (device == null) {
-                    maybeChangeActiveInput(pathToPort(mCurrentRoutingPath));
+                    maybeChangeActiveInput(mCurrentRoutingPath);
                 } else {
                     // TODO: Also check followings and then proceed:
                     //       if routing change was neither triggered by TV at CEC enable time, nor
@@ -185,7 +185,7 @@ public class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 int tvPowerStatus = getTvPowerStatus();
                 if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
-                    if (!maybeChangeActiveInput(pathToPort(mCurrentRoutingPath))) {
+                    if (!maybeChangeActiveInput(mCurrentRoutingPath)) {
                         sendSetStreamPath();
                     }
                 }
@@ -196,8 +196,8 @@ public class RoutingControlAction extends FeatureAction {
     }
 
     // Called whenever an HDMI input of the TV shall become the active input.
-    private boolean maybeChangeActiveInput(int inputPortPath) {
-        if (mService.getActiveInput() == inputPortPath) {
+    private boolean maybeChangeActiveInput(int path) {
+        if (mService.getActiveInput() == mService.pathToPortId(path)) {
             return false;
         }
         // TODO: Remember the currently active input
@@ -217,13 +217,8 @@ public class RoutingControlAction extends FeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            maybeChangeActiveInput(pathToPort(mCurrentRoutingPath));
+            maybeChangeActiveInput(mCurrentRoutingPath);
         }
-    }
-
-    // Get the address of the TV port to which the given path is connected.
-    private static int pathToPort(int path) {
-        return path & HdmiConstants.ROUTING_PATH_TOP_MASK;
     }
 
     // Given the HDMI port id, return the port address.
