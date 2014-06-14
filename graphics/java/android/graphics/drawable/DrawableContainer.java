@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
@@ -23,6 +24,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
@@ -151,13 +153,27 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setColorFilter(ColorFilter cf) {
-        mDrawableContainerState.mHasColorFilter = true;
+        mDrawableContainerState.mHasColorFilter = (cf != null);
 
         if (mDrawableContainerState.mColorFilter != cf) {
             mDrawableContainerState.mColorFilter = cf;
 
             if (mCurrDrawable != null) {
                 mCurrDrawable.mutate().setColorFilter(cf);
+            }
+        }
+    }
+
+    @Override
+    public void setTint(ColorStateList tint, Mode tintMode) {
+        mDrawableContainerState.mHasTint = (tint != null && tintMode != null);
+
+        if (mDrawableContainerState.mTint != tint || mDrawableContainerState.mTintMode != tintMode) {
+            mDrawableContainerState.mTint = tint;
+            mDrawableContainerState.mTintMode = tintMode;
+
+            if (mCurrDrawable != null) {
+                mCurrDrawable.mutate().setTint(tint, tintMode);
             }
         }
     }
@@ -396,6 +412,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
                 if (mDrawableContainerState.mHasColorFilter) {
                     d.setColorFilter(mDrawableContainerState.mColorFilter);
+                } else if (mDrawableContainerState.mHasTint) {
+                    d.setTint(mDrawableContainerState.mTint, mDrawableContainerState.mTintMode);
                 }
                 d.setVisible(isVisible(), true);
                 d.setDither(mDrawableContainerState.mDither);
@@ -566,6 +584,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         ColorFilter mColorFilter;
         boolean mHasColorFilter;
 
+        ColorStateList mTint;
+        Mode mTintMode;
+        boolean mHasTint;
+
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
@@ -588,6 +610,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mAutoMirrored = orig.mAutoMirrored;
                 mColorFilter = orig.mColorFilter;
                 mHasColorFilter = orig.mHasColorFilter;
+                mTint = orig.mTint;
+                mTintMode = orig.mTintMode;
+                mHasTint = orig.mHasTint;
 
                 // Cloning the following values may require creating futures.
                 mConstantPadding = orig.getConstantPadding();
@@ -741,7 +766,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             for (int i = 0; i < N; i++) {
-                final Drawable d = drawables[i]; 
+                final Drawable d = drawables[i];
                 if (d != null) {
                     if (d.canApplyTheme()) {
                         return true;

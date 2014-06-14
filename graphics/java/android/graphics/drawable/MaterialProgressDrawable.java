@@ -27,8 +27,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Paint.Cap;
 import android.graphics.Paint.Style;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -67,6 +69,7 @@ class MaterialProgressDrawable extends Drawable implements Animatable {
     private final Ring mRing;
 
     private MaterialProgressState mState;
+    private PorterDuffColorFilter mTintFilter;
 
     /** Canvas rotation in degrees. */
     private float mRotation;
@@ -118,12 +121,18 @@ class MaterialProgressDrawable extends Drawable implements Animatable {
     }
 
     @Override
-    protected boolean onStateChange(int[] state) {
-        boolean changed = super.onStateChange(state);
+    protected boolean onStateChange(int[] stateSet) {
+        boolean changed = super.onStateChange(stateSet);
 
-        final int color = mState.mColor.getColorForState(state, Color.TRANSPARENT);
+        final MaterialProgressState state = mState;
+        final int color = state.mColor.getColorForState(stateSet, Color.TRANSPARENT);
         if (color != mRing.getColor()) {
             mRing.setColor(color);
+            changed = true;
+        }
+
+        if (state.mTint != null && state.mTintMode != null) {
+            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
             changed = true;
         }
 
@@ -223,11 +232,24 @@ class MaterialProgressDrawable extends Drawable implements Animatable {
         return mRing.getColorFilter();
     }
 
+    @Override
+    public void setTint(ColorStateList tint, Mode tintMode) {
+        if (mState.mTint != tint || mState.mTintMode != tintMode) {
+            mState.mTint = tint;
+            mState.mTintMode = tintMode;
+
+            mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+            invalidateSelf();
+        }
+    }
+
+    @SuppressWarnings("unused")
     private void setRotation(float rotation) {
         mRotation = rotation;
         invalidateSelf();
     }
 
+    @SuppressWarnings("unused")
     private float getRotation() {
         return mRotation;
     }
@@ -331,6 +353,8 @@ class MaterialProgressDrawable extends Drawable implements Animatable {
         private int mWidth = -1;
         private int mHeight = -1;
         private ColorStateList mColor = ColorStateList.valueOf(Color.TRANSPARENT);
+        private ColorStateList mTint = null;
+        private Mode mTintMode = null;
 
         public MaterialProgressState(MaterialProgressState orig) {
             if (orig != null) {
@@ -340,6 +364,8 @@ class MaterialProgressDrawable extends Drawable implements Animatable {
                 mWidth = orig.mWidth;
                 mHeight = orig.mHeight;
                 mColor = orig.mColor;
+                mTint = orig.mTint;
+                mTintMode = orig.mTintMode;
             }
         }
 
