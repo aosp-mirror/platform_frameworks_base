@@ -16,8 +16,8 @@
 */
 -->
 <resources>
-    <!-- The width of the notification panel window: 446 + 16 + 16 (padding in the bg drawable) -->
-    <dimen name="notification_panel_width">478dp</dimen>
+    <!-- The width of the notification panel window: 400 + 16 + 16 (padding in the bg drawable) -->
+    <dimen name="notification_panel_width">432dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <!-- 0x31 = top|center_horizontal -->
@@ -56,10 +56,10 @@
          max value is used when no notifications are displaying, and the min value is when the
          highest possible number of notifications are showing. -->
     <fraction name="keyguard_clock_y_fraction_max">34%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">25%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">24%</fraction>
 
     <!-- The margin between the clock and the notifications on Keyguard. See
          keyguard_clock_height_fraction_* for the difference between min and max.-->
-    <dimen name="keyguard_clock_notifications_margin_min">36dp</dimen>
-    <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_min">44dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">44dp</dimen>
 </resources>
