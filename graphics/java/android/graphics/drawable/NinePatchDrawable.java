@@ -327,12 +327,25 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
-        final NinePatchState state = mNinePatchState;
-        state.mTint = tint;
-        state.mTintMode = tintMode;
-
-        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+        mNinePatchState.mTint = tint;
+        mNinePatchState.mTintMode = tintMode;
+        computeTintFilter();
         invalidateSelf();
+    }
+
+    private void computeTintFilter() {
+        final NinePatchState state = mNinePatchState;
+        if (state.mTint != null && state.mTintMode != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            if (mTintFilter != null) {
+                mTintFilter.setColor(color);
+                mTintFilter.setMode(state.mTintMode);
+            } else {
+                mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+            }
+        } else {
+            mTintFilter = null;
+        }
     }
 
     @Override
@@ -536,10 +549,15 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
-        final NinePatchState state = mNinePatchState;
-        if (state.mTint != null && state.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            return true;
+        final ColorStateList tint = mNinePatchState.mTint;
+        if (tint != null) {
+            final int newColor = tint.getColorForState(stateSet, 0);
+            final int oldColor = mTintFilter.getColor();
+            if (oldColor != newColor) {
+                mTintFilter.setColor(newColor);
+                invalidateSelf();
+                return true;
+            }
         }
 
         return false;

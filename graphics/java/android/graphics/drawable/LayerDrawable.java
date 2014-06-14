@@ -16,14 +16,12 @@
 
 package android.graphics.drawable;
 
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -629,15 +627,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
             array[i].mDrawable.setColorFilter(cf);
-        }
-    }
-
-    @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
-            array[i].mDrawable.setTint(tint, tintMode);
         }
     }
 

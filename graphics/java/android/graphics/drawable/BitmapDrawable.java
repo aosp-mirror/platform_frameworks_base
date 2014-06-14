@@ -31,7 +31,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.ColorDrawable.ColorState;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -619,11 +618,9 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
-        final BitmapState state = mBitmapState;
-        state.mTint = tint;
-        state.mTintMode = tintMode;
-
-        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+        mBitmapState.mTint = tint;
+        mBitmapState.mTintMode = tintMode;
+        computeTintFilter();
         invalidateSelf();
     }
 
@@ -639,6 +636,21 @@ public class BitmapDrawable extends Drawable {
      */
     public Mode getTintMode() {
         return mBitmapState.mTintMode;
+    }
+
+    private void computeTintFilter() {
+        final BitmapState state = mBitmapState;
+        if (state.mTint != null && state.mTintMode != null) {
+            final int color = state.mTint.getColorForState(getState(), 0);
+            if (mTintFilter != null) {
+                mTintFilter.setColor(color);
+                mTintFilter.setMode(state.mTintMode);
+            } else {
+                mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
+            }
+        } else {
+            mTintFilter = null;
+        }
     }
 
     /**
@@ -667,11 +679,17 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
-        final BitmapState state = mBitmapState;
-        if (state.mTint != null && state.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            return true;
+        final ColorStateList tint = mBitmapState.mTint;
+        if (tint != null) {
+            final int newColor = tint.getColorForState(stateSet, 0);
+            final int oldColor = mTintFilter.getColor();
+            if (oldColor != newColor) {
+                mTintFilter.setColor(newColor);
+                invalidateSelf();
+                return true;
+            }
         }
+
         return false;
     }
 
