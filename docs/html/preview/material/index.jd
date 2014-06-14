@@ -1,0 +1,136 @@
+page.title=Material Design
+
+@jd:body
+
+
+<p>The Android L Developer Preview includes support for material design apps. Material design
+is a comprehensive guide for visual, motion, and interaction design across platforms and devices.
+To use material design in your Android apps, follow the guidelines defined in the
+<a href="">material design specification</a> and use the new components and functionality
+available in the Android L Developer Preview.</p>
+
+<p>The Android L Developer Preview provides the following elements for you to build material
+design apps:</p>
+
+<ul>
+  <li>A new theme</li>
+  <li>New widgets for complex views</li>
+  <li>New APIs for custom shadows and animations</li>
+</ul>
+
+
+<h3 style="margin-top:30px">Material Theme</h3>
+
+<p>The Material theme provides a new style for your app, system widgets that let you set
+their color palette, and default animations for touch feedback and activity transitions.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}preview/material/images/MaterialDark.png" style="width:250px;"/>
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Dark Material theme</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}preview/material/images/MaterialLight.png" style="width:250px;"/>
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Light Material theme</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+
+<h3 style="margin-top:30px">New Widgets</h3>
+
+<p>The Android L Developer Preview includes two new widgets for displaying complex views:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}preview/material/images/list_mail.png" style="width:250px;"/>
+  <p>The new <code>RecyclerView</code> widget is a container for large sets of views that can be
+  recycled and scrolled very efficiently.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}preview/material/images/card_travel.png" style="width:250px;"/>
+  <p>The new <code>CardView</code> widget lets you display important pieces of information inside
+  cards that have a consistent look and feel.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+
+<h3 style="margin-top:30px">3D Views and Shadows</h3>
+
+<p>In addition to the X and Y components, views in the Android L Developer Preview have a Z
+component. This new component represents the elevation of a view, which determines the size of
+its shadow: views with higher Z values cast bigger shadows.</p>
+
+
+<h3 style="margin-top:30px">Animations</h3>
+
+<p>The Android L Developer Preview provides new APIs that let you create custom animations for
+touch feedback in UI controls, view state changes, and activity transitions.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-left:12px;margin-top:25px;margin-bottom:5px">
+<div style="float:left;width:340px;margin-left:0px;margin-right:0px;">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="/preview/material/videos/ContactsAnim.mp4"/>
+    <source src="/preview/material/videos/ContactsAnim.webm"/>
+    <source src="/preview/material/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+</div>
+<div style="float:left;width:340px;margin-right:0px;">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="/preview/material/videos/Dial.mp4"/>
+    <source src="/preview/material/videos/Dial.webm"/>
+    <source src="/preview/material/videos/Dial.ogv"/>
+  </video>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<div style="text-align:center;font-size:10pt;margin-right:35px">
+<em>Click on the device screen to replay the movie</em>
+</div>
+
+<!-- three columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:0px">
+<div style="float:left;width:200px;margin-left:0px;margin-right:0px;">
+  <p>Respond to touch events in your views with <strong>touch feedback</strong> animations.</p>
+</div>
+<div style="float:left;margin-left:25px;width:200px;margin-right:0px;">
+  <p>Hide and show views with <strong>reveal effect</strong> animations.</p>
+</div>
+<div style="float:left;margin-left:25px;width:200px;margin-right:0px;">
+  <p>Switch between activities with custom <strong>activity transition</strong> animations.</p>
+</div>
+<br style="clear:left"/>
+</div>
+<!-- three columns -->
+<div style="width:700px;margin-top:0px;margin-bottom:20px">
+<div style="float:left;width:200px;margin-left:0px;margin-right:0px;">
+  <p>Create custom animation patterns with <strong>curved motion</strong>.</p>
+</div>
+<div style="float:left;margin-left:25px;width:200px;margin-right:0px;">
+  <p>Animate changes in one or more view properties with <strong>view state change</strong> animations.</p>
+</div>
+<div style="float:left;margin-left:25px;width:200px;margin-right:0px;">
+  <p>Show animations in <strong>state list drawables</strong> between view state changes.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+
+<h3 style="margin-top:30px">New Capabilities for Drawables</h3>
+
+<p>The Android L Developer Preview supports <strong>drawable tinting</strong>: you can define
+bitmaps as an alpha mask and tint them using a color resource. You can create these assets only
+once and color each instance to match your theme.</p>

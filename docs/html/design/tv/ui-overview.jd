@@ -1,0 +1,63 @@
+page.title=UI Overview for TV
+page.tags="design"
+@jd:body
+
+<p>The Android TV system user interface provides the launch pad for your app's big screen
+  experience. It's important to understand how your app is presented in the main user interface and
+  how your app can help users get to the content they want quickly, including contributing content
+  suggestions to the recommendations row.</p>
+
+<p>This section provides quick overview of the Android TV user interface.</p>
+
+
+<h2>Home Screen</h2>
+
+<p>The Home Screen is the start of a TV user's experience, providing search, content
+  recommendations, access to apps and settings. The Home Screen provides a rich and cinematic
+  overview of apps and content.</p>
+
+<img src="{@docRoot}design/tv/images/atv-home.png" alt="TV Home screen" />
+
+
+<h2>Search</h2>
+
+<p>By bringing the power of Google search to the big screen, Android TV makes new, dynamic
+  connections between content - a favorite movie may connect to the discovery of a new music artist,
+  planning trip to Paris might surface new YouTube content and photos.</p>
+
+<img src="{@docRoot}design/tv/images/search.png" alt="Recommendations Row" />
+
+
+<h2>Recommendations</h2>
+
+<p>The recommendation row on Android TV is a central feature of the Home Screen that allows
+  users quick access to dynamic and relevant content for their media consumption activities. The
+  stream is optimized for quick browsing of personalized content and activity resumption (on the
+  device and across devices), while also providing a way for users to act on meaningful new content.</p>
+
+<img src="{@docRoot}design/tv/images/recommendations.png" alt="Recommendations Row" />
+
+<p>
+  The recommendations are based on the user’s recent and frequent usage behaviors, as well as
+  expressed content preferences. They are presented as cards that represent a system or app action,
+  notification, activity, or piece of actionable media. Your app can provide suggestions for the
+  recommendations row to help get your content noticed. To learn more, see
+  <a href="{@docRoot}preview/tv/build-ui/recommendations.html">Recommendations</a>.
+</p>
+
+
+<h2>Apps and Games</h2>
+
+<p>Apps and Games rows both have special areas on the Home Screen. Within these respective
+  areas, Apps and Games titles are reordered to reflect the user’s recent usage.</p>
+
+<img src="{@docRoot}design/tv/images/apps-games-rows.png" alt="Apps and Games Rows" />
+
+
+<h2>Settings</h2>
+
+<p>Access to Settings is found at the bottom of the Home Screen. From here, the user can access
+  Android and device-specific settings. Please see the "Settings" section for more detailed
+  information.</p>
+
+<img src="{@docRoot}design/tv/images/settings.png" alt="Settings Row" />

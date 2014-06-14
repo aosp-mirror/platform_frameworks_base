@@ -1,0 +1,31 @@
+page.title=Design for TV
+header.justLinks=1
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 402px;
+  width: 220px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <span itemprop="description">
+      Build beautiful apps for the biggest screen in the house.</span>
+    <br><br>
+    <a href="{@docRoot}design/tv/principles.html"
+       class="landing-page-link">Design Principles</a>
+  </div>
+
+  <a href="{@docRoot}design/tv/principles.html">
+    <img src="{@docRoot}design/tv/images/atv.png" style="margin-left: 70px;">
+  </a>
+</div>

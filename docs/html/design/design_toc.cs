@@ -67,6 +67,25 @@
   </li>
 
   <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>design/devices.html">Devices</a></div>
+    <ul>
+      <!-- wear design goes here -->
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>design/tv/index.html">TV</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>design/tv/principles.html">Design Principles</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/ui-overview.html">UI Overview</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/style.html">Style</a></li>
+          <li><a href="<?cs var:toroot ?>design/tv/patterns.html">Patterns</a></li>
+        </ul>
+      </li>
+
+    </ul>
+  </li>
+
+
+  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/downloads/index.html">Downloads</a></div>
   </li>
 
