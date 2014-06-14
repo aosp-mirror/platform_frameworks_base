@@ -23,6 +23,8 @@ import android.hardware.hdmi.HdmiCecMessage;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,7 +74,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
         mService.removeAction(DeviceSelectAction.class);
         mService.addAndStartAction(new DeviceSelectAction(mService, mAddress,
-                                                          mService.getPhysicalAddress(), targetDevice, callback));
+                mService.getPhysicalAddress(), targetDevice, callback));
     }
 
     private static void invokeCallback(IHdmiControlCallback callback, int result) {
@@ -108,6 +110,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.addAndStartAction(new NewDeviceAction(mService,
                 mAddress, message.getSource(), physicalAddress));
 
+        return true;
+    }
+
+    @Override
+    protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
+        List<VendorSpecificAction> actions = Collections.emptyList();
+        // TODO: Call mService.getActions(VendorSpecificAction.class) to get all the actions.
+
+        // We assume that there can be multiple vendor-specific command actions running
+        // at the same time. Pass the message to each action to see if one of them needs it.
+        for (VendorSpecificAction action : actions) {
+            if (action.processCommand(message)) {
+                return true;
+            }
+        }
+        // Handle the message here if it is not already consumed by one of the running actions.
+        // Respond with a appropriate vendor-specific command or <Feature Abort>, or create another
+        // vendor-specific action:
+        //
+        // mService.addAndStartAction(new VendorSpecificAction(mService, mAddress));
+        //
+        // For now, simply reply with <Feature Abort> and mark it consumed by returning true.
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                message.getDestination(), message.getSource(), message.getOpcode(),
+                HdmiConstants.ABORT_REFUSED));
         return true;
     }
 }

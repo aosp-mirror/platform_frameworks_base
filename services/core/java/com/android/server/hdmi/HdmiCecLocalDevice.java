@@ -139,6 +139,10 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
+        return false;
+    }
+
     final void handleAddressAllocated(int logicalAddress) {
         mAddress = mPreferredAddress = logicalAddress;
         onAddressAllocated(logicalAddress);
