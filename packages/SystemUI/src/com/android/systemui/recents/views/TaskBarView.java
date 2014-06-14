@@ -22,10 +22,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -103,21 +103,24 @@ class TaskBarView extends FrameLayout {
     }
 
     /** Synchronizes this bar view's properties with the task's transform */
-    void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
-                                             TaskViewTransform toTransform, int duration) {
+    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
         if (duration > 0 && (mDismissButton.getVisibility() == View.VISIBLE)) {
-            if (animateFromTransform != null) {
-                mDismissButton.setAlpha(animateFromTransform.dismissAlpha);
-            }
-            mDismissButton.animate()
-                    .alpha(toTransform.dismissAlpha)
+            ViewPropertyAnimator anim = mDismissButton.animate();
+
+            // Animate to the final state
+            if (toTransform.hasDismissAlphaChangedFrom(mDismissButton.getAlpha())) {
+                anim.alpha(toTransform.dismissAlpha)
                     .setStartDelay(0)
                     .setDuration(duration)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
                     .withLayer()
                     .start();
+            }
         } else {
-            mDismissButton.setAlpha(toTransform.dismissAlpha);
+            // Set the changed properties
+            if (toTransform.hasDismissAlphaChangedFrom(mDismissButton.getAlpha())) {
+                mDismissButton.setAlpha(toTransform.dismissAlpha);
+            }
         }
     }
 
@@ -169,7 +172,6 @@ class TaskBarView extends FrameLayout {
                 .setStartDelay(delay)
                 .setInterpolator(mConfig.fastOutSlowInInterpolator)
                 .setDuration(mConfig.taskBarEnterAnimDuration)
-                .withLayer()
                 .withEndAction(postAnimRunnable)
                 .start();
     }
@@ -182,7 +184,6 @@ class TaskBarView extends FrameLayout {
                 .setStartDelay(0)
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
                 .setDuration(mConfig.taskBarExitAnimDuration)
-                .withLayer()
                 .withStartAction(preAnimRunnable)
                 .withEndAction(new Runnable() {
                     @Override

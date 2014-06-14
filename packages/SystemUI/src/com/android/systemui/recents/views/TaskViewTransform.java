@@ -45,6 +45,23 @@ public class TaskViewTransform {
         t = o.t;
     }
 
+    /** Convenience functions to compare against current property values */
+    public boolean hasAlphaChangedFrom(float v) {
+        return (Float.compare(alpha, v) != 0);
+    }
+    public boolean hasDismissAlphaChangedFrom(float v) {
+        return (Float.compare(dismissAlpha, v) != 0);
+    }
+    public boolean hasScaleChangedFrom(float v) {
+        return (Float.compare(scale, v) != 0);
+    }
+    public boolean hasTranslationYChangedFrom(float v) {
+        return (Float.compare(translationY, v) != 0);
+    }
+    public boolean hasTranslationZChangedFrom(float v) {
+        return (Float.compare(translationZ, v) != 0);
+    }
+
     @Override
     public String toString() {
         return "TaskViewTransform y: " + translationY + " z: " + translationZ + " scale: " + scale +
