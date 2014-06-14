@@ -1,0 +1,303 @@
+heropage.title=Android TV
+page.viewport_width=970
+fullpage=true
+no_footer_links=true
+
+@jd:body
+
+<style>
+.fullpage>#footer,
+#jd-content>.content-footer.wrap {
+  display:none;
+}
+</style>
+
+<style>
+#footer {
+    display: none;
+}
+.content-footer {
+  display: none;
+}
+</style>
+
+<div id="video-container">
+  <div id="video-frame">
+    <div class="video-close">
+      <span id="icon-video-close">&nbsp;</span>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+    <div id="ytapiplayer">
+      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
+      src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+    </div>
+  </div>
+</div>
+
+
+
+<div class="landing-body-content">
+  <div class="landing-hero-container">
+
+    <div class="landing-section tv-hero">
+      <div class="landing-hero-scrim"></div>
+      <div class="landing-hero-wrap">
+        <div class="vertical-center-outer">
+          <div class="vertical-center-inner">
+
+            <div class="col-10">
+              <div class="landing-section-header">
+                <div class="landing-h1 hero">Android TV</div>
+                <div class="landing-subhead hero">
+                <p>Big screen, big experience</p>
+                </div>
+              <div class="landing-hero-description">
+                <p>Engage your users from the comfort of their couch.
+                  Put your app on TV and bring the whole family into
+                  the action.</p>
+              </div>
+
+              <div class="landing-body">
+                <a href="{@docRoot}wear/preview/start.html" class="landing-button landing-primary" style="margin-top: 40px;">
+                  Get Started
+                </a>
+                <a id="watchVideo" href="https://youtube.googleapis.com/v/0xQ3y902DEQ">
+                  <div class="landing-video-link">Watch the video</div>
+                </a>
+<script>
+$("#watchVideo").on("click", function(e) {
+  $("#video-container").fadeIn(400, function(){$("#video-frame").show()});
+
+  var params = { allowScriptAccess: "always"};
+  var atts = { id: "ytapiplayer" };
+  swfobject.embedSWF("//www.youtube.com/v/0xQ3y902DEQ?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1;autoplay=1",
+    "ytapiplayer", "940", "526.4", "8", null, null, params, atts);
+
+  e.preventDefault();
+});
+$("#icon-video-close").on("click", function() {
+  ytplayer = document.getElementById("ytapiplayer");
+  try {
+    ytplayer.stopVideo();
+    $(ytplayer).hide();
+    $("#video-container").fadeOut(400);
+  } catch(e) {
+    console.log('Video not available');
+    $("#video-container").fadeOut(400);
+  }
+});
+</script>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div> <!-- end .wrap -->
+      <div class="landing-scroll-down-affordance">
+        <a class="landing-down-arrow" href="#reimagine-your-app">
+          <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
+        </a>
+      </div>
+    </div> <!-- end .landing-section .landing-hero -->
+  </div> <!-- end .landing-hero-container -->
+
+    <div class="landing-rest-of-page">
+
+      <div class="landing-section landing-gray-background" id="reimagine-your-app">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Reimagine Your App</div>
+            <div class="landing-subhead">
+              Design your app to shine on the biggest screen in the house.
+            </div>
+          </div>
+
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Simple</p>
+                <p class="landing-small">
+                  Smooth, fast interactions are key to a successful TV app. Keep navigation simple
+                  and light. Bring your content forward to let users enjoy it with a minimum of
+                  fuss.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn about TV design</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Cinematic</p>
+                <p class="landing-small">
+                  What would your app look like if it were a film? Use movement, animation and sound to make your app into an experience.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn about TV design</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Beautiful</p>
+                <p class="landing-small">
+                  Apps on TV should be a pleasure to look at, as well as enjoyable to use. Use
+                  made-for-TV styles to make your app familiar and fun.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn about design for TV</a>
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>  <!-- end .wrap -->
+      </div>  <!-- end .landing-section -->
+
+      <div class="landing-section" style="background-color:#f5f5f5">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Build to Entertain</div>
+            <div class="landing-subhead">
+              Android TV let's you engage your users in a new, shared environment.<br>
+              Find out how to get your app ready for it's big screen debut.
+            </div>
+          </div>
+
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Made for TV</p>
+                <p class="landing-small">
+                  Take advantage of pre-built fragments for browsing and interacting with media
+                  catalogs.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn pre-built fragments</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Get Found</p>
+                <p class="landing-small">
+                  Give your content the attention it deserves by including it in Android TV's global
+                  search results.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn about TV design</a>
+                </p>
+              </div>
+
+              <div class="col-3-wide">
+                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+
+                <p>Recommend</p>
+                <p class="landing-small">
+                  Suggest content from your app to keep your users coming back.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}design/tv/index.html">Learn about design for TV</a>
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>  <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+      <div class="landing-section landing-red-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1 landing-align-left">Get Started with Android TV</div>
+            <div class="landing-body">
+              <p>You can begin building apps right away using these developer resources.</p>
+            </div>
+          </div>
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+              <div class="col-8">
+                <p>Preview SDK</p>
+                <p>
+                  Get started building for Android TV using the Android L-preview SDK. The preview
+                  SDK includes the Android TV emulator so you can start building your TV app right
+                  away.
+                </p>
+
+              </div>
+
+              <div class="col-8">
+                <p>ADT-1 Developer Kit</p>
+                <p>
+                  While supplies last, developers can request an ADT-1 Developer Kit, a compact and
+                  powerful streaming media player and gamepad, ideal for developing apps for Android
+                  TV.
+                </p>
+
+              </div>
+
+            </div>
+          </div>
+
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+
+              <div class="col-8">
+                <a href="{@docRoot}preview/download.html" class="landing-button landing-secondary">
+                  Download the Preview SDK
+                </a>
+              </div>
+
+              <div class="col-8">
+                <a href="{@docRoot}tv/adt-1/request.html" class="landing-button landing-secondary">
+                  Request ADT-1 Developer Kit
+                </a>
+            </div>
+          </div>
+
+        </div>  <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+    </div> <!-- end .landing-rest-of-page -->
+
+
+    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
+      <div class="layout-content-col col-16" style="padding-top:4px">
+        <style>#___plusone_0 {float:right !important;}</style>
+        <div class="g-plusone" data-size="medium"></div>
+      </div>
+    </div>
+    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
+      <div id="copyright">
+        Except as noted, this content is
+        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
+        Creative Commons Attribution 2.5</a>. For details and
+        restrictions, see the <a href="/license.html">Content
+        License</a>.
+      </div>
+    </div>
+
+
+  </div> <!-- end landing-body-content -->
+
+  <script>
+  $("a.landing-down-arrow").on("click", function(e) {
+    $("body").animate({
+      scrollTop: $(".wear-hero").height() + 76
+    }, 1000, "easeOutQuint");
+    e.preventDefault();
+  });
+  </script>

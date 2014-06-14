@@ -1,0 +1,100 @@
+page.title=Patterns for TV
+page.tags="design"
+@jd:body
+
+<p>As a developer of apps for TV, you should follow certain patterns to enable users to
+  quickly understand and efficiently your app. This section describes recommended design patterns
+  for TV apps.</p>
+
+<h2>Navigation</h2>
+
+<p>Users typically navigate TV devices using a directional pad (D-Pad). This type of controller
+  limits movement to up, down, left, and right. In a typical D-Pad remote, hardware keys that
+  correspond to those directions are present and an additional action key is available to make a
+  selection. As you design your Android application for TVs, pay special attention to how users
+  navigate your application when using a remote control instead of a touchscreen.</p>
+
+<p>[add visual: D-Pad image or illustration]</p>
+
+<p>A key aspect of making your application work well with a D-Pad controller is to make sure
+  that there is always a object that is obviously in focus. If a user cannot see what is in focus,
+  they will not be able to navigate your app intuitively with this type of controller.</p>
+
+<p>Optimize your app screen layouts for D-Pad navigation. Align objects in your app lists and
+  grids to make navigation within each screen intuitive. Design your layout so it takes advantage of
+  two-axis navigation.</p>
+
+
+<h2>Home and Back Buttons</h2>
+
+<p>
+  In addition to the D-Pad buttons, Android TV devices always include Home and Back buttons on their
+  controllers. Make sure the Back button functions within your app in a way that is consistent with
+  the general <a href="{@docRoot}design/patterns/navigation.html">Android Design guidelines</a>.
+</p>
+
+
+<h2>Focus and Selection</h2>
+
+<p>Providing good focus and selection indicators is key to making your app useable on TV. As
+  mentioned previously, making sure that an object is always selected in your app is critical for
+  effective navigation using a D-Pad. This requirement also means that you must use focus indicators
+  that are easy to recognize and should be consistent throughout your app.</p>
+
+<p>
+  [add visual of selected item on screen]
+</p>
+
+<p>The default focus indicator used in Android TV use a combination of scale, shadow,
+  brightness, and opacity. The focus feedback is enhanced by displaying an animation going from a
+  non-focused to a focused state and back. Instead of immediately applying the focus transformation,
+  it is animated into place to reduce abrupt changes and help users notice how the object changed.</p>
+
+<h2>Audio Feedback</h2>
+
+<p>Sounds on Android TV bring a cinematic quality to the interaction experience. You should
+  consider adding sounds for user actions or to provide feedback when a user is only partially
+  visually engaged with the screen (e.g., because they have their hands full or are multitasking).
+  You should also consider using sounds as alternatives to error messages, for example to indicate
+  that a user has reached the end of a list or is trying to navigate to an undefined location.</p>
+
+<h2>Banners</h2>
+
+<p>
+  App Banners represent your app on the home screen of TV devices and serves and as a way for
+  users to launch your app. Here are specific requirements for the banner image:
+</p>
+
+<ul>
+  <li>Size: 320 x 180 px, xhdpi resource</li>
+  <li>Text should be included in the image. If your app is available in more than one
+      language, you must provide version of the banner image for each supported language.</li>
+</ul>
+
+
+<h2>App Icons</h2>
+
+<p>The app icon is shown in recommendation cards on the Home screen, search results and the main
+  Browse screen of your app if you use {@code BrowseFragment}. Here are the specific
+  requirements for the app icon:</p>
+
+<ul>
+  <li><p>Full color: size: 52x52dp, PNG</p></li>
+  <li><p>Monocolor: size 52x52dp, white(#fff) icon with transparent background, PNG</p></li>
+</ul>
+
+
+<h2>Background Images</h2>
+
+<p>Background images are displayed in the background of your app to provide additional visual
+  interest, information or branding. The BrowseFragment and DetailsFragment classes in the Leanback
+  support library provide specific support for background images and updating them as items are
+  brought into and out of focus. Here are the specific requirements for background images:</p>
+
+<ul>
+  <li>2016x1134 (1920x1080 + 5% extra margin for motion)</li>
+</ul>
+
+<p>
+  <strong>Note:</strong> If the image does not meet this requirement, it is scaled to fit.
+</p>

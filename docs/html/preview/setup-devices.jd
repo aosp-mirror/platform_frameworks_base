@@ -1,0 +1,81 @@
+page.title=Setting Up Hardware and AVDs
+
+@jd:body
+
+<p>The Android 5.0 developer preview provides you with 32-bit system images
+to flash the following devices:
+</p>
+
+<ul>
+  <li>Nexus 5</li>
+  <li>Nexus 7 Wi-Fi (version 2, released in 2013)</li>
+</ul>
+
+<p>In addition, you also get the emulator system images, which includes
+experimental 64-bit system images along with standard 32-bit system images.
+</p>
+
+<h2>Flashing Devices</h2>
+
+<p class="warning"><b>Warning</b>: This is a preview version of the Android
+system image, and is subject to change. Your use of this system image is
+governed by the Android SDK Preview License Agreement. The Android preview
+system image is not a stable release, and may contain errors and defects that
+can result in damage to your computer systems, devices, and data. The preview
+Android system image is not subject to the same testing as the factory OS and
+can cause your phone and installed services and applications to stop working.
+</p>
+
+<p>
+Click through Terms of Service:
+https://docs.google.com/a/google.com/document/d/1OixnM1Q890ExOzDB3Z-FDD6Sb2kF4uZQiMxsYVII8F0/edit?usp=sharing
+</p>
+
+<h3>To the Developer Preview</h3>
+<ol>
+  <li>Download and extract the Android Developer Preview package to a directory
+  referred to as <code>&lt;extracted_images&gt;</code>.</li>
+  <li>Connect your powered-off Android device to your development machine and
+  press and hold the following buttons until your device is in fastboot mode:
+    <ul>
+    <li>For Nexus 5: vol down + vol up + power</li>
+    <li>For Nexus 7: vol down + power </li>
+    </ul>
+    <p class="note">Alternatively, run <code>adb reboot bootloader</code>
+    with USB debugging turned on to enter fastboot mode.
+    The device must be booted up if you’re using this method.</p>
+  </li>
+  <li>Follow the instructions at
+  <a href="https://developers.google.com/android/nexus/images">developers.google.com/android</a>
+  to set up your system for flashing devices.</li>
+  <li>Run the <code>&lt;extracted-images&gt;/flash-all</code> script
+  corresponding to your platform. This script flashes all of the system data
+  onto the phone.</li>
+  <li>(Optional) After flashing is complete, run <code>fastboot oem lock</code>
+  with the device in fastboot mode to lock it again. This does not wipe your
+  device, but if you want to flash again, you need to run <code>fastboot oem
+  unlock</code>, which wipes your device. We recommend you leave the
+  bootloader unlocked until you are done with flashing the device.</li>
+</ol>
+
+<h3>To factory specifications</h3>
+
+  <p>Go to <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a>
+  and download the image you want to flash to for your device.
+  Follow the instructions there to flash the image to your device.</p>
+
+
+<h2>Setting up an AVD</h2>
+You can set up Android Virtual Devices (AVD) and use the emulator to
+build and test apps with:
+
+<ol>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+</ol>
