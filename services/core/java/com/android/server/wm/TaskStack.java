@@ -154,7 +154,8 @@ public class TaskStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    if (windows.get(winNdx).mWinAnimator.isAnimating()) {
+                    final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
+                    if (winAnimator.isAnimating() && !winAnimator.isDummyAnimation()) {
                         return true;
                     }
                 }
@@ -236,9 +237,22 @@ public class TaskStack {
 
     void detachDisplay() {
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
+
+        boolean doAnotherLayoutPass = false;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            mService.tmpRemoveTaskWindowsLocked(mTasks.get(taskNdx));
+            final AppTokenList appWindowTokens = mTasks.get(taskNdx).mAppTokens;
+            for (int appNdx = appWindowTokens.size() - 1; appNdx >= 0; --appNdx) {
+                final WindowList appWindows = appWindowTokens.get(appNdx).allAppWindows;
+                for (int winNdx = appWindows.size() - 1; winNdx >= 0; --winNdx) {
+                    mService.removeWindowInnerLocked(null, appWindows.get(winNdx));
+                    doAnotherLayoutPass = true;
+                }
+            }
         }
+        if (doAnotherLayoutPass) {
+            mService.requestTraversalLocked();
+        }
+
         mAnimationBackgroundSurface.destroySurface();
         mAnimationBackgroundSurface = null;
         mDimLayer.destroySurface();
