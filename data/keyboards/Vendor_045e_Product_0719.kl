@@ -1,0 +1,57 @@
+# Copyright (C) 2013 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# XBox 360 USB Wireless Controller
+# Reports itself as "Xbox 360 Wireless Receiver" and
+# "Microsoft Corp. Xbox 360 Wireless Adapter"
+# Similar in behavior to XBox 360 USB Controller except for the d-pad,
+# which is digital (scan codes instead of axes) on the wireless version.
+
+key 0x130    BUTTON_A
+key 0x131    BUTTON_B
+key 0x133    BUTTON_X
+key 0x134    BUTTON_Y
+# Button "LB" maps to BUTTON_L1.
+key 0x136    BUTTON_L1
+# Button "RB" maps to BUTTON_R1.
+key 0x137    BUTTON_R1
+key 0x13a    BACK
+key 0x13b    BUTTON_START
+# Button with Xbox logo maps to HOME.
+key 0x13c    HOME
+# These two keycodes are for click (press from above) on analog control sticks.
+key 0x13d    BUTTON_THUMBL
+key 0x13e    BUTTON_THUMBR
+
+# Left (0x00, 0x01) and right (0x03, 0x04) analog control stick.
+# The reported value for flat is 128 out of a range from -32767 to 32768, which is absurd.
+# This confuses applications that rely on the flat value because the joystick actually
+# settles in a flat range of +/- 4096 or so.
+axis 0x00 X flat 4096
+axis 0x01 Y flat 4096
+axis 0x03 Z flat 4096
+axis 0x04 RZ flat 4096
+
+# Triggers.
+# (Shoulder trigger buttons marked with "LT" and "RT" are analog.
+# Each axis has range from 0 to 255.)
+axis 0x02 LTRIGGER
+axis 0x05 RTRIGGER
+
+# Hat.
+# (D-pad is reported as digital. Each direction has a scan code.)
+key 0x2c0 DPAD_LEFT
+key 0x2c1 DPAD_RIGHT
+key 0x2c2 DPAD_UP
+key 0x2c3 DPAD_DOWN
