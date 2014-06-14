@@ -19,19 +19,16 @@ package com.android.server.job.controllers;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.os.BatteryProperty;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.BatteryService;
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
@@ -158,14 +155,10 @@ public class BatteryController extends StateController {
             mContext.registerReceiver(this, filter);
 
             // Initialise tracker state.
-            BatteryService batteryService = (BatteryService) ServiceManager.getService("battery");
-            if (batteryService != null) {
-                mBatteryHealthy = !batteryService.getBatteryLevelLow();
-                mCharging = batteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
-            } else {
-                // Unavailable for some reason, we default to false and let ACTION_BATTERY_[OK,LOW]
-                // sort it out.
-            }
+            BatteryManagerInternal batteryManagerInternal =
+                    LocalServices.getService(BatteryManagerInternal.class);
+            mBatteryHealthy = !batteryManagerInternal.getBatteryLevelLow();
+            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
         }
 
         boolean isOnStablePower() {

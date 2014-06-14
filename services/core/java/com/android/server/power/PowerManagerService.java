@@ -19,7 +19,6 @@ package com.android.server.power;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -43,6 +42,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -168,7 +168,7 @@ public final class PowerManagerService extends com.android.server.SystemService
     private final PowerManagerHandler mHandler;
 
     private LightsManager mLightsManager;
-    private BatteryService mBatteryService;
+    private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
     private IBatteryStats mBatteryStats;
     private IAppOpsService mAppOps;
@@ -463,14 +463,14 @@ public final class PowerManagerService extends com.android.server.SystemService
         Watchdog.getInstance().addThread(mHandler);
     }
 
-    public void systemReady(BatteryService batteryService, IAppOpsService appOps) {
+    public void systemReady(IAppOpsService appOps) {
         synchronized (mLock) {
             mSystemReady = true;
-            mBatteryService = batteryService;
             mAppOps = appOps;
             mDreamManager = getLocalService(DreamManagerInternal.class);
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
+            mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
 
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
@@ -1158,10 +1158,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             final boolean wasPowered = mIsPowered;
             final int oldPlugType = mPlugType;
             final boolean oldLevelLow = mBatteryLevelLow;
-            mIsPowered = mBatteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
-            mPlugType = mBatteryService.getPlugType();
-            mBatteryLevel = mBatteryService.getBatteryLevel();
-            mBatteryLevelLow = mBatteryService.getBatteryLevelLow();
+            mIsPowered = mBatteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+            mPlugType = mBatteryManagerInternal.getPlugType();
+            mBatteryLevel = mBatteryManagerInternal.getBatteryLevel();
+            mBatteryLevelLow = mBatteryManagerInternal.getBatteryLevelLow();
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
@@ -1244,7 +1244,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             final boolean wasStayOn = mStayOn;
             if (mStayOnWhilePluggedInSetting != 0
                     && !isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
-                mStayOn = mBatteryService.isPowered(mStayOnWhilePluggedInSetting);
+                mStayOn = mBatteryManagerInternal.isPowered(mStayOnWhilePluggedInSetting);
             } else {
                 mStayOn = false;
             }

@@ -150,7 +150,6 @@ public final class SystemServer {
     private DisplayManagerService mDisplayManagerService;
     private PackageManagerService mPackageManagerService;
     private PackageManager mPackageManager;
-    private BatteryService mBatteryService;
     private ContentResolver mContentResolver;
 
     private boolean mOnlyCore;
@@ -362,11 +361,8 @@ public final class SystemServer {
         // Manages LEDs and display backlight.
         mSystemServiceManager.startService(LightsService.class);
 
-        // Tracks the battery level.
-        Slog.i(TAG, "Battery Service");
-        mBatteryService = new BatteryService(mSystemContext,
-                LocalServices.getService(LightsManager.class));
-        ServiceManager.addService("battery", mBatteryService);
+        // Tracks the battery level.  Requires LightService.
+        mSystemServiceManager.startService(BatteryService.class);
     }
 
     /**
@@ -998,8 +994,7 @@ public final class SystemServer {
 
         try {
             // TODO: use boot phase
-            mPowerManagerService.systemReady(mBatteryService,
-                    mActivityManagerService.getAppOpsService());
+            mPowerManagerService.systemReady(mActivityManagerService.getAppOpsService());
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }
@@ -1065,11 +1060,6 @@ public final class SystemServer {
                     if (mountServiceF != null) mountServiceF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Mount Service ready", e);
-                }
-                try {
-                    mBatteryService.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Battery Service ready", e);
                 }
                 try {
                     if (networkScoreF != null) networkScoreF.systemReady();
