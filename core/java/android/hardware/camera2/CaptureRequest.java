@@ -1020,9 +1020,17 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Video stabilization automatically translates and scales images from the camera
      * in order to stabilize motion between consecutive frames.</p>
      * <p>If enabled, video stabilization can modify the
-     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream
-     * stabilized</p>
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream stabilized.</p>
+     * <p>Switching between different video stabilization modes may take several frames
+     * to initialize, the camera device will report the current mode in capture result
+     * metadata. For example, When "ON" mode is requested, the video stabilization modes
+     * in the first several capture results may still be "OFF", and it will become "ON"
+     * when the initialization is done.</p>
+     * <p>If a camera device supports both this mode and OIS ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}),
+     * turning both modes on may produce undesirable interaction, so it is recommended not to
+     * enable both at the same time.</p>
      *
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
@@ -1258,6 +1266,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * makes use of mechanical elements to stabilize the camera
      * sensor, and thus allows for longer exposure times before
      * camera shake becomes apparent.</p>
+     * <p>Switching between different optical stabilization modes may take several
+     * frames to initialize, the camera device will report the current mode in
+     * capture result metadata. For example, When "ON" mode is requested, the
+     * optical stabilization modes in the first several capture results may still
+     * be "OFF", and it will become "ON" when the initialization is done.</p>
+     * <p>If a camera device supports both OIS and EIS ({@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode}),
+     * turning both modes on may produce undesirable interaction, so it is recommended not
+     * to enable both at the same time.</p>
      * <p>Not all devices will support OIS; see
      * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization} for
      * available controls.</p>

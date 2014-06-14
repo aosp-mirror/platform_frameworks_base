@@ -1423,6 +1423,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sensor.info.whiteLevel", int.class);
 
     /**
+     * <p>The sensor timestamp calibration quality.</p>
+     * <p>The sensor timestamp calibration quality determines the reliability of
+     * {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} provided by the camera device.</p>
+     *
+     * @see CaptureResult#SENSOR_TIMESTAMP
+     * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED
+     * @see #SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED
+     */
+    public static final Key<Integer> SENSOR_INFO_TIMESTAMP_CALIBRATION =
+            new Key<Integer>("android.sensor.info.timestampCalibration", int.class);
+
+    /**
      * <p>The standard reference illuminant used as the scene light source when
      * calculating the {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1},
      * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}, and
