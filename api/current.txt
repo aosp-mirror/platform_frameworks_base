@@ -27622,7 +27622,7 @@ package android.telecomm {
     method public void mute(boolean);
     method public void playDtmfTone(java.lang.String, char);
     method public void postDialContinue(java.lang.String, boolean);
-    method public void rejectCall(java.lang.String);
+    method public void rejectCall(java.lang.String, boolean, java.lang.String);
     method public void setAudioRoute(int);
     method public void stopDtmfTone(java.lang.String);
     method public void unholdCall(java.lang.String);
@@ -27630,6 +27630,7 @@ package android.telecomm {
 
   public final class InCallCall implements android.os.Parcelable {
     method public int describeContents();
+    method public java.util.List<java.lang.String> getCannedSmsResponses();
     method public int getCapabilities();
     method public long getConnectTimeMillis();
     method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();

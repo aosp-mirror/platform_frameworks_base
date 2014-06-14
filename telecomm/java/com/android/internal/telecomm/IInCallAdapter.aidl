@@ -28,7 +28,7 @@ import android.telecomm.CallAudioState;
 oneway interface IInCallAdapter {
     void answerCall(String callId);
 
-    void rejectCall(String callId);
+    void rejectCall(String callId, boolean rejectWithMessage, String textMessage);
 
     void disconnectCall(String callId);
 
