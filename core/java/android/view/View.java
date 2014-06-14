@@ -4796,7 +4796,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void manageFocusHotspot(boolean focused, View v) {
         final Rect r = new Rect();
-        if (!focused && v != null) {
+        if (!focused && v != null && mAttachInfo != null) {
             v.getBoundsOnScreen(r);
             final int[] location = mAttachInfo.mTmpLocation;
             getLocationOnScreen(location);
