@@ -2,7 +2,6 @@ page.title=Android Wear
 page.viewport_width=970
 fullpage=true
 no_footer_links=true
-page.customHeadTag=<link rel="stylesheet" type="text/css" href="/wear/css/wear.css">
 
 @jd:body
 
@@ -14,7 +13,6 @@ page.customHeadTag=<link rel="stylesheet" type="text/css" href="/wear/css/wear.c
 </style>
 
 
-
 <div id="video-container">
   <div id="video-frame">
     <div class="video-close">
@@ -22,41 +20,37 @@ page.customHeadTag=<link rel="stylesheet" type="text/css" href="/wear/css/wear.c
     </div>
     <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
     <div id="ytapiplayer">
-      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
-      src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
+      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width="940" src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
     </div>
   </div>
 </div>
 
 
 
-<div class="wear-body-content">
-  <div class="wear-hero-container">
-    <div class="wear-section wear-hero">
-      <div class="wear-hero-scrim"></div>
-      <div class="wear-hero-wrap">
+<div class="landing-body-content">
+  <div class="landing-hero-container">
+    <div class="landing-section wear-hero">
+      <div class="landing-hero-scrim"></div>
+      <div class="landing-hero-wrap">
         <div class="vertical-center-outer">
           <div class="vertical-center-inner">
 
             <div class="col-10">
-              <div class="wear-section-header">
-                <div class="wear-h1 hero">Android Wear</div>
-                <div class="wear-subhead hero">Information that moves with you</div>
+              <div class="landing-section-header">
+                <div class="landing-h1 hero">Android Wear</div>
+                <div class="landing-subhead hero">Information that moves with you</div>
               </div>
-              <div class="wear-hero-description">
-                <p>Small, powerful devices, worn on the body.
-                Useful information when you need it most.
-                Intelligent answers to spoken questions.
-                Tools to help reach fitness goals.
+              <div class="landing-hero-description">
+                <p>
+                Useful information when you need it most.<br />
+                Intelligent answers to spoken questions.<br />
+                Tools to help reach fitness goals.<br />
                 Your key to a multiscreen world.</p>
               </div>
 
-              <div class="wear-body">
-                <a href="/wear/preview/start.html" class="wear-button wear-primary" style="margin-top: 40px;">
-                  Get the Developer Preview
-                </a>
-                <a id="watchVideo" href="https://youtube.googleapis.com/v/0xQ3y902DEQ">
-                  <div class="wear-video-link">Watch the video</div>
+              <div class="landing-body">
+                <a href="/training/wearables/index.html" class="landing-button landing-primary" style="margin-top: 40px;">
+                  Get Started
                 </a>
 <script>
 $("#watchVideo").on("click", function(e) {
@@ -87,186 +81,136 @@ $("#icon-video-close").on("click", function() {
           </div>
         </div>
       </div> <!-- end .wrap -->
-      <div class="wear-scroll-down-affordance">
-        <a class="wear-down-arrow" href="#extending-android-to-wearables">
+      <div class="landing-scroll-down-affordance">
+        <a class="landing-down-arrow" href="#extending-android-to-wearables">
           <img src="/wear/images/carrot.png" alt="Scroll down to read more">
         </a>
       </div>
-    </div> <!-- end .wear-section .wear-hero -->
-  </div> <!-- end .wear-hero-container -->
+    </div> <!-- end .landing-section .landing-hero -->
+  </div> <!-- end .landing-hero-container -->
 
-    <div class="wear-rest-of-page">
-      <div class="wear-section" id="extending-android-to-wearables">
+    <div class="landing-rest-of-page">
+      <div class="landing-section" id="extending-android-to-wearables">
         <div class="wrap">
-          <div class="wear-section-header">
-            <div class="wear-h1">Extending Android to Wearables</div>
-            <div class="wear-subhead">
-              Android Wear extends the Android platform to a new generation of wearable devices. <br>
-              The user experience is designed specifically for wearables.
+          <div class="landing-section-header">
+            <div class="landing-h1">Extending Android to Wearables</div>
+            <div class="landing-subhead">
+              Android Wear extends the Android platform to a new generation of devices, <br>
+              with a user experience that's designed specifically for wearables.
             </div>
           </div>
 
-          <div class="wear-body">
-            <div class="wear-breakout cols">
+          <div class="landing-body">
+            <div class="landing-breakout cols">
               <div class="col-3-wide">
 
-                <div class="wear-inset-video-container">
-                  <img class="wear-bezel-only" src="/wear/images/screens/bezel.png" alt="">
+                <div class="landing-inset-video-container">
+                  <img class="landing-bezel-only" src="/wear/images/screens/bezel.png" alt="">
                   <img class="gif" src="/wear/images/screens/reservation_animated.gif">
                 </div>
 
-                <p class="wear-small">
+                <p class="landing-small">
                   Say “Ok Google” to ask questions and get stuff done.
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="/wear/images/screens/circle_message2.png" itemprop="image" alt="" >
-                <p class="wear-small">
-                  Get glanceable, actionable information at just the right time throughout the day.
+                <img src="/wear/images/screens/circle_message2.png" itemprop="image" alt="">
+                <p class="landing-small">
+                  Get glanceable, actionable information at just the right time with notifications
+                  that are synced from your handheld device.
                 </p>
               </div>
               <div class="col-3-wide">
                 <img src="/wear/images/screens/fitness-24.png" alt="">
-                <p class="wear-small">
-                  A wide range of sensors is available to your applications, from accelerometers to heart rate monitors.
+                <p class="landing-small">
+                  Design apps that can access a wide range of sensors and other hardware
+                   directly on the wearable.
                 </p>
               </div>
             </div>
 
             <p>
-              The Android Wear Developer Preview lets you create wearable experiences for your existing Android apps and see how they will appear on square and round Android wearables.
-            </p>
-
-            <p>
-              Later this year, we’ll be launching the Android Wear SDK, enabling even more customized experiences.
-            </p>
-          </div>
-        </div>  <!-- end .wrap -->
-      </div>  <!-- end .wear-section -->
-
-      <div class="wear-section wear-gray-background">
-        <div class="wrap">
-          <div class="wear-section-header">
-            <div class="wear-h1">Developer Preview</div>
-            <div class="wear-subhead">
-              Your app’s notifications will already appear on Android wearables. <br>
-              With the new Android Wear APIs you can customize and extend those notifications.
-            </div>
-          </div>
-
-
-          <div class="wear-body">
-            <div class="wear-breakout cols">
-              <div class="col-3-wide">
-                <img src="images/screens/14_circle_voicereply.png" alt="">
-                <p>Receive Voice Replies</p>
-                <p class="wear-small">
-                  Add actions to your notifications to allow users to reply by voice or touch. The system delivers the text to your app on the phone.
-                </p>
-                <p class="wear-small">
-                  <a href="/wear/notifications/remote-input.html">Learn about input actions</a>
-                </p>
-              </div>
-              <div class="col-3-wide">
-
-
-                <div class="wear-inset-video-container">
-                  <img class="wear-bezel-only" src="/wear/images/screens/bezel.png" alt="">
-                  <img class="gif" src="/wear/images/screens/pages_animated.gif">
-                </div>
-
-                <p>Add Notification Pages</p>
-                <p class="wear-small">
-                  Add additional pages to your notification that are visible on the wearable device to provide detailed information on the wrist.
-                </p>
-                <p class="wear-small">
-                  <a href="/wear/notifications/pages.html">Learn about pages</a>
-                </p>
-              </div>
-              <div class="col-3-wide">
-                <img src="images/screens/11_stack_B.png" alt="">
-                <p>Stack Multiple Notifications</p>
-                <p class="wear-small">
-                  Your app should consolidate similar notifications. On a wearable, you can stack them together so the details for each are immediately available.
-                </p>
-                <p class="wear-small">
-                  <a href="/wear/notifications/stacks.html">Learn about stacks</a>
-                </p>
-              </div>
-            </div>
-
-            <p>
-              You can also trigger your notifications contextually using existing Android APIs.  For example, use <a href="{@docRoot}training/location/geofencing.html">geofences</a> to provide glanceable information to your users when they are at home, or use the <a href="{@docRoot}training/location/activity-recognition.html">activity detection APIs</a> to send messages to your users’ wrists while they are bicycling.
-            </p>
-
-            <p>See the <a href="{@docRoot}wear/design/index.html">Android Wear Developer Preview Design Principles</a> for more suggestions on creating great wearable experiences.</p>
+              Before you start building, check out the
+              <a href="/design/devices/wear.html">Android Wear Design Principles</a>
+              to understand how to create great experiences for this exciting, new form factor.</p>
 
           </div>
         </div>  <!-- end .wrap -->
-      </div>  <!-- end .wear-section -->
+      </div>  <!-- end .landing-section -->
 
-      <div class="wear-section" style="background-color:#f5f5f5">
+      <div class="landing-section landing-gray-background">
         <div class="wrap">
-          <div class="wear-section-header">
-            <div class="wear-pre-h1">Coming soon</div>
-            <div class="wear-h1">The Android Wear SDK</div>
-            <div class="wear-subhead">
-              The Developer Preview is just the beginning for Android Wear.
+          <div class="landing-section-header">
+            <div class="landing-h1">Developing for Android Wear</div>
+            <div class="landing-subhead">
+             The Android Wear APIs are delivered in the Android v4 support library and Google Play services.
+             This lets Android handhelds, old and new, communicate with Android wearables.
             </div>
           </div>
 
-          <div class="wear-body">
-            <p>
-              In the coming months we’ll be launching new APIs and features for Android wearables to create even more unique experiences for the wrist:
-            </p>
-
-            <div class="wear-breakout cols">
+          <div class="landing-body">
+            <div class="landing-breakout cols">
+              <div class="col-4">
+                <img src="/wear/images/features/ts2.png" alt="">
+                <p>Synced Notifications</p>
+                <p class="landing-small">
+                  Notifications on handhelds can automatically sync to wearables, so design them
+                  with both devices in mind.
+                </p>
+                <p class="landing-small">
+                  <a href="/training/wearables/notifications/index.html">Build notifications</a>
+                </p>
+              </div>
               <div class="col-4">
                 <img src="/wear/images/features/ts1.png" alt="">
-                <p>Build Custom UI</p>
-                <p class="wear-small">
-                  Create custom card layouts and run activities directly on  wearables.
+                <p>Wearable Apps</p>
+                <p class="landing-small">
+                  Create custom experiences with activities, services, sensors, and much
+                  more with the Android SDK.
+                </p>
+                <p class="landing-small">
+                  <a href="/training/wearables/apps/index.html/">Create wearable apps</a>
                 </p>
               </div>
               <div class="col-4">
                 <img src="/wear/images/features/ts2.png" alt="">
                 <p>Send Data</p>
-                <p class="wear-small">
-                  Send data and actions between a phone and a wearable with data replication APIs and RPCs.
+                <p class="landing-small">
+                  Send data and actions between handhelds and wearables with
+                  data replication APIs and RPCs.
                 </p>
-              </div>
-              <div class="col-4">
-                <img src="/wear/images/features/ts3.png" alt="">
-                <p>Control Sensors</p>
-                <p class="wear-small">
-                  Gather sensor data and display it in real-time on Android wearables.
+                <p class="landing-small">
+                  <a href="/training/wearables/apps/index.html/">Work with the Data Layer</a>
                 </p>
               </div>
               <div class="col-4">
                 <img src="/wear/images/features/ts4.png" alt="">
                 <p>Voice Actions</p>
-                <p class="wear-small">
-                  Register your app to handle voice actions, like "Ok Google, take a note."
+                <p class="landing-small">
+                  Register your app to handle voice actions, like "Ok Google, take a&nbsp;note,"
+                  for a hands-free experience.
+                </p>
+                <p class="landing-small">
+                  <a href="/training/wearables/apps/index.html/">Integrate voice actions</a>
                 </p>
               </div>
             </div>
-
           </div>
         </div> <!-- end .wrap -->
-      </div> <!-- end .wear-section -->
-
-      <div class="wear-section wear-white-background">
+      </div> <!-- end .landing-section -->
+<!--
+      <div class="landing-section landing-white-background">
         <div class="wrap">
-          <div class="wear-section-header">
-            <div class="wear-h2">Building an Ecosystem</div>
-            <div class="wear-body wear-align-center">
-              <p class="wear-small">
+          <div class="landing-section-header">
+            <div class="landing-h2">Building an Ecosystem</div>
+            <div class="landing-body landing-align-center">
+              <p class="landing-small">
                 We’re working with several partners to bring you watches powered by Android Wear later this year!
               </p>
             </div>
           </div>
 
-          <div class="wear-partners cols">
+          <div class="landing-partners cols">
             <div class="col-4">
               <img src="/wear/images/partners/asus.png" alt="Asus">
             </div>
@@ -301,68 +245,75 @@ $("#icon-video-close").on("click", function() {
               <img src="/wear/images/partners/samsung.png" alt="Samsung">
             </div>
           </div>
-        </div> <!-- end .wrap -->
-      </div> <!-- end .wear-section -->
+        </div> <!-- end .wrap 
+      </div> <!-- end .landing-section -->
 
-      <div class="wear-section wear-red-background">
+      <div class="landing-section landing-red-background">
         <div class="wrap">
-          <div class="wear-section-header">
-            <div class="wear-h1 wear-align-left">Start working with Android Wear</div>
-            <div class="wear-subhead wear-subhead-red">
+          <div class="landing-section-header">
+            <div class="landing-h1 landing-align-left">Get Started with Android Wear</div>
+            <div class="landing-subhead landing-subhead-red">
               <p>
-                Your app’s notifications will already appear on Android wearables. <br>
-                With the new Android Wear APIs, you can customize and extend those notifications.
-              </p>
-              <p>
-                We’re excited about wearables and the experiences developers can create with them. <br>
-                We can’t wait to see what you do next.</p>
+                Set up your development environment and start working with the APIs.
+                We’re excited about the experiences you'll create and can't
+                wait to see what you do next.</p>
             </div>
           </div>
-          <div class="wear-body">
-            <a href="/wear/preview/start.html" class="wear-button wear-secondary" style="margin-top: 20px;">
-              Get the Developer Preview
+          <div class="landing-body">
+            <a href="/training/wearables/index.html" class="landing-button landing-secondary" style="margin-top: 20px;">
+              Get Started
             </a>
           </div>
         </div>
       </div>
 
-      <div class="wear-section">
+      <div class="landing-section">
         <div class="wrap">
           <div class="cols">
-            <div class="wear-body">
+            <div class="landing-body">
               <div class="col-3-wide">
                   <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">
-                    <img class="wear-social-image" src="//www.google.com/images/icons/product/youtube-128.png" alt="">
+                    <img class="landing-social-image" src="//www.google.com/images/icons/product/youtube-128.png" alt="">
                   </a>
-                <div class="wear-social-copy">
+                <div class="landing-social-copy">
                   <p>DevBytes</p>
-                  <p class="wear-small">
-                    Learn how to optimize your app notifications for wearable devices in this <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">DevBytes video</a> using the Android Wear Developer Preview.
-                  </p>
+                    <p class="landing-small">
+                    Learn the basic concepts of Android Wear
+                    development with videos from the product team.
+                    </p>
+                    <br>
+                    <p class="landing-small">
+                      <a target="_blank" href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef">DevBytes videos</a>
+                    </p>
                 </div>
               </div>
               <div class="col-3-wide">
-                <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">
-                  <img class="wear-social-image" src="/wear/images/blogger.png" alt="">
+                <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-landing-developer-preview.html">
+                  <img class="landing-social-image" src="/wear/images/blogger.png" alt="">
                 </a>
-                <div class="wear-social-copy">
+                <div class="landing-social-copy">
                   <p>Blog Post</p>
-                  <p class="wear-small">
-                    Read more about the Android Wear Developer Preview announcement
-                    at the <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">Android Developers Blog</a>.
+                  <p class="landing-small">
+                    Read more about Android Wear development
+                    on our blog. Just search for "Android Wear".
                   </p>
+                  <br>
+                    <p class="landing-small">
+                    <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">Android Developers Blog</a>
+                    </p>
+                  <p></p>
                 </div>
               </div>
               <div class="col-3-wide">
                 <a target="_blank" href="http://g.co/androidweardev">
-                  <img class="wear-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Wear Developers">
+                  <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Wear Developers">
                 </a>
-                <div class="wear-social-copy">
+                <div class="landing-social-copy">
                   <p>G+ Community</p>
-                  <p class="wear-small">
-                    Follow us on Google+ to stay up-to-date on Android Wear development and join the discussion!
+                  <p class="landing-small">
+                    Follow us on Google+ to stay up-to-date with Android Wear development and to join the discussion!
                   </p>
-                  <p class="wear-small">
+                  <p class="landing-small">
                     <a target="_blank" href="http://g.co/androidweardev">+Android Wear Developers</a>
                   </p>
                 </div>
@@ -370,14 +321,14 @@ $("#icon-video-close").on("click", function() {
             </div>
           </div>
         </div> <!-- end .wrap -->
-      </div> <!-- end .wear-section -->
-    </div> <!-- end .wear-rest-of-page -->
+      </div> <!-- end .landing-section -->
+    </div> <!-- end .landing-rest-of-page -->
 
 
     <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
       <div class="layout-content-col col-16" style="padding-top:4px">
         <style>#___plusone_0 {float:right !important;}</style>
-        <div class="g-plusone" data-size="medium"></div>
+        <div id="___plusone_0" style="text-indent: 0px; margin: 0px; padding: 0px; border-style: none; float: none; line-height: normal; font-size: 1px; vertical-align: baseline; display: inline-block; width: 90px; height: 20px; background: transparent;"><iframe frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" style="position: static; top: 0px; width: 90px; margin: 0px; border-style: none; left: 0px; visibility: visible; height: 20px;" tabindex="0" vspace="0" width="100%" id="I0_1402525433965" name="I0_1402525433965" src="https://apis.google.com/u/0/_/+1/fastbutton?usegapi=1&amp;size=medium&amp;origin=http%3A%2F%2Frobertly.mtv%3A8080&amp;url=http%3A%2F%2Frobertly.mtv%3A8080%2Fwear%2Findex.html&amp;gsrc=3p&amp;jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.QxHQHBkhz7M.O%2Fm%3D__features__%2Fam%3DUQ%2Frt%3Dj%2Fd%3D1%2Fz%3Dzcms%2Frs%3DAItRSTMLrMyRVKsu2FQoRingre3w1MT49A#_methods=onPlusOne%2C_ready%2C_close%2C_open%2C_resizeMe%2C_renderstart%2Concircled%2Cdrefresh%2Cerefresh%2Conload&amp;id=I0_1402525433965&amp;parent=http%3A%2F%2Frobertly.mtv%3A8080&amp;pfname=&amp;rpctoken=32453860" data-gapiattached="true" title="+1"></iframe></div>
       </div>
     </div>
     <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
@@ -391,14 +342,4 @@ $("#icon-video-close").on("click", function() {
     </div>
 
 
-  </div> <!-- end wear-body-content -->
-
-  <script>
-  $("a.wear-down-arrow").on("click", function(e) {
-    $("body").animate({
-      scrollTop: $(".wear-hero").height() + 128
-    }, 1000, "easeOutQuint");
-    e.preventDefault();
-  });
-  </script>
-
+  </div> <!-- end landing-body-content -->

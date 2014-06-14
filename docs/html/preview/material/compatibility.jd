@@ -1,0 +1,51 @@
+page.title=Compatibility
+
+@jd:body
+
+<p>The new material design features (like the Material theme and custom animations) are only
+available in the Android L Developer Preview. However, you can design your apps to make use of
+these features when running on devices with the Android L Developer Preview and still be
+compatible with previous releases of Android.</p>
+
+
+<h2 style="margin-top:35px">Material Theme</h2>
+
+<p>The Material theme is only available in the Android L Developer Preview. To configure your
+app to use the Material theme on devices running the Android L Developer Preview and an older
+theme on devices running earlier versions of Android:</p>
+
+<ol>
+<li>Define a theme that inherits from an older theme (like Holo) in
+<code>res/values/styles.xml</code>.</li>
+<li>Define a theme with the same name that inherits from the Material theme in
+<code>res/values-v21/styles.xml</code>.</li>
+<li>Set this theme as your app's theme in the manifest file.</li>
+</ol>
+
+<p class="note"><strong>Note:</strong> If you do not provide an alternative theme in this manner,
+your app will not run on earlier versions of Android.</p>
+
+
+<h2 style="margin-top:35px">Layouts</h2>
+
+<p>If the layouts that you design according to the material design guidelines do not use any
+of the new XML attributes from the Android L Developer Preview, they will work on previous
+versions of Android. Otherwise, you can provide alternative layouts. You can also provide
+alternative layouts to customize how your app looks on earlier versions of Android.</p>
+
+<p>Create your layout files for the Android L Developer Preview inside <code>res/layout-v21/</code>
+and your alternative layout files for earlier versions of Android inside <code>res/layout/</code>.
+Alternative layouts have the same file name.</p>
+
+
+<h2 style="margin-top:35px">UI Widgets</h2>
+
+<p>The <code>RecyclerView</code> and <code>CardView</code> widgets are included in the Android L
+Developer Preview Support Library, so they are available in earlier versions of Android.</p>
+
+
+<h2 style="margin-top:35px">Animation APIs</h2>
+
+<p>The new APIs for custom animations are only available in the Android L Developer Preview. To
+preserve compatibility with earlier verisons of Android, check the system version at runtime before
+you invoke these APIs.</p>
