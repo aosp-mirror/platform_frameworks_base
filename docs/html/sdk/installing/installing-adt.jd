@@ -20,6 +20,18 @@ only if you already have an Eclipse installation that you want to continue using
 have Eclipse installed, you should instead <b><a href="{@docRoot}sdk/index.html">install
 the complete Android SDK</a></b>, which includes the latest IDE for Android developers.</p>
 
+<p>Your existing Eclipse installation must meet these requirements:</p>
+    <ul>
+      <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
+<p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
+supported with the latest version of ADT.</p></li>
+      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
+in most Eclipse IDE packages) </li>
+      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
+        (JRE alone is not sufficient)</li>oid Development Tools plugin</a>
+(recommended)</li>
+      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
+    </ul>
 
 
 <h2 id="Download">Download the ADT Plugin</h2>

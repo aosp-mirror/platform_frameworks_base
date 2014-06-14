@@ -1,5 +1,5 @@
-page.title=Getting Started with Android Studio
-page.tags=studio
+page.title=Android Studio
+page.tags="studio"
 @jd:body
 
 
@@ -7,7 +7,7 @@ page.tags=studio
 
 <div style="position:relative;min-height:660px;">
 
-<h3 style="color:#f80">BETA RELEASE</h3>
+<h3 style="color:#FF4444;margin:-30px 0 20px">BETA</h3>
 
 <div id="tos" style="position:absolute;display:none;width:inherit;">
 <div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
@@ -185,19 +185,19 @@ This is the Android Software Development Kit License Agreement
 
 <div id="main">
 
-<div class="figure" style="width:400px;margin-top:-20px">
+<div class="figure" style="width:400px;margin-top:-75px">
 <img src="{@docRoot}images/tools/android-studio.png" height="330" width="400" style="margin-bottom:20px" />
 
 <a class="big button subtitle" id="download-ide-button"
-href="" style="display:none;width:265px;margin:0 auto;display:block;font-size:18px" ></a>
-<div style="width:290px;padding:10px 40px 0 60px;font-size:12px;line-height:16px">
+href="" style="display:none;width:368px;margin:0 auto;display:block;font-size:18px" ></a>
+<div style="margin:20px 0 0 0">
 
 <p style="margin-bottom:8px">This download includes:</p>
-<ul>
-<li>Android Studio <b>early access preview</b></li>
-<li>All the Android SDK Tools to design, test, debug, and profile your app</li>
-<li>The latest Android platform to compile your app</li>
-<li>The latest Android system image to run your app in the emulator</li>
+<ul style="margin-bottom:20px">
+<li>Android Studio Beta</li>
+<li>All the Android SDK Tools to design, test, and debug your app</li>
+<li>A version of the Android platform to compile your app</li>
+<li>A version of the Android system image to run your app in the emulator</li>
 </ul>
 
 </div>
@@ -206,36 +206,34 @@ href="" style="display:none;width:265px;margin:0 auto;display:block;font-size:18
 
 
 <p>Android Studio is a new Android development environment based on IntelliJ
-IDEA. Similar to Eclipse with the
-ADT Plugin, Android Studio provides integrated Android developer tools
-for development and debugging. On top of the
+IDEA. It provides new features and improvements over Eclipse ADT
+and will be the official Android IDE once it's ready. On top of the
 capabilities you expect from IntelliJ, Android Studio offers:</p>
 
 <ul>
-  <li>Gradle-based build support.</li>
-  <li>Android-specific refactoring and quick fixes.</li>
-  <li>Lint tools to catch performance, usability, version compatibility and other problems.</li>
-  <li>ProGuard and app-signing capabilities. </li>
-  <li>Template-based wizards to create common Android designs and components.</li>
-  <li>A rich layout editor that allows you to drag-and-drop UI components, preview layouts on
-  multiple screen configurations, and much more.</li>
+  <li>Flexible Gradle-based build system.</li>
+  <li>Build variants and multiple APK generation.</li>
+  <li>Expanded template support for Google Services and various device types.</li>
+  <li>Rich layout editor with support for theme editing.</li>
+  <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
+  <li>ProGuard and app-signing capabilities.</li>
   <li>Built-in support for <a
   href="http://android-developers.blogspot.com/2013/06/adding-backend-to-your-app-in-android.html"
   class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
-  Messaging and App Engine as server-side components.
+  Messaging and App Engine.
 </ul>
 
-<p class="caution"><strong>Caution:</strong> Android Studio is currently available as
-an <strong>early access preview</strong>. Several features
-are either incomplete or not yet implemented and you may encounter bugs. If you are not
+<p class="caution"><strong>Caution:</strong> Android Studio is currently in
+<strong>beta</strong>. Some features
+are not yet implemented and you may encounter bugs. If you are not
 comfortable using an unfinished product, you may want to instead
-download (or continue to use) the
-<a href="{@docRoot}sdk/index.html">ADT Bundle</a> (Eclipse with the ADT Plugin).</p>
+download (or continue to use)
+<a href="{@docRoot}sdk/index.html">Eclipse with ADT</a>.</p>
 
 
-<h4 style="clear:right;text-align:right;margin-right:50px"><a href='' class="expandable"
+<h4 style="margin-top: 20px;"><a href='' class="expandable"
   onclick="toggleExpandable(this,'.pax');return false;"
-  >DOWNLOAD FOR OTHER PLATFORMS</a></h4>
+  >VIEW ALL DOWNLOADS AND SIZES</a></h4>
 
 <div class="pax col-13 online" style="display:none;margin:0;">
 
@@ -285,6 +283,79 @@ download (or continue to use) the
   </table>
 
 </div><!-- end pax -->
+
+
+
+<h2 style="margin-bottom: 0px;">Android Studio vs. Eclipse ADT Comparison</h2>
+
+<p>
+The following table lists some key differences between Android Studio Beta and
+<a href="{@docRoot}sdk/index.html">Eclipse with ADT</a>.
+</p>
+
+<style>
+td.yes {
+  color: #669900;
+}
+td.no {
+  color: #CC0000;
+}
+</style>
+
+<table>
+  <tbody><tr>
+    <th>Feature</th>
+    <th>Android Studio</th>
+    <th>ADT</th>
+  </tr>
+  <tr>
+    <td>Build system</td>
+    <td><a href="http://www.gradle.org/" class="external-link">Gradle</a></td>
+    <td><a href="http://ant.apache.org/" class="external-link">Ant</a></td>
+    </tr>
+    <tr>
+
+    <td>Maven-based build dependencies</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+
+    <td>Build variants and multiple-APK generation (great for Android Wear)</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+
+    <tr>
+    <td>Advanced Android code completion and refactoring</td>
+    <td class="yes">Yes</td>
+    <td class="no">No</td>
+    </tr>
+  <tr>
+    <td>Graphical layout editor</td>
+    <td class="yes">Yes</td>
+    <td class="yes">Yes</td>
+   </tr>
+   <tr>
+  </tr>
+
+    <tr>
+    <td>APK signing</td>
+    <td class="yes">Yes</td>
+    <td class="yes">Yes</td>
+    </tr>
+
+    <tr>
+    <td>Keystore management</td>
+    <td class="no">Coming soon</td>
+    <td class="yes">Yes</td>
+    </tr>
+
+    <tr>
+    <td>NDK support</td>
+    <td class="no">Coming soon</td>
+    <td class="yes">Yes</td>
+    </tr>
+ </tbody></table>
 
 
 
@@ -505,8 +576,8 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.5.2</span>"
-        + "<br/> <span class='small'>for " + os + "</span>");
+    $('#download-ide-button').append("Download Android Studio Beta <span class='small'>v0.5.2</span>"
+        + "<br/> <span class='small'>with the Android SDK for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
   } else {
