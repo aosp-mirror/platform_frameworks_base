@@ -29,6 +29,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -163,50 +164,64 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     }
 
     /** Synchronizes this view's properties with the task's transform */
-    void updateViewPropertiesToTaskTransform(TaskViewTransform animateFromTransform,
-                                             TaskViewTransform toTransform, int duration) {
+    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
         if (Console.Enabled) {
             Console.log(Constants.Log.UI.Draw, "[TaskView|updateViewPropertiesToTaskTransform]",
                     "duration: " + duration, Console.AnsiPurple);
         }
 
         // Update the bar view
-        mBarView.updateViewPropertiesToTaskTransform(animateFromTransform, toTransform, duration);
+        mBarView.updateViewPropertiesToTaskTransform(toTransform, duration);
 
-        // Update this task view
+        // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
-            if (animateFromTransform != null) {
-                setTranslationY(animateFromTransform.translationY);
-                if (Constants.DebugFlags.App.EnableShadows) {
-                    setTranslationZ(animateFromTransform.translationZ);
-                }
-                setScaleX(animateFromTransform.scale);
-                setScaleY(animateFromTransform.scale);
-                setAlpha(animateFromTransform.alpha);
+            ViewPropertyAnimator anim = animate();
+            boolean useLayers = false;
+
+            // Animate to the final state
+            if (toTransform.hasTranslationYChangedFrom(getTranslationY())) {
+                anim.translationY(toTransform.translationY);
             }
-            if (Constants.DebugFlags.App.EnableShadows) {
-                animate().translationZ(toTransform.translationZ);
+            if (Constants.DebugFlags.App.EnableShadows &&
+                    toTransform.hasTranslationZChangedFrom(getTranslationZ())) {
+                anim.translationZ(toTransform.translationZ);
             }
-            animate().translationY(toTransform.translationY)
-                    .scaleX(toTransform.scale)
+            if (toTransform.hasScaleChangedFrom(getScaleX())) {
+                anim.scaleX(toTransform.scale)
                     .scaleY(toTransform.scale)
-                    .alpha(toTransform.alpha)
-                    .setStartDelay(0)
-                    .setDuration(duration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setUpdateListener(mUpdateDimListener)
-                    .start();
+                    .setUpdateListener(mUpdateDimListener);
+                useLayers = true;
+            }
+            if (toTransform.hasAlphaChangedFrom(getAlpha())) {
+                // Use layers if we animate alpha
+                anim.alpha(toTransform.alpha);
+                useLayers = true;
+            }
+            if (useLayers) {
+                anim.withLayer();
+            }
+            anim.setStartDelay(0)
+                .setDuration(duration)
+                .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                .start();
         } else {
-            setTranslationY(toTransform.translationY);
-            if (Constants.DebugFlags.App.EnableShadows) {
+            // Set the changed properties
+            if (toTransform.hasTranslationYChangedFrom(getTranslationY())) {
+                setTranslationY(toTransform.translationY);
+            }
+            if (Constants.DebugFlags.App.EnableShadows &&
+                    toTransform.hasTranslationZChangedFrom(getTranslationZ())) {
                 setTranslationZ(toTransform.translationZ);
             }
-            setScaleX(toTransform.scale);
-            setScaleY(toTransform.scale);
-            setAlpha(toTransform.alpha);
+            if (toTransform.hasScaleChangedFrom(getScaleX())) {
+                setScaleX(toTransform.scale);
+                setScaleY(toTransform.scale);
+                updateDimOverlayFromScale();
+            }
+            if (toTransform.hasAlphaChangedFrom(getAlpha())) {
+                setAlpha(toTransform.alpha);
+            }
         }
-        updateDimOverlayFromScale();
-        invalidate();
     }
 
     /** Resets this view's properties */
@@ -298,6 +313,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         .scaleY(transform.scale)
                         .translationY(transform.translationY)
                         .setStartDelay(0)
+                        .setUpdateListener(null)
                         .setInterpolator(mConfig.linearOutSlowInInterpolator)
                         .setDuration(475)
                         .withLayer()
@@ -330,6 +346,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .scaleY(transform.scale)
                     .translationY(transform.translationY)
                     .setStartDelay(delay)
+                    .setUpdateListener(null)
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .setDuration(mConfig.taskViewEnterFromHomeDuration)
                     .withLayer()
@@ -343,6 +360,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         animate()
                 .translationY(ctx.offscreenTranslationY)
                 .setStartDelay(0)
+                .setUpdateListener(null)
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
                 .setDuration(mConfig.taskViewExitToHomeDuration)
                 .withLayer()
@@ -383,6 +401,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         animate().translationX(mConfig.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
             .setStartDelay(0)
+            .setUpdateListener(null)
             .setInterpolator(mConfig.fastOutSlowInInterpolator)
             .setDuration(mConfig.taskViewRemoveAnimDuration)
             .withLayer()

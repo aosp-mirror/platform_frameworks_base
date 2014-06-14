@@ -30,18 +30,21 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
@@ -55,6 +58,8 @@ import java.util.Random;
  * a point of injection when testing UI.
  */
 public class SystemServicesProxy {
+    final static String TAG = "SystemServicesProxy";
+
     ActivityManager mAm;
     AppWidgetManager mAwm;
     PackageManager mPm;
@@ -67,6 +72,8 @@ public class SystemServicesProxy {
     ComponentName mAssistComponent;
 
     Bitmap mDummyIcon;
+    Paint mBgProtectionPaint;
+    Canvas mBgProtectionCanvas;
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
@@ -79,6 +86,12 @@ public class SystemServicesProxy {
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
+
+        // Create the protection paints
+        mBgProtectionPaint = new Paint();
+        mBgProtectionPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
+        mBgProtectionPaint.setColor(0xFFffffff);
+        mBgProtectionCanvas = new Canvas();
 
         // Resolve the assist intent
         Intent assist = mSm.getAssistIntent(context, false);
@@ -195,7 +208,20 @@ public class SystemServicesProxy {
             return thumbnail;
         }
 
-        return mAm.getTaskTopThumbnail(taskId);
+        Bitmap thumbnail = mAm.getTaskTopThumbnail(taskId);
+        if (thumbnail != null) {
+            // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
+            // left pixel, then assume the whole thumbnail is transparent. Generally, proper
+            // screenshots are always composed onto a bitmap that has no alpha.
+            if (Color.alpha(thumbnail.getPixel(0, 0)) == 0) {
+                mBgProtectionCanvas.setBitmap(thumbnail);
+                mBgProtectionCanvas.drawRect(0, 0, thumbnail.getWidth(), thumbnail.getHeight(),
+                        mBgProtectionPaint);
+                mBgProtectionCanvas.setBitmap(null);
+                Log.e(TAG, "Invalid screenshot detected from getTaskThumbnail()");
+            }
+        }
+        return thumbnail;
     }
 
     /** Moves a task to the front with the specified activity options */

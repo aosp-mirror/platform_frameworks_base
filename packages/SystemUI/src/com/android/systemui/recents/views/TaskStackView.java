@@ -322,7 +322,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         if (mStackViewsAnimationDuration > 0 && i != 0) {
                             int fromIndex = (transform.t < 0) ? (visibleRange[0] - 1) :
                                     (visibleRange[1] + 1);
-                            tv.updateViewPropertiesToTaskTransform(null,
+                            tv.updateViewPropertiesToTaskTransform(
                                     getStackTransform(fromIndex, stackScroll), 0);
                         }
                     }
@@ -343,7 +343,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 if (taskIndex < 0 || !mTaskTransforms.get(taskIndex).visible) {
                     mViewPool.returnViewToPool(tv);
                 } else {
-                    tv.updateViewPropertiesToTaskTransform(null, mTaskTransforms.get(taskIndex),
+                    tv.updateViewPropertiesToTaskTransform(mTaskTransforms.get(taskIndex),
                             mStackViewsAnimationDuration);
                 }
             }
@@ -996,7 +996,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     // Compose a new transform to fade and slide the new task in
                     TaskViewTransform fromTransform = new TaskViewTransform(toTransform);
                     tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
-                    tv.updateViewPropertiesToTaskTransform(null, fromTransform, 0);
+                    tv.updateViewPropertiesToTaskTransform(fromTransform, 0);
 
                     int startDelay = offset *
                             Constants.Values.TaskStackView.FilterStartDelay;
@@ -1059,13 +1059,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                     for (final TaskView tv : childViewTransforms.keySet()) {
                                         Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
                                         tv.animate().setStartDelay(t.first);
-                                        tv.updateViewPropertiesToTaskTransform(null, t.second, duration);
+                                        tv.updateViewPropertiesToTaskTransform(t.second, duration);
                                     }
                                 }
                             }
                         }
                     });
-            tv.updateViewPropertiesToTaskTransform(null, t.second, duration);
+            tv.updateViewPropertiesToTaskTransform(t.second, duration);
         }
     }
 
