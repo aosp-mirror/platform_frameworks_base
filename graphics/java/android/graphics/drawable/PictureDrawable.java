@@ -25,7 +25,7 @@ import android.graphics.Rect;
 
 /**
  * Drawable subclass that wraps a Picture, allowing the picture to be used
- * wherever a Drawable is supported.
+ * whereever a Drawable is supported.
  */
 public class PictureDrawable extends Drawable {
 
@@ -40,7 +40,7 @@ public class PictureDrawable extends Drawable {
     public PictureDrawable(Picture picture) {
         mPicture = picture;
     }
-
+    
     /**
      * Return the picture associated with the drawable. May be null.
      *
@@ -49,7 +49,7 @@ public class PictureDrawable extends Drawable {
     public Picture getPicture() {
         return mPicture;
     }
-
+    
     /**
      * Associate a picture with this drawable. The picture may be null.
      *
@@ -58,7 +58,7 @@ public class PictureDrawable extends Drawable {
     public void setPicture(Picture picture) {
         mPicture = picture;
     }
-
+    
     @Override
     public void draw(Canvas canvas) {
         if (mPicture != null) {
@@ -86,16 +86,16 @@ public class PictureDrawable extends Drawable {
         // not sure, so be safe
         return PixelFormat.TRANSLUCENT;
     }
-
+    
     @Override
     public void setFilterBitmap(boolean filter) {}
-
+    
     @Override
     public void setDither(boolean dither) {}
-
+    
     @Override
     public void setColorFilter(ColorFilter colorFilter) {}
-
+    
     @Override
     public void setAlpha(int alpha) {}
 }

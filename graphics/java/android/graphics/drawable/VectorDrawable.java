@@ -14,7 +14,6 @@
 
 package android.graphics.drawable;
 
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -26,10 +25,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.PorterDuff.Mode;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -140,8 +137,6 @@ public class VectorDrawable extends Drawable {
 
     private final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
 
-    private PorterDuffColorFilter mTintFilter;
-
     public VectorDrawable() {
         mVectorState = new VectorDrawableState(null);
     }
@@ -187,42 +182,8 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
-        final VectorDrawableState state = mVectorState;
-        if (colorFilter != null) {
-            // Color filter overrides tint.
-            mTintFilter = null;
-        } else if (state.mTint != null && state.mTintMode != null) {
-            // Restore the tint filter, if we need one.
-            final int color = state.mTint.getColorForState(getState(), Color.TRANSPARENT);
-            mTintFilter = new PorterDuffColorFilter(color, state.mTintMode);
-            colorFilter = mTintFilter;
-        }
-
-        state.mVPathRenderer.setColorFilter(colorFilter);
+        mVectorState.mVPathRenderer.setColorFilter(colorFilter);
         invalidateSelf();
-    }
-
-    @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        final VectorDrawableState state = mVectorState;
-        if (state.mTint != tint || state.mTintMode != tintMode) {
-            state.mTint = tint;
-            state.mTintMode = tintMode;
-
-            mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
-            mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
-            invalidateSelf();
-        }
-    }
-
-    @Override
-    protected boolean onStateChange(int[] stateSet) {
-        final VectorDrawableState state = mVectorState;
-        if (state.mTint != null && state.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -436,8 +397,6 @@ public class VectorDrawable extends Drawable {
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
         Rect mPadding;
-        ColorStateList mTint;
-        Mode mTintMode;
 
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
@@ -445,8 +404,6 @@ public class VectorDrawable extends Drawable {
                 // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
                 mPadding = new Rect(copy.mPadding);
-                mTint = copy.mTint;
-                mTintMode = copy.mTintMode;
             }
         }
 

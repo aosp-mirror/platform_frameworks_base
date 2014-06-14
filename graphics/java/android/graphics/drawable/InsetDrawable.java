@@ -19,12 +19,10 @@ package android.graphics.drawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
 import android.graphics.*;
-import android.graphics.PorterDuff.Mode;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -46,7 +44,8 @@ import java.io.IOException;
  * @attr ref android.R.styleable#InsetDrawable_insetTop
  * @attr ref android.R.styleable#InsetDrawable_insetBottom
  */
-public class InsetDrawable extends Drawable implements Drawable.Callback {
+public class InsetDrawable extends Drawable implements Drawable.Callback
+{
     // Most of this is copied from ScaleDrawable.
     private InsetState mInsetState;
     private final Rect mTmpRect = new Rect();
@@ -63,13 +62,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     public InsetDrawable(Drawable drawable, int insetLeft, int insetTop,
                          int insetRight, int insetBottom) {
         this(null, null);
-
+        
         mInsetState.mDrawable = drawable;
         mInsetState.mInsetLeft = insetLeft;
         mInsetState.mInsetTop = insetTop;
         mInsetState.mInsetRight = insetRight;
         mInsetState.mInsetBottom = insetBottom;
-
+        
         if (drawable != null) {
             drawable.setCallback(this);
         }
@@ -79,7 +78,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         int type;
-
+        
         TypedArray a = r.obtainAttributes(attrs,
                 com.android.internal.R.styleable.InsetDrawable);
 
@@ -169,7 +168,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
                 | mInsetState.mChangingConfigurations
                 | mInsetState.mDrawable.getChangingConfigurations();
     }
-
+    
     @Override
     public boolean getPadding(Rect padding) {
         boolean pad = mInsetState.mDrawable.getPadding(padding);
@@ -179,7 +178,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         padding.top += mInsetState.mInsetTop;
         padding.bottom += mInsetState.mInsetBottom;
 
-        if (pad || (mInsetState.mInsetLeft | mInsetState.mInsetRight |
+        if (pad || (mInsetState.mInsetLeft | mInsetState.mInsetRight | 
                     mInsetState.mInsetTop | mInsetState.mInsetBottom) != 0) {
             return true;
         } else {
@@ -218,11 +217,6 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         mInsetState.mDrawable.setColorFilter(cf);
     }
 
-    @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        mInsetState.mDrawable.setTint(tint, tintMode);
-    }
-
     /** {@hide} */
     @Override
     public void setLayoutDirection(int layoutDirection) {
@@ -233,7 +227,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     public int getOpacity() {
         return mInsetState.mDrawable.getOpacity();
     }
-
+    
     @Override
     public boolean isStateful() {
         return mInsetState.mDrawable.isStateful();
@@ -245,12 +239,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         onBoundsChange(getBounds());
         return changed;
     }
-
-    @Override
-    protected boolean onLevelChange(int level) {
-        return mInsetState.mDrawable.setLevel(level);
-    }
-
+    
     @Override
     protected void onBoundsChange(Rect bounds) {
         final Rect r = mTmpRect;
@@ -332,12 +321,12 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         public Drawable newDrawable() {
             return new InsetDrawable(this, null);
         }
-
+        
         @Override
         public Drawable newDrawable(Resources res) {
             return new InsetDrawable(this, res);
         }
-
+        
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
