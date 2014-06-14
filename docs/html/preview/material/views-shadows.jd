@@ -1,0 +1,76 @@
+page.title=Views and Shadows
+
+@jd:body
+
+
+<p>In material design apps, depth has meaning. You should assign higher elevation values to more
+important UI elements in your app. The elevation value of a view determines the size of its
+shadow: views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane
+under an orthographic projection (the views do not scale for different values of Z).</p>
+
+
+<h2 style="margin-top:35px">View Elevation</h2>
+
+<p>The Z value for a view has two components, elevation and translation. The elevation is the
+static component, and the translation is used for animations:</p>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<p>To set the elevation of a view:</p>
+
+<ul>
+  <li>In a layout definition, use the <code>android:elevation</code> attribute.</li>
+  <li>In the code of an activity, use the <code>View.setElevation</code> method.</li>
+</ul>
+
+<p>To set the translation of a view, use the <code>View.setTranslationZ</code> method.</p>
+
+<p>The Z values are measured in the same units as the X and Y values (like <code>dp</code> or
+<code>px</code>).</p>
+
+
+<h2 style="margin-top:35px">Shadows and Outlines</h2>
+
+<p>The bounds of a view's background drawable determine the default shape of its shadow. To define
+a custom shape for a shadow, such as an oval, use the <code>View.setOutline</code> method:</p>
+
+<pre>
+View v = findViewById(R.id.my_view);
+
+// add 10px to the static elevation
+v.setTranslationZ(10);
+
+// set an oval shadow
+Outline outline = new Outline();
+outline.setOval(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+myView.setOutline(outline);
+</pre>
+
+<p>An <code>Outline</code> represents the outer shape of a graphics object. You can create
+<code>Outline</code> objects as in this example, or you can obtain the outline from a
+<code>Drawable</code> object with the <code>getOutline</code> method.</p>
+
+<p>The outline of a view also defines the ripple area for touch feedback.</p>
+
+<p>To prevent a view from casting a shadow, set its outline to <code>null</code>.</p>
+
+
+<h2 style="margin-top:35px">Clipping Views</h2>
+
+<p>The Android L Developer Preview lets you clip a view to its outline area using the
+<code>View.setClipToOutline</code> method. Only rectangle, circle, and round rectangle outlines
+support clipping, as determined by the <code>Outline.canClip</code> method.</p>
+
+<p>To determine if a view has been clipped, use the <code>View.getClipToOutline</code> method.</p>
+
+<pre>
+// clip a view to an oval
+View v = findViewById(R.id.my_view);
+outline.setOval(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+myView.setOutline(outline);
+
+// if the view is not already clipped
+if (v.getClipToOutline() == false) {
+    v.setClipToOutline(true);
+}
+</pre>
