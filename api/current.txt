@@ -12277,6 +12277,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_PHYSICAL_SIZE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_PIXEL_ARRAY_SIZE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_SENSITIVITY_RANGE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_TIMESTAMP_CALIBRATION;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_WHITE_LEVEL;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_MAX_ANALOG_SENSITIVITY;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_ORIENTATION;
@@ -12485,6 +12486,8 @@ package android.hardware.camera2 {
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG = 1; // 0x1
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB = 4; // 0x4
     field public static final int SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB = 0; // 0x0
+    field public static final int SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED = 1; // 0x1
+    field public static final int SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED = 0; // 0x0
     field public static final int SENSOR_REFERENCE_ILLUMINANT1_CLOUDY_WEATHER = 10; // 0xa
     field public static final int SENSOR_REFERENCE_ILLUMINANT1_COOL_WHITE_FLUORESCENT = 14; // 0xe
     field public static final int SENSOR_REFERENCE_ILLUMINANT1_D50 = 23; // 0x17

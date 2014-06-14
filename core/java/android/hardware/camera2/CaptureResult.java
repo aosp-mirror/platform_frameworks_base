@@ -1591,9 +1591,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Video stabilization automatically translates and scales images from the camera
      * in order to stabilize motion between consecutive frames.</p>
      * <p>If enabled, video stabilization can modify the
-     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream
-     * stabilized</p>
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to keep the video stream stabilized.</p>
+     * <p>Switching between different video stabilization modes may take several frames
+     * to initialize, the camera device will report the current mode in capture result
+     * metadata. For example, When "ON" mode is requested, the video stabilization modes
+     * in the first several capture results may still be "OFF", and it will become "ON"
+     * when the initialization is done.</p>
+     * <p>If a camera device supports both this mode and OIS ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}),
+     * turning both modes on may produce undesirable interaction, so it is recommended not to
+     * enable both at the same time.</p>
      *
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
@@ -1846,6 +1854,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * makes use of mechanical elements to stabilize the camera
      * sensor, and thus allows for longer exposure times before
      * camera shake becomes apparent.</p>
+     * <p>Switching between different optical stabilization modes may take several
+     * frames to initialize, the camera device will report the current mode in
+     * capture result metadata. For example, When "ON" mode is requested, the
+     * optical stabilization modes in the first several capture results may still
+     * be "OFF", and it will become "ON" when the initialization is done.</p>
+     * <p>If a camera device supports both OIS and EIS ({@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode}),
+     * turning both modes on may produce undesirable interaction, so it is recommended not
+     * to enable both at the same time.</p>
      * <p>Not all devices will support OIS; see
      * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization} for
      * available controls.</p>
@@ -2117,12 +2133,19 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * row of the image sensor active array, in nanoseconds.</p>
      * <p>The timestamps are also included in all image
      * buffers produced for the same capture, and will be identical
-     * on all the outputs. The timestamps measure time since an
-     * unspecified starting point, and are monotonically
-     * increasing.</p>
-     * <p>They can be compared with the timestamps for other captures
-     * from the same camera device, but are not guaranteed to be
-     * comparable to any other time source.</p>
+     * on all the outputs.</p>
+     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION android.sensor.info.timestampCalibration} <code>==</code> UNCALIBRATED,
+     * the timestamps measure time since an unspecified starting point,
+     * and are monotonically increasing. They can be compared with the
+     * timestamps for other captures from the same camera device, but are
+     * not guaranteed to be comparable to any other time source.</p>
+     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION android.sensor.info.timestampCalibration} <code>==</code> CALIBRATED,
+     * the timestamps measure time in the same timebase as
+     * android.os.SystemClock#elapsedRealtimeNanos(), and they can be
+     * compared to other timestamps from other subsystems that are using
+     * that base.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_CALIBRATION
      */
     public static final Key<Long> SENSOR_TIMESTAMP =
             new Key<Long>("android.sensor.timestamp", long.class);
