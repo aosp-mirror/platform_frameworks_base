@@ -15,7 +15,6 @@ page.customHeadTag=<link rel="stylesheet" type="text/css" href="/wear/css/wear.c
 
 
 
-
 <div id="video-container">
   <div id="video-frame">
     <div class="video-close">
@@ -397,7 +396,7 @@ $("#icon-video-close").on("click", function() {
   <script>
   $("a.wear-down-arrow").on("click", function(e) {
     $("body").animate({
-      scrollTop: $(".wear-hero").height() + 76
+      scrollTop: $(".wear-hero").height() + 128
     }, 1000, "easeOutQuint");
     e.preventDefault();
   });
