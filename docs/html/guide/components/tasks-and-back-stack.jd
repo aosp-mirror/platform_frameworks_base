@@ -5,14 +5,6 @@ parent.link=activities.html
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>All activities belong to a task</li>
-  <li>A task contains a collection of activities in the order in which the user interacts with
-them</li>
-  <li>Tasks can move to the background and retain the state of each activity in order for users
-to perform other tasks without losing their work</li>
-</ul>
 
 <h2>In this document</h2>
 <ol>

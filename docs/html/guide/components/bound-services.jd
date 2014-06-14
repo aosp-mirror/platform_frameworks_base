@@ -6,12 +6,6 @@ parent.link=services.html
 
 <div id="qv-wrapper">
 <ol id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>A bound service allows other components to bind to it, in order to interact with it and
-perform interprocess communication</li>
-  <li>A bound service is destroyed once all clients unbind, unless the service was also started</li>
-</ul>
 <h2>In this document</h2>
 <ol>
   <li><a href="#Basics">The Basics</a></li>
