@@ -3,14 +3,6 @@ page.title=Services
 
 <div id="qv-wrapper">
 <ol id="qv">
-<h2>Quickview</h2>
-<ul>
-  <li>A service can run in the background to perform work even while the user is in a different
-application</li>
-  <li>A service can allow other components to bind to it, in order to interact with it and
-perform interprocess communication</li>
-  <li>A service runs in the main thread of the application that hosts it, by default</li>
-</ul>
 <h2>In this document</h2>
 <ol>
 <li><a href="#Basics">The Basics</a></li>

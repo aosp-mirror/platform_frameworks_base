@@ -5,15 +5,6 @@ parent.link=activities.html
 
 <div id="qv-wrapper">
 <div id="qv">
-
-  <h2>Quickview</h2>
-  <ul>
-    <li>Fragments decompose application functionality and UI into reusable modules</li>
-    <li>Add multiple fragments to a screen to avoid switching activities</li>
-    <li>Fragments have their own lifecycle, state, and back stack</li>
-    <li>Fragments require API Level 11 or greater</li>
-  </ul>
-
   <h2>In this document</h2>
   <ol>
     <li><a href="#Design">Design Philosophy</a></li>
