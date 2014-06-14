@@ -155,15 +155,15 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-6dp</dimen>
+    <dimen name="bottom_text_spacing_digital">-10dp</dimen>
     <dimen name="label_font_size">14dp</dimen>
-    <dimen name="widget_label_font_size">14sp</dimen>
-    <dimen name="widget_big_font_size">68dp</dimen>
+    <dimen name="widget_label_font_size">16sp</dimen>
+    <dimen name="widget_big_font_size">96dp</dimen>
     <dimen name="big_font_size">120dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>
 
     <!-- The vertical margin between the date and the owner info. -->
-    <dimen name="date_owner_info_margin">2dp</dimen>
+    <dimen name="date_owner_info_margin">10dp</dimen>
 </resources>
