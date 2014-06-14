@@ -19,10 +19,12 @@ package android.graphics.drawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
 import android.graphics.*;
+import android.graphics.PorterDuff.Mode;
 import android.view.Gravity;
 import android.util.AttributeSet;
 
@@ -185,6 +187,11 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     @Override
     public void setColorFilter(ColorFilter cf) {
         mScaleState.mDrawable.setColorFilter(cf);
+    }
+
+    @Override
+    public void setTint(ColorStateList tint, Mode tintMode) {
+        mScaleState.mDrawable.setTint(tint, tintMode);
     }
 
     @Override

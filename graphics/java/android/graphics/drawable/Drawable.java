@@ -17,13 +17,6 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
-import android.graphics.Insets;
-import android.graphics.Xfermode;
-import android.os.Trace;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -31,21 +24,28 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.Xfermode;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.View;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1223,6 +1223,26 @@ public abstract class Drawable {
         }
 
         return new BitmapDrawable(res, bm);
+    }
+
+    /**
+     * Ensures the tint filter is consistent with the current tint color and
+     * mode.
+     */
+    PorterDuffColorFilter updateTintFilter(PorterDuffColorFilter tintFilter, ColorStateList tint,
+            PorterDuff.Mode tintMode) {
+        if (tint == null || tintMode == null) {
+            return null;
+        }
+
+        final int color = tint.getColorForState(getState(), Color.TRANSPARENT);
+        if (tintFilter == null) {
+            return new PorterDuffColorFilter(color, tintMode);
+        }
+
+        tintFilter.setColor(color);
+        tintFilter.setMode(tintMode);
+        return tintFilter;
     }
 
     /**
