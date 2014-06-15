@@ -542,4 +542,12 @@ import java.util.TimeZone;
             throw new IllegalStateException("Wrong type " + expectedType + " but got " + type);
         }
     }
+
+    /**
+     * Recycle parcel object
+     */
+    public void recycleParcel() {
+        if (mParcel != null)
+            mParcel.recycle();
+    }
 }

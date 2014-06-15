@@ -430,6 +430,7 @@ public class VideoView extends SurfaceView
                         || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
                 mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
                         || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+                data.recycleParcel();
             } else {
                 mCanPause = mCanSeekBack = mCanSeekForward = true;
             }
