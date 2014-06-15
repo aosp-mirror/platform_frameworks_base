@@ -143,7 +143,7 @@ sounds and vibration.
 media playback control from the lockscreen through a media notification. This
 gives your app more control over the presentation of media buttons, while
 providing a consistent experience for users across the lockscreen and
-the unlocked device.</p>
+unlocked device.</p>
 
 <p>You must call {@code Notification.Builder.setVisibility(Notification.VISIBILITY_PUBLIC)} to mark your media notification as safe to reveal, even when the lockscreen is secured
 with a PIN, pattern, or password.</p>
@@ -185,7 +185,7 @@ which feel natural and delightful to users. This support includes:</p>
 UI elements with {@code android.view.Window.setStatusBarColor()}.
 </ul>
 <p>To learn more about adding material design functionality to your app, see
-<a href="{@docRoot}preview/quantum/index.html">Material design on Android</a>.</p>
+<a href="{@docRoot}preview/material/index.html">Material design on Android</a>.</p>
 
 <h3 id="LockscreenNotifications">Lockscreen notifications</h3>
 <p>Lockscreens in L Developer Preview have the ability to present notifications.
@@ -448,6 +448,7 @@ flexible use of NFC:</p>
 
 <ul>
 <li>Android Beam is now available in the share menu.
+<li>Support for the <a href="http://www.wi-fi.org/discover-wi-fi/wi-fi-direct">Wi-fi Direct standard</a>.
 <li>Your app can invoke the Android Beam on the user’s device to share data by
 calling {@code android.nfc.NfcAdapter.invokeBeam()}. This avoids the need for
 the user to manually tap the device against another NFC-capable device to
@@ -466,8 +467,8 @@ activity is in the foreground.
 
 <h3 id="JobScheduler">Scheduling jobs</h3>
 <p>The L Developer Preview provides a new {@code android.app.job.JobScheduler}
-API that lets you define jobs for the system to run asynchronously at a later
-time that optimizes battery life, such as when the device is charging. This is
+API that lets you optimize battery life by defining jobs for the system to run
+asynchronously at a later time, such as when the device is charging. This is
 useful when you want to defer non user-facing units of work, have application
 code that accesses the network, or want to run a number of tasks as a batch on
 a regular schedule.</p>
@@ -513,10 +514,10 @@ statistical data about battery usage on a device, organized by unique user ID
 <li>App UID aggregated statistics
 </ul>
 
-<p>Use the {@code --help} option to learn about the various options that you
-can apply for tailoring the output. For example, to run the tool to print
-battery usage statistics since the device was last charged for a given app
-package, run this command:
+<p>Use the {@code --help} option to learn about the various options for
+tailoring the output. For example, to run the tool to print battery usage
+statistics since the device was last charged for a given app package, run this
+command:
 <pre>
 $ adb shell dumpsys batterystats --charged <package-name>
 </pre>
