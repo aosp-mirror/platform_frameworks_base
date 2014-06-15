@@ -16,54 +16,24 @@
 
 package com.android.printspooler.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 
-import android.widget.TextView;
 import com.android.printspooler.R;
 
 /**
  * Fragment for showing a work in progress UI.
  */
 public final class PrintProgressFragment extends Fragment {
-
-    public interface OnCancelRequestListener {
-        public void onCancelRequest();
-    }
-
     public static PrintProgressFragment newInstance() {
         return new PrintProgressFragment();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup root,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle state) {
         return inflater.inflate(R.layout.print_progress_fragment, root, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        final Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
-        final TextView message = (TextView) view.findViewById(R.id.message);
-
-        cancelButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Activity activity = getActivity();
-                if (activity instanceof OnCancelRequestListener) {
-                    ((OnCancelRequestListener) getActivity()).onCancelRequest();
-                }
-                cancelButton.setVisibility(View.GONE);
-                message.setVisibility(View.VISIBLE);
-            }
-        });
     }
 }

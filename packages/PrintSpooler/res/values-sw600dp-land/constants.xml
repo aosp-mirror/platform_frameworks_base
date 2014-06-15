@@ -17,5 +17,6 @@
 <resources>
 
     <integer name="print_option_column_count">6</integer>
+    <integer name="preview_page_per_row_count">4</integer>
 
 </resources>

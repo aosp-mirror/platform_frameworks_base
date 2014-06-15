@@ -204,9 +204,13 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
         // PDF's coordinate system origin is left-bottom while
         // in graphics it is the top-left, so remap the origin.
         matrix.Set(1, 0, 0, -1, 0, pPage->GetPageHeight());
-        matrix.Scale(transform->getScaleX(), transform->getScaleY());
-        matrix.Rotate(transform->getSkewX(), transform->getSkewY());
-        matrix.Translate(transform->getTranslateX(), transform->getTranslateY());
+
+        SkScalar transformValues[6];
+        transform->asAffine(transformValues);
+
+        matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
     }
     pageContext->AppendObjectList(pPage, &matrix);
 
@@ -251,6 +255,7 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
     renderPageBitmap(bitmap, page, destLeft, destTop, destRight,
             destBottom, skMatrix, renderFlags);
 
+    skBitmap->notifyPixelsChanged();
     skBitmap->unlockPixels();
 }
 

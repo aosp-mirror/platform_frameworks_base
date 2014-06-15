@@ -34,39 +34,54 @@ import com.android.printspooler.R;
  * the former is opened.
  */
 @SuppressWarnings("unused")
-public final class ContentView extends ViewGroup implements View.OnClickListener {
+public final class PrintContentView extends ViewGroup implements View.OnClickListener {
     private static final int FIRST_POINTER_ID = 0;
 
     private final ViewDragHelper mDragger;
+
+    private final int mScrimColor;
 
     private View mStaticContent;
     private ViewGroup mSummaryContent;
     private View mDynamicContent;
 
     private View mDraggableContent;
+    private View mPrintButton;
     private ViewGroup mMoreOptionsContainer;
     private ViewGroup mOptionsContainer;
 
     private View mEmbeddedContentContainer;
+    private View mEmbeddedContentScrim;
 
     private View mExpandCollapseHandle;
     private View mExpandCollapseIcon;
 
     private int mClosedOptionsOffsetY;
-    private int mCurrentOptionsOffsetY;
+    private int mCurrentOptionsOffsetY = Integer.MIN_VALUE;
 
     private OptionsStateChangeListener mOptionsStateChangeListener;
 
+    private OptionsStateController mOptionsStateController;
+
     private int mOldDraggableHeight;
+
+    private float mDragProgress;
 
     public interface OptionsStateChangeListener {
         public void onOptionsOpened();
         public void onOptionsClosed();
     }
 
-    public ContentView(Context context, AttributeSet attrs) {
+    public interface OptionsStateController {
+        public boolean canOpenOptions();
+        public boolean canCloseOptions();
+    }
+
+    public PrintContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mDragger = ViewDragHelper.create(this, new DragCallbacks());
+
+        mScrimColor = context.getResources().getColor(R.color.print_preview_scrim_color);
 
         // The options view is sliding under the static header but appears
         // after it in the layout, so we will draw in opposite order.
@@ -77,7 +92,11 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         mOptionsStateChangeListener = listener;
     }
 
-    private boolean isOptionsOpened() {
+    public void setOpenOptionsController(OptionsStateController controller) {
+        mOptionsStateController = controller;
+    }
+
+    public boolean isOptionsOpened() {
         return mCurrentOptionsOffsetY == 0;
     }
 
@@ -85,7 +104,7 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         return mCurrentOptionsOffsetY == mClosedOptionsOffsetY;
     }
 
-    private void openOptions() {
+    public void openOptions() {
         if (isOptionsOpened()) {
             return;
         }
@@ -94,7 +113,7 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         invalidate();
     }
 
-    private void closeOptions() {
+    public void closeOptions() {
         if (isOptionsClosed()) {
             return;
         }
@@ -114,13 +133,14 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         mSummaryContent = (ViewGroup) findViewById(R.id.summary_content);
         mDynamicContent = findViewById(R.id.dynamic_content);
         mDraggableContent = findViewById(R.id.draggable_content);
+        mPrintButton = findViewById(R.id.print_button);
         mMoreOptionsContainer = (ViewGroup) findViewById(R.id.more_options_container);
         mOptionsContainer = (ViewGroup) findViewById(R.id.options_container);
         mEmbeddedContentContainer = findViewById(R.id.embedded_content_container);
-        mExpandCollapseIcon = findViewById(R.id.expand_collapse_icon);
+        mEmbeddedContentScrim = findViewById(R.id.embedded_content_scrim);
         mExpandCollapseHandle = findViewById(R.id.expand_collapse_handle);
+        mExpandCollapseIcon = findViewById(R.id.expand_collapse_icon);
 
-        mExpandCollapseIcon.setOnClickListener(this);
         mExpandCollapseHandle.setOnClickListener(this);
 
         // Make sure we start in a closed options state.
@@ -129,12 +149,16 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-        if (view == mExpandCollapseHandle || view == mExpandCollapseIcon) {
-            if (isOptionsClosed()) {
+        if (view == mExpandCollapseHandle) {
+            if (isOptionsClosed() && mOptionsStateController.canOpenOptions()) {
                 openOptions();
-            } else if (isOptionsOpened()) {
+            } else if (isOptionsOpened() && mOptionsStateController.canCloseOptions()) {
                 closeOptions();
             } // else in open/close progress do nothing.
+        } else if (view == mEmbeddedContentScrim) {
+            if (isOptionsOpened() && mOptionsStateController.canCloseOptions()) {
+                closeOptions();
+            }
         }
     }
 
@@ -162,6 +186,12 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         }
     }
 
+    private int computeScrimColor() {
+        final int baseAlpha = (mScrimColor & 0xff000000) >>> 24;
+        final int adjustedAlpha = (int) (baseAlpha * (1 - mDragProgress));
+        return adjustedAlpha << 24 | (mScrimColor & 0xffffff);
+    }
+
     private int getOpenedOptionsY() {
         return mStaticContent.getBottom();
     }
@@ -172,6 +202,8 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final boolean wasOpened = isOptionsOpened();
+
         measureChild(mStaticContent, widthMeasureSpec, heightMeasureSpec);
 
         if (mSummaryContent.getVisibility() != View.GONE) {
@@ -180,34 +212,34 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
 
         measureChild(mDynamicContent, widthMeasureSpec, heightMeasureSpec);
 
-        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
-//        // The height of the draggable content may change and if that happens
-//        // we have to adjust the current offset to ensure the sliding area is
-//        // at the same position.
-//        mCurrentOptionsOffsetY -= mDraggableContent.getMeasuredHeight()
-//                - oldDraggableHeight;
-
-        if (mOldDraggableHeight != mDraggableContent.getMeasuredHeight()) {
-            mCurrentOptionsOffsetY -= mDraggableContent.getMeasuredHeight()
-                    - mOldDraggableHeight;
-            mOldDraggableHeight = mDraggableContent.getMeasuredHeight();
-        }
+        measureChild(mPrintButton, widthMeasureSpec, heightMeasureSpec);
 
         // The height of the draggable content may change and if that happens
         // we have to adjust the sliding area closed state offset.
         mClosedOptionsOffsetY = mSummaryContent.getMeasuredHeight()
                 - mDraggableContent.getMeasuredHeight();
 
+        if (mCurrentOptionsOffsetY == Integer.MIN_VALUE) {
+            mCurrentOptionsOffsetY = mClosedOptionsOffsetY;
+        }
+
+        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
         // The content host must be maximally large size that fits entirely
         // on the screen when the options are collapsed.
         ViewGroup.LayoutParams params = mEmbeddedContentContainer.getLayoutParams();
-        if (params.height == 0) {
-            params.height = heightSize - mStaticContent.getMeasuredHeight()
-                    - mSummaryContent.getMeasuredHeight() - mDynamicContent.getMeasuredHeight()
-                    + mDraggableContent.getMeasuredHeight();
+        params.height = heightSize - mStaticContent.getMeasuredHeight()
+                - mSummaryContent.getMeasuredHeight() - mDynamicContent.getMeasuredHeight()
+                + mDraggableContent.getMeasuredHeight();
 
-            mCurrentOptionsOffsetY = mClosedOptionsOffsetY;
+        // The height of the draggable content may change and if that happens
+        // we have to adjust the current offset to ensure the sliding area is
+        // at the correct position.
+        if (mOldDraggableHeight != mDraggableContent.getMeasuredHeight()) {
+            if (mOldDraggableHeight != 0) {
+                mCurrentOptionsOffsetY = wasOpened ? 0 : mClosedOptionsOffsetY;
+            }
+            mOldDraggableHeight = mDraggableContent.getMeasuredHeight();
         }
 
         // The content host can grow vertically as much as needed - we will be covering it.
@@ -232,6 +264,15 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
 
         mDynamicContent.layout(left, dynContentTop, right, dynContentBottom);
 
+        MarginLayoutParams params = (MarginLayoutParams) mPrintButton.getLayoutParams();
+        final int rightMargin = params.rightMargin;
+        final int printButtonLeft = right - mPrintButton.getMeasuredWidth() - rightMargin;
+        final int printButtonTop = dynContentBottom - mPrintButton.getMeasuredHeight() / 2;
+        final int printButtonRight = printButtonLeft + mPrintButton.getMeasuredWidth();
+        final int printButtonBottom = printButtonTop + mPrintButton.getMeasuredHeight();
+
+        mPrintButton.layout(printButtonLeft, printButtonTop, printButtonRight, printButtonBottom);
+
         final int embContentTop = mStaticContent.getMeasuredHeight() + mClosedOptionsOffsetY
                 + mDynamicContent.getMeasuredHeight();
         final int embContentBottom = embContentTop + mEmbeddedContentContainer.getMeasuredHeight();
@@ -239,40 +280,51 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
         mEmbeddedContentContainer.layout(left, embContentTop, right, embContentBottom);
     }
 
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new ViewGroup.MarginLayoutParams(getContext(), attrs);
+    }
+
     private void onDragProgress(float progress) {
-        final int summaryCount = mSummaryContent.getChildCount();
-        for (int i = 0; i < summaryCount; i++) {
-            View child = mSummaryContent.getChildAt(i);
-            child.setAlpha(progress);
+        if (Float.compare(mDragProgress, progress) == 0) {
+            return;
         }
+
+        if ((mDragProgress == 0 && progress > 0)
+                || (mDragProgress == 1.0f && progress < 1.0f)) {
+            mSummaryContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mDraggableContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mMoreOptionsContainer.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+        if ((mDragProgress > 0 && progress == 0)
+                || (mDragProgress < 1.0f && progress == 1.0f)) {
+            mSummaryContent.setLayerType(View.LAYER_TYPE_NONE, null);
+            mDraggableContent.setLayerType(View.LAYER_TYPE_NONE, null);
+            mMoreOptionsContainer.setLayerType(View.LAYER_TYPE_NONE, null);
+        }
+
+        mDragProgress = progress;
+
+        mSummaryContent.setAlpha(progress);
+
+        final float inverseAlpha = 1.0f - progress;
+        mOptionsContainer.setAlpha(inverseAlpha);
+        mMoreOptionsContainer.setAlpha(inverseAlpha);
+
+        mEmbeddedContentScrim.setBackgroundColor(computeScrimColor());
 
         if (progress == 0) {
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsOpened();
             }
             mSummaryContent.setVisibility(View.GONE);
+            mEmbeddedContentScrim.setOnClickListener(this);
             mExpandCollapseIcon.setBackgroundResource(R.drawable.ic_expand_less);
         } else {
             mSummaryContent.setVisibility(View.VISIBLE);
         }
 
-        final float inverseAlpha = 1.0f - progress;
-
-        final int optionCount = mOptionsContainer.getChildCount();
-        for (int i = 0; i < optionCount; i++) {
-            View child = mOptionsContainer.getChildAt(i);
-            child.setAlpha(inverseAlpha);
-        }
-
-        if (mMoreOptionsContainer.getVisibility() != View.GONE) {
-            final int moreOptionCount = mMoreOptionsContainer.getChildCount();
-            for (int i = 0; i < moreOptionCount; i++) {
-                View child = mMoreOptionsContainer.getChildAt(i);
-                child.setAlpha(inverseAlpha);
-            }
-        }
-
-        if (inverseAlpha == 0) {
+        if (progress == 1.0f) {
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsClosed();
             }
@@ -280,6 +332,10 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
                 mMoreOptionsContainer.setVisibility(View.INVISIBLE);
             }
             mDraggableContent.setVisibility(View.INVISIBLE);
+            // If we change the scrim visibility the dimming is lagging
+            // and is janky. Now it is there but transparent, doing nothing.
+            mEmbeddedContentScrim.setOnClickListener(null);
+            mEmbeddedContentScrim.setClickable(false);
             mExpandCollapseIcon.setBackgroundResource(R.drawable.ic_expand_more);
         } else {
             if (mMoreOptionsContainer.getVisibility() != View.GONE) {
@@ -292,14 +348,24 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
     private final class DragCallbacks extends ViewDragHelper.Callback {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
+            if (isOptionsOpened() && !mOptionsStateController.canCloseOptions()
+                    || isOptionsClosed() && !mOptionsStateController.canOpenOptions()) {
+                return false;
+            }
             return child == mDynamicContent && pointerId == FIRST_POINTER_ID;
         }
 
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            if ((isOptionsClosed() || isOptionsClosed()) && dy <= 0) {
+                return;
+            }
+
             mCurrentOptionsOffsetY += dy;
             final float progress = ((float) top - getOpenedOptionsY())
                     / (getClosedOptionsY() - getOpenedOptionsY());
+
+            mPrintButton.offsetTopAndBottom(dy);
 
             mDraggableContent.notifySubtreeAccessibilityStateChangedIfNeeded();
 
@@ -324,6 +390,10 @@ public final class ContentView extends ViewGroup implements View.OnClickListener
             }
 
             invalidate();
+        }
+
+        public int getOrderedChildIndex(int index) {
+            return getChildCount() - index - 1;
         }
 
         public int getViewVerticalDragRange(View child) {

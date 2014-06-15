@@ -105,6 +105,13 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Gets the minimal margins. If the content does not fit
      * these margins it will be clipped.
+     * <p>
+     * <strong>These margins are physically imposed by the printer and they
+     * are <em>not</em> rotated, i.e. they are the same for both portrait and
+     * landscape. For example, a printer may not be able to print in a stripe
+     * on both left and right sides of the page.
+     * </strong>
+     * </p>
      *
      * @return The margins or <code>null</code> if not set.
      */
@@ -115,6 +122,13 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Sets the minimal margins. If the content does not fit
      * these margins it will be clipped.
+     * <p>
+     * <strong>These margins are physically imposed by the printer and they
+     * are <em>not</em> rotated, i.e. they are the same for both portrait and
+     * landscape. For example, a printer may not be able to print in a stripe
+     * on both left and right sides of the page.
+     * </strong>
+     * </p>
      *
      * @param The margins.
      *
@@ -193,14 +207,8 @@ public final class PrintAttributes implements Parcelable {
                 oldResolution.getHorizontalDpi());
         attributes.setResolution(newResolution);
 
-        // Rotate the physical margins.
-        Margins oldMinMargins = getMinMargins();
-        Margins newMinMargins = new Margins(
-                oldMinMargins.getBottomMils(),
-                oldMinMargins.getLeftMils(),
-                oldMinMargins.getTopMils(),
-                oldMinMargins.getRightMils());
-        attributes.setMinMargins(newMinMargins);
+        // Do not rotate the physical margins.
+        attributes.setMinMargins(getMinMargins());
 
         attributes.setColorMode(getColorMode());
 
@@ -236,14 +244,8 @@ public final class PrintAttributes implements Parcelable {
                 oldResolution.getHorizontalDpi());
         attributes.setResolution(newResolution);
 
-        // Rotate the physical margins.
-        Margins oldMinMargins = getMinMargins();
-        Margins newMargins = new Margins(
-                oldMinMargins.getTopMils(),
-                oldMinMargins.getRightMils(),
-                oldMinMargins.getBottomMils(),
-                oldMinMargins.getLeftMils());
-        attributes.setMinMargins(newMargins);
+        // Do not rotate the physical margins.
+        attributes.setMinMargins(getMinMargins());
 
         attributes.setColorMode(getColorMode());
 

@@ -19,9 +19,9 @@
     <integer name="page_option_value_all">0</integer>
     <integer name="page_option_value_page_range">1</integer>
 
-    <integer name="print_option_column_count">2</integer>
+    <integer name="preview_page_per_row_count">1</integer>
 
-    <integer-array name="page_options_values" translatable="false">
+    <integer-array name="page_options_values">
         <item>@integer/page_option_value_all</item>
         <item>@integer/page_option_value_page_range</item>
     </integer-array>
@@ -30,5 +30,12 @@
 
     <dimen name="printer_list_view_padding_start">16dip</dimen>
     <dimen name="printer_list_view_padding_end">16dip</dimen>
+
+    <dimen name="selected_page_elevation">6dip</dimen>
+    <dimen name="unselected_page_elevation">2dip</dimen>
+
+    <dimen name="preview_page_margin">8dip</dimen>
+
+    <dimen name="preview_list_padding">24dip</dimen>
 
 </resources>

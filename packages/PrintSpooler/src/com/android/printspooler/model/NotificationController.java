@@ -342,7 +342,7 @@ final class NotificationController {
                         printManager.cancelPrintJob(printJobId, PrintManager.APP_ID_ANY,
                                 UserHandle.myUserId());
                     } catch (RemoteException re) {
-                        Log.i(LOG_TAG, "Error requestion print job cancellation", re);
+                        Log.i(LOG_TAG, "Error requesting print job cancellation", re);
                     } finally {
                         wakeLock.release();
                     }
@@ -379,7 +379,7 @@ final class NotificationController {
                         printManager.restartPrintJob(printJobId, PrintManager.APP_ID_ANY,
                                 UserHandle.myUserId());
                     } catch (RemoteException re) {
-                        Log.i(LOG_TAG, "Error requestion print job restart", re);
+                        Log.i(LOG_TAG, "Error requesting print job restart", re);
                     } finally {
                         wakeLock.release();
                     }

@@ -105,7 +105,7 @@ public final class PrintManager {
 
     private static final String LOG_TAG = "PrintManager";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int MSG_NOTIFY_PRINT_JOB_STATE_CHANGED = 1;
 

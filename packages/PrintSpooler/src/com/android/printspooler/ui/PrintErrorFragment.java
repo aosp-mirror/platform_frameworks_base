@@ -35,22 +35,21 @@ import com.android.printspooler.R;
 public final class PrintErrorFragment extends Fragment {
     public static final int ACTION_NONE = 0;
     public static final int ACTION_RETRY = 1;
-    public static final int ACTION_CONFIRM = 2;
+
+    private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
+    private static final String EXTRA_ACTION = "EXTRA_ACTION";
 
     public interface OnActionListener {
         public void onActionPerformed();
     }
 
-    private static final String EXTRA_ERROR_MESSAGE = "EXTRA_ERROR_MESSAGE";
-    private static final String EXTRA_ACTION = "EXTRA_ACTION";
-
-    public static PrintErrorFragment newInstance(CharSequence errorMessage, int action) {
-        PrintErrorFragment instance = new PrintErrorFragment();
+    public static PrintErrorFragment newInstance(CharSequence message, int action) {
         Bundle arguments = new Bundle();
-        arguments.putCharSequence(EXTRA_ERROR_MESSAGE, errorMessage);
+        arguments.putCharSequence(EXTRA_MESSAGE, message);
         arguments.putInt(EXTRA_ACTION, action);
-        instance.setArguments(arguments);
-        return instance;
+        PrintErrorFragment fragment = new PrintErrorFragment();
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
     @Override
@@ -63,12 +62,11 @@ public final class PrintErrorFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Bundle arguments = getArguments();
+        CharSequence message = getArguments().getCharSequence(EXTRA_MESSAGE);
 
-        CharSequence error = arguments.getString(EXTRA_ERROR_MESSAGE);
-        if (!TextUtils.isEmpty(error)) {
-            TextView message = (TextView) view.findViewById(R.id.message);
-            message.setText(error);
+        if (!TextUtils.isEmpty(message)) {
+            TextView messageView = (TextView) view.findViewById(R.id.message);
+            messageView.setText(message);
         }
 
         Button actionButton = (Button) view.findViewById(R.id.action_button);
@@ -78,11 +76,6 @@ public final class PrintErrorFragment extends Fragment {
             case ACTION_RETRY: {
                 actionButton.setVisibility(View.VISIBLE);
                 actionButton.setText(R.string.print_error_retry);
-            } break;
-
-            case ACTION_CONFIRM: {
-                actionButton.setVisibility(View.VISIBLE);
-                actionButton.setText(android.R.string.ok);
             } break;
 
             case ACTION_NONE: {

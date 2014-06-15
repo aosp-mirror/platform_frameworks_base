@@ -31,7 +31,7 @@ import com.android.printspooler.R;
 @SuppressWarnings("unused")
 public final class PrintOptionsLayout extends ViewGroup {
 
-    private final int mColumnCount;
+    private int mColumnCount;
 
     public PrintOptionsLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,6 +40,13 @@ public final class PrintOptionsLayout extends ViewGroup {
                 R.styleable.PrintOptionsLayout);
         mColumnCount = typedArray.getInteger(R.styleable.PrintOptionsLayout_columnCount, 0);
         typedArray.recycle();
+    }
+
+    public void setColumnCount(int columnCount) {
+        if (mColumnCount != columnCount) {
+            mColumnCount = columnCount;
+            requestLayout();
+        }
     }
 
     @Override

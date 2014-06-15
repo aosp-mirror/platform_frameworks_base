@@ -17,9 +17,9 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.printspooler"
-        android:versionName="1"
-        android:versionCode="1">
+    package="com.android.printspooler"
+    android:versionName="1"
+    android:versionCode="1">
 
     <!-- Allows an application to call APIs that give it access to all print jobs
          on the device. Usually an app can access only the print jobs it created. -->
@@ -58,7 +58,7 @@
             android:name=".ui.PrintActivity"
             android:configChanges="orientation|screenSize"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            android:theme="@style/PrintActivity">
             <intent-filter>
                 <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />

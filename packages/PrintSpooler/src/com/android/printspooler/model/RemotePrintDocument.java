@@ -55,7 +55,7 @@ import java.util.Arrays;
 public final class RemotePrintDocument {
     private static final String LOG_TAG = "RemotePrintDocument";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int STATE_INITIAL = 0;
     private static final int STATE_STARTED = 1;
@@ -66,10 +66,6 @@ public final class RemotePrintDocument {
     private static final int STATE_CANCELING = 6;
     private static final int STATE_CANCELED = 7;
     private static final int STATE_DESTROYED = 8;
-
-    private static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {
-            PageRange.ALL_PAGES
-    };
 
     private final Context mContext;
 
@@ -93,18 +89,23 @@ public final class RemotePrintDocument {
                     // do nothing. However, if there is no next command we may need to
                     // ask for some pages given we do not already have them or we do
                     // but the content has changed.
-                    LayoutCommand layoutCommand = (LayoutCommand) mCurrentCommand;
                     if (mNextCommand == null) {
-                        if (layoutCommand.isDocumentChanged() || !PageRangeUtils.contains(
-                                mDocumentInfo.writtenPages, mUpdateSpec.pages)) {
+                        if (mUpdateSpec.pages != null && (mDocumentInfo.changed
+                                || (mDocumentInfo.info.getPageCount()
+                                        != PrintDocumentInfo.PAGE_COUNT_UNKNOWN
+                                && !PageRangeUtils.contains(mDocumentInfo.writtenPages,
+                                        mUpdateSpec.pages, mDocumentInfo.info.getPageCount())))) {
                             mNextCommand = new WriteCommand(mContext, mLooper,
                                     mPrintDocumentAdapter, mDocumentInfo,
                                     mDocumentInfo.info.getPageCount(), mUpdateSpec.pages,
-                                    mDocumentInfo.file, mCommandResultCallback);
+                                    mDocumentInfo.fileProvider, mCommandResultCallback);
                         } else {
-                            // If we have the requested pages just update that ones to be printed.
-                            mDocumentInfo.printedPages = computePrintedPages(mUpdateSpec.pages,
-                                    mDocumentInfo.writtenPages, mDocumentInfo.info.getPageCount());
+                            if (mUpdateSpec.pages != null) {
+                                // If we have the requested pages, update which ones to be printed.
+                                mDocumentInfo.printedPages = PageRangeUtils.computePrintedPages(
+                                        mUpdateSpec.pages, mDocumentInfo.writtenPages,
+                                        mDocumentInfo.info.getPageCount());
+                            }
                             // Notify we are done.
                             notifyUpdateCompleted();
                         }
@@ -154,13 +155,14 @@ public final class RemotePrintDocument {
     }
 
     public RemotePrintDocument(Context context, IPrintDocumentAdapter adapter,
-            File file, DocumentObserver destroyListener, UpdateResultCallbacks callbacks) {
+            MutexFileProvider fileProvider, DocumentObserver destroyListener,
+            UpdateResultCallbacks callbacks) {
         mPrintDocumentAdapter = adapter;
         mLooper = context.getMainLooper();
         mContext = context;
         mDocumentObserver = destroyListener;
         mDocumentInfo = new RemotePrintDocumentInfo();
-        mDocumentInfo.file = file;
+        mDocumentInfo.fileProvider = fileProvider;
         mUpdateCallbacks = callbacks;
         connectToRemoteDocument();
     }
@@ -219,7 +221,8 @@ public final class RemotePrintDocument {
         // If no layout in progress and we don't have all pages - schedule a write.
         } else if ((!(mCurrentCommand instanceof LayoutCommand)
                 || (!mCurrentCommand.isPending() && !mCurrentCommand.isRunning()))
-                && !PageRangeUtils.contains(mUpdateSpec.pages, pages)) {
+                && pages != null && !PageRangeUtils.contains(mUpdateSpec.pages, pages,
+                mDocumentInfo.info.getPageCount())) {
             willUpdate = true;
 
             // Cancel the current write as a new one is to be scheduled.
@@ -231,7 +234,7 @@ public final class RemotePrintDocument {
             // Schedule a write command.
             AsyncCommand command = new WriteCommand(mContext, mLooper, mPrintDocumentAdapter,
                     mDocumentInfo, mDocumentInfo.info.getPageCount(), pages,
-                    mDocumentInfo.file, mCommandResultCallback);
+                    mDocumentInfo.fileProvider, mCommandResultCallback);
             scheduleCommand(command);
 
             mState = STATE_UPDATING;
@@ -325,10 +328,12 @@ public final class RemotePrintDocument {
     }
 
     public void writeContent(ContentResolver contentResolver, Uri uri) {
+        File file = null;
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = new FileInputStream(mDocumentInfo.file);
+            file = mDocumentInfo.fileProvider.acquireFile(null);
+            in = new FileInputStream(file);
             out = contentResolver.openOutputStream(uri);
             final byte[] buffer = new byte[8192];
             while (true) {
@@ -343,6 +348,9 @@ public final class RemotePrintDocument {
         } finally {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
+            if (file != null) {
+                mDocumentInfo.fileProvider.releaseFile();
+            }
         }
     }
 
@@ -453,42 +461,6 @@ public final class RemotePrintDocument {
         }
     }
 
-    private static PageRange[] computePrintedPages(PageRange[] requestedPages,
-                                                   PageRange[] writtenPages, int pageCount) {
-        // Adjust the print job pages based on what was requested and written.
-        // The cases are ordered in the most expected to the least expected.
-        if (Arrays.equals(writtenPages, requestedPages)) {
-            // We got a document with exactly the pages we wanted. Hence,
-            // the printer has to print all pages in the data.
-            return ALL_PAGES_ARRAY;
-        } else if (Arrays.equals(writtenPages, ALL_PAGES_ARRAY)) {
-            // We requested specific pages but got all of them. Hence,
-            // the printer has to print only the requested pages.
-            return requestedPages;
-        } else if (PageRangeUtils.contains(writtenPages, requestedPages)) {
-            // We requested specific pages and got more but not all pages.
-            // Hence, we have to offset appropriately the printed pages to
-            // be based off the start of the written ones instead of zero.
-            // The written pages are always non-null and not empty.
-            final int offset = -writtenPages[0].getStart();
-            PageRangeUtils.offset(requestedPages, offset);
-            return requestedPages;
-        } else if (Arrays.equals(requestedPages, ALL_PAGES_ARRAY)
-                && isAllPages(writtenPages, pageCount)) {
-            // We requested all pages via the special constant and got all
-            // of them as an explicit enumeration. Hence, the printer has
-            // to print only the requested pages.
-            return ALL_PAGES_ARRAY;
-        }
-
-        return null;
-    }
-
-    private static boolean isAllPages(PageRange[] pageRanges, int pageCount) {
-        return pageRanges.length > 0 && pageRanges[0].getStart() == 0
-                && pageRanges[pageRanges.length - 1].getEnd() == pageCount - 1;
-    }
-
     static final class UpdateSpec {
         final PrintAttributes attributes = new PrintAttributes.Builder().build();
         boolean preview;
@@ -498,7 +470,7 @@ public final class RemotePrintDocument {
                 PageRange[] pages) {
             this.attributes.copyFrom(attributes);
             this.preview = preview;
-            this.pages = Arrays.copyOf(pages, pages.length);
+            this.pages = (pages != null) ? Arrays.copyOf(pages, pages.length) : null;
         }
 
         public void reset() {
@@ -518,7 +490,10 @@ public final class RemotePrintDocument {
         public PrintDocumentInfo info;
         public PageRange[] printedPages;
         public PageRange[] writtenPages;
-        public File file;
+        public MutexFileProvider fileProvider;
+        public boolean changed;
+        public boolean updated;
+        public boolean laidout;
     }
 
     private interface CommandDoneCallback {
@@ -647,8 +622,6 @@ public final class RemotePrintDocument {
 
         private final Handler mHandler;
 
-        private boolean mDocumentChanged;
-
         public LayoutCommand(Looper looper, IPrintDocumentAdapter adapter,
                 RemotePrintDocumentInfo document, PrintAttributes oldAttributes,
                 PrintAttributes newAttributes, boolean preview, CommandDoneCallback callback) {
@@ -660,10 +633,6 @@ public final class RemotePrintDocument {
             mMetadata.putBoolean(PrintDocumentAdapter.EXTRA_PRINT_PREVIEW, preview);
         }
 
-        public boolean isDocumentChanged() {
-            return mDocumentChanged;
-        }
-
         @Override
         public void run() {
             running();
@@ -672,6 +641,7 @@ public final class RemotePrintDocument {
                 if (DEBUG) {
                     Log.i(LOG_TAG, "[PERFORMING] layout");
                 }
+                mDocument.changed = false;
                 mAdapter.layout(mOldAttributes, mNewAttributes, mRemoteResultCallback,
                         mMetadata, mSequence);
             } catch (RemoteException re) {
@@ -720,12 +690,13 @@ public final class RemotePrintDocument {
                 // we will request them again with the new content.
                 mDocument.writtenPages = null;
                 mDocument.printedPages = null;
-                mDocumentChanged = true;
+                mDocument.changed = true;
             }
 
             // Update the document with data from the layout pass.
             mDocument.attributes = mNewAttributes;
             mDocument.metadata = mMetadata;
+            mDocument.laidout = true;
             mDocument.info = info;
 
             // Release the remote cancellation interface.
@@ -743,6 +714,8 @@ public final class RemotePrintDocument {
             if (DEBUG) {
                 Log.i(LOG_TAG, "[CALLBACK] onLayoutFailed");
             }
+
+            mDocument.laidout = false;
 
             failed(error);
 
@@ -877,7 +850,7 @@ public final class RemotePrintDocument {
     private static final class WriteCommand extends AsyncCommand {
         private final int mPageCount;
         private final PageRange[] mPages;
-        private final File mContentFile;
+        private final MutexFileProvider mFileProvider;
 
         private final IWriteResultCallback mRemoteResultCallback;
         private final CommandDoneCallback mDoneCallback;
@@ -887,14 +860,14 @@ public final class RemotePrintDocument {
 
         public WriteCommand(Context context, Looper looper, IPrintDocumentAdapter adapter,
                 RemotePrintDocumentInfo document, int pageCount, PageRange[] pages,
-                File contentFile, CommandDoneCallback callback) {
+                MutexFileProvider fileProvider, CommandDoneCallback callback) {
             super(adapter, document, callback);
             mContext = context;
             mHandler = new WriteHandler(looper);
             mRemoteResultCallback = new WriteResultCallback(mHandler);
             mPageCount = pageCount;
             mPages = Arrays.copyOf(pages, pages.length);
-            mContentFile = contentFile;
+            mFileProvider = fileProvider;
             mDoneCallback = callback;
         }
 
@@ -909,17 +882,19 @@ public final class RemotePrintDocument {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
+                    File file = null;
                     InputStream in = null;
                     OutputStream out = null;
                     ParcelFileDescriptor source = null;
                     ParcelFileDescriptor sink = null;
                     try {
+                        file = mFileProvider.acquireFile(null);
                         ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
                         source = pipe[0];
                         sink = pipe[1];
 
                         in = new FileInputStream(source.getFileDescriptor());
-                        out = new FileOutputStream(mContentFile);
+                        out = new FileOutputStream(file);
 
                         // Async call to initiate the other process writing the data.
                         if (DEBUG) {
@@ -947,6 +922,9 @@ public final class RemotePrintDocument {
                         IoUtils.closeQuietly(out);
                         IoUtils.closeQuietly(sink);
                         IoUtils.closeQuietly(source);
+                        if (file != null) {
+                            mFileProvider.releaseFile();
+                        }
                     }
                     return null;
                 }
@@ -984,7 +962,8 @@ public final class RemotePrintDocument {
             }
 
             PageRange[] writtenPages = PageRangeUtils.normalize(pages);
-            PageRange[] printedPages = computePrintedPages(mPages, writtenPages, mPageCount);
+            PageRange[] printedPages = PageRangeUtils.computePrintedPages(
+                    mPages, writtenPages, mPageCount);
 
             // Handle if we got invalid pages
             if (printedPages != null) {

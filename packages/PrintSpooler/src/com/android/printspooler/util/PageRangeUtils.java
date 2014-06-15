@@ -17,6 +17,7 @@
 package com.android.printspooler.util;
 
 import android.print.PageRange;
+import android.print.PrintDocumentInfo;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,19 +41,42 @@ public final class PageRangeUtils {
     }
 
     /**
+     * Gets whether page ranges contains a given page.
+     *
+     * @param pageRanges The page ranges.
+     * @param pageIndex The page for which to check.
+     * @return Whether the page is within the ranges.
+     */
+    public static boolean contains(PageRange[] pageRanges, int pageIndex) {
+        final int rangeCount = pageRanges.length;
+        for (int i = 0; i < rangeCount; i++) {
+            PageRange pageRange = pageRanges[i];
+            if (pageRange.contains(pageIndex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks whether one page range array contains another one.
      *
      * @param ourRanges The container page ranges.
      * @param otherRanges The contained page ranges.
+     * @param pageCount The total number of pages.
      * @return Whether the container page ranges contains the contained ones.
      */
-    public static boolean contains(PageRange[] ourRanges, PageRange[] otherRanges) {
+    public static boolean contains(PageRange[] ourRanges, PageRange[] otherRanges, int pageCount) {
         if (ourRanges == null || otherRanges == null) {
             return false;
         }
 
         if (Arrays.equals(ourRanges, ALL_PAGES_RANGE)) {
             return true;
+        }
+
+        if (Arrays.equals(otherRanges, ALL_PAGES_RANGE)) {
+            otherRanges[0] = new PageRange(0, pageCount - 1);
         }
 
         ourRanges = normalize(ourRanges);
@@ -77,10 +101,7 @@ public final class PageRangeUtils {
                 }
             }
         }
-        if (otherRangeIdx < otherRangeCount) {
-            return false;
-        }
-        return true;
+        return (otherRangeIdx >= otherRangeCount);
     }
 
     /**
@@ -95,28 +116,42 @@ public final class PageRangeUtils {
         if (pageRanges == null) {
             return null;
         }
+
         final int oldRangeCount = pageRanges.length;
         if (oldRangeCount <= 1) {
             return pageRanges;
         }
+
         Arrays.sort(pageRanges, sComparator);
+
         int newRangeCount = 1;
         for (int i = 0; i < oldRangeCount - 1; i++) {
-            newRangeCount++;
             PageRange currentRange = pageRanges[i];
             PageRange nextRange = pageRanges[i + 1];
             if (currentRange.getEnd() + 1 >= nextRange.getStart()) {
-                newRangeCount--;
                 pageRanges[i] = null;
                 pageRanges[i + 1] = new PageRange(currentRange.getStart(),
                         Math.max(currentRange.getEnd(), nextRange.getEnd()));
+            } else {
+                newRangeCount++;
             }
         }
+
         if (newRangeCount == oldRangeCount) {
             return pageRanges;
         }
-        return Arrays.copyOfRange(pageRanges, oldRangeCount - newRangeCount,
-                oldRangeCount);
+
+        int normalRangeIndex = 0;
+        PageRange[] normalRanges = new PageRange[newRangeCount];
+        for (int i = 0; i < oldRangeCount; i++) {
+            PageRange normalRange = pageRanges[i];
+            if (normalRange != null) {
+                normalRanges[normalRangeIndex] = normalRange;
+                normalRangeIndex++;
+            }
+        }
+
+        return normalRanges;
     }
 
     /**
@@ -146,14 +181,89 @@ public final class PageRangeUtils {
      */
     public static int getNormalizedPageCount(PageRange[] pageRanges, int layoutPageCount) {
         int pageCount = 0;
+        if (pageRanges != null) {
+            final int pageRangeCount = pageRanges.length;
+            for (int i = 0; i < pageRangeCount; i++) {
+                PageRange pageRange = pageRanges[i];
+                if (PageRange.ALL_PAGES.equals(pageRange)) {
+                    return layoutPageCount;
+                }
+                pageCount += pageRange.getSize();
+            }
+        }
+        return pageCount;
+    }
+
+    public static PageRange asAbsoluteRange(PageRange pageRange, int pageCount) {
+        if (PageRange.ALL_PAGES.equals(pageRange)) {
+            return new PageRange(0, pageCount - 1);
+        }
+        return pageRange;
+    }
+
+    public static boolean isAllPages(PageRange[] pageRanges) {
         final int pageRangeCount = pageRanges.length;
         for (int i = 0; i < pageRangeCount; i++) {
             PageRange pageRange = pageRanges[i];
-            if (PageRange.ALL_PAGES.equals(pageRange)) {
-                return layoutPageCount;
+            if (isAllPages(pageRange)) {
+                return true;
             }
-            pageCount += pageRange.getEnd() - pageRange.getStart() + 1;
         }
-        return pageCount;
+        return false;
+    }
+
+    public static boolean isAllPages(PageRange pageRange) {
+        return PageRange.ALL_PAGES.equals(pageRange);
+    }
+
+    public static boolean isAllPages(PageRange[] pageRanges, int pageCount) {
+        final int pageRangeCount = pageRanges.length;
+        for (int i = 0; i < pageRangeCount; i++) {
+            PageRange pageRange = pageRanges[i];
+            if (isAllPages(pageRange, pageCount)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isAllPages(PageRange pageRanges, int pageCount) {
+        return pageRanges.getStart() == 0 && pageRanges.getEnd() == pageCount - 1;
+    }
+
+    public static PageRange[] computePrintedPages(PageRange[] requestedPages,
+            PageRange[] writtenPages, int pageCount) {
+        // Adjust the print job pages based on what was requested and written.
+        // The cases are ordered in the most expected to the least expected
+        // with a special case first where the app does not know the page count
+        // so we ask for all to be written.
+        if (Arrays.equals(requestedPages, ALL_PAGES_RANGE)
+                && pageCount == PrintDocumentInfo.PAGE_COUNT_UNKNOWN) {
+            return ALL_PAGES_RANGE;
+        } else if (Arrays.equals(writtenPages, requestedPages)) {
+            // We got a document with exactly the pages we wanted. Hence,
+            // the printer has to print all pages in the data.
+            return ALL_PAGES_RANGE;
+        } else if (Arrays.equals(writtenPages, ALL_PAGES_RANGE)) {
+            // We requested specific pages but got all of them. Hence,
+            // the printer has to print only the requested pages.
+            return requestedPages;
+        } else if (PageRangeUtils.contains(writtenPages, requestedPages, pageCount)) {
+            // We requested specific pages and got more but not all pages.
+            // Hence, we have to offset appropriately the printed pages to
+            // be based off the start of the written ones instead of zero.
+            // The written pages are always non-null and not empty.
+            final int offset = -writtenPages[0].getStart();
+            PageRangeUtils.offset(requestedPages, offset);
+            return requestedPages;
+        } else if (Arrays.equals(requestedPages, ALL_PAGES_RANGE)
+                && isAllPages(writtenPages, pageCount)) {
+            // We requested all pages via the special constant and got all
+            // of them as an explicit enumeration. Hence, the printer has
+            // to print only the requested pages.
+            return ALL_PAGES_RANGE;
+        }
+
+        return null;
     }
 }

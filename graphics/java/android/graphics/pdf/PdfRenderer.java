@@ -70,6 +70,32 @@ import java.lang.annotation.RetentionPolicy;
  * renderer.close();
  * </pre>
  *
+ * <h3>Print preview and print output</h3>
+ * <p>
+ * If you are using this class to rasterize a PDF for printing or show a print
+ * preview, it is recommended that you respect the following contract in order
+ * to provide a consistent user experience when seeing a preview and printing,
+ * i.e. the user sees a preview that is the same as the printout.
+ * </p>
+ * <ul>
+ * <li>
+ * Respect the property whether the document would like to be scaled for printing
+ * as per {@link #shouldScaleForPrinting()}.
+ * </li>
+ * <li>
+ * When scaling a document for printing the aspect ratio should be preserved.
+ * </li>
+ * <li>
+ * Do not inset the content with any margins from the {@link android.print.PrintAttributes}
+ * as the application is responsible to render it such that the margins are respected.
+ * </li>
+ * <li>
+ * If document page size is greater than the printed media size the content should
+ * be anchored to the upper left corner of the page for left-to-right locales and
+ * top right corner for right-to-left locales.
+ * </li>
+ * </ul>
+ *
  * @see #close()
  */
 public final class PdfRenderer implements AutoCloseable {
@@ -188,7 +214,6 @@ public final class PdfRenderer implements AutoCloseable {
     private void doClose() {
         if (mCurrentPage != null) {
             mCurrentPage.close();
-            mCurrentPage = null;
         }
         nativeClose(mNativeDocument);
         try {
@@ -280,7 +305,7 @@ public final class PdfRenderer implements AutoCloseable {
          * </p>
          * <p>
          * You may optionally specify a matrix to transform the content from page coordinates
-         * which are in points (1/72") to bitmap coordintates which are in pixels. If this
+         * which are in points (1/72") to bitmap coordinates which are in pixels. If this
          * matrix is not provided this method will apply a transformation that will fit the
          * whole page to the destination clip if provided or the destination bitmap if no
          * clip is provided.
@@ -375,6 +400,7 @@ public final class PdfRenderer implements AutoCloseable {
             nativeClosePage(mNativePage);
             mNativePage = 0;
             mCloseGuard.close();
+            mCurrentPage = null;
         }
 
         private void throwIfClosed() {

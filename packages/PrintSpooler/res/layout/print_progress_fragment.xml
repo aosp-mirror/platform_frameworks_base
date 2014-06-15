@@ -36,30 +36,13 @@
         style="?android:attr/progressBarStyleHorizontal">
     </ProgressBar>
 
-    <FrameLayout
+    <TextView
+        android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
-        android:gravity="center"
-        android:animateLayoutChanges="true">
-
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLargeInverse"
-            android:text="@string/print_operation_canceling"
-            android:visibility="gone">
-        </TextView>
-
-        <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@android:string/cancel">
-        </Button>
-
-    </FrameLayout>
+        android:textAppearance="?android:attr/textAppearanceLargeInverse"
+        android:text="@string/print_preparing_preview">
+    </TextView>
 
 </LinearLayout>
 

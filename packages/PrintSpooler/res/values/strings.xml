@@ -73,6 +73,11 @@
     <!-- Title for the print dialog announced to the user for accessibility. Not shown in the UI. [CHAR LIMIT=none] -->
     <string name="print_dialog">Print dialog</string>
 
+
+    <!-- Template for the message that shows the current page out of the total number of pages -->
+    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
+        /<xliff:g id="page_count">%2$d</xliff:g></string>
+
     <!-- Select printer activity -->
 
     <!-- Title for the share action bar menu item. [CHAR LIMIT=20] -->
@@ -203,17 +208,17 @@
     <string name="print_write_error_message">Couldn\'t write to file</string>
 
     <!-- Default message for an error while generating a print job. [CHAR LIMIT=50] -->
-    <string name="print_error_default_message">Couldn\'t generate print job</string>
+    <string name="print_error_default_message">Sorry, that didn\'t work. Try again.</string>
 
     <!-- Label for the retry button in the error message. [CHAR LIMIT=50] -->
     <string name="print_error_retry">Retry</string>
 
-    <!-- Message for the currently selected printer becoming unavailable. [CHAR LIMIT=50] -->
-    <string name="print_error_printer_unavailable">Printer unavailable</string>
+    <!-- Message for the currently selected printer being unavailable. [CHAR LIMIT=100] -->
+    <string name="print_error_printer_unavailable">This printer isn\'t available right now.</string>
 
     <!-- Long running operations -->
 
-    <!-- Message for the cancel print operation UI while waiting for cancel to be performed. [CHAR LIMIT=50] -->
-    <string name="print_operation_canceling">Cancelling\u2026</string>
+    <!-- Message long running operation when preparing print preview. [CHAR LIMIT=50] -->
+    <string name="print_preparing_preview">Preparing preview\u2026</string>
 
 </resources>
