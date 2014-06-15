@@ -73,6 +73,18 @@ For more information, see <a href="{@docRoot}preview/material/compatibility.html
 the theme for the element and any elements inflated below it, which is useful to alter theme
 color palettes in a specific portion of an interface.</p>
 
+<h3 style="margin-top:25px;">Customize the Status Bar</h3>
+
+<p>The Material theme lets you easily customize the status bar, so you can specify a
+color which fits your brand and provides enough contrast to show the white status icons. To
+set a custom color for the status bar, use the <code>android:statusBarColor</code> attribute when
+you extend the Material theme.</p>
+
+<p>To handle the color of the status bar yourself (for example, by adding a gradient in the
+background), set the <code>android:statusBarColor</code> attribute to
+<code>&#64;android:color/transparent</code>. You can also use the
+<code>Window.setStatusBarColor</code> method for animations or fading.</p>
+
 
 <h2 style="margin-top:35px">Material Design</h2>
 
