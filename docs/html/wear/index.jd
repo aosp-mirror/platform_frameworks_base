@@ -2,6 +2,7 @@ page.title=Android Wear
 page.viewport_width=970
 fullpage=true
 no_footer_links=true
+page.type=about
 
 @jd:body
 
@@ -41,10 +42,11 @@ no_footer_links=true
                 <div class="landing-subhead hero">Information that moves with you</div>
               </div>
               <div class="landing-hero-description">
-                <p>
-                Useful information when you need it most.<br />
-                Intelligent answers to spoken questions.<br />
-                Tools to help reach fitness goals.<br />
+
+                <p>Small, powerful devices, worn on the body.
+                Useful information when you need it most.
+                Intelligent answers to spoken questions.
+                Tools to help reach fitness goals.
                 Your key to a multiscreen world.</p>
               </div>
 
@@ -52,29 +54,6 @@ no_footer_links=true
                 <a href="/training/wearables/index.html" class="landing-button landing-primary" style="margin-top: 40px;">
                   Get Started
                 </a>
-<script>
-$("#watchVideo").on("click", function(e) {
-  $("#video-container").fadeIn(400, function(){$("#video-frame").show()});
-
-  var params = { allowScriptAccess: "always"};
-  var atts = { id: "ytapiplayer" };
-  swfobject.embedSWF("//www.youtube.com/v/0xQ3y902DEQ?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1;autoplay=1",
-    "ytapiplayer", "940", "526.4", "8", null, null, params, atts);
-
-  e.preventDefault();
-});
-$("#icon-video-close").on("click", function() {
-  ytplayer = document.getElementById("ytapiplayer");
-  try {
-    ytplayer.stopVideo();
-    $(ytplayer).hide();
-    $("#video-container").fadeOut(400);
-  } catch(e) {
-    console.log('Video not available');
-    $("#video-container").fadeOut(400);
-  }
-});
-</script>
               </div>
             </div>
 
@@ -97,6 +76,7 @@ $("#icon-video-close").on("click", function() {
             <div class="landing-subhead">
               Android Wear extends the Android platform to a new generation of devices, <br>
               with a user experience that's designed specifically for wearables.
+
             </div>
           </div>
 
@@ -118,6 +98,7 @@ $("#icon-video-close").on("click", function() {
                 <p class="landing-small">
                   Get glanceable, actionable information at just the right time with notifications
                   that are synced from your handheld device.
+
                 </p>
               </div>
               <div class="col-3-wide">
@@ -125,6 +106,7 @@ $("#icon-video-close").on("click", function() {
                 <p class="landing-small">
                   Design apps that can access a wide range of sensors and other hardware
                    directly on the wearable.
+
                 </p>
               </div>
             </div>
@@ -170,6 +152,7 @@ $("#icon-video-close").on("click", function() {
                 </p>
                 <p class="landing-small">
                   <a href="/training/wearables/apps/index.html/">Create wearable apps</a>
+
                 </p>
               </div>
               <div class="col-4">
@@ -181,6 +164,7 @@ $("#icon-video-close").on("click", function() {
                 </p>
                 <p class="landing-small">
                   <a href="/training/wearables/apps/index.html/">Work with the Data Layer</a>
+
                 </p>
               </div>
               <div class="col-4">
@@ -198,7 +182,11 @@ $("#icon-video-close").on("click", function() {
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
+<<<<<<< HEAD
 <!--
+=======
+
+>>>>>>> add page.types to various pages for dynamic content
       <div class="landing-section landing-white-background">
         <div class="wrap">
           <div class="landing-section-header">
@@ -246,12 +234,14 @@ $("#icon-video-close").on("click", function() {
             </div>
           </div>
         </div> <!-- end .wrap 
+
       </div> <!-- end .landing-section -->
 
       <div class="landing-section landing-red-background">
         <div class="wrap">
           <div class="landing-section-header">
             <div class="landing-h1 landing-align-left">Get Started with Android Wear</div>
+
             <div class="landing-subhead landing-subhead-red">
               <p>
                 Set up your development environment and start working with the APIs.
@@ -296,6 +286,7 @@ $("#icon-video-close").on("click", function() {
                   <p class="landing-small">
                     Read more about Android Wear development
                     on our blog. Just search for "Android Wear".
+
                   </p>
                   <br>
                     <p class="landing-small">
@@ -312,6 +303,7 @@ $("#icon-video-close").on("click", function() {
                   <p>G+ Community</p>
                   <p class="landing-small">
                     Follow us on Google+ to stay up-to-date with Android Wear development and to join the discussion!
+
                   </p>
                   <p class="landing-small">
                     <a target="_blank" href="http://g.co/androidweardev">+Android Wear Developers</a>
@@ -340,6 +332,5 @@ $("#icon-video-close").on("click", function() {
         License</a>.
       </div>
     </div>
-
-
   </div> <!-- end landing-body-content -->
+

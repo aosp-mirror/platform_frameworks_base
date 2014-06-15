@@ -2,6 +2,7 @@ heropage.title=Android TV
 page.viewport_width=970
 fullpage=true
 no_footer_links=true
+page.type=about
 
 @jd:body
 
@@ -33,8 +34,6 @@ no_footer_links=true
     </div>
   </div>
 </div>
-
-
 
 <div class="landing-body-content">
   <div class="landing-hero-container">
