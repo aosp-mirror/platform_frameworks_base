@@ -170,65 +170,63 @@ information.</p>
 
 <h3 id="MaterialDesign">Material design support</h3>
 
-<p>L adds support for the material design style. You can create
+<p>The L Developer Preview adds support for the material design style. You can create
 material design apps that are visually dynamic and have UI element transitions
 which feel natural and delightful to users. This support includes:</p>
 <ul>
-  <li>Material design theme
-  <li>View shadows
-  <li>{@code RecyclerView} widget
-  <li>Drawable animation and styling effects
-  <li>Material design animation and activity transitions effects
-  <li>Ability to define animators to run on the view, with
-{@code android.animation.StateListAnimator}.
-  <li>Ability to change your status bar color to match the action bar and other
-UI elements with {@code android.view.Window.setStatusBarColor()}.
+  <li>The Material theme</li>
+  <li>View shadows</li>
+  <li>The {@code RecyclerView} widget</li>
+  <li>Drawable animation and styling effects</li>
+  <li>Material design animation and activity transition effects</li>
+  <li>Animators for view properties based on the state of a view</li>
+  <li>Customizable UI widgets and app bars with color palettes that you control</li>
 </ul>
 <p>To learn more about adding material design functionality to your app, see
 <a href="{@docRoot}preview/material/index.html">Material design on Android</a>.</p>
 
 <h3 id="LockscreenNotifications">Lockscreen notifications</h3>
-<p>Lockscreens in L Developer Preview have the ability to present notifications.
-User can choose via <em>Settings</em> whether to allow sensitive notification
+<p>Lockscreens in the L Developer Preview have the ability to present notifications.
+Users can choose via <em>Settings</em> whether to allow sensitive notification
 content to be shown over a secure lockscreen.</p>
 
 <p>Your app can control the level of detail visible when its notifications are
-displayed over the secure lockscreen.To control the visibility level, call
+displayed over the secure lockscreen. To control the visibility level, call
 {@code android.app.Notification.Builder.setVisibility()} and specify one of these
 values:</p>
 <ul>
 <li>{@code VISIBILITY_PRIVATE}. Shows basic information, such as the
 notification’s icon, but hides the notification’s full content. If you want to
 provide a redacted public version of your notification for the system to display
-on a secure lockscreen, set the public notification object in the publicVersion
-field.
+on a secure lockscreen, set the public notification object in the <code>publicVersion</code>
+field.</li>
 <li>{@code VISIBILITY_PUBLIC}. Shows the notification’s full content. This is
-  the system default if visibility is left unspecified.
+  the system default if visibility is left unspecified.</li>
 <li>{@code VISIBILITY_SECRET}. Shows only the most minimal information,
-excluding even the notification’s icon.
+excluding even the notification’s icon.</li>
 </ul>
 
 <h3 id="NotificationsMetadata">Notifications metadata</h3>
 <p>The L Developer Preview uses metadata associated with your app notifications
 to more intelligently sort your notifications. The metadata you set also
-controls how the system presents your app notifications when the user is in Do
-not disturb mode. When constructing your notification, you can call the
+controls how the system presents your app notifications when the user is in <em>Do
+not disturb</em> mode. When constructing your notification, you can call the
 following methods in {@code android.app.Notification.Builder}:</p>
 
 <ul>
 <li>{@code setCategory()}. Allows the system to handle your app notifications
-in Do not disturb mode (for example, if your notification represents an
-incoming call, instant message, or alarm).
+in <em>Do not disturb mode</em> (for example, if your notification represents an
+incoming call, instant message, or alarm).</li>
 <li>{@code setPriority()}. Notifications with the priority field set to
 {@code PRIORITY_MAX} or {@code PRIORITY_HIGH} will appear in a small floating
-window if the notification also has sound or vibration.
+window if the notification also has sound or vibration.</li>
 <li>{@code addPerson()}. Allows you to add a list of people to a notification.
 Your app can use this to signal to the system that it should group together
 notifications from the specified people, or rank notifications from these
-people as being more important.
+people as being more important.</li>
 </ul>
 
-<h3 id="Recents">Concurrent documents and activities in Recents screen</h3>
+<h3 id="Recents">Concurrent documents and activities in the Recents screen</h3>
 
 <p>In previous releases, the
 <a href="{@docRoot}design/get-started/ui-overview.html">Recents screen</a>
