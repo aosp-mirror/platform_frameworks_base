@@ -22,6 +22,7 @@
       <li><a href="<?cs var:toroot ?>preview/material/ui-widgets.html">UI Widgets</a></li>
       <li><a href="<?cs var:toroot ?>preview/material/views-shadows.html">Views and Shadows</a></li>
       <li><a href="<?cs var:toroot ?>preview/material/animations.html">Animations</a></li>
+      <li><a href="<?cs var:toroot ?>preview/material/compatibility.html">Compatibility</a></li>
     </ul>
   </li>
 
