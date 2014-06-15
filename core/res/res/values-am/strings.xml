@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"የሚያስተማምን ሁነታ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android ስርዓት"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"የግል መተግበሪያዎች"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android ስራ"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ገንዘብ የሚያስወጥዎ አገልግሎቶች"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ገንዘብ የሚያስወጡህን ነገሮች አድርግ።"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"መልዕክቶችዎ"</string>
