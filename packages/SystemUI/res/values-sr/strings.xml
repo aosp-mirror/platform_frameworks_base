@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нема обавештења"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текуће"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Обавештења"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Прикључите пуњач"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Батерија ће се ускоро испразнити."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Ниво напуњености батерије је низак"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"преостало је <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Преостало је још <xliff:g id="NUMBER">%d%%</xliff:g>. Штедња батерије је укључена."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Пуњење преко USB-а није подржано.\nКористите само приложени пуњач."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Коришћење батерије"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Пуњење преко USB-а није подржано."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Користите само пуњач који сте добили."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Подешавања"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Желите ли да покренете Штедњу батерије?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Покрени"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Покрените Штедњу батерије"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Да би продужила век трајања батерије, Штедња батерије ће умањити перформансе уређаја.\n\nШтедња батерије ће се искључити када укључите уређај."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Подешавања"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим рада у авиону"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Један сат"</item>
     <item quantity="other" msgid="5408537517529822157">"%d с"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Штедња батерије је укључена"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Перформансе уређаја су умањене."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Отворите подешавања Штедње батерије"</string>
 </resources>

@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Δεν υπάρχουν ειδοποιήσεις"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Εν εξελίξει"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ειδοποιήσεις"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Συνδέστε φορτιστή"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Η στάθμη της μπαταρίας είναι χαμηλή."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Χαμηλή στάθμη μπαταρίας"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Απομένει <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Απομένει <xliff:g id="NUMBER">%d%%</xliff:g>. Η Εξοικονόμηση μπαταρίας είναι ενεργή."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Δεν υποστηρίζεται η φόρτιση USB.\nΧρησιμοποιείτε μόνο τον φορτιστή που παρέχεται."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Χρήση μπαταρίας"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Δεν υποστηρίζεται η φόρτιση μέσω USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Χρήση μόνο του παρεχόμενου φορτιστή."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Ρυθμίσεις"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Έναρξη Εξοικονόμησης μπαταρίας;"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Έναρξη"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Έναρξη Εξοικονόμησης μπαταρίας"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Για να συμβάλει στη βελτίωση της διάρκειας ζωής της μπαταρίας, η Εξοικονόμηση μπαταρίας θα μειώσει την απόδοση της συσκευής σας.\n\nΗ Εξοικονόμηση μπαταρίας θα απενεργοποιηθεί όταν η συσκευή σας συνδεθεί για φόρτιση."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ρυθμίσεις"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Λειτουργία πτήσης"</string>
@@ -243,4 +249,7 @@
     <item quantity="one" msgid="3480040795582254384">"Για μία ώρα"</item>
     <item quantity="other" msgid="5408537517529822157">"Για %d ώρες"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Η απόδοση της συσκευής μειώνεται."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Άνοιγμα ρυθμίσεων Εξοικονόμησης μπαταρίας"</string>
 </resources>

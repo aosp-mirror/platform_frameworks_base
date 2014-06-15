@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Không có thông báo nào"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Đang diễn ra"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Thông báo"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Cắm bộ sạc"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Pin đang yếu."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Pin yếu"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> còn lại"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Còn lại <xliff:g id="NUMBER">%d%%</xliff:g>. Trình tiết kiệm pin đang bật."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Không hỗ trợ sạc qua USB.\nChỉ sử dụng bộ sạc được cung cấp."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Sử dụng pin"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Sạc qua USB không được hỗ trợ."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Chỉ sử dụng bộ sạc được cung cấp."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Cài đặt"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Khởi động trình tiết kiệm pin?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Bắt đầu"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Khởi động trình tiết kiệm pin"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất của thiết bị.\n\nTrình tiết kiệm pin sẽ tắt khi thiết bị của bạn được cắm vào."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Cài đặt"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Chế độ trên máy bay"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Trong một giờ"</item>
     <item quantity="other" msgid="5408537517529822157">"Trong %d giờ"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Trình tiết kiệm pin đang bật"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Hiệu suất của thiết bị đã giảm."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Mở cài đặt trình tiết kiệm pin"</string>
 </resources>

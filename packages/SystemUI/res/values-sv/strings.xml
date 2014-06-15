@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelanden"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Anslut laddaren"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Batteriet håller på att ta slut."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Lågt batteri"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> återstår"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> kvar. Batterisparläget har aktiverats."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Det går inte att ladda via USB.\nAnvänd endast den laddare som levererades med telefonen."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Batteriförbrukning"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Det finns inget stöd för laddning via USB."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Använd endast den medföljande laddaren."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Inställningar"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Vill du aktivera batterisparläget?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Börja"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Aktivera batterisparläget"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Med batterisparläget minskas enhetens prestanda i syfte att förlänga batteritiden.\n\nBatterisparläget inaktiveras när enheten ansluts till ett uttag."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Inställningar"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flygplansläge"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"I en timme"</item>
     <item quantity="other" msgid="5408537517529822157">"I %d timmar"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterisparläget har aktiverats"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Enhetens prestanda har minskats."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Öppna inställningarna för batterisparläget"</string>
 </resources>

@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Немає сповіщень"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Підключіть зарядний пристрій"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Акумулятор розряджається."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Низький рівень заряду акумулятора"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Залишилося <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Залишилося <xliff:g id="NUMBER">%d%%</xliff:g>. Режим заощадження заряду акумулятора ввімкнено."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується.\nВикористовуйте лише наданий у комплекті зарядний пристрій."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Використання акумулятора"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Заряджання через USB не підтримується."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Використовуйте лише зарядний пристрій, який постачається в комплекті."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Налаштування"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Увімкнути режим заощадження заряду акумулятора?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Почати"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Увімкнути режим заощадження заряду акумулятора"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Щоб подовжити роботу акумулятора, буде знижено продуктивність пристрою.\n\nРежим заощадження заряду акумулятора вимкнеться, коли пристрій буде підключено до мережі живлення."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим польоту"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Протягом години"</item>
     <item quantity="other" msgid="5408537517529822157">"Протягом %d год"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим заощадження заряду акумулятора ввімкнено"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Продуктивність пристрою знижено."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Відкрийте налаштування режиму заощадження заряду акумулятора"</string>
 </resources>

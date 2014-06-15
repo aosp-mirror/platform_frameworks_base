@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bez obavijesti"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Priključite punjač"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Baterija će uskoro biti potrošena."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Niska razina baterije"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Preostalo je <xliff:g id="NUMBER">%d%%</xliff:g>. Štednja baterije je uključena."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB punjenje nije podržano.\nUpotrijebite samo priloženi punjač."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Iskorištenost baterije"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Punjenje putem USB-a nije podržano."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Upotrebljavajte samo priloženi punjač."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Postavke"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Želite li pokrenuti štednju baterije?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Kreni"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Pokretanje štednje baterije"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Da bi baterija trajala dulje, Štednja baterije smanjit će intenzitet rada uređaja.\n\nŠtednja baterije onemogućit će se kada je uređaj priključen."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Postavke"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Način rada u zrakoplovu"</string>
@@ -186,8 +192,8 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (broj uređaja: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth isključen"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Svjetlina"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatsko usmjerenje"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Usmjerenje je zaključano"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatsko izmjenjivanje"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Izmjenjivanje je zaključano"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Okomito"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Vodoravno"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Način unosa"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Jedan sat"</item>
     <item quantity="other" msgid="5408537517529822157">"%d h"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Štednja baterije je uključena"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Uređaj radi smanjenim intenzitetom."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Otvaranje postavki štednje baterije"</string>
 </resources>

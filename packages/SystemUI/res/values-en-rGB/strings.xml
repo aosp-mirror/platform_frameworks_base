@@ -32,11 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No notifications"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ongoing"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
-    <string name="battery_low_title" msgid="2783104807551211639">"Connect charger"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"The battery is getting low."</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Battery is low"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> remaining"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> remaining. Battery saver is on."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB charging not supported.\nUse only the supplied charger."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Battery use"</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"USB charging not supported."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Use only the supplied charger."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Settings"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Start battery saver?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Start"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Start battery saver"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"To help improve battery life, Battery saver will reduce your device’s performance.\n\nBattery saver will be disabled when your device is plugged in."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Settings"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Aeroplane mode"</string>
@@ -241,4 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"For one hour"</item>
     <item quantity="other" msgid="5408537517529822157">"For %d hours"</item>
   </plurals>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Battery saver is on"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Device performance is reduced."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Open battery saver settings"</string>
 </resources>
