@@ -40,6 +40,8 @@ final class HdmiConstants {
     // Constants related to UI Command Codes.
     // Refer to CEC Table 30 in HDMI Spec v1.4b.
     static final int UI_COMMAND_POWER = 0x40;
+    static final int UI_COMMAND_VOLUME_UP = 0x41;
+    static final int UI_COMMAND_VOLUME_DOWN = 0x42;
     static final int UI_COMMAND_MUTE = 0x43;
     static final int UI_COMMAND_MUTE_FUNCTION = 0x65;
     static final int UI_COMMAND_RESTORE_VOLUME_FUNCTION = 0x66;
