@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"व्यक्तिगत ऐप्स"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"कार्यालय के लिए Android"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android कार्य"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"वे सेवाएं जिन पर आप खर्चा करते हैं"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ऐसे कार्य करें जिससे आपका धन खर्च हो सकता है."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"आपके संदेश"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"धारक को किसी वॉलपेपर के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"किसी ध्वनि सहभागिताकर्ता से आबद्ध हों"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"धारक को किसी ध्वनि सहभागिता सेवा के शीर्ष-स्तर के इंटरफ़ेस से आबद्ध होने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ध्वनि कीफ़्रेज़ प्रबंधित करें"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"धारक को ध्वनि हॉटवर्ड पहचान के लिए कीफ़्रेज़ प्रबंधित करने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"रिमोट डिस्प्ले से आबद्ध करें"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"धारक को किसी रिमोट डिस्प्ले के शीर्ष-स्‍तरीय इंटरफ़ेस से आबद्ध होने देती है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"किसी विजेट सेवा से आबद्ध करें"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ऐप्स  को प्लेबैक डीकोड करने के लिए किसी भी इंस्टॉल किए गए डीकोडर का उपयोग करने देता है."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"विश्वसनीय क्रेडेंशियल प्रबंधित करें"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"ऐप्स  को CA प्रमाणपत्रों को विश्वसनीय क्रेडेंशियल के रूप में इंस्टॉल और अनइंस्टॉल करने दें"</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"निष्क्रिय समय के दौरान एप्लिकेशन चलाएं"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"यह अनुमति Android सिस्टम को उपकरण के उपयोग में नहीं रहने पर एप्लिकेशन को पृष्ठभूमि में चलाने देती है."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"एप्लिकेशन का शेड्यूल किया गया पृष्ठभूमि कार्य चलाएं"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"यह अनुमति Android सिस्टम को, अनुरोध किए जाने पर एप्लिकेशन को पृष्ठभूमि में चलाने देती है."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"निदान के स्‍वामित्‍व वाले संसाधनों को पढ़ें/लिखें"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ऐप्स को diag समूह के स्‍वामित्‍व वाले किसी संसाधन को पढ़ने और उसमें लिखने देता है; उदाहरण के लिए, /dev की फ़ाइलें. यह सिस्‍टम की स्‍थिरता और सुरक्षा को संभावित रूप से प्रभावित कर सकता है. इसका उपयोग निर्माता या ऑपरेटर द्वारा केवल हार्डवेयर-विशिष्ट निदान के लिए किया जाना चाहिए."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ऐप्स घटकों को सक्षम या अक्षम करें"</string>

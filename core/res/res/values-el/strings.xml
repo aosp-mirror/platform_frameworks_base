@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Προσωπικές εφαρμογές"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android for Work"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Υπηρεσίες επί πληρωμή"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Πραγματοποίηση ενεργειών για τις οποίες ενδέχεται να χρεωθείτε."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Τα μηνύματά σας"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας ταπετσαρίας. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"σύνδεση σε παράγοντα φωνητικής αλληλεπίδρασης"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Επιτρέπει στον κάτοχο τη σύνδεση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας φωνητικής αλληλεπίδρασης. Δεν απαιτείται για κανονικές εφαρμογές."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"διαχείριση φωνητικών φράσεων-κλειδιών"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Δίνει στον κάτοχο τη δυνατότητα να διαχειριστεί τις φράσεις-κλειδιά για την ανίχνευση φωνητικών λέξεων-κλειδιών. Δεν απαιτείται για τις συνήθεις εφαρμογές."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"μεταφορά σε μια απομακρυσμένη οθόνη"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας απομακρυσμένης οθόνης. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"δέσμευση σε υπηρεσία γραφικών στοιχείων"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Επιτρέπει στην εφαρμογή τη χρήση οποιουδήποτε εγκατεστημένου αποκωδικοποιητή μέσων για αναπαραγωγή."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"διαχείριση αξιόπιστων διαπιστευτηρίων"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Επιτρέπει στην εφαρμογή την εγκατάσταση και την απεγκατάσταση πιστοποιητικών CA ως αξιόπιστων διαπιστευτηρίων."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"εκτέλεση εφαρμογής κατά τη λειτουργία αδράνειας"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Αυτή η άδεια επιτρέπει στο σύστημα Android να εκτελεί την εφαρμογή στο παρασκήνιο όταν δεν χρησιμοποιείται η συσκευή."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"εκτέλεση των προγραμματισμένων εργασιών της εφαρμογής στο παρασκήνιο"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Αυτή η άδεια επιτρέπει στο σύστημα Android να εκτελεί την εφαρμογή στο παρασκήνιο όταν ζητηθεί."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ανάγνωση/εγγραφή σε πόρους που ανήκουν στο διαγνωστικό"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Επιτρέπει στην εφαρμογή την ανάγνωση και την εγγραφή σε οποιονδήποτε πόρο που ανήκει στην ομάδα διαγνωστικού (π.χ. αρχεία στον κατάλογο /dev). Αυτό ενδέχεται να επηρεάσει την σταθερότητα και την ασφάλεια του συστήματος. Θα πρέπει να χρησιμοποιείται ΜΟΝΟ για διαγνωστικά υλικού από τον κατασκευαστή ή τον χειριστή."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ενεργοποίηση ή απενεργοποίηση στοιχείων εφαρμογής"</string>

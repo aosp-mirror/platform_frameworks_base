@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Veiligmodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Persoonlike programme"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android vir Werk"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Werk"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dienste wat jou geld kos"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Doen dinge wat jou geld kan kos."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n muurpapier te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"verbind met \'n steminteraksiediens"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Laat die houer toe om met die topvlak-koppelvlak van \'n steminteraksiediens te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"bestuur stemsleutelfrases"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Laat die houer toe om die sleutelfrases vir aktiveerwoordbespeuring met stem te bestuur. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"koppel aan \'n afstandskerm"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Dit laat die houer toe om aan die top-koppelvlak van \'n afstandskerm te koppel. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind aan \'n legstukdiens"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Laat die program toe om enige geïnstalleer mediadekodeerder te gebruik om te kan dekodeer vir terugspeel."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"bestuur vertroude eiebewyse"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Laat die program CA-sertifikate as vertroude eiebewyse installeer en deïnstalleer."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"laat program gedurende ledige tyd loop"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Met hierdie toestemming kan die Android-stelsel die program in die agtergrond laat loop terwyl die toestel nie gebruik word nie."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"laat loop die program se geskeduleerde agtergrondwerk"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Hierdie toestemming laat die Android-stelsel toe om die program in die agtergrond te laat loop wanneer dit versoek word."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>

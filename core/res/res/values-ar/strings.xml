@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"التطبيقات الشخصية"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"‏Android للعمل"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"‏عمل Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"يمكنك تنفيذ إجراءات يمكن أن تكلفك مالاً."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"رسائلك"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"الربط بخدمة التفاعل الصوتي"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة التفاعل الصوتي. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"إدارة العبارات الأساسية الصوتية"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"للسماح للمالك بإدارة العبارات الأساسية لاكتشاف الكلمات المهمة الصوتية. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"الربط بالشاشة عن بُعد"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للعرض عن بُعد. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"الالتزام بخدمة أداة"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"السماح للتطبيق باستخدام أي برنامج فك تشفير وسائط مثبت لفك التشفير من أجل التشغيل."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"إدارة بيانات الاعتماد الموثوقة"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏السماح للتطبيق بتثبيت شهادات CA وإلغاء تثبيتها باعتبارها بيانات اعتماد محل ثقة."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"تشغيل التطبيق أثناء وقت الخمول"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية في حين أن الجهاز ليس قيد الاستخدام."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"تشغيل عمل الخلفية المجدول للتطبيق"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"‏يتيح هذا الإذن لنظام Android تشغيل التطبيق في الخلفية عند طلبه."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"قراءة/كتابة إلى الموارد المملوكة بواسطة التشخيص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏للسماح للتطبيق بالقراءة والكتابة إلى أي مورد مملوك بواسطة مجموعة التشخيصات؛ على سبيل المثال، الملفات في /dev. من المحتمل أن يؤثر ذلك في استقرار النظام وأمانه. يجب ألا يستخدم ذلك سوى للتشخيصات الخاصة بالنظام من قِبل المصنِّع أو المشغِّل."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"تمكين مكونات التطبيق أو تعطيلها"</string>

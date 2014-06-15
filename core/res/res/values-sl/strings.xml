@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Varni način"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osebne aplikacije"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android za delo"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Plačljive storitve"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Dovolite stvari, za katere bo morda treba plačati."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaša sporočila"</string>
@@ -400,6 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Imetniku omogoča povezavo z vmesnikom ozadja najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"povezovanje z glasovnim interaktorjem"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Imetniku omogoča povezovanje z vmesnikom storitve glasovne interakcije najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"upravljanje glasovnih ključnih besednih zvez"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Imetniku omogoča upravljanje ključnih besednih zvez za zaznavanje sprožilne besede. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"povezava z oddaljenim prikazom"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Imetniku omogoča povezovanje z vmesnikom oddaljenega prikaza najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"poveži s storitvijo pripomočka"</string>
@@ -445,8 +448,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Programu omogoča, da uporabi kateri koli dekodirnik večpredstavnosti za predvajanje."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje preverjenih poverilnic"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Aplikaciji dovoli nameščanje in odstranjevanje potrdil overitelja potrdil kot preverjenih poverilnic."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"izvajanje aplikacije ob nedejavnosti"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"To dovoljenje sistemu Android omogoča, da izvaja aplikacijo v ozadju, ko naprava ni v uporabi."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"izvajanje načrtovanega dela aplikacije v ozadju"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"To dovoljenje sistemu Android omogoča, da na zahtevo izvaja aplikacijo v ozadju."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"branje/pisanje v sredstva, ki so v lasti skupine za diagnostiko"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Programu omogoča branje in pisanje na poljuben vir, ki je v lasti skupine za diagnostiko; na primer datoteke v mapi /dev. To lahko vpliva na stabilnost in varnost sistema. To naj uporablja SAMO izdelovalec ali operater za diagnostiko, specifično za strojno opremo."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogočanje ali onemogočanje komponent programa"</string>

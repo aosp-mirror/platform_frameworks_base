@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Asmeninės programos"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Darbui skirta „Android“"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"„Android“ (darbas)"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Paslaugos, už kurias mokėjote"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Atlikite mokamus veiksmus."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsų pranešimai"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Leidžiama savininką susaistyti su aukščiausio lygio darbalaukio fono sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"susaistyti su sąveikos balsu priemone"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Turėtojui leidžiama susaistyti programą su sąveikos balsu paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to niekada neturėtų prireikti."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"tvarkyti pagrindines balso frazes"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Savininkui leidžiama tvarkyti pagrindines aktyvinamiesiems žodžiams aptikti skirtas frazes. To niekada neturėtų prireikti naudojant įprastas programas."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"susisaistyti su nuotoliniu ekranu"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Leidžiama savininkui susisaistyti su aukščiausiojo lygio nuotolinio ekrano sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"susaistyti su valdiklio paslauga"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"tvarkyti patikimus prisijungimo duomenis"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Programoje galima įdiegti ir iš jos pašalinti CA sertifikatus kaip patikimus prisijungimo duomenis."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"paleisti programą, kai įrenginys yra neaktyvus"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Šiuo leidimu sistemai „Android“ leidžiama fone paleisti programą, kai įrenginys yra nenaudojamas."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"vykdyti suplanuotą programos darbą fone"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Šiuo leidimu sistemai „Android“ leidžiama fone vykdyti programą, kai to prašoma."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>

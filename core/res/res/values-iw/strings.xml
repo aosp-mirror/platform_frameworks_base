@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"מצב בטוח"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏מערכת Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"אפליקציות אישיות"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"‏Android לעבודה"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"‏Android לעבודה"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"שירותים שעולים כסף"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ביצוע פעולות שעשויות לעלות לך כסף."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ההודעות שלך"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"מאפשר למשתמש לבצע איגוד לממשק הרמה העליונה של טפט. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"איגוד לשירות אינטראקציה קולית"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות אינטראקציה קולית. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ניהול של ביטויי מפתח קוליים"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"מאפשרת לבעלים לנהל את ביטויי המפתח עבור זיהוי של מילת הפעלה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"איגוד לצג מרוחק"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של צג רחוק. לעולם אינה אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"‏הכפפה לשירות Widget"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"הרשאה זו מאפשרת לאפליקציה להשתמש בכל מפענח מדיה מותקן כדי לבצע פענוח להשמעה."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"ניהול פרטי כניסה מהימנים"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"‏מאפשרת לאפליקציה להתקין ולהסיר אישורי CA כפרטי כניסה מהימנים."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"הרצת אפליקציה בזמן מצב לא פעיל"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"‏ההרשאה הזו מאפשרת למערכת Android להריץ את האפליקציה ברקע כשהמכשיר אינו בשימוש."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"הרץ את העבודה ברקע המתוזמנת של האפליקציה"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"‏ההרשאה הזו מאפשרת למערכת Android להריץ את האפליקציה ברקע כשהפעולה מתבקשת."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"‏קרא/כתוב במשאבים בבעלות diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"‏מאפשר לאפליקציה לקרוא ולכתוב בכל משאב שבבעלות קבוצת ה-diag; לדוגמה, קבצים ב-‎/dev. פעולה זו עשויה להשפיע על היציבות והאבטחה של המערכת. אפשרות זו צריכה לשמש רק את היצרן או המפעיל, לצורך אבחונים ספציפיים לחומרה."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"הפעלה או השבתה של רכיבי אפליקציות"</string>

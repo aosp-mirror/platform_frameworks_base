@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicaciones personales"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android para el trabajo"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Trabajo Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicios que te cuestan dinero"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Permite que las aplicaciones realicen actividades con cargo."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tus mensajes"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite al propietario vincularse a la interfaz de nivel superior de un fondo de pantalla. Las aplicaciones normales no deben utilizar este permiso."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"vincular con un servicio de interacción por voz"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite vincular con la interfaz de nivel superior de un servicio de interacción por voz. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"administrar frases clave de voz"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permite administrar las frases clave para detección de palabras activas de voz. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"vincular a una pantalla remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite al propietario vincularse a la interfaz de nivel superior de una pantalla remota. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a un servicio de widget"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que la aplicación use cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"administrar credenciales de confianza"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite que la aplicación instale y desinstale certificados de CA como credenciales de confianza."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"ejecutar la aplicación durante el tiempo de inactividad"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Con este permiso, el sistema Android puede ejecutar la aplicación en segundo plano mientras el dispositivo no está en uso."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"Ejecutar el trabajo en segundo plano programado de la aplicación"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Con este permiso, el sistema Android puede ejecutar la aplicación en segundo plano cuando sea necesario."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer y escribir a recursos dentro del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación lea y escriba en cualquier recurso propiedad del grupo de diagnóstico como, por ejemplo, archivos in/dev. Este permiso podría afectar la seguridad y estabilidad del sistema. SOLO se debe utilizar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activar o desactivar componentes de la aplicación"</string>

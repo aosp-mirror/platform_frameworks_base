@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Drošais režīms"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistēma"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Personīgās lietotnes"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android darbam"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android darbs"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Maksas pakalpojumi"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Veikt darbības, par kurām, iespējams, būs jāmaksā."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsu ziņojumi"</string>
@@ -400,6 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ļauj īpašniekam piesaistīt tapetes augstākā līmeņa lietotāja saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"Saistīšana ar balss mijiedarbības elementu"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ļauj īpašniekam izveidot savienojumu ar balss mijiedarbības pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"pārvaldīt balss atslēgas frāzes"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ļauj īpašniekam pārvaldīt atslēgas frāzes balss īsinājumvārdu identificēšanai. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"Saites izveide ar attālu displeju"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ļauj īpašniekam izveidot saiti ar attāla displeja augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"saistīt ar logrīka pakalpojumu"</string>
@@ -445,8 +447,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ļauj lietotnei izmantot jebkuru instalētu multivides failu dekodētāju, lai dekodētu failus atskaņošanai."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"Uzticamo akreditācijas datu pārvaldība"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Ļauj lietotnei instalēt un atinstalēt CA sertifikātus kā uzticamus akreditācijas datus."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"Lietojumprogrammas darbība dīkstāves laikā"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Ar šo atļauju Android sistēmā lietojumprogramma darbojas fonā, kad ierīce netiek lietota."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"iespējot lietojumprogrammas plānoto darbību fonā"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Ar šo atļauju Android sistēmā lietojumprogramma pēc pieprasījuma darbojas fonā."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ļauj lietotnei lasīt un rakstīt jebkurā resursā, kas pieder diagnostikas grupai, piemēram, failiem mapē /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Var izmantot ražotājs vai operators TIKAI konkrētas aparatūras diagnostikai."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"iespējot vai atspējot lietotnes komponentus"</string>

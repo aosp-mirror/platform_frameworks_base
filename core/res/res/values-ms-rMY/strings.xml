@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Mod selamat"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Apl peribadi"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android untuk Kerja"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Perkhidmatan yang anda perlu bayar"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Melakukan perkara yang boleh mengenakan bayaran kepada anda."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesej anda"</string>
@@ -400,6 +401,10 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kertas dinding. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"terikat kepada interaksi suara"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan interaksi suara. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
+    <skip />
+    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"terikat kepada paparan jauh"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi paparan jauh. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
@@ -445,8 +450,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Membenarkan apl untuk menggunakan sebarang penyahkod media yang dipasangkan untuk menyahkod main semula."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"urus bukti kelayakan yang dipercayai"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Membenarkan apl memasang dan menyahpasang sijil CA sebagai bukti kelayakan yang dipercayai."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"jalankan aplikasi pada masa melahu"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Kebenaran ini membolehkan sistem Android menjalankan aplikasi di latar belakang semasa peranti tidak digunakan."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"jalankan kerja latar belakang dijadualkan aplikasi"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Kebenaran ini membolehkan sistem Android menjalankan aplikasi di latar belakang apabila diminta."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Membenarkan apl membaca dan menulis ke sebarang sumber yang dimiliki oleh kumpulan diag; contohnya, fail dalam /dev. Hal ini berpotensi menjejaskan kestabilan dan keselamatan sistem. Perkara ini seharusnya HANYA digunakan untuk diagnosis khusus perkakasan oleh pengilang atau pengendali."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"dayakan atau lumpuhkan komponen apl"</string>
@@ -521,7 +526,7 @@
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Pengesanan sebutan laluan"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Benarkan apl merakam audio untuk pengesahan Sebutan Laluan. Rakaman ini boleh berlaku di latar belakang tetapi tidak menghalang rakaman audio lain (cth. Kamkorder)."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Penghalaan Audio"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Membenarkan apl untuk mengawal penghalaan audio secara langsung dan mengatasi keputusan dasar audio."</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Membenarkan apl untuk mengawal penghalaan audio secara langsung dan melangkau keputusan dasar audio."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"tangkap output video"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Membenarkan apl menangkap dan mengubah hala output video."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"tangkap output video selamat"</string>

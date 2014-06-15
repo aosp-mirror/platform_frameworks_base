@@ -189,7 +189,8 @@
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemul Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicații personale"</string>
-    <string name="managed_profile_label" msgid="3022906847647343112">"Android pentru serviciu"</string>
+    <!-- no translation found for managed_profile_label (4287077106125758391) -->
+    <skip />
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicii cu plată"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Efectuează acţiuni care sunt cu plată."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajele dvs."</string>
@@ -400,6 +401,10 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"conectare la un serviciu de interacțiune vocală"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de interacțiune vocală. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
+    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
+    <skip />
+    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
+    <skip />
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"conectare la un ecran la distanță"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -445,8 +450,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite aplicaţiei să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestionarea acreditărilor de încredere"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite aplicației să instaleze și să dezinstaleze certificate CA ca acreditări de încredere."</string>
-    <string name="permlab_bindIdleService" msgid="816311765497613780">"rulează aplicația în timp ce dispozitivul este inactiv"</string>
-    <string name="permdesc_bindIdleService" msgid="1767538493214100612">"Cu această permisiune, sistemul Android poate rula aplicația în fundal în timp ce dispozitivul nu este utilizat."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"rulează operațiile programate, în fundal, ale aplicației"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Cu această permisiune, sistemul Android poate rula aplicația în fundal la cerere."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
