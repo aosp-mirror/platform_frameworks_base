@@ -7,6 +7,7 @@ function mergeArrays() {
 }
 
 var ALL_RESOURCES = mergeArrays(
+  ABOUT_RESOURCES,
   DESIGN_RESOURCES,
   DISTRIBUTE_RESOURCES,
   GOOGLE_RESOURCES,

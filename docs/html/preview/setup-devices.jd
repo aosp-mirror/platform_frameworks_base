@@ -1,8 +1,7 @@
 page.title=Setting Up Hardware and AVDs
-
 @jd:body
 
-<p>The Android 5.0 developer preview provides you with 32-bit system images
+<p>The Android L developer preview provides you with 32-bit system images
 to flash the following devices:
 </p>
 
@@ -15,8 +14,9 @@ to flash the following devices:
 experimental 64-bit system images along with standard 32-bit system images.
 </p>
 
-<h2>Flashing Devices</h2>
+<h2>Installing the L Preview System Image</h2>
 
+<!-- Will we get an official warning text from the lawyercats? Is this it? -->
 <p class="warning"><b>Warning</b>: This is a preview version of the Android
 system image, and is subject to change. Your use of this system image is
 governed by the Android SDK Preview License Agreement. The Android preview
@@ -26,56 +26,71 @@ Android system image is not subject to the same testing as the factory OS and
 can cause your phone and installed services and applications to stop working.
 </p>
 
-<p>
-Click through Terms of Service:
-https://docs.google.com/a/google.com/document/d/1OixnM1Q890ExOzDB3Z-FDD6Sb2kF4uZQiMxsYVII8F0/edit?usp=sharing
+<p><!-- Will this link change before we publish (to a clean version of the doc)?
+  Or will we scrub the doc's comments & revision history? -->
+<a href="https://docs.google.com/a/google.com/document/d/1OixnM1Q890ExOzDB3Z-FDD6Sb2kF4uZQiMxsYVII8F0/edit?usp=sharing">L
+Preview Terms of Service</a>
 </p>
 
-<h3>To the Developer Preview</h3>
+
 <ol>
   <li>Download and extract the Android Developer Preview package to a directory
-  referred to as <code>&lt;extracted_images&gt;</code>.</li>
-  <li>Connect your powered-off Android device to your development machine and
-  press and hold the following buttons until your device is in fastboot mode:
+  (which we'll call <code>&lt;l_download_dir&gt;</code> in these
+  instructions).</li>
+  <li>Connect your powered-off Android device to your development machine. Put
+  the device in fastboot mode by pressing and holding the following buttons:
     <ul>
-    <li>For Nexus 5: vol down + vol up + power</li>
-    <li>For Nexus 7: vol down + power </li>
+    <li><strong>Nexus 5:</strong> <i>volume down</i> + <i>volume up</i> +
+        <i>power</i></li>
+    <li><strong>Nexus 7:</strong> <i>volume down</i> + <i>power</i> </li>
     </ul>
-    <p class="note">Alternatively, run <code>adb reboot bootloader</code>
-    with USB debugging turned on to enter fastboot mode.
-    The device must be booted up if you’re using this method.</p>
+    <p class="note">Alternatively, you can enter fastboot mode by booting up
+    the device and running <code>adb reboot bootloader</code> with USB debugging
+    turned on.</p>
   </li>
   <li>Follow the instructions at
-  <a href="https://developers.google.com/android/nexus/images">developers.google.com/android</a>
+  <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
   to set up your system for flashing devices.</li>
-  <li>Run the <code>&lt;extracted-images&gt;/flash-all</code> script
+  <li>Run the <code>&lt;l_download_dir&gt;/flash-all</code> script
   corresponding to your platform. This script flashes all of the system data
-  onto the phone.</li>
-  <li>(Optional) After flashing is complete, run <code>fastboot oem lock</code>
-  with the device in fastboot mode to lock it again. This does not wipe your
-  device, but if you want to flash again, you need to run <code>fastboot oem
-  unlock</code>, which wipes your device. We recommend you leave the
+  onto the phone.</li> <!-- Confirm names of flash scripts -->
+  <li>(Optional) After flashing is complete, lock your device's bootloader by
+  putting it in   fastboot mode and running <code>fastboot oem lock</code>.
+  (This does not wipe   your device.) Once you do this,  you will not be able to
+  flash your device until you run   run <code>fastboot oem   unlock</code>,
+  which unlocks the bootloader and wipes your device. We recommend you leave the
   bootloader unlocked until you are done with flashing the device.</li>
 </ol>
 
-<h3>To factory specifications</h3>
+<h3>Reverting a Device to Factory Specifications</h3>
 
-  <p>Go to <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a>
-  and download the image you want to flash to for your device.
-  Follow the instructions there to flash the image to your device.</p>
+  <p>If you want to uninstall the L Preview and revert the device to factory
+specifications, go to <a href="http://developers.google.com/android
+/nexus/images">developers.google.com/android</a> and download the image you want
+to flash to for your device. Follow the instructions on that page to flash the
+image to your device.</p>
 
 
 <h2>Setting up an AVD</h2>
-You can set up Android Virtual Devices (AVD) and use the emulator to
-build and test apps with:
+
+<p>You can set up <a href="{@docRoot}tools/devices/">Android Virtual Devices
+(AVD)</a> and use the emulator to build and test apps with the L Preview.</p>
+
+<p>To create an AVD with the AVD Manager:</p>
 
 <ol>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
+  <li>Install the L Preview SDK in your development environment, as described
+      in <a href="{@docRoot}preview/setup-sdk.html">Setting Up the Preview
+      SDK.</a></li>
+  <li>Follow the steps in
+      <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
+      Manager</a>. Use the following settings:
+    <ul>
+      <li><b>Device:</b> Either Nexus 5 or Nexus 7</li>
+      <li><b>Target:</b> <!-- Confirm exact text when we have final distro -->
+       Android L (Preview) - API Level L</li>
+    </ul>
+    <!-- Confirm this works when you can download image through SDK manager! -->
+  </li>
 </ol>
+
