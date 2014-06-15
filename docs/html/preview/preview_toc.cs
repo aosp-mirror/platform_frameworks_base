@@ -24,6 +24,42 @@
       <li><a href="<?cs var:toroot ?>preview/material/animations.html">Animations</a></li>
     </ul>
   </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>preview/tv/index.html">TV</a>
+      </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>preview/tv/start/index.html">
+        Get Started</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>preview/tv/ui/index.html">
+          User Interface</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/layouts.html">
+            Layouts</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/navigation.html">
+            Navigation</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/browse.html">
+            BrowseFragment</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/details.html">
+            DetailsFragment</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/in-app-search.html">
+            In-App Search</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/ui/recommendations.html">
+            Recommendations</a></li>
+        </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>preview/tv/games/index.html">
+        Games on TV</a></li>
+      <li><a href="<?cs var:toroot ?>preview/tv/start/hardware-features.html">
+        Hardware Features</a></li>
+      <li><a href="<?cs var:toroot ?>preview/tv/adt-1/index.html">
+        ADT-1</a></li>
+    </ul>
+  </li>
+
   <li class="nav-section">
     <div class="nav-section-header empty">
       <a href="<?cs var:toroot ?>preview/samples.html">Samples</a>
