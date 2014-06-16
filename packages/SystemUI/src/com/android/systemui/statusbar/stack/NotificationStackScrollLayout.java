@@ -762,11 +762,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                                 }
                             }
                         }
-
-                        mActivePointerId = INVALID_POINTER;
-                        endDrag();
                     }
+
+                    mActivePointerId = INVALID_POINTER;
+                    endDrag();
                 }
+
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
