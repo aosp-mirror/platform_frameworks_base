@@ -705,7 +705,7 @@ $(full_target): $(framework_built) $(gen)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
-# ====  the private api stubs ===================================
+# ====  the system api stubs ===================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
@@ -717,11 +717,11 @@ LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
 LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 
-LOCAL_MODULE := private-api-stubs
+LOCAL_MODULE := system-api-stubs
 
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_private_stubs_current_intermediates/src \
+		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_system_stubs_current_intermediates/src \
         -showAnnotation android.annotation.SystemApi \
 		-nodocs
 
