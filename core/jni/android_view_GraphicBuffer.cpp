@@ -142,16 +142,16 @@ static void android_view_GraphiceBuffer_destroy(JNIEnv* env, jobject clazz,
 // Canvas management
 // ----------------------------------------------------------------------------
 
-static inline SkBitmap::Config convertPixelFormat(int32_t format) {
+static inline SkColorType convertPixelFormat(int32_t format) {
     switch (format) {
         case PIXEL_FORMAT_RGBA_8888:
-            return SkBitmap::kARGB_8888_Config;
+            return kN32_SkColorType;
         case PIXEL_FORMAT_RGBX_8888:
-            return SkBitmap::kARGB_8888_Config;
+            return kN32_SkColorType;
         case PIXEL_FORMAT_RGB_565:
-            return SkBitmap::kRGB_565_Config;
+            return kRGB_565_SkColorType;
         default:
-            return SkBitmap::kNo_Config;
+            return kUnknown_SkColorType;
     }
 }
 
@@ -188,8 +188,10 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     ssize_t bytesCount = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
 
     SkBitmap bitmap;
-    bitmap.setConfig(convertPixelFormat(buffer->getPixelFormat()),
-            buffer->getWidth(), buffer->getHeight(), bytesCount);
+    bitmap.setInfo(SkImageInfo::Make(buffer->getWidth(), buffer->getHeight(),
+                                     convertPixelFormat(buffer->getPixelFormat()),
+                                     kPremul_SkAlphaType),
+                   bytesCount);
 
     if (buffer->getWidth() > 0 && buffer->getHeight() > 0) {
         bitmap.setPixels(bits);

@@ -61,8 +61,7 @@ static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, job
         jobject canvas, jint width, jint height) {
 
     SkBitmap* bitmap = new SkBitmap;
-    bitmap->setConfig(SkBitmap::kARGB_8888_Config, width, height);
-    bitmap->allocPixels();
+    bitmap->allocN32Pixels(width, height);
     bitmap->eraseColor(0);
     INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(bitmap));
 

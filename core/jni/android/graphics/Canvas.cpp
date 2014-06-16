@@ -703,10 +703,11 @@ public:
                                 jboolean hasAlpha, jlong paintHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        SkImageInfo info = SkImageInfo::Make(width, height,
+                               hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
+                               kPremul_SkAlphaType);
         SkBitmap    bitmap;
-        bitmap.setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config :
-                         SkBitmap::kRGB_565_Config, width, height);
-        if (!bitmap.allocPixels()) {
+        if (!bitmap.allocPixels(info)) {
             return;
         }
 

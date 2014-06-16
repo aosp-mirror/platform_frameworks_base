@@ -173,17 +173,17 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
     return value;
 }
 
-static inline SkBitmap::Config convertPixelFormat(PixelFormat format) {
+static inline SkColorType convertPixelFormat(PixelFormat format) {
     /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
-        we can map to SkBitmap::kARGB_8888_Config, and optionally call
+        we can map to kN32_SkColorType, and optionally call
         bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
         (as an accelerator)
     */
     switch (format) {
-    case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
-    case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
-    default:                        return SkBitmap::kNo_Config;
+    case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
+    case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
+    case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
+    default:                        return kUnknown_SkColorType;
     }
 }
 
@@ -220,12 +220,16 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     // Associate a SkCanvas object to this surface
     env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
 
+    SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
+                                         convertPixelFormat(outBuffer.format),
+                                         kPremul_SkAlphaType);
+    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
+        info.fAlphaType = kOpaque_SkAlphaType;
+    }
+
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-    bitmap.setConfig(convertPixelFormat(outBuffer.format), outBuffer.width, outBuffer.height, bpr);
-    if (outBuffer.format == PIXEL_FORMAT_RGBX_8888) {
-        bitmap.setAlphaType(kOpaque_SkAlphaType);
-    }
+    bitmap.setInfo(info, bpr);
     if (outBuffer.width > 0 && outBuffer.height > 0) {
         bitmap.setPixels(outBuffer.bits);
     } else {

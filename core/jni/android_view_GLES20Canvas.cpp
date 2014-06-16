@@ -388,11 +388,11 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
 static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jintArray colors, jint offset, jint stride,
         jfloat left, jfloat top, jint width, jint height, jboolean hasAlpha, jlong paintPtr) {
+    const SkImageInfo info = SkImageInfo::Make(width, height,
+                               hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
+                               kPremul_SkAlphaType);
     SkBitmap* bitmap = new SkBitmap;
-    bitmap->setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config : SkBitmap::kRGB_565_Config,
-            width, height);
-
-    if (!bitmap->allocPixels()) {
+    if (!bitmap->allocPixels(info)) {
         delete bitmap;
         return;
     }

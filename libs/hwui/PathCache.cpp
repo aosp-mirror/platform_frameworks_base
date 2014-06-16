@@ -104,8 +104,7 @@ void PathCache::computeBounds(const SkRect& bounds, const SkPaint* paint,
 }
 
 static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
-    bitmap.setConfig(SkBitmap::kA8_Config, width, height);
-    bitmap.allocPixels();
+    bitmap.allocPixels(SkImageInfo::MakeA8(width, height));
     bitmap.eraseColor(0);
 }
 

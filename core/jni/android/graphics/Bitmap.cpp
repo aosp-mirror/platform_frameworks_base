@@ -258,16 +258,16 @@ static void ToColor_SI8_Opaque(SkColor dst[], const void* src, int width,
 
 // can return NULL
 static ToColorProc ChooseToColorProc(const SkBitmap& src, bool isPremultiplied) {
-    switch (src.config()) {
-        case SkBitmap::kARGB_8888_Config:
+    switch (src.colorType()) {
+        case kN32_SkColorType:
             if (src.isOpaque()) return ToColor_S32_Opaque;
             return isPremultiplied ? ToColor_S32_Alpha : ToColor_S32_Raw;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             if (src.isOpaque()) return ToColor_S4444_Opaque;
             return isPremultiplied ? ToColor_S4444_Alpha : ToColor_S4444_Raw;
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             return ToColor_S565;
-        case SkBitmap::kIndex8_Config:
+        case kIndex_8_SkColorType:
             if (src.getColorTable() == NULL) {
                 return NULL;
             }
@@ -291,7 +291,7 @@ static int getPremulBitmapCreateFlags(bool isMutable) {
 static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                               jint offset, jint stride, jint width, jint height,
                               jint configHandle, jboolean isMutable) {
-    SkBitmap::Config config = static_cast<SkBitmap::Config>(configHandle);
+    SkColorType colorType = SkBitmapConfigToColorType(static_cast<SkBitmap::Config>(configHandle));
     if (NULL != jColors) {
         size_t n = env->GetArrayLength(jColors);
         if (n < SkAbs32(stride) * (size_t)height) {
@@ -301,12 +301,12 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     // ARGB_4444 is a deprecated format, convert automatically to 8888
-    if (config == SkBitmap::kARGB_4444_Config) {
-        config = SkBitmap::kARGB_8888_Config;
+    if (colorType == kARGB_4444_SkColorType) {
+        colorType = kN32_SkColorType;
     }
 
     SkBitmap bitmap;
-    bitmap.setConfig(config, width, height);
+    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));
 
     jbyteArray buff = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
     if (NULL == buff) {
@@ -515,28 +515,29 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    const bool              isMutable = p->readInt32() != 0;
-    const SkBitmap::Config  config = (SkBitmap::Config)p->readInt32();
-    const int               width = p->readInt32();
-    const int               height = p->readInt32();
-    const int               rowBytes = p->readInt32();
-    const int               density = p->readInt32();
+    const bool        isMutable = p->readInt32() != 0;
+    const SkColorType colorType = (SkColorType)p->readInt32();
+    const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
+    const int         width = p->readInt32();
+    const int         height = p->readInt32();
+    const int         rowBytes = p->readInt32();
+    const int         density = p->readInt32();
 
-    if (SkBitmap::kARGB_8888_Config != config &&
-            SkBitmap::kRGB_565_Config != config &&
-            SkBitmap::kARGB_4444_Config != config &&
-            SkBitmap::kIndex8_Config != config &&
-            SkBitmap::kA8_Config != config) {
-        SkDebugf("Bitmap_createFromParcel unknown config: %d\n", config);
+    if (kN32_SkColorType != colorType &&
+            kRGB_565_SkColorType != colorType &&
+            kARGB_4444_SkColorType != colorType &&
+            kIndex_8_SkColorType != colorType &&
+            kAlpha_8_SkColorType != colorType) {
+        SkDebugf("Bitmap_createFromParcel unknown colortype: %d\n", colorType);
         return NULL;
     }
 
     SkBitmap* bitmap = new SkBitmap;
 
-    bitmap->setConfig(config, width, height, rowBytes);
+    bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType), rowBytes);
 
     SkColorTable* ctable = NULL;
-    if (config == SkBitmap::kIndex8_Config) {
+    if (colorType == kIndex_8_SkColorType) {
         int count = p->readInt32();
         if (count > 0) {
             size_t size = count * sizeof(SkPMColor);
@@ -587,13 +588,14 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
     p->writeInt32(isMutable);
-    p->writeInt32(bitmap->config());
+    p->writeInt32(bitmap->colorType());
+    p->writeInt32(bitmap->alphaType());
     p->writeInt32(bitmap->width());
     p->writeInt32(bitmap->height());
     p->writeInt32(bitmap->rowBytes());
     p->writeInt32(density);
 
-    if (bitmap->config() == SkBitmap::kIndex8_Config) {
+    if (bitmap->colorType() == kIndex_8_SkColorType) {
         SkColorTable* ctable = bitmap->getColorTable();
         if (ctable != NULL) {
             int count = ctable->count();
