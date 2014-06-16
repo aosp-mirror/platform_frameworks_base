@@ -23,7 +23,7 @@ import android.animation.ValueAnimator;
  * Defines common utilities for working with View's animations.
  *
  */
-public class ViewAnimationUtils {
+public final class ViewAnimationUtils {
     private ViewAnimationUtils() {}
     /**
      * Returns a ValueAnimator which can animate a clipping circle.
