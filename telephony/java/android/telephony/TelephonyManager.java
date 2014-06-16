@@ -1414,6 +1414,9 @@ public class TelephonyManager {
     // FIXME the argument to pass is subId ??
     public int getSimState(int slotId) {
         long[] subId = SubscriptionManager.getSubId(slotId);
+        if (subId == null) {
+            return SIM_STATE_ABSENT;
+        }
         // FIXME Do not use a property to determine SIM_STATE, call
         // appropriate method on some object.
         String prop =
