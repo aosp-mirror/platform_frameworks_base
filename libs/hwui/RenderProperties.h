@@ -21,6 +21,7 @@
 #include <vector>
 #include <cutils/compiler.h>
 #include <androidfw/ResourceTypes.h>
+#include <utils/Log.h>
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
@@ -281,6 +282,7 @@ public:
     }
 
     bool setScaleX(float scaleX) {
+        LOG_ALWAYS_FATAL_IF(scaleX > 1000000, "invalid scaleX %e", scaleX);
         return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleX, scaleX);
     }
 
@@ -289,6 +291,7 @@ public:
     }
 
     bool setScaleY(float scaleY) {
+        LOG_ALWAYS_FATAL_IF(scaleY > 1000000, "invalid scaleY %e", scaleY);
         return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleY, scaleY);
     }
 
