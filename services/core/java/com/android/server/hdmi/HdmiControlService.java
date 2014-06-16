@@ -897,7 +897,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void sendKeyEvent(int keyCode) {
+        public void sendKeyEvent(int keyCode, boolean isPressed) {
             // TODO: Implement this
         }
 
