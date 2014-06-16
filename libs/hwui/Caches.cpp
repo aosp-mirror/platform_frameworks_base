@@ -554,16 +554,21 @@ void Caches::deleteTexture(GLuint texture) {
     // call, any texture operation will be performed on the default
     // texture (name=0)
 
-    for (int i = 0; i < REQUIRED_TEXTURE_UNITS_COUNT; i++) {
-        if (mBoundTextures[i] == texture) {
-            mBoundTextures[i] = 0;
-        }
-    }
+    unbindTexture(texture);
+
     glDeleteTextures(1, &texture);
 }
 
 void Caches::resetBoundTextures() {
     memset(mBoundTextures, 0, REQUIRED_TEXTURE_UNITS_COUNT * sizeof(GLuint));
+}
+
+void Caches::unbindTexture(GLuint texture) {
+    for (int i = 0; i < REQUIRED_TEXTURE_UNITS_COUNT; i++) {
+        if (mBoundTextures[i] == texture) {
+            mBoundTextures[i] = 0;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
