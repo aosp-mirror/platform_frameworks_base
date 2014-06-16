@@ -976,7 +976,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
 ///////////////////////////////////////////////////////////////////////////////
 
 // Depth at which recursion is aborted
-#define ABORT_DEPTH 20
+#define ABORT_DEPTH 10
 
 void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
