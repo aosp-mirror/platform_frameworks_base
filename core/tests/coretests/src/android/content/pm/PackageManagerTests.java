@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
@@ -60,7 +61,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -303,14 +303,13 @@ public class PackageManagerTests extends AndroidTestCase {
         return Uri.fromFile(outFile);
     }
 
-    private PackageParser.Package parsePackage(Uri packageURI) {
+    private PackageParser.Package parsePackage(Uri packageURI) throws PackageParserException {
         final String archiveFilePath = packageURI.getPath();
         PackageParser packageParser = new PackageParser(archiveFilePath);
         File sourceFile = new File(archiveFilePath);
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
-        PackageParser.Package pkg = packageParser.parsePackage(sourceFile, archiveFilePath,
-                metrics, 0);
+        PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, metrics, 0);
         packageParser = null;
         return pkg;
     }
@@ -579,18 +578,18 @@ public class PackageManagerTests extends AndroidTestCase {
 
         PackageParser.Package pkg;
 
-        InstallParams(String outFileName, int rawResId) {
+        InstallParams(String outFileName, int rawResId) throws PackageParserException {
             this.pkg = getParsedPackage(outFileName, rawResId);
-            this.packageURI = Uri.fromFile(new File(pkg.mScanPath));
+            this.packageURI = Uri.fromFile(new File(pkg.codePath));
         }
 
         InstallParams(PackageParser.Package pkg) {
-            this.packageURI = Uri.fromFile(new File(pkg.mScanPath));
+            this.packageURI = Uri.fromFile(new File(pkg.codePath));
             this.pkg = pkg;
         }
 
         long getApkSize() {
-            File file = new File(pkg.mScanPath);
+            File file = new File(pkg.codePath);
             return file.length();
         }
     }
@@ -691,7 +690,8 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private PackageParser.Package getParsedPackage(String outFileName, int rawResId) {
+    private PackageParser.Package getParsedPackage(String outFileName, int rawResId)
+            throws PackageParserException {
         PackageManager pm = mContext.getPackageManager();
         File filesDir = mContext.getFilesDir();
         File outFile = new File(filesDir, outFileName);
@@ -1343,7 +1343,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 assertUninstalled(info);
             }
         } finally {
-            File outFile = new File(ip.pkg.mScanPath);
+            File outFile = new File(ip.pkg.codePath);
             if (outFile != null && outFile.exists()) {
                 outFile.delete();
             }

@@ -93,6 +93,7 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.ActivityIntentInfo;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
@@ -2241,8 +2242,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) == 0) {
                     return null;
                 }
-                // TODO: teach about reading split name
-                pkg = new PackageParser.Package(packageName, null);
+                pkg = new PackageParser.Package(packageName);
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
@@ -4070,19 +4070,19 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean createIdmapForPackagePairLI(PackageParser.Package pkg,
             PackageParser.Package opkg) {
         if (!opkg.mTrustedOverlay) {
-            Slog.w(TAG, "Skipping target and overlay pair " + pkg.mScanPath + " and " +
-                    opkg.mScanPath + ": overlay not trusted");
+            Slog.w(TAG, "Skipping target and overlay pair " + pkg.codePath + " and " +
+                    opkg.codePath + ": overlay not trusted");
             return false;
         }
         HashMap<String, PackageParser.Package> overlaySet = mOverlays.get(pkg.packageName);
         if (overlaySet == null) {
-            Slog.e(TAG, "was about to create idmap for " + pkg.mScanPath + " and " +
-                    opkg.mScanPath + " but target package has no known overlays");
+            Slog.e(TAG, "was about to create idmap for " + pkg.codePath + " and " +
+                    opkg.codePath + " but target package has no known overlays");
             return false;
         }
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-        if (mInstaller.idmap(pkg.mScanPath, opkg.mScanPath, sharedGid) != 0) {
-            Slog.e(TAG, "Failed to generate idmap for " + pkg.mScanPath + " and " + opkg.mScanPath);
+        if (mInstaller.idmap(pkg.codePath, opkg.codePath, sharedGid) != 0) {
+            Slog.e(TAG, "Failed to generate idmap for " + pkg.codePath + " and " + opkg.codePath);
             return false;
         }
         PackageParser.Package[] overlayArray =
@@ -4177,8 +4177,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.i(TAG, srcFile.toString() + " changed; collecting certs");
         }
 
-        if (!pp.collectCertificates(pkg, parseFlags)) {
-            mLastScanError = pp.getParseError();
+        try {
+            pp.collectCertificates(pkg, parseFlags);
+        } catch (PackageParserException e) {
+            mLastScanError = e.error;
             return false;
         }
         return true;
@@ -4197,11 +4199,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser pp = new PackageParser(scanPath);
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setOnlyCoreApps(mOnlyCore);
-        final PackageParser.Package pkg = pp.parsePackage(scanFile,
-                scanPath, mMetrics, parseFlags, (scanMode & SCAN_TRUSTED_OVERLAY) != 0);
 
-        if (pkg == null) {
-            mLastScanError = pp.getParseError();
+        final PackageParser.Package pkg;
+        try {
+            pkg = pp.parseMonolithicPackage(scanFile, mMetrics, parseFlags,
+                (scanMode & SCAN_TRUSTED_OVERLAY) != 0);
+        } catch (PackageParserException e) {
+            mLastScanError = e.error;
             return null;
         }
 
@@ -4368,12 +4372,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.e(TAG, "Resource path not set for pkg : " + pkg.packageName);
             }
         } else {
-            resPath = pkg.mScanPath;
+            resPath = pkg.codePath;
         }
 
-        codePath = pkg.mScanPath;
+        codePath = pkg.codePath;
         // Set application objects path explicitly.
-        setApplicationInfoPaths(pkg, codePath, resPath);
+        pkg.applicationInfo.sourceDir = codePath;
+        pkg.applicationInfo.publicSourceDir = resPath;
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
                 | SCAN_UPDATE_SIGNATURE, currentTime, user, abiOverride);
@@ -4396,13 +4401,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return scannedPkg;
-    }
-
-    private static void setApplicationInfoPaths(PackageParser.Package pkg, String destCodePath,
-            String destResPath) {
-        pkg.mPath = pkg.mScanPath = destCodePath;
-        pkg.applicationInfo.sourceDir = destCodePath;
-        pkg.applicationInfo.publicSourceDir = destResPath;
     }
 
     private static String fixProcessName(String defProcessName,
@@ -4630,7 +4628,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean performed = false;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            String path = pkg.mScanPath;
+            String path = pkg.codePath;
             try {
                 boolean isDexOptNeededInternal = DexFile.isDexOptNeededInternal(path,
                                                                                 pkg.packageName,
@@ -4820,7 +4818,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if (p != null) {
-            usesLibraryFiles.add(p.mPath);
+            usesLibraryFiles.add(p.codePath);
         }
     }
 
@@ -4907,7 +4905,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
-        File scanFile = new File(pkg.mScanPath);
+        final File scanFile = new File(pkg.codePath);
         if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
                 pkg.applicationInfo.publicSourceDir == null) {
             // Bail out. The resource and code paths haven't been set.
@@ -5345,7 +5343,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgSetting.uidError = uidError;
         }
 
-        String path = scanFile.getPath();
+        final String path = scanFile.getPath();
         /* Note: We don't want to unpack the native binaries for
          *        system applications, unless they have been updated
          *        (the binaries are already under /system/lib).
@@ -5476,7 +5474,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 handle.close();
             }
         }
-        pkg.mScanPath = path;
 
         if ((scanMode&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
             // We don't do this here during boot because we can do it all
@@ -5621,7 +5618,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // We don't expect installation to fail beyond this point,
             if ((scanMode&SCAN_MONITOR) != 0) {
-                mAppDirs.put(pkg.mPath, pkg);
+                mAppDirs.put(pkg.codePath, pkg);
             }
             // Add the new setting to mSettings
             mSettings.insertPackageSettingLPw(pkgSetting, pkg);
@@ -6242,8 +6239,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         synchronized (mPackages) {
             mPackages.remove(pkg.applicationInfo.packageName);
-            if (pkg.mPath != null) {
-                mAppDirs.remove(pkg.mPath);
+            if (pkg.codePath != null) {
+                mAppDirs.remove(pkg.codePath);
             }
             cleanPackageDataStructuresLILPw(pkg, chatty);
         }
@@ -9810,7 +9807,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.returnCode = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
                 return;
             }
-            if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.mPath)) {
+            if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.codePath)) {
                 // Don't allow installation over an existing package with the same name.
                 Slog.w(TAG, "Attempt to re-install " + pkgName
                         + " without first uninstalling.");
@@ -9822,15 +9819,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode,
                 System.currentTimeMillis(), user, abiOverride);
         if (newPackage == null) {
-            Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
+            Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                 res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
             }
         } else {
-            updateSettingsLI(newPackage,
-                    installerPackageName,
-                    null, null,
-                    res);
+            updateSettingsLI(null, newPackage, installerPackageName, null, null, res);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -9915,15 +9909,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             newPackage = scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_TIME,
                     System.currentTimeMillis(), user, abiOverride);
             if (newPackage == null) {
-                Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
+                Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
                 if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                     res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
                 }
             } else {
-                updateSettingsLI(newPackage,
-                        installerPackageName,
-                        allUsers, perUserInstalled,
-                        res);
+                updateSettingsLI(deletedPackage, newPackage, installerPackageName, allUsers,
+                        perUserInstalled, res);
                 updatedSettings = true;
             }
         }
@@ -9944,7 +9936,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // package that we deleted.
             if (deletedPkg) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, reinstalling: " + deletedPackage);
-                File restoreFile = new File(deletedPackage.mPath);
+                File restoreFile = new File(deletedPackage.codePath);
                 // Parse old package
                 boolean oldOnSd = isExternal(deletedPackage);
                 int oldParseFlags  = mDefParseFlags | PackageParser.PARSE_CHATTY |
@@ -10029,7 +10021,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user, abiOverride);
         if (newPackage == null) {
-            Slog.w(TAG, "Package couldn't be installed in " + pkg.mPath);
+            Slog.w(TAG, "Package couldn't be installed in " + pkg.codePath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                 res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
             }
@@ -10049,7 +10041,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
+                updateSettingsLI(deletedPackage, newPackage, installerPackageName, allUsers,
+                        perUserInstalled, res);
                 updatedSettings = true;
             }
         }
@@ -10075,12 +10068,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Utility method used to move dex files during install.
-    private int moveDexFilesLI(PackageParser.Package newPackage) {
-        if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
+    private int moveDexFilesLI(PackageParser.Package oldPackage, PackageParser.Package newPackage) {
+        // TODO: extend to handle splits
+        if ((newPackage.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
             final String instructionSet = getAppInstructionSet(newPackage.applicationInfo);
-            int retCode = mInstaller.movedex(newPackage.mScanPath, newPackage.mPath,
-                                             instructionSet);
-            if (retCode != 0) {
+
+            boolean moveSuccess = false;
+            if (oldPackage != null
+                    && (oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                if (mInstaller.movedex(oldPackage.codePath, newPackage.codePath, instructionSet)
+                        == 0) {
+                    moveSuccess = true;
+                }
+            }
+
+            if (!moveSuccess) {
                 /*
                  * Programs may be lazily run through dexopt, so the
                  * source may not exist. However, something seems to
@@ -10089,17 +10091,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * remove the target to make sure there isn't a stale
                  * file from a previous version of the package.
                  */
+                if (oldPackage != null) {
+                    mInstaller.rmdex(oldPackage.codePath, instructionSet);
+                }
+                mInstaller.rmdex(newPackage.codePath, instructionSet);
                 newPackage.mDexOptNeeded = true;
-                mInstaller.rmdex(newPackage.mScanPath, instructionSet);
-                mInstaller.rmdex(newPackage.mPath, instructionSet);
             }
         }
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
-            int[] allUsers, boolean[] perUserInstalled,
-            PackageInstalledInfo res) {
+    private void updateSettingsLI(PackageParser.Package oldPackage,
+            PackageParser.Package newPackage, String installerPackageName, int[] allUsers,
+            boolean[] perUserInstalled, PackageInstalledInfo res) {
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -10109,13 +10113,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSettings.writeLPr();
         }
 
-        if ((res.returnCode = moveDexFilesLI(newPackage))
+        if ((res.returnCode = moveDexFilesLI(oldPackage, newPackage))
                 != PackageManager.INSTALL_SUCCEEDED) {
             // Discontinue if moving dex files failed.
             return;
         }
 
-        if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.mPath);
+        if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.codePath);
 
         synchronized (mPackages) {
             updatePermissionsLPw(newPackage.packageName, newPackage,
@@ -10182,12 +10186,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
         PackageParser pp = new PackageParser(tmpPackageFile.getPath());
         pp.setSeparateProcesses(mSeparateProcesses);
-        final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
-                null, mMetrics, parseFlags);
-        if (pkg == null) {
-            res.returnCode = pp.getParseError();
+
+        final PackageParser.Package pkg;
+        try {
+            pkg = pp.parseMonolithicPackage(tmpPackageFile, mMetrics,
+                parseFlags);
+        } catch (PackageParserException e) {
+            res.returnCode = e.error;
             return;
         }
+
         String pkgName = res.name = pkg.packageName;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
             if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
@@ -10195,8 +10203,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
-        if (!pp.collectCertificates(pkg, parseFlags)) {
-            res.returnCode = pp.getParseError();
+
+        try {
+            pp.collectCertificates(pkg, parseFlags);
+        } catch (PackageParserException e) {
+            res.returnCode = e.error;
             return;
         }
 
@@ -10301,7 +10312,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         // Set application objects path explicitly after the rename
-        setApplicationInfoPaths(pkg, args.getCodePath(), args.getResourcePath());
+        pkg.codePath = args.getCodePath();
+        pkg.applicationInfo.sourceDir = args.getCodePath();
+        pkg.applicationInfo.publicSourceDir = args.getResourcePath();
         pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,
@@ -11181,7 +11194,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 publicSrcDir = applicationInfo.publicSourceDir;
             }
         }
-        int res = mInstaller.getSizeInfo(packageName, userHandle, p.mPath, libDirPath,
+        int res = mInstaller.getSizeInfo(packageName, userHandle, p.codePath, libDirPath,
                 publicSrcDir, asecPath, getAppInstructionSetFromSettings(ps),
                 pStats);
         if (res < 0) {
@@ -12814,7 +12827,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                             + " Aborting move and returning error");
                                     returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
                                 } else {
-                                    final String oldCodePath = pkg.mPath;
+                                    final String oldCodePath = pkg.codePath;
                                     final String newCodePath = mp.targetArgs.getCodePath();
                                     final String newResPath = mp.targetArgs.getResourcePath();
                                     final String newNativePath = mp.targetArgs
@@ -12844,18 +12857,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     }
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
-                                        pkg.mPath = newCodePath;
+                                        PackageParser.Package oldPackage = new PackageParser.Package(
+                                                pkg.packageName);
+                                        oldPackage.codePath = pkg.codePath;
+                                        pkg.codePath = newCodePath;
                                         // Move dex files around
-                                        if (moveDexFilesLI(pkg) != PackageManager.INSTALL_SUCCEEDED) {
+                                        if (moveDexFilesLI(oldPackage, pkg) != PackageManager.INSTALL_SUCCEEDED) {
                                             // Moving of dex files failed. Set
                                             // error code and abort move.
-                                            pkg.mPath = pkg.mScanPath;
+                                            pkg.codePath = oldPackage.codePath;
                                             returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                         }
                                     }
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
-                                        pkg.mScanPath = newCodePath;
                                         pkg.applicationInfo.sourceDir = newCodePath;
                                         pkg.applicationInfo.publicSourceDir = newResPath;
                                         pkg.applicationInfo.nativeLibraryDir = newNativePath;

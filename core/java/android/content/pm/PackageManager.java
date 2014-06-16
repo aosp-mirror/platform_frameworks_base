@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -2873,16 +2874,17 @@ public abstract class PackageManager {
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
         final File sourceFile = new File(archiveFilePath);
-        PackageParser.Package pkg = packageParser.parsePackage(
-                sourceFile, archiveFilePath, metrics, 0);
-        if (pkg == null) {
+        try {
+            PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, metrics,
+                    0);
+            if ((flags & GET_SIGNATURES) != 0) {
+                packageParser.collectCertificates(pkg, 0);
+            }
+            PackageUserState state = new PackageUserState();
+            return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);
+        } catch (PackageParserException e) {
             return null;
         }
-        if ((flags & GET_SIGNATURES) != 0) {
-            packageParser.collectCertificates(pkg, 0);
-        }
-        PackageUserState state = new PackageUserState();
-        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);
     }
 
     /**

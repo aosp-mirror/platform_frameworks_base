@@ -28,7 +28,7 @@ import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageLite;
+import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
@@ -297,7 +297,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all staged packages are internally consistent
         for (File file : files) {
-            final PackageLite info = PackageParser.parsePackageLite(file.getAbsolutePath(),
+            final ApkLite info = PackageParser.parseApkLite(file.getAbsolutePath(),
                     PackageParser.PARSE_GET_SIGNATURES);
             if (info == null) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
@@ -356,7 +356,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Missing existing base package for " + mPackageName);
             }
 
-            final PackageLite info = PackageParser.parsePackageLite(app.sourceDir,
+            final ApkLite info = PackageParser.parseApkLite(app.sourceDir,
                     PackageParser.PARSE_GET_SIGNATURES);
             if (info == null) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,

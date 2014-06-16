@@ -170,7 +170,7 @@ public class DefaultContainerService extends IntentService {
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
 
-            PackageParser.PackageLite pkg = PackageParser.parsePackageLite(packagePath, 0);
+            PackageParser.ApkLite pkg = PackageParser.parseApkLite(packagePath, 0);
             if (pkg == null) {
                 Slog.w(TAG, "Failed to parse package");
 
