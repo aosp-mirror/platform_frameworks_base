@@ -182,11 +182,9 @@ page.type=about
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
-<<<<<<< HEAD
-<!--
-=======
 
->>>>>>> add page.types to various pages for dynamic content
+<!--
+
       <div class="landing-section landing-white-background">
         <div class="wrap">
           <div class="landing-section-header">

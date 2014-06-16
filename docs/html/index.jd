@@ -13,7 +13,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
     <div class="vcenter">
       <div class="wrap clearfix">
         <div class="resource-widget resource-flow-layout wrap col-16"
-          data-query="collection:launch/static"
+          data-query="collection:index/primary"
           data-resourceStyle="card"
           data-sortOrder="-timestamp"
           data-numStacks="3"
@@ -28,10 +28,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 <div class="actions-bar">
   <div class="wrap">
     <div class="actions">
-      <div><a href="http://developer.android.com/sdk/index.html">Get the SDK</a></div>
-      <div><a href="http://developer.android.com/samples/index.html">Sample Code</a></div>
-      <div><a href="http://developer.android.com/design/videos/index.html">Videos</a></div>
-      <div><a href="https://developer.android.com/distribute/googleplay/developer-console.html">Developer Console</a></div>
+      <div><a href="{@docRoot}sdk/index.html">Get the SDK</a></div>
+      <div><a href="{@docRoot}samples/index.html">Browse Samples</a></div>
+      <div><a href="//www.youtube.com/user/androiddevelopers">Watch Videos</a></div>
+      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">Manage Your Apps</a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
@@ -45,20 +45,16 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <div class="landing-h1">Android, Everywhere You Need It</div>
         <div class="landing-subhead">
           Android runs on hundreds of millions of handheld devices around the world, <br /> and it now supports these exciting, new form-factors.
-
         </div>
       </div>
-
-
-
-
       <div class="landing-body">
         <div class="landing-breakout cols">
 
-<!--<div class="resource-widget resource-flow-layout col-16" data-query="collection:index/devices" data-sortorder="" data-cardsizes="6x2, 6x2, 6x2" data-maxresults="3"></div>-->
+         <!-- <div class="resource-widget resource-flow-layout col-16" data-query="collection:index/devices"
+          data-sortorder="" data-cardsizes="6x6, 6x6, 6x6" data-maxresults="3"></div>-->
 
           <div class="col-3-wide">
-            <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+            <img src="" alt="">
 
             <p>Wear</p>
             <p class="landing-small">
@@ -70,7 +66,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           </div>
 
           <div class="col-3-wide">
-            <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+            <img src="" alt="">
 
             <p>TV</p>
             <p class="landing-small">
@@ -82,7 +78,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           </div>
 
           <div class="col-3-wide">
-            <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+            <img src="" alt="">
 
             <p>Auto</p>
             <p class="landing-small">
