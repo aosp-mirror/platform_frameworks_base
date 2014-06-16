@@ -42,12 +42,21 @@ $(eval $(call create-font-symlink,DroidSerif-Bold.ttf,NotoSerif-Bold.ttf))
 $(eval $(call create-font-symlink,DroidSerif-Italic.ttf,NotoSerif-Italic.ttf))
 $(eval $(call create-font-symlink,DroidSerif-BoldItalic.ttf,NotoSerif-BoldItalic.ttf))
 
+extra_font_files := \
+    DroidSans.ttf \
+    DroidSans-Bold.ttf
+
 ################################
 # On space-constrained devices, we include a subset of fonts:
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+
 droidsans_fallback_src := DroidSansFallback.ttf
-extra_font_files := DroidSans.ttf DroidSans-Bold.ttf
-else
+
+else  # !SMALLER_FONT_FOOTPRINT
+
+droidsans_fallback_src := DroidSansFallbackFull.ttf
+
+ifneq ($(EXTENDED_FONT_FOOTPRINT),true)
 include $(CLEAR_VARS)
 LOCAL_MODULE := MTLmr3m.ttf
 LOCAL_SRC_FILES := $(LOCAL_MODULE)
@@ -55,12 +64,9 @@ LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
+extra_font_files += MTLmr3m.ttf
+endif  # !EXTENDED_FONT_FOOTPRINT
 
-droidsans_fallback_src := DroidSansFallbackFull.ttf
-extra_font_files := \
-	DroidSans.ttf \
-	DroidSans-Bold.ttf \
-	MTLmr3m.ttf
 endif  # SMALLER_FONT_FOOTPRINT
 
 ################################
