@@ -1,0 +1,157 @@
+page.title=Handling Features Not Supported on TV
+parent.title=Designing for TV
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Optimizing Navigation for TV
+previous.link=optimizing-navigation-tv.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#WorkaroundUnsupportedFeatures">Work Around Features Not Supported on TV</a></li>
+  <li><a href="#CheckAvailableFeatures">Check for Available Features at Runtime</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+TVs are much different from other Android-powered devices:
+</p>
+<ul>
+  <li>They're not mobile.</li>
+  <li>Out of habit, people use them for watching media with little or no interaction.</li>
+  <li>People interact with them from a distance.</li>
+</ul>
+
+<p>
+Because TVs have a different purpose from other devices, they usually don't have hardware features 
+that other Android-powered devices often have. For this reason, the Android system does not 
+support the following features for a TV device:
+<table>
+<tr>
+<th>Hardware</th>
+<th>Android feature descriptor</th>
+</tr>
+<tr>
+<td>Camera</td>
+<td>android.hardware.camera</td>
+</tr>
+<tr>
+<td>GPS</td>
+<td>android.hardware.location.gps</td>
+</tr>
+<tr>
+<td>Microphone</td>
+<td>android.hardware.microphone</td>
+</tr>
+<tr>
+<td>Near Field Communications (NFC)</td>
+<td>android.hardware.nfc</td>
+</tr>
+<tr>
+<td>Telephony</td>
+<td>android.hardware.telephony</td>
+</tr>
+<tr>
+<td>Touchscreen</td>
+<td>android.hardware.touchscreen</td>
+</tr>
+</table>
+</p>
+
+<p>
+This lesson shows you how to work around features that are not available on TV by:
+<ul>
+  <li>Providing work arounds for some non-supported features.</li>
+  <li>Checking for available features at runtime and conditionally activating/deactivating certain code 
+  paths based on availability of those features.</li>
+</ul>
+</p>
+
+
+<h2 id="WorkaroundUnsupportedFeatures">Work Around Features Not Supported on TV</h2> 
+
+<p>
+Android doesn't support touchscreen interaction for TV devices, most TVs don't have touch screens, 
+and interacting with a TV using a touchscreen is not consistent with the 10 foot environment. For 
+these reasons, users interact with Android-powered TVs using a remote. In consideration of this, 
+ensure that every control in your app can be accessed with the D-pad. Refer back to the previous two lessons 
+<a href="{@docRoot}training/tv/optimizing-layouts-tv.html">Optimizing Layouts for TV</a> and 
+<a href="{@docRoot}training/tv/optimizing-navigation-tv.html">Optimize Navigation for TV</a> for
+more details 
+on this topic. The Android system assumes that a device has a touchscreen, so if you want your application 
+to run on a TV, you must <strong>explicitly</strong> disable the touchscreen requirement in your manifest file:
+<pre>
+&lt;uses-feature android:name="android.hardware.touchscreen" android:required="false"/&gt;
+</pre>
+</p> 
+
+<p>
+Although a TV doesn't have a camera, you can still provide a photography-related application on a TV. 
+For example, if you have an app that takes, views and edits photos, you can disable its picture-taking 
+functionality for TVs and still allow users to view and even edit photos. The next section talks about how to 
+deactivate or activate specific functions in the application based on runtime device type detection.
+</p>
+
+<p>
+Because TVs are stationary, indoor devices, they don't have built-in GPS. If your application uses location 
+information, allow users to search for a location or use a "static" location provider to get 
+a location from the zip code configured during the TV setup.
+<pre>
+LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+Location location = locationManager.getLastKnownLocation("static");
+Geocoder geocoder = new Geocoder(this);
+Address address = null;
+
+try {
+  address = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1).get(0);
+  Log.d("Zip code", address.getPostalCode());
+
+} catch (IOException e) {
+  Log.e(TAG, "Geocoder error", e);
+}
+</pre>
+</p>
+
+<p>
+TVs usually don't support microphones, but if you have an application that uses voice control, 
+you can create a mobile device app that takes voice input and then acts as a remote control for a TV.
+</p>
+
+<h2 id="CheckAvailableFeatures">Check for Available Features at Runtime</h2>
+
+<p>
+To check if a feature is available at runtime, call 
+{@link android.content.pm.PackageManager#hasSystemFeature(String)}.
+ This method takes a single argument : a string corresponding to the 
+feature you want to check. For example, to check for touchscreen, use 
+{@link android.content.pm.PackageManager#hasSystemFeature(String)} with the argument 
+{@link android.content.pm.PackageManager#FEATURE_TOUCHSCREEN}.
+</p>
+
+<p>
+The following code snippet demonstrates how to detect device type at runtime based on supported features:
+
+<pre>
+// Check if android.hardware.telephony feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.telephony")) {
+   Log.d("Mobile Test", "Running on phone");
+// Check if android.hardware.touchscreen feature is available.
+} else if (getPackageManager().hasSystemFeature("android.hardware.touchscreen")) {
+   Log.d("Tablet Test", "Running on devices that don't support telphony but have a touchscreen.");
+} else {
+    Log.d("TV Test", "Running on a TV!");
+}
+</pre>
+</p>
+
+<p>
+This is just one example of using runtime checks to deactivate app functionality that depends on features 
+that aren't available on TVs.
+</p>
