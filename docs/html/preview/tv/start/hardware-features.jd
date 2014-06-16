@@ -1,22 +1,15 @@
-page.title=Handling Features Not Supported on TV
-parent.title=Designing for TV
-parent.link=index.html
-
-trainingnavtop=true
-previous.title=Optimizing Navigation for TV
-previous.link=optimizing-navigation-tv.html
+page.title=Hardware Features on TV
+page.tags="unsupported"
 
 @jd:body
 
-<div id="tb-wrapper">
-<div id="tb">
-
-<h2>This lesson teaches you to</h2>
-<ol>
-  <li><a href="#WorkaroundUnsupportedFeatures">Work Around Features Not Supported on TV</a></li>
-  <li><a href="#CheckAvailableFeatures">Check for Available Features at Runtime</a></li>
-</ol>
-
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#WorkaroundUnsupportedFeatures">Handle Unsupported Features</a></li>
+    <li><a href="#CheckAvailableFeatures">Check Available Features</a></li>
+  </ol>
 </div>
 </div>
 
@@ -30,8 +23,8 @@ TVs are much different from other Android-powered devices:
 </ul>
 
 <p>
-Because TVs have a different purpose from other devices, they usually don't have hardware features 
-that other Android-powered devices often have. For this reason, the Android system does not 
+Because TVs have a different purpose from other devices, they usually don't have hardware features
+that other Android-powered devices often have. For this reason, the Android system does not
 support the following features for a TV device:
 <table>
 <tr>
@@ -69,39 +62,39 @@ support the following features for a TV device:
 This lesson shows you how to work around features that are not available on TV by:
 <ul>
   <li>Providing work arounds for some non-supported features.</li>
-  <li>Checking for available features at runtime and conditionally activating/deactivating certain code 
+  <li>Checking for available features at runtime and conditionally activating/deactivating certain code
   paths based on availability of those features.</li>
 </ul>
 </p>
 
 
-<h2 id="WorkaroundUnsupportedFeatures">Work Around Features Not Supported on TV</h2> 
+<h2 id="WorkaroundUnsupportedFeatures">Handle Unsupported Features</h2>
 
 <p>
-Android doesn't support touchscreen interaction for TV devices, most TVs don't have touch screens, 
-and interacting with a TV using a touchscreen is not consistent with the 10 foot environment. For 
-these reasons, users interact with Android-powered TVs using a remote. In consideration of this, 
-ensure that every control in your app can be accessed with the D-pad. Refer back to the previous two lessons 
-<a href="{@docRoot}training/tv/optimizing-layouts-tv.html">Optimizing Layouts for TV</a> and 
+Android doesn't support touchscreen interaction for TV devices, most TVs don't have touch screens,
+and interacting with a TV using a touchscreen is not consistent with the 10 foot environment. For
+these reasons, users interact with Android-powered TVs using a remote. In consideration of this,
+ensure that every control in your app can be accessed with the D-pad. Refer back to the previous two lessons
+<a href="{@docRoot}training/tv/optimizing-layouts-tv.html">Optimizing Layouts for TV</a> and
 <a href="{@docRoot}training/tv/optimizing-navigation-tv.html">Optimize Navigation for TV</a> for
-more details 
-on this topic. The Android system assumes that a device has a touchscreen, so if you want your application 
+more details
+on this topic. The Android system assumes that a device has a touchscreen, so if you want your application
 to run on a TV, you must <strong>explicitly</strong> disable the touchscreen requirement in your manifest file:
 <pre>
 &lt;uses-feature android:name="android.hardware.touchscreen" android:required="false"/&gt;
 </pre>
-</p> 
+</p>
 
 <p>
-Although a TV doesn't have a camera, you can still provide a photography-related application on a TV. 
-For example, if you have an app that takes, views and edits photos, you can disable its picture-taking 
-functionality for TVs and still allow users to view and even edit photos. The next section talks about how to 
+Although a TV doesn't have a camera, you can still provide a photography-related application on a TV.
+For example, if you have an app that takes, views and edits photos, you can disable its picture-taking
+functionality for TVs and still allow users to view and even edit photos. The next section talks about how to
 deactivate or activate specific functions in the application based on runtime device type detection.
 </p>
 
 <p>
-Because TVs are stationary, indoor devices, they don't have built-in GPS. If your application uses location 
-information, allow users to search for a location or use a "static" location provider to get 
+Because TVs are stationary, indoor devices, they don't have built-in GPS. If your application uses location
+information, allow users to search for a location or use a "static" location provider to get
 a location from the zip code configured during the TV setup.
 <pre>
 LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -120,18 +113,18 @@ try {
 </p>
 
 <p>
-TVs usually don't support microphones, but if you have an application that uses voice control, 
+TVs usually don't support microphones, but if you have an application that uses voice control,
 you can create a mobile device app that takes voice input and then acts as a remote control for a TV.
 </p>
 
-<h2 id="CheckAvailableFeatures">Check for Available Features at Runtime</h2>
+<h2 id="CheckAvailableFeatures">Check Available Features</h2>
 
 <p>
-To check if a feature is available at runtime, call 
+To check if a feature is available at runtime, call
 {@link android.content.pm.PackageManager#hasSystemFeature(String)}.
- This method takes a single argument : a string corresponding to the 
-feature you want to check. For example, to check for touchscreen, use 
-{@link android.content.pm.PackageManager#hasSystemFeature(String)} with the argument 
+ This method takes a single argument : a string corresponding to the
+feature you want to check. For example, to check for touchscreen, use
+{@link android.content.pm.PackageManager#hasSystemFeature(String)} with the argument
 {@link android.content.pm.PackageManager#FEATURE_TOUCHSCREEN}.
 </p>
 
@@ -152,6 +145,6 @@ if (getPackageManager().hasSystemFeature("android.hardware.telephony")) {
 </p>
 
 <p>
-This is just one example of using runtime checks to deactivate app functionality that depends on features 
+This is just one example of using runtime checks to deactivate app functionality that depends on features
 that aren't available on TVs.
 </p>
