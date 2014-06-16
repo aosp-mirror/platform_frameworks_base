@@ -35188,10 +35188,23 @@ package android.webkit {
     method public void onRequestFocus(android.webkit.WebView);
     method public void onShowCustomView(android.view.View, android.webkit.WebChromeClient.CustomViewCallback);
     method public deprecated void onShowCustomView(android.view.View, int, android.webkit.WebChromeClient.CustomViewCallback);
+    method public boolean showFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams);
   }
 
   public static abstract interface WebChromeClient.CustomViewCallback {
     method public abstract void onCustomViewHidden();
+  }
+
+  public static class WebChromeClient.FileChooserParams {
+    ctor public WebChromeClient.FileChooserParams();
+    field public static final int MODE_OPEN_FOLDER = 2; // 0x2
+    field public static final int MODE_OPEN_MULTIPLE = 1; // 0x1
+    field public static final int MODE_SAVE = 4; // 0x4
+    field public java.lang.String acceptTypes;
+    field public boolean capture;
+    field public java.lang.String defaultFilename;
+    field public int mode;
+    field public java.lang.String title;
   }
 
   public class WebHistoryItem implements java.lang.Cloneable {
