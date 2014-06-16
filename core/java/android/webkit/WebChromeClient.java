@@ -408,7 +408,6 @@ public class WebChromeClient {
      * @return true if filePathCallback will be invoked, false to use default handling.
      *
      * @see FileChooserParams
-     * @hide For API approval
      */
     public boolean showFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
             FileChooserParams fileChooserParams) {
@@ -416,11 +415,8 @@ public class WebChromeClient {
     }
 
     /**
-     * Parameters used in the {@link #showFileChooser(WebView,ValueCallback<String[]>,FileChooserParams)}
-     * method.
-     *
+     * Parameters used in the {@link #showFileChooser} method.
      * This is intended to be used as a read-only data struct by the application.
-     * @hide For API approval
      */
     public static class FileChooserParams {
         // Flags for mode
