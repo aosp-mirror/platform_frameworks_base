@@ -42,6 +42,7 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.NativeLibraryHelper.ApkHandle;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -2242,11 +2243,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) == 0) {
                     return null;
                 }
+                // App code is gone, so we aren't worried about split paths
                 pkg = new PackageParser.Package(packageName);
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
-                pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 pkg.applicationInfo.sourceDir = ps.codePathString;
+                pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 pkg.applicationInfo.dataDir =
                         getDataPathForPackage(packageName, 0).getPath();
                 pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
@@ -4081,6 +4083,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+        // TODO: generate idmap for split APKs
         if (mInstaller.idmap(pkg.codePath, opkg.codePath, sharedGid) != 0) {
             Slog.e(TAG, "Failed to generate idmap for " + pkg.codePath + " and " + opkg.codePath);
             return false;
@@ -4362,23 +4365,30 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        String codePath = null;
+        final String codePath = pkg.codePath;
+        final String[] splitCodePaths = pkg.splitCodePaths;
+
         String resPath = null;
+        String[] splitResPaths = null;
         if ((parseFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
             if (ps != null && ps.resourcePathString != null) {
                 resPath = ps.resourcePathString;
+                splitResPaths = deriveSplitResPaths(pkg.splitCodePaths);
             } else {
                 // Should not happen at all. Just log an error.
                 Slog.e(TAG, "Resource path not set for pkg : " + pkg.packageName);
             }
         } else {
             resPath = pkg.codePath;
+            splitResPaths = pkg.splitCodePaths;
         }
 
-        codePath = pkg.codePath;
         // Set application objects path explicitly.
         pkg.applicationInfo.sourceDir = codePath;
         pkg.applicationInfo.publicSourceDir = resPath;
+        pkg.applicationInfo.splitSourceDirs = splitCodePaths;
+        pkg.applicationInfo.splitPublicSourceDirs = splitResPaths;
+
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
                 | SCAN_UPDATE_SIGNATURE, currentTime, user, abiOverride);
@@ -4626,52 +4636,56 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        boolean performed = false;
-        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            String path = pkg.codePath;
-            try {
-                boolean isDexOptNeededInternal = DexFile.isDexOptNeededInternal(path,
-                                                                                pkg.packageName,
-                                                                                instructionSet,
-                                                                                defer);
-                // There are three basic cases here:
-                // 1.) we need to dexopt, either because we are forced or it is needed
-                // 2.) we are defering a needed dexopt
-                // 3.) we are skipping an unneeded dexopt
-                if (forceDex || (!defer && isDexOptNeededInternal)) {
-                    Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
-                    final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                    int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                                pkg.packageName, instructionSet);
-                    // Note that we ran dexopt, since rerunning will
-                    // probably just result in an error again.
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            final ArrayList<String> paths = new ArrayList<>();
+            paths.add(pkg.codePath);
+            if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+                Collections.addAll(paths, pkg.splitCodePaths);
+            }
+
+            for (String path : paths) {
+                try {
+                    boolean isDexOptNeededInternal = DexFile.isDexOptNeededInternal(path,
+                            pkg.packageName, instructionSet, defer);
+                    // There are three basic cases here:
+                    // 1.) we need to dexopt, either because we are forced or it is needed
+                    // 2.) we are defering a needed dexopt
+                    // 3.) we are skipping an unneeded dexopt
+                    if (forceDex || (!defer && isDexOptNeededInternal)) {
+                        Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
+                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                        int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
+                                                    pkg.packageName, instructionSet);
+                        // Note that we ran dexopt, since rerunning will
+                        // probably just result in an error again.
+                        pkg.mDexOptNeeded = false;
+                        if (ret < 0) {
+                            return DEX_OPT_FAILED;
+                        }
+                        return DEX_OPT_PERFORMED;
+                    }
+                    if (defer && isDexOptNeededInternal) {
+                        if (mDeferredDexOpt == null) {
+                            mDeferredDexOpt = new HashSet<PackageParser.Package>();
+                        }
+                        mDeferredDexOpt.add(pkg);
+                        return DEX_OPT_DEFERRED;
+                    }
                     pkg.mDexOptNeeded = false;
-                    if (ret < 0) {
-                        return DEX_OPT_FAILED;
-                    }
-                    return DEX_OPT_PERFORMED;
+                    return DEX_OPT_SKIPPED;
+                } catch (FileNotFoundException e) {
+                    Slog.w(TAG, "Apk not found for dexopt: " + path);
+                    return DEX_OPT_FAILED;
+                } catch (IOException e) {
+                    Slog.w(TAG, "IOException reading apk: " + path, e);
+                    return DEX_OPT_FAILED;
+                } catch (StaleDexCacheError e) {
+                    Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
+                    return DEX_OPT_FAILED;
+                } catch (Exception e) {
+                    Slog.w(TAG, "Exception when doing dexopt : ", e);
+                    return DEX_OPT_FAILED;
                 }
-                if (defer && isDexOptNeededInternal) {
-                    if (mDeferredDexOpt == null) {
-                        mDeferredDexOpt = new HashSet<PackageParser.Package>();
-                    }
-                    mDeferredDexOpt.add(pkg);
-                    return DEX_OPT_DEFERRED;
-                }
-                pkg.mDexOptNeeded = false;
-                return DEX_OPT_SKIPPED;
-            } catch (FileNotFoundException e) {
-                Slog.w(TAG, "Apk not found for dexopt: " + path);
-                return DEX_OPT_FAILED;
-            } catch (IOException e) {
-                Slog.w(TAG, "IOException reading apk: " + path, e);
-                return DEX_OPT_FAILED;
-            } catch (StaleDexCacheError e) {
-                Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
-                return DEX_OPT_FAILED;
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception when doing dexopt : ", e);
-                return DEX_OPT_FAILED;
             }
         }
         return DEX_OPT_SKIPPED;
@@ -4819,6 +4833,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (p != null) {
             usesLibraryFiles.add(p.codePath);
+            if (!ArrayUtils.isEmpty(p.splitCodePaths)) {
+                Collections.addAll(usesLibraryFiles, p.splitCodePaths);
+            }
         }
     }
 
@@ -4906,7 +4923,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
         final File scanFile = new File(pkg.codePath);
-        if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
+        if (pkg.applicationInfo.sourceDir == null ||
                 pkg.applicationInfo.publicSourceDir == null) {
             // Bail out. The resource and code paths haven't been set.
             Slog.w(TAG, " Code and resource paths haven't been set correctly");
@@ -5355,6 +5372,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          *        only for non-system apps and system app upgrades.
          */
         if (pkg.applicationInfo.nativeLibraryDir != null) {
+            // TODO: extend to extract native code from split APKs
             final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(scanFile);
             try {
                 // Enable gross and lame hacks for apps that are built with old
@@ -5908,6 +5926,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.packageName = pkg.applicationInfo.packageName;
                 a.info.sourceDir = pkg.applicationInfo.sourceDir;
                 a.info.publicSourceDir = pkg.applicationInfo.publicSourceDir;
+                a.info.splitSourceDirs = pkg.applicationInfo.splitSourceDirs;
+                a.info.splitPublicSourceDirs = pkg.applicationInfo.splitPublicSourceDirs;
                 a.info.dataDir = pkg.applicationInfo.dataDir;
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
@@ -9021,6 +9041,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         abstract boolean doPostDeleteLI(boolean delete);
         abstract boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException;
 
+        String[] getSplitCodePaths() {
+            return null;
+        }
+
         /**
          * Called before the source arguments are copied. This is used mostly
          * for MoveParams when it needs to read the source file to put it in the
@@ -9107,10 +9131,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
-        }
-
-        String getCodePath() {
-            return codeFileName;
         }
 
         void createCopyFile() {
@@ -9268,10 +9288,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        String getResourcePath() {
-            return resourceFileName;
-        }
-
         private String getResourcePathFromCodePath() {
             final String codePath = getCodePath();
             if (isFwdLocked()) {
@@ -9299,6 +9315,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private String getLibraryPathFromCodePath() {
             return new File(mAppLibInstallDir, getApkName(getCodePath())).getPath();
+        }
+
+        @Override
+        String getCodePath() {
+            return codeFileName;
+        }
+
+        @Override
+        String getResourcePath() {
+            return resourceFileName;
         }
 
         @Override
@@ -9768,6 +9794,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         return codePath.substring(sidx+1, eidx);
     }
 
+    private static String[] deriveSplitResPaths(String[] splitCodePaths) {
+        String[] splitResPaths = null;
+        if (!ArrayUtils.isEmpty(splitCodePaths)) {
+            splitResPaths = new String[splitCodePaths.length];
+            for (int i = 0; i < splitCodePaths.length; i++) {
+                final String splitCodePath = splitCodePaths[i];
+                final String resName = getApkName(splitCodePath) + ".zip";
+                splitResPaths[i] = new File(new File(splitCodePath).getParentFile(),
+                        resName).getAbsolutePath();
+            }
+        }
+        return splitResPaths;
+    }
+
     class PackageInstalledInfo {
         String name;
         int uid;
@@ -10067,6 +10107,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Utility method used to move dex files during install.
     private int moveDexFilesLI(String oldCodePath, PackageParser.Package newPackage) {
+        // TODO: extend to move split APK dex files
         if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             final String instructionSet = getAppInstructionSet(newPackage.applicationInfo);
             int retCode = mInstaller.movedex(oldCodePath, newPackage.codePath,
@@ -10296,6 +10337,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.codePath = args.getCodePath();
         pkg.applicationInfo.sourceDir = args.getCodePath();
         pkg.applicationInfo.publicSourceDir = args.getResourcePath();
+        pkg.applicationInfo.splitSourceDirs = args.getSplitCodePaths();
+        pkg.applicationInfo.splitPublicSourceDirs = deriveSplitResPaths(
+                pkg.applicationInfo.splitSourceDirs);
         pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,

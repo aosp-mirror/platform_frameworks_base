@@ -8148,6 +8148,8 @@ package android.content.pm {
     field public int requiresSmallestWidthDp;
     field public java.lang.String[] sharedLibraryFiles;
     field public java.lang.String sourceDir;
+    field public java.lang.String[] splitPublicSourceDirs;
+    field public java.lang.String[] splitSourceDirs;
     field public int targetSdkVersion;
     field public java.lang.String taskAffinity;
     field public int theme;
@@ -8216,6 +8218,8 @@ package android.content.pm {
     field public boolean handleProfiling;
     field public java.lang.String publicSourceDir;
     field public java.lang.String sourceDir;
+    field public java.lang.String[] splitPublicSourceDirs;
+    field public java.lang.String[] splitSourceDirs;
     field public java.lang.String targetPackage;
   }
 

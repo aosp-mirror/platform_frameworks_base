@@ -58,11 +58,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.android.internal.content.PackageHelper;
+import com.android.internal.util.ArrayUtils;
 
 public final class Pm {
     IPackageManager mPm;
@@ -1548,6 +1550,12 @@ public final class Pm {
             if (info != null && info.applicationInfo != null) {
                 System.out.print("package:");
                 System.out.println(info.applicationInfo.sourceDir);
+                if (!ArrayUtils.isEmpty(info.applicationInfo.splitSourceDirs)) {
+                    for (String splitSourceDir : info.applicationInfo.splitSourceDirs) {
+                        System.out.print("package:");
+                        System.out.println(splitSourceDir);
+                    }
+                }
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());

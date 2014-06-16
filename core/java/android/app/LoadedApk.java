@@ -16,8 +16,8 @@
 
 package android.app;
 
+import android.text.TextUtils;
 import android.util.ArrayMap;
-import com.android.internal.util.ArrayUtils;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -52,6 +52,8 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
@@ -79,6 +81,8 @@ public final class LoadedApk {
     final String mPackageName;
     private final String mAppDir;
     private final String mResDir;
+    private final String[] mSplitAppDirs;
+    private final String[] mSplitResDirs;
     private final String[] mOverlayDirs;
     private final String[] mSharedLibraries;
     private final String mDataDir;
@@ -116,13 +120,14 @@ public final class LoadedApk {
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
             CompatibilityInfo compatInfo, ClassLoader baseLoader,
             boolean securityViolation, boolean includeCode) {
+        final int myUid = Process.myUid();
         mActivityThread = activityThread;
         mApplicationInfo = aInfo;
         mPackageName = aInfo.packageName;
         mAppDir = aInfo.sourceDir;
-        final int myUid = Process.myUid();
-        mResDir = aInfo.uid == myUid ? aInfo.sourceDir
-                : aInfo.publicSourceDir;
+        mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
+        mSplitAppDirs = aInfo.splitSourceDirs;
+        mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
         mOverlayDirs = aInfo.resourceDirs;
         if (!UserHandle.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
             aInfo.dataDir = PackageManager.getDataDirForUser(UserHandle.getUserId(myUid),
@@ -149,6 +154,8 @@ public final class LoadedApk {
         mPackageName = "android";
         mAppDir = null;
         mResDir = null;
+        mSplitAppDirs = null;
+        mSplitResDirs = null;
         mOverlayDirs = null;
         mSharedLibraries = null;
         mDataDir = null;
@@ -214,53 +221,6 @@ public final class LoadedApk {
         return ai.sharedLibraryFiles;
     }
 
-    /**
-     * Combines two arrays (of library names) such that they are
-     * concatenated in order but are devoid of duplicates. The
-     * result is a single string with the names of the libraries
-     * separated by colons, or <code>null</code> if both lists
-     * were <code>null</code> or empty.
-     *
-     * @param list1 null-ok; the first list
-     * @param list2 null-ok; the second list
-     * @return null-ok; the combination
-     */
-    private static String combineLibs(String[] list1, String[] list2) {
-        StringBuilder result = new StringBuilder(300);
-        boolean first = true;
-
-        if (list1 != null) {
-            for (String s : list1) {
-                if (first) {
-                    first = false;
-                } else {
-                    result.append(':');
-                }
-                result.append(s);
-            }
-        }
-
-        // Only need to check for duplicates if list1 was non-empty.
-        boolean dupCheck = !first;
-
-        if (list2 != null) {
-            for (String s : list2) {
-                if (dupCheck && ArrayUtils.contains(list1, s)) {
-                    continue;
-                }
-
-                if (first) {
-                    first = false;
-                } else {
-                    result.append(':');
-                }
-                result.append(s);
-            }
-        }
-
-        return result.toString();
-    }
-
     public ClassLoader getClassLoader() {
         synchronized (this) {
             if (mClassLoader != null) {
@@ -268,8 +228,15 @@ public final class LoadedApk {
             }
 
             if (mIncludeCode && !mPackageName.equals("android")) {
-                String zip = mAppDir;
-                String libraryPath = mLibDir;
+                final ArrayList<String> zipPaths = new ArrayList<>();
+                final ArrayList<String> libPaths = new ArrayList<>();
+
+                zipPaths.add(mAppDir);
+                if (mSplitAppDirs != null) {
+                    Collections.addAll(zipPaths, mSplitAppDirs);
+                }
+
+                libPaths.add(mLibDir);
 
                 /*
                  * The following is a bit of a hack to inject
@@ -280,34 +247,55 @@ public final class LoadedApk {
                  * concatenation of both apps' shared library lists.
                  */
 
-                String instrumentationAppDir =
-                        mActivityThread.mInstrumentationAppDir;
-                String instrumentationAppLibraryDir =
-                        mActivityThread.mInstrumentationAppLibraryDir;
-                String instrumentationAppPackage =
-                        mActivityThread.mInstrumentationAppPackage;
-                String instrumentedAppDir =
-                        mActivityThread.mInstrumentedAppDir;
-                String instrumentedAppLibraryDir =
-                        mActivityThread.mInstrumentedAppLibraryDir;
+                String instrumentationPackageName = mActivityThread.mInstrumentationPackageName;
+                String instrumentationAppDir = mActivityThread.mInstrumentationAppDir;
+                String[] instrumentationSplitAppDirs = mActivityThread.mInstrumentationSplitAppDirs;
+                String instrumentationLibDir = mActivityThread.mInstrumentationLibDir;
+
+                String instrumentedAppDir = mActivityThread.mInstrumentedAppDir;
+                String[] instrumentedSplitAppDirs = mActivityThread.mInstrumentedSplitAppDirs;
+                String instrumentedLibDir = mActivityThread.mInstrumentedLibDir;
                 String[] instrumentationLibs = null;
 
                 if (mAppDir.equals(instrumentationAppDir)
                         || mAppDir.equals(instrumentedAppDir)) {
-                    zip = instrumentationAppDir + ":" + instrumentedAppDir;
-                    libraryPath = instrumentationAppLibraryDir + ":" + instrumentedAppLibraryDir;
-                    if (! instrumentedAppDir.equals(instrumentationAppDir)) {
-                        instrumentationLibs =
-                            getLibrariesFor(instrumentationAppPackage);
+                    zipPaths.clear();
+                    zipPaths.add(instrumentationAppDir);
+                    if (instrumentationSplitAppDirs != null) {
+                        Collections.addAll(zipPaths, instrumentationSplitAppDirs);
+                    }
+                    zipPaths.add(instrumentedAppDir);
+                    if (instrumentedSplitAppDirs != null) {
+                        Collections.addAll(zipPaths, instrumentedSplitAppDirs);
+                    }
+
+                    libPaths.clear();
+                    libPaths.add(instrumentationLibDir);
+                    libPaths.add(instrumentedLibDir);
+
+                    if (!instrumentedAppDir.equals(instrumentationAppDir)) {
+                        instrumentationLibs = getLibrariesFor(instrumentationPackageName);
                     }
                 }
 
-                if ((mSharedLibraries != null) ||
-                        (instrumentationLibs != null)) {
-                    zip =
-                        combineLibs(mSharedLibraries, instrumentationLibs)
-                        + ':' + zip;
+                if (mSharedLibraries != null) {
+                    for (String lib : mSharedLibraries) {
+                        if (!zipPaths.contains(lib)) {
+                            zipPaths.add(0, lib);
+                        }
+                    }
                 }
+
+                if (instrumentationLibs != null) {
+                    for (String lib : instrumentationLibs) {
+                        if (!zipPaths.contains(lib)) {
+                            zipPaths.add(0, lib);
+                        }
+                    }
+                }
+
+                final String zip = TextUtils.join(File.pathSeparator, zipPaths);
+                final String lib = TextUtils.join(File.pathSeparator, libPaths);
 
                 /*
                  * With all the combination done (if necessary, actually
@@ -315,15 +303,14 @@ public final class LoadedApk {
                  */
 
                 if (ActivityThread.localLOGV)
-                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + libraryPath);
+                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + lib);
 
                 // Temporarily disable logging of disk reads on the Looper thread
                 // as this is early and necessary.
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-                mClassLoader =
-                    ApplicationLoaders.getDefault().getClassLoader(
-                        zip, libraryPath, mBaseClassLoader);
+                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib,
+                        mBaseClassLoader);
                 initializeJavaContextClassLoader();
 
                 StrictMode.setThreadPolicy(oldPolicy);
@@ -469,6 +456,14 @@ public final class LoadedApk {
         return mResDir;
     }
 
+    public String[] getSplitAppDirs() {
+        return mSplitAppDirs;
+    }
+
+    public String[] getSplitResDirs() {
+        return mSplitResDirs;
+    }
+
     public String[] getOverlayDirs() {
         return mOverlayDirs;
     }
@@ -487,7 +482,7 @@ public final class LoadedApk {
 
     public Resources getResources(ActivityThread mainThread) {
         if (mResources == null) {
-            mResources = mainThread.getTopLevelResources(mResDir, mOverlayDirs,
+            mResources = mainThread.getTopLevelResources(mResDir, mSplitResDirs, mOverlayDirs,
                     mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, null, this);
         }
         return mResources;

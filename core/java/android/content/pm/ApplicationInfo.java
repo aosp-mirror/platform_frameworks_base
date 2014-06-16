@@ -23,8 +23,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Information you can retrieve about a particular application.  This
@@ -398,17 +402,30 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int largestWidthLimitDp = 0;
 
     /**
-     * Full path to the location of this package.
+     * Full path to the base APK for this application.
      */
     public String sourceDir;
 
     /**
-     * Full path to the location of the publicly available parts of this
-     * package (i.e. the primary resource package and manifest).  For
-     * non-forward-locked apps this will be the same as {@link #sourceDir).
+     * Full path to the publicly available parts of {@link #sourceDir},
+     * including resources and manifest. This may be different from
+     * {@link #sourceDir} if an application is forward locked.
      */
     public String publicSourceDir;
-    
+
+    /**
+     * Full paths to zero or more split APKs that, when combined with the base
+     * APK defined in {@link #sourceDir}, form a complete application.
+     */
+    public String[] splitSourceDirs;
+
+    /**
+     * Full path to the publicly available parts of {@link #splitSourceDirs},
+     * including resources and manifest. This may be different from
+     * {@link #splitSourceDirs} if an application is forward locked.
+     */
+    public String[] splitPublicSourceDirs;
+
     /**
      * Full paths to the locations of extra resource packages this application
      * uses. This field is only used if there are extra resource packages,
@@ -512,12 +529,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
                 + " largestWidthLimitDp=" + largestWidthLimitDp);
         pw.println(prefix + "sourceDir=" + sourceDir);
-        if (sourceDir == null) {
-            if (publicSourceDir != null) {
-                pw.println(prefix + "publicSourceDir=" + publicSourceDir);
-            }
-        } else if (!sourceDir.equals(publicSourceDir)) {
+        if (!Objects.equals(sourceDir, publicSourceDir)) {
             pw.println(prefix + "publicSourceDir=" + publicSourceDir);
+        }
+        if (!ArrayUtils.isEmpty(splitSourceDirs)) {
+            pw.println(prefix + "splitSourceDirs=" + Arrays.toString(splitSourceDirs));
+        }
+        if (!ArrayUtils.isEmpty(splitPublicSourceDirs)
+                && !Arrays.equals(splitSourceDirs, splitPublicSourceDirs)) {
+            pw.println(prefix + "splitPublicSourceDirs=" + Arrays.toString(splitPublicSourceDirs));
         }
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + resourceDirs);
@@ -591,6 +611,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         largestWidthLimitDp = orig.largestWidthLimitDp;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
+        splitSourceDirs = orig.splitSourceDirs;
+        splitPublicSourceDirs = orig.splitPublicSourceDirs;
         nativeLibraryDir = orig.nativeLibraryDir;
         cpuAbi = orig.cpuAbi;
         resourceDirs = orig.resourceDirs;
@@ -633,6 +655,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(largestWidthLimitDp);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
+        dest.writeStringArray(splitSourceDirs);
+        dest.writeStringArray(splitPublicSourceDirs);
         dest.writeString(nativeLibraryDir);
         dest.writeString(cpuAbi);
         dest.writeStringArray(resourceDirs);
@@ -674,6 +698,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         largestWidthLimitDp = source.readInt();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
+        splitSourceDirs = source.readStringArray();
+        splitPublicSourceDirs = source.readStringArray();
         nativeLibraryDir = source.readString();
         cpuAbi = source.readString();
         resourceDirs = source.readStringArray();

@@ -191,11 +191,13 @@ public final class ActivityThread {
     /** Reference to singleton {@link ActivityThread} */
     private static ActivityThread sCurrentActivityThread;
     Instrumentation mInstrumentation;
+    String mInstrumentationPackageName = null;
     String mInstrumentationAppDir = null;
-    String mInstrumentationAppLibraryDir = null;
-    String mInstrumentationAppPackage = null;
+    String[] mInstrumentationSplitAppDirs = null;
+    String mInstrumentationLibDir = null;
     String mInstrumentedAppDir = null;
-    String mInstrumentedAppLibraryDir = null;
+    String[] mInstrumentedSplitAppDirs = null;
+    String mInstrumentedLibDir = null;
     boolean mSystemThread = false;
     boolean mJitEnabled = false;
 
@@ -1585,11 +1587,11 @@ public final class ActivityThread {
     /**
      * Creates the top level resources for the given package.
      */
-    Resources getTopLevelResources(String resDir, String[] overlayDirs, String[] libDirs,
-            int displayId, Configuration overrideConfiguration,
+    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
+            String[] libDirs, int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
-        return mResourcesManager.getTopLevelResources(resDir, overlayDirs, libDirs, displayId,
-                overrideConfiguration, pkgInfo.getCompatibilityInfo(), null);
+        return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
+                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo(), null);
     }
 
     final Handler getHandler() {
@@ -4315,16 +4317,20 @@ public final class ActivityThread {
                     + data.instrumentationName);
             }
 
+            mInstrumentationPackageName = ii.packageName;
             mInstrumentationAppDir = ii.sourceDir;
-            mInstrumentationAppLibraryDir = ii.nativeLibraryDir;
-            mInstrumentationAppPackage = ii.packageName;
+            mInstrumentationSplitAppDirs = ii.splitSourceDirs;
+            mInstrumentationLibDir = ii.nativeLibraryDir;
             mInstrumentedAppDir = data.info.getAppDir();
-            mInstrumentedAppLibraryDir = data.info.getLibDir();
+            mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
+            mInstrumentedLibDir = data.info.getLibDir();
 
             ApplicationInfo instrApp = new ApplicationInfo();
             instrApp.packageName = ii.packageName;
             instrApp.sourceDir = ii.sourceDir;
             instrApp.publicSourceDir = ii.publicSourceDir;
+            instrApp.splitSourceDirs = ii.splitSourceDirs;
+            instrApp.splitPublicSourceDirs = ii.splitPublicSourceDirs;
             instrApp.dataDir = ii.dataDir;
             instrApp.nativeLibraryDir = ii.nativeLibraryDir;
             LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,

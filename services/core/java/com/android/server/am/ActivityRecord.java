@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.app.ActivityManager.TaskDescription;
 import android.os.PersistableBundle;
 import android.os.Trace;
+
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -49,6 +50,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -58,6 +60,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * An entry in the history stack, representing an activity.
@@ -83,6 +86,7 @@ final class ActivityRecord {
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
     final ActivityInfo info; // all about me
+    final ApplicationInfo appInfo; // information about activity's app
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
     final int userId;          // Which user is this running for?
@@ -103,9 +107,6 @@ final class ActivityRecord {
     static final int RECENTS_ACTIVITY_TYPE = 2;
     int mActivityType;
 
-    final String baseDir;   // where activity source (resources etc) located
-    final String resDir;   // where public activity source (public resources etc) located
-    final String dataDir;   // where activity data should go
     CharSequence nonLocalizedLabel;  // the label information from the package mgr.
     int labelRes;           // the label information from the package mgr.
     int icon;               // resource identifier of activity's icon.
@@ -184,11 +185,13 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("realActivity=");
                 pw.println(realActivity.flattenToShortString());
-        pw.print(prefix); pw.print("baseDir="); pw.println(baseDir);
-        if (!resDir.equals(baseDir)) {
-            pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        if (appInfo != null) {
+            pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
+            if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
+                pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
+            }
+            pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
         }
-        pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
                 pw.print(" mActivityType="); pw.println(mActivityType);
@@ -418,9 +421,7 @@ final class ActivityRecord {
             taskAffinity = aInfo.taskAffinity;
             stateNotNeeded = (aInfo.flags&
                     ActivityInfo.FLAG_STATE_NOT_NEEDED) != 0;
-            baseDir = aInfo.applicationInfo.sourceDir;
-            resDir = aInfo.applicationInfo.publicSourceDir;
-            dataDir = aInfo.applicationInfo.dataDir;
+            appInfo = aInfo.applicationInfo;
             nonLocalizedLabel = aInfo.nonLocalizedLabel;
             labelRes = aInfo.labelRes;
             if (nonLocalizedLabel == null && labelRes == 0) {
@@ -488,9 +489,7 @@ final class ActivityRecord {
             realActivity = null;
             taskAffinity = null;
             stateNotNeeded = false;
-            baseDir = null;
-            resDir = null;
-            dataDir = null;
+            appInfo = null;
             processName = null;
             packageName = null;
             fullscreen = true;
