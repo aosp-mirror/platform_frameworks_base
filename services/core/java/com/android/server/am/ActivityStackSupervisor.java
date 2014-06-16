@@ -251,7 +251,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** If non-null then the task specified remains in front and no other tasks may be started
      * until the task exits or #stopLockTaskMode() is called. */
-    private TaskRecord mLockTaskModeTask;
+    TaskRecord mLockTaskModeTask;
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
