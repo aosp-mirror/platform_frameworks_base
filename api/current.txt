@@ -37749,6 +37749,7 @@ package android.widget {
     method public float getShadowDx();
     method public float getShadowDy();
     method public float getShadowRadius();
+    method public final boolean getShowSoftInputOnFocus();
     method public java.lang.CharSequence getText();
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public final android.content.res.ColorStateList getTextColors();
@@ -37842,6 +37843,7 @@ package android.widget {
     method public void setScroller(android.widget.Scroller);
     method public void setSelectAllOnFocus(boolean);
     method public void setShadowLayer(float, float, float, int);
+    method public final void setShowSoftInputOnFocus(boolean);
     method public void setSingleLine();
     method public void setSingleLine(boolean);
     method public final void setSpannableFactory(android.text.Spannable.Factory);

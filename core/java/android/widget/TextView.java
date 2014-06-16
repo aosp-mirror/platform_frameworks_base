@@ -2727,7 +2727,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets whether the soft input method will be made visible when this
      * TextView gets focused. The default is true.
-     * @hide
      */
     @android.view.RemotableViewMethod
     public final void setShowSoftInputOnFocus(boolean show) {
@@ -2738,7 +2737,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns whether the soft input method will be made visible when this
      * TextView gets focused. The default is true.
-     * @hide
      */
     public final boolean getShowSoftInputOnFocus() {
         // When there is no Editor, return default true value
