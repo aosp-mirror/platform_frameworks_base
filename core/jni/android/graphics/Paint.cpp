@@ -707,7 +707,7 @@ public:
     }
 
     static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, TypefaceImpl* typeface, const jchar *text,
-                                    jint start, jint count, jint contextCount, jint flags,
+                                    jint start, jint count, jint contextCount, jboolean isRtl,
                                     jfloatArray advances, jint advancesIndex) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         NPE_CHECK_RETURN_ZERO(env, text);
@@ -729,14 +729,16 @@ public:
         jfloat* advancesArray = new jfloat[count];
         jfloat totalAdvance = 0;
 
+        int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+
 #ifdef USE_MINIKIN
         Layout layout;
-        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, flags, typeface);
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, start, count, contextCount, css);
         layout.getAdvances(advancesArray);
         totalAdvance = layout.getAdvance();
 #else
-        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
+        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, bidiFlags,
                                        advancesArray, &totalAdvance);
 #endif
 
@@ -747,28 +749,28 @@ public:
         return totalAdvance;
     }
 
-    static jfloat getTextRunAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+    static jfloat getTextRunAdvances___CIIIIZ_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
             jlong typefaceHandle,
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
-            jint flags, jfloatArray advances, jint advancesIndex) {
+            jboolean isRtl, jfloatArray advances, jint advancesIndex) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextIndex,
-                index - contextIndex, count, contextCount, flags, advances, advancesIndex);
+                index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
-    static jfloat getTextRunAdvances__StringIIIII_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
+    static jfloat getTextRunAdvances__StringIIIIZ_FI(JNIEnv* env, jobject clazz, jlong paintHandle,
             jlong typefaceHandle,
-            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jboolean isRtl,
             jfloatArray advances, jint advancesIndex) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         jfloat result = doTextRunAdvances(env, paint, typeface, textArray + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart, flags,
+                start - contextStart, end - start, contextEnd - contextStart, isRtl,
                 advances, advancesIndex);
         env->ReleaseStringChars(text, textArray);
         return result;
@@ -819,21 +821,21 @@ public:
     }
 
     static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, jlong paintHandle, jcharArray text,
-            jint contextStart, jint contextCount, jint flags, jint offset, jint cursorOpt) {
+            jint contextStart, jint contextCount, jint dir, jint offset, jint cursorOpt) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jint result = doTextRunCursor(env, paint, textArray, contextStart, contextCount, flags,
+        jint result = doTextRunCursor(env, paint, textArray, contextStart, contextCount, dir,
                 offset, cursorOpt);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
     static jint getTextRunCursor__String(JNIEnv* env, jobject clazz, jlong paintHandle, jstring text,
-            jint contextStart, jint contextEnd, jint flags, jint offset, jint cursorOpt) {
+            jint contextStart, jint contextEnd, jint dir, jint offset, jint cursorOpt) {
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         jint result = doTextRunCursor(env, paint, textArray, contextStart,
-                contextEnd - contextStart, flags, offset, cursorOpt);
+                contextEnd - contextStart, dir, offset, cursorOpt);
         env->ReleaseStringChars(text, textArray);
         return result;
     }
@@ -1110,10 +1112,10 @@ static JNINativeMethod methods[] = {
     {"native_breakText","(Ljava/lang/String;ZFI[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(JJ[CIII[F)I", (void*) SkPaintGlue::getTextWidths___CIII_F},
     {"native_getTextWidths","(JJLjava/lang/String;III[F)I", (void*) SkPaintGlue::getTextWidths__StringIII_F},
-    {"native_getTextRunAdvances","(JJ[CIIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances___CIIIII_FI},
-    {"native_getTextRunAdvances","(JJLjava/lang/String;IIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FI},
+    {"native_getTextRunAdvances","(JJ[CIIIIZ[FI)F",
+        (void*) SkPaintGlue::getTextRunAdvances___CIIIIZ_FI},
+    {"native_getTextRunAdvances","(JJLjava/lang/String;IIIIZ[FI)F",
+        (void*) SkPaintGlue::getTextRunAdvances__StringIIIIZ_FI},
 
 
     {"native_getTextGlyphs","(JLjava/lang/String;IIIII[C)I",

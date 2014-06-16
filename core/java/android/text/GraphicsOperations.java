@@ -38,7 +38,7 @@ extends CharSequence
      * {@hide}
      */
     void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, Paint p);
+            float x, float y, boolean isRtl, Paint p);
 
    /**
      * Just like {@link Paint#measureText}.
@@ -55,12 +55,12 @@ extends CharSequence
      * @hide
      */
     float getTextRunAdvances(int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex, Paint paint);
+            boolean isRtl, float[] advances, int advancesIndex, Paint paint);
 
     /**
      * Just like {@link Paint#getTextRunCursor}.
      * @hide
      */
-    int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
+    int getTextRunCursor(int contextStart, int contextEnd, int dir, int offset,
             int cursorOpt, Paint p);
 }

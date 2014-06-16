@@ -51,10 +51,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     private int mWidth;
     private int mHeight;
-    
+
     private float[] mPoint;
     private float[] mLine;
-    
+
     private Rect mClipBounds;
     private RectF mPathBounds;
 
@@ -167,7 +167,7 @@ class GLES20Canvas extends HardwareCanvas {
 
         nSetViewport(mRenderer, width, height);
     }
-    
+
     private static native void nSetViewport(long renderer, int width, int height);
 
     @Override
@@ -208,22 +208,22 @@ class GLES20Canvas extends HardwareCanvas {
 
     /**
      * Must match Caches::FlushMode values
-     * 
-     * @see #flushCaches(int) 
+     *
+     * @see #flushCaches(int)
      */
     static final int FLUSH_CACHES_LAYERS = 0;
-    
+
     /**
      * Must match Caches::FlushMode values
-     * 
-     * @see #flushCaches(int) 
+     *
+     * @see #flushCaches(int)
      */
     static final int FLUSH_CACHES_MODERATE = 1;
 
     /**
      * Must match Caches::FlushMode values
-     * 
-     * @see #flushCaches(int) 
+     *
+     * @see #flushCaches(int)
      */
     static final int FLUSH_CACHES_FULL = 2;
 
@@ -245,7 +245,7 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
     ///////////////////////////////////////////////////////////////////////////
-    
+
     void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
         layer.setLayerPaint(paint);
         nDrawLayer(mRenderer, layer.getLayer(), x, y);
@@ -298,7 +298,7 @@ class GLES20Canvas extends HardwareCanvas {
     public boolean clipRect(float left, float top, float right, float bottom) {
         return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
-    
+
     private static native boolean nClipRect(long renderer, float left, float top,
             float right, float bottom, int op);
 
@@ -311,14 +311,14 @@ class GLES20Canvas extends HardwareCanvas {
     public boolean clipRect(int left, int top, int right, int bottom) {
         return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
-    
+
     private static native boolean nClipRect(long renderer, int left, int top,
             int right, int bottom, int op);
 
     @Override
     public boolean clipRect(Rect rect) {
         return nClipRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
-                Region.Op.INTERSECT.nativeInt);        
+                Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
@@ -360,7 +360,7 @@ class GLES20Canvas extends HardwareCanvas {
     public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
         return nQuickReject(mRenderer, left, top, right, bottom);
     }
-    
+
     private static native boolean nQuickReject(long renderer, float left, float top,
             float right, float bottom);
 
@@ -385,7 +385,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void translate(float dx, float dy) {
         if (dx != 0.0f || dy != 0.0f) nTranslate(mRenderer, dx, dy);
     }
-    
+
     private static native void nTranslate(long renderer, float dx, float dy);
 
     @Override
@@ -399,21 +399,21 @@ class GLES20Canvas extends HardwareCanvas {
     public void rotate(float degrees) {
         nRotate(mRenderer, degrees);
     }
-    
+
     private static native void nRotate(long renderer, float degrees);
 
     @Override
     public void scale(float sx, float sy) {
         nScale(mRenderer, sx, sy);
     }
-    
+
     private static native void nScale(long renderer, float sx, float sy);
 
     @Override
     public void setMatrix(Matrix matrix) {
         nSetMatrix(mRenderer, matrix == null ? 0 : matrix.native_instance);
     }
-    
+
     private static native void nSetMatrix(long renderer, long matrix);
 
     @SuppressWarnings("deprecation")
@@ -421,16 +421,16 @@ class GLES20Canvas extends HardwareCanvas {
     public void getMatrix(Matrix matrix) {
         nGetMatrix(mRenderer, matrix.native_instance);
     }
-    
+
     private static native void nGetMatrix(long renderer, long matrix);
 
     @Override
     public void concat(Matrix matrix) {
         if (matrix != null) nConcatMatrix(mRenderer, matrix.native_instance);
     }
-    
+
     private static native void nConcatMatrix(long renderer, long matrix);
-    
+
     ///////////////////////////////////////////////////////////////////////////
     // State management
     ///////////////////////////////////////////////////////////////////////////
@@ -439,14 +439,14 @@ class GLES20Canvas extends HardwareCanvas {
     public int save() {
         return nSave(mRenderer, Canvas.CLIP_SAVE_FLAG | Canvas.MATRIX_SAVE_FLAG);
     }
-    
+
     @Override
     public int save(int saveFlags) {
         return nSave(mRenderer, saveFlags);
     }
 
     private static native int nSave(long renderer, int flags);
-    
+
     @Override
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
         if (bounds != null) {
@@ -494,12 +494,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nSaveLayerAlpha(long renderer, float left, float top, float right,
             float bottom, int alpha, int saveFlags);
-    
+
     @Override
     public void restore() {
         nRestore(mRenderer);
     }
-    
+
     private static native void nRestore(long renderer);
 
     @Override
@@ -508,12 +508,12 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native void nRestoreToCount(long renderer, int saveCount);
-    
+
     @Override
     public int getSaveCount() {
         return nGetSaveCount(mRenderer);
     }
-    
+
     private static native int nGetSaveCount(long renderer);
 
     ///////////////////////////////////////////////////////////////////////////
@@ -739,7 +739,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawColor(int color, PorterDuff.Mode mode) {
         nDrawColor(mRenderer, color, mode.nativeInt);
     }
-    
+
     private static native void nDrawColor(long renderer, int color, int mode);
 
     @Override
@@ -930,7 +930,7 @@ class GLES20Canvas extends HardwareCanvas {
         nDrawText(mRenderer, text, index, count, x, y,
                 paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
-    
+
     private static native void nDrawText(long renderer, char[] text, int index, int count,
             float x, float y, int bidiFlags, long paint, long typeface);
 
@@ -997,49 +997,45 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
-            float x, float y, int dir, Paint paint) {
+            float x, float y, boolean isRtl, Paint paint) {
         if ((index | count | text.length - index - count) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
-            throw new IllegalArgumentException("Unknown direction: " + dir);
-        }
 
-        nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, dir,
+        nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, isRtl,
                 paint.mNativePaint, paint.mNativeTypeface);
     }
 
     private static native void nDrawTextRun(long renderer, char[] text, int index, int count,
-            int contextIndex, int contextCount, float x, float y, int dir, long nativePaint, long nativeTypeface);
+            int contextIndex, int contextCount, float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
     @Override
     public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
-            float x, float y, int dir, Paint paint) {
+            float x, float y, boolean isRtl, Paint paint) {
         if ((start | end | end - start | text.length() - end) < 0) {
             throw new IndexOutOfBoundsException();
         }
 
-        int flags = dir == 0 ? 0 : 1;
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
-                    contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+                    contextEnd, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
-                    contextStart, contextEnd, x, y, flags, paint);
+                    contextStart, contextEnd, x, y, isRtl, paint);
         } else {
             int contextLen = contextEnd - contextStart;
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
-                    x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+                    x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
 
     private static native void nDrawTextRun(long renderer, String text, int start, int end,
-            int contextStart, int contextEnd, float x, float y, int flags, long nativePaint, long nativeTypeface);
+            int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
     @Override
     public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,
