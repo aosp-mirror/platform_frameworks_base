@@ -57,6 +57,65 @@ public class LauncherApps {
 
     private List<OnAppsChangedListener> mListeners
             = new ArrayList<OnAppsChangedListener>();
+    private List<OnAppsChangedCallback> mCallbacks
+            = new ArrayList<OnAppsChangedCallback>();
+
+    /**
+     * Callbacks for package changes to this and related managed profiles.
+     */
+    public static abstract class OnAppsChangedCallback {
+        /**
+         * Indicates that a package was removed from the specified profile.
+         *
+         * @param packageName The name of the package that was removed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        abstract public void onPackageRemoved(String packageName, UserHandle user);
+
+        /**
+         * Indicates that a package was added to the specified profile.
+         *
+         * @param packageName The name of the package that was added.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        abstract public void onPackageAdded(String packageName, UserHandle user);
+
+        /**
+         * Indicates that a package was modified in the specified profile.
+         *
+         * @param packageName The name of the package that has changed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        abstract public void onPackageChanged(String packageName, UserHandle user);
+
+        /**
+         * Indicates that one or more packages have become available. For
+         * example, this can happen when a removable storage card has
+         * reappeared.
+         *
+         * @param packageNames The names of the packages that have become
+         *            available.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether these packages are replacing
+         *            existing ones.
+         */
+        abstract public void onPackagesAvailable(String[] packageNames, UserHandle user,
+                boolean replacing);
+
+        /**
+         * Indicates that one or more packages have become unavailable. For
+         * example, this can happen when a removable storage card has been
+         * removed.
+         *
+         * @param packageNames The names of the packages that have become
+         *            unavailable.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether the packages are about to be
+         *            replaced with new versions.
+         */
+        abstract public void onPackagesUnavailable(String[] packageNames, UserHandle user,
+                boolean replacing);
+    }
 
     /**
      * Callbacks for package changes to this and related managed profiles.
@@ -270,7 +329,7 @@ public class LauncherApps {
         synchronized (this) {
             if (listener != null && !mListeners.contains(listener)) {
                 mListeners.add(listener);
-                if (mListeners.size() == 1) {
+                if (mListeners.size() == 1 && mCallbacks.size() == 0) {
                     try {
                         mService.addOnAppsChangedListener(mAppsChangedListener);
                     } catch (RemoteException re) {
@@ -289,7 +348,44 @@ public class LauncherApps {
     public void removeOnAppsChangedListener(OnAppsChangedListener listener) {
         synchronized (this) {
             mListeners.remove(listener);
-            if (mListeners.size() == 0) {
+            if (mListeners.size() == 0 && mCallbacks.size() == 0) {
+                try {
+                    mService.removeOnAppsChangedListener(mAppsChangedListener);
+                } catch (RemoteException re) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds a callback for changes to packages in current and managed profiles.
+     *
+     * @param callback The callback to add.
+     */
+    public void addOnAppsChangedCallback(OnAppsChangedCallback callback) {
+        synchronized (this) {
+            if (callback != null && !mCallbacks.contains(callback)) {
+                mCallbacks.add(callback);
+                if (mCallbacks.size() == 1 && mListeners.size() == 0) {
+                    try {
+                        mService.addOnAppsChangedListener(mAppsChangedListener);
+                    } catch (RemoteException re) {
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes a callback that was previously added.
+     *
+     * @param callback The callback to remove.
+     * @see #addOnAppsChangedListener(OnAppsChangedCallback)
+     */
+    public void removeOnAppsChangedCallback(OnAppsChangedCallback callback) {
+        synchronized (this) {
+            mListeners.remove(callback);
+            if (mListeners.size() == 0 && mCallbacks.size() == 0) {
                 try {
                     mService.removeOnAppsChangedListener(mAppsChangedListener);
                 } catch (RemoteException re) {
@@ -309,6 +405,9 @@ public class LauncherApps {
                 for (OnAppsChangedListener listener : mListeners) {
                     listener.onPackageRemoved(user, packageName);
                 }
+                for (OnAppsChangedCallback callback : mCallbacks) {
+                    callback.onPackageRemoved(packageName, user);
+                }
             }
         }
 
@@ -321,6 +420,9 @@ public class LauncherApps {
                 for (OnAppsChangedListener listener : mListeners) {
                     listener.onPackageChanged(user, packageName);
                 }
+                for (OnAppsChangedCallback callback : mCallbacks) {
+                    callback.onPackageChanged(packageName, user);
+                }
             }
         }
 
@@ -332,6 +434,9 @@ public class LauncherApps {
             synchronized (LauncherApps.this) {
                 for (OnAppsChangedListener listener : mListeners) {
                     listener.onPackageAdded(user, packageName);
+                }
+                for (OnAppsChangedCallback callback : mCallbacks) {
+                    callback.onPackageAdded(packageName, user);
                 }
             }
         }
@@ -346,6 +451,9 @@ public class LauncherApps {
                 for (OnAppsChangedListener listener : mListeners) {
                     listener.onPackagesAvailable(user, packageNames, replacing);
                 }
+                for (OnAppsChangedCallback callback : mCallbacks) {
+                    callback.onPackagesAvailable(packageNames, user, replacing);
+                }
             }
         }
 
@@ -359,7 +467,10 @@ public class LauncherApps {
                 for (OnAppsChangedListener listener : mListeners) {
                     listener.onPackagesUnavailable(user, packageNames, replacing);
                 }
-            }
+                for (OnAppsChangedCallback callback : mCallbacks) {
+                    callback.onPackagesUnavailable(packageNames, user, replacing);
+                }
+           }
         }
     };
 }
