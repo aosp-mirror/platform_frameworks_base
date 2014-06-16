@@ -2,14 +2,24 @@ page.title=Views and Shadows
 
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#elevation">View Elevation</a></li>
+  <li><a href="#shadows">Shadows and Outlines</a></li>
+  <li><a href="#clip">Clipping Views</a></li>
+</ol>
+</div>
+</div>
 
-<p>In material design apps, depth has meaning. You should assign higher elevation values to more
+<p>In apps with material design, depth has meaning. You should assign higher elevation values to more
 important UI elements in your app. The elevation value of a view determines the size of its
 shadow: views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane
 under an orthographic projection (the views do not scale for different values of Z).</p>
 
 
-<h2 style="margin-top:35px">View Elevation</h2>
+<h2 id="elevation">View Elevation</h2>
 
 <p>The Z value for a view has two components, elevation and translation. The elevation is the
 static component, and the translation is used for animations:</p>
@@ -29,7 +39,7 @@ static component, and the translation is used for animations:</p>
 <code>px</code>).</p>
 
 
-<h2 style="margin-top:35px">Shadows and Outlines</h2>
+<h2 id="shadows">Shadows and Outlines</h2>
 
 <p>The bounds of a view's background drawable determine the default shape of its shadow. To define
 a custom shape for a shadow, such as an oval, use the <code>View.setOutline</code> method:</p>
@@ -55,7 +65,7 @@ myView.setOutline(outline);
 <p>To prevent a view from casting a shadow, set its outline to <code>null</code>.</p>
 
 
-<h2 style="margin-top:35px">Clipping Views</h2>
+<h2 id="clip">Clipping Views</h2>
 
 <p>The Android L Developer Preview lets you clip a view to its outline area using the
 <code>View.setClipToOutline</code> method. Only rectangle, circle, and round rectangle outlines
