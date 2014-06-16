@@ -23,5 +23,8 @@
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.25</item>
 
     <fraction name="keyguard_clock_y_fraction_max">37%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">14%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">20%</fraction>
+
+    <dimen name="keyguard_clock_notifications_margin_min">36dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
 </resources>
