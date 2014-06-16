@@ -16,12 +16,13 @@
 
 package com.android.server.pm;
 
-import android.content.BroadcastReceiver;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -30,62 +31,63 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * {@hide}
  */
-public class BackgroundDexOptService {
-
+public class BackgroundDexOptService extends JobService {
     static final String TAG = "BackgroundDexOptService";
 
-    private final BroadcastReceiver mIdleMaintenanceReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_IDLE_MAINTENANCE_START.equals(action)) {
-                onIdleStart();
-            } else if (Intent.ACTION_IDLE_MAINTENANCE_END.equals(action)) {
-                onIdleStop();
-            }
-        }
-    };
-
-    final PackageManagerService mPackageManager;
+    static final int BACKGROUND_DEXOPT_JOB = 808;
+    private static ComponentName sDexoptServiceName = new ComponentName(
+            BackgroundDexOptService.class.getPackage().getName(),
+            BackgroundDexOptService.class.getName());
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
 
-    public BackgroundDexOptService(Context context) {
-        mPackageManager = (PackageManagerService)ServiceManager.getService("package");
-
-        IntentFilter idleMaintenanceFilter = new IntentFilter();
-        idleMaintenanceFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_START);
-        idleMaintenanceFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_END);
-        context.registerReceiverAsUser(mIdleMaintenanceReceiver, UserHandle.ALL,
-                                       idleMaintenanceFilter, null, null);
+    public static void schedule(Context context) {
+        JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        JobInfo job = new JobInfo.Builder(BACKGROUND_DEXOPT_JOB, sDexoptServiceName)
+                .setRequiresDeviceIdle(true)
+                .setRequiresCharging(true)
+                .build();
+        js.schedule(job);
     }
 
-    public boolean onIdleStart() {
+    @Override
+    public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "onIdleStart");
-        if (mPackageManager.isStorageLow()) {
+        final PackageManagerService pm =
+                (PackageManagerService)ServiceManager.getService("package");
+
+        if (pm.isStorageLow()) {
             return false;
         }
-        final HashSet<String> pkgs = mPackageManager.getPackagesThatNeedDexOpt();
+        final HashSet<String> pkgs = pm.getPackagesThatNeedDexOpt();
         if (pkgs == null) {
             return false;
         }
+
+        final JobParameters jobParams = params;
         mIdleTime.set(true);
         new Thread("BackgroundDexOptService_DexOpter") {
             @Override
             public void run() {
                 for (String pkg : pkgs) {
                     if (!mIdleTime.get()) {
-                        break;
+                        // stopped while still working, so we need to reschedule
+                        schedule(BackgroundDexOptService.this);
+                        return;
                     }
-                    mPackageManager.performDexOpt(pkg, false);
+                    pm.performDexOpt(pkg, false);
                 }
+                // ran to completion, so we abandon our timeslice and do not reschedule
+                jobFinished(jobParams, false);
             }
         }.start();
         return true;
     }
 
-    public void onIdleStop() {
+    @Override
+    public boolean onStopJob(JobParameters params) {
         Log.i(TAG, "onIdleStop");
         mIdleTime.set(false);
+        return false;
     }
 }
