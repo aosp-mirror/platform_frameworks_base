@@ -7041,6 +7041,7 @@ package android.content {
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
+    field public static final java.lang.String TELECOMM_SERVICE = "telecomm";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
@@ -27684,6 +27685,9 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "package";
+  }
+
+  public class TelecommManager {
   }
 
 }

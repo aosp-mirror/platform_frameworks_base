@@ -118,6 +118,7 @@ import android.print.PrintManager;
 import android.service.fingerprint.FingerprintManager;
 import android.service.fingerprint.FingerprintManagerReceiver;
 import android.service.fingerprint.FingerprintService;
+import android.telecomm.TelecommManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
@@ -142,6 +143,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.appwidget.IAppWidgetService.Stub;
 import com.android.internal.os.IDropBoxManagerService;
+import com.android.internal.telecomm.ITelecommService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -552,6 +554,13 @@ class ContextImpl extends Context {
         registerService(TELEPHONY_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new TelephonyManager(ctx.getOuterContext());
+                }});
+
+        registerService(TELECOMM_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(TELECOMM_SERVICE);
+                    return new TelecommManager(ctx.getOuterContext(),
+                            ITelecommService.Stub.asInterface(b));
                 }});
 
         registerService(UI_MODE_SERVICE, new ServiceFetcher() {
