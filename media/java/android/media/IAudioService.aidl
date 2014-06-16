@@ -36,12 +36,7 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
-    void adjustVolume(int direction, int flags, String callingPackage);
-
     boolean isLocalOrRemoteMusicActive();
-
-    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
-            String callingPackage);
 
     void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage);
@@ -126,9 +121,6 @@ interface IAudioService {
     void unregisterAudioFocusClient(String clientId);
 
     int getCurrentAudioFocus();
-
-    oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
-    void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
 
            void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c, IBinder token);
     oneway void unregisterMediaButtonIntent(in PendingIntent pi);

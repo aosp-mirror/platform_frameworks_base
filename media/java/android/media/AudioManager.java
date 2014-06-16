@@ -1616,26 +1616,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * If the stream is active locally or remotely, adjust its volume according to the enforced
-     * priority rules.
-     * Note: only AudioManager.STREAM_MUSIC is supported at the moment
-     */
-    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction) {
-        if (streamType != STREAM_MUSIC) {
-            Log.w(TAG, "adjustLocalOrRemoteStreamVolume() doesn't support stream " + streamType);
-        }
-        IAudioService service = getService();
-        try {
-            service.adjustLocalOrRemoteStreamVolume(streamType, direction,
-                    mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in adjustLocalOrRemoteStreamVolume", e);
-        }
-    }
-
-
-    /**
      * Return a new audio session identifier not associated with any player or effect.
      * It can for instance be used to create one of the {@link android.media.audiofx.AudioEffect}
      * objects.

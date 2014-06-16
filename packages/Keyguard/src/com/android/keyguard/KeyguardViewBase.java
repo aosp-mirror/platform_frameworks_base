@@ -341,11 +341,11 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
                         }
                         // Volume buttons should only function for music (local or remote).
                         // TODO: Actually handle MUTE.
-                        mAudioManager.adjustLocalOrRemoteStreamVolume(
-                                AudioManager.STREAM_MUSIC,
+                        mAudioManager.adjustSuggestedStreamVolume(
                                 keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                         ? AudioManager.ADJUST_RAISE
-                                        : AudioManager.ADJUST_LOWER);
+                                        : AudioManager.ADJUST_LOWER /* direction */,
+                                AudioManager.STREAM_MUSIC /* stream */, 0 /* flags */);
                         // Don't execute default volume behavior
                         return true;
                     } else {
@@ -376,17 +376,13 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     }
 
     private void handleMediaKeyEvent(KeyEvent keyEvent) {
-        IAudioService audioService = IAudioService.Stub.asInterface(
-                ServiceManager.checkService(Context.AUDIO_SERVICE));
-        if (audioService != null) {
-            try {
-                audioService.dispatchMediaKeyEvent(keyEvent);
-            } catch (RemoteException e) {
-                Log.e("KeyguardViewBase", "dispatchMediaKeyEvent threw exception " + e);
+        synchronized (this) {
+            if (mAudioManager == null) {
+                mAudioManager = (AudioManager) getContext().getSystemService(
+                        Context.AUDIO_SERVICE);
             }
-        } else {
-            Slog.w("KeyguardViewBase", "Unable to find IAudioService for media key event");
         }
+        mAudioManager.dispatchMediaKeyEvent(keyEvent);
     }
 
     @Override

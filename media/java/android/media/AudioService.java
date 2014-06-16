@@ -830,24 +830,6 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#adjustVolume(int, int) */
-    public void adjustVolume(int direction, int flags, String callingPackage) {
-        adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags,
-                callingPackage);
-    }
-
-    /** @see AudioManager#adjustLocalOrRemoteStreamVolume(int, int) with current assumption
-     *  on streamType: fixed to STREAM_MUSIC */
-    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
-            String callingPackage) {
-        if (DEBUG_VOL) Log.d(TAG, "adjustLocalOrRemoteStreamVolume(dir="+direction+")");
-        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
-            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0, callingPackage);
-        } else if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-            mMediaFocusControl.adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
-        }
-    }
-
-    /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
@@ -4480,22 +4462,6 @@ public class AudioService extends IAudioService.Stub {
 
     public void setPlaybackInfoForRcc(int rccId, int what, int value) {
         mMediaFocusControl.setPlaybackInfoForRcc(rccId, what, value);
-    }
-
-    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
-        if (DEBUG_SESSIONS) {
-            int pid = getCallingPid();
-            Log.w(TAG, "Call to dispatchMediaKeyEvent from " + pid);
-        }
-        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
-    }
-
-    public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
-        if (DEBUG_SESSIONS) {
-            int pid = getCallingPid();
-            Log.w(TAG, "Call to dispatchMediaKeyEventUnderWakelock from " + pid);
-        }
-        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, true);
     }
 
     //==========================================================================================

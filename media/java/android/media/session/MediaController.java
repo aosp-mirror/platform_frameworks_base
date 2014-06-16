@@ -70,14 +70,7 @@ public final class MediaController {
      * @hide
      */
     public static MediaController fromBinder(ISessionController sessionBinder) {
-        MediaController controller = new MediaController(sessionBinder);
-        try {
-            controller.mSessionBinder.registerCallbackListener(controller.mCbStub);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "MediaController created with expired token", e);
-            controller = null;
-        }
-        return controller;
+        return new MediaController(sessionBinder);
     }
 
     /**
@@ -305,7 +298,7 @@ public final class MediaController {
                 mSessionBinder.registerCallbackListener(mCbStub);
                 mCbRegistered = true;
             } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in registerCallback", e);
+                Log.e(TAG, "Dead object in registerCallback", e);
             }
         }
     }
@@ -314,14 +307,23 @@ public final class MediaController {
         if (cb == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
+        boolean success = false;
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             MessageHandler handler = mCallbacks.get(i);
             if (cb == handler.mCallback) {
                 mCallbacks.remove(i);
-                return true;
+                success = true;
             }
         }
-        return false;
+        if (mCbRegistered && mCallbacks.size() == 0) {
+            try {
+                mSessionBinder.unregisterCallbackListener(mCbStub);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in removeCallbackLocked");
+            }
+            mCbRegistered = false;
+        }
+        return success;
     }
 
     private MessageHandler getHandlerForCallbackLocked(Callback cb) {
