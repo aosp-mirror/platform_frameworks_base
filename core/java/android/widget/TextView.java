@@ -9062,11 +9062,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void drawTextRun(Canvas c, int start, int end,
-                int contextStart, int contextEnd, float x, float y, int flags, Paint p) {
+                int contextStart, int contextEnd, float x, float y, boolean isRtl, Paint p) {
             int count = end - start;
             int contextCount = contextEnd - contextStart;
             c.drawTextRun(mChars, start + mStart, count, contextStart + mStart,
-                    contextCount, x, y, flags, p);
+                    contextCount, x, y, isRtl, p);
         }
 
         public float measureText(int start, int end, Paint p) {
@@ -9078,20 +9078,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public float getTextRunAdvances(int start, int end, int contextStart,
-                int contextEnd, int flags, float[] advances, int advancesIndex,
+                int contextEnd, boolean isRtl, float[] advances, int advancesIndex,
                 Paint p) {
             int count = end - start;
             int contextCount = contextEnd - contextStart;
             return p.getTextRunAdvances(mChars, start + mStart, count,
-                    contextStart + mStart, contextCount, flags, advances,
+                    contextStart + mStart, contextCount, isRtl, advances,
                     advancesIndex);
         }
 
-        public int getTextRunCursor(int contextStart, int contextEnd, int flags,
+        public int getTextRunCursor(int contextStart, int contextEnd, int dir,
                 int offset, int cursorOpt, Paint p) {
             int contextCount = contextEnd - contextStart;
             return p.getTextRunCursor(mChars, contextStart + mStart,
-                    contextCount, flags, offset + mStart, cursorOpt);
+                    contextCount, dir, offset + mStart, cursorOpt);
         }
     }
 

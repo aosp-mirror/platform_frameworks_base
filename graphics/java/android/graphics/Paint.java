@@ -56,7 +56,7 @@ public class Paint {
      * @hide
      */
     public  int         mBidiFlags = BIDI_DEFAULT_LTR;
-    
+
     static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE
     };
@@ -202,14 +202,14 @@ public class Paint {
 
     /**
      * Bidi flag to set LTR paragraph direction.
-     * 
+     *
      * @hide
      */
     public static final int BIDI_LTR = 0x0;
 
     /**
      * Bidi flag to set RTL paragraph direction.
-     * 
+     *
      * @hide
      */
     public static final int BIDI_RTL = 0x1;
@@ -217,7 +217,7 @@ public class Paint {
     /**
      * Bidi flag to detect paragraph direction via heuristics, defaulting to
      * LTR.
-     * 
+     *
      * @hide
      */
     public static final int BIDI_DEFAULT_LTR = 0x2;
@@ -225,21 +225,21 @@ public class Paint {
     /**
      * Bidi flag to detect paragraph direction via heuristics, defaulting to
      * RTL.
-     * 
+     *
      * @hide
      */
     public static final int BIDI_DEFAULT_RTL = 0x3;
 
     /**
      * Bidi flag to override direction to all LTR (ignore bidi).
-     * 
+     *
      * @hide
      */
     public static final int BIDI_FORCE_LTR = 0x4;
 
     /**
      * Bidi flag to override direction to all RTL (ignore bidi).
-     * 
+     *
      * @hide
      */
     public static final int BIDI_FORCE_RTL = 0x5;
@@ -331,7 +331,7 @@ public class Paint {
          * either FILL or STROKE.
          */
         FILL_AND_STROKE (2);
-        
+
         Style(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -357,7 +357,7 @@ public class Paint {
          * of the path.
          */
         SQUARE  (2);
-        
+
         private Cap(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -381,7 +381,7 @@ public class Paint {
          * The outer edges of a join meet with a straight line
          */
         BEVEL   (2);
-        
+
         private Join(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -405,7 +405,7 @@ public class Paint {
          * The text is drawn to the left of the x,y origin
          */
         RIGHT   (2);
-        
+
         private Align(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -418,7 +418,7 @@ public class Paint {
     public Paint() {
         this(0);
     }
-    
+
     /**
      * Create a new paint with the specified flags. Use setFlags() to change
      * these after the paint is created.
@@ -475,7 +475,7 @@ public class Paint {
         setTextLocale(Locale.getDefault());
         setElegantTextHeight(false);
     }
-    
+
     /**
      * Copy the fields from src into this paint. This is equivalent to calling
      * get() on all of the src fields, and calling the corresponding set()
@@ -529,7 +529,7 @@ public class Paint {
 
     /**
      * Return the bidi flags on the paint.
-     * 
+     *
      * @return the bidi flags on the paint
      * @hide
      */
@@ -552,7 +552,7 @@ public class Paint {
 
     /**
      * Return the paint's flags. Use the Flag enum to test flag values.
-     * 
+     *
      * @return the paint's flags (see enums ending in _Flag for bit masks)
      */
     public native int getFlags();
@@ -587,7 +587,7 @@ public class Paint {
     public final boolean isAntiAlias() {
         return (getFlags() & ANTI_ALIAS_FLAG) != 0;
     }
-    
+
     /**
      * Helper for setFlags(), setting or clearing the ANTI_ALIAS_FLAG bit
      * AntiAliasing smooths out the edges of what is being drawn, but is has
@@ -597,7 +597,7 @@ public class Paint {
      * @param aa true to set the antialias bit in the flags, false to clear it
      */
     public native void setAntiAlias(boolean aa);
-    
+
     /**
      * Helper for getFlags(), returning true if DITHER_FLAG bit is set
      * Dithering affects how colors that are higher precision than the device
@@ -611,7 +611,7 @@ public class Paint {
     public final boolean isDither() {
         return (getFlags() & DITHER_FLAG) != 0;
     }
-    
+
     /**
      * Helper for setFlags(), setting or clearing the DITHER_FLAG bit
      * Dithering affects how colors that are higher precision than the device
@@ -623,7 +623,7 @@ public class Paint {
      * @param dither true to set the dithering bit in flags, false to clear it
      */
     public native void setDither(boolean dither);
-    
+
     /**
      * Helper for getFlags(), returning true if LINEAR_TEXT_FLAG bit is set
      *
@@ -649,7 +649,7 @@ public class Paint {
     public final boolean isSubpixelText() {
         return (getFlags() & SUBPIXEL_TEXT_FLAG) != 0;
     }
-    
+
     /**
      * Helper for setFlags(), setting or clearing the SUBPIXEL_TEXT_FLAG bit
      *
@@ -657,7 +657,7 @@ public class Paint {
      *                     flags, false to clear it.
      */
     public native void setSubpixelText(boolean subpixelText);
-    
+
     /**
      * Helper for getFlags(), returning true if UNDERLINE_TEXT_FLAG bit is set
      *
@@ -708,7 +708,7 @@ public class Paint {
      *                     flags, false to clear it.
      */
     public native void setFakeBoldText(boolean fakeBoldText);
-    
+
     /**
      * Whether or not the bitmap filter is activated.
      * Filtering affects the sampling of bitmaps when they are transformed.
@@ -720,13 +720,13 @@ public class Paint {
     public final boolean isFilterBitmap() {
         return (getFlags() & FILTER_BITMAP_FLAG) != 0;
     }
-    
+
     /**
      * Helper for setFlags(), setting or clearing the FILTER_BITMAP_FLAG bit.
      * Filtering affects the sampling of bitmaps when they are transformed.
      * Filtering does not affect how the colors in the bitmap are converted into
      * device pixels. That is dependent on dithering and xfermodes.
-     * 
+     *
      * @param filter true to set the FILTER_BITMAP_FLAG bit in the paint's
      *               flags, false to clear it.
      */
@@ -773,7 +773,7 @@ public class Paint {
      * @param color The new color (including alpha) to set in the paint.
      */
     public native void setColor(int color);
-    
+
     /**
      * Helper to getColor() that just returns the color's alpha value. This is
      * the same as calling getColor() >>> 24. It always returns a value between
@@ -1285,7 +1285,7 @@ public class Paint {
      */
     public static class FontMetrics {
         /**
-         * The maximum distance above the baseline for the tallest glyph in 
+         * The maximum distance above the baseline for the tallest glyph in
          * the font at a given text size.
          */
         public float   top;
@@ -1298,7 +1298,7 @@ public class Paint {
          */
         public float   descent;
         /**
-         * The maximum distance below the baseline for the lowest glyph in 
+         * The maximum distance below the baseline for the lowest glyph in
          * the font at a given text size.
          */
         public float   bottom;
@@ -1307,7 +1307,7 @@ public class Paint {
          */
         public float   leading;
     }
-    
+
     /**
      * Return the font's recommended interline spacing, given the Paint's
      * settings for typeface, textSize, etc. If metrics is not null, return the
@@ -1318,7 +1318,7 @@ public class Paint {
      * @return the font's recommended interline spacing.
      */
     public native float getFontMetrics(FontMetrics metrics);
-    
+
     /**
      * Allocates a new FontMetrics object, and then calls getFontMetrics(fm)
      * with it, returning the object.
@@ -1328,7 +1328,7 @@ public class Paint {
         getFontMetrics(fm);
         return fm;
     }
-    
+
     /**
      * Convenience method for callers that want to have FontMetrics values as
      * integers.
@@ -1339,7 +1339,7 @@ public class Paint {
         public int   descent;
         public int   bottom;
         public int   leading;
-        
+
         @Override public String toString() {
             return "FontMetricsInt: top=" + top + " ascent=" + ascent +
                     " descent=" + descent + " bottom=" + bottom +
@@ -1364,7 +1364,7 @@ public class Paint {
         getFontMetricsInt(fm);
         return fm;
     }
-    
+
     /**
      * Return the recommend line spacing based on the current typeface and
      * text size.
@@ -1407,7 +1407,7 @@ public class Paint {
     }
 
     private native float native_measureText(char[] text, int index, int count, int bidiFlags);
-    
+
     /**
      * Return the width of the text.
      *
@@ -1439,7 +1439,7 @@ public class Paint {
     }
 
     private native float native_measureText(String text, int start, int end, int bidiFlags);
-    
+
     /**
      * Return the width of the text.
      *
@@ -1466,7 +1466,7 @@ public class Paint {
     }
 
     private native float native_measureText(String text, int bidiFlags);
-    
+
     /**
      * Return the width of the text.
      *
@@ -1503,7 +1503,7 @@ public class Paint {
         TemporaryBuffer.recycle(buf);
         return result;
     }
-    
+
     /**
      * Measure the text, stopping early if the measured width exceeds maxWidth.
      * Return the number of chars that were measured, and if measuredWidth is
@@ -1738,7 +1738,7 @@ public class Paint {
         if (end - start > widths.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        
+
         if (text.length() == 0 || start == end) {
             return 0;
         }
@@ -1755,7 +1755,7 @@ public class Paint {
         }
         return res;
     }
-    
+
     /**
      * Return the advance widths for the characters in the string.
      *
@@ -1816,14 +1816,11 @@ public class Paint {
      * @hide
      */
     public float getTextRunAdvances(char[] chars, int index, int count,
-            int contextIndex, int contextCount, int flags, float[] advances,
+            int contextIndex, int contextCount, boolean isRtl, float[] advances,
             int advancesIndex) {
 
         if (chars == null) {
             throw new IllegalArgumentException("text cannot be null");
-        }
-        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown flags value: " + flags);
         }
         if ((index | count | contextIndex | contextCount | advancesIndex
                 | (index - contextIndex) | (contextCount - count)
@@ -1839,13 +1836,13 @@ public class Paint {
         }
         if (!mHasCompatScaling) {
             return native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
-                    contextIndex, contextCount, flags, advances, advancesIndex);
+                    contextIndex, contextCount, isRtl, advances, advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
         float res = native_getTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
-                contextIndex, contextCount, flags, advances, advancesIndex);
+                contextIndex, contextCount, isRtl, advances, advancesIndex);
         setTextSize(oldSize);
 
         if (advances != null) {
@@ -1864,7 +1861,7 @@ public class Paint {
      * @hide
      */
     public float getTextRunAdvances(CharSequence text, int start, int end,
-            int contextStart, int contextEnd, int flags, float[] advances,
+            int contextStart, int contextEnd, boolean isRtl, float[] advances,
             int advancesIndex) {
 
         if (text == null) {
@@ -1880,16 +1877,16 @@ public class Paint {
 
         if (text instanceof String) {
             return getTextRunAdvances((String) text, start, end,
-                    contextStart, contextEnd, flags, advances, advancesIndex);
+                    contextStart, contextEnd, isRtl, advances, advancesIndex);
         }
         if (text instanceof SpannedString ||
             text instanceof SpannableString) {
             return getTextRunAdvances(text.toString(), start, end,
-                    contextStart, contextEnd, flags, advances, advancesIndex);
+                    contextStart, contextEnd, isRtl, advances, advancesIndex);
         }
         if (text instanceof GraphicsOperations) {
             return ((GraphicsOperations) text).getTextRunAdvances(start, end,
-                    contextStart, contextEnd, flags, advances, advancesIndex, this);
+                    contextStart, contextEnd, isRtl, advances, advancesIndex, this);
         }
         if (text.length() == 0 || end == start) {
             return 0f;
@@ -1900,7 +1897,7 @@ public class Paint {
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
         float result = getTextRunAdvances(buf, start - contextStart, len,
-                0, contextLen, flags, advances, advancesIndex);
+                0, contextLen, isRtl, advances, advancesIndex);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -1937,8 +1934,7 @@ public class Paint {
      * must be <= start
      * @param contextEnd the index past the last character to use for shaping context,
      * must be >= end
-     * @param flags the flags to control the advances, either {@link #DIRECTION_LTR}
-     * or {@link #DIRECTION_RTL}
+     * @param isRtl whether the run is in RTL direction
      * @param advances array to receive the advances, must have room for all advances,
      * can be null if only total advance is needed
      * @param advancesIndex the position in advances at which to put the
@@ -1948,13 +1944,10 @@ public class Paint {
      * @hide
      */
     public float getTextRunAdvances(String text, int start, int end, int contextStart,
-            int contextEnd, int flags, float[] advances, int advancesIndex) {
+            int contextEnd, boolean isRtl, float[] advances, int advancesIndex) {
 
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
-        }
-        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown flags value: " + flags);
         }
         if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
                 | (start - contextStart) | (contextEnd - end)
@@ -1970,13 +1963,13 @@ public class Paint {
 
         if (!mHasCompatScaling) {
             return native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
-                    contextStart, contextEnd, flags, advances, advancesIndex);
+                    contextStart, contextEnd, isRtl, advances, advancesIndex);
         }
 
         final float oldSize = getTextSize();
         setTextSize(oldSize * mCompatScaling);
         float totalAdvance = native_getTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
-                contextStart, contextEnd, flags, advances, advancesIndex);
+                contextStart, contextEnd, isRtl, advances, advancesIndex);
         setTextSize(oldSize);
 
         if (advances != null) {
@@ -2005,7 +1998,7 @@ public class Paint {
      * @param text the text
      * @param contextStart the start of the context
      * @param contextLength the length of the context
-     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
      * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
@@ -2014,7 +2007,7 @@ public class Paint {
      * @hide
      */
     public int getTextRunCursor(char[] text, int contextStart, int contextLength,
-            int flags, int offset, int cursorOpt) {
+            int dir, int offset, int cursorOpt) {
         int contextEnd = contextStart + contextLength;
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
@@ -2024,7 +2017,7 @@ public class Paint {
         }
 
         return native_getTextRunCursor(mNativePaint, text,
-                contextStart, contextLength, flags, offset, cursorOpt);
+                contextStart, contextLength, dir, offset, cursorOpt);
     }
 
     /**
@@ -2045,7 +2038,7 @@ public class Paint {
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
      * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
@@ -2054,22 +2047,22 @@ public class Paint {
      * @hide
      */
     public int getTextRunCursor(CharSequence text, int contextStart,
-           int contextEnd, int flags, int offset, int cursorOpt) {
+           int contextEnd, int dir, int offset, int cursorOpt) {
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             return getTextRunCursor(text.toString(), contextStart, contextEnd,
-                    flags, offset, cursorOpt);
+                    dir, offset, cursorOpt);
         }
         if (text instanceof GraphicsOperations) {
             return ((GraphicsOperations) text).getTextRunCursor(
-                    contextStart, contextEnd, flags, offset, cursorOpt, this);
+                    contextStart, contextEnd, dir, offset, cursorOpt, this);
         }
 
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int result = getTextRunCursor(buf, 0, contextLen, flags, offset - contextStart, cursorOpt);
+        int result = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -2092,7 +2085,7 @@ public class Paint {
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
      * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
@@ -2101,7 +2094,7 @@ public class Paint {
      * @hide
      */
     public int getTextRunCursor(String text, int contextStart, int contextEnd,
-            int flags, int offset, int cursorOpt) {
+            int dir, int offset, int cursorOpt) {
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
                 | (text.length() - contextEnd) | cursorOpt) < 0)
@@ -2110,7 +2103,7 @@ public class Paint {
         }
 
         return native_getTextRunCursor(mNativePaint, text,
-                contextStart, contextEnd, flags, offset, cursorOpt);
+                contextStart, contextEnd, dir, offset, cursorOpt);
     }
 
     /**
@@ -2156,7 +2149,7 @@ public class Paint {
         native_getTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y,
                 path.ni());
     }
-    
+
     /**
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
@@ -2176,7 +2169,7 @@ public class Paint {
         }
         nativeGetStringBounds(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, bounds);
     }
-    
+
     /**
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
@@ -2197,7 +2190,7 @@ public class Paint {
         nativeGetCharArrayBounds(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags,
             bounds);
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -2252,15 +2245,15 @@ public class Paint {
 
     private static native float native_getTextRunAdvances(long native_object, long native_typeface,
             char[] text, int index, int count, int contextIndex, int contextCount,
-            int flags, float[] advances, int advancesIndex);
+            boolean isRtl, float[] advances, int advancesIndex);
     private static native float native_getTextRunAdvances(long native_object, long native_typeface,
             String text, int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex);
+            boolean isRtl, float[] advances, int advancesIndex);
 
     private native int native_getTextRunCursor(long native_object, char[] text,
-            int contextStart, int contextLength, int flags, int offset, int cursorOpt);
+            int contextStart, int contextLength, int dir, int offset, int cursorOpt);
     private native int native_getTextRunCursor(long native_object, String text,
-            int contextStart, int contextEnd, int flags, int offset, int cursorOpt);
+            int contextStart, int contextEnd, int dir, int offset, int cursorOpt);
 
     private static native void native_getTextPath(long native_object, long native_typeface,
             int bidiFlags, char[] text, int index, int count, float x, float y, long path);

@@ -65,11 +65,11 @@ public class Canvas {
 
     /**
      * Used to determine when compatibility scaling is in effect.
-     * 
+     *
      * @hide
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
-    
+
     // Used by native code
     @SuppressWarnings("UnusedDeclaration")
     private int mSurfaceFormat;
@@ -79,7 +79,7 @@ public class Canvas {
      * @hide
      */
     public static final int DIRECTION_LTR = 0;
-    
+
     /**
      * Flag for drawTextRun indicating right-to-left run direction.
      * @hide
@@ -136,7 +136,7 @@ public class Canvas {
     /**
      * Construct a canvas with the specified bitmap to draw into. The bitmap
      * must be mutable.
-     * 
+     *
      * <p>The initial target density of the canvas is the same as the given
      * bitmap's density.
      *
@@ -177,10 +177,10 @@ public class Canvas {
 
     /**
      * Indicates whether this Canvas uses hardware acceleration.
-     * 
+     *
      * Note that this method does not define what type of hardware acceleration
      * may or may not be used.
-     * 
+     *
      * @return True if drawing operations are hardware accelerated,
      *         false otherwise.
      */
@@ -189,7 +189,7 @@ public class Canvas {
     }
 
     /**
-     * Specify a bitmap for the canvas to draw into. All canvas state such as 
+     * Specify a bitmap for the canvas to draw into. All canvas state such as
      * layers, filters, and the save/restore stack are reset with the exception
      * of the current matrix and clip stack. Additionally, as a side-effect
      * the canvas' target density is updated to match that of the bitmap.
@@ -279,7 +279,7 @@ public class Canvas {
      * to determine the scaling factor when drawing a bitmap into it.
      *
      * @see #setDensity(int)
-     * @see Bitmap#getDensity() 
+     * @see Bitmap#getDensity()
      */
     public int getDensity() {
         return mDensity;
@@ -295,7 +295,7 @@ public class Canvas {
      * {@link Bitmap#DENSITY_NONE} to disable bitmap scaling.
      *
      * @see #getDensity()
-     * @see Bitmap#setDensity(int) 
+     * @see Bitmap#setDensity(int)
      */
     public void setDensity(int density) {
         if (mBitmap != null) {
@@ -313,19 +313,19 @@ public class Canvas {
      * Returns the maximum allowed width for bitmaps drawn with this canvas.
      * Attempting to draw with a bitmap wider than this value will result
      * in an error.
-     * 
-     * @see #getMaximumBitmapHeight() 
+     *
+     * @see #getMaximumBitmapHeight()
      */
     public int getMaximumBitmapWidth() {
         return MAXMIMUM_BITMAP_SIZE;
     }
-    
+
     /**
      * Returns the maximum allowed height for bitmaps drawn with this canvas.
      * Attempting to draw with a bitmap taller than this value will result
      * in an error.
-     * 
-     * @see #getMaximumBitmapWidth() 
+     *
+     * @see #getMaximumBitmapWidth()
      */
     public int getMaximumBitmapHeight() {
         return MAXMIMUM_BITMAP_SIZE;
@@ -357,8 +357,8 @@ public class Canvas {
     /** clip against the layer's bounds */
     public static final int CLIP_TO_LAYER_SAVE_FLAG = 0x10;
     /** restore everything when restore() is called */
-    public static final int ALL_SAVE_FLAG = 0x1F; 
-    
+    public static final int ALL_SAVE_FLAG = 0x1F;
+
     /**
      * Saves the current matrix and clip onto a private stack. Subsequent
      * calls to translate,scale,rotate,skew,concat or clipRect,clipPath
@@ -371,7 +371,7 @@ public class Canvas {
     public int save() {
         return native_save(mNativeCanvasWrapper, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
     }
-    
+
     /**
      * Based on saveFlags, can save the current matrix and clip onto a private
      * stack. Subsequent calls to translate,scale,rotate,skew,concat or
@@ -589,25 +589,25 @@ public class Canvas {
     public void concat(@Nullable Matrix matrix) {
         if (matrix != null) native_concat(mNativeCanvasWrapper, matrix.native_instance);
     }
-    
+
     /**
      * Completely replace the current matrix with the specified matrix. If the
      * matrix parameter is null, then the current matrix is reset to identity.
-     * 
+     *
      * <strong>Note:</strong> it is recommended to use {@link #concat(Matrix)},
      * {@link #scale(float, float)}, {@link #translate(float, float)} and
      * {@link #rotate(float)} instead of this method.
      *
      * @param matrix The matrix to replace the current matrix with. If it is
      *               null, set the current matrix to identity.
-     *               
-     * @see #concat(Matrix) 
+     *
+     * @see #concat(Matrix)
      */
     public void setMatrix(@Nullable Matrix matrix) {
         native_setMatrix(mNativeCanvasWrapper,
                          matrix == null ? 0 : matrix.native_instance);
     }
-    
+
     /**
      * Return, in ctm, the current transformation matrix. This does not alter
      * the matrix in the canvas, but just returns a copy of it.
@@ -628,7 +628,7 @@ public class Canvas {
         getMatrix(m);
         return m;
     }
-    
+
     /**
      * Modify the current clip with the specified rectangle.
      *
@@ -677,7 +677,7 @@ public class Canvas {
         return native_clipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 Region.Op.INTERSECT.nativeInt);
     }
-    
+
     /**
      * Modify the current clip with the specified rectangle, which is
      * expressed in local coordinates.
@@ -744,7 +744,7 @@ public class Canvas {
     public boolean clipPath(@NonNull Path path, @NonNull Region.Op op) {
         return native_clipPath(mNativeCanvasWrapper, path.ni(), op.nativeInt);
     }
-    
+
     /**
      * Intersect the current clip with the specified path.
      *
@@ -754,7 +754,7 @@ public class Canvas {
     public boolean clipPath(@NonNull Path path) {
         return clipPath(path, Region.Op.INTERSECT);
     }
-    
+
     /**
      * Modify the current clip with the specified region. Note that unlike
      * clipRect() and clipPath() which transform their arguments by the
@@ -789,11 +789,11 @@ public class Canvas {
     public boolean clipRegion(@NonNull Region region) {
         return clipRegion(region, Region.Op.INTERSECT);
     }
-    
+
     public @Nullable DrawFilter getDrawFilter() {
         return mDrawFilter;
     }
-    
+
     public void setDrawFilter(@Nullable DrawFilter filter) {
         long nativeFilter = 0;
         if (filter != null) {
@@ -814,7 +814,7 @@ public class Canvas {
          * Antialiased: Treat edges by rounding-out, since they may be antialiased
          */
         AA(1);
-        
+
         EdgeType(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -900,7 +900,7 @@ public class Canvas {
     public boolean getClipBounds(@Nullable Rect bounds) {
         return native_getClipBounds(mNativeCanvasWrapper, bounds);
     }
-    
+
     /**
      * Retrieve the bounds of the current clip (in local coordinates).
      *
@@ -911,7 +911,7 @@ public class Canvas {
         getClipBounds(r);
         return r;
     }
-    
+
     /**
      * Fill the entire canvas' bitmap (restricted to the current clip) with the
      * specified RGB color, using srcover porterduff mode.
@@ -968,7 +968,7 @@ public class Canvas {
     public void drawPaint(@NonNull Paint paint) {
         native_drawPaint(mNativeCanvasWrapper, paint.mNativePaint);
     }
-    
+
     /**
      * Draw a series of points. Each point is centered at the coordinate
      * specified by pts[], and its diameter is specified by the paint's stroke
@@ -1065,7 +1065,7 @@ public class Canvas {
     public void drawRect(@NonNull Rect r, @NonNull Paint paint) {
         drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
-    
+
 
     /**
      * Draw the specified Rect using the specified paint. The rectangle will
@@ -1111,15 +1111,15 @@ public class Canvas {
     /**
      * <p>Draw the specified arc, which will be scaled to fit inside the
      * specified oval.</p>
-     * 
+     *
      * <p>If the start angle is negative or >= 360, the start angle is treated
      * as start angle modulo 360.</p>
-     * 
+     *
      * <p>If the sweep angle is >= 360, then the oval is drawn
      * completely. Note that this differs slightly from SkPath::arcTo, which
      * treats the sweep angle modulo 360. If the sweep angle is negative,
      * the sweep angle is treated as sweep angle modulo 360</p>
-     * 
+     *
      * <p>The arc is drawn clockwise. An angle of 0 degrees correspond to the
      * geometric angle of 0 degrees (3 o'clock on a watch.)</p>
      *
@@ -1197,7 +1197,7 @@ public class Canvas {
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
-     * 
+     *
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
@@ -1220,7 +1220,7 @@ public class Canvas {
     /**
      * Draw the specified bitmap, with its top/left corner at (x,y), using
      * the specified paint, transformed by the current matrix.
-     * 
+     *
      * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
@@ -1230,7 +1230,7 @@ public class Canvas {
      * <p>If the bitmap and canvas have different densities, this function
      * will take care of automatically scaling the bitmap to draw at the
      * same density as the canvas.
-     * 
+     *
      * @param bitmap The bitmap to be drawn
      * @param left   The position of the left side of the bitmap being drawn
      * @param top    The position of the top side of the bitmap being drawn
@@ -1246,7 +1246,7 @@ public class Canvas {
      * Draw the specified bitmap, scaling/translating automatically to fill
      * the destination rectangle. If the source rectangle is not null, it
      * specifies the subset of the bitmap to draw.
-     * 
+     *
      * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
@@ -1257,7 +1257,7 @@ public class Canvas {
      * This is because the source and destination rectangle coordinate
      * spaces are in their respective densities, so must already have the
      * appropriate scaling factor applied.
-     * 
+     *
      * @param bitmap The bitmap to be drawn
      * @param src    May be null. The subset of the bitmap to be drawn
      * @param dst    The rectangle that the bitmap will be scaled/translated
@@ -1278,7 +1278,7 @@ public class Canvas {
      * Draw the specified bitmap, scaling/translating automatically to fill
      * the destination rectangle. If the source rectangle is not null, it
      * specifies the subset of the bitmap to draw.
-     * 
+     *
      * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
@@ -1289,7 +1289,7 @@ public class Canvas {
      * This is because the source and destination rectangle coordinate
      * spaces are in their respective densities, so must already have the
      * appropriate scaling factor applied.
-     * 
+     *
      * @param bitmap The bitmap to be drawn
      * @param src    May be null. The subset of the bitmap to be drawn
      * @param dst    The rectangle that the bitmap will be scaled/translated
@@ -1305,7 +1305,7 @@ public class Canvas {
         native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), src, dst,
                 paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
-    
+
     /**
      * Treat the specified array of colors as a bitmap, and draw it. This gives
      * the same result as first creating a bitmap from the array, and then
@@ -1394,7 +1394,7 @@ public class Canvas {
             throw new ArrayIndexOutOfBoundsException();
         }
     }
-    
+
     /**
      * Draw the bitmap through the mesh, where mesh vertices are evenly
      * distributed across the bitmap. There are meshWidth+1 vertices across, and
@@ -1446,7 +1446,7 @@ public class Canvas {
         TRIANGLES(0),
         TRIANGLE_STRIP(1),
         TRIANGLE_FAN(2);
-        
+
         VertexMode(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -1456,7 +1456,7 @@ public class Canvas {
          */
         public final int nativeInt;
     }
-    
+
     /**
      * Draw the array of vertices, interpreted as triangles (based on mode). The
      * verts array is required, and specifies the x,y pairs for each vertex. If
@@ -1485,7 +1485,7 @@ public class Canvas {
      * @param indices If not null, array of indices to reference into the
      *      vertex (texs, colors) array.
      * @param indexCount number of entries in the indices array (if not null).
-     * @param paint Specifies the shader to use if the texs array is non-null. 
+     * @param paint Specifies the shader to use if the texs array is non-null.
      */
     public void drawVertices(@NonNull VertexMode mode, int vertexCount, @NonNull float[] verts,
             int vertOffset, @Nullable float[] texs, int texOffset, @Nullable int[] colors,
@@ -1595,7 +1595,7 @@ public class Canvas {
      * bidi on the provided text, but renders it as a uniform right-to-left or
      * left-to-right run, as indicated by dir. Alignment of the text is as
      * determined by the Paint's TextAlign value.
-     * 
+     *
      * @param text the text to render
      * @param index the start of the text to render
      * @param count the count of chars to render
@@ -1606,13 +1606,12 @@ public class Canvas {
      *         + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
-     * @param dir the run direction, either {@link #DIRECTION_LTR} or
-     *         {@link #DIRECTION_RTL}.
+     * @param isRtl whether the run is in RTL direction
      * @param paint the paint
      * @hide
      */
     public void drawTextRun(@NonNull char[] text, int index, int count, int contextIndex,
-            int contextCount, float x, float y, int dir, @NonNull Paint paint) {
+            int contextCount, float x, float y, boolean isRtl, @NonNull Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1623,12 +1622,9 @@ public class Canvas {
         if ((index | count | text.length - index - count) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown dir: " + dir);
-        }
 
         native_drawTextRun(mNativeCanvasWrapper, text, index, count,
-                contextIndex, contextCount, x, y, dir, paint.mNativePaint, paint.mNativeTypeface);
+                contextIndex, contextCount, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1644,12 +1640,12 @@ public class Canvas {
      *            position can be used for shaping context.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
-     * @param dir the run direction, either 0 for LTR or 1 for RTL.
+     * @param isRtl whether the run is in RTL direction
      * @param paint the paint
      * @hide
      */
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
-            int contextEnd, float x, float y, int dir, @NonNull Paint paint) {
+            int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {
 
         if (text == null) {
             throw new NullPointerException("text is null");
@@ -1661,22 +1657,20 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
 
-        int flags = dir == 0 ? 0 : 1;
-
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end,
-                    contextStart, contextEnd, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+                    contextStart, contextEnd, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
-                    contextStart, contextEnd, x, y, flags, paint);
+                    contextStart, contextEnd, x, y, isRtl, paint);
         } else {
             int contextLen = contextEnd - contextStart;
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             native_drawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, flags, paint.mNativePaint, paint.mNativeTypeface);
+                    0, contextLen, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1684,7 +1678,7 @@ public class Canvas {
     /**
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
-     * 
+     *
      * This method does not support glyph composition and decomposition and
      * should therefore not be used to render complex scripts.
      *
@@ -1708,7 +1702,7 @@ public class Canvas {
     /**
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
-     * 
+     *
      * This method does not support glyph composition and decomposition and
      * should therefore not be used to render complex scripts.
      *
@@ -1776,7 +1770,7 @@ public class Canvas {
      * <p>
      * <strong>Note:</strong> This forces the picture to internally call
      * {@link Picture#endRecording} in order to prepare for playback.
-     * 
+     *
      * @param picture  The picture to be drawn
      */
     public void drawPicture(@NonNull Picture picture) {
@@ -1785,7 +1779,7 @@ public class Canvas {
         picture.draw(this);
         restoreToCount(restoreCount);
     }
-    
+
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
@@ -1798,7 +1792,7 @@ public class Canvas {
         drawPicture(picture);
         restore();
     }
-    
+
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
@@ -1977,11 +1971,11 @@ public class Canvas {
 
     private static native void native_drawTextRun(long nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
     private static native void native_drawTextRun(long nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
     private static native void native_drawPosText(long nativeCanvas,
                                                   char[] text, int index,
