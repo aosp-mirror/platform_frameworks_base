@@ -32,26 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nicio notificare"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfăşurare"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificări"</string>
-    <!-- no translation found for battery_low_title (6456385927409742437) -->
-    <skip />
+    <string name="battery_low_title" msgid="6456385927409742437">"Bateria este aproape descărcată"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Rămas: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <!-- no translation found for battery_low_percent_format_saver_started (6534746636002666456) -->
-    <skip />
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Procent rămas din baterie: <xliff:g id="NUMBER">%d%%</xliff:g>. Economisirea bateriei este activată."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Încărcarea USB nu este acceptată. \nUtilizaţi numai încărcătorul furnizat."</string>
-    <!-- no translation found for invalid_charger_title (3515740382572798460) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (5474997287953892710) -->
-    <skip />
-    <!-- no translation found for battery_low_why (4553600287639198111) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_title (5987726159603849352) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7283108887345688413) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (7245333922937402896) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_text (8417584516834617662) -->
-    <skip />
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Încărcarea prin USB nu este acceptată."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Utilizați numai încărcătorul furnizat."</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"Setări"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Porniți economisirea bateriei?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Începeți"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Porniți economisirea bateriei"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Pentru a mări autonomia bateriei, funcția Economisirea bateriei reduce performanța dispozitivului.\n\nEconomisirea bateriei se dezactivează când dispozitivul este conectat la priză."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Setări"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mod Avion"</string>
@@ -256,10 +247,7 @@
     <item quantity="one" msgid="3480040795582254384">"Timp de o oră"</item>
     <item quantity="other" msgid="5408537517529822157">"Timp de %d (de) ore"</item>
   </plurals>
-    <!-- no translation found for battery_saver_notification_title (237918726750955859) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_text (7796554871101546872) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (7546297220816993504) -->
-    <skip />
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Economisirea bateriei este activată"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"Performanța dispozitivului s-a redus."</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"Deschideți setările pentru economisirea bateriei"</string>
 </resources>

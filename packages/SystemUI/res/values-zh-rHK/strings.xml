@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"啟動節約電池用量模式？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"開始"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"啟動節約電池用量模式"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"節約電池用量模式有助於延長電池壽命，但會讓裝置的效能降低。\n\n裝置接上電源時，節約電池用量模式會自動停用。"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"節約電池用量模式有助於延長電池壽命，但會降低裝置的效能。\n\n裝置接上電源時，節約電池用量模式會自動停用。"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"設定"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飛行模式"</string>
