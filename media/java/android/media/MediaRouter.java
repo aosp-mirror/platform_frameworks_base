@@ -60,7 +60,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MediaRouter {
     private static final String TAG = "MediaRouter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean USE_SESSIONS = true;
 
     static class Static implements DisplayManager.DisplayListener {
         final Context mAppContext;
@@ -2104,11 +2103,7 @@ public class MediaRouter {
         public void setPlaybackType(int type) {
             if (mPlaybackType != type) {
                 mPlaybackType = type;
-                if (USE_SESSIONS) {
-                    configureSessionVolume();
-                } else {
-                    setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, type);
-                }
+                configureSessionVolume();
             }
         }
 
@@ -2121,12 +2116,7 @@ public class MediaRouter {
         public void setVolumeHandling(int volumeHandling) {
             if (mVolumeHandling != volumeHandling) {
                 mVolumeHandling = volumeHandling;
-                if (USE_SESSIONS) {
-                    configureSessionVolume();
-                } else {
-                    setPlaybackInfoOnRcc(
-                            RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, volumeHandling);
-                }
+                configureSessionVolume();
             }
         }
 
@@ -2139,12 +2129,8 @@ public class MediaRouter {
             volume = Math.max(0, Math.min(volume, getVolumeMax()));
             if (mVolume != volume) {
                 mVolume = volume;
-                if (USE_SESSIONS) {
-                    if (mSvp != null) {
-                        mSvp.notifyVolumeChanged();
-                    }
-                } else {
-                    setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME, volume);
+                if (mSvp != null) {
+                    mSvp.notifyVolumeChanged();
                 }
                 dispatchRouteVolumeChanged(this);
                 if (mGroup != null) {
@@ -2184,11 +2170,7 @@ public class MediaRouter {
         public void setVolumeMax(int volumeMax) {
             if (mVolumeMax != volumeMax) {
                 mVolumeMax = volumeMax;
-                if (USE_SESSIONS) {
-                    configureSessionVolume();
-                } else {
-                    setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, volumeMax);
-                }
+                configureSessionVolume();
             }
         }
 
@@ -2199,40 +2181,12 @@ public class MediaRouter {
         public void setPlaybackStream(int stream) {
             if (mPlaybackStream != stream) {
                 mPlaybackStream = stream;
-                if (USE_SESSIONS) {
-                    configureSessionVolume();
-                } else {
-                    setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_USES_STREAM, stream);
-                }
+                configureSessionVolume();
             }
         }
 
         private void updatePlaybackInfoOnRcc() {
-            if (USE_SESSIONS) {
-                configureSessionVolume();
-            } else {
-                if ((mRcc != null)
-                        && (mRcc.getRcseId() != RemoteControlClient.RCSE_ID_UNREGISTERED)) {
-                    mRcc.setPlaybackInformation(
-                            RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, mVolumeMax);
-                    mRcc.setPlaybackInformation(
-                            RemoteControlClient.PLAYBACKINFO_VOLUME, mVolume);
-                    mRcc.setPlaybackInformation(
-                            RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, mVolumeHandling);
-                    mRcc.setPlaybackInformation(
-                            RemoteControlClient.PLAYBACKINFO_USES_STREAM, mPlaybackStream);
-                    mRcc.setPlaybackInformation(
-                            RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, mPlaybackType);
-                    // let AudioService know whom to call when remote volume
-                    // needs to be updated
-                    try {
-                        sStatic.mAudioService.registerRemoteVolumeObserverForRcc(
-                                mRcc.getRcseId() /* rccId */, mRemoteVolObserver /* rvo */);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error registering remote volume observer", e);
-                    }
-                }
-            }
+            configureSessionVolume();
         }
 
         private void configureSessionVolume() {
@@ -2269,12 +2223,6 @@ public class MediaRouter {
                 // We only know how to handle local and remote, fall back to local if not remote.
                 session.setPlaybackToLocal(mPlaybackStream);
                 mSvp = null;
-            }
-        }
-
-        private void setPlaybackInfoOnRcc(int what, int value) {
-            if (mRcc != null) {
-                mRcc.setPlaybackInformation(what, value);
             }
         }
 

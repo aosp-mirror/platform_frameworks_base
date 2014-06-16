@@ -56,7 +56,7 @@ class PlayerRecord implements DeathRecipient {
      */
     final private ComponentName mReceiverComponent;
 
-    private int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
+    private int mRccId = -1;
 
     /**
      * A non-null token implies this record tracks a "live" player whose death is being monitored.

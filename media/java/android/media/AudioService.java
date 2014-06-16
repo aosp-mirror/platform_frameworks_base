@@ -108,8 +108,7 @@ public class AudioService extends IAudioService.Stub {
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = false;
 
-    /** Reroute calls to media session apis */
-    private static final boolean USE_SESSIONS = true;
+    /** debug calls to media session apis */
     private static final boolean DEBUG_SESSIONS = true;
 
     /** Allow volume changes to set ringer mode to silent? */
@@ -4484,27 +4483,19 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
-        if (USE_SESSIONS) {
-            if (DEBUG_SESSIONS) {
-                int pid = getCallingPid();
-                Log.w(TAG, "Call to dispatchMediaKeyEvent from " + pid);
-            }
-            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
-        } else {
-            mMediaFocusControl.dispatchMediaKeyEvent(keyEvent);
+        if (DEBUG_SESSIONS) {
+            int pid = getCallingPid();
+            Log.w(TAG, "Call to dispatchMediaKeyEvent from " + pid);
         }
+        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
     }
 
     public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
-        if (USE_SESSIONS) {
-            if (DEBUG_SESSIONS) {
-                int pid = getCallingPid();
-                Log.w(TAG, "Call to dispatchMediaKeyEventUnderWakelock from " + pid);
-            }
-            MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, true);
-        } else {
-            mMediaFocusControl.dispatchMediaKeyEventUnderWakelock(keyEvent);
+        if (DEBUG_SESSIONS) {
+            int pid = getCallingPid();
+            Log.w(TAG, "Call to dispatchMediaKeyEventUnderWakelock from " + pid);
         }
+        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, true);
     }
 
     //==========================================================================================
