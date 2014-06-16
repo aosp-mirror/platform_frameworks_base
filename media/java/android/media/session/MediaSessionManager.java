@@ -133,7 +133,8 @@ public final class MediaSessionManager {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
             List<IBinder> binders = mService.getSessions(notificationListener, userId);
-            for (int i = binders.size() - 1; i >= 0; i--) {
+            int size = binders.size();
+            for (int i = 0; i < size; i++) {
                 MediaController controller = MediaController.fromBinder(ISessionController.Stub
                         .asInterface(binders.get(i)));
                 controllers.add(controller);
