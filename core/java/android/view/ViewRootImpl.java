@@ -700,7 +700,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
-                mAttachInfo.mHardwareRenderer = HardwareRenderer.create(translucent);
+                mAttachInfo.mHardwareRenderer = HardwareRenderer.create(mContext, translucent);
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.setName(attrs.getTitle().toString());
                     mAttachInfo.mHardwareAccelerated =
