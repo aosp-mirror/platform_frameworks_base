@@ -40024,109 +40024,6 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock YI_SYLLABLES;
   }
 
-  public static final class Character.UnicodeScript extends java.lang.Enum {
-    method public static java.lang.Character.UnicodeScript forName(java.lang.String);
-    method public static java.lang.Character.UnicodeScript of(int);
-    method public static java.lang.Character.UnicodeScript valueOf(java.lang.String);
-    method public static final java.lang.Character.UnicodeScript[] values();
-    enum_constant public static final java.lang.Character.UnicodeScript ARABIC;
-    enum_constant public static final java.lang.Character.UnicodeScript ARMENIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript AVESTAN;
-    enum_constant public static final java.lang.Character.UnicodeScript BALINESE;
-    enum_constant public static final java.lang.Character.UnicodeScript BAMUM;
-    enum_constant public static final java.lang.Character.UnicodeScript BATAK;
-    enum_constant public static final java.lang.Character.UnicodeScript BENGALI;
-    enum_constant public static final java.lang.Character.UnicodeScript BOPOMOFO;
-    enum_constant public static final java.lang.Character.UnicodeScript BRAHMI;
-    enum_constant public static final java.lang.Character.UnicodeScript BRAILLE;
-    enum_constant public static final java.lang.Character.UnicodeScript BUGINESE;
-    enum_constant public static final java.lang.Character.UnicodeScript BUHID;
-    enum_constant public static final java.lang.Character.UnicodeScript CANADIAN_ABORIGINAL;
-    enum_constant public static final java.lang.Character.UnicodeScript CARIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript CHAM;
-    enum_constant public static final java.lang.Character.UnicodeScript CHEROKEE;
-    enum_constant public static final java.lang.Character.UnicodeScript COMMON;
-    enum_constant public static final java.lang.Character.UnicodeScript COPTIC;
-    enum_constant public static final java.lang.Character.UnicodeScript CUNEIFORM;
-    enum_constant public static final java.lang.Character.UnicodeScript CYPRIOT;
-    enum_constant public static final java.lang.Character.UnicodeScript CYRILLIC;
-    enum_constant public static final java.lang.Character.UnicodeScript DESERET;
-    enum_constant public static final java.lang.Character.UnicodeScript DEVANAGARI;
-    enum_constant public static final java.lang.Character.UnicodeScript EGYPTIAN_HIEROGLYPHS;
-    enum_constant public static final java.lang.Character.UnicodeScript ETHIOPIC;
-    enum_constant public static final java.lang.Character.UnicodeScript GEORGIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript GLAGOLITIC;
-    enum_constant public static final java.lang.Character.UnicodeScript GOTHIC;
-    enum_constant public static final java.lang.Character.UnicodeScript GREEK;
-    enum_constant public static final java.lang.Character.UnicodeScript GUJARATI;
-    enum_constant public static final java.lang.Character.UnicodeScript GURMUKHI;
-    enum_constant public static final java.lang.Character.UnicodeScript HAN;
-    enum_constant public static final java.lang.Character.UnicodeScript HANGUL;
-    enum_constant public static final java.lang.Character.UnicodeScript HANUNOO;
-    enum_constant public static final java.lang.Character.UnicodeScript HEBREW;
-    enum_constant public static final java.lang.Character.UnicodeScript HIRAGANA;
-    enum_constant public static final java.lang.Character.UnicodeScript IMPERIAL_ARAMAIC;
-    enum_constant public static final java.lang.Character.UnicodeScript INHERITED;
-    enum_constant public static final java.lang.Character.UnicodeScript INSCRIPTIONAL_PAHLAVI;
-    enum_constant public static final java.lang.Character.UnicodeScript INSCRIPTIONAL_PARTHIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript JAVANESE;
-    enum_constant public static final java.lang.Character.UnicodeScript KAITHI;
-    enum_constant public static final java.lang.Character.UnicodeScript KANNADA;
-    enum_constant public static final java.lang.Character.UnicodeScript KATAKANA;
-    enum_constant public static final java.lang.Character.UnicodeScript KAYAH_LI;
-    enum_constant public static final java.lang.Character.UnicodeScript KHAROSHTHI;
-    enum_constant public static final java.lang.Character.UnicodeScript KHMER;
-    enum_constant public static final java.lang.Character.UnicodeScript LAO;
-    enum_constant public static final java.lang.Character.UnicodeScript LATIN;
-    enum_constant public static final java.lang.Character.UnicodeScript LEPCHA;
-    enum_constant public static final java.lang.Character.UnicodeScript LIMBU;
-    enum_constant public static final java.lang.Character.UnicodeScript LINEAR_B;
-    enum_constant public static final java.lang.Character.UnicodeScript LISU;
-    enum_constant public static final java.lang.Character.UnicodeScript LYCIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript LYDIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript MALAYALAM;
-    enum_constant public static final java.lang.Character.UnicodeScript MANDAIC;
-    enum_constant public static final java.lang.Character.UnicodeScript MEETEI_MAYEK;
-    enum_constant public static final java.lang.Character.UnicodeScript MONGOLIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript MYANMAR;
-    enum_constant public static final java.lang.Character.UnicodeScript NEW_TAI_LUE;
-    enum_constant public static final java.lang.Character.UnicodeScript NKO;
-    enum_constant public static final java.lang.Character.UnicodeScript OGHAM;
-    enum_constant public static final java.lang.Character.UnicodeScript OLD_ITALIC;
-    enum_constant public static final java.lang.Character.UnicodeScript OLD_PERSIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript OLD_SOUTH_ARABIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript OLD_TURKIC;
-    enum_constant public static final java.lang.Character.UnicodeScript OL_CHIKI;
-    enum_constant public static final java.lang.Character.UnicodeScript ORIYA;
-    enum_constant public static final java.lang.Character.UnicodeScript OSMANYA;
-    enum_constant public static final java.lang.Character.UnicodeScript PHAGS_PA;
-    enum_constant public static final java.lang.Character.UnicodeScript PHOENICIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript REJANG;
-    enum_constant public static final java.lang.Character.UnicodeScript RUNIC;
-    enum_constant public static final java.lang.Character.UnicodeScript SAMARITAN;
-    enum_constant public static final java.lang.Character.UnicodeScript SAURASHTRA;
-    enum_constant public static final java.lang.Character.UnicodeScript SHAVIAN;
-    enum_constant public static final java.lang.Character.UnicodeScript SINHALA;
-    enum_constant public static final java.lang.Character.UnicodeScript SUNDANESE;
-    enum_constant public static final java.lang.Character.UnicodeScript SYLOTI_NAGRI;
-    enum_constant public static final java.lang.Character.UnicodeScript SYRIAC;
-    enum_constant public static final java.lang.Character.UnicodeScript TAGALOG;
-    enum_constant public static final java.lang.Character.UnicodeScript TAGBANWA;
-    enum_constant public static final java.lang.Character.UnicodeScript TAI_LE;
-    enum_constant public static final java.lang.Character.UnicodeScript TAI_THAM;
-    enum_constant public static final java.lang.Character.UnicodeScript TAI_VIET;
-    enum_constant public static final java.lang.Character.UnicodeScript TAMIL;
-    enum_constant public static final java.lang.Character.UnicodeScript TELUGU;
-    enum_constant public static final java.lang.Character.UnicodeScript THAANA;
-    enum_constant public static final java.lang.Character.UnicodeScript THAI;
-    enum_constant public static final java.lang.Character.UnicodeScript TIBETAN;
-    enum_constant public static final java.lang.Character.UnicodeScript TIFINAGH;
-    enum_constant public static final java.lang.Character.UnicodeScript UGARITIC;
-    enum_constant public static final java.lang.Character.UnicodeScript UNKNOWN;
-    enum_constant public static final java.lang.Character.UnicodeScript VAI;
-    enum_constant public static final java.lang.Character.UnicodeScript YI;
-  }
-
   public final class Class implements java.lang.reflect.AnnotatedElement java.lang.reflect.GenericDeclaration java.io.Serializable java.lang.reflect.Type {
     method public java.lang.Class<? extends U> asSubclass(java.lang.Class<U>);
     method public T cast(java.lang.Object);
@@ -41967,13 +41864,11 @@ package java.net {
     method public java.lang.String getValue();
     method public int getVersion();
     method public boolean hasExpired();
-    method public boolean isHttpOnly();
     method public static java.util.List<java.net.HttpCookie> parse(java.lang.String);
     method public void setComment(java.lang.String);
     method public void setCommentURL(java.lang.String);
     method public void setDiscard(boolean);
     method public void setDomain(java.lang.String);
-    method public void setHttpOnly(boolean);
     method public void setMaxAge(long);
     method public void setPath(java.lang.String);
     method public void setPortlist(java.lang.String);
@@ -42364,11 +42259,6 @@ package java.net {
     method public abstract java.net.SocketImpl createSocketImpl();
   }
 
-  public abstract interface SocketOption {
-    method public abstract java.lang.String name();
-    method public abstract java.lang.Class<T> type();
-  }
-
   public abstract interface SocketOptions {
     method public abstract java.lang.Object getOption(int) throws java.net.SocketException;
     method public abstract void setOption(int, java.lang.Object) throws java.net.SocketException;
@@ -42397,21 +42287,6 @@ package java.net {
   public class SocketTimeoutException extends java.io.InterruptedIOException {
     ctor public SocketTimeoutException();
     ctor public SocketTimeoutException(java.lang.String);
-  }
-
-  public final class StandardSocketOptions {
-    ctor public StandardSocketOptions();
-    field public static final java.net.SocketOption IP_MULTICAST_IF;
-    field public static final java.net.SocketOption IP_MULTICAST_LOOP;
-    field public static final java.net.SocketOption IP_MULTICAST_TTL;
-    field public static final java.net.SocketOption IP_TOS;
-    field public static final java.net.SocketOption SO_BROADCAST;
-    field public static final java.net.SocketOption SO_KEEPALIVE;
-    field public static final java.net.SocketOption SO_LINGER;
-    field public static final java.net.SocketOption SO_RCVBUF;
-    field public static final java.net.SocketOption SO_REUSEADDR;
-    field public static final java.net.SocketOption SO_SNDBUF;
-    field public static final java.net.SocketOption TCP_NODELAY;
   }
 
   public final class URI implements java.lang.Comparable java.io.Serializable {
@@ -42509,7 +42384,6 @@ package java.net {
     method public java.lang.Object getContent(java.lang.Class[]) throws java.io.IOException;
     method public java.lang.String getContentEncoding();
     method public int getContentLength();
-    method public long getContentLengthLong();
     method public java.lang.String getContentType();
     method public long getDate();
     method public static boolean getDefaultAllowUserInteraction();
@@ -42524,7 +42398,6 @@ package java.net {
     method public long getHeaderFieldDate(java.lang.String, long);
     method public int getHeaderFieldInt(java.lang.String, int);
     method public java.lang.String getHeaderFieldKey(int);
-    method public long getHeaderFieldLong(java.lang.String, long);
     method public java.util.Map<java.lang.String, java.util.List<java.lang.String>> getHeaderFields();
     method public long getIfModifiedSince();
     method public java.io.InputStream getInputStream() throws java.io.IOException;
@@ -42875,10 +42748,6 @@ package java.nio {
 
 package java.nio.channels {
 
-  public class AlreadyBoundException extends java.lang.IllegalStateException {
-    ctor public AlreadyBoundException();
-  }
-
   public class AlreadyConnectedException extends java.lang.IllegalStateException {
     ctor public AlreadyConnectedException();
   }
@@ -42926,32 +42795,25 @@ package java.nio.channels {
     ctor public ConnectionPendingException();
   }
 
-  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.MulticastChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
     ctor protected DatagramChannel(java.nio.channels.spi.SelectorProvider);
-    method public java.nio.channels.DatagramChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel connect(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel disconnect() throws java.io.IOException;
-    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
-    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public abstract boolean isConnected();
-    method public java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface) throws java.io.IOException;
-    method public java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface, java.net.InetAddress) throws java.io.IOException;
     method public static java.nio.channels.DatagramChannel open() throws java.io.IOException;
     method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
     method public final synchronized long read(java.nio.ByteBuffer[]) throws java.io.IOException;
     method public abstract java.net.SocketAddress receive(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract int send(java.nio.ByteBuffer, java.net.SocketAddress) throws java.io.IOException;
-    method public java.nio.channels.DatagramChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.DatagramSocket socket();
-    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
     method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
     method public final synchronized long write(java.nio.ByteBuffer[]) throws java.io.IOException;
   }
 
-  public abstract class FileChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel java.nio.channels.SeekableByteChannel {
+  public abstract class FileChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
     ctor protected FileChannel();
     method public abstract void force(boolean) throws java.io.IOException;
     method public final java.nio.channels.FileLock lock() throws java.io.IOException;
@@ -42983,7 +42845,6 @@ package java.nio.channels {
 
   public abstract class FileLock implements java.lang.AutoCloseable {
     ctor protected FileLock(java.nio.channels.FileChannel, long, long, boolean);
-    method public java.nio.channels.Channel acquiredBy();
     method public final java.nio.channels.FileChannel channel();
     method public final void close() throws java.io.IOException;
     method public final boolean isShared();
@@ -43014,32 +42875,6 @@ package java.nio.channels {
 
   public abstract interface InterruptibleChannel implements java.nio.channels.Channel {
     method public abstract void close() throws java.io.IOException;
-  }
-
-  public abstract class MembershipKey {
-    ctor protected MembershipKey();
-    method public abstract java.nio.channels.MembershipKey block(java.net.InetAddress) throws java.io.IOException;
-    method public abstract java.nio.channels.MulticastChannel channel();
-    method public abstract void drop();
-    method public abstract java.net.InetAddress group();
-    method public abstract boolean isValid();
-    method public abstract java.net.NetworkInterface networkInterface();
-    method public abstract java.net.InetAddress sourceAddress();
-    method public abstract java.nio.channels.MembershipKey unblock(java.net.InetAddress);
-  }
-
-  public abstract interface MulticastChannel implements java.nio.channels.NetworkChannel {
-    method public abstract void close() throws java.io.IOException;
-    method public abstract java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface) throws java.io.IOException;
-    method public abstract java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface, java.net.InetAddress) throws java.io.IOException;
-  }
-
-  public abstract interface NetworkChannel implements java.lang.AutoCloseable java.nio.channels.Channel java.io.Closeable {
-    method public abstract java.nio.channels.NetworkChannel bind(java.net.SocketAddress) throws java.io.IOException;
-    method public abstract java.net.SocketAddress getLocalAddress() throws java.io.IOException;
-    method public abstract T getOption(java.net.SocketOption<T>) throws java.io.IOException;
-    method public abstract java.nio.channels.NetworkChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
-    method public abstract java.util.Set<java.net.SocketOption<?>> supportedOptions();
   }
 
   public class NoConnectionPendingException extends java.lang.IllegalStateException {
@@ -43092,15 +42927,6 @@ package java.nio.channels {
     method public abstract long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
   }
 
-  public abstract interface SeekableByteChannel implements java.nio.channels.ByteChannel {
-    method public abstract long position() throws java.io.IOException;
-    method public abstract java.nio.channels.SeekableByteChannel position(long) throws java.io.IOException;
-    method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
-    method public abstract long size() throws java.io.IOException;
-    method public abstract java.nio.channels.SeekableByteChannel truncate(long) throws java.io.IOException;
-    method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
-  }
-
   public abstract class SelectableChannel extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.Channel {
     ctor protected SelectableChannel();
     method public abstract java.lang.Object blockingLock();
@@ -43149,27 +42975,18 @@ package java.nio.channels {
     method public abstract java.nio.channels.Selector wakeup();
   }
 
-  public abstract class ServerSocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.NetworkChannel {
+  public abstract class ServerSocketChannel extends java.nio.channels.spi.AbstractSelectableChannel {
     ctor protected ServerSocketChannel(java.nio.channels.spi.SelectorProvider);
     method public abstract java.nio.channels.SocketChannel accept() throws java.io.IOException;
-    method public final java.nio.channels.ServerSocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
-    method public java.nio.channels.ServerSocketChannel bind(java.net.SocketAddress, int) throws java.io.IOException;
-    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
-    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public static java.nio.channels.ServerSocketChannel open() throws java.io.IOException;
-    method public java.nio.channels.ServerSocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.ServerSocket socket();
-    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
   }
 
-  public abstract class SocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.NetworkChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class SocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
     ctor protected SocketChannel(java.nio.channels.spi.SelectorProvider);
-    method public java.nio.channels.SocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract boolean connect(java.net.SocketAddress) throws java.io.IOException;
     method public abstract boolean finishConnect() throws java.io.IOException;
-    method public java.net.SocketAddress getLocalAddress() throws java.io.IOException;
-    method public T getOption(java.net.SocketOption<T>) throws java.io.IOException;
     method public abstract boolean isConnected();
     method public abstract boolean isConnectionPending();
     method public static java.nio.channels.SocketChannel open() throws java.io.IOException;
@@ -43177,9 +42994,7 @@ package java.nio.channels {
     method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
     method public final synchronized long read(java.nio.ByteBuffer[]) throws java.io.IOException;
-    method public java.nio.channels.SocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
     method public abstract java.net.Socket socket();
-    method public java.util.Set<java.net.SocketOption<?>> supportedOptions();
     method public final int validOps();
     method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
     method public abstract long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException;
@@ -47139,7 +46954,6 @@ package java.util {
     method public java.lang.String getDisplayName(java.util.Locale);
     method public static java.util.Currency getInstance(java.lang.String);
     method public static java.util.Currency getInstance(java.util.Locale);
-    method public int getNumericCode();
     method public java.lang.String getSymbol();
     method public java.lang.String getSymbol(java.util.Locale);
   }
@@ -47424,13 +47238,6 @@ package java.util {
     method public int getWidth();
   }
 
-  public class IllformedLocaleException extends java.lang.RuntimeException {
-    ctor public IllformedLocaleException();
-    ctor public IllformedLocaleException(java.lang.String);
-    ctor public IllformedLocaleException(java.lang.String, int);
-    method public int getErrorIndex();
-  }
-
   public class InputMismatchException extends java.util.NoSuchElementException implements java.io.Serializable {
     ctor public InputMismatchException();
     ctor public InputMismatchException(java.lang.String);
@@ -47545,7 +47352,6 @@ package java.util {
     ctor public Locale(java.lang.String, java.lang.String);
     ctor public Locale(java.lang.String, java.lang.String, java.lang.String);
     method public java.lang.Object clone();
-    method public static java.util.Locale forLanguageTag(java.lang.String);
     method public static java.util.Locale[] getAvailableLocales();
     method public java.lang.String getCountry();
     method public static java.util.Locale getDefault();
@@ -47555,24 +47361,15 @@ package java.util {
     method public java.lang.String getDisplayLanguage(java.util.Locale);
     method public final java.lang.String getDisplayName();
     method public java.lang.String getDisplayName(java.util.Locale);
-    method public java.lang.String getDisplayScript();
-    method public java.lang.String getDisplayScript(java.util.Locale);
     method public final java.lang.String getDisplayVariant();
     method public java.lang.String getDisplayVariant(java.util.Locale);
-    method public java.lang.String getExtension(char);
-    method public java.util.Set<java.lang.Character> getExtensionKeys();
     method public java.lang.String getISO3Country();
     method public java.lang.String getISO3Language();
     method public static java.lang.String[] getISOCountries();
     method public static java.lang.String[] getISOLanguages();
     method public java.lang.String getLanguage();
-    method public java.lang.String getScript();
-    method public java.util.Set<java.lang.String> getUnicodeLocaleAttributes();
-    method public java.util.Set<java.lang.String> getUnicodeLocaleKeys();
-    method public java.lang.String getUnicodeLocaleType(java.lang.String);
     method public java.lang.String getVariant();
     method public static synchronized void setDefault(java.util.Locale);
-    method public java.lang.String toLanguageTag();
     method public final java.lang.String toString();
     field public static final java.util.Locale CANADA;
     field public static final java.util.Locale CANADA_FRENCH;
@@ -47590,31 +47387,12 @@ package java.util {
     field public static final java.util.Locale KOREA;
     field public static final java.util.Locale KOREAN;
     field public static final java.util.Locale PRC;
-    field public static final char PRIVATE_USE_EXTENSION = 120; // 0x0078 'x'
     field public static final java.util.Locale ROOT;
     field public static final java.util.Locale SIMPLIFIED_CHINESE;
     field public static final java.util.Locale TAIWAN;
     field public static final java.util.Locale TRADITIONAL_CHINESE;
     field public static final java.util.Locale UK;
-    field public static final char UNICODE_LOCALE_EXTENSION = 117; // 0x0075 'u'
     field public static final java.util.Locale US;
-  }
-
-  public static final class Locale.Builder {
-    ctor public Locale.Builder();
-    method public java.util.Locale.Builder addUnicodeLocaleAttribute(java.lang.String);
-    method public java.util.Locale build();
-    method public java.util.Locale.Builder clear();
-    method public java.util.Locale.Builder clearExtensions();
-    method public java.util.Locale.Builder removeUnicodeLocaleAttribute(java.lang.String);
-    method public java.util.Locale.Builder setExtension(char, java.lang.String);
-    method public java.util.Locale.Builder setLanguage(java.lang.String);
-    method public java.util.Locale.Builder setLanguageTag(java.lang.String);
-    method public java.util.Locale.Builder setLocale(java.util.Locale);
-    method public java.util.Locale.Builder setRegion(java.lang.String);
-    method public java.util.Locale.Builder setScript(java.lang.String);
-    method public java.util.Locale.Builder setUnicodeLocaleKeyword(java.lang.String, java.lang.String);
-    method public java.util.Locale.Builder setVariant(java.lang.String);
   }
 
   public abstract interface Map {
@@ -48303,35 +48081,6 @@ package java.util.concurrent {
     method public V replace(K, V);
   }
 
-  public class ConcurrentLinkedDeque extends java.util.AbstractCollection implements java.util.Deque java.io.Serializable {
-    ctor public ConcurrentLinkedDeque();
-    ctor public ConcurrentLinkedDeque(java.util.Collection<? extends E>);
-    method public void addFirst(E);
-    method public void addLast(E);
-    method public java.util.Iterator<E> descendingIterator();
-    method public E element();
-    method public E getFirst();
-    method public E getLast();
-    method public java.util.Iterator<E> iterator();
-    method public boolean offer(E);
-    method public boolean offerFirst(E);
-    method public boolean offerLast(E);
-    method public E peek();
-    method public E peekFirst();
-    method public E peekLast();
-    method public E poll();
-    method public E pollFirst();
-    method public E pollLast();
-    method public E pop();
-    method public void push(E);
-    method public E remove();
-    method public E removeFirst();
-    method public boolean removeFirstOccurrence(java.lang.Object);
-    method public E removeLast();
-    method public boolean removeLastOccurrence(java.lang.Object);
-    method public int size();
-  }
-
   public class ConcurrentLinkedQueue extends java.util.AbstractQueue implements java.util.Queue java.io.Serializable {
     ctor public ConcurrentLinkedQueue();
     ctor public ConcurrentLinkedQueue(java.util.Collection<? extends E>);
@@ -48572,94 +48321,6 @@ package java.util.concurrent {
     method public static java.util.concurrent.ScheduledExecutorService unconfigurableScheduledExecutorService(java.util.concurrent.ScheduledExecutorService);
   }
 
-  public class ForkJoinPool extends java.util.concurrent.AbstractExecutorService {
-    ctor public ForkJoinPool();
-    ctor public ForkJoinPool(int);
-    ctor public ForkJoinPool(int, java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory, java.lang.Thread.UncaughtExceptionHandler, boolean);
-    method public boolean awaitQuiescence(long, java.util.concurrent.TimeUnit);
-    method public boolean awaitTermination(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
-    method protected int drainTasksTo(java.util.Collection<? super java.util.concurrent.ForkJoinTask<?>>);
-    method public void execute(java.util.concurrent.ForkJoinTask<?>);
-    method public void execute(java.lang.Runnable);
-    method public int getActiveThreadCount();
-    method public boolean getAsyncMode();
-    method public java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory getFactory();
-    method public int getParallelism();
-    method public int getPoolSize();
-    method public int getQueuedSubmissionCount();
-    method public long getQueuedTaskCount();
-    method public int getRunningThreadCount();
-    method public long getStealCount();
-    method public java.lang.Thread.UncaughtExceptionHandler getUncaughtExceptionHandler();
-    method public boolean hasQueuedSubmissions();
-    method public T invoke(java.util.concurrent.ForkJoinTask<T>);
-    method public boolean isQuiescent();
-    method public boolean isShutdown();
-    method public boolean isTerminated();
-    method public boolean isTerminating();
-    method public static void managedBlock(java.util.concurrent.ForkJoinPool.ManagedBlocker) throws java.lang.InterruptedException;
-    method protected java.util.concurrent.ForkJoinTask<?> pollSubmission();
-    method public void shutdown();
-    method public java.util.List<java.lang.Runnable> shutdownNow();
-    method public java.util.concurrent.ForkJoinTask<T> submit(java.util.concurrent.ForkJoinTask<T>);
-    field public static final java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory defaultForkJoinWorkerThreadFactory;
-  }
-
-  public static abstract interface ForkJoinPool.ForkJoinWorkerThreadFactory {
-    method public abstract java.util.concurrent.ForkJoinWorkerThread newThread(java.util.concurrent.ForkJoinPool);
-  }
-
-  public static abstract interface ForkJoinPool.ManagedBlocker {
-    method public abstract boolean block() throws java.lang.InterruptedException;
-    method public abstract boolean isReleasable();
-  }
-
-  public abstract class ForkJoinTask implements java.util.concurrent.Future java.io.Serializable {
-    ctor public ForkJoinTask();
-    method public static java.util.concurrent.ForkJoinTask<?> adapt(java.lang.Runnable);
-    method public static java.util.concurrent.ForkJoinTask<T> adapt(java.lang.Runnable, T);
-    method public static java.util.concurrent.ForkJoinTask<T> adapt(java.util.concurrent.Callable<? extends T>);
-    method public boolean cancel(boolean);
-    method public void complete(V);
-    method public void completeExceptionally(java.lang.Throwable);
-    method protected abstract boolean exec();
-    method public final java.util.concurrent.ForkJoinTask<V> fork();
-    method public final V get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
-    method public final V get(long, java.util.concurrent.TimeUnit) throws java.util.concurrent.ExecutionException, java.lang.InterruptedException, java.util.concurrent.TimeoutException;
-    method public final java.lang.Throwable getException();
-    method public static java.util.concurrent.ForkJoinPool getPool();
-    method public static int getQueuedTaskCount();
-    method public abstract V getRawResult();
-    method public static int getSurplusQueuedTaskCount();
-    method public static void helpQuiesce();
-    method public static boolean inForkJoinPool();
-    method public final V invoke();
-    method public static void invokeAll(java.util.concurrent.ForkJoinTask<?>, java.util.concurrent.ForkJoinTask<?>);
-    method public static void invokeAll(java.util.concurrent.ForkJoinTask<?>...);
-    method public static java.util.Collection<T> invokeAll(java.util.Collection<T>);
-    method public final boolean isCancelled();
-    method public final boolean isCompletedAbnormally();
-    method public final boolean isCompletedNormally();
-    method public final boolean isDone();
-    method public final V join();
-    method protected static java.util.concurrent.ForkJoinTask<?> peekNextLocalTask();
-    method protected static java.util.concurrent.ForkJoinTask<?> pollNextLocalTask();
-    method protected static java.util.concurrent.ForkJoinTask<?> pollTask();
-    method public final void quietlyInvoke();
-    method public final void quietlyJoin();
-    method public void reinitialize();
-    method protected abstract void setRawResult(V);
-    method public boolean tryUnfork();
-  }
-
-  public class ForkJoinWorkerThread extends java.lang.Thread {
-    ctor protected ForkJoinWorkerThread(java.util.concurrent.ForkJoinPool);
-    method public java.util.concurrent.ForkJoinPool getPool();
-    method public int getPoolIndex();
-    method protected void onStart();
-    method protected void onTermination(java.lang.Throwable);
-  }
-
   public abstract interface Future {
     method public abstract boolean cancel(boolean);
     method public abstract V get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
@@ -48744,52 +48405,6 @@ package java.util.concurrent {
     method public E take() throws java.lang.InterruptedException;
   }
 
-  public class LinkedTransferQueue extends java.util.AbstractQueue implements java.io.Serializable java.util.concurrent.TransferQueue {
-    ctor public LinkedTransferQueue();
-    ctor public LinkedTransferQueue(java.util.Collection<? extends E>);
-    method public int drainTo(java.util.Collection<? super E>);
-    method public int drainTo(java.util.Collection<? super E>, int);
-    method public int getWaitingConsumerCount();
-    method public boolean hasWaitingConsumer();
-    method public java.util.Iterator<E> iterator();
-    method public boolean offer(E, long, java.util.concurrent.TimeUnit);
-    method public boolean offer(E);
-    method public E peek();
-    method public E poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
-    method public E poll();
-    method public void put(E);
-    method public int remainingCapacity();
-    method public int size();
-    method public E take() throws java.lang.InterruptedException;
-    method public void transfer(E) throws java.lang.InterruptedException;
-    method public boolean tryTransfer(E);
-    method public boolean tryTransfer(E, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
-  }
-
-  public class Phaser {
-    ctor public Phaser();
-    ctor public Phaser(int);
-    ctor public Phaser(java.util.concurrent.Phaser);
-    ctor public Phaser(java.util.concurrent.Phaser, int);
-    method public int arrive();
-    method public int arriveAndAwaitAdvance();
-    method public int arriveAndDeregister();
-    method public int awaitAdvance(int);
-    method public int awaitAdvanceInterruptibly(int) throws java.lang.InterruptedException;
-    method public int awaitAdvanceInterruptibly(int, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
-    method public int bulkRegister(int);
-    method public void forceTermination();
-    method public int getArrivedParties();
-    method public java.util.concurrent.Phaser getParent();
-    method public final int getPhase();
-    method public int getRegisteredParties();
-    method public java.util.concurrent.Phaser getRoot();
-    method public int getUnarrivedParties();
-    method public boolean isTerminated();
-    method protected boolean onAdvance(int, int);
-    method public int register();
-  }
-
   public class PriorityBlockingQueue extends java.util.AbstractQueue implements java.util.concurrent.BlockingQueue java.io.Serializable {
     ctor public PriorityBlockingQueue();
     ctor public PriorityBlockingQueue(int);
@@ -48808,22 +48423,6 @@ package java.util.concurrent {
     method public int remainingCapacity();
     method public int size();
     method public E take() throws java.lang.InterruptedException;
-  }
-
-  public abstract class RecursiveAction extends java.util.concurrent.ForkJoinTask {
-    ctor public RecursiveAction();
-    method protected abstract void compute();
-    method protected final boolean exec();
-    method public final java.lang.Void getRawResult();
-    method protected final void setRawResult(java.lang.Void);
-  }
-
-  public abstract class RecursiveTask extends java.util.concurrent.ForkJoinTask {
-    ctor public RecursiveTask();
-    method protected abstract V compute();
-    method protected final boolean exec();
-    method public final V getRawResult();
-    method protected final void setRawResult(V);
   }
 
   public class RejectedExecutionException extends java.lang.RuntimeException {
@@ -48864,14 +48463,12 @@ package java.util.concurrent {
     method protected java.util.concurrent.RunnableScheduledFuture<V> decorateTask(java.util.concurrent.Callable<V>, java.util.concurrent.RunnableScheduledFuture<V>);
     method public boolean getContinueExistingPeriodicTasksAfterShutdownPolicy();
     method public boolean getExecuteExistingDelayedTasksAfterShutdownPolicy();
-    method public boolean getRemoveOnCancelPolicy();
     method public java.util.concurrent.ScheduledFuture<?> schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<V> schedule(java.util.concurrent.Callable<V>, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<?> scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit);
     method public java.util.concurrent.ScheduledFuture<?> scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit);
     method public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean);
     method public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean);
-    method public void setRemoveOnCancelPolicy(boolean);
   }
 
   public class Semaphore implements java.io.Serializable {
@@ -48915,15 +48512,6 @@ package java.util.concurrent {
 
   public abstract interface ThreadFactory {
     method public abstract java.lang.Thread newThread(java.lang.Runnable);
-  }
-
-  public class ThreadLocalRandom extends java.util.Random {
-    method public static java.util.concurrent.ThreadLocalRandom current();
-    method public double nextDouble(double);
-    method public double nextDouble(double, double);
-    method public int nextInt(int, int);
-    method public long nextLong(long);
-    method public long nextLong(long, long);
   }
 
   public class ThreadPoolExecutor extends java.util.concurrent.AbstractExecutorService {
@@ -49011,14 +48599,6 @@ package java.util.concurrent {
   public class TimeoutException extends java.lang.Exception {
     ctor public TimeoutException();
     ctor public TimeoutException(java.lang.String);
-  }
-
-  public abstract interface TransferQueue implements java.util.concurrent.BlockingQueue {
-    method public abstract int getWaitingConsumerCount();
-    method public abstract boolean hasWaitingConsumer();
-    method public abstract void transfer(E) throws java.lang.InterruptedException;
-    method public abstract boolean tryTransfer(E);
-    method public abstract boolean tryTransfer(E, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
   }
 
 }
@@ -49230,7 +48810,6 @@ package java.util.concurrent.locks {
     method public final int getWaitQueueLength(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method public final java.util.Collection<java.lang.Thread> getWaitingThreads(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method public final boolean hasContended();
-    method public final boolean hasQueuedPredecessors();
     method public final boolean hasQueuedThreads();
     method public final boolean hasWaiters(java.util.concurrent.locks.AbstractQueuedLongSynchronizer.ConditionObject);
     method protected boolean isHeldExclusively();
@@ -49277,7 +48856,6 @@ package java.util.concurrent.locks {
     method public final int getWaitQueueLength(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method public final java.util.Collection<java.lang.Thread> getWaitingThreads(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method public final boolean hasContended();
-    method public final boolean hasQueuedPredecessors();
     method public final boolean hasQueuedThreads();
     method public final boolean hasWaiters(java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject);
     method protected boolean isHeldExclusively();
@@ -50222,10 +49800,8 @@ package java.util.zip {
 
   public class ZipFile implements java.io.Closeable {
     ctor public ZipFile(java.io.File) throws java.io.IOException, java.util.zip.ZipException;
-    ctor public ZipFile(java.io.File, java.nio.charset.Charset) throws java.io.IOException, java.util.zip.ZipException;
     ctor public ZipFile(java.lang.String) throws java.io.IOException;
     ctor public ZipFile(java.io.File, int) throws java.io.IOException;
-    ctor public ZipFile(java.io.File, int, java.nio.charset.Charset) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public java.util.Enumeration<? extends java.util.zip.ZipEntry> entries();
     method public java.lang.String getComment();
@@ -50279,7 +49855,6 @@ package java.util.zip {
 
   public class ZipInputStream extends java.util.zip.InflaterInputStream {
     ctor public ZipInputStream(java.io.InputStream);
-    ctor public ZipInputStream(java.io.InputStream, java.nio.charset.Charset);
     method public void closeEntry() throws java.io.IOException;
     method protected java.util.zip.ZipEntry createZipEntry(java.lang.String);
     method public java.util.zip.ZipEntry getNextEntry() throws java.io.IOException;
@@ -50327,7 +49902,6 @@ package java.util.zip {
 
   public class ZipOutputStream extends java.util.zip.DeflaterOutputStream {
     ctor public ZipOutputStream(java.io.OutputStream);
-    ctor public ZipOutputStream(java.io.OutputStream, java.nio.charset.Charset);
     method public void closeEntry() throws java.io.IOException;
     method public void putNextEntry(java.util.zip.ZipEntry) throws java.io.IOException;
     method public void setComment(java.lang.String);
@@ -51826,7 +51400,6 @@ package javax.net.ssl {
     method public abstract boolean getEnableSessionCreation();
     method public abstract java.lang.String[] getEnabledCipherSuites();
     method public abstract java.lang.String[] getEnabledProtocols();
-    method public javax.net.ssl.SSLSession getHandshakeSession();
     method public abstract javax.net.ssl.SSLEngineResult.HandshakeStatus getHandshakeStatus();
     method public abstract boolean getNeedClientAuth();
     method public java.lang.String getPeerHost();
@@ -51900,12 +51473,10 @@ package javax.net.ssl {
     ctor public SSLParameters(java.lang.String[]);
     ctor public SSLParameters(java.lang.String[], java.lang.String[]);
     method public java.lang.String[] getCipherSuites();
-    method public java.lang.String getEndpointIdentificationAlgorithm();
     method public boolean getNeedClientAuth();
     method public java.lang.String[] getProtocols();
     method public boolean getWantClientAuth();
     method public void setCipherSuites(java.lang.String[]);
-    method public void setEndpointIdentificationAlgorithm(java.lang.String);
     method public void setNeedClientAuth(boolean);
     method public void setProtocols(java.lang.String[]);
     method public void setWantClientAuth(boolean);
@@ -52006,7 +51577,6 @@ package javax.net.ssl {
     method public abstract boolean getEnableSessionCreation();
     method public abstract java.lang.String[] getEnabledCipherSuites();
     method public abstract java.lang.String[] getEnabledProtocols();
-    method public javax.net.ssl.SSLSession getHandshakeSession();
     method public abstract boolean getNeedClientAuth();
     method public javax.net.ssl.SSLParameters getSSLParameters();
     method public abstract javax.net.ssl.SSLSession getSession();
@@ -52060,14 +51630,6 @@ package javax.net.ssl {
     ctor protected X509ExtendedKeyManager();
     method public java.lang.String chooseEngineClientAlias(java.lang.String[], java.security.Principal[], javax.net.ssl.SSLEngine);
     method public java.lang.String chooseEngineServerAlias(java.lang.String, java.security.Principal[], javax.net.ssl.SSLEngine);
-  }
-
-  public abstract class X509ExtendedTrustManager implements javax.net.ssl.X509TrustManager {
-    ctor public X509ExtendedTrustManager();
-    method public abstract void checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket) throws java.security.cert.CertificateException;
-    method public abstract void checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine) throws java.security.cert.CertificateException;
-    method public abstract void checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket) throws java.security.cert.CertificateException;
-    method public abstract void checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine) throws java.security.cert.CertificateException;
   }
 
   public abstract interface X509KeyManager implements javax.net.ssl.KeyManager {
