@@ -195,7 +195,7 @@ public class DateFormat {
      * @return a string pattern suitable for use with {@link java.text.SimpleDateFormat}.
      */
     public static String getBestDateTimePattern(Locale locale, String skeleton) {
-        return ICU.getBestDateTimePattern(skeleton, locale.toString());
+        return ICU.getBestDateTimePattern(skeleton, locale);
     }
 
     /**
