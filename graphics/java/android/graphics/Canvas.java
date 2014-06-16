@@ -1770,7 +1770,7 @@ public class Canvas {
         }
         native_drawTextOnPath(mNativeCanvasWrapper, text, index, count,
                 path.ni(), hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint);
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     /**
@@ -1790,7 +1790,7 @@ public class Canvas {
             float vOffset, @NonNull Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvasWrapper, text, path.ni(), hOffset, vOffset,
-                    paint.mBidiFlags, paint.mNativePaint);
+                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
         }
     }
 
@@ -2021,11 +2021,11 @@ public class Canvas {
                                                      int count, long nativePath,
                                                      float hOffset,
                                                      float vOffset, int bidiFlags,
-                                                     long nativePaint);
+                                                     long nativePaint, long nativeTypeface);
     private static native void native_drawTextOnPath(long nativeCanvas,
                                                      String text, long nativePath,
                                                      float hOffset,
                                                      float vOffset,
-                                                     int flags, long nativePaint);
+                                                     int flags, long nativePaint, long nativeTypeface);
     private static native void finalizer(long nativeCanvas);
 }

@@ -19,6 +19,7 @@
 #include <string>
 
 #include "SkPaint.h"
+#include "SkPathMeasure.h"
 #include "minikin/Layout.h"
 #include "TypefaceImpl.h"
 #include "MinikinSkia.h"
@@ -74,6 +75,22 @@ float MinikinUtils::xOffsetForTextAlign(SkPaint* paint, const Layout& layout) {
             break;
     }
     return 0;
+}
+
+float MinikinUtils::hOffsetForTextAlign(SkPaint* paint, const Layout& layout, const SkPath& path) {
+    float align = 0;
+    switch (paint->getTextAlign()) {
+        case SkPaint::kCenter_Align:
+            align = -0.5f;
+            break;
+        case SkPaint::kRight_Align:
+            align = -1;
+            break;
+        default:
+            return 0;
+    }
+    SkPathMeasure measure(path, false);
+    return align * (layout.getAdvance() - measure.getLength());
 }
 
 }

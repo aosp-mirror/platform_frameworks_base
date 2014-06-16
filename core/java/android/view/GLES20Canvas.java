@@ -981,22 +981,24 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         nDrawTextOnPath(mRenderer, text, index, count, path.mNativePath, hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint);
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     private static native void nDrawTextOnPath(long renderer, char[] text, int index, int count,
-            long path, float hOffset, float vOffset, int bidiFlags, long nativePaint);
+            long path, float hOffset, float vOffset, int bidiFlags, long nativePaint,
+            long typeface);
 
     @Override
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
         if (text.length() == 0) return;
 
         nDrawTextOnPath(mRenderer, text, 0, text.length(), path.mNativePath, hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint);
+                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     }
 
     private static native void nDrawTextOnPath(long renderer, String text, int start, int end,
-            long path, float hOffset, float vOffset, int bidiFlags, long nativePaint);
+            long path, float hOffset, float vOffset, int bidiFlags, long nativePaint,
+            long typeface);
 
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
