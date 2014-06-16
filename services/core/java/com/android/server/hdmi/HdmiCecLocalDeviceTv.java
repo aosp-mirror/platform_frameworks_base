@@ -16,12 +16,14 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,18 +48,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
 
-        mService.launchDeviceDiscovery(mAddress);
+        launchDeviceDiscovery();
         // TODO: Start routing control action, device discovery action.
-    }
-
-    @Override
-    protected boolean onMessage(HdmiCecMessage message) {
-        switch (message.getOpcode()) {
-            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
-                return handleReportPhysicalAddress(message);
-            default:
-                return super.onMessage(message);
-        }
     }
 
     /**
@@ -98,7 +90,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
-    private boolean handleReportPhysicalAddress(HdmiCecMessage message) {
+    @Override
+    protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
         // Ignore if [Device Discovery Action] is going on.
         if (mService.hasAction(DeviceDiscoveryAction.class)) {
             Slog.i(TAG, "Ignore unrecognizable <Report Physical Address> "
@@ -107,9 +100,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
 
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        mService.addAndStartAction(new NewDeviceAction(mService,
-                mAddress, message.getSource(), physicalAddress));
+        int logicalAddress = message.getSource();
 
+        // If it is a new device and connected to the tail of active path,
+        // it's required to change routing path.
+        boolean requireRoutingChange = !mService.isInDeviceList(physicalAddress, logicalAddress)
+                && mService.isTailOfActivePath(physicalAddress);
+        mService.addAndStartAction(new NewDeviceAction(mService,
+                mAddress, message.getSource(), physicalAddress,
+                requireRoutingChange));
         return true;
     }
 
@@ -136,5 +135,30 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 message.getDestination(), message.getSource(), message.getOpcode(),
                 HdmiConstants.ABORT_REFUSED));
         return true;
+    }
+
+    private void launchDeviceDiscovery() {
+        mService.clearAllDeviceInfo();
+        // TODO: Move the following callback to HdmiLocalDeviceTv.
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(mService, mAddress,
+                new DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiCecDeviceInfo> deviceInfos) {
+                        for (HdmiCecDeviceInfo info : deviceInfos) {
+                            mService.addCecDevice(info);
+                        }
+
+                        // Since we removed all devices when it's start and
+                        // device discovery action does not poll local devices,
+                        // we should put device info of local device manually here
+                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+                            mService.addCecDevice(device.getDeviceInfo());
+                        }
+
+                        mService.addAndStartAction(new HotplugDetectionAction(mService,
+                                mAddress));
+                    }
+                });
+        mService.addAndStartAction(action);
     }
 }

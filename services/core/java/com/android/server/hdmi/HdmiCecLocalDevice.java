@@ -76,7 +76,7 @@ abstract class HdmiCecLocalDevice {
         return onMessage(message);
     }
 
-    protected boolean onMessage(HdmiCecMessage message) {
+    protected final boolean onMessage(HdmiCecMessage message) {
         switch (message.getOpcode()) {
             case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
                 return handleGetMenuLanguage(message);
@@ -88,6 +88,8 @@ abstract class HdmiCecLocalDevice {
                 return handleGiveDeviceVendorId();
             case HdmiCec.MESSAGE_GET_CEC_VERSION:
                 return handleGetCecVersion(message);
+            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+                return handleReportPhysicalAddress(message);
             default:
                 return false;
         }
@@ -140,6 +142,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
         return false;
     }
 

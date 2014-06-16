@@ -48,6 +48,7 @@ final class NewDeviceAction extends FeatureAction {
 
     private final int mDeviceLogicalAddress;
     private final int mDevicePhysicalAddress;
+    private final boolean mRequireRoutingChange;
 
     private int mVendorId;
     private String mDisplayName;
@@ -59,17 +60,36 @@ final class NewDeviceAction extends FeatureAction {
      * @param sourceAddress logical address to be used as source address
      * @param deviceLogicalAddress logical address of the device in interest
      * @param devicePhysicalAddress physical address of the device in interest
+     * @param requireRoutingChange whether to initiate routing change or not
      */
     NewDeviceAction(HdmiControlService service, int sourceAddress, int deviceLogicalAddress,
-            int devicePhysicalAddress) {
+            int devicePhysicalAddress, boolean requireRoutingChange) {
         super(service, sourceAddress);
         mDeviceLogicalAddress = deviceLogicalAddress;
         mDevicePhysicalAddress = devicePhysicalAddress;
         mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
+        mRequireRoutingChange = requireRoutingChange;
     }
 
     @Override
     public boolean start() {
+        if (HdmiCec.getTypeFromAddress(mSourceAddress) == HdmiCec.DEVICE_AUDIO_SYSTEM) {
+            if (mService.getAvrDeviceInfo() == null) {
+                // TODO: Start system audio initiation action
+            }
+
+            // If new device is connected through ARC enabled port,
+            // initiates ARC channel establishment.
+            if (mService.isConnectedToArcPort(mDevicePhysicalAddress)) {
+                mService.addAndStartAction(new RequestArcInitiationAction(mService, mSourceAddress,
+                        mDeviceLogicalAddress));
+            }
+        }
+
+        if (mRequireRoutingChange) {
+            startRoutingChange();
+        }
+
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
         if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_SET_OSD_NAME)) {
             return true;
@@ -131,6 +151,22 @@ final class NewDeviceAction extends FeatureAction {
             }
         }
         return false;
+    }
+
+    private void startRoutingChange() {
+        // Stop existing routing control.
+        mService.removeAction(RoutingControlAction.class);
+
+        // Send routing change. The the address is a path of the active port.
+        int newPath = toTopMostPortPath(mDevicePhysicalAddress);
+        sendCommand(HdmiCecMessageBuilder.buildRoutingChange(mSourceAddress,
+                mService.getActivePath(), newPath));
+        mService.addAndStartAction(new RoutingControlAction(mService, mSourceAddress,
+                mService.pathToPortId(newPath), null));
+    }
+
+    private static int toTopMostPortPath(int physicalAddress) {
+        return physicalAddress & HdmiConstants.ROUTING_PATH_TOP_MASK;
     }
 
     private boolean mayProcessCommandIfCached(int destAddress, int opcode) {

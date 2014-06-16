@@ -16,12 +16,11 @@
 
 package com.android.server.hdmi;
 
-import java.util.concurrent.TimeUnit;
-
-import android.hardware.hdmi.IHdmiControlCallback;
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -59,7 +58,7 @@ public class RoutingControlAction extends FeatureAction {
     // Time out in milliseconds used for <Report Power Status>
     private static final int TIMEOUT_REPORT_POWER_STATUS_MS = 1000;
 
-    private final IHdmiControlCallback mCallback;
+    @Nullable private final IHdmiControlCallback mCallback;
 
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
@@ -167,7 +166,7 @@ public class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
                 HdmiCecDeviceInfo device = mService.getDeviceInfoByPath(mCurrentRoutingPath);
                 if (device == null) {
-                    maybeChangeActiveInput(mCurrentRoutingPath);
+                    maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath));
                 } else {
                     // TODO: Also check followings and then proceed:
                     //       if routing change was neither triggered by TV at CEC enable time, nor
@@ -185,7 +184,7 @@ public class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 int tvPowerStatus = getTvPowerStatus();
                 if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
-                    if (!maybeChangeActiveInput(mCurrentRoutingPath)) {
+                    if (!maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath))) {
                         sendSetStreamPath();
                     }
                 }
@@ -217,13 +216,8 @@ public class RoutingControlAction extends FeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            maybeChangeActiveInput(mCurrentRoutingPath);
+            maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath));
         }
-    }
-
-    // Given the HDMI port id, return the port address.
-    private int portToPath(int portId) {
-        return mService.getPortInfo(portId).getAddress();
     }
 
     private void invokeCallback(int result) {
