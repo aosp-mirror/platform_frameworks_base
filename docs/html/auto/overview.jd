@@ -6,6 +6,15 @@ page.metaDescription=Android Auto
 
 @jd:body
 
+<style>
+.jd-descr {
+    height:auto;
+}
+#copyright {
+    margin-top:-35px;
+}
+</style>
+
 <div style="width:780px; margin:0 auto;">
 
 <div id="qv-wrapper">
