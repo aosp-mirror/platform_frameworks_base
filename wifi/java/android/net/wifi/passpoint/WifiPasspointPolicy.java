@@ -16,9 +16,17 @@
 
 package android.net.wifi.passpoint;
 
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.ScanResult;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.security.Credentials;
 import android.util.Log;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.List;
+
 
 /** @hide */
 public class WifiPasspointPolicy implements Parcelable {
@@ -42,6 +50,20 @@ public class WifiPasspointPolicy implements Parcelable {
     private WifiPasspointCredential mCredential;
     private int mRestriction;// Permitted values are "HomeSP", "RoamingPartner", or "Unrestricted"
     private boolean mIsHomeSp;
+
+    private final String INT_PRIVATE_KEY = "private_key";
+    private final String INT_PHASE2 = "phase2";
+    private final String INT_PASSWORD = "password";
+    private final String INT_IDENTITY = "identity";
+    private final String INT_EAP = "eap";
+    private final String INT_CLIENT_CERT = "client_cert";
+    private final String INT_CA_CERT = "ca_cert";
+    private final String INT_ANONYMOUS_IDENTITY = "anonymous_identity";
+    private final String INT_SIM_SLOT = "sim_slot";
+    private final String INT_ENTERPRISEFIELD_NAME ="android.net.wifi.WifiConfiguration$EnterpriseField";
+    private final String ISO8601DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private final String ENTERPRISE_PHASE2_MSCHAPV2 = "auth=MSCHAPV2";
+    private final String ENTERPRISE_PHASE2_MSCHAP = "auth=MSCHAP";
 
     /** @hide */
     public WifiPasspointPolicy(String name, String ssid,
@@ -89,7 +111,7 @@ public class WifiPasspointPolicy implements Parcelable {
     }
 
     /** @hide */
-    public boolean getHomeSp() {
+    public boolean isHomeSp() {
         return mIsHomeSp;
     }
 
@@ -121,6 +143,142 @@ public class WifiPasspointPolicy implements Parcelable {
         return mRoamingPriority;
     }
 
+    public WifiConfiguration createWifiConfiguration() {
+        WifiConfiguration wfg = new WifiConfiguration();
+        if (mBssid != null) {
+            Log.d(TAG, "create bssid:" + mBssid);
+            wfg.BSSID = mBssid;
+        }
+
+        if (mSsid != null) {
+            Log.d(TAG, "create ssid:" + mSsid);
+            wfg.SSID = mSsid;
+        }
+        //TODO: 1. add pmf configuration
+        //      2. add ocsp configuration
+        //      3. add eap-sim configuration
+        /*Key management*/
+        wfg.status = WifiConfiguration.Status.ENABLED;
+        wfg.allowedKeyManagement.clear();
+        wfg.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+        wfg.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+
+        /*Group Ciphers*/
+        wfg.allowedGroupCiphers.clear();
+        wfg.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        wfg.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+
+        /*Protocols*/
+        wfg.allowedProtocols.clear();
+        wfg.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+        wfg.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+
+        Class[] enterpriseFieldArray  = WifiConfiguration.class.getClasses();
+        Class<?> enterpriseFieldClass = null;
+
+
+        for(Class<?> myClass : enterpriseFieldArray) {
+            if(myClass.getName().equals(INT_ENTERPRISEFIELD_NAME)) {
+                enterpriseFieldClass = myClass;
+                break;
+            }
+        }
+        Log.d(TAG, "class chosen " + enterpriseFieldClass.getName() );
+
+
+        Field anonymousId = null, caCert = null, clientCert = null,
+              eap = null, identity = null, password = null,
+              phase2 = null, privateKey =  null;
+
+        Field[] fields = WifiConfiguration.class.getFields();
+
+
+        for (Field tempField : fields) {
+            if (tempField.getName().trim().equals(INT_ANONYMOUS_IDENTITY)) {
+                anonymousId = tempField;
+                Log.d(TAG, "field " + anonymousId.getName() );
+            } else if (tempField.getName().trim().equals(INT_CA_CERT)) {
+                caCert = tempField;
+            } else if (tempField.getName().trim().equals(INT_CLIENT_CERT)) {
+                clientCert = tempField;
+                Log.d(TAG, "field " + clientCert.getName() );
+            } else if (tempField.getName().trim().equals(INT_EAP)) {
+                eap = tempField;
+                Log.d(TAG, "field " + eap.getName() );
+            } else if (tempField.getName().trim().equals(INT_IDENTITY)) {
+                identity = tempField;
+                Log.d(TAG, "field " + identity.getName() );
+            } else if (tempField.getName().trim().equals(INT_PASSWORD)) {
+                password = tempField;
+                Log.d(TAG, "field " + password.getName() );
+            } else if (tempField.getName().trim().equals(INT_PHASE2)) {
+                phase2 = tempField;
+                Log.d(TAG, "field " + phase2.getName() );
+
+            } else if (tempField.getName().trim().equals(INT_PRIVATE_KEY)) {
+                privateKey = tempField;
+            }
+        }
+
+
+        Method setValue = null;
+
+        for(Method m: enterpriseFieldClass.getMethods()) {
+            if(m.getName().trim().equals("setValue")) {
+                Log.d(TAG, "method " + m.getName() );
+                setValue = m;
+                break;
+            }
+        }
+
+        try {
+            // EAP
+            String eapmethod = mCredential.getType();
+            Log.d(TAG, "eapmethod:" + eapmethod);
+            setValue.invoke(eap.get(wfg), eapmethod);
+
+            // Username, password, EAP Phase 2
+            if ("TTLS".equals(eapmethod)) {
+                setValue.invoke(phase2.get(wfg), ENTERPRISE_PHASE2_MSCHAPV2);
+                setValue.invoke(identity.get(wfg), mCredential.getUserName());
+                setValue.invoke(password.get(wfg), mCredential.getPassword());
+                setValue.invoke(anonymousId.get(wfg), "anonymous@" + mCredential.getRealm());
+            }
+
+            // EAP CA Certificate
+            String cacertificate = null;
+            String rootCA = mCredential.getCaRootCertPath();
+            if (rootCA == null){
+                cacertificate = null;
+            } else {
+                cacertificate = "keystore://" + Credentials.WIFI + "HS20" + Credentials.CA_CERTIFICATE + rootCA;
+            }
+            Log.d(TAG, "cacertificate:" + cacertificate);
+            setValue.invoke(caCert.get(wfg), cacertificate);
+
+            //User certificate
+            if ("TLS".equals(eapmethod)) {
+                String usercertificate = null;
+                String privatekey = null;
+                String clientCertPath = mCredential.getClientCertPath();
+                if (clientCertPath != null){
+                    privatekey = "keystore://" + Credentials.WIFI + "HS20" + Credentials.USER_PRIVATE_KEY + clientCertPath;
+                    usercertificate = "keystore://" + Credentials.WIFI + "HS20" + Credentials.USER_CERTIFICATE + clientCertPath;
+                }
+                Log.d(TAG, "privatekey:" + privatekey);
+                Log.d(TAG, "usercertificate:" + usercertificate);
+                if (privatekey != null && usercertificate != null) {
+                    setValue.invoke(privateKey.get(wfg), privatekey);
+                    setValue.invoke(clientCert.get(wfg), usercertificate);
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "createWifiConfiguration err:" + e);
+        }
+
+        return wfg;
+    }
+
     /** {@inheritDoc} @hide */
     public int compareTo(WifiPasspointPolicy another) {
         Log.d(TAG, "this:" + this);
@@ -128,11 +286,11 @@ public class WifiPasspointPolicy implements Parcelable {
 
         if (another == null) {
             return -1;
-        } else if (this.mIsHomeSp == true && another.getHomeSp() == false) {
+        } else if (this.mIsHomeSp == true && another.isHomeSp() == false) {
             //home sp priority is higher then roaming
             Log.d(TAG, "compare HomeSP  first, this is HomeSP, another isn't");
             return -1;
-        } else if ((this.mIsHomeSp == true && another.getHomeSp() == true)) {
+        } else if ((this.mIsHomeSp == true && another.isHomeSp() == true)) {
             Log.d(TAG, "both HomeSP");
             //if both home sp, compare credential priority
             if (this.mCredentialPriority < another.getCredentialPriority()) {
@@ -160,7 +318,7 @@ public class WifiPasspointPolicy implements Parcelable {
             } else {
                 return 1;
             }
-        } else if ((this.mIsHomeSp == false && another.getHomeSp() == false)) {
+        } else if ((this.mIsHomeSp == false && another.isHomeSp() == false)) {
             Log.d(TAG, "both RoamingSp");
             //if both roaming sp, compare roaming priority(preferredRoamingPartnerList/<X+>/priority)
             if (this.mRoamingPriority < another.getRoamingPriority()) {
