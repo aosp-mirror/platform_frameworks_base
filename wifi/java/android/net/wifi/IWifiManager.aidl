@@ -41,6 +41,8 @@ interface IWifiManager
 
     List<WifiConfiguration> getConfiguredNetworks();
 
+    List<WifiConfiguration> getPrivilegedConfiguredNetworks();
+
     int addOrUpdateNetwork(in WifiConfiguration config);
 
     boolean removeNetwork(int netId);
