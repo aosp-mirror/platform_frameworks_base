@@ -3,8 +3,9 @@ page.tags="controller"
 
 @jd:body
 
-<p>This document complements the larger best-practice guidelines for [Design for TV](TODO, use formal name of referenced doc, and add link). It assumes that you have read those guidelines, and seeks to minimize repetition.</p>
-<h3>Overview</h3>
+<p>This section complements the [larger best-practices guidance for designing for Android TV](TODO, use formal name of referenced doc, and add link). It assumes that you have read that guidance, and seeks to minimize repetition.</p>
+
+<h2>Overview</h2>
 <p>Because of factors including its large size, its control scheme, and its nature as a shared display, the television screen presents a number of considerations that may be new to mobile developers. This document breaks these considerations down into five sections:</p>
 <ul>
 <li>Display</li>
@@ -13,54 +14,57 @@ page.tags="controller"
 <li>Google Play Game Services</li>
 <li>Web</li>
 </ul>
-<h3>Display</h3>
-<h4>A shared display</h4>
-<p>A living-room TV presents design challenges for multiplayer games, in that all of the players can see everything. This issue is especially germane to games (such as card games or strategy games) that rely on each player’s possession of hidden information.</p>
+<h2>Display</h2>
+<p>Large and centrally situated, the television screen imposes limitations, but also opens up new opportunities for immersive gameplay.</p>
+<h3>A shared display</h3>
+<p>A living-room TV poses design challenges for multiplayer games, in that all players can see everything. This issue is especially germane to games (such as card games or strategy games) that rely on each player’s possession of hidden information.</p>
 <p>Some mechanisms you can implement to address the problem of one player’s “eavesdropping” on another’s information are:</p>
 <ul>
-<li>In a turn-based game, like a word or card game, one player at a time might view the display. On finishing her move, the game allows the player to cover the screen with a “blinder”. When the next player takes his turn, he opens the blinder to reveal the information he’s allowed to be seeing.</li>
-<li>Using a second screen, such as a phone or tablet, can enable a player to conceal information. For information on implementing second-screen support, see <a href="http://developer.android.com/reference/android/app/Presentation.html">Presentation</a> on the Android developer site.</li>
+<li>A player might place a "blinder" on the screen to help conceal information. For example, in a turn-based game like a word or card game, one player at a time might view the display. When the player finishes a move, the game allows him or her to cover the screen with a “blinder” that blocks anyone from viewing secret information. When the next player begins a turn, the blinder opens to reveal his or her own information.</li>
+<li>A second screen, such as a handset or larger device, can enable a player to conceal information. For information on implementing second-screen support, see <a href="http://developer.android.com/reference/android/app/Presentation.html">Presentation</a> on the Android developer site.</li>
 </ul>
-<h4>No touch interface</h4>
+<h3>No touch interface</h3>
 <p>A television does not have a touch interface. Your game design, therefore, need not take into account the possibility that a player’s controlling fingers might block the on-screen action. You can assume constant visibility of the entire viewing area.</p>
-<p>See the Control section in this document and in [Design for TV](TODO, use formal name of referenced doc, and add link) for more implications of the lack of touch interface.</p>
-<h4>Landscape display</h4>
+<p>See the <a href=#control>Control</a> section in this document and in [Design for TV](TODO, use formal name of referenced doc, and add link) for more implications of the lack of touch interface.</p>
+<h3>Landscape display</h3>
 <p>In mobile-device terms, a TV is always “sideways.” You can’t turn it, and there is no portrait orientation. You should always be designing your TV games to be displayed in landscape mode.</p>
-<h3>Control</h3>
-<h4>D-pad</h4>
+<a id=control><h2>Control</h2>
+<p>Without a touch interface, it's even more important than usual to get your controls right, so that players find them intuitive and fun to use. The separation of controller from device also introduces some other issues to pay attention to, like keeping track of multiple players' controllers, and handling disconnects gracefully.</p>
+<h3>D-pad</h3>
 <p>Because of the lack of touch interface, you should be planning your control scheme based on a D-pad. Some key points to keep in mind include:</p>
 <p>The player needs to use the gamepad in all aspects of the game&ndash;not just controlling core gameplay, but also navigating menus and ads. For this reason, you should also ensure that your Android TV game does not refer to a touch interface: for example, an Android TV game cannot tell a player to "Tap to skip".</p>
 <p>You can avoid unhappy surprises (and resulting low ratings) by using your Play Store description to communicate to the player any expectations about controllers. If a game is better suited to a gamepad with a joystick than one with only a D-pad, you should make this clear. A player who uses an ill-suited controller for a game is likely to have a subpar experience&ndash;and penalize your game in the ratings.</p>
-<p>You can also help ensure a good player experience by ensuring that button mapping is intuitive and flexible. A widely accepted standard has the A button serving to <code>Accept</code>, and the B button serving to <code>Cancel</code>. You can also offer flexibility in the form of remappability. For more information on button mapping, <a href="http://developer.android.com/training/game-controllers/controller-input.html">Handling Controller Actions</a>.</p>
+<p>You can also help ensure a good player experience by ensuring that button mapping is intuitive and flexible. For example, you can adhere to accepted custom by using the A button to <code>Accept</code>, and the B button to <code>Cancel</code>. You can also offer flexibility in the form of remappability. For more information on button mapping, see <a href="http://developer.android.com/training/game-controllers/controller-input.html">Handling Controller Actions</a>.</p>
 <p>Your game can also contribute to a good match between controller and game by querying the controller about its capabilities. For example, you may intend for a player to steer an object by waving the controller in the air. If a player's controller lacks accelerometer and gyroscope hardware, however, waving will not work. But when your game queries the controller and discovers that motion detection is not supported, it can switch over to an alternative, available control scheme.</p>
 <p>For more information on querying controller capabilities, see <a href="http://developer.android.com/training/game-controllers/compatibility.html">Supporting Controllers Across Android Versions</a>.</p>
-<h4>Back-button behavior</h4>
+<h3>Back-button behavior</h3>
 <p>The Back button should never act as a toggle. For example, do not use it to both open and close a menu. Its behavior should only be linear. For example: Game play &gt; Game pause screen &gt; Game main screen &gt; Android home screen.</p>
-<p>With this principle of "linear navigation" in mind, the back button may leave an in-game menu (opened by a different button) to return to gameplay.</p>
-<h4>Handling multiple controllers</h4>
+<p>With this principle of "linear navigation" in mind, you <b>may</b> use the back button to leave an in-game menu (opened by a different button) and return to gameplay.</p>
+<h3>Handling multiple controllers</h3>
 <p>When multiple players are playing a game, each with his or her own controller, it is important to map each player-controller pair. For information on how to implement controller-number identification, see <a href="http://developer.android.com/reference/android/view/InputDevice.html#getControllerNumber(">Input Devices</a>) on the Android developer site.</p>
-<h4>Handling disconnects</h4>
+<h3>Handling disconnects</h3>
 <p>When a controller is disconnected in the middle of gameplay, the game should pause, and a dialog should appear prompting the disconnected player to reconnect his or her controller.</p>
 <p>The dialog should also offer troubleshooting tips (e.g., "Check your Bluetooth connection").</p>
-<h3>Manifest</h3>
-<p>Games are displayed in a separate row from regular apps in the launcher. Android TV uses the <code>android:isGame</code> flag to differentiate games from non-game apps. You can assign it a value of either <code>true</code> or <code>false</code>. </p>
+<h2>Manifest</h2>
+<p>Games are displayed in a separate row from regular apps in the launcher. Android TV uses the <code>android:isGame</code> flag to differentiate games from non-game apps. You can assign it a value of either <code>true</code> or <code>false</code>. For example:</p>
 <pre class="fragment">&lt;application&gt;
  . . .
  &lt;meta-data android:name="isGame" android:value=["true" | "false"]/&gt;
 android:isGame=["true" | "false"] &gt;
  . . .
 &lt;/application&gt;
-</pre><h3>Google Play Game Services</h3>
+</pre><h2>Google Play Game Services</h2>
 <p>If your game integrates Google Play Game Services, you should keep in mind a number of considerations pertaining to achievements, sign-on, saving games, and multiplayer play.</p>
-<h4>Achievements</h4>
+<h3>Achievements</h3>
 <p>Your game should include at least five (earnable) achievements. Only a user controlling gameplay from a supported input device should be able to earn achievements.</p>
-<h4>Sign-on</h4>
+<h3>Sign-on</h3>
 <p>Your game should attempt to sign the user in on launch. If the player declines sign-in several times in a row, your game should stop asking.</p>
-<h4>Saving</h4>
-<p>We highly recommend using Play Services cloud save to store your game save. Your game should bind game saves to a specific Google account, so as to be uniquely identifiable, even across devices: Whether the player is using her phone or her tablet, the game should be able to pull the same game-save information from her account.</p>
+<h3>Saving</h3>
+<p>We highly recommend using Play Services cloud save to store your game save. Your game should bind game saves to a specific Google account, so as to be uniquely identifiable even across devices: Whether the player is using a handset or a TV, the game should be able to pull the same game-save information from his or her account.</p>
 <p>You should also provide an option in your game's UI to prompt the player to destroy save data. You might put the option in the game's <code>Settings</code> screen.</p>
-<h4>Multiplayer experience</h4>
+<h3>Multiplayer experience</h3>
 <p>A game offering a multiplayer experience must allow at least two players to enter a room.</p>
-<h3>Web</h3>
+<h2>Web</h2>
 <p>Android TV games do not support a full web browser. You should therefore avoid using generic URLs in your game.</p>
 <p>Webviews will work for logins to services like Google+ and Facebook. </p>
+

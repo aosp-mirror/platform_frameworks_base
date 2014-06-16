@@ -20,8 +20,9 @@ next.link=details.html
 </div>
 </div>
 
-<p>The Leanback support library provides several APIs for displaying and browsing media catalogs
-  on the TV devices. This lesson discusses how to use the classes provided by this library to
+<p>The <a href="{@docRoot}preview/tv/start/index.html#tv-libraries">Leanback support library</a>
+  provides several APIs for displaying and browsing media catalogs
+  on the TV devices. This guide discusses how to use the classes provided by this library to
   implement a user interface for browsing music or videos from your app's media catalog.</p>
 
 
