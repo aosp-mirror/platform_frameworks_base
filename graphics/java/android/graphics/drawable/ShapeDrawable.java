@@ -32,6 +32,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 
+import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -74,7 +75,7 @@ public class ShapeDrawable extends Drawable {
      * ShapeDrawable constructor.
      */
     public ShapeDrawable() {
-        this((ShapeState) null);
+        this(new ShapeState(null), null, null);
     }
 
     /**
@@ -83,15 +84,9 @@ public class ShapeDrawable extends Drawable {
      * @param s the Shape that this ShapeDrawable should be
      */
     public ShapeDrawable(Shape s) {
-        this((ShapeState) null);
+        this(new ShapeState(null), null, null);
 
         mShapeState.mShape = s;
-    }
-
-    private ShapeDrawable(ShapeState state) {
-        mShapeState = new ShapeState(state);
-
-        updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
     /**
@@ -405,20 +400,8 @@ public class ShapeDrawable extends Drawable {
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
 
-        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.ShapeDrawable);
-
-        int color = mShapeState.mPaint.getColor();
-        color = a.getColor(com.android.internal.R.styleable.ShapeDrawable_color, color);
-        mShapeState.mPaint.setColor(color);
-
-        boolean dither = a.getBoolean(com.android.internal.R.styleable.ShapeDrawable_dither, false);
-        mShapeState.mPaint.setDither(dither);
-
-        setIntrinsicWidth((int)
-                a.getDimension(com.android.internal.R.styleable.ShapeDrawable_width, 0f));
-        setIntrinsicHeight((int)
-                a.getDimension(com.android.internal.R.styleable.ShapeDrawable_height, 0f));
-
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.ShapeDrawable);
+        updateStateFromTypedArray(a);
         a.recycle();
 
         int type;
@@ -436,6 +419,38 @@ public class ShapeDrawable extends Drawable {
                         " for ShapeDrawable " + this);
             }
         }
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final ShapeState state = mShapeState;
+        if (state == null || state.mThemeAttrs == null) {
+            return;
+        }
+
+        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ShapeDrawable);
+        updateStateFromTypedArray(a);
+        a.recycle();
+    }
+
+    private void updateStateFromTypedArray(TypedArray a) {
+        final ShapeState state = mShapeState;
+        final Paint paint = state.mPaint;
+
+        int color = paint.getColor();
+        color = a.getColor(R.styleable.ShapeDrawable_color, color);
+        paint.setColor(color);
+
+        boolean dither = paint.isDither();
+        dither = a.getBoolean(R.styleable.ShapeDrawable_dither, dither);
+        paint.setDither(dither);
+
+        setIntrinsicWidth((int) a.getDimension(
+                R.styleable.ShapeDrawable_width, state.mIntrinsicWidth));
+        setIntrinsicHeight((int) a.getDimension(
+                R.styleable.ShapeDrawable_height, state.mIntrinsicHeight));
     }
 
     private void updateShape() {
@@ -495,6 +510,7 @@ public class ShapeDrawable extends Drawable {
      * Defines the intrinsic properties of this ShapeDrawable's Shape.
      */
     final static class ShapeState extends ConstantState {
+        int[] mThemeAttrs;
         int mChangingConfigurations;
         Paint mPaint;
         Shape mShape;
@@ -508,6 +524,7 @@ public class ShapeDrawable extends Drawable {
 
         ShapeState(ShapeState orig) {
             if (orig != null) {
+                mThemeAttrs = orig.mThemeAttrs;
                 mPaint = orig.mPaint;
                 mShape = orig.mShape;
                 mTint = orig.mTint;
@@ -523,19 +540,40 @@ public class ShapeDrawable extends Drawable {
         }
 
         @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
+        @Override
         public Drawable newDrawable() {
-            return new ShapeDrawable(this);
+            return new ShapeDrawable(this, null, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new ShapeDrawable(this);
+            return new ShapeDrawable(this, res, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new ShapeDrawable(this, res, theme);
         }
 
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }
+    }
+
+    private ShapeDrawable(ShapeState state, Resources res, Theme theme) {
+        if (theme != null && state.canApplyTheme()) {
+            mShapeState = new ShapeState(state);
+            applyTheme(theme);
+        } else {
+            mShapeState = state;
+        }
+
+        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, mShapeState.mTintMode);
     }
 
     /**
