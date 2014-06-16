@@ -537,8 +537,11 @@ void CanvasContext::invokeFunctor(Functor* functor) {
         requireGlContext();
         mode = DrawGlInfo::kModeProcess;
     }
-    (*functor)(mode, NULL);
 
+    if (mCanvas) {
+        mCanvas->interrupt();
+    }
+    (*functor)(mode, NULL);
     if (mCanvas) {
         mCanvas->resume();
     }
