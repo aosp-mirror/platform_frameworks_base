@@ -1,9 +1,9 @@
 page.title=Material Design
+page.type=design
 
 @jd:body
 
-
-<p>The Android L Developer Preview includes support for material design apps. Material design
+<p itemprop="description">The Android L Developer Preview includes support for material design apps. Material design
 is a comprehensive guide for visual, motion, and interaction design across platforms and devices.
 To use material design in your Android apps, follow the guidelines defined in the
 <a href="">material design specification</a> and use the new components and functionality

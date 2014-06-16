@@ -1,32 +1,36 @@
 page.title=Setting Up the Preview SDK
-
 @jd:body
 
-<p>The Preview SDK is available from the Android SDK Manager. This document assumes that you
-are familiar with Android Development, such as using the Android SDK Manager and creating
-projects. If you're new to Android, see
-<a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> training lesson first.</a></p>
+<p>The Preview SDK is available from the Android SDK Manager. <!-- Not yet! -->
+This document assumes that you are familiar with Android app development, such
+as using the Android SDK Manager and creating projects. If you're new to
+Android, see <a href="/training/basics/firstapp/index.html">Building Your First
+App</a> training lesson first.</a></p>
 
 <h2>Download the SDK</h2>
 
 <ol>
   <li>Start the Android SDK Manager.</li>
-  <li>In the <b>Tools</b> section, select the latest Android <b>SDK Tools</b>, <b>Platform-tools</b>, and <b>Build-tools</b>.</li>
-  <li>Select everything under the <b>Android L Developer Preview</b> section and click <b>Install packages...</b></li>
-  <li>Accept the Licensing Agreement for all of the packages and click <b>Install</b>.</li>
+  <li>In the <b>Tools</b> section, select the latest Android <b>SDK Tools</b>,
+    <b>Platform-tools</b>, and <b>Build-tools</b>.</li>
+    <!-- Android L not yet showing up in Android SDK Manager...  -->
+  <li>Select everything under the <b>Android L Developer Preview</b> section and
+    click <b>Install packages...</b></li>
+  <li>Accept the Licensing Agreement for all of the packages and click
+    <b>Install</b>.</li>
 </ol>
 
 <h2>Set up your environment</h2>
 
 <ol>
   <li>Create a new Android project with the following properties:
-    <dl>
+    <ul>
       <li>Minimum SDK Version: L</li>
       <li>Target SDK Version: L</li>
       <li>Build Target: L</li>
-    </dl>
+    </ul>
   </li>
-  <li>Set the theme for your app to use <code>Theme.Material</code>
-  <li>etc</li>
-</ol>
+  <li>Choose the theme <code>Theme.Material</code>
+    <!-- put in name as it appears in Eclipse menu? -->
 
+</ol>
