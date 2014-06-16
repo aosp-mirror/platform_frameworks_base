@@ -48,7 +48,8 @@
 #include <sys/epoll.h>
 #include <sys/ioctl.h>
 #include <sys/limits.h>
-#include <sys/sha1.h>
+
+#include <openssl/sha.h>
 
 /* this macro is used to tell if "bit" is set in "array"
  * it selects a byte from the array, and does a boolean AND
@@ -80,14 +81,14 @@ static inline const char* toString(bool value) {
 }
 
 static String8 sha1(const String8& in) {
-    SHA1_CTX ctx;
-    SHA1Init(&ctx);
-    SHA1Update(&ctx, reinterpret_cast<const u_char*>(in.string()), in.size());
-    u_char digest[SHA1_DIGEST_LENGTH];
-    SHA1Final(digest, &ctx);
+    SHA_CTX ctx;
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, reinterpret_cast<const u_char*>(in.string()), in.size());
+    u_char digest[SHA_DIGEST_LENGTH];
+    SHA1_Final(digest, &ctx);
 
     String8 out;
-    for (size_t i = 0; i < SHA1_DIGEST_LENGTH; i++) {
+    for (size_t i = 0; i < SHA_DIGEST_LENGTH; i++) {
         out.appendFormat("%02x", digest[i]);
     }
     return out;
