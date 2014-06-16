@@ -16,21 +16,29 @@
 
 package android.view;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
@@ -71,8 +79,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private Choreographer mChoreographer;
     private boolean mProfilingEnabled;
 
-    ThreadedRenderer(boolean translucent) {
-        AtlasInitializer.sInstance.init();
+    ThreadedRenderer(Context context, boolean translucent) {
+        AtlasInitializer.sInstance.init(context);
 
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
@@ -334,7 +342,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         private AtlasInitializer() {}
 
-        synchronized void init() {
+        synchronized void init(Context context) {
             if (mInitialized) return;
             IBinder binder = ServiceManager.getService("assetatlas");
             if (binder == null) return;
@@ -346,6 +354,8 @@ public class ThreadedRenderer extends HardwareRenderer {
                     if (buffer != null) {
                         long[] map = atlas.getMap();
                         if (map != null) {
+                            // TODO Remove after fixing b/15425820
+                            validateMap(context, map);
                             nSetAtlas(buffer, map);
                             mInitialized = true;
                         }
@@ -359,6 +369,30 @@ public class ThreadedRenderer extends HardwareRenderer {
                 }
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Could not acquire atlas", e);
+            }
+        }
+
+        private static void validateMap(Context context, long[] map) {
+            Log.d("Atlas", "Validating map...");
+            HashSet<Long> preloadedPointers = new HashSet<Long>();
+
+            // We only care about drawables that hold bitmaps
+            final Resources resources = context.getResources();
+            final LongSparseArray<Drawable.ConstantState> drawables = resources.getPreloadedDrawables();
+
+            final int count = drawables.size();
+            for (int i = 0; i < count; i++) {
+                final Bitmap bitmap = drawables.valueAt(i).getBitmap();
+                if (bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888) {
+                    preloadedPointers.add(bitmap.mNativeBitmap);
+                }
+            }
+
+            for (int i = 0; i < map.length; i += 4) {
+                if (!preloadedPointers.contains(map[i])) {
+                    Log.w("Atlas", String.format("Pointer 0x%X, not in getPreloadedDrawables?", map[i]));
+                    map[i] = 0;
+                }
             }
         }
     }

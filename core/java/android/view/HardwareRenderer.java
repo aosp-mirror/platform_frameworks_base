@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -452,10 +453,10 @@ public abstract class HardwareRenderer {
      *
      * @return A hardware renderer backed by OpenGL.
      */
-    static HardwareRenderer create(boolean translucent) {
+    static HardwareRenderer create(Context context, boolean translucent) {
         HardwareRenderer renderer = null;
         if (GLES20Canvas.isAvailable()) {
-            renderer = new ThreadedRenderer(translucent);
+            renderer = new ThreadedRenderer(context, translucent);
         }
         return renderer;
     }
