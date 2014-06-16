@@ -2259,7 +2259,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
             final boolean isPortrait = metrics.widthPixels < metrics.heightPixels;
-
             final int widthMode = getMode(widthMeasureSpec);
             final int heightMode = getMode(heightMeasureSpec);
 
@@ -2306,10 +2305,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             if (mOutsetBottom != null) {
                 int mode = MeasureSpec.getMode(heightMeasureSpec);
-                if (mode != MeasureSpec.UNSPECIFIED) {
+                if (mode != MeasureSpec.UNSPECIFIED && !isPortrait) {
                     int outset = (int) mOutsetBottom.getDimension(metrics);
                     int height = MeasureSpec.getSize(heightMeasureSpec);
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + outset, mode);
+                }
+                mode = MeasureSpec.getMode(widthMeasureSpec);
+                if (mode != MeasureSpec.UNSPECIFIED && isPortrait) {
+                    int outset = (int) mOutsetBottom.getDimension(metrics);
+                    int width = MeasureSpec.getSize(widthMeasureSpec);
+                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(width + outset, mode);
                 }
             }
 
