@@ -14,45 +14,39 @@
  * limitations under the License.
  */
 
-#include "android_runtime/AndroidRuntime.h"
+#define LOG_TAG "Zygote"
 
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
 #include <sys/mount.h>
 #include <linux/fs.h>
 
 #include <grp.h>
+#include <fcntl.h>
 #include <paths.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <sys/capability.h>
+#include <sys/personality.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
 
-#include "cutils/fs.h"
-#include "cutils/multiuser.h"
-#include "cutils/sched_policy.h"
-#include "utils/String8.h"
+
+#include <cutils/fs.h>
+#include <cutils/multiuser.h>
+#include <cutils/sched_policy.h>
+#include <utils/String8.h>
+#include <selinux/android.h>
+
+#include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
 #include "ScopedLocalRef.h"
 #include "ScopedPrimitiveArray.h"
 #include "ScopedUtfChars.h"
-
-#if defined(HAVE_PRCTL)
-#include <sys/prctl.h>
-#endif
-
-#include <selinux/android.h>
-
-#if defined(__linux__)
-#include <sys/personality.h>
-#include <sys/utsname.h>
-#if defined(HAVE_ANDROID_OS)
-#include <sys/capability.h>
-#endif
-#endif
 
 namespace {
 
@@ -97,11 +91,9 @@ static void SigChldHandler(int /*signal_number*/) {
       if (WTERMSIG(status) != SIGKILL) {
         ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
       }
-#ifdef WCOREDUMP
       if (WCOREDUMP(status)) {
         ALOGI("Process %d dumped core.", pid);
       }
-#endif /* ifdef WCOREDUMP */
     }
 
     // If the just-crashed process is the system_server, bring down zygote
@@ -199,8 +191,6 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
   }
 }
 
-#if defined(HAVE_ANDROID_OS)
-
 // The debug malloc library needs to know whether it's the zygote or a child.
 extern "C" int gMallocLeakZygoteChild;
 
@@ -253,17 +243,6 @@ static void SetSchedulerPolicy(JNIEnv* env) {
     RuntimeAbort(env);
   }
 }
-
-#else
-
-static int gMallocLeakZygoteChild = 0;
-
-static void EnableKeepCapabilities(JNIEnv*) {}
-static void DropCapabilitiesBoundingSet(JNIEnv*) {}
-static void SetCapabilities(JNIEnv*, int64_t, int64_t) {}
-static void SetSchedulerPolicy(JNIEnv*) {}
-
-#endif
 
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
@@ -337,7 +316,6 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode) {
   return true;
 }
 
-#if defined(__linux__)
 static bool NeedsNoRandomizeWorkaround() {
 #if !defined(__arm__)
     return false;
@@ -357,7 +335,6 @@ static bool NeedsNoRandomizeWorkaround() {
     return (major < 3) || ((major == 3) && (minor < 4));
 #endif
 }
-#endif
 
 // Utility to close down the Zygote socket file descriptors while
 // the child is still running as root with Zygote's privileges.  Each
@@ -474,7 +451,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       RuntimeAbort(env);
     }
 
-#if defined(__linux__)
     if (NeedsNoRandomizeWorkaround()) {
         // Work around ARM kernel ASLR lossage (http://b/5817320).
         int old_personality = personality(0xffffffff);
@@ -483,58 +459,49 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
             ALOGW("personality(%d) failed", new_personality);
         }
     }
-#endif
 
     SetCapabilities(env, permittedCapabilities, effectiveCapabilities);
 
     SetSchedulerPolicy(env);
 
-#if defined(HAVE_ANDROID_OS)
-    {  // NOLINT(whitespace/braces)
-      const char* se_info_c_str = NULL;
-      ScopedUtfChars* se_info = NULL;
-      if (java_se_info != NULL) {
-          se_info = new ScopedUtfChars(env, java_se_info);
-          se_info_c_str = se_info->c_str();
-          if (se_info_c_str == NULL) {
-            ALOGE("se_info_c_str == NULL");
-            RuntimeAbort(env);
-          }
-      }
-      const char* se_name_c_str = NULL;
-      ScopedUtfChars* se_name = NULL;
-      if (java_se_name != NULL) {
-          se_name = new ScopedUtfChars(env, java_se_name);
-          se_name_c_str = se_name->c_str();
-          if (se_name_c_str == NULL) {
-            ALOGE("se_name_c_str == NULL");
-            RuntimeAbort(env);
-          }
-      }
-      rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
-      if (rc == -1) {
-        ALOGE("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
-              is_system_server, se_info_c_str, se_name_c_str);
-        RuntimeAbort(env);
-      }
-
-      // Make it easier to debug audit logs by setting the main thread's name to the
-      // nice name rather than "app_process".
-      if (se_info_c_str == NULL && is_system_server) {
-        se_name_c_str = "system_server";
-      }
-      if (se_info_c_str != NULL) {
-        SetThreadName(se_name_c_str);
-      }
-
-      delete se_info;
-      delete se_name;
+    const char* se_info_c_str = NULL;
+    ScopedUtfChars* se_info = NULL;
+    if (java_se_info != NULL) {
+        se_info = new ScopedUtfChars(env, java_se_info);
+        se_info_c_str = se_info->c_str();
+        if (se_info_c_str == NULL) {
+          ALOGE("se_info_c_str == NULL");
+          RuntimeAbort(env);
+        }
     }
-#else
-    UNUSED(is_system_server);
-    UNUSED(java_se_info);
-    UNUSED(java_se_name);
-#endif
+    const char* se_name_c_str = NULL;
+    ScopedUtfChars* se_name = NULL;
+    if (java_se_name != NULL) {
+        se_name = new ScopedUtfChars(env, java_se_name);
+        se_name_c_str = se_name->c_str();
+        if (se_name_c_str == NULL) {
+          ALOGE("se_name_c_str == NULL");
+          RuntimeAbort(env);
+        }
+    }
+    rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
+    if (rc == -1) {
+      ALOGE("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
+            is_system_server, se_info_c_str, se_name_c_str);
+      RuntimeAbort(env);
+    }
+
+    // Make it easier to debug audit logs by setting the main thread's name to the
+    // nice name rather than "app_process".
+    if (se_info_c_str == NULL && is_system_server) {
+      se_name_c_str = "system_server";
+    }
+    if (se_info_c_str != NULL) {
+      SetThreadName(se_name_c_str);
+    }
+
+    delete se_info;
+    delete se_name;
 
     UnsetSigChldHandler();
 
