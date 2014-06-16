@@ -629,6 +629,16 @@ public class WifiManager {
         }
     }
 
+    /** @hide */
+    @SystemApi
+    public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
+        try {
+            return mService.getPrivilegedConfiguredNetworks();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /**
      * Add a new network description to the set of configured networks.
      * The {@code networkId} field of the supplied configuration object
