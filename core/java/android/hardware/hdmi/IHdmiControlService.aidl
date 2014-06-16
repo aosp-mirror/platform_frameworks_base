@@ -40,6 +40,6 @@ interface IHdmiControlService {
     void addDeviceEventListener(IHdmiDeviceEventListener listener);
     void deviceSelect(int logicalAddress, IHdmiControlCallback callback);
     void portSelect(int portId, IHdmiControlCallback callback);
-    void sendKeyEvent(int keyCode);
+    void sendKeyEvent(int keyCode, boolean isPressed);
     List<HdmiPortInfo> getPortInfo();
 }
