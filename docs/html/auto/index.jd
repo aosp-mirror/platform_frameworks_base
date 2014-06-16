@@ -13,29 +13,20 @@ page.type=about
 }
 </style>
 
-
-
-
-<div id="video-container">
-  <div id="video-frame">
-    <div class="video-close">
-      <span id="icon-video-close">&nbsp;</span>
-    </div>
-    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-    <div id="ytapiplayer">
-      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
-      src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
-    </div>
-  </div>
-</div>
-
+<style>
+#footer {
+    display: none;
+}
+.content-footer {
+  display: none;
+}
+</style>
 
 
 <div class="landing-body-content">
   <div class="landing-hero-container">
 
     <div class="landing-section auto-hero">
-
       <div class="landing-hero-scrim"></div>
       <div class="landing-hero-wrap">
         <div class="vertical-center-outer">
@@ -45,12 +36,11 @@ page.type=about
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android Auto</div>
                 <div class="landing-subhead hero">Entertainment and services on your dashboard</div>
-              </div>
-              <div class="landing-hero-description">
-                <p>Maps, music, search and more in your vehicle, powered by your Android phone.
-                  Voice actions and feedback. Useful local information. Clean user interfaces to
-                  keep your eyes on the road.</p>
-              </div>
+                <div class="landing-hero-description">
+                  <p>Display and control your handheld app in vehicles.
+                  Build apps with easy-to-use UI templates that
+                  let users keep ther eyes on the road.</p>
+                </div>
 
               <div class="landing-body">
                 <a href="{@docRoot}auto/overview.html" class="landing-button landing-primary" style="margin-top: 40px;">

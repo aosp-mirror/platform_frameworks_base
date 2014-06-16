@@ -1,4 +1,21 @@
 var RESOURCE_COLLECTIONS = {
+  "index/primary": {
+    "title": "",
+    "resources": [
+      "preview/index.html",
+      "preview/material/index.html",
+      "preview/material/index.html",
+      "preview/material/index.html" 
+    ]
+  },
+  "index/devices": {
+    "title": "",
+    "resources": [
+      "wear/index.html",
+      "tv/index.html",
+      "auto/index.html"
+    ]
+  },
   "launch/static": {
     "title": "",
     "resources": [
