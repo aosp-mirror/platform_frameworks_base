@@ -1439,7 +1439,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (didDexOptLibraryOrTool) {
-                pruneDexFiles(new File(dataDir, "dalvik-cache"));
+                // If we dexopted a library or tool, then something on the system has
+                // changed. Consider this significant, and wipe away all other
+                // existing dexopt files to ensure we don't leave any dangling around.
+                //
+                // Additionally, delete all dex files from the root directory
+                // since there shouldn't be any there anyway.
+                //
+                // TODO: This should be revisited because it isn't as good an indicator
+                // as it used to be. It used to include the boot classpath but at some point
+                // DexFile.isDexOptNeeded started returning false for the boot
+                // class path files in all cases. It is very possible in a
+                // small maintenance release update that the library and tool
+                // jars may be unchanged but APK could be removed resulting in
+                // unused dalvik-cache files.
+                mInstaller.pruneDexCache();
             }
 
             // Collect vendor overlay packages.
@@ -1665,45 +1679,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mRequiredVerifierPackage = getRequiredVerifierLPr();
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
-    }
-
-    private static void pruneDexFiles(File cacheDir) {
-        // If we had to do a dexopt of one of the previous
-        // things, then something on the system has changed.
-        // Consider this significant, and wipe away all other
-        // existing dexopt files to ensure we don't leave any
-        // dangling around.
-        //
-        // Additionally, delete all dex files from the root directory
-        // since there shouldn't be any there anyway.
-        //
-        // Note: This isn't as good an indicator as it used to be. It
-        // used to include the boot classpath but at some point
-        // DexFile.isDexOptNeeded started returning false for the boot
-        // class path files in all cases. It is very possible in a
-        // small maintenance release update that the library and tool
-        // jars may be unchanged but APK could be removed resulting in
-        // unused dalvik-cache files.
-        File[] files = cacheDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (!file.isDirectory()) {
-                    Slog.i(TAG, "Pruning dalvik file: " + file.getAbsolutePath());
-                    file.delete();
-                } else {
-                    File[] subDirList = file.listFiles();
-                    if (subDirList != null) {
-                        for (File subDirFile : subDirList) {
-                            final String fn = subDirFile.getName();
-                            if (fn.startsWith("data@app@") || fn.startsWith("data@app-private@")) {
-                                Slog.i(TAG, "Pruning dalvik file: " + fn);
-                                subDirFile.delete();
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Override
