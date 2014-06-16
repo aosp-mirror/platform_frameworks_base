@@ -187,4 +187,8 @@ interface IBackupTransport {
      * freeing any resources and connections used during the restore process.
      */
     void finishRestore();
+
+    long requestFullBackupTime();
+    int performFullBackup(in PackageInfo targetPackage, in ParcelFileDescriptor socket);
+    int sendBackupData(int numBytes);
 }

@@ -201,7 +201,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     private static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
     private static final String RUN_CLEAR_ACTION = "android.app.backup.intent.CLEAR";
     private static final int MSG_RUN_BACKUP = 1;
-    private static final int MSG_RUN_FULL_BACKUP = 2;
+    private static final int MSG_RUN_ADB_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
     private static final int MSG_RUN_CLEAR = 4;
     private static final int MSG_RUN_INITIALIZE = 5;
@@ -209,10 +209,11 @@ public class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_TIMEOUT = 7;
     private static final int MSG_RESTORE_TIMEOUT = 8;
     private static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
-    private static final int MSG_RUN_FULL_RESTORE = 10;
+    private static final int MSG_RUN_ADB_RESTORE = 10;
     private static final int MSG_RETRY_INIT = 11;
     private static final int MSG_RETRY_CLEAR = 12;
     private static final int MSG_WIDGET_BROADCAST = 13;
+    private static final int MSG_RUN_FULL_TRANSPORT_BACKUP = 14;
 
     // backup task state machine tick
     static final int MSG_BACKUP_RESTORE_STEP = 20;
@@ -448,11 +449,12 @@ public class BackupManagerService extends IBackupManager.Stub {
         public boolean doWidgets;
         public boolean allApps;
         public boolean includeSystem;
+        public boolean doCompress;
         public String[] packages;
 
         FullBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveObbs,
                 boolean saveShared, boolean alsoWidgets, boolean doAllApps, boolean doSystem,
-                String[] pkgList) {
+                boolean compress, String[] pkgList) {
             fd = output;
             includeApks = saveApks;
             includeObbs = saveObbs;
@@ -460,6 +462,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             doWidgets = alsoWidgets;
             allApps = doAllApps;
             includeSystem = doSystem;
+            doCompress = compress;
             packages = pkgList;
         }
     }
@@ -646,17 +649,25 @@ public class BackupManagerService extends IBackupManager.Stub {
                 break;
             }
 
-            case MSG_RUN_FULL_BACKUP:
+            case MSG_RUN_ADB_BACKUP:
             {
                 // TODO: refactor full backup to be a looper-based state machine
                 // similar to normal backup/restore.
                 FullBackupParams params = (FullBackupParams)msg.obj;
-                PerformFullBackupTask task = new PerformFullBackupTask(params.fd,
+                PerformAdbBackupTask task = new PerformAdbBackupTask(params.fd,
                         params.observer, params.includeApks, params.includeObbs,
                         params.includeShared, params.doWidgets,
                         params.curPassword, params.encryptPassword,
-                        params.allApps, params.includeSystem, params.packages, params.latch);
-                (new Thread(task)).start();
+                        params.allApps, params.includeSystem, params.doCompress,
+                        params.packages, params.latch);
+                (new Thread(task, "adb-backup")).start();
+                break;
+            }
+
+            case MSG_RUN_FULL_TRANSPORT_BACKUP:
+            {
+                PerformFullTransportBackupTask task = (PerformFullTransportBackupTask) msg.obj;
+                (new Thread(task, "transport-backup")).start();
                 break;
             }
 
@@ -673,7 +684,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 break;
             }
 
-            case MSG_RUN_FULL_RESTORE:
+            case MSG_RUN_ADB_RESTORE:
             {
                 // TODO: refactor full restore to be a looper-based state machine
                 // similar to normal backup/restore.
@@ -681,7 +692,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 PerformFullRestoreTask task = new PerformFullRestoreTask(params.fd,
                         params.curPassword, params.encryptPassword,
                         params.observer, params.latch);
-                (new Thread(task)).start();
+                (new Thread(task, "adb-restore")).start();
                 break;
             }
 
@@ -2618,13 +2629,6 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Full backup/restore to a file/socket -----
 
-    abstract class ObbServiceClient {
-        public IObbBackupService mObbService;
-        public void setObbBinder(IObbBackupService binder) {
-            mObbService = binder;
-        }
-    }
-
     class FullBackupObbConnection implements ServiceConnection {
         volatile IObbBackupService mService;
 
@@ -2736,24 +2740,15 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    class PerformFullBackupTask extends ObbServiceClient implements Runnable {
-        ParcelFileDescriptor mOutputFile;
-        DeflaterOutputStream mDeflater;
+    // Core logic for performing one package's full backup, gathering the tarball from the
+    // application and emitting it to the designated OutputStream.
+    class FullBackupEngine {
+        OutputStream mOutput;
         IFullBackupRestoreObserver mObserver;
-        boolean mIncludeApks;
-        boolean mIncludeObbs;
-        boolean mIncludeShared;
-        boolean mDoWidgets;
-        boolean mAllApps;
-        final boolean mIncludeSystem;
-        ArrayList<String> mPackages;
-        String mCurrentPassword;
-        String mEncryptPassword;
-        AtomicBoolean mLatchObject;
         File mFilesDir;
         File mManifestFile;
         File mMetadataFile;
-        
+        boolean mIncludeApks;
 
         class FullBackupRunner implements Runnable {
             PackageInfo mPackage;
@@ -2823,326 +2818,17 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
-                boolean includeApks, boolean includeObbs, boolean includeShared,
-                boolean doWidgets, String curPassword, String encryptPassword, boolean doAllApps,
-                boolean doSystem, String[] packages, AtomicBoolean latch) {
-            mOutputFile = fd;
-            mObserver = observer;
-            mIncludeApks = includeApks;
-            mIncludeObbs = includeObbs;
-            mIncludeShared = includeShared;
-            mDoWidgets = doWidgets;
-            mAllApps = doAllApps;
-            mIncludeSystem = doSystem;
-            mPackages = (packages == null)
-                    ? new ArrayList<String>()
-                    : new ArrayList<String>(Arrays.asList(packages));
-            mCurrentPassword = curPassword;
-            // when backing up, if there is a current backup password, we require that
-            // the user use a nonempty encryption password as well.  if one is supplied
-            // in the UI we use that, but if the UI was left empty we fall back to the
-            // current backup password (which was supplied by the user as well).
-            if (encryptPassword == null || "".equals(encryptPassword)) {
-                mEncryptPassword = curPassword;
-            } else {
-                mEncryptPassword = encryptPassword;
-            }
-            mLatchObject = latch;
-
+        FullBackupEngine(OutputStream output, String packageName, boolean alsoApks) {
+            mOutput = output;
+            mIncludeApks = alsoApks;
             mFilesDir = new File("/data/system");
             mManifestFile = new File(mFilesDir, BACKUP_MANIFEST_FILENAME);
             mMetadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
         }
 
-        void addPackagesToSet(TreeMap<String, PackageInfo> set, List<String> pkgNames) {
-            for (String pkgName : pkgNames) {
-                if (!set.containsKey(pkgName)) {
-                    try {
-                        PackageInfo info = mPackageManager.getPackageInfo(pkgName,
-                                PackageManager.GET_SIGNATURES);
-                        set.put(pkgName, info);
-                    } catch (NameNotFoundException e) {
-                        Slog.w(TAG, "Unknown package " + pkgName + ", skipping");
-                    }
-                }
-            }
-        }
 
-        @Override
-        public void run() {
-            Slog.i(TAG, "--- Performing full-dataset backup ---");
-
-            TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<String, PackageInfo>();
-            FullBackupObbConnection obbConnection = new FullBackupObbConnection();
-            obbConnection.establish();  // we'll want this later
-
-            sendStartBackup();
-
-            // doAllApps supersedes the package set if any
-            if (mAllApps) {
-                List<PackageInfo> allPackages = mPackageManager.getInstalledPackages(
-                        PackageManager.GET_SIGNATURES);
-                for (int i = 0; i < allPackages.size(); i++) {
-                    PackageInfo pkg = allPackages.get(i);
-                    // Exclude system apps if we've been asked to do so
-                    if (mIncludeSystem == true
-                            || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
-                        packagesToBackup.put(pkg.packageName, pkg);
-                    }
-                }
-            }
-
-            // If we're doing widget state as well, ensure that we have all the involved
-            // host & provider packages in the set
-            if (mDoWidgets) {
-                List<String> pkgs =
-                        AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_OWNER);
-                if (pkgs != null) {
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "Adding widget participants to backup set:");
-                        StringBuilder sb = new StringBuilder(128);
-                        sb.append("   ");
-                        for (String s : pkgs) {
-                            sb.append(' ');
-                            sb.append(s);
-                        }
-                        Slog.i(TAG, sb.toString());
-                    }
-                    addPackagesToSet(packagesToBackup, pkgs);
-                }
-            }
-
-            // Now process the command line argument packages, if any. Note that explicitly-
-            // named system-partition packages will be included even if includeSystem was
-            // set to false.
-            if (mPackages != null) {
-                addPackagesToSet(packagesToBackup, mPackages);
-            }
-
-            // Now we cull any inapplicable / inappropriate packages from the set
-            Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
-            while (iter.hasNext()) {
-                PackageInfo pkg = iter.next().getValue();
-                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
-                        || pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
-                    // Cull any packages that have indicated that backups are not permitted, as well
-                    // as any explicit mention of the 'special' shared-storage agent package (we
-                    // handle that one at the end).
-                    iter.remove();
-                } else if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
-                        && (pkg.applicationInfo.backupAgentName == null)) {
-                    // Cull any packages that run as system-domain uids but do not define their
-                    // own backup agents
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "... ignoring non-agent system package " + pkg.packageName);
-                    }
-                    iter.remove();
-                }
-            }
-
-            // flatten the set of packages now so we can explicitly control the ordering
-            ArrayList<PackageInfo> backupQueue =
-                    new ArrayList<PackageInfo>(packagesToBackup.values());
-
-            FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
-            OutputStream out = null;
-
-            PackageInfo pkg = null;
-            try {
-                boolean encrypting = (mEncryptPassword != null && mEncryptPassword.length() > 0);
-                boolean compressing = COMPRESS_FULL_BACKUPS;
-                OutputStream finalOutput = ofstream;
-
-                // Verify that the given password matches the currently-active
-                // backup password, if any
-                if (!backupPasswordMatches(mCurrentPassword)) {
-                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                    return;
-                }
-
-                // Write the global file header.  All strings are UTF-8 encoded; lines end
-                // with a '\n' byte.  Actual backup data begins immediately following the
-                // final '\n'.
-                //
-                // line 1: "ANDROID BACKUP"
-                // line 2: backup file format version, currently "2"
-                // line 3: compressed?  "0" if not compressed, "1" if compressed.
-                // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
-                //
-                // When line 4 is not "none", then additional header data follows:
-                //
-                // line 5: user password salt [hex]
-                // line 6: master key checksum salt [hex]
-                // line 7: number of PBKDF2 rounds to use (same for user & master) [decimal]
-                // line 8: IV of the user key [hex]
-                // line 9: master key blob [hex]
-                //     IV of the master key, master key itself, master key checksum hash
-                //
-                // The master key checksum is the master key plus its checksum salt, run through
-                // 10k rounds of PBKDF2.  This is used to verify that the user has supplied the
-                // correct password for decrypting the archive:  the master key decrypted from
-                // the archive using the user-supplied password is also run through PBKDF2 in
-                // this way, and if the result does not match the checksum as stored in the
-                // archive, then we know that the user-supplied password does not match the
-                // archive's.
-                StringBuilder headerbuf = new StringBuilder(1024);
-
-                headerbuf.append(BACKUP_FILE_HEADER_MAGIC);
-                headerbuf.append(BACKUP_FILE_VERSION); // integer, no trailing \n
-                headerbuf.append(compressing ? "\n1\n" : "\n0\n");
-
-                try {
-                    // Set up the encryption stage if appropriate, and emit the correct header
-                    if (encrypting) {
-                        finalOutput = emitAesBackupHeader(headerbuf, finalOutput);
-                    } else {
-                        headerbuf.append("none\n");
-                    }
-
-                    byte[] header = headerbuf.toString().getBytes("UTF-8");
-                    ofstream.write(header);
-
-                    // Set up the compression stage feeding into the encryption stage (if any)
-                    if (compressing) {
-                        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-                        finalOutput = new DeflaterOutputStream(finalOutput, deflater, true);
-                    }
-
-                    out = finalOutput;
-                } catch (Exception e) {
-                    // Should never happen!
-                    Slog.e(TAG, "Unable to emit archive header", e);
-                    return;
-                }
-
-                // Shared storage if requested
-                if (mIncludeShared) {
-                    try {
-                        pkg = mPackageManager.getPackageInfo(SHARED_BACKUP_AGENT_PACKAGE, 0);
-                        backupQueue.add(pkg);
-                    } catch (NameNotFoundException e) {
-                        Slog.e(TAG, "Unable to find shared-storage backup handler");
-                    }
-                }
-
-                // Now back up the app data via the agent mechanism
-                int N = backupQueue.size();
-                for (int i = 0; i < N; i++) {
-                    pkg = backupQueue.get(i);
-                    backupOnePackage(pkg, out);
-
-                    // after the app's agent runs to handle its private filesystem
-                    // contents, back up any OBB content it has on its behalf.
-                    if (mIncludeObbs) {
-                        boolean obbOkay = obbConnection.backupObbs(pkg, out);
-                        if (!obbOkay) {
-                            throw new RuntimeException("Failure writing OBB stack for " + pkg);
-                        }
-                    }
-                }
-
-                // Done!
-                finalizeBackup(out);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "App died during full backup");
-            } catch (Exception e) {
-                Slog.e(TAG, "Internal exception during full backup", e);
-            } finally {
-                tearDown(pkg);
-                try {
-                    if (out != null) out.close();
-                    mOutputFile.close();
-                } catch (IOException e) {
-                    /* nothing we can do about this */
-                }
-                synchronized (mCurrentOpLock) {
-                    mCurrentOperations.clear();
-                }
-                synchronized (mLatchObject) {
-                    mLatchObject.set(true);
-                    mLatchObject.notifyAll();
-                }
-                sendEndBackup();
-                obbConnection.tearDown();
-                if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
-                mWakelock.release();
-            }
-        }
-
-        private OutputStream emitAesBackupHeader(StringBuilder headerbuf,
-                OutputStream ofstream) throws Exception {
-            // User key will be used to encrypt the master key.
-            byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
-            SecretKey userKey = buildPasswordKey(PBKDF_CURRENT, mEncryptPassword, newUserSalt,
-                    PBKDF2_HASH_ROUNDS);
-
-            // the master key is random for each backup
-            byte[] masterPw = new byte[256 / 8];
-            mRng.nextBytes(masterPw);
-            byte[] checksumSalt = randomBytes(PBKDF2_SALT_SIZE);
-
-            // primary encryption of the datastream with the random key
-            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec masterKeySpec = new SecretKeySpec(masterPw, "AES");
-            c.init(Cipher.ENCRYPT_MODE, masterKeySpec);
-            OutputStream finalOutput = new CipherOutputStream(ofstream, c);
-
-            // line 4: name of encryption algorithm
-            headerbuf.append(ENCRYPTION_ALGORITHM_NAME);
-            headerbuf.append('\n');
-            // line 5: user password salt [hex]
-            headerbuf.append(byteArrayToHex(newUserSalt));
-            headerbuf.append('\n');
-            // line 6: master key checksum salt [hex]
-            headerbuf.append(byteArrayToHex(checksumSalt));
-            headerbuf.append('\n');
-            // line 7: number of PBKDF2 rounds used [decimal]
-            headerbuf.append(PBKDF2_HASH_ROUNDS);
-            headerbuf.append('\n');
-
-            // line 8: IV of the user key [hex]
-            Cipher mkC = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            mkC.init(Cipher.ENCRYPT_MODE, userKey);
-
-            byte[] IV = mkC.getIV();
-            headerbuf.append(byteArrayToHex(IV));
-            headerbuf.append('\n');
-
-            // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
-            //    [byte] IV length = Niv
-            //    [array of Niv bytes] IV itself
-            //    [byte] master key length = Nmk
-            //    [array of Nmk bytes] master key itself
-            //    [byte] MK checksum hash length = Nck
-            //    [array of Nck bytes] master key checksum hash
-            //
-            // The checksum is the (master key + checksum salt), run through the
-            // stated number of PBKDF2 rounds
-            IV = c.getIV();
-            byte[] mk = masterKeySpec.getEncoded();
-            byte[] checksum = makeKeyChecksum(PBKDF_CURRENT, masterKeySpec.getEncoded(),
-                    checksumSalt, PBKDF2_HASH_ROUNDS);
-
-            ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
-                    + checksum.length + 3);
-            DataOutputStream mkOut = new DataOutputStream(blob);
-            mkOut.writeByte(IV.length);
-            mkOut.write(IV);
-            mkOut.writeByte(mk.length);
-            mkOut.write(mk);
-            mkOut.writeByte(checksum.length);
-            mkOut.write(checksum);
-            mkOut.flush();
-            byte[] encryptedMk = mkC.doFinal(blob.toByteArray());
-            headerbuf.append(byteArrayToHex(encryptedMk));
-            headerbuf.append('\n');
-
-            return finalOutput;
-        }
-
-        private void backupOnePackage(PackageInfo pkg, OutputStream out)
-                throws RemoteException {
+        public int backupOnePackage(PackageInfo pkg) throws RemoteException {
+            int result = BackupTransport.TRANSPORT_OK;
             Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
 
             IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
@@ -3162,47 +2848,52 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                     byte[] widgetBlob = AppWidgetBackupBridge.getWidgetState(pkg.packageName,
                             UserHandle.USER_OWNER);
-                    sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                     final int token = generateToken();
                     FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
                             token, sendApk, !isSharedStorage, widgetBlob);
                     pipes[1].close();   // the runner has dup'd it
                     pipes[1] = null;
-                    Thread t = new Thread(runner);
+                    Thread t = new Thread(runner, "app-data-runner");
                     t.start();
 
-                    // Now pull data from the app and stuff it into the compressor
+                    // Now pull data from the app and stuff it into the output
                     try {
-                        routeSocketDataToOutput(pipes[0], out);
+                        routeSocketDataToOutput(pipes[0], mOutput);
                     } catch (IOException e) {
                         Slog.i(TAG, "Caught exception reading from agent", e);
+                        result = BackupTransport.AGENT_ERROR;
                     }
 
                     if (!waitUntilOperationComplete(token)) {
                         Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
+                        result = BackupTransport.AGENT_ERROR;
                     } else {
                         if (DEBUG) Slog.d(TAG, "Full package backup success: " + pkg.packageName);
                     }
 
                 } catch (IOException e) {
                     Slog.e(TAG, "Error backing up " + pkg.packageName, e);
+                    result = BackupTransport.AGENT_ERROR;
                 } finally {
                     try {
                         // flush after every package
-                        out.flush();
+                        mOutput.flush();
                         if (pipes != null) {
                             if (pipes[0] != null) pipes[0].close();
                             if (pipes[1] != null) pipes[1].close();
                         }
                     } catch (IOException e) {
                         Slog.w(TAG, "Error bringing down backup stack");
+                        result = BackupTransport.TRANSPORT_ERROR;
                     }
                 }
             } else {
                 Slog.w(TAG, "Unable to bind to full agent for " + pkg.packageName);
+                result = BackupTransport.AGENT_ERROR;
             }
             tearDown(pkg);
+            return result;
         }
 
         private void writeApkToBackup(PackageInfo pkg, BackupDataOutput output) {
@@ -3229,16 +2920,6 @@ public class BackupManagerService extends IBackupManager.Stub {
                                 obbDirName, obb.getAbsolutePath(), output);
                     }
                 }
-            }
-        }
-
-        private void finalizeBackup(OutputStream out) {
-            try {
-                // A standard 'tar' EOF sequence: two 512-byte blocks of all zeroes.
-                byte[] eof = new byte[512 * 2]; // newly allocated == zero filled
-                out.write(eof);
-            } catch (IOException e) {
-                Slog.w(TAG, "Error attempting to finalize backup stream");
             }
         }
 
@@ -3332,7 +3013,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                             if (MORE_DEBUG) Slog.d(TAG, "Backup complete, killing host process");
                             mActivityManager.killApplicationProcess(app.processName, app.uid);
                         } else {
-                            if (MORE_DEBUG) Slog.d(TAG, "Not killing after restore: " + app.processName);
+                            if (MORE_DEBUG) Slog.d(TAG, "Not killing after backup: " + app.processName);
                         }
                     } catch (RemoteException e) {
                         Slog.d(TAG, "Lost app trying to shut down");
@@ -3340,9 +3021,18 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         }
+    }
+
+    // Generic driver skeleton for full backup operations
+    abstract class FullBackupTask implements Runnable {
+        IFullBackupRestoreObserver mObserver;
+
+        FullBackupTask(IFullBackupRestoreObserver observer) {
+            mObserver = observer;
+        }
 
         // wrappers for observer use
-        void sendStartBackup() {
+        final void sendStartBackup() {
             if (mObserver != null) {
                 try {
                     mObserver.onStartBackup();
@@ -3353,7 +3043,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        void sendOnBackupPackage(String name) {
+        final void sendOnBackupPackage(String name) {
             if (mObserver != null) {
                 try {
                     // TODO: use a more user-friendly name string
@@ -3365,7 +3055,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        void sendEndBackup() {
+        final void sendEndBackup() {
             if (mObserver != null) {
                 try {
                     mObserver.onEndBackup();
@@ -3377,6 +3067,556 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Full backup task variant used for adb backup
+    class PerformAdbBackupTask extends FullBackupTask {
+        FullBackupEngine mBackupEngine;
+        final AtomicBoolean mLatch;
+
+        ParcelFileDescriptor mOutputFile;
+        DeflaterOutputStream mDeflater;
+        boolean mIncludeApks;
+        boolean mIncludeObbs;
+        boolean mIncludeShared;
+        boolean mDoWidgets;
+        boolean mAllApps;
+        boolean mIncludeSystem;
+        boolean mCompress;
+        ArrayList<String> mPackages;
+        String mCurrentPassword;
+        String mEncryptPassword;
+        
+        PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
+                boolean includeApks, boolean includeObbs, boolean includeShared,
+                boolean doWidgets, String curPassword, String encryptPassword, boolean doAllApps,
+                boolean doSystem, boolean doCompress, String[] packages, AtomicBoolean latch) {
+            super(observer);
+            mLatch = latch;
+
+            mOutputFile = fd;
+            mIncludeApks = includeApks;
+            mIncludeObbs = includeObbs;
+            mIncludeShared = includeShared;
+            mDoWidgets = doWidgets;
+            mAllApps = doAllApps;
+            mIncludeSystem = doSystem;
+            mPackages = (packages == null)
+                    ? new ArrayList<String>()
+                    : new ArrayList<String>(Arrays.asList(packages));
+            mCurrentPassword = curPassword;
+            // when backing up, if there is a current backup password, we require that
+            // the user use a nonempty encryption password as well.  if one is supplied
+            // in the UI we use that, but if the UI was left empty we fall back to the
+            // current backup password (which was supplied by the user as well).
+            if (encryptPassword == null || "".equals(encryptPassword)) {
+                mEncryptPassword = curPassword;
+            } else {
+                mEncryptPassword = encryptPassword;
+            }
+            mCompress = doCompress;
+        }
+
+        void addPackagesToSet(TreeMap<String, PackageInfo> set, List<String> pkgNames) {
+            for (String pkgName : pkgNames) {
+                if (!set.containsKey(pkgName)) {
+                    try {
+                        PackageInfo info = mPackageManager.getPackageInfo(pkgName,
+                                PackageManager.GET_SIGNATURES);
+                        set.put(pkgName, info);
+                    } catch (NameNotFoundException e) {
+                        Slog.w(TAG, "Unknown package " + pkgName + ", skipping");
+                    }
+                }
+            }
+        }
+
+        private OutputStream emitAesBackupHeader(StringBuilder headerbuf,
+                OutputStream ofstream) throws Exception {
+            // User key will be used to encrypt the master key.
+            byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
+            SecretKey userKey = buildPasswordKey(PBKDF_CURRENT, mEncryptPassword, newUserSalt,
+                    PBKDF2_HASH_ROUNDS);
+
+            // the master key is random for each backup
+            byte[] masterPw = new byte[256 / 8];
+            mRng.nextBytes(masterPw);
+            byte[] checksumSalt = randomBytes(PBKDF2_SALT_SIZE);
+
+            // primary encryption of the datastream with the random key
+            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec masterKeySpec = new SecretKeySpec(masterPw, "AES");
+            c.init(Cipher.ENCRYPT_MODE, masterKeySpec);
+            OutputStream finalOutput = new CipherOutputStream(ofstream, c);
+
+            // line 4: name of encryption algorithm
+            headerbuf.append(ENCRYPTION_ALGORITHM_NAME);
+            headerbuf.append('\n');
+            // line 5: user password salt [hex]
+            headerbuf.append(byteArrayToHex(newUserSalt));
+            headerbuf.append('\n');
+            // line 6: master key checksum salt [hex]
+            headerbuf.append(byteArrayToHex(checksumSalt));
+            headerbuf.append('\n');
+            // line 7: number of PBKDF2 rounds used [decimal]
+            headerbuf.append(PBKDF2_HASH_ROUNDS);
+            headerbuf.append('\n');
+
+            // line 8: IV of the user key [hex]
+            Cipher mkC = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            mkC.init(Cipher.ENCRYPT_MODE, userKey);
+
+            byte[] IV = mkC.getIV();
+            headerbuf.append(byteArrayToHex(IV));
+            headerbuf.append('\n');
+
+            // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
+            //    [byte] IV length = Niv
+            //    [array of Niv bytes] IV itself
+            //    [byte] master key length = Nmk
+            //    [array of Nmk bytes] master key itself
+            //    [byte] MK checksum hash length = Nck
+            //    [array of Nck bytes] master key checksum hash
+            //
+            // The checksum is the (master key + checksum salt), run through the
+            // stated number of PBKDF2 rounds
+            IV = c.getIV();
+            byte[] mk = masterKeySpec.getEncoded();
+            byte[] checksum = makeKeyChecksum(PBKDF_CURRENT, masterKeySpec.getEncoded(),
+                    checksumSalt, PBKDF2_HASH_ROUNDS);
+
+            ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
+                    + checksum.length + 3);
+            DataOutputStream mkOut = new DataOutputStream(blob);
+            mkOut.writeByte(IV.length);
+            mkOut.write(IV);
+            mkOut.writeByte(mk.length);
+            mkOut.write(mk);
+            mkOut.writeByte(checksum.length);
+            mkOut.write(checksum);
+            mkOut.flush();
+            byte[] encryptedMk = mkC.doFinal(blob.toByteArray());
+            headerbuf.append(byteArrayToHex(encryptedMk));
+            headerbuf.append('\n');
+
+            return finalOutput;
+        }
+
+        private void finalizeBackup(OutputStream out) {
+            try {
+                // A standard 'tar' EOF sequence: two 512-byte blocks of all zeroes.
+                byte[] eof = new byte[512 * 2]; // newly allocated == zero filled
+                out.write(eof);
+            } catch (IOException e) {
+                Slog.w(TAG, "Error attempting to finalize backup stream");
+            }
+        }
+
+        @Override
+        public void run() {
+            Slog.i(TAG, "--- Performing full-dataset adb backup ---");
+
+            TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<String, PackageInfo>();
+            FullBackupObbConnection obbConnection = new FullBackupObbConnection();
+            obbConnection.establish();  // we'll want this later
+
+            sendStartBackup();
+
+            // doAllApps supersedes the package set if any
+            if (mAllApps) {
+                List<PackageInfo> allPackages = mPackageManager.getInstalledPackages(
+                        PackageManager.GET_SIGNATURES);
+                for (int i = 0; i < allPackages.size(); i++) {
+                    PackageInfo pkg = allPackages.get(i);
+                    // Exclude system apps if we've been asked to do so
+                    if (mIncludeSystem == true
+                            || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                        packagesToBackup.put(pkg.packageName, pkg);
+                    }
+                }
+            }
+
+            // If we're doing widget state as well, ensure that we have all the involved
+            // host & provider packages in the set
+            if (mDoWidgets) {
+                List<String> pkgs =
+                        AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_OWNER);
+                if (pkgs != null) {
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "Adding widget participants to backup set:");
+                        StringBuilder sb = new StringBuilder(128);
+                        sb.append("   ");
+                        for (String s : pkgs) {
+                            sb.append(' ');
+                            sb.append(s);
+                        }
+                        Slog.i(TAG, sb.toString());
+                    }
+                    addPackagesToSet(packagesToBackup, pkgs);
+                }
+            }
+
+            // Now process the command line argument packages, if any. Note that explicitly-
+            // named system-partition packages will be included even if includeSystem was
+            // set to false.
+            if (mPackages != null) {
+                addPackagesToSet(packagesToBackup, mPackages);
+            }
+
+            // Now we cull any inapplicable / inappropriate packages from the set
+            Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
+            while (iter.hasNext()) {
+                PackageInfo pkg = iter.next().getValue();
+                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
+                        || pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
+                    // Cull any packages that have indicated that backups are not permitted, as well
+                    // as any explicit mention of the 'special' shared-storage agent package (we
+                    // handle that one at the end).
+                    iter.remove();
+                } else if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                        && (pkg.applicationInfo.backupAgentName == null)) {
+                    // Cull any packages that run as system-domain uids but do not define their
+                    // own backup agents
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "... ignoring non-agent system package " + pkg.packageName);
+                    }
+                    iter.remove();
+                }
+            }
+
+            // flatten the set of packages now so we can explicitly control the ordering
+            ArrayList<PackageInfo> backupQueue =
+                    new ArrayList<PackageInfo>(packagesToBackup.values());
+            FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
+            OutputStream out = null;
+
+            PackageInfo pkg = null;
+            try {
+                boolean encrypting = (mEncryptPassword != null && mEncryptPassword.length() > 0);
+                OutputStream finalOutput = ofstream;
+
+                // Verify that the given password matches the currently-active
+                // backup password, if any
+                if (!backupPasswordMatches(mCurrentPassword)) {
+                    if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                    return;
+                }
+
+                // Write the global file header.  All strings are UTF-8 encoded; lines end
+                // with a '\n' byte.  Actual backup data begins immediately following the
+                // final '\n'.
+                //
+                // line 1: "ANDROID BACKUP"
+                // line 2: backup file format version, currently "2"
+                // line 3: compressed?  "0" if not compressed, "1" if compressed.
+                // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
+                //
+                // When line 4 is not "none", then additional header data follows:
+                //
+                // line 5: user password salt [hex]
+                // line 6: master key checksum salt [hex]
+                // line 7: number of PBKDF2 rounds to use (same for user & master) [decimal]
+                // line 8: IV of the user key [hex]
+                // line 9: master key blob [hex]
+                //     IV of the master key, master key itself, master key checksum hash
+                //
+                // The master key checksum is the master key plus its checksum salt, run through
+                // 10k rounds of PBKDF2.  This is used to verify that the user has supplied the
+                // correct password for decrypting the archive:  the master key decrypted from
+                // the archive using the user-supplied password is also run through PBKDF2 in
+                // this way, and if the result does not match the checksum as stored in the
+                // archive, then we know that the user-supplied password does not match the
+                // archive's.
+                StringBuilder headerbuf = new StringBuilder(1024);
+
+                headerbuf.append(BACKUP_FILE_HEADER_MAGIC);
+                headerbuf.append(BACKUP_FILE_VERSION); // integer, no trailing \n
+                headerbuf.append(mCompress ? "\n1\n" : "\n0\n");
+
+                try {
+                    // Set up the encryption stage if appropriate, and emit the correct header
+                    if (encrypting) {
+                        finalOutput = emitAesBackupHeader(headerbuf, finalOutput);
+                    } else {
+                        headerbuf.append("none\n");
+                    }
+
+                    byte[] header = headerbuf.toString().getBytes("UTF-8");
+                    ofstream.write(header);
+
+                    // Set up the compression stage feeding into the encryption stage (if any)
+                    if (mCompress) {
+                        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
+                        finalOutput = new DeflaterOutputStream(finalOutput, deflater, true);
+                    }
+
+                    out = finalOutput;
+                } catch (Exception e) {
+                    // Should never happen!
+                    Slog.e(TAG, "Unable to emit archive header", e);
+                    return;
+                }
+
+                // Shared storage if requested
+                if (mIncludeShared) {
+                    try {
+                        pkg = mPackageManager.getPackageInfo(SHARED_BACKUP_AGENT_PACKAGE, 0);
+                        backupQueue.add(pkg);
+                    } catch (NameNotFoundException e) {
+                        Slog.e(TAG, "Unable to find shared-storage backup handler");
+                    }
+                }
+
+                // Now actually run the constructed backup sequence
+                int N = backupQueue.size();
+                for (int i = 0; i < N; i++) {
+                    pkg = backupQueue.get(i);
+                    final boolean isSharedStorage =
+                            pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
+
+                    mBackupEngine = new FullBackupEngine(out, pkg.packageName, mIncludeApks);
+                    sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
+                    mBackupEngine.backupOnePackage(pkg);
+
+                    // after the app's agent runs to handle its private filesystem
+                    // contents, back up any OBB content it has on its behalf.
+                    if (mIncludeObbs) {
+                        boolean obbOkay = obbConnection.backupObbs(pkg, out);
+                        if (!obbOkay) {
+                            throw new RuntimeException("Failure writing OBB stack for " + pkg);
+                        }
+                    }
+                }
+
+                // Done!
+                finalizeBackup(out);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "App died during full backup");
+            } catch (Exception e) {
+                Slog.e(TAG, "Internal exception during full backup", e);
+            } finally {
+                try {
+                    if (out != null) out.close();
+                    mOutputFile.close();
+                } catch (IOException e) {
+                    /* nothing we can do about this */
+                }
+                synchronized (mCurrentOpLock) {
+                    mCurrentOperations.clear();
+                }
+                synchronized (mLatch) {
+                    mLatch.set(true);
+                    mLatch.notifyAll();
+                }
+                sendEndBackup();
+                obbConnection.tearDown();
+                if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
+                mWakelock.release();
+            }
+        }
+    }
+
+    // Full backup task extension used for transport-oriented operation
+    class PerformFullTransportBackupTask extends FullBackupTask {
+        static final String TAG = "PFTBT";
+        ArrayList<PackageInfo> mPackages;
+        AtomicBoolean mLatch;
+
+        PerformFullTransportBackupTask(IFullBackupRestoreObserver observer, 
+                String[] whichPackages, AtomicBoolean latch) {
+            super(observer);
+            mLatch = latch;
+            mPackages = new ArrayList<PackageInfo>(whichPackages.length);
+
+            for (String pkg : whichPackages) {
+                try {
+                    PackageInfo info = mPackageManager.getPackageInfo(pkg,
+                            PackageManager.GET_SIGNATURES);
+                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
+                            || pkg.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
+                        // Cull any packages that have indicated that backups are not permitted,
+                        // as well as any explicit mention of the 'special' shared-storage agent
+                        // package (we handle that one at the end).
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "Ignoring opted-out package " + pkg);
+                        }
+                        continue;
+                    } else if ((info.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                            && (info.applicationInfo.backupAgentName == null)) {
+                        // Cull any packages that run as system-domain uids but do not define their
+                        // own backup agents
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "Ignoring non-agent system package " + pkg);
+                        }
+                        continue;
+                    }
+                    mPackages.add(info);
+                } catch (NameNotFoundException e) {
+                    Slog.i(TAG, "Requested package " + pkg + " not found; ignoring");
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            IBackupTransport transport = getTransport(mCurrentTransport);
+            if (transport == null) {
+                Slog.w(TAG, "Transport not present; full data backup not performed");
+                return;
+            }
+
+            // data from the app, passed to us for bridging to the transport
+            ParcelFileDescriptor[] enginePipes = null;
+
+            // Pipe through which we write data to the transport
+            ParcelFileDescriptor[] transportPipes = null;
+
+            try {
+                // Set up to send data to the transport
+                if (transport != null) {
+                    for (PackageInfo target : mPackages) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Initiating full-data transport backup of "
+                                    + target.packageName);
+                        }
+                        transportPipes = ParcelFileDescriptor.createPipe();
+
+                        // Tell the transport the data's coming
+                        int result = transport.performFullBackup(target, transportPipes[0]);
+                        if (result == BackupTransport.TRANSPORT_OK) {
+                            // The transport has its own copy of the read end of the pipe,
+                            // so close ours now
+                            transportPipes[0].close();
+                            transportPipes[0] = null;
+
+                            // Now set up the backup engine / data source end of things
+                            enginePipes = ParcelFileDescriptor.createPipe();
+                            AtomicBoolean runnerLatch = new AtomicBoolean(false);
+                            SinglePackageBackupRunner backupRunner =
+                                    new SinglePackageBackupRunner(enginePipes[1], target,
+                                            runnerLatch);
+                            // The runner dup'd the pipe half, so we close it here
+                            enginePipes[1].close();
+                            enginePipes[1] = null;
+
+                            // Spin off the runner to fetch the app's data and pipe it
+                            // into the engine pipes
+                            (new Thread(backupRunner, "package-backup-bridge")).start();
+
+                            // Read data off the engine pipe and pass it to the transport
+                            // pipe until we hit EOD on the input stream.
+                            FileInputStream in = new FileInputStream(
+                                    enginePipes[0].getFileDescriptor());
+                            FileOutputStream out = new FileOutputStream(
+                                    transportPipes[1].getFileDescriptor());
+                            byte[] buffer = new byte[8192];
+                            int nRead = 0;
+                            do {
+                                nRead = in.read(buffer);
+                                if (nRead > 0) {
+                                    out.write(buffer, 0, nRead);
+                                    result = transport.sendBackupData(nRead);
+                                }
+                            } while (nRead > 0 && result == BackupTransport.TRANSPORT_OK);
+
+                            // Done -- how did it turn out?
+                            if (result == BackupTransport.TRANSPORT_OK){
+                                result = transport.finishBackup();
+                            } else {
+                                Slog.w(TAG, "Error backing up " + target.packageName);
+                            }
+                        } else if (result == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                            if (DEBUG) {
+                                Slog.i(TAG, "Transport rejected backup of " + target.packageName
+                                        + ", skipping");
+                            }
+                            // do nothing, clean up, and continue looping
+                        } else {
+                            if (DEBUG) {
+                                Slog.i(TAG, "Transport failed; aborting backup");
+                                return;
+                            }
+                        }
+                        cleanUpPipes(transportPipes);
+                        cleanUpPipes(enginePipes);
+                    }
+
+                    if (DEBUG) {
+                        Slog.i(TAG, "Full backup completed.");
+                    }
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception trying full transport backup", e);
+            } finally {
+                cleanUpPipes(transportPipes);
+                cleanUpPipes(enginePipes);
+                synchronized (mLatch) {
+                    mLatch.set(true);
+                    mLatch.notifyAll();
+                }
+            }
+        }
+
+        void cleanUpPipes(ParcelFileDescriptor[] pipes) {
+            if (pipes != null) {
+                if (pipes[0] != null) {
+                    ParcelFileDescriptor fd = pipes[0];
+                    pipes[0] = null;
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Unable to close pipe!");
+                    }
+                }
+                if (pipes[1] != null) {
+                    ParcelFileDescriptor fd = pipes[1];
+                    pipes[1] = null;
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Unable to close pipe!");
+                    }
+                }
+            }
+        }
+
+        // Run the backup and pipe it back to the given socket -- expects to run on
+        // a standalone thread.  The  runner owns this half of the pipe, and closes
+        // it to indicate EOD to the other end.
+        class SinglePackageBackupRunner implements Runnable {
+            final ParcelFileDescriptor mOutput;
+            final PackageInfo mTarget;
+            final AtomicBoolean mLatch;
+
+            SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
+                    AtomicBoolean latch) throws IOException {
+                int oldfd = output.getFd();
+                mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
+                mTarget = target;
+                mLatch = latch;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    FileOutputStream out = new FileOutputStream(mOutput.getFileDescriptor());
+                    FullBackupEngine engine = new FullBackupEngine(out, mTarget.packageName, false);
+                    engine.backupOnePackage(mTarget);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Exception during full package backup of " + mTarget);
+                } finally {
+                    synchronized (mLatch) {
+                        mLatch.set(true);
+                        mLatch.notifyAll();
+                    }
+                    try {
+                        mOutput.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Error closing transport pipe in runner");
+                    }
+                }
+            }
+            
+        }
+    }
 
     // ----- Full restore from a file/socket -----
 
@@ -3410,7 +3650,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         ACCEPT_IF_APK
     }
 
-    class PerformFullRestoreTask extends ObbServiceClient implements Runnable {
+    class PerformFullRestoreTask implements Runnable {
         ParcelFileDescriptor mInputFile;
         String mCurrentPassword;
         String mDecryptPassword;
@@ -3877,7 +4117,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                                         Slog.d(TAG, "system process agent - spinning a thread");
                                         RestoreFileRunnable runner = new RestoreFileRunnable(
                                                 mAgent, info, mPipes[0], token);
-                                        new Thread(runner).start();
+                                        new Thread(runner, "restore-sys-runner").start();
                                     } else {
                                         mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                                 info.domain, info.path, info.mode, info.mtime,
@@ -5684,13 +5924,16 @@ public class BackupManagerService extends IBackupManager.Stub {
         return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
     }
 
-    // Run a *full* backup pass for the given package, writing the resulting data stream
+    // Run a *full* backup pass for the given packages, writing the resulting data stream
     // to the supplied file descriptor.  This method is synchronous and does not return
     // to the caller until the backup has been completed.
+    //
+    // This is the variant used by 'adb backup'; it requires on-screen confirmation
+    // by the user because it can be used to offload data over untrusted USB.
     @Override
     public void fullBackup(ParcelFileDescriptor fd, boolean includeApks,
             boolean includeObbs, boolean includeShared, boolean doWidgets,
-            boolean doAllApps, boolean includeSystem, String[] pkgList) {
+            boolean doAllApps, boolean includeSystem, boolean compress, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
@@ -5725,7 +5968,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             Slog.i(TAG, "Beginning full backup...");
 
             FullBackupParams params = new FullBackupParams(fd, includeApks, includeObbs,
-                    includeShared, doWidgets, doAllApps, includeSystem, pkgList);
+                    includeShared, doWidgets, doAllApps, includeSystem, compress, pkgList);
             final int token = generateToken();
             synchronized (mFullConfirmations) {
                 mFullConfirmations.put(token, params);
@@ -5759,6 +6002,36 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    @Override
+    public void fullTransportBackup(String[] pkgNames) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "fullTransportBackup");
+
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_OWNER) {
+            throw new IllegalStateException("Restore supported only for the device owner");
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "fullTransportBackup()");
+        }
+
+        AtomicBoolean latch = new AtomicBoolean(false);
+        PerformFullTransportBackupTask task = new PerformFullTransportBackupTask(null, pkgNames, latch);
+        (new Thread(task, "full-transport-master")).start();
+        synchronized (latch) {
+            try {
+                while (latch.get() == false) {
+                    latch.wait();
+                }
+            } catch (InterruptedException e) {}
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Done with full transport backup.");
+        }
+    }
+
+    @Override
     public void fullRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
 
@@ -5876,8 +6149,8 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                     if (allow) {
                         final int verb = params instanceof FullBackupParams
-                                ? MSG_RUN_FULL_BACKUP
-                                : MSG_RUN_FULL_RESTORE;
+                                ? MSG_RUN_ADB_BACKUP
+                                : MSG_RUN_ADB_RESTORE;
 
                         params.observer = observer;
                         params.curPassword = curPassword;
