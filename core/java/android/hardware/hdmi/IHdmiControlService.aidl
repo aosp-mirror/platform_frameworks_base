@@ -16,9 +16,13 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
+
+import java.util.List;
 
 /**
  * Binder interface that clients running in the application process
@@ -33,5 +37,9 @@ interface IHdmiControlService {
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
+    void addDeviceEventListener(IHdmiDeviceEventListener listener);
     void deviceSelect(int logicalAddress, IHdmiControlCallback callback);
+    void portSelect(int portId, IHdmiControlCallback callback);
+    void sendKeyEvent(int keyCode);
+    List<HdmiPortInfo> getPortInfo();
 }

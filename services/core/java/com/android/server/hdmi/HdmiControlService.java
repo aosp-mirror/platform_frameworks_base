@@ -25,6 +25,7 @@ import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
+import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.os.Build;
 import android.os.Handler;
@@ -116,6 +117,14 @@ public final class HdmiControlService extends SystemService {
 
     // List of records for hotplug event listener to handle the the caller killed in action.
     private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
+            new ArrayList<>();
+
+    // List of listeners registered by callers that want to get notified of
+    // device status events.
+    private final ArrayList<IHdmiDeviceEventListener> mDeviceEventListeners = new ArrayList<>();
+
+    // List of records for device event listener to handle the the caller killed in action.
+    private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
             new ArrayList<>();
 
     // Handler running on service thread. It's used to run a task in service thread.
@@ -777,6 +786,22 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    private final class DeviceEventListenerRecord implements IBinder.DeathRecipient {
+        private final IHdmiDeviceEventListener mListener;
+
+        public DeviceEventListenerRecord(IHdmiDeviceEventListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+            public void binderDied() {
+            synchronized (mLock) {
+                mDeviceEventListenerRecords.remove(this);
+                mDeviceEventListeners.remove(mListener);
+            }
+        }
+    }
+
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -854,6 +879,33 @@ public final class HdmiControlService extends SystemService {
                 }
             });
         }
+
+        @Override
+        public void addDeviceEventListener(final IHdmiDeviceEventListener listener) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                    public void run() {
+                    HdmiControlService.this.addDeviceEventListener(listener);
+                }
+            });
+        }
+
+        @Override
+        public void portSelect(int portId, IHdmiControlCallback callback) {
+            // TODO: Implement this
+        }
+
+        @Override
+        public void sendKeyEvent(int keyCode) {
+            // TODO: Implement this
+        }
+
+        @Override
+        public List<HdmiPortInfo> getPortInfo() {
+            enforceAccessPermission();
+            return mPortInfo;
+        }
     }
 
     private void oneTouchPlay(IHdmiControlCallback callback) {
@@ -923,6 +975,19 @@ public final class HdmiControlService extends SystemService {
                 if (record.mListener.asBinder() == listener.asBinder()) {
                     listener.asBinder().unlinkToDeath(record, 0);
                     mHotplugEventListenerRecords.remove(record);
+                    break;
+                }
+            }
+            mHotplugEventListeners.remove(listener);
+        }
+    }
+
+    private void addDeviceEventListener(IHdmiDeviceEventListener listener) {
+        synchronized (mLock) {
+            for (DeviceEventListenerRecord record : mDeviceEventListenerRecords) {
+                if (record.mListener.asBinder() == listener.asBinder()) {
+                    listener.asBinder().unlinkToDeath(record, 0);
+                    mDeviceEventListenerRecords.remove(record);
                     break;
                 }
             }
