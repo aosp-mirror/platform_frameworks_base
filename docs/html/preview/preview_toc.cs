@@ -19,6 +19,7 @@
       </a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>preview/material/get-started.html">Get Started</a></li>
+      <li><a href="<?cs var:toroot ?>preview/material/theme.html">Material Theme</a></li>
       <li><a href="<?cs var:toroot ?>preview/material/ui-widgets.html">UI Widgets</a></li>
       <li><a href="<?cs var:toroot ?>preview/material/views-shadows.html">Views and Shadows</a></li>
       <li><a href="<?cs var:toroot ?>preview/material/animations.html">Animations</a></li>

@@ -2,13 +2,22 @@ page.title=UI Widgets
 
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#recyclerview">RecyclerView</a></li>
+  <li><a href="#cardview">CardView</a></li>
+</ol>
+</div>
+</div>
 
 <p>The support library in the Android L Developer Preview contains two new widgets,
 <code>RecyclerView</code> and <code>CardView</code>. Use these widgets to show complex lists
 and cards in your app. These widgets have material design styles and animations by default.</p>
 
 
-<h2  style="margin-top:35px">RecyclerView</h2>
+<h2 id="recyclerview">RecyclerView</h2>
 
 <p><code>RecyclerView</code> is a more advanced version of <code>ListView</code>. This widget is
 a container for large sets of views that can be recycled and scrolled very efficiently. Use the
@@ -62,7 +71,7 @@ performance by avoiding the creation of unnecessary views or performing expensiv
 
 <p>To create a custom layout, you extend the <code>RecyclerView.LayoutManager</code> class.</p>
 
-<h3 style="margin-top:30px">Examples</h3>
+<h3>Examples</h3>
 
 <p>To include a <code>RecyclerView</code> in your layout:</p>
 
@@ -155,7 +164,7 @@ public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
 </pre>
 
 
-<h2 style="margin-top:35px">CardView</h2>
+<h2 id="cardview">CardView</h2>
 
 <p><code>CardView</code> extends the <code>FrameLayout</code> class and lets you show information
 inside a card with optional rounded corners:</p>

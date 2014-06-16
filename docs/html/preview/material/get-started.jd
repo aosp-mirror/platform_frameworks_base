@@ -2,135 +2,145 @@ page.title=Get Started
 
 @jd:body
 
-<p>To create material design apps on Android:</p>
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#applytheme">Apply the Material Theme</a></li>
+  <li><a href="#layouts">Design Your Layouts</a></li>
+  <li><a href="#depth">Specify Depth in Your Views</a></li>
+  <li><a href="#widgets">Use the New UI Widgets</a></li>
+  <li><a href="#apis">Use the New APIs</a></li>
+</ol>
+</div>
+</div>
+
+<p>To create apps with material design:</p>
 
 <ol>
-  <li>Take a look at the <a href="">material design specification</a>.</li>
-  <li>Apply the Material <strong>theme</strong> to your app.</li>
-  <li>Define additional <strong>styles</strong> to customize the Material theme.</li>
-  <li>Create your <strong>layouts</strong> following material design guidelines.</li>
-  <li>Specify the <strong>depth</strong> of each component in your layouts to cast appropriate shadows.</li>
-  <li>Use the new <strong>widgets</strong> for complex views, such as lists and cards.</li>
-  <li>Use the new <strong>APIs</strong> to customize 3D views and animations in your app.</li>
+  <li style="margin-bottom:10px">
+    Take a look at the <a href="">material design specification</a>.</li>
+  <li style="margin-bottom:10px">
+    Apply the material <strong>theme</strong> to your app.</li>
+  <li style="margin-bottom:10px">
+    Define additional <strong>styles</strong> to customize the material theme.</li>
+  <li style="margin-bottom:10px">
+    Create your <strong>layouts</strong> following material design guidelines.</li>
+  <li style="margin-bottom:10px">
+    Specify the <strong>depth</strong> for views to cast appropriate shadows.</li>
+  <li style="margin-bottom:10px">
+    Use the new <strong>widgets</strong> for complex views, such as lists and cards.</li>
+  <li style="margin-bottom:10px">
+    Use the new <strong>APIs</strong> to customize the animations in your app.</li>
 </ol>
 
-<h3 style="margin-top:25px;">Update Your App for the Android L Developer Preview</h3>
+<h3>Update Your App for the Android L Developer Preview</h3>
 
 <p>To update an existing app for the Android L Developer Preview, design new layouts following
 material design guidelines and consider how you can improve the user experience for your app by
 incorporating depth, touch feedback and animations in your UI.</p>
 
-<h3 style="margin-top:25px;">Create New Apps for the Android L Developer Preview</h3>
+<h3>Create New Apps for the Android L Developer Preview</h3>
 
 <p>If you are creating a new app for the Android L Developer Preview, the material design
 guidelines provide you with a solid design framework for your app. Follow these guidelines and
 use the new functionality in the Android framework to design and develop your app.</p>
 
 
-<h2 style="margin-top:35px">Material Theme</h2>
+<h2 id="applytheme">Apply the Material Theme</h2>
 
-<div style="float:right;margin-left:25px">
-<img src="{@docRoot}preview/material/images/ThemeColors.png" style="width:250px"/>
-<p class="img-caption"><strong>Figure 1.</strong> Customizing the Material theme.</p>
-</div>
-
-<p>The new Material theme provides:</p>
-
-<ul>
-  <li>System widgets that let you set their color palette</li>
-  <li>Touch feedback animations for the system widgets</li>
-  <li>Activity transition animations</li>
-</ul>
-
-<p>The Android L Developer Preview lets you easily customize the look of the Material theme
-according to your brand identity with a color palette you control. You can tint the app bar and
-the status bar using theme attributes, as shown in Figure 1.</p>
-
-<p>The system widgets have a new design and touch feedback animations. Activity transitions help
-users navigate your app by providing visual continuity. You can customize the color palette,
-the touch feedback animations, and the activity transitions for your app.</p>
-
-<p>The Material theme is defined as:</p>
-
-<ul>
-  <li><code>@android:style/Theme.Material</code> (dark version)</li>
-  <li><code>@android:style/Theme.Material.Light</code> (light version)</li>
-  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
-</ul>
-
-<p>For a list of material styles that you can use, see the API reference for
-<code>android.R.styles</code>.</p>
-
-<p class="note">
-<strong>Note:</strong> The Material theme is only available in the Android L Developer Preview.
-For more information, see <a href="{@docRoot}preview/material/compatibility.html">Compatibility</a>.
-</p>
-
-<h3 style="margin-top:25px;">Theme Inheritance</h3>
-
-<p>In the Android L Developer Preview, elements in XML layout definitions can specify the
-<code>android:theme</code> attribute, which references a theme resource. This attribute modifies
-the theme for the element and any elements inflated below it, which is useful to alter theme
-color palettes in a specific portion of an interface.</p>
-
-<h3 style="margin-top:25px;">Customize the Status Bar</h3>
-
-<p>The Material theme lets you easily customize the status bar, so you can specify a
-color which fits your brand and provides enough contrast to show the white status icons. To
-set a custom color for the status bar, use the <code>android:statusBarColor</code> attribute when
-you extend the Material theme.</p>
-
-<p>To handle the color of the status bar yourself (for example, by adding a gradient in the
-background), set the <code>android:statusBarColor</code> attribute to
-<code>&#64;android:color/transparent</code>. You can also use the
-<code>Window.setStatusBarColor</code> method for animations or fading.</p>
-
-
-<h2 style="margin-top:35px">Material Design</h2>
-
-<p>In addition to applying the Material theme, you also have to:</p>
-
-<ul>
-  <li>Customize the theme's base colors to fit your brand.</li>
-  <li>Design your layouts according to material design guidelines.</li>
-</ul>
-
-<p>The Android L Developer Preview provides new attributes to make it easy to customize the
-Material theme:</p>
+<p>To apply the material theme in your app, specify a style that inherits from
+<code>android:theme.Material</code>:</p>
 
 <pre>
+&lt;!-- res/values/styles.xml -->
 &lt;resources>
-  &lt;!-- inherit from the Material theme -->
-  &lt;style name="BaseAppTheme" parent="android:Theme.Material">
-    &lt;!-- Main theme colors -->
-    &lt;!--   your app's branding color (for the app bar) -->
-    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
-    &lt;!--   darker variant of colorPrimary (for contextual app bars) -->
-    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
-
-    &lt;!-- other theme colors -->
-    &lt;item name="android:colorBackground">@color/background&lt;/item>
-    &lt;item name="android:colorAccent">@color/accent&lt;/item>
-    &lt;item name="android:colorButtonNormal">@color/button_normal&lt;/item>
-    &lt;item name="android:colorControlHighlight">@color/button_chigh&lt;/item>
-    &lt;item name="android:windowBackground">@color/wbackground&lt;/item>
+  &lt!-- your app's theme inherits from the Material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt!-- theme customizations -->
   &lt;/style>
 &lt;/resources>
 </pre>
 
-<p>Ensure that you follow material design guidelines when choosing colors for your app.</p>
+<p>The material theme provides new system widgets that let you set their color palette and default
+animations for touch feedback and activity transitions. For more details, see
+<a href="{@docRoot}preview/material/theme.html">Material Theme</a>.</p>
 
-<p>Design your layouts according to the material design specification. In particular, pay
-attention to:</p>
+
+<h2 id="layouts">Design Your Layouts</h2>
+
+<p>In addition to applying and customizing the material theme, your layouts should conform to
+the material design guidelines. When you design your layouts, pay special attention to the
+following:</p>
 
 <ul>
-  <li>Baseline grids</li>
-  <li>Keylines</li>
-  <li>Spacing</li>
-  <li>Touch target size</li>
-  <li>Layout structure</li>
+<li>Baseline grids</li>
+<li>Keylines</li>
+<li>Spacing</li>
+<li>Touch target size</li>
+<li>Layout structure</li>
 </ul>
 
 <p>You still define layouts inside XML files using the standard tools from the Android framework.
-To specify the depth level of each view in your layout, use the <code>android:elevation</code>
-attribute.</p>
+For details on the material design guidelines, see the <a href="">material design
+specification</a>.</p>
+
+
+<h2 id="depth">Specify Depth in Your Views</h2>
+
+<p>In the Android L Developer Preview, views can cast shadows. The elevation value of a view
+determines the size of its shadow. To set the elevation of a view, use the
+<code>android:elevation</code> attribute in your layouts:</p>
+
+<pre>
+&lt;Button
+    android:id="@+id/my_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/next"
+    <strong>android:elevation</strong>="10dp" />
+</pre>
+
+<p>For more details, see <a href="{@docRoot}preview/material/views-shadows.html">Views and
+Shadows</a>.</p>
+
+
+<h2 id="widgets">Use the New UI Widgets</h2>
+
+<p>The Android L Developer Preview includes two new UI widgets for complex views,
+<code>RecyclerView</code> and <code>CardView</code>. <code>RecyclerView</code> is a more advanced
+version of <code>ListView</code> that provides performance improvements and is easier to use.
+<code>CardView</code> lets you show pieces of information inside cards with a consistent look
+across apps. To include a <code>CardView</code> in your layout:</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="@+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>For more information, see <a href="{@docRoot}preview/material/ui-widgets.html">UI Widgets</a>.</p>
+
+
+<h2 id="apis">Use the APIs to Customize Your Animations</h2>
+
+<p>The Android L Developer Preview includes new APIs to create custom animations in your app.
+For example, you can enable activity transitions and define an exit transition inside an
+activity:</p>
+
+<pre>
+// inside your activity
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>When you start another activity from this activity, the exit transition is activated.</p>
+
+<p>To learn about all the features in the new APIs, see <a
+href="{@docRoot}preview/material/animations.html">Animations</a>.</p>

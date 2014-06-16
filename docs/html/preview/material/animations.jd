@@ -2,9 +2,22 @@ page.title=Animations
 
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#touch">Touch Feedback</a></li>
+  <li><a href="#reveal">Reveal Effect</a></li>
+  <li><a href="#transitions">Activity Transitions</a></li>
+  <li><a href="#curvedmotion">Curved Motion</a></li>
+  <li><a href="#viewstate">View State Changes</a></li>
+  <li><a href="#drawabletint">Drawable Tinting</a></li>
+</ol>
+</div>
+</div>
 
 <p>Animations in material design give users feedback on their actions and provide visual
-continuity as users interact with your app. The Material theme provides some default animations
+continuity as users interact with your app. The material theme provides some default animations
 for buttons and activity transitions, and the Android L Developer Preview provides additional
 APIs that let you customize these animations and create new ones:</p>
 
@@ -17,7 +30,7 @@ APIs that let you customize these animations and create new ones:</p>
 </ul>
 
 
-<h2 style="margin-top:35px">Touch Feedback</h2>
+<h2 id="touch">Touch Feedback</h2>
 
 <p>In the Android L Developer Preview the default touch feedback animations for buttons use the new
 <code>RippleDrawable</code> class, which transitions between different states with a ripple
@@ -28,7 +41,7 @@ it as the background of your view. You can define a <code>RippleDrawable</code> 
 using the <code>ripple</code> element.</p>
 
 
-<h2 style="margin-top:35px">Reveal Effect</h2>
+<h2 id="reveal">Reveal Effect</h2>
 
 <p>The <code>View.createRevealAnimator</code> method enables you to animate a clipping circle
 to reveal or hide a view.</p>
@@ -82,7 +95,7 @@ anim.start();
 </pre>
 
 
-<h2 style="margin-top:35px">Activity Transitions</h2>
+<h2 id="transitions">Activity Transitions</h2>
 
 <p>The Android L Developer Preview enables your app to customize the default animations for
 activity transitions. You can specify custom animations for enter and exit transitions and for
@@ -109,10 +122,10 @@ transitions of shared elements between activities.</p>
   <strong>Figure 1</strong> - A scene transition with one shared element.
 </p>
 
-<h3 style="margin-top:30px">Specify custom transitions</h3>
+<h3>Specify custom transitions</h3>
 
 <p>First, enable window content transitions with the <code>android:windowContentTransitions</code>
-attribute when you define a style that inherits from the Material theme:</p>
+attribute when you define a style that inherits from the material theme:</p>
 
 <pre>
 &lt;style name="BaseAppTheme" parent="android:Theme.Material">
@@ -174,14 +187,14 @@ object:</p>
   <li><code>Window.setSharedElementExitTransition</code></li>
 </ul>
 
-<h3 style="margin-top:30px">Start an activity using transitions</h3>
+<h3>Start an activity using transitions</h3>
 
 <p>If you enable transitions and set an exit transition for an activity, the transition is activated
 when you launch another activity with the <code>startActivity</code> method. If you have set an
 enter transition for the second activity, the transition is also activated when the activity
 starts.</p>
 
-<h3 style="margin-top:30px">Shared elements transitions</h3>
+<h3>Shared elements transitions</h3>
 
 <p>To make a screne transition animation between two activities that have a shared element:</p>
 
@@ -219,7 +232,7 @@ imgContainerView.setOnClickListener(new View.OnClickListener() {
 <p>For shared dynamic views that you generate in your code, use the <code>View.setViewName</code>
 method to specify a common element name in both activities.</p>
 
-<h3 style="margin-top:30px">Multiple shared elements</h3>
+<h3>Multiple shared elements</h3>
 
 <p>To make a scene transition animation between two activities that have more than one shared
 element, define the shared elements in both layouts with the <code>android:viewName</code>
@@ -237,7 +250,7 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
 </pre>
 
 
-<h2 style="margin-top:35px">Curved Motion</h2>
+<h2 id="curvedmotion">Curved Motion</h2>
 
 <p>Animations in material design rely on curves for time interpolation and spatial movement
 patterns. The Android L Developer Preview provides new APIs that enable you to define custom
@@ -280,7 +293,7 @@ mAnimator.start();
 </pre>
 
 
-<h2 style="margin-top:35px">View State Changes</h2>
+<h2 id="viewstate">View State Changes</h2>
 
 <p>The new <code>StateListAnimator</code> class lets you define animators that run when the state
 of a view changes. The following example shows how to define an <code>StateListAnimator</code> as
@@ -343,7 +356,7 @@ to define an <code>AnimatedStateListDrawable</code> as an XML resource:</p>
 </pre>
 
 
-<h2 style="margin-top:35px">Drawable Tinting</h2>
+<h2 id="drawabletint">Drawable Tinting</h2>
 
 <p>The Android L Developer Preview enables you to define bitmaps as an alpha mask and to tint
 them using a color resource or a theme attribute that resolves to a color resource. You can
