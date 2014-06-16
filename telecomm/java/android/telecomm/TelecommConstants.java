@@ -55,6 +55,21 @@ public final class TelecommConstants {
     public static final String ACTION_CALL_SERVICE_SELECTOR = CallServiceSelector.class.getName();
 
     /**
+     * Activity action: Ask the user to change the default phone application. This will show a
+     * dialog that asks the user whether they want to replace the current default phone application
+     * with the one defined in {@link #EXTRA_PACKAGE_NAME}.
+     */
+    public static final String ACTION_CHANGE_DEFAULT_PHONE =
+            "android.telecomm.ACTION_CHANGE_DEFAULT_PHONE";
+
+    /**
+     * The PackageName string passed in as an extra for {@link #ACTION_CHANGE_DEFAULT_PHONE}.
+     *
+     * @see #ACTION_CHANGE_DEFAULT_PHONE
+     */
+    public static final String EXTRA_PACKAGE_NAME = "package";
+
+    /**
      * Extra for {@link #ACTION_INCOMING_CALL} containing the {@link CallServiceDescriptor} that
      * describes the call service to use for the incoming call.
      */
