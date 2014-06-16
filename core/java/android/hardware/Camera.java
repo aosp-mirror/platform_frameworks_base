@@ -172,6 +172,11 @@ public class Camera {
     private static final int NO_ERROR = 0;
     private static final int EACCESS = -13;
     private static final int ENODEV = -19;
+    private static final int EBUSY = -16;
+    private static final int EINVAL = -22;
+    private static final int ENOSYS = -38;
+    private static final int EUSERS = -87;
+    private static final int EOPNOTSUPP = -95;
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -189,6 +194,22 @@ public class Camera {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
 
+    /**
+     * Camera HAL device API version 1.0
+     * @hide
+     */
+    public static final int CAMERA_HAL_API_VERSION_1_0 = 0x100;
+
+    /**
+     * A constant meaning the normal camera connect/open will be used.
+     * @hide
+     */
+    public static final int CAMERA_HAL_API_VERSION_NORMAL_OPEN = -2;
+
+    /**
+     * Used to indicate HAL version un-specified.
+     */
+    private static final int CAMERA_HAL_API_VERSION_UNSPECIFIED = -1;
     /**
      * Hardware face detection. It does not use much CPU.
      */
@@ -331,6 +352,111 @@ public class Camera {
         return null;
     }
 
+    /**
+     * Creates a new Camera object to access a particular hardware camera with
+     * given hal API version. If the same camera is opened by other applications
+     * or the hal API version is not supported by this device, this will throw a
+     * RuntimeException.
+     * <p>
+     * You must call {@link #release()} when you are done using the camera,
+     * otherwise it will remain locked and be unavailable to other applications.
+     * <p>
+     * Your application should only have one Camera object active at a time for
+     * a particular hardware camera.
+     * <p>
+     * Callbacks from other methods are delivered to the event loop of the
+     * thread which called open(). If this thread has no event loop, then
+     * callbacks are delivered to the main application event loop. If there is
+     * no main application event loop, callbacks are not delivered.
+     * <p class="caution">
+     * <b>Caution:</b> On some devices, this method may take a long time to
+     * complete. It is best to call this method from a worker thread (possibly
+     * using {@link android.os.AsyncTask}) to avoid blocking the main
+     * application UI thread.
+     *
+     * @param cameraId The hardware camera to access, between 0 and
+     * {@link #getNumberOfCameras()}-1.
+     * @param halVersion The HAL API version this camera device to be opened as. When
+     * it is {@value #CAMERA_HAL_API_VERSION_NORMAL_OPEN}, the methods will be equivalent
+     * to {@link #open}, but more detailed error information will be returned to managed code.
+     * @return a new Camera object, connected, locked and ready for use.
+     * @throws RuntimeException if opening the camera fails (for example, if the
+     * camera is in use by another process or device policy manager has disabled
+     * the camera).
+     * @see android.app.admin.DevicePolicyManager#getCameraDisabled(android.content.ComponentName)
+     *
+     * @hide
+     */
+    public static Camera openLegacy(int cameraId, int halVersion) {
+        return new Camera(cameraId, halVersion);
+    }
+
+    /**
+     * Create a legacy camera object.
+     *
+     * @param cameraId The hardware camera to access, between 0 and
+     * {@link #getNumberOfCameras()}-1.
+     * @param halVersion The HAL API version this camera device to be opened as.
+     */
+    private Camera(int cameraId, int halVersion) {
+        int err = cameraInit(cameraId, halVersion);
+        if (checkInitErrors(err)) {
+            switch(err) {
+                case EACCESS:
+                    throw new RuntimeException("Fail to connect to camera service");
+                case ENODEV:
+                    throw new RuntimeException("Camera initialization failed");
+                case ENOSYS:
+                    throw new RuntimeException("Camera initialization failed because some methods"
+                            + " are not implemented");
+                case EOPNOTSUPP:
+                    throw new RuntimeException("Camera initialization failed because the hal"
+                            + " version is not supported by this device");
+                case EINVAL:
+                    throw new RuntimeException("Camera initialization failed because the input"
+                            + " arugments are invalid");
+                case EBUSY:
+                    throw new RuntimeException("Camera initialization failed because the camera"
+                            + " device was already opened");
+                case EUSERS:
+                    throw new RuntimeException("Camera initialization failed because the max"
+                            + " number of camera devices were already opened");
+                default:
+                    // Should never hit this.
+                    throw new RuntimeException("Unknown camera error");
+            }
+        }
+    }
+
+    private int cameraInit(int cameraId, int halVersion) {
+        // This function should be only called by Camera(int cameraId, int halVersion).
+        if (halVersion < CAMERA_HAL_API_VERSION_1_0 &&
+                halVersion != CAMERA_HAL_API_VERSION_NORMAL_OPEN) {
+            throw new IllegalArgumentException("Invalid HAL version " + halVersion);
+        }
+
+        mShutterCallback = null;
+        mRawImageCallback = null;
+        mJpegCallback = null;
+        mPreviewCallback = null;
+        mPostviewCallback = null;
+        mUsingPreviewAllocation = false;
+        mZoomListener = null;
+
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+        }
+
+        String packageName = ActivityThread.currentPackageName();
+
+        return native_setup(new WeakReference<Camera>(this), cameraId, halVersion, packageName);
+    }
+
     Camera(int cameraId) {
         int err = cameraInit(cameraId);
         if (checkInitErrors(err)) {
@@ -369,7 +495,8 @@ public class Camera {
 
         String packageName = ActivityThread.currentPackageName();
 
-        return native_setup(new WeakReference<Camera>(this), cameraId, packageName);
+        return native_setup(new WeakReference<Camera>(this), cameraId,
+                CAMERA_HAL_API_VERSION_UNSPECIFIED, packageName);
     }
 
     /**
@@ -396,7 +523,7 @@ public class Camera {
         release();
     }
 
-    private native final int native_setup(Object camera_this, int cameraId,
+    private native final int native_setup(Object camera_this, int cameraId, int halVersion,
                                            String packageName);
 
     private native final void native_release();

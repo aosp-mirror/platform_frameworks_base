@@ -74,4 +74,11 @@ interface ICameraService
     int getLegacyParameters(int cameraId, out String[] parameters);
     // Determines if a particular API version is supported; see ICameraService.h for version defines
     int supportsCameraApi(int cameraId, int apiVersion);
+
+    int connectLegacy(ICameraClient client, int cameraId,
+                    int halVersion,
+                    String clientPackageName,
+                    int clientUid,
+                    // Container for an ICamera object
+                    out BinderHolder device);
 }
