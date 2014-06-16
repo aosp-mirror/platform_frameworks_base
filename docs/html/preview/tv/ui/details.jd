@@ -23,11 +23,14 @@ next.link=in-app-search.html
 </div>
 </div>
 
-<p>The media browsing interface classes provided by the leanback support library include classes
-  for displaying additional information about a media item, such as a description or reviews, and
-  taking action on that item, such as purchasing it or playing its content. This section discusses
-  how to create a presenter class for media item details and extend the {@code DetailsFragment}
-  class to implement a details view for a media item when it is selected by a user.</p>
+<p>The media browsing interface classes provided by the
+  <a href="{@docRoot}preview/tv/start/index.html#tv-libraries">Leanback support library</a>
+  include classes for displaying additional information about a media item, such as a description
+  or reviews, and taking action on that item, such as purchasing it or playing its content. This
+  section discusses how to create a presenter class for media item details and extend the
+  {@code DetailsFragment} class to implement a details view for a media item when it
+  is selected by a user.
+</p>
 
 <p class="note">
   <strong>Note:</strong> The implementation example shown here uses an additional activity to
@@ -49,7 +52,8 @@ next.link=in-app-search.html
   the following code sample:</p>
 
 <pre>
-public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
+public class DetailsDescriptionPresenter
+        extends AbstractDetailsDescriptionPresenter {
 
     &#64;Override
     protected void onBindDescription(ViewHolder viewHolder, Object itemData) {
