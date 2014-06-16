@@ -3,7 +3,8 @@ page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.type=about
-
+page.metaDescription=Test and build your apps against the next version of Android to ensure they're ready when the platform officially launches.
+page.image={@docRoot}preview/images/hero.jpg
 @jd:body
 
 <style>
@@ -21,19 +22,6 @@ page.type=about
   display: none;
 }
 </style>
-
-<div id="video-container">
-  <div id="video-frame">
-    <div class="video-close">
-      <span id="icon-video-close">&nbsp;</span>
-    </div>
-    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-    <div id="ytapiplayer">
-      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
-      src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
-    </div>
-  </div>
-</div>
 
 <div class="landing-body-content">
   <div class="landing-hero-container">
@@ -93,7 +81,7 @@ page.type=about
                 <p>A New UI Design</p>
                 <p class="landing-small">
                   Create a consistent experience across mobile and the web with
-                   <b>Material</b>, the new Google design standard.
+                   material design, the new Google-wide standard.
                 </p>
                 <p class="landing-small">
                   <a href="/preview/quantum/index.html">Learn about</a>
@@ -174,13 +162,13 @@ page.type=about
                     <img class="landing-social-image" src="{@docRoot}preview/images/bugs.png" alt="">
                   </a>
                 <div class="landing-social-copy">
-                  <p>Submit Bugs</p>
+                  <p>Issue Tracker</p>
                   <p class="landing-small">
                   Let us know when you encounter problems, so we can fix them and make
                   the platform better for you and your users.
                     </p><p class="landing-small">
                       <a target="_blank" href="http://submit-bugs!">
-                      Submit Bugs</a>
+                      Report Issues</a>
                     </p>
                   <p></p>
                 </div>
@@ -190,13 +178,13 @@ page.type=about
                   <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="">
                 </a>
                 <div class="landing-social-copy">
-                  <p>Discuss on Google+ </p>
+                  <p>Google+ </p>
                   <p class="landing-small">
                     Join the community of Android developers testing out the L Developer Preview and
                     share your thoughts and experiences.
                   </p><p class="landing-small">
                     <a target="_blank" href="http://plus.google.com">
-                    Socialize on Google+</a>
+                    Discuss on Google+</a>
                     </p>
                 </div>
               </div>
@@ -205,14 +193,14 @@ page.type=about
                   <img class="landing-social-image" src="{@docRoot}preview/images/updates.png" alt="">
                 </a>
                 <div class="landing-social-copy">
-                  <p>Get Updates</p>
+                  <p>Support and Updates</p>
                   <p class="landing-small">
                   Updates to the L Developer Preview are delivered
-                  in the Android SDK Manager. Check back here
+                  in the Android SDK Manager. Check back periodically
                   for news about the changes.
                   </p>
                   <p class="landing-small">
-                    <a target="_blank" href="{@docRoot}preview/release-notes.html">See Release Notes</a>
+                    <a target="_blank" href="{@docRoot}preview/support.html">Get Support</a>
                   </p>
                 </div>
               </div>
@@ -236,8 +224,6 @@ page.type=about
         License</a>.
       </div>
     </div>
-
-
   </div> <!-- end landing-body-content -->
 
   <script>

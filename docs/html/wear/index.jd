@@ -51,7 +51,7 @@ page.type=about
               </div>
 
               <div class="landing-body">
-                <a href="/training/wearables/index.html" class="landing-button landing-primary" style="margin-top: 40px;">
+                <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-primary" style="margin-top: 40px;">
                   Get Started
                 </a>
               </div>
@@ -62,7 +62,7 @@ page.type=about
       </div> <!-- end .wrap -->
       <div class="landing-scroll-down-affordance">
         <a class="landing-down-arrow" href="#extending-android-to-wearables">
-          <img src="/wear/images/carrot.png" alt="Scroll down to read more">
+          <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
         </a>
       </div>
     </div> <!-- end .landing-section .landing-hero -->
@@ -85,8 +85,8 @@ page.type=about
               <div class="col-3-wide">
 
                 <div class="landing-inset-video-container">
-                  <img class="landing-bezel-only" src="/wear/images/screens/bezel.png" alt="">
-                  <img class="gif" src="/wear/images/screens/reservation_animated.gif">
+                  <img class="landing-bezel-only" src="{@docRoot}wear/images/screens/bezel.png" alt="">
+                  <img class="gif" src="{@docRoot}wear/images/screens/reservation_animated.gif">
                 </div>
 
                 <p class="landing-small">
@@ -94,7 +94,7 @@ page.type=about
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="/wear/images/screens/circle_message2.png" itemprop="image" alt="">
+                <img src="{@docRoot}wear/images/screens/circle_message2.png" itemprop="image" alt="">
                 <p class="landing-small">
                   Get glanceable, actionable information at just the right time with notifications
                   that are synced from your handheld device.
@@ -102,7 +102,7 @@ page.type=about
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="/wear/images/screens/fitness-24.png" alt="">
+                <img src="{@docRoot}wear/images/screens/fitness-24.png" alt="">
                 <p class="landing-small">
                   Design apps that can access a wide range of sensors and other hardware
                    directly on the wearable.
@@ -113,7 +113,7 @@ page.type=about
 
             <p>
               Before you start building, check out the
-              <a href="/design/devices/wear.html">Android Wear Design Principles</a>
+              <a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a>
               to understand how to create great experiences for this exciting, new form factor.</p>
 
           </div>
@@ -133,49 +133,49 @@ page.type=about
           <div class="landing-body">
             <div class="landing-breakout cols">
               <div class="col-4">
-                <img src="/wear/images/features/ts2.png" alt="">
+                <img src="{@docRoot}wear/images/features/ts2.png" alt="">
                 <p>Synced Notifications</p>
                 <p class="landing-small">
                   Notifications on handhelds can automatically sync to wearables, so design them
                   with both devices in mind.
                 </p>
                 <p class="landing-small">
-                  <a href="/training/wearables/notifications/index.html">Build notifications</a>
+                  <a href="{@docRoot}training/wearables/notifications/index.html">Build notifications</a>
                 </p>
               </div>
               <div class="col-4">
-                <img src="/wear/images/features/ts1.png" alt="">
+                <img src="{@docRoot}wear/images/features/ts1.png" alt="">
                 <p>Wearable Apps</p>
                 <p class="landing-small">
                   Create custom experiences with activities, services, sensors, and much
                   more with the Android SDK.
                 </p>
                 <p class="landing-small">
-                  <a href="/training/wearables/apps/index.html/">Create wearable apps</a>
+                  <a href="{@docRoot}training/wearables/apps/index.html">Create wearable apps</a>
 
                 </p>
               </div>
               <div class="col-4">
-                <img src="/wear/images/features/ts2.png" alt="">
+                <img src="{@docRoot}wear/images/features/ts2.png" alt="">
                 <p>Send Data</p>
                 <p class="landing-small">
                   Send data and actions between handhelds and wearables with
                   data replication APIs and RPCs.
                 </p>
                 <p class="landing-small">
-                  <a href="/training/wearables/apps/index.html/">Work with the Data Layer</a>
+                  <a href="{@docRoot}training/wearables/data-layer/index.html">Work with the Data Layer</a>
 
                 </p>
               </div>
               <div class="col-4">
-                <img src="/wear/images/features/ts4.png" alt="">
+                <img src="{@docRoot}wear/images/features/ts4.png" alt="">
                 <p>Voice Actions</p>
                 <p class="landing-small">
                   Register your app to handle voice actions, like "Ok Google, take a&nbsp;note,"
                   for a hands-free experience.
                 </p>
                 <p class="landing-small">
-                  <a href="/training/wearables/apps/index.html/">Integrate voice actions</a>
+                  <a href="{@docRoot}training/wearables/apps/voice-actions.html/">Integrate voice actions</a>
                 </p>
               </div>
             </div>
@@ -248,7 +248,7 @@ page.type=about
             </div>
           </div>
           <div class="landing-body">
-            <a href="/training/wearables/index.html" class="landing-button landing-secondary" style="margin-top: 20px;">
+            <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-secondary" style="margin-top: 20px;">
               Get Started
             </a>
           </div>
@@ -277,7 +277,7 @@ page.type=about
               </div>
               <div class="col-3-wide">
                 <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-landing-developer-preview.html">
-                  <img class="landing-social-image" src="/wear/images/blogger.png" alt="">
+                  <img class="landing-social-image" src="{@docRoot}wear/images/blogger.png" alt="">
                 </a>
                 <div class="landing-social-copy">
                   <p>Blog Post</p>
@@ -313,8 +313,6 @@ page.type=about
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
     </div> <!-- end .landing-rest-of-page -->
-
-
     <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
       <div class="layout-content-col col-16" style="padding-top:4px">
         <style>#___plusone_0 {float:right !important;}</style>
@@ -326,7 +324,7 @@ page.type=about
         Except as noted, this content is
         licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
         Creative Commons Attribution 2.5</a>. For details and
-        restrictions, see the <a href="/license.html">Content
+        restrictions, see the <a href="{@docRoot}license.html">Content
         License</a>.
       </div>
     </div>

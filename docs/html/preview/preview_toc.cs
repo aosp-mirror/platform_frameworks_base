@@ -75,7 +75,12 @@
   </li>
     <li class="nav-section">
     <div class="nav-section-header empty">
-      <a href="<?cs var:toroot ?>preview/feedback-support.html">Feedback and Support</a>
+      <a href="<?cs var:toroot ?>preview/support.html">Support</a>
+      </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>preview/tos.html">Terms of Service</a>
       </div>
   </li>
 </ul>
