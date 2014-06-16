@@ -83,7 +83,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
      * indicating the last section of the run.  Calls from different
      * runs must not be intermixed.
      *
-     * @param data
+     * @param data subtitle data byte buffer
      * @param eos true if this is the last section of the run.
      * @param runID mostly-unique ID for this run of data.  Subtitle cues
      *              with runID of 0 are discarded immediately after
@@ -92,10 +92,8 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
      *              with other runID-s are discarded at the end of the
      *              run, which defaults to the latest timestamp of
      *              any of its cues (with this runID).
-     *
-     * TODO use ByteBuffer
      */
-    public abstract void onData(String data, boolean eos, long runID);
+    public abstract void onData(byte[] data, boolean eos, long runID);
 
     /**
      * Called when adding the subtitle rendering widget to the view hierarchy,
