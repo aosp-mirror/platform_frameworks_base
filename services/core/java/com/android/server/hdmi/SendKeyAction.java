@@ -16,10 +16,8 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCecMessage;
-import android.view.KeyEvent;
 import android.util.Slog;
-
-import libcore.util.EmptyArray;
+import android.view.KeyEvent;
 
 /**
  * Feature action that transmits remote control key command (User Control Press/
@@ -56,13 +54,12 @@ final class SendKeyAction extends FeatureAction {
     /**
      * Constructor.
      *
-     * @param service {@link HdmiControlService} instance
-     * @param sourceAddress logical address to be used as source address
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param targetAddress logical address of the device to send the keys to
      * @param keyCode remote control key code as defined in {@link KeyEvent}
      */
-    SendKeyAction(HdmiControlService service, int sourceAddress, int targetAddress, int keyCode) {
-        super(service, sourceAddress);
+    SendKeyAction(HdmiCecLocalDevice source, int targetAddress, int keyCode) {
+        super(source);
         mTargetAddress = targetAddress;
         mLastKeyCode = keyCode;
     }
@@ -112,12 +109,13 @@ final class SendKeyAction extends FeatureAction {
         if (keyCodeAndParam == null) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(mSourceAddress, mTargetAddress,
-                keyCodeAndParam));
+        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
+                mTargetAddress, keyCodeAndParam));
     }
 
     private void sendKeyUp() {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(mSourceAddress, mTargetAddress));
+        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
+                mTargetAddress));
     }
 
     @Override

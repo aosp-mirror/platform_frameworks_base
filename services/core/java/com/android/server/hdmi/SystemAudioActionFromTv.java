@@ -26,16 +26,15 @@ final class SystemAudioActionFromTv extends SystemAudioAction {
     /**
      * Constructor
      *
-     * @param service {@link HdmiControlService} instance
-     * @param tvAddress logical address of TV device
+     * @param sourceAddress {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
      * @throw IllegalArugmentException if device type of tvAddress is invalid
      */
-    SystemAudioActionFromTv(HdmiControlService service, int tvAddress, int avrAddress,
+    SystemAudioActionFromTv(HdmiCecLocalDevice sourceAddress, int avrAddress,
             boolean targetStatus) {
-        super(service, tvAddress, avrAddress, targetStatus);
-        HdmiUtils.verifyAddressType(tvAddress, HdmiCec.DEVICE_TV);
+        super(sourceAddress, avrAddress, targetStatus);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
     }
 
     @Override

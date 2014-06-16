@@ -39,7 +39,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
  * <li> Routing at CEC enable time
  * </ul>
  */
-public class RoutingControlAction extends FeatureAction {
+final class RoutingControlAction extends FeatureAction {
     private static final String TAG = "RoutingControlAction";
 
     // State in which we wait for <Routing Information> to arrive. If timed out, we use the
@@ -63,9 +63,8 @@ public class RoutingControlAction extends FeatureAction {
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
 
-    RoutingControlAction(HdmiControlService service, int sourceAddress, int path,
-            IHdmiControlCallback callback) {
-        super(service, sourceAddress);
+    RoutingControlAction(HdmiCecLocalDevice localDevice, int path, IHdmiControlCallback callback) {
+        super(localDevice);
         mCallback = callback;
         mCurrentRoutingPath = path;
     }
@@ -92,7 +91,7 @@ public class RoutingControlAction extends FeatureAction {
             }
             mCurrentRoutingPath = routingPath;
             // Stop possible previous routing change sequence if in progress.
-            mService.removeAction(RoutingControlAction.class);
+            removeAction(RoutingControlAction.class);
             addTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
             return true;
         } else if (mState == STATE_WAIT_FOR_REPORT_POWER_STATUS
@@ -130,7 +129,8 @@ public class RoutingControlAction extends FeatureAction {
     }
 
     private void sendSetStreamPath() {
-        sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(mSourceAddress, mCurrentRoutingPath));
+        sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(getSourceAddress(),
+                mCurrentRoutingPath));
     }
 
     private static boolean isInActiveRoutingPath(int activePath, int newPath) {
@@ -164,9 +164,9 @@ public class RoutingControlAction extends FeatureAction {
         }
         switch (timeoutState) {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
-                HdmiCecDeviceInfo device = mService.getDeviceInfoByPath(mCurrentRoutingPath);
+                HdmiCecDeviceInfo device = tv().getDeviceInfoByPath(mCurrentRoutingPath);
                 if (device == null) {
-                    maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath));
+                    maybeChangeActiveInput(tv().pathToPortId(mCurrentRoutingPath));
                 } else {
                     // TODO: Also check followings and then proceed:
                     //       if routing change was neither triggered by TV at CEC enable time, nor
@@ -184,7 +184,7 @@ public class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 int tvPowerStatus = getTvPowerStatus();
                 if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
-                    if (!maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath))) {
+                    if (!maybeChangeActiveInput(localDevice().pathToPortId(mCurrentRoutingPath))) {
                         sendSetStreamPath();
                     }
                 }
@@ -196,7 +196,7 @@ public class RoutingControlAction extends FeatureAction {
 
     // Called whenever an HDMI input of the TV shall become the active input.
     private boolean maybeChangeActiveInput(int path) {
-        if (mService.getActiveInput() == mService.pathToPortId(path)) {
+        if (localDevice().getActiveInput() == localDevice().pathToPortId(path)) {
             return false;
         }
         // TODO: Remember the currently active input
@@ -207,7 +207,7 @@ public class RoutingControlAction extends FeatureAction {
     }
 
     private void queryDevicePowerStatus(int address, SendMessageCallback callback) {
-        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(mSourceAddress, address),
+        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(), address),
                 callback);
     }
 
@@ -216,7 +216,7 @@ public class RoutingControlAction extends FeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            maybeChangeActiveInput(mService.pathToPortId(mCurrentRoutingPath));
+            maybeChangeActiveInput(localDevice().pathToPortId(mCurrentRoutingPath));
         }
     }
 

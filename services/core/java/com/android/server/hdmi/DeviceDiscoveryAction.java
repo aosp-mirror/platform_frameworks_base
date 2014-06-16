@@ -94,12 +94,10 @@ final class DeviceDiscoveryAction extends FeatureAction {
     /**
      * Constructor.
      *
-     * @param service an instance of {@link HdmiControlService}.
-     * @param sourceAddress a logical address which initiates this action
+     * @param source an instance of {@link HdmiCecLocalDevice}.
      */
-    DeviceDiscoveryAction(HdmiControlService service, int sourceAddress,
-            DeviceDiscoveryCallback callback) {
-        super(service, sourceAddress);
+    DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback) {
+        super(source);
         mCallback = Preconditions.checkNotNull(callback);
     }
 
@@ -108,7 +106,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         mDevices.clear();
         mState = STATE_WAITING_FOR_DEVICE_POLLING;
 
-        mService.pollDevices(new DevicePollingCallback() {
+        pollDevices(new DevicePollingCallback() {
             @Override
             public void onPollingFinished(List<Integer> ackedAddress) {
                 if (ackedAddress.isEmpty()) {
@@ -156,7 +154,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS)) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(mSourceAddress, address));
+        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(), address));
         addTimer(mState, TIMEOUT_MS);
     }
 
@@ -179,7 +177,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_SET_OSD_NAME)) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress, address));
+        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(), address));
         addTimer(mState, TIMEOUT_MS);
     }
 
@@ -203,12 +201,13 @@ final class DeviceDiscoveryAction extends FeatureAction {
         if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress, address));
+        sendCommand(
+                HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(getSourceAddress(), address));
         addTimer(mState, TIMEOUT_MS);
     }
 
     private boolean mayProcessMessageIfCached(int address, int opcode) {
-        HdmiCecMessage message = mService.getCecMessageCache().getMessage(address, opcode);
+        HdmiCecMessage message = getCecMessageCache().getMessage(address, opcode);
         if (message != null) {
             processCommand(message);
             return true;

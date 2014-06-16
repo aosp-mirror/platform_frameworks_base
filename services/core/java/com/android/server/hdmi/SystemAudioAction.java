@@ -47,23 +47,22 @@ abstract class SystemAudioAction extends FeatureAction {
     /**
      * Constructor
      *
-     * @param service {@link HdmiControlService} instance
-     * @param sourceAddress logical address of source device (TV or STB).
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
      * @throw IllegalArugmentException if device type of sourceAddress and avrAddress is invalid
      */
-    SystemAudioAction(HdmiControlService service, int sourceAddress, int avrAddress,
-            boolean targetStatus) {
-        super(service, sourceAddress);
+    SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus) {
+        super(source);
         HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
     }
 
     protected void sendSystemAudioModeRequest() {
-        int avrPhysicalAddress = mService.getAvrDeviceInfo().getPhysicalAddress();
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildSystemAudioModeRequest(mSourceAddress,
+        int avrPhysicalAddress = tv().getAvrDeviceInfo().getPhysicalAddress();
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+                getSourceAddress(),
                 mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus);
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
@@ -90,11 +89,11 @@ abstract class SystemAudioAction extends FeatureAction {
     }
 
     protected void setSystemAudioMode(boolean mode) {
-        mService.setSystemAudioMode(mode);
+        tv().setSystemAudioMode(mode);
     }
 
     protected void sendGiveAudioStatus() {
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildGiveAudioStatus(mSourceAddress,
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildGiveAudioStatus(getSourceAddress(),
                 mAvrLogicalAddress);
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
@@ -112,7 +111,7 @@ abstract class SystemAudioAction extends FeatureAction {
     private void handleSendGiveAudioStatusFailure() {
         // TODO: Notify the failure status.
 
-        int uiCommand = mService.getSystemAudioMode()
+        int uiCommand = tv().getSystemAudioMode()
                 ? HdmiConstants.UI_COMMAND_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
                 : HdmiConstants.UI_COMMAND_MUTE_FUNCTION;           // SystemAudioMode: OFF
         sendUserControlPressedAndReleased(uiCommand);
@@ -121,9 +120,9 @@ abstract class SystemAudioAction extends FeatureAction {
 
     private void sendUserControlPressedAndReleased(int uiCommand) {
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(
-                mSourceAddress, mAvrLogicalAddress, uiCommand));
+                getSourceAddress(), mAvrLogicalAddress, uiCommand));
         sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
-                mSourceAddress, mAvrLogicalAddress));
+                getSourceAddress(), mAvrLogicalAddress));
     }
 
     @Override
@@ -158,7 +157,7 @@ abstract class SystemAudioAction extends FeatureAction {
                 if (params.length > 0) {
                     boolean mute = (params[0] & 0x80) == 0x80;
                     int volume = params[0] & 0x7F;
-                    mService.setAudioStatus(mute, volume);
+                    tv().setAudioStatus(mute, volume);
                     if (mTargetAudioStatus && mute || !mTargetAudioStatus && !mute) {
                         // Toggle AVR's mute status to match with the system audio status.
                         sendUserControlPressedAndReleased(HdmiConstants.UI_COMMAND_MUTE);
@@ -171,8 +170,8 @@ abstract class SystemAudioAction extends FeatureAction {
     }
 
     protected void removeSystemAudioActionInProgress() {
-        mService.removeActionExcept(SystemAudioActionFromTv.class, this);
-        mService.removeActionExcept(SystemAudioActionFromAvr.class, this);
+        removeActionExcept(SystemAudioActionFromTv.class, this);
+        removeActionExcept(SystemAudioActionFromAvr.class, this);
     }
 
     @Override

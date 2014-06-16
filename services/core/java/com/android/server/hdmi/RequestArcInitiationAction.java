@@ -31,14 +31,14 @@ final class RequestArcInitiationAction extends RequestArcAction {
      *
      * For more details look at {@link RequestArcAction#RequestArcAction}.
      */
-    RequestArcInitiationAction(HdmiControlService service, int sourceAddress, int avrAddress) {
-        super(service, sourceAddress, avrAddress);
+    RequestArcInitiationAction(HdmiCecLocalDevice source, int avrAddress) {
+        super(source, avrAddress);
     }
 
     @Override
     boolean start() {
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildRequestArcInitiation(mSourceAddress,
-                mAvrAddress);
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildRequestArcInitiation(
+                getSourceAddress(), mAvrAddress);
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {

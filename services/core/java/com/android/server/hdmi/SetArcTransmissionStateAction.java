@@ -39,14 +39,13 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     /**
      * @Constructor
      *
-     * @param service an instance of {@link HdmiControlService}
-     * @param sourceAddress logical address to be used as source address
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param enabled whether to enable ARC Transmission channel
      */
-    SetArcTransmissionStateAction(HdmiControlService service, int sourceAddress, int avrAddress,
+    SetArcTransmissionStateAction(HdmiCecLocalDevice source, int avrAddress,
             boolean enabled) {
-        super(service, sourceAddress);
-        HdmiUtils.verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
+        super(source);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
         HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
         mEnabled = enabled;
@@ -65,7 +64,7 @@ final class SetArcTransmissionStateAction extends FeatureAction {
 
     private void sendReportArcInitiated() {
         HdmiCecMessage command =
-                HdmiCecMessageBuilder.buildReportArcInitiated(mSourceAddress, mAvrAddress);
+                HdmiCecMessageBuilder.buildReportArcInitiated(getSourceAddress(), mAvrAddress);
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
@@ -93,14 +92,14 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     }
 
     private void setArcStatus(boolean enabled) {
-        boolean wasEnabled = mService.setArcStatus(enabled);
+        boolean wasEnabled = tv().setArcStatus(enabled);
         Slog.i(TAG, "Change arc status [old:" + wasEnabled + " ,new:" + enabled);
 
         // If enabled before and set to "disabled" and send <Report Arc Terminated> to
         // av reciever.
         if (!enabled && wasEnabled) {
-            sendCommand(
-                    HdmiCecMessageBuilder.buildReportArcTerminated(mSourceAddress, mAvrAddress));
+            sendCommand(HdmiCecMessageBuilder.buildReportArcTerminated(getSourceAddress(),
+                    mAvrAddress));
         }
     }
 

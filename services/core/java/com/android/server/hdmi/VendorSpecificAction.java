@@ -12,8 +12,8 @@ public class VendorSpecificAction extends FeatureAction {
     private static final int STATE_1 = 1;
     private static final int STATE_2 = 2;
 
-    VendorSpecificAction(HdmiControlService service, int sourceAddress) {
-        super(service, sourceAddress);
+    VendorSpecificAction(HdmiCecLocalDevice source) {
+        super(source);
         // Modify the constructor if additional arguments are necessary.
     }
 

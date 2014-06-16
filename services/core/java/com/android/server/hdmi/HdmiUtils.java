@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,4 +112,13 @@ final class HdmiUtils {
     static int threeBytesToInt(byte[] data) {
         return ((data[0] & 0xFF) << 16) | ((data[1] & 0xFF) << 8) | (data[2] & 0xFF);
     }
+
+    static <T> List<T> sparseArrayToList(SparseArray<T> array) {
+        ArrayList<T> list = new ArrayList<>();
+        for (int i = 0; i < array.size(); ++i) {
+            list.add(array.valueAt(i));
+        }
+        return list;
+    }
+
 }

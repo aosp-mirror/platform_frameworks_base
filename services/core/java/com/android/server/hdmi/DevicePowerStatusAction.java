@@ -16,9 +16,10 @@ package com.android.server.hdmi;
  * limitations under the License.
  */
 
-import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -40,18 +41,18 @@ final class DevicePowerStatusAction extends FeatureAction {
     private final int mTargetAddress;
     private final IHdmiControlCallback mCallback;
 
-    static DevicePowerStatusAction create(HdmiControlService service, int sourceAddress,
+    static DevicePowerStatusAction create(HdmiCecLocalDevice source,
             int targetAddress, IHdmiControlCallback callback) {
-        if (service == null || callback == null) {
+        if (source == null || callback == null) {
             Slog.e(TAG, "Wrong arguments");
             return null;
         }
-        return new DevicePowerStatusAction(service, sourceAddress, targetAddress, callback);
+        return new DevicePowerStatusAction(source, targetAddress, callback);
     }
 
-    private DevicePowerStatusAction(HdmiControlService service, int sourceAddress,
+    private DevicePowerStatusAction(HdmiCecLocalDevice localDevice,
             int targetAddress, IHdmiControlCallback callback) {
-        super(service, sourceAddress);
+        super(localDevice);
         mTargetAddress = targetAddress;
         mCallback = callback;
     }
@@ -65,8 +66,8 @@ final class DevicePowerStatusAction extends FeatureAction {
     }
 
     private void queryDevicePowerStatus() {
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(mSourceAddress, mTargetAddress));
+        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
+                mTargetAddress));
     }
 
     @Override
