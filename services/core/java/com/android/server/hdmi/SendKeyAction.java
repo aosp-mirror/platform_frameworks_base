@@ -144,6 +144,6 @@ final class SendKeyAction extends FeatureAction {
     // KeyEvent.KEYCODE_TV_BROADCAST_CABLE.
     // The return byte array contains both UI command (keycode) and optional parameter.
     private byte[] getCecKeyCodeAndParam(int keyCode) {
-        return HdmiCecKeycodeTranslator.androidKeyToCecKey(keyCode);
+        return HdmiCecKeycode.androidKeyToCecKey(keyCode);
     }
 }
