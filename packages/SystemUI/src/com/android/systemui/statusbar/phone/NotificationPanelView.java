@@ -688,6 +688,9 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isScrolledToBottom() {
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+            return true;
+        }
         if (!isInSettings()) {
             return mNotificationStackScroller.isScrolledToBottom();
         }
