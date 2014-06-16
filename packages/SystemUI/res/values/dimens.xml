@@ -330,6 +330,4 @@
          phone hints. -->
     <dimen name="edge_tap_area_width">48dp</dimen>
 
-    <!-- the distance the panel moves up when starting the up motion on Keyguard -->
-    <dimen name="keyguard_panel_move_up_distance">100dp</dimen>
 </resources>
