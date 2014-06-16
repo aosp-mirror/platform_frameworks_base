@@ -1,8 +1,9 @@
-heropage.title=Android TV
+page.title=Android TV
 page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.type=about
+
 
 @jd:body
 
@@ -22,18 +23,6 @@ page.type=about
 }
 </style>
 
-<div id="video-container">
-  <div id="video-frame">
-    <div class="video-close">
-      <span id="icon-video-close">&nbsp;</span>
-    </div>
-    <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-    <div id="ytapiplayer">
-      <a href="http://www.youtube.com/watch?v=0xQ3y902DEQ"><img width=940
-      src="https://i1.ytimg.com/vi/0xQ3y902DEQ/maxresdefault.jpg"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
-    </div>
-  </div>
-</div>
 
 <div class="landing-body-content">
   <div class="landing-hero-container">
@@ -47,48 +36,19 @@ page.type=about
             <div class="col-10">
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android TV</div>
-                <div class="landing-subhead hero">
-                <p>Big screen, big experience</p>
+                <div class="landing-subhead hero">Your apps on the big screen</div>
+                <div class="landing-hero-description">
+                  <p>Engage users from the comfort of their couches.
+                    Put your app on TV and bring everyone into
+                    the action.</p>
                 </div>
-              <div class="landing-hero-description">
-                <p>Engage your users from the comfort of their couch.
-                  Put your app on TV and bring the whole family into
-                  the action.</p>
-              </div>
 
               <div class="landing-body">
-                <a href="{@docRoot}wear/preview/start.html" class="landing-button landing-primary" style="margin-top: 40px;">
+                <a href="{@docRoot}preview/tv/index.html" class="landing-button landing-primary" style="margin-top: 40px;">
                   Get Started
                 </a>
-                <a id="watchVideo" href="https://youtube.googleapis.com/v/0xQ3y902DEQ">
-                  <div class="landing-video-link">Watch the video</div>
-                </a>
-<script>
-$("#watchVideo").on("click", function(e) {
-  $("#video-container").fadeIn(400, function(){$("#video-frame").show()});
-
-  var params = { allowScriptAccess: "always"};
-  var atts = { id: "ytapiplayer" };
-  swfobject.embedSWF("//www.youtube.com/v/0xQ3y902DEQ?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1;autoplay=1",
-    "ytapiplayer", "940", "526.4", "8", null, null, params, atts);
-
-  e.preventDefault();
-});
-$("#icon-video-close").on("click", function() {
-  ytplayer = document.getElementById("ytapiplayer");
-  try {
-    ytplayer.stopVideo();
-    $(ytplayer).hide();
-    $("#video-container").fadeOut(400);
-  } catch(e) {
-    console.log('Video not available');
-    $("#video-container").fadeOut(400);
-  }
-});
-</script>
               </div>
             </div>
-
           </div>
         </div>
       </div> <!-- end .wrap -->
