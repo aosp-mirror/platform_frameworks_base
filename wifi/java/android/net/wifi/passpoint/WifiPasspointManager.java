@@ -325,7 +325,7 @@ public class WifiPasspointManager {
                         listener = getListener(message.arg2, true);
                         if (listener != null) {
                             ParcelableString str = (ParcelableString) message.obj;
-                            if (str.string == null)
+                            if (str == null || str.string == null)
                                 ((OsuRemListener) listener).onBrowserDismiss();
                             else
                                 ((OsuRemListener) listener).onBrowserLaunch(str.string);
@@ -485,7 +485,7 @@ public class WifiPasspointManager {
      *
      * @return The list of credentials
      */
-    public List<WifiPasspointCredential> getSavedCredentials() {
+    public List<WifiPasspointCredential> getCredentials() {
         return null;
     }
 
@@ -529,7 +529,7 @@ public class WifiPasspointManager {
         Log.d(TAG, "startOsu end");
     }
 
-    public void startUserRemediation(Channel c, OsuRemListener listener) {
+    public void startRemediation(Channel c, OsuRemListener listener) {
     }
 
     public void connect(WifiPasspointPolicy policy) {

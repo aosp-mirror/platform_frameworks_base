@@ -213,22 +213,22 @@ public class WifiPasspointInfo implements Parcelable {
     public String venueName;
 
     /** list of network authentication types */
-    public List<NetworkAuthType> networkAuthType;
+    public List<NetworkAuthType> networkAuthTypeList;
 
     /** list of roaming consortium OIs */
-    public List<String> roamingConsortium;
+    public List<String> roamingConsortiumList;
 
     /** IP address availability */
     public IpAddressType ipAddrTypeAvailability;
 
-    /** NAI realm */
-    public List<NaiRealm> naiRealm;
+    /** list of NAI realm */
+    public List<NaiRealm> naiRealmList;
 
-    /** 3GPP cellular network */
-    public List<CellularNetwork> cellularNetwork;
+    /** list of 3GPP cellular network */
+    public List<CellularNetwork> cellularNetworkList;
 
-    /** fully qualified domain name (FQDN) */
-    public List<String> domainName;
+    /** list of fully qualified domain name (FQDN) */
+    public List<String> domainNameList;
 
     /** HS 2.0 operator friendly name */
     public String operatorFriendlyName;
@@ -236,10 +236,10 @@ public class WifiPasspointInfo implements Parcelable {
     /** HS 2.0 wan metrics */
     public WanMetrics wanMetrics;
 
-    /** HS 2.0 list of IP proto port */
-    public List<IpProtoPort> connectionCapability;
+    /** list of HS 2.0 IP proto port */
+    public List<IpProtoPort> connectionCapabilityList;
 
-    /** HS 2.0 list of OSU providers */
+    /** list of HS 2.0 OSU providers */
     public List<WifiPasspointOsuProvider> osuProviderList;
 
     /**
@@ -292,15 +292,15 @@ public class WifiPasspointInfo implements Parcelable {
             sb.append(" venueName: ").append("(")
               .append(venueName.replace("\n", "\\n")).append(")");
 
-        if (networkAuthType != null) {
+        if (networkAuthTypeList != null) {
             sb.append(" networkAuthType: ");
-            for (NetworkAuthType auth : networkAuthType)
+            for (NetworkAuthType auth : networkAuthTypeList)
                 sb.append("(").append(auth.toString()).append(")");
         }
 
-        if (roamingConsortium != null) {
+        if (roamingConsortiumList != null) {
             sb.append(" roamingConsortium: ");
-            for (String oi : roamingConsortium)
+            for (String oi : roamingConsortiumList)
                 sb.append("(").append(oi).append(")");
         }
 
@@ -309,21 +309,21 @@ public class WifiPasspointInfo implements Parcelable {
               .append(ipAddrTypeAvailability.toString()).append(")");
         }
 
-        if (naiRealm != null) {
+        if (naiRealmList != null) {
             sb.append(" naiRealm: ");
-            for (NaiRealm realm : naiRealm)
+            for (NaiRealm realm : naiRealmList)
                 sb.append("(").append(realm.toString()).append(")");
         }
 
-        if (cellularNetwork != null) {
+        if (cellularNetworkList != null) {
             sb.append(" cellularNetwork: ");
-            for (CellularNetwork plmn : cellularNetwork)
+            for (CellularNetwork plmn : cellularNetworkList)
                 sb.append("(").append(plmn.toString()).append(")");
         }
 
-        if (domainName != null) {
+        if (domainNameList != null) {
             sb.append(" domainName: ");
-            for (String fqdn : domainName)
+            for (String fqdn : domainNameList)
                 sb.append("(").append(fqdn).append(")");
         }
 
@@ -335,9 +335,9 @@ public class WifiPasspointInfo implements Parcelable {
             sb.append(" wanMetrics: ").append("(")
               .append(wanMetrics.toString()).append(")");
 
-        if (connectionCapability != null) {
+        if (connectionCapabilityList != null) {
             sb.append(" connectionCapability: ");
-            for (IpProtoPort ip : connectionCapability)
+            for (IpProtoPort ip : connectionCapabilityList)
                 sb.append("(").append(ip.toString()).append(")");
         }
 
@@ -356,21 +356,21 @@ public class WifiPasspointInfo implements Parcelable {
         out.writeString(bssid);
         out.writeString(venueName);
 
-        if (networkAuthType == null) {
+        if (networkAuthTypeList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(networkAuthType.size());
-            for (NetworkAuthType auth : networkAuthType) {
+            out.writeInt(networkAuthTypeList.size());
+            for (NetworkAuthType auth : networkAuthTypeList) {
                 out.writeInt(auth.type);
                 out.writeString(auth.redirectUrl);
             }
         }
 
-        if (roamingConsortium == null) {
+        if (roamingConsortiumList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(roamingConsortium.size());
-            for (String oi : roamingConsortium)
+            out.writeInt(roamingConsortiumList.size());
+            for (String oi : roamingConsortiumList)
                 out.writeString(oi);
         }
 
@@ -380,32 +380,32 @@ public class WifiPasspointInfo implements Parcelable {
             out.writeInt(ipAddrTypeAvailability.availability);
         }
 
-        if (naiRealm == null) {
+        if (naiRealmList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(naiRealm.size());
-            for (NaiRealm realm : naiRealm) {
+            out.writeInt(naiRealmList.size());
+            for (NaiRealm realm : naiRealmList) {
                 out.writeInt(realm.encoding);
                 out.writeString(realm.realm);
             }
         }
 
-        if (cellularNetwork == null) {
+        if (cellularNetworkList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(cellularNetwork.size());
-            for (CellularNetwork plmn : cellularNetwork) {
+            out.writeInt(cellularNetworkList.size());
+            for (CellularNetwork plmn : cellularNetworkList) {
                 out.writeString(plmn.mcc);
                 out.writeString(plmn.mnc);
             }
         }
 
 
-        if (domainName == null) {
+        if (domainNameList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(domainName.size());
-            for (String fqdn : domainName)
+            out.writeInt(domainNameList.size());
+            for (String fqdn : domainNameList)
                 out.writeString(fqdn);
         }
 
@@ -423,11 +423,11 @@ public class WifiPasspointInfo implements Parcelable {
             out.writeInt(wanMetrics.lmd);
         }
 
-        if (connectionCapability == null) {
+        if (connectionCapabilityList == null) {
             out.writeInt(0);
         } else {
-            out.writeInt(connectionCapability.size());
-            for (IpProtoPort ip : connectionCapability) {
+            out.writeInt(connectionCapabilityList.size());
+            for (IpProtoPort ip : connectionCapabilityList) {
                 out.writeInt(ip.proto);
                 out.writeInt(ip.port);
                 out.writeInt(ip.status);
@@ -462,20 +462,20 @@ public class WifiPasspointInfo implements Parcelable {
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.networkAuthType = new ArrayList<NetworkAuthType>();
+                        p.networkAuthTypeList = new ArrayList<NetworkAuthType>();
                         for (int i = 0; i < n; i++) {
                             NetworkAuthType auth = new NetworkAuthType();
                             auth.type = in.readInt();
                             auth.redirectUrl = in.readString();
-                            p.networkAuthType.add(auth);
+                            p.networkAuthTypeList.add(auth);
                         }
                     }
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.roamingConsortium = new ArrayList<String>();
+                        p.roamingConsortiumList = new ArrayList<String>();
                         for (int i = 0; i < n; i++)
-                            p.roamingConsortium.add(in.readString());
+                            p.roamingConsortiumList.add(in.readString());
                     }
 
                     n = in.readInt();
@@ -486,31 +486,31 @@ public class WifiPasspointInfo implements Parcelable {
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.naiRealm = new ArrayList<NaiRealm>();
+                        p.naiRealmList = new ArrayList<NaiRealm>();
                         for (int i = 0; i < n; i++) {
                             NaiRealm realm = new NaiRealm();
                             realm.encoding = in.readInt();
                             realm.realm = in.readString();
-                            p.naiRealm.add(realm);
+                            p.naiRealmList.add(realm);
                         }
                     }
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.cellularNetwork = new ArrayList<CellularNetwork>();
+                        p.cellularNetworkList = new ArrayList<CellularNetwork>();
                         for (int i = 0; i < n; i++) {
                             CellularNetwork plmn = new CellularNetwork();
                             plmn.mcc = in.readString();
                             plmn.mnc = in.readString();
-                            p.cellularNetwork.add(plmn);
+                            p.cellularNetworkList.add(plmn);
                         }
                     }
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.domainName = new ArrayList<String>();
+                        p.domainNameList = new ArrayList<String>();
                         for (int i = 0; i < n; i++)
-                            p.domainName.add(in.readString());
+                            p.domainNameList.add(in.readString());
                     }
 
                     p.operatorFriendlyName = in.readString();
@@ -528,13 +528,13 @@ public class WifiPasspointInfo implements Parcelable {
 
                     n = in.readInt();
                     if (n > 0) {
-                        p.connectionCapability = new ArrayList<IpProtoPort>();
+                        p.connectionCapabilityList = new ArrayList<IpProtoPort>();
                         for (int i = 0; i < n; i++) {
                             IpProtoPort ip = new IpProtoPort();
                             ip.proto = in.readInt();
                             ip.port = in.readInt();
                             ip.status = in.readInt();
-                            p.connectionCapability.add(ip);
+                            p.connectionCapabilityList.add(ip);
                         }
                     }
 
