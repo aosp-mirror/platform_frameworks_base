@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicativos pessoais"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android para trabalho"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serviços que geram gastos"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Faça coisas que podem custar dinheiro."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Suas mensagens"</string>
@@ -401,10 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite que o proprietário utilize interface de nível superior de um plano de fundo. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"associar a um interagente de voz"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite que o proprietário use a interface de nível superior de um serviço de interação de voz. Não deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
-    <skip />
-    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
-    <skip />
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gerenciar frases-chave de voz"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permite ao titular gerenciar as frases-chave para detecção de hotword por voz. Isso nunca será necessário para aplicativos normais."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"usar uma tela remota"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite que o proprietário use a interface de nível superior de uma tela remota. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"sujeitar-se a um serviço de widget"</string>
@@ -1365,6 +1362,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite que o aplicativo detecte alterações no estado de confiança."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Fornecer um agente de confiança."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite que um aplicativo forneça um agente de confiança."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Associar a um serviço de agente de confiança"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite que o aplicativo se associe a um serviço de agente de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagir com o sistema de atualizações e recuperação"</string>

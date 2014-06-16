@@ -401,10 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"conectare la un serviciu de interacțiune vocală"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de interacțiune vocală. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
-    <skip />
-    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
-    <skip />
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"gestionarea expresiilor cheie vocale"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Permite titularului să gestioneze expresiile cheie pentru detectarea expresiei de activare. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"conectare la un ecran la distanță"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -1365,6 +1363,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite unei aplicații să detecteze modificările în starea de încredere."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Indicați un agent de încredere."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite unei aplicații să indice un agent de încredere."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Asocierea la un serviciu „agenți de încredere”."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite unei aplicații să se asocieze la un serviciu „agent de încredere”."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacțiune cu sistemul de recuperare și de actualizare"</string>

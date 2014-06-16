@@ -1362,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Lehetővé teszi, hogy az alkalmazás figyelje a trust-állapot változásait."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust agent szoftver megadása"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Lehetővé teszi, hogy az alkalmazás megadjon egy trust agent szoftvert."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Trust agent szoftver beállításmenüjének indítása."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Lehetővé teszi az alkalmazások számára olyan tevékenységek indítását, amelyek megváltoztatják a trust agent szoftver viselkedését."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Csatlakozás egy trust agent szolgáltatáshoz"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Lehetővé teszi, hogy az alkalmazás egy trust agent szolgáltatáshoz csatlakozzon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Kapcsolatfelvétel a frissítési és helyreállítási rendszerrel"</string>

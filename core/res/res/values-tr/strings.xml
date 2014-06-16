@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Güvenli mod"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android Sistemi"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Kişisel uygulamalar"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Size maliyet getiren hizmetler"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Size maliyet getirebilecek işlemler yapma."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajlarınız"</string>
@@ -1363,6 +1362,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Bir uygulamanın, güven durumundaki değişiklikleri dinlemesine izin verir."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Güven aracısı sağlama."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Bir uygulamanın güven aracısı sağlamasına izin verir."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Güven aracı hizmetine bağlan"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Bir uygulamanın, güven aracı hizmetine bağlanmasına izin verir."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Güncelleme ve kurtarma sistemiyle etkileşim kur"</string>

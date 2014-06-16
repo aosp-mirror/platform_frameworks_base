@@ -1362,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ivumela uhlelo lokusebenza ukuthi lilalelele izinguquko kusimo sethemba."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Nikeza umsebenzeli owethembekile."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ivumela uhlelo lokusebenza ukunikeza umsebenzeli owethembekile."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Qalisa imenyu yezilungiselelo zomsebenzeli wethemba."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Ivumela uhlelo lokusebenza ukuthi luqalise umsebenzi oguqula ukuziphatha komsebenzeli wethemba."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bophezela kusevisi yomenzeli wethemba"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ivumela uhlelo lokusebenza ukuthi libophezeleke kusevisi yomenzeli wethemba."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Ixhumana nesibuyekezo nesistimu yokutakula"</string>
