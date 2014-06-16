@@ -17,9 +17,22 @@
 package android.media;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
+import android.text.style.UpdateAppearance;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -35,11 +48,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
-
-import android.text.SpannableStringBuilder;
-import android.text.Spannable;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.StyleSpan;
 
 /** @hide */
 public class ClosedCaptionRenderer extends SubtitleController.Renderer {
@@ -384,6 +392,10 @@ class CCParser {
             return (mStyle & STYLE_ITALICS) != 0;
         }
 
+        boolean isUnderline() {
+            return (mStyle & STYLE_UNDERLINE) != 0;
+        }
+
         int getColor() {
             return mColor;
         }
@@ -504,6 +516,11 @@ class CCParser {
                         new StyleSpan(android.graphics.Typeface.ITALIC),
                         start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+            if (s.isUnderline()) {
+                styledText.setSpan(
+                        new UnderlineSpan(),
+                        start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         SpannableStringBuilder getStyledText(CaptionStyle captionStyle) {
@@ -539,7 +556,7 @@ class CCParser {
                     int expandedStart = mDisplayChars.charAt(start) == ' ' ? start : start - 1;
                     int expandedEnd = mDisplayChars.charAt(next - 1) == ' ' ? next : next + 1;
                     styledText.setSpan(
-                            new BackgroundColorSpan(captionStyle.backgroundColor),
+                            new MutableBackgroundColorSpan(captionStyle.backgroundColor),
                             expandedStart, expandedEnd,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     if (styleStart >= 0) {
@@ -1017,6 +1034,49 @@ class CCParser {
 }
 
 /**
+ * @hide
+ *
+ * MutableBackgroundColorSpan
+ *
+ * This is a mutable version of BackgroundSpan to facilitate text
+ * rendering with edge styles.
+ *
+ */
+class MutableBackgroundColorSpan extends CharacterStyle
+        implements UpdateAppearance, ParcelableSpan {
+    private int mColor;
+
+    public MutableBackgroundColorSpan(int color) {
+        mColor = color;
+    }
+    public MutableBackgroundColorSpan(Parcel src) {
+        mColor = src.readInt();
+    }
+    public void setBackgroundColor(int color) {
+        mColor = color;
+    }
+    public int getBackgroundColor() {
+        return mColor;
+    }
+    @Override
+    public int getSpanTypeId() {
+        return TextUtils.BACKGROUND_COLOR_SPAN;
+    }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mColor);
+    }
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        ds.bgColor = mColor;
+    }
+}
+
+/**
  * Widget capable of rendering CEA-608 closed captions.
  *
  * @hide
@@ -1159,6 +1219,16 @@ class ClosedCaptionWidget extends ViewGroup implements
 
     private static class CCLineBox extends TextView {
         private static final float FONT_PADDING_RATIO = 0.75f;
+        private static final float EDGE_OUTLINE_RATIO = 0.1f;
+        private static final float EDGE_SHADOW_RATIO = 0.05f;
+        private float mOutlineWidth;
+        private float mShadowRadius;
+        private float mShadowOffset;
+
+        private int mTextColor = Color.WHITE;
+        private int mBgColor = Color.BLACK;
+        private int mEdgeType = CaptionStyle.EDGE_TYPE_NONE;
+        private int mEdgeColor = Color.TRANSPARENT;
 
         CCLineBox(Context context) {
             super(context);
@@ -1167,11 +1237,31 @@ class ClosedCaptionWidget extends ViewGroup implements
             setTextColor(Color.WHITE);
             setTypeface(Typeface.MONOSPACE);
             setVisibility(View.INVISIBLE);
+
+            final Resources res = getContext().getResources();
+
+            // get the default (will be updated later during measure)
+            mOutlineWidth = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.subtitle_outline_width);
+            mShadowRadius = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.subtitle_shadow_radius);
+            mShadowOffset = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.subtitle_shadow_offset);
         }
 
         void setCaptionStyle(CaptionStyle captionStyle) {
-            setTextColor(captionStyle.foregroundColor);
-            // TODO: edge color?
+            mTextColor = captionStyle.foregroundColor;
+            mBgColor = captionStyle.backgroundColor;
+            mEdgeType = captionStyle.edgeType;
+            mEdgeColor = captionStyle.edgeColor;
+
+            setTextColor(mTextColor);
+            if (mEdgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
+                setShadowLayer(mShadowRadius, mShadowOffset, mShadowOffset, mEdgeColor);
+            } else {
+                setShadowLayer(0, 0, 0, 0);
+            }
+            invalidate();
         }
 
         @Override
@@ -1179,6 +1269,10 @@ class ClosedCaptionWidget extends ViewGroup implements
             float fontSize = MeasureSpec.getSize(heightMeasureSpec)
                     * FONT_PADDING_RATIO;
             setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+
+            mOutlineWidth = EDGE_OUTLINE_RATIO * fontSize + 1.0f;
+            mShadowRadius = EDGE_SHADOW_RATIO * fontSize + 1.0f;;
+            mShadowOffset = mShadowRadius;
 
             // set font scale in the X direction to match the required width
             setScaleX(1.0f);
@@ -1188,6 +1282,94 @@ class ClosedCaptionWidget extends ViewGroup implements
             setScaleX(requiredTextWidth / actualTextWidth);
 
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+
+        @Override
+        protected void onDraw(Canvas c) {
+            if (mEdgeType == CaptionStyle.EDGE_TYPE_UNSPECIFIED
+                    || mEdgeType == CaptionStyle.EDGE_TYPE_NONE
+                    || mEdgeType == CaptionStyle.EDGE_TYPE_DROP_SHADOW) {
+                // these edge styles don't require a second pass
+                super.onDraw(c);
+                return;
+            }
+
+            if (mEdgeType == CaptionStyle.EDGE_TYPE_OUTLINE) {
+                drawEdgeOutline(c);
+            } else {
+                // Raised or depressed
+                drawEdgeRaisedOrDepressed(c);
+            }
+        }
+
+        private void drawEdgeOutline(Canvas c) {
+            TextPaint textPaint = getPaint();
+
+            Paint.Style previousStyle = textPaint.getStyle();
+            Paint.Join previousJoin = textPaint.getStrokeJoin();
+            float previousWidth = textPaint.getStrokeWidth();
+
+            setTextColor(mEdgeColor);
+            textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            textPaint.setStrokeJoin(Paint.Join.ROUND);
+            textPaint.setStrokeWidth(mOutlineWidth);
+
+            // Draw outline and background only.
+            super.onDraw(c);
+
+            // Restore original settings.
+            setTextColor(mTextColor);
+            textPaint.setStyle(previousStyle);
+            textPaint.setStrokeJoin(previousJoin);
+            textPaint.setStrokeWidth(previousWidth);
+
+            // Remove the background.
+            setBackgroundSpans(Color.TRANSPARENT);
+            // Draw foreground only.
+            super.onDraw(c);
+            // Restore the background.
+            setBackgroundSpans(mBgColor);
+        }
+
+        private void drawEdgeRaisedOrDepressed(Canvas c) {
+            TextPaint textPaint = getPaint();
+
+            Paint.Style previousStyle = textPaint.getStyle();
+            textPaint.setStyle(Paint.Style.FILL);
+
+            final boolean raised = mEdgeType == CaptionStyle.EDGE_TYPE_RAISED;
+            final int colorUp = raised ? Color.WHITE : mEdgeColor;
+            final int colorDown = raised ? mEdgeColor : Color.WHITE;
+            final float offset = mShadowRadius / 2f;
+
+            // Draw background and text with shadow up
+            setShadowLayer(mShadowRadius, -offset, -offset, colorUp);
+            super.onDraw(c);
+
+            // Remove the background.
+            setBackgroundSpans(Color.TRANSPARENT);
+
+            // Draw text with shadow down
+            setShadowLayer(mShadowRadius, +offset, +offset, colorDown);
+            super.onDraw(c);
+
+            // Restore settings
+            textPaint.setStyle(previousStyle);
+
+            // Restore the background.
+            setBackgroundSpans(mBgColor);
+        }
+
+        private void setBackgroundSpans(int color) {
+            CharSequence text = getText();
+            if (text instanceof Spannable) {
+                Spannable spannable = (Spannable) text;
+                MutableBackgroundColorSpan[] bgSpans = spannable.getSpans(
+                        0, spannable.length(), MutableBackgroundColorSpan.class);
+                for (int i = 0; i < bgSpans.length; i++) {
+                    bgSpans[i].setBackgroundColor(color);
+                }
+            }
         }
     }
 
@@ -1216,7 +1398,7 @@ class ClosedCaptionWidget extends ViewGroup implements
         void update(SpannableStringBuilder[] textBuffer) {
             for (int i = 0; i < MAX_ROWS; i++) {
                 if (textBuffer[i] != null) {
-                    mLineBoxes[i].setText(textBuffer[i]);
+                    mLineBoxes[i].setText(textBuffer[i], TextView.BufferType.SPANNABLE);
                     mLineBoxes[i].setVisibility(View.VISIBLE);
                 } else {
                     mLineBoxes[i].setVisibility(View.INVISIBLE);
