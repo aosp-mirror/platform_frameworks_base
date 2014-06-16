@@ -126,7 +126,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void updateNotification() {
-        Slog.d(TAG, "updateNotification mWarning=" + mWarning
+        if (DEBUG) Slog.d(TAG, "updateNotification mWarning=" + mWarning
                 + " mSaver=" + mSaver + " mInvalidCharger=" + mInvalidCharger);
         if (mInvalidCharger) {
             showInvalidChargerNotification();
@@ -238,13 +238,13 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     @Override
     public void dismissLowBatteryWarning() {
-        Slog.i(TAG, "dismissing low battery warning: level=" + mBatteryLevel);
+        if (DEBUG) Slog.d(TAG, "dismissing low battery warning: level=" + mBatteryLevel);
         dismissLowBatteryNotification();
         mFallbackDialogs.dismissLowBatteryWarning();
     }
 
     private void dismissLowBatteryNotification() {
-        Slog.i(TAG, "dismissing low battery notification");
+        if (mWarning) Slog.i(TAG, "dismissing low battery notification");
         mWarning = false;
         updateNotification();
     }
@@ -307,7 +307,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void dismissInvalidChargerNotification() {
-        Slog.i(TAG, "dismissing invalid charger notification");
+        if (mInvalidCharger) Slog.i(TAG, "dismissing invalid charger notification");
         mInvalidCharger = false;
         updateNotification();
     }
