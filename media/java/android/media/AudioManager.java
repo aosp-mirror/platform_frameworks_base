@@ -1425,7 +1425,12 @@ public class AudioManager {
      *           <var>false</var> to turn mute off
      */
     public void setMicrophoneMute(boolean on){
-        AudioSystem.muteMicrophone(on);
+        IAudioService service = getService();
+        try {
+            service.setMicrophoneMute(on, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMicrophoneMute", e);
+        }
     }
 
     /**
