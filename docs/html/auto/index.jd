@@ -15,10 +15,13 @@ page.type=about
 
 <style>
 #footer {
-    display: none;
+  display: none;
 }
 .content-footer {
   display: none;
+}
+#hero-height {
+  height:calc(100% - 100px);
 }
 </style>
 
@@ -26,7 +29,7 @@ page.type=about
 <div class="landing-body-content">
   <div class="landing-hero-container">
 
-    <div class="landing-section auto-hero">
+    <div id="hero-height" class="landing-section auto-hero">
       <div class="landing-hero-scrim"></div>
       <div class="landing-hero-wrap">
         <div class="vertical-center-outer">
@@ -39,7 +42,7 @@ page.type=about
                 <div class="landing-hero-description">
                   <p>Display and control your handheld app in vehicles.
                   Build apps with easy-to-use UI templates that
-                  let users keep ther eyes on the road.</p>
+                  let users keep their eyes on the road.</p>
                 </div>
 
               <div class="landing-body">
@@ -82,7 +85,26 @@ page.type=about
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
-      <div class="landing-section" >
+
+      <div class="landing-section">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">One Platform</div>
+          </div>
+
+          <div class="landing-body">
+            <p>Android Auto is an extension of the Android platform. You can easily adapt
+            existing apps for Android Auto and reuse many of the Android APIs and services you
+            are already familiar with.</p>
+            <p>The Android Auto platform and SDK let you write your apps only once, without having
+            to worry about vehicle-specific hardware differences like screen resolution, software
+            interfaces, knobs and touch controls. Your app runs the same on any compatible
+            vehicle.</p>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+      <div class="landing-section landing-gray-background" >
         <div class="wrap">
           <div class="landing-section-header">
             <div class="landing-h1">Minimizing Distraction</div>
@@ -98,27 +120,42 @@ page.type=about
             <p>Android Auto locks any device that users connect to a compatible vehicle, so drivers
               interact with the device using voice actions and the vehicle’s input controls.</p>
           </div>
-
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
       <div class="landing-section landing-white-background">
         <div class="wrap">
           <div class="landing-section-header">
-            <div class="landing-h2">Building an Ecosystem</div>
-            <div class="landing-body landing-align-center">
-              <p class="landing-small">
+            <div class="landing-h1">Building an Ecosystem</div>
+          </div>
+          <div class="landing-body landing-align-center">
+              <p style="margin-bottom:20px">
                 Android Auto is coming soon to new cars from these manufacturers:
               </p>
-            </div>
-          </div>
-
           </div>
           <div style="width:800px;margin:0 auto">
             <img src="{@docRoot}auto/images/carlogos.png" alt="Partners" />
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
+
+
+      <div class="landing-section" >
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Developer Stories</div>
+          </div>
+
+          <div class="landing-body">
+            <p>We're working with developers to bring many popular apps to Android Auto:</p>
+            <p>
+
+            </p>
+          </div>
+
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
 
       <div class="landing-section" style="background-color:#f5f5f5">
         <div class="wrap">
@@ -135,18 +172,19 @@ page.type=about
               and tools to make your existing apps compatible with Android Auto. The first version
               of the SDK will provide templates and APIs for music, podcast, live radio, and audio
               news apps, as well as limited voice actions.</p>
-            <p>Future versions of the Android Auto SDK will include support for a selection of
+            <p style="margin-bottom:40px">
+              Future versions of the Android Auto SDK will include support for a selection of
               Android notifications, additional voice actions, and templates and APIs for
               messaging, communication, local search, and more.</p>
 
-              <a target="_blank" href="http://g.co/androidweardev">
+              <a target="_blank" href="http://g.co/androidautodev">
                 <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Auto Developers">
               </a>
-              <p>G+ Community</p>
+              <p style="margin-bottom:5px">G+ Community</p>
               <p class="landing-small">
                 Join the Android Auto developer community on Google+ to stay involved, get the
                 latest updates, and exchange experiences with other developers.
-                <a target="_blank" href="http://g.co/androidweardev">+Android Auto Developers</a>
+                <a target="_blank" href="http://g.co/androidautodev">+Android Auto Developers</a>
               </p>
           </div>
 
@@ -178,7 +216,7 @@ page.type=about
   <script>
   $("a.landing-down-arrow").on("click", function(e) {
     $("body").animate({
-      scrollTop: $(".wear-hero").height() + 76
+      scrollTop: $(".auto-hero").height() + 120
     }, 1000, "easeOutQuint");
     e.preventDefault();
   });
