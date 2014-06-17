@@ -62,7 +62,7 @@ public class Path {
         }
         mNativePath = init2(valNative);
     }
-    
+
     /**
      * Clear any lines and curves from the path, making it empty.
      * This does NOT change the fill-type setting.
@@ -205,7 +205,7 @@ public class Path {
          * Same as {@link #EVEN_ODD}, but draws outside of the path, rather than inside.
          */
         INVERSE_EVEN_ODD(3);
-        
+
         FillType(int ni) {
             nativeInt = ni;
         }
@@ -425,7 +425,7 @@ public class Path {
      * the path is different from the path's current last point, then an
      * automatic lineTo() is added to connect the current contour to the
      * start of the arc. However, if the path is empty, then we call moveTo()
-     * with the first point of the arc. The sweep angle is tread mod 360.
+     * with the first point of the arc.
      *
      * @param oval        The bounds of oval defining shape and size of the arc
      * @param startAngle  Starting angle (in degrees) where the arc begins
@@ -435,10 +435,9 @@ public class Path {
      */
     public void arcTo(RectF oval, float startAngle, float sweepAngle,
                       boolean forceMoveTo) {
-        isSimplePath = false;
-        native_arcTo(mNativePath, oval, startAngle, sweepAngle, forceMoveTo);
+        arcTo(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, forceMoveTo);
     }
-    
+
     /**
      * Append the specified arc to the path as a new contour. If the start of
      * the path is different from the path's current last point, then an
@@ -451,10 +450,27 @@ public class Path {
      * @param sweepAngle  Sweep angle (in degrees) measured clockwise
      */
     public void arcTo(RectF oval, float startAngle, float sweepAngle) {
-        isSimplePath = false;
-        native_arcTo(mNativePath, oval, startAngle, sweepAngle, false);
+        arcTo(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, false);
     }
-    
+
+    /**
+     * Append the specified arc to the path as a new contour. If the start of
+     * the path is different from the path's current last point, then an
+     * automatic lineTo() is added to connect the current contour to the
+     * start of the arc. However, if the path is empty, then we call moveTo()
+     * with the first point of the arc.
+     *
+     * @param startAngle  Starting angle (in degrees) where the arc begins
+     * @param sweepAngle  Sweep angle (in degrees) measured clockwise, treated
+     *                    mod 360.
+     * @param forceMoveTo If true, always begin a new contour with the arc
+     */
+    public void arcTo(float left, float top, float right, float bottom, float startAngle,
+            float sweepAngle, boolean forceMoveTo) {
+        isSimplePath = false;
+        native_arcTo(mNativePath, left, top, right, bottom, startAngle, sweepAngle, forceMoveTo);
+    }
+
     /**
      * Close the current contour. If the current point is not equal to the
      * first point of the contour, a line segment is automatically added.
@@ -473,13 +489,13 @@ public class Path {
         CW  (1),    // must match enum in SkPath.h
         /** counter-clockwise */
         CCW (2);    // must match enum in SkPath.h
-        
+
         Direction(int ni) {
             nativeInt = ni;
         }
         final int nativeInt;
     }
-    
+
     private void detectSimplePath(float left, float top, float right, float bottom, Direction dir) {
         if (mLastDirection == null) {
             mLastDirection = dir;
@@ -557,11 +573,19 @@ public class Path {
      * @param sweepAngle Sweep angle (in degrees) measured clockwise
      */
     public void addArc(RectF oval, float startAngle, float sweepAngle) {
-        if (oval == null) {
-            throw new NullPointerException("need oval parameter");
-        }
+        addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
+    }
+
+    /**
+     * Add the specified arc to the path as a new contour.
+     *
+     * @param startAngle Starting angle (in degrees) where the arc begins
+     * @param sweepAngle Sweep angle (in degrees) measured clockwise
+     */
+    public void addArc(float left, float top, float right, float bottom, float startAngle,
+            float sweepAngle) {
         isSimplePath = false;
-        native_addArc(mNativePath, oval, startAngle, sweepAngle);
+        native_addArc(mNativePath, left, top, right, bottom, startAngle, sweepAngle);
     }
 
     /**
@@ -573,13 +597,22 @@ public class Path {
      * @param dir  The direction to wind the round-rectangle's contour
      */
     public void addRoundRect(RectF rect, float rx, float ry, Direction dir) {
-        if (rect == null) {
-            throw new NullPointerException("need rect parameter");
-        }
-        isSimplePath = false;
-        native_addRoundRect(mNativePath, rect, rx, ry, dir.nativeInt);
+        addRoundRect(rect.left, rect.top, rect.right, rect.bottom, rx, ry, dir);
     }
-    
+
+    /**
+     * Add a closed round-rectangle contour to the path
+     *
+     * @param rx   The x-radius of the rounded corners on the round-rectangle
+     * @param ry   The y-radius of the rounded corners on the round-rectangle
+     * @param dir  The direction to wind the round-rectangle's contour
+     */
+    public void addRoundRect(float left, float top, float right, float bottom, float rx, float ry,
+            Direction dir) {
+        isSimplePath = false;
+        native_addRoundRect(mNativePath, left, top, right, bottom, rx, ry, dir.nativeInt);
+    }
+
     /**
      * Add a closed round-rectangle contour to the path. Each corner receives
      * two radius values [X, Y]. The corners are ordered top-left, top-right,
@@ -593,13 +626,26 @@ public class Path {
         if (rect == null) {
             throw new NullPointerException("need rect parameter");
         }
+        addRoundRect(rect.left, rect.top, rect.right, rect.bottom, radii, dir);
+    }
+
+    /**
+     * Add a closed round-rectangle contour to the path. Each corner receives
+     * two radius values [X, Y]. The corners are ordered top-left, top-right,
+     * bottom-right, bottom-left
+     *
+     * @param radii Array of 8 values, 4 pairs of [X,Y] radii
+     * @param dir  The direction to wind the round-rectangle's contour
+     */
+    public void addRoundRect(float left, float top, float right, float bottom, float[] radii,
+            Direction dir) {
         if (radii.length < 8) {
             throw new ArrayIndexOutOfBoundsException("radii[] needs 8 values");
         }
         isSimplePath = false;
-        native_addRoundRect(mNativePath, rect, radii, dir.nativeInt);
+        native_addRoundRect(mNativePath, left, top, right, bottom, radii, dir.nativeInt);
     }
-    
+
     /**
      * Add a copy of src to the path, offset by (dx,dy)
      *
@@ -755,19 +801,24 @@ public class Path {
                                         float x2, float y2, float x3, float y3);
     private static native void native_rCubicTo(long nPath, float x1, float y1,
                                         float x2, float y2, float x3, float y3);
-    private static native void native_arcTo(long nPath, RectF oval,
-                    float startAngle, float sweepAngle, boolean forceMoveTo);
+    private static native void native_arcTo(long nPath, float left, float top,
+                                            float right, float bottom, float startAngle,
+                                            float sweepAngle, boolean forceMoveTo);
     private static native void native_close(long nPath);
     private static native void native_addRect(long nPath, float left, float top,
                                             float right, float bottom, int dir);
     private static native void native_addOval(long nPath, float left, float top,
             float right, float bottom, int dir);
     private static native void native_addCircle(long nPath, float x, float y, float radius, int dir);
-    private static native void native_addArc(long nPath, RectF oval,
-                                            float startAngle, float sweepAngle);
-    private static native void native_addRoundRect(long nPath, RectF rect,
+    private static native void native_addArc(long nPath, float left, float top,
+                                             float right, float bottom,
+                                             float startAngle, float sweepAngle);
+    private static native void native_addRoundRect(long nPath, float left, float top,
+                                                   float right, float bottom,
                                                    float rx, float ry, int dir);
-    private static native void native_addRoundRect(long nPath, RectF r, float[] radii, int dir);
+    private static native void native_addRoundRect(long nPath, float left, float top,
+                                                   float right, float bottom,
+                                                   float[] radii, int dir);
     private static native void native_addPath(long nPath, long src, float dx, float dy);
     private static native void native_addPath(long nPath, long src);
     private static native void native_addPath(long nPath, long src, long matrix);

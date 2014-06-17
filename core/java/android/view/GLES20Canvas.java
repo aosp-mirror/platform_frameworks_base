@@ -547,9 +547,9 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
-            Paint paint) {
-        nDrawArc(mRenderer, oval.left, oval.top, oval.right, oval.bottom,
+    public void drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, boolean useCenter, Paint paint) {
+        nDrawArc(mRenderer, left, top, right, bottom,
                 startAngle, sweepAngle, useCenter, paint.mNativePaint);
     }
 
@@ -774,8 +774,8 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
-    public void drawOval(RectF oval, Paint paint) {
-        nDrawOval(mRenderer, oval.left, oval.top, oval.right, oval.bottom, paint.mNativePaint);
+    public void drawOval(float left, float top, float right, float bottom, Paint paint) {
+        nDrawOval(mRenderer, left, top, right, bottom, paint.mNativePaint);
     }
 
     private static native void nDrawOval(long renderer, float left, float top,

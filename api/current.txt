@@ -10215,6 +10215,7 @@ package android.graphics {
     method public void concat(android.graphics.Matrix);
     method public void drawARGB(int, int, int, int);
     method public void drawArc(android.graphics.RectF, float, float, boolean, android.graphics.Paint);
+    method public void drawArc(float, float, float, float, float, float, boolean, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, float, float, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, android.graphics.Rect, android.graphics.RectF, android.graphics.Paint);
     method public void drawBitmap(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Rect, android.graphics.Paint);
@@ -10229,6 +10230,7 @@ package android.graphics {
     method public void drawLines(float[], int, int, android.graphics.Paint);
     method public void drawLines(float[], android.graphics.Paint);
     method public void drawOval(android.graphics.RectF, android.graphics.Paint);
+    method public void drawOval(float, float, float, float, android.graphics.Paint);
     method public void drawPaint(android.graphics.Paint);
     method public void drawPath(android.graphics.Path, android.graphics.Paint);
     method public void drawPicture(android.graphics.Picture);
@@ -10738,6 +10740,7 @@ package android.graphics {
     ctor public Path();
     ctor public Path(android.graphics.Path);
     method public void addArc(android.graphics.RectF, float, float);
+    method public void addArc(float, float, float, float, float, float);
     method public void addCircle(float, float, float, android.graphics.Path.Direction);
     method public void addOval(android.graphics.RectF, android.graphics.Path.Direction);
     method public void addOval(float, float, float, float, android.graphics.Path.Direction);
@@ -10747,9 +10750,12 @@ package android.graphics {
     method public void addRect(android.graphics.RectF, android.graphics.Path.Direction);
     method public void addRect(float, float, float, float, android.graphics.Path.Direction);
     method public void addRoundRect(android.graphics.RectF, float, float, android.graphics.Path.Direction);
+    method public void addRoundRect(float, float, float, float, float, float, android.graphics.Path.Direction);
     method public void addRoundRect(android.graphics.RectF, float[], android.graphics.Path.Direction);
+    method public void addRoundRect(float, float, float, float, float[], android.graphics.Path.Direction);
     method public void arcTo(android.graphics.RectF, float, float, boolean);
     method public void arcTo(android.graphics.RectF, float, float);
+    method public void arcTo(float, float, float, float, float, float, boolean);
     method public void close();
     method public void computeBounds(android.graphics.RectF, boolean);
     method public void cubicTo(float, float, float, float, float, float);
