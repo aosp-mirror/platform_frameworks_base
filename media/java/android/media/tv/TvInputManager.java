@@ -533,12 +533,11 @@ public final class TvInputManager {
 
         /**
          * Releases this session.
-         *
-         * @throws IllegalStateException if the session has been already released.
          */
         public void release() {
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 mService.releaseSession(mToken, mUserId);
@@ -553,12 +552,12 @@ public final class TvInputManager {
          * Sets the {@link android.view.Surface} for this session.
          *
          * @param surface A {@link android.view.Surface} used to render video.
-         * @throws IllegalStateException if the session has been already released.
          * @hide
          */
         public void setSurface(Surface surface) {
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             // surface can be null.
             try {
@@ -573,11 +572,11 @@ public final class TvInputManager {
          *
          * @param volume A volume value between 0.0f to 1.0f.
          * @throws IllegalArgumentException if the volume value is out of range.
-         * @throws IllegalStateException if the session has been already released.
          */
         public void setStreamVolume(float volume) {
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 if (volume < 0.0f || volume > 1.0f) {
@@ -594,14 +593,14 @@ public final class TvInputManager {
          *
          * @param channelUri The URI of a channel.
          * @throws IllegalArgumentException if the argument is {@code null}.
-         * @throws IllegalStateException if the session has been already released.
          */
         public void tune(Uri channelUri) {
             if (channelUri == null) {
                 throw new IllegalArgumentException("channelUri cannot be null");
             }
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 mService.tune(mToken, channelUri, mUserId);
@@ -620,8 +619,7 @@ public final class TvInputManager {
          * @param view A view playing TV.
          * @param frame A position of the overlay view.
          * @throws IllegalArgumentException if any of the arguments is {@code null}.
-         * @throws IllegalStateException if {@code view} is not attached to a window or
-         *         if the session has been already released.
+         * @throws IllegalStateException if {@code view} is not attached to a window.
          */
         void createOverlayView(View view, Rect frame) {
             if (view == null) {
@@ -634,7 +632,8 @@ public final class TvInputManager {
                 throw new IllegalStateException("view must be attached to a window");
             }
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 mService.createOverlayView(mToken, view.getWindowToken(), frame, mUserId);
@@ -648,14 +647,14 @@ public final class TvInputManager {
          *
          * @param frame A new position of the overlay view.
          * @throws IllegalArgumentException if the arguments is {@code null}.
-         * @throws IllegalStateException if the session has been already released.
          */
         void relayoutOverlayView(Rect frame) {
             if (frame == null) {
                 throw new IllegalArgumentException("frame cannot be null");
             }
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 mService.relayoutOverlayView(mToken, frame, mUserId);
@@ -666,12 +665,11 @@ public final class TvInputManager {
 
         /**
          * Removes the current overlay view.
-         *
-         * @throws IllegalStateException if the session has been already released.
          */
         void removeOverlayView() {
             if (mToken == null) {
-                throw new IllegalStateException("the session has been already released");
+                Log.w(TAG, "The session has been already released");
+                return;
             }
             try {
                 mService.removeOverlayView(mToken, mUserId);
