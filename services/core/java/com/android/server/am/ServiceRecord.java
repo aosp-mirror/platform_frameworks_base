@@ -45,6 +45,7 @@ import android.util.TimeUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A running application service.
@@ -70,9 +71,6 @@ final class ServiceRecord extends Binder {
     final String packageName; // the package implementing intent's component
     final String processName; // process where this component wants to run
     final String permission;// permission needed to access service
-    final String baseDir;   // where activity source (resources etc) located
-    final String resDir;   // where public activity source (public resources etc) located
-    final String dataDir;   // where activity data should go
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
     final long createTime;  // when this service was created
@@ -209,11 +207,13 @@ final class ServiceRecord extends Binder {
         }
         long now = SystemClock.uptimeMillis();
         long nowReal = SystemClock.elapsedRealtime();
-        pw.print(prefix); pw.print("baseDir="); pw.println(baseDir);
-        if (!resDir.equals(baseDir)) {
-            pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        if (appInfo != null) {
+            pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
+            if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
+                pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
+            }
+            pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
         }
-        pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
         if (isolatedProc != null) {
             pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
@@ -305,9 +305,6 @@ final class ServiceRecord extends Binder {
         packageName = sInfo.applicationInfo.packageName;
         processName = sInfo.processName;
         permission = sInfo.permission;
-        baseDir = sInfo.applicationInfo.sourceDir;
-        resDir = sInfo.applicationInfo.publicSourceDir;
-        dataDir = sInfo.applicationInfo.dataDir;
         exported = sInfo.exported;
         this.restarter = restarter;
         createTime = SystemClock.elapsedRealtime();

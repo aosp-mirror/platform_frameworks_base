@@ -149,9 +149,9 @@ public class ResourcesManager {
      * @param compatInfo the compability info. Must not be null.
      * @param token the application token for determining stack bounds.
      */
-    public Resources getTopLevelResources(String resDir, String[] overlayDirs, String[] libDirs,
-            int displayId, Configuration overrideConfiguration, CompatibilityInfo compatInfo,
-            IBinder token) {
+    public Resources getTopLevelResources(String resDir, String[] splitResDirs,
+            String[] overlayDirs, String[] libDirs, int displayId,
+            Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
         final float scale = compatInfo.applicationScale;
         ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale, token);
         Resources r;
@@ -180,6 +180,14 @@ public class ResourcesManager {
         AssetManager assets = new AssetManager();
         if (assets.addAssetPath(resDir) == 0) {
             return null;
+        }
+
+        if (splitResDirs != null) {
+            for (String splitResDir : splitResDirs) {
+                if (assets.addAssetPath(splitResDir) == 0) {
+                    return null;
+                }
+            }
         }
 
         if (overlayDirs != null) {

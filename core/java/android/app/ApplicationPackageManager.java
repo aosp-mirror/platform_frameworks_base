@@ -823,8 +823,10 @@ final class ApplicationPackageManager extends PackageManager {
         if (app.packageName.equals("system")) {
             return mContext.mMainThread.getSystemContext().getResources();
         }
+        final boolean sameUid = (app.uid == Process.myUid());
         Resources r = mContext.mMainThread.getTopLevelResources(
-                app.uid == Process.myUid() ? app.sourceDir : app.publicSourceDir,
+                sameUid ? app.sourceDir : app.publicSourceDir,
+                sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
                 app.resourceDirs, null, Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
         if (r != null) {
             return r;

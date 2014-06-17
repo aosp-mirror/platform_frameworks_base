@@ -30,17 +30,32 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
      * "package" attribute.
      */
     public String targetPackage;
-    
+
     /**
-     * Full path to the location of this package.
+     * Full path to the base APK for this application.
      */
     public String sourceDir;
-    
+
     /**
-     * Full path to the location of the publicly available parts of this package (i.e. the resources
-     * and manifest).  For non-forward-locked apps this will be the same as {@link #sourceDir).
+     * Full path to the publicly available parts of {@link #sourceDir},
+     * including resources and manifest. This may be different from
+     * {@link #sourceDir} if an application is forward locked.
      */
     public String publicSourceDir;
+
+    /**
+     * Full paths to zero or more split APKs that, when combined with the base
+     * APK defined in {@link #sourceDir}, form a complete application.
+     */
+    public String[] splitSourceDirs;
+
+    /**
+     * Full path to the publicly available parts of {@link #splitSourceDirs},
+     * including resources and manifest. This may be different from
+     * {@link #splitSourceDirs} if an application is forward locked.
+     */
+    public String[] splitPublicSourceDirs;
+
     /**
      * Full path to a directory assigned to the package for its persistent
      * data.
