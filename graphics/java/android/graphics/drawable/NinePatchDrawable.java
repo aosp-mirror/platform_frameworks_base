@@ -671,7 +671,7 @@ public class NinePatchDrawable extends Drawable {
             mPadding = new Rect(state.mPadding);
         }
 
-        updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
         setNinePatch(state.mNinePatch);
     }
 }
