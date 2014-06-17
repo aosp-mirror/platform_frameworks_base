@@ -5174,6 +5174,7 @@ package android.app.admin {
     method public java.lang.CharSequence onDisableRequested(android.content.Context, android.content.Intent);
     method public void onDisabled(android.content.Context, android.content.Intent);
     method public void onEnabled(android.content.Context, android.content.Intent);
+    method public void onLockTaskModeChanged(android.content.Context, android.content.Intent);
     method public void onPasswordChanged(android.content.Context, android.content.Intent);
     method public void onPasswordExpiring(android.content.Context, android.content.Intent);
     method public void onPasswordFailed(android.content.Context, android.content.Intent);
@@ -5183,6 +5184,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_ENABLED = "android.app.action.DEVICE_ADMIN_ENABLED";
+    field public static final java.lang.String ACTION_LOCK_TASK_CHANGED = "android.app.action.ACTION_LOCK_TASK_CHANGED";
     field public static final java.lang.String ACTION_PASSWORD_CHANGED = "android.app.action.ACTION_PASSWORD_CHANGED";
     field public static final java.lang.String ACTION_PASSWORD_EXPIRING = "android.app.action.ACTION_PASSWORD_EXPIRING";
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
@@ -5190,6 +5192,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.app.action.ACTION_PROFILE_PROVISIONING_COMPLETE";
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
+    field public static final java.lang.String EXTRA_LOCK_TASK_ENTERING = "android.app.extra.LOCK_TASK_ENTERING";
   }
 
   public class DevicePolicyManager {

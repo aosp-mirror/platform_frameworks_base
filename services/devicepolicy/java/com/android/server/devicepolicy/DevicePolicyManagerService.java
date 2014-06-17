@@ -3793,6 +3793,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userHandle) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("notifyLockTaskModeChanged can only be called by system");
+        }
+        synchronized (this) {
+            final DevicePolicyData policy = getUserData(userHandle);
+            Bundle adminExtras = new Bundle();
+            adminExtras.putBoolean(DeviceAdminReceiver.EXTRA_LOCK_TASK_ENTERING, isEnabled);
+            adminExtras.putString(DeviceAdminReceiver.EXTRA_LOCK_TASK_PACKAGE, pkg);
+            for (ActiveAdmin admin : policy.mAdminList) {
+                boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
+                boolean ownsProfile = (getProfileOwner(userHandle) != null
+                        && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
+                if (ownsDevice || ownsProfile) {
+                    sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_CHANGED,
+                            adminExtras, null);
+                }
+            }
+        }
+    }
+
+    @Override
     public void setGlobalSetting(ComponentName who, String setting, String value) {
         final ContentResolver contentResolver = mContext.getContentResolver();
 
