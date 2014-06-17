@@ -310,8 +310,27 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mNotificationData.findByKey(sbn.getKey()) != null ||
-                            isHeadsUp(sbn.getKey())) {
+                    Notification n = sbn.getNotification();
+                    boolean isUpdate = mNotificationData.findByKey(sbn.getKey()) != null
+                            || isHeadsUp(sbn.getKey());
+                    boolean isGroupedChild = n.getGroup() != null
+                            && (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0;
+                    if (isGroupedChild) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Ignoring group child: " + sbn);
+                        }
+                        // Don't show grouped notifications. If this is an
+                        // update, i.e. the notification existed before but
+                        // wasn't a group child, remove the old instance.
+                        // Otherwise just update the ranking.
+                        if (isUpdate) {
+                            removeNotificationInternal(sbn.getKey(), rankingMap);
+                        } else {
+                            updateRankingInternal(rankingMap);
+                        }
+                        return;
+                    }
+                    if (isUpdate) {
                         updateNotificationInternal(sbn, rankingMap);
                     } else {
                         addNotificationInternal(sbn, rankingMap);
