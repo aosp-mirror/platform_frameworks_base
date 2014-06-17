@@ -6044,7 +6044,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
             return false;
         }
+        return checkHoldingPermissionsInternalLocked(pm, pi, grantUri, uid, modeFlags, true);
+    }
 
+    private final boolean checkHoldingPermissionsInternalLocked(IPackageManager pm, ProviderInfo pi,
+            GrantUri grantUri, int uid, final int modeFlags, boolean considerUidPermissions) {
         if (pi.applicationInfo.uid == uid) {
             return true;
         } else if (!pi.exported) {
@@ -6055,11 +6059,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean writeMet = (modeFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0;
         try {
             // check if target holds top-level <provider> permissions
-            if (!readMet && pi.readPermission != null
+            if (!readMet && pi.readPermission != null && considerUidPermissions
                     && (pm.checkUidPermission(pi.readPermission, uid) == PERMISSION_GRANTED)) {
                 readMet = true;
             }
-            if (!writeMet && pi.writePermission != null
+            if (!writeMet && pi.writePermission != null && considerUidPermissions
                     && (pm.checkUidPermission(pi.writePermission, uid) == PERMISSION_GRANTED)) {
                 writeMet = true;
             }
@@ -6085,7 +6089,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     + ": match=" + pp.match(path)
                                     + " check=" + pm.checkUidPermission(pprperm, uid));
                             if (pprperm != null) {
-                                if (pm.checkUidPermission(pprperm, uid) == PERMISSION_GRANTED) {
+                                if (considerUidPermissions && pm.checkUidPermission(pprperm, uid)
+                                        == PERMISSION_GRANTED) {
                                     readMet = true;
                                 } else {
                                     allowDefaultRead = false;
@@ -6099,7 +6104,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     + ": match=" + pp.match(path)
                                     + " check=" + pm.checkUidPermission(ppwperm, uid));
                             if (ppwperm != null) {
-                                if (pm.checkUidPermission(ppwperm, uid) == PERMISSION_GRANTED) {
+                                if (considerUidPermissions && pm.checkUidPermission(ppwperm, uid)
+                                        == PERMISSION_GRANTED) {
                                     writeMet = true;
                                 } else {
                                     allowDefaultWrite = false;
@@ -6296,28 +6302,40 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        /* There is a special cross user grant if:
+         * - The target is on another user.
+         * - Apps on the current user can access the uri without any uid permissions.
+         * In this case, we grant a uri permission, even if the ContentProvider does not normally
+         * grant uri permissions.
+         */
+        boolean specialCrossUserGrant = UserHandle.getUserId(targetUid) != grantUri.sourceUserId
+                && checkHoldingPermissionsInternalLocked(pm, pi, grantUri, callingUid,
+                modeFlags, false /*without considering the uid permissions*/);
+
         // Second...  is the provider allowing granting of URI permissions?
-        if (!pi.grantUriPermissions) {
-            throw new SecurityException("Provider " + pi.packageName
-                    + "/" + pi.name
-                    + " does not allow granting of Uri permissions (uri "
-                    + grantUri + ")");
-        }
-        if (pi.uriPermissionPatterns != null) {
-            final int N = pi.uriPermissionPatterns.length;
-            boolean allowed = false;
-            for (int i=0; i<N; i++) {
-                if (pi.uriPermissionPatterns[i] != null
-                        && pi.uriPermissionPatterns[i].match(grantUri.uri.getPath())) {
-                    allowed = true;
-                    break;
-                }
-            }
-            if (!allowed) {
+        if (!specialCrossUserGrant) {
+            if (!pi.grantUriPermissions) {
                 throw new SecurityException("Provider " + pi.packageName
                         + "/" + pi.name
-                        + " does not allow granting of permission to path of Uri "
-                        + grantUri);
+                        + " does not allow granting of Uri permissions (uri "
+                        + grantUri + ")");
+            }
+            if (pi.uriPermissionPatterns != null) {
+                final int N = pi.uriPermissionPatterns.length;
+                boolean allowed = false;
+                for (int i=0; i<N; i++) {
+                    if (pi.uriPermissionPatterns[i] != null
+                            && pi.uriPermissionPatterns[i].match(grantUri.uri.getPath())) {
+                        allowed = true;
+                        break;
+                    }
+                }
+                if (!allowed) {
+                    throw new SecurityException("Provider " + pi.packageName
+                            + "/" + pi.name
+                            + " does not allow granting of permission to path of Uri "
+                            + grantUri);
+                }
             }
         }
 
