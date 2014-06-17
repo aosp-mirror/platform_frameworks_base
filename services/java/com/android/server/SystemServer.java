@@ -44,7 +44,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
-import android.service.fingerprint.FingerprintManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
