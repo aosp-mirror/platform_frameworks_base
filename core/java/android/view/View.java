@@ -13432,8 +13432,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Destroy any previous software drawing cache if needed
         if (mLayerType == LAYER_TYPE_SOFTWARE) {
             destroyDrawingCache();
-            invalidateParentCaches();
-            invalidate(true);
         }
 
         mLayerType = layerType;
@@ -13441,13 +13439,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mLayerPaint = layerDisabled ? null : (paint == null ? new Paint() : paint);
         mRenderNode.setLayerPaint(mLayerPaint);
 
-        if (mLayerType == LAYER_TYPE_SOFTWARE) {
-            // LAYER_TYPE_SOFTWARE is handled by View:draw(), so need to invalidate()
-            invalidateParentCaches();
-            invalidate(true);
-        } else {
-            invalidateViewProperty(false, false);
-        }
+        // draw() behaves differently if we are on a layer, so we need to
+        // invalidate() here
+        invalidateParentCaches();
+        invalidate(true);
     }
 
     /**
