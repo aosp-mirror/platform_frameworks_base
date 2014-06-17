@@ -961,8 +961,6 @@ final class AccessibilityController {
                     // If the window is not touchable, do not report it but take into account
                     // the space it takes since the content behind it cannot be touched.
                     if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                        unaccountedSpace.op(boundsInScreen, unaccountedSpace,
-                                Region.Op.DIFFERENCE);
                         continue;
                     }
 
