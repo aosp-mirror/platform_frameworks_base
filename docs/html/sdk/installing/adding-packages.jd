@@ -74,6 +74,11 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   </li>
 </ul>
 
+<p>When you open the SDK Manager for the first time, several packages will be selected by
+default. Leave these selected, but be sure you have everything you need
+to get started by following these steps:</p>
+
+
 <ol class="large">
 <li>
   <h2 id="GetTools" class="norule">Get the latest SDK tools</h2>
@@ -87,7 +92,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
      <ul>
        <li><strong>Android SDK Tools</strong></li>
        <li><strong>Android SDK Platform-tools</strong></li>
-       <li><strong>Android SDK Build-tools</strong></li>
+       <li><strong>Android SDK Build-tools</strong> (highest version)</li>
      </ul>
    </li>
    <li>Open the first Android X.X folder (the latest version) and select:
@@ -97,7 +102,6 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
       <strong>ARM EABI v7a System Image</strong></li>
      </ul>
    </li>
-   <li>Click <strong>Install</strong>.</li>
   </ol>
 </li>
 
@@ -105,8 +109,6 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   <h2 id="GetSupportLib" class="norule">Get the support library for additional APIs</h2>
 
   <div class="sidebox">
-    <h3>Why use the support library?</h3>
-
     <p>The support library is required for:</p>
     <ul>
       <li><a href="{@docRoot}wear/index.html">Android Wear</a></li>
@@ -114,7 +116,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
       <li><a href="{@docRoot}google/play-services/cast.html">Google Cast</a></li>
     </ul>
 
-    <p>The support library also provides these popular APIs:</p>
+    <p>It also provides these popular APIs:</p>
     <ul>
       <li><a href="{@docRoot}reference/android/support/v4/widget/DrawerLayout.html">Navigation
       drawer</a></li>
@@ -127,16 +129,11 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   <p>The <a href="{@docRoot}tools/support-library/features.html">Android Support Library</a>
   provides an extended set of APIs that are compatible with most versions of Android.</p>
 
-  <p>To download the support library:</p>
-  <ol>
-    <li>Open the <strong>Extras</strong> directory and select:
+  <p>Open the <strong>Extras</strong> directory and select:</p>
      <ul>
        <li><strong>Android Support Repository</strong></li>
        <li><strong>Android Support Library</strong></li>
      </ul>
-    </li>
-    <li>Click <strong>Install</strong>.</li>
-  </ol>
 
   <p>&nbsp;</p>
   <p>&nbsp;</p>
@@ -148,7 +145,6 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   <h2 id="GetGoogle" class="norule">Get Google Play services for even more APIs</h2>
 
   <div class="sidebox">
-    <h3>Why use Google Play services?</h3>
 
     <p>The Google Play services APIs provide a variety of features and services for your Android
     apps, such as:</p>
@@ -163,15 +159,11 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   </div>
 
   <p>To develop with Google APIs, you need the Google Play services package:</p>
-  <ol>
-    <li>Open the <strong>Extras</strong> directory and select:
+  <p>Open the <strong>Extras</strong> directory and select:</p>
      <ul>
        <li><strong>Google Repository</strong></li>
        <li><strong>Google Play services</strong></li>
      </ul>
-    </li>
-    <li>Click <strong>Install</strong>.</li>
-  </ol>
 
   <p class="note"><strong>Note:</strong> Google Play services APIs are not available on all
   Android-powered devices, but are available on all devices with Google Play Store. To use these
@@ -180,6 +172,18 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
 </li>
 
 
+<li>
+  <h2 id="Install" class="norule">Install the packages</h2>
+  <p>Once you've selected all the desired packages, continue to install:</p>
+  <ol>
+   <li>Click <strong>Install X packages</strong>.</li>
+   <li>In the next window, double-click each package name on the left
+   to accept the license agreement for each.</li>
+   <li>Click <strong>Install</strong>.</li>
+  </ol>
+  <p>The download progress is shown at the bottom of the SDK Manager window.
+  <strong>Do not exit the SDK Manager</strong> or it will cancel the download.</p>
+</li>
 
 <li>
   <h2 id="Build" class="norule">Build something!</h2>

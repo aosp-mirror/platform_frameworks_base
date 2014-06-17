@@ -8,7 +8,6 @@ page.title=Setting Up Google Play Services
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#Install">Install the Google Play Services SDK</a></li>
   <li><a href="#Setup">Add Google Play Services to Your Project</a></li>
   <li><a href="#Proguard">Create a Proguard Exception</a></li>
   <li><a href="#ensure">Ensure Devices Have the Google Play services APK</a></li>
