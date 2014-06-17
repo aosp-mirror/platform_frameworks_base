@@ -167,6 +167,15 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
+     * Sets the notification as dark. The default implementation does nothing.
+     *
+     * @param dark Whether the notification should be dark.
+     * @param fade Whether an animation should be played to change the state.
+     */
+    public void setDark(boolean dark, boolean fade) {
+    }
+
+    /**
      * @return The desired notification height.
      */
     public int getIntrinsicHeight() {

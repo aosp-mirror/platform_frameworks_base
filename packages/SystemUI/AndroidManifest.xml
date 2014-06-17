@@ -300,5 +300,11 @@
                 <category android:name="android.intent.category.DESK_DOCK" />
             </intent-filter>
         </activity>
+
+
+        <!-- I dream of notifications -->
+        <service
+            android:name=".doze.DozeService"
+            android:exported="true" />
     </application>
 </manifest>

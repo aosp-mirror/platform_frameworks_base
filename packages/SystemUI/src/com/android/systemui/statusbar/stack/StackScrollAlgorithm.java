@@ -233,12 +233,14 @@ public class StackScrollAlgorithm {
     private void updateDimmedActivated(AmbientState ambientState, StackScrollState resultState,
             StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
+        boolean dark = ambientState.isDark();
         View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
             childViewState.dimmed = dimmed;
+            childViewState.dark = dark;
             boolean isActivatedChild = activatedChild == child;
             childViewState.scale = !dimmed || isActivatedChild
                     ? 1.0f

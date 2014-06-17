@@ -161,6 +161,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mFinished;
     private boolean mCanDoze;
     private boolean mDozing;
+    private boolean mWindowless;
     private DozeHardware mDozeHardware;
 
     private boolean mDebug = false;
@@ -520,6 +521,24 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
+     * Marks this dream as windowless.  Only available to doze dreams.
+     *
+     * @hide
+     */
+    public void setWindowless(boolean windowless) {
+        mWindowless = windowless;
+    }
+
+    /**
+     * Returns whether or not this dream is windowless.  Only available to doze dreams.
+     *
+     * @hide
+     */
+    public boolean isWindowless() {
+        return mWindowless;
+    }
+
+    /**
      * Returns true if this dream is allowed to doze.
      * <p>
      * The value returned by this method is only meaningful when the dream has started.
@@ -715,6 +734,7 @@ public class DreamService extends Service implements Window.Callback {
             WindowManagerGlobal.getInstance().closeAll(mWindowToken,
                     this.getClass().getName(), "Dream");
             mWindowToken = null;
+            mCanDoze = false;
         }
     }
 
@@ -744,47 +764,50 @@ public class DreamService extends Service implements Window.Callback {
 
         mWindowToken = windowToken;
         mCanDoze = canDoze;
-
-        mWindow = PolicyManager.makeNewWindow(this);
-        mWindow.setCallback(this);
-        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
-        mWindow.setFormat(PixelFormat.OPAQUE);
-
-        if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
-                windowToken, WindowManager.LayoutParams.TYPE_DREAM));
-
-        WindowManager.LayoutParams lp = mWindow.getAttributes();
-        lp.type = WindowManager.LayoutParams.TYPE_DREAM;
-        lp.token = windowToken;
-        lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
-        lp.flags |= ( WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-                    | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
-                    | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
-                    );
-        mWindow.setAttributes(lp);
-        mWindow.setWindowManager(null, windowToken, "dream", true);
-
-        applySystemUiVisibilityFlags(
-                (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
-                View.SYSTEM_UI_FLAG_LOW_PROFILE);
-
-        try {
-            getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
-        } catch (WindowManager.BadTokenException ex) {
-            // This can happen because the dream manager service will remove the token
-            // immediately without necessarily waiting for the dream to start.
-            // We should receive a finish message soon.
-            Slog.i(TAG, "attach() called after window token already removed, dream will "
-                    + "finish soon");
-            mWindow = null;
-            return;
+        if (mWindowless && !mCanDoze) {
+            throw new IllegalStateException("Only doze dreams can be windowless");
         }
+        if (!mWindowless) {
+            mWindow = PolicyManager.makeNewWindow(this);
+            mWindow.setCallback(this);
+            mWindow.requestFeature(Window.FEATURE_NO_TITLE);
+            mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
+            mWindow.setFormat(PixelFormat.OPAQUE);
 
+            if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
+                    windowToken, WindowManager.LayoutParams.TYPE_DREAM));
+
+            WindowManager.LayoutParams lp = mWindow.getAttributes();
+            lp.type = WindowManager.LayoutParams.TYPE_DREAM;
+            lp.token = windowToken;
+            lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
+            lp.flags |= ( WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+                        | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
+                        | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
+                        );
+            mWindow.setAttributes(lp);
+            mWindow.setWindowManager(null, windowToken, "dream", true);
+
+            applySystemUiVisibilityFlags(
+                    (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
+                    View.SYSTEM_UI_FLAG_LOW_PROFILE);
+
+            try {
+                getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
+            } catch (WindowManager.BadTokenException ex) {
+                // This can happen because the dream manager service will remove the token
+                // immediately without necessarily waiting for the dream to start.
+                // We should receive a finish message soon.
+                Slog.i(TAG, "attach() called after window token already removed, dream will "
+                        + "finish soon");
+                mWindow = null;
+                return;
+            }
+        }
         // We need to defer calling onDreamingStarted until after onWindowAttached,
         // which is posted to the handler by addView, so we post onDreamingStarted
         // to the handler also.  Need to watch out here in case detach occurs before
@@ -792,7 +815,7 @@ public class DreamService extends Service implements Window.Callback {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mWindow != null) {
+                if (mWindow != null || mWindowless) {
                     if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
                     mStarted = true;
                     onDreamingStarted();
@@ -878,6 +901,7 @@ public class DreamService extends Service implements Window.Callback {
                 if (isLowProfile()) pw.print(" lowprofile");
                 if (isFullscreen()) pw.print(" fullscreen");
                 if (isScreenBright()) pw.print(" bright");
+                if (isWindowless()) pw.print(" windowless");
                 if (isDozing()) pw.print(" dozing");
                 pw.println();
             }

@@ -128,6 +128,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
     private boolean mDimmedNeedsAnimation;
+    private boolean mDarkNeedsAnimation;
     private boolean mActivateNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
@@ -354,14 +355,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private boolean needsHeightAdaption() {
         return getNotGoneChildCount() > 1;
-    }
-
-    private boolean isViewExpanded(View view) {
-        if (view != null) {
-            ExpandableView expandView = (ExpandableView) view;
-            return expandView.getActualHeight() > mCollapsedSize;
-        }
-        return false;
     }
 
     /**
@@ -1479,6 +1472,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateTopPaddingEvent();
         generateActivateEvent();
         generateDimmedEvent();
+        generateDarkEvent();
         mNeedsAnimation = false;
     }
 
@@ -1552,6 +1546,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                     new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DIMMED));
         }
         mDimmedNeedsAnimation = false;
+    }
+
+    private void generateDarkEvent() {
+        if (mDarkNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK));
+        }
+        mDarkNeedsAnimation = false;
     }
 
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
@@ -1852,6 +1854,18 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * See {@link AmbientState#setDark}.
+     */
+    public void setDark(boolean dark, boolean animate) {
+        mAmbientState.setDark(dark);
+        if (animate && mAnimationsEnabled) {
+            mDarkNeedsAnimation = true;
+            mNeedsAnimation =  true;
+        }
+        requestChildrenUpdate();
+    }
+
+    /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
@@ -1940,7 +1954,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
-                        .animateZ()
+                        .animateZ(),
+
+                // ANIMATION_TYPE_DARK
+                new AnimationFilter()
+                        .animateDark(),
         };
 
         static int[] LENGTHS = new int[] {
@@ -1971,6 +1989,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_CHANGE_POSITION
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_DARK
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -1982,6 +2003,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_ACTIVATED_CHILD = 6;
         static final int ANIMATION_TYPE_DIMMED = 7;
         static final int ANIMATION_TYPE_CHANGE_POSITION = 8;
+        static final int ANIMATION_TYPE_DARK = 9;
 
         final long eventStartTime;
         final View changingView;
