@@ -28,7 +28,7 @@ public class TaskViewTransform {
     public float dismissAlpha = 1f;
     public boolean visible = false;
     public Rect rect = new Rect();
-    float t;
+    float t = 0f;
 
     public TaskViewTransform() {
         // Do nothing
@@ -43,6 +43,18 @@ public class TaskViewTransform {
         visible = o.visible;
         rect.set(o.rect);
         t = o.t;
+    }
+
+    /** Resets the current transform */
+    public void reset() {
+        translationY = 0;
+        translationZ = 0;
+        scale = 1f;
+        alpha = 1f;
+        dismissAlpha = 1f;
+        visible = false;
+        rect.setEmpty();
+        t = 0f;
     }
 
     /** Convenience functions to compare against current property values */

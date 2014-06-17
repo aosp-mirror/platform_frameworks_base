@@ -54,7 +54,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
-        public void onTaskLaunching(boolean isTaskInStackBounds);
+        public void onTaskLaunching();
         public void onExitAnimationTriggered();
     }
 
@@ -389,11 +389,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                                final TaskStack stack, final Task task) {
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
-            boolean isTaskInStackBounds = false;
-            if (stackView != null && tv != null) {
-                isTaskInStackBounds = stackView.isTaskInStackBounds(tv);
-            }
-            mCb.onTaskLaunching(isTaskInStackBounds);
+            mCb.onTaskLaunching();
         }
 
         final Runnable launchRunnable = new Runnable() {

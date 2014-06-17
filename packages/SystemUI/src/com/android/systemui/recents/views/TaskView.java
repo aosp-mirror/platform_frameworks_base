@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -63,6 +64,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     Point mLastTouchDown = new Point();
     Path mRoundedRectClipPath = new Path();
     Rect mTmpRect = new Rect();
+    Paint mLayerPaint = new Paint();
 
     TaskThumbnailView mThumbnailView;
     TaskBarView mBarView;
@@ -440,13 +442,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        mThumbnailView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
         mBarView.enableHwLayers();
     }
 
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
-        mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, null);
+        mThumbnailView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
         mBarView.disableHwLayers();
     }
 

@@ -50,6 +50,7 @@ class TaskBarView extends FrameLayout {
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
 
+    Paint mLayerPaint = new Paint();
     static Paint sHighlightPaint;
 
     public TaskBarView(Context context) {
@@ -237,11 +238,11 @@ class TaskBarView extends FrameLayout {
 
     /** Enable the hw layers on this task view */
     void enableHwLayers() {
-        mDismissButton.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        mDismissButton.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
     }
 
     /** Disable the hw layers on this task view */
     void disableHwLayers() {
-        mDismissButton.setLayerType(View.LAYER_TYPE_NONE, null);
+        mDismissButton.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
     }
 }
