@@ -236,12 +236,12 @@ public class KeySetManagerService {
      * Returns {@code null} if the identifier doesn't
      * identify a {@link KeySet}.
      */
-    public Set<PublicKey> getPublicKeysFromKeySet(long id) {
+    public ArraySet<PublicKey> getPublicKeysFromKeySet(long id) {
         synchronized (mLockObject) {
             if(mKeySetMapping.get(id) == null) {
                 return null;
             }
-            Set<PublicKey> mPubKeys = new ArraySet<PublicKey>();
+            ArraySet<PublicKey> mPubKeys = new ArraySet<PublicKey>();
             for (long pkId : mKeySetMapping.get(id)) {
                 mPubKeys.add(mPublicKeys.get(pkId));
             }
@@ -280,9 +280,9 @@ public class KeySetManagerService {
      * @throws IllegalArgumentException if the package has no keyset data.
      * @throws NullPointerException if the package is unknown.
      */
-    public Set<KeySet> getUpgradeKeySetsByPackageName(String packageName) {
+    public ArraySet<KeySet> getUpgradeKeySetsByPackageName(String packageName) {
         synchronized (mLockObject) {
-            Set<KeySet> upgradeKeySets = new ArraySet<KeySet>();
+            ArraySet<KeySet> upgradeKeySets = new ArraySet<KeySet>();
             PackageSetting p = mPackages.get(packageName);
             if (p == null) {
                 throw new NullPointerException("Unknown package");
