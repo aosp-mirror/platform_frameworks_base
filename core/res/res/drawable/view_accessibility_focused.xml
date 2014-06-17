@@ -17,9 +17,11 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <stroke
-        android:width="2dp"
-        android:color="@color/accessibility_focus_highlight" />
+        android:width="4dp"
+        android:color="@color/accessibility_focus_highlight"
+        android:dashWidth="4dp"
+        android:dashGap="2dp" />
 
-    <corners android:radius="2dp"/>
+    <corners android:radius="2dp" />
 
 </shape>
