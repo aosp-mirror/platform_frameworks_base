@@ -7963,8 +7963,7 @@ public final class ContactsContract {
                 actualContext = ((ContextWrapper) actualContext).getBaseContext();
             }
             final int intentFlags = (actualContext instanceof Activity)
-                    ? Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
-                    : Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+                    ? 0 : Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
 
             // Launch pivot dialog through intent for now
             final Intent intent = new Intent(ACTION_QUICK_CONTACT).addFlags(intentFlags);
