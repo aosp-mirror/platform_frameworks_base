@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -427,15 +428,27 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * {@link Adapter#getItemViewType(int) getItemViewType(int)} on the object
      * returned from {@link #getAdapter()} will always return 0. Calling
      * {@link Adapter#getViewTypeCount() getViewTypeCount()} will always return
-     * 1.
+     * 1. On API {@link Build.VERSION_CODES#L} and above, attempting to set an
+     * adapter with more than one view type will throw an
+     * {@link IllegalArgumentException}.
+     *
+     * @param adapter the adapter to set
      *
      * @see AbsSpinner#setAdapter(SpinnerAdapter)
+     * @throws IllegalArgumentException if the adapter has more than one view
+     *         type
      */
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
 
         mRecycler.clear();
+
+        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion >= Build.VERSION_CODES.L
+                && adapter != null && adapter.getViewTypeCount() != 1) {
+            throw new IllegalArgumentException("Spinner adapter view type count must be 1");
+        }
 
         if (mPopup != null) {
             mPopup.setAdapter(new DropDownAdapter(adapter));
