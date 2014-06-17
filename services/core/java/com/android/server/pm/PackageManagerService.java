@@ -9824,7 +9824,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
             }
         } else {
-            updateSettingsLI(null, newPackage, installerPackageName, null, null, res);
+            updateSettingsLI(newPackage, installerPackageName, null, null, res);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -9914,8 +9914,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
                 }
             } else {
-                updateSettingsLI(deletedPackage, newPackage, installerPackageName, allUsers,
-                        perUserInstalled, res);
+                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
             }
         }
@@ -10041,8 +10040,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                updateSettingsLI(deletedPackage, newPackage, installerPackageName, allUsers,
-                        perUserInstalled, res);
+                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
             }
         }
@@ -10068,21 +10066,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Utility method used to move dex files during install.
-    private int moveDexFilesLI(PackageParser.Package oldPackage, PackageParser.Package newPackage) {
-        // TODO: extend to handle splits
-        if ((newPackage.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+    private int moveDexFilesLI(String oldCodePath, PackageParser.Package newPackage) {
+        if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             final String instructionSet = getAppInstructionSet(newPackage.applicationInfo);
-
-            boolean moveSuccess = false;
-            if (oldPackage != null
-                    && (oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                if (mInstaller.movedex(oldPackage.codePath, newPackage.codePath, instructionSet)
-                        == 0) {
-                    moveSuccess = true;
-                }
-            }
-
-            if (!moveSuccess) {
+            int retCode = mInstaller.movedex(oldCodePath, newPackage.codePath,
+                                             instructionSet);
+            if (retCode != 0) {
                 /*
                  * Programs may be lazily run through dexopt, so the
                  * source may not exist. However, something seems to
@@ -10091,19 +10080,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * remove the target to make sure there isn't a stale
                  * file from a previous version of the package.
                  */
-                if (oldPackage != null) {
-                    mInstaller.rmdex(oldPackage.codePath, instructionSet);
-                }
-                mInstaller.rmdex(newPackage.codePath, instructionSet);
                 newPackage.mDexOptNeeded = true;
+                mInstaller.rmdex(oldCodePath, instructionSet);
+                mInstaller.rmdex(newPackage.codePath, instructionSet);
             }
         }
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private void updateSettingsLI(PackageParser.Package oldPackage,
-            PackageParser.Package newPackage, String installerPackageName, int[] allUsers,
-            boolean[] perUserInstalled, PackageInstalledInfo res) {
+    private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
+            int[] allUsers, boolean[] perUserInstalled,
+            PackageInstalledInfo res) {
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -10111,12 +10098,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             //added to mPackages. It hasn't been persisted yet.
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_INCOMPLETE);
             mSettings.writeLPr();
-        }
-
-        if ((res.returnCode = moveDexFilesLI(oldPackage, newPackage))
-                != PackageManager.INSTALL_SUCCEEDED) {
-            // Discontinue if moving dex files failed.
-            return;
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.codePath);
@@ -12857,15 +12838,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     }
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
-                                        PackageParser.Package oldPackage = new PackageParser.Package(
-                                                pkg.packageName);
-                                        oldPackage.codePath = pkg.codePath;
                                         pkg.codePath = newCodePath;
                                         // Move dex files around
-                                        if (moveDexFilesLI(oldPackage, pkg) != PackageManager.INSTALL_SUCCEEDED) {
+                                        if (moveDexFilesLI(oldCodePath, pkg) != PackageManager.INSTALL_SUCCEEDED) {
                                             // Moving of dex files failed. Set
                                             // error code and abort move.
-                                            pkg.codePath = oldPackage.codePath;
+                                            pkg.codePath = oldCodePath;
                                             returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                         }
                                     }
