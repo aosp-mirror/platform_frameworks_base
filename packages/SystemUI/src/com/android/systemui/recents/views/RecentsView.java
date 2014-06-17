@@ -55,6 +55,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskLaunching(boolean isTaskInStackBounds);
+        public void onExitAnimationTriggered();
     }
 
     RecentsConfiguration mConfig;
@@ -160,19 +161,19 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Requests all task stacks to start their enter-recents animation */
-    public void startOnEnterAnimation(ViewAnimation.TaskViewEnterContext ctx) {
+    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child instanceof TaskStackView) {
                 TaskStackView stackView = (TaskStackView) child;
-                stackView.startOnEnterAnimation(ctx);
+                stackView.startEnterRecentsAnimation(ctx);
             }
         }
     }
 
     /** Requests all task stacks to start their exit-recents animation */
-    public void startOnExitAnimation(ViewAnimation.TaskViewExitContext ctx) {
+    public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         // Handle the case when there are no views by incrementing and decrementing after all
         // animations are started.
         ctx.postAnimationTrigger.increment();
@@ -183,7 +184,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 View child = getChildAt(i);
                 if (child instanceof TaskStackView) {
                     TaskStackView stackView = (TaskStackView) child;
-                    stackView.startOnExitAnimation(ctx);
+                    stackView.startExitToHomeAnimation(ctx);
                 }
             }
         }
@@ -191,6 +192,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Handle the case when there are no views by incrementing and decrementing after all
         // animations are started.
         ctx.postAnimationTrigger.decrement();
+
+        // Notify of the exit animation
+        mCb.onExitAnimationTriggered();
     }
 
     /** Adds the search bar */
@@ -476,7 +480,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (tv == null) {
             post(launchRunnable);
         } else {
-            tv.animateOnLaunchingTask(launchRunnable);
+            stackView.animateOnLaunchingTask(tv, launchRunnable);
         }
     }
 

@@ -117,7 +117,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                         // Otherwise, just finish the activity without launching any other activities
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(context,
                                 null, mFinishRunnable, null);
-                        mRecentsView.startOnExitAnimation(
+                        mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     }
                 }
@@ -129,7 +129,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             } else if (action.equals(RecentsService.ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
-                mRecentsView.startOnEnterAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenshotView));
+                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenshotView));
                 // Call our callback
                 onEnterAnimationTriggered();
             }
@@ -162,6 +162,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks(Intent launchIntent) {
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
+        ArrayList<TaskStack> stacks = root.getStacks();
+        if (!stacks.isEmpty()) {
+            mRecentsView.setBSP(root);
+        }
+
         // Update the configuration based on the launch intent
         mConfig.launchedFromHome = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_HOME, false);
@@ -171,13 +178,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_FROM_APP_FULL_SCREENSHOT, false);
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
-
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SpaceNode root = loader.reload(this, Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
-        ArrayList<TaskStack> stacks = root.getStacks();
-        if (!stacks.isEmpty()) {
-            mRecentsView.setBSP(root);
-        }
+        mConfig.launchedWithNoRecentTasks = !root.hasTasks();
 
         if (mConfig.shouldAnimateNavBarScrim()) {
             // Hide the scrim if we animate into Recents with window transitions
@@ -188,14 +189,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Add the default no-recents layout
-        if (stacks.size() == 1 && stacks.get(0).getTaskCount() == 0) {
+        if (mConfig.launchedWithNoRecentTasks) {
             mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.setBackgroundColor(0x80000000);
         } else {
             mEmptyView.setVisibility(View.GONE);
         }
-
-        // Dim the background
-        mRecentsView.setBackgroundColor(0x80000000);
     }
 
     /** Attempts to allocate and bind the search bar app widget */
@@ -284,7 +283,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                         // We really shouldn't hit this, but if we do, just animate out (aka. finish)
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
                                 null, mFinishRunnable, null);
-                        mRecentsView.startOnExitAnimation(
+                        mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     }
                 }
@@ -376,7 +375,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     void onConfigurationChange() {
         // Try and start the enter animation (or restart it on configuration changed)
-        mRecentsView.startOnEnterAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenshotView));
+        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenshotView));
         // Call our callback
         onEnterAnimationTriggered();
     }
@@ -547,7 +546,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     // Just start the animation out of recents
                     ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
                             null, mFinishRunnable, null);
-                    mRecentsView.startOnExitAnimation(
+                    mRecentsView.startExitToHomeAnimation(
                             new ViewAnimation.TaskViewExitContext(exitTrigger));
                 } else {
                     // Otherwise, try and launch the first task
@@ -555,7 +554,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                         // If there are no tasks, then just finish recents
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
                                 null, mFinishRunnable, null);
-                        mRecentsView.startOnExitAnimation(
+                        mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     }
                 }
@@ -567,12 +566,25 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Fade in the scrim
         if (mConfig.shouldAnimateNavBarScrim() && mConfig.hasNavBarScrim()) {
             mNavBarScrimView.setVisibility(View.VISIBLE);
-            mNavBarScrimView.setAlpha(0f);
-            mNavBarScrimView.animate().alpha(1f)
+            mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
+            mNavBarScrimView.animate()
+                    .translationY(0)
                     .setStartDelay(mConfig.taskBarEnterAnimDelay)
                     .setDuration(mConfig.navBarScrimEnterDuration)
+                    .setInterpolator(mConfig.quintOutInterpolator)
+                    .start();
+        }
+    }
+
+    @Override
+    public void onExitAnimationTriggered() {
+        // Fade out the scrim
+        if (mConfig.shouldAnimateNavBarScrim() && mConfig.hasNavBarScrim()) {
+            mNavBarScrimView.animate()
+                    .translationY(mNavBarScrimView.getMeasuredHeight())
+                    .setStartDelay(0)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .withLayer()
                     .start();
         }
     }
@@ -598,12 +610,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Fade out the scrim
         if (!isTaskInStackBounds && mConfig.hasNavBarScrim()) {
-            mNavBarScrimView.animate().alpha(0f)
-                    .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .withLayer()
-                    .start();
+            onExitAnimationTriggered();
         }
 
         // Mark recents as no longer visible

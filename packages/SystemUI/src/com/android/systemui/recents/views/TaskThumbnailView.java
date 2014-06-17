@@ -54,10 +54,13 @@ public class TaskThumbnailView extends ImageView {
     @Override
     public void draw(Canvas canvas) {
         if (mClipTaskBar && (mClipRect != null)) {
-            // Apply the clip rect
+            int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
             canvas.clipRect(mClipRect);
+            super.draw(canvas);
+            canvas.restoreToCount(restoreCount);
+        } else {
+            super.draw(canvas);
         }
-        super.draw(canvas);
     }
 
     /** Updates the clip rect based on the given task bar. */

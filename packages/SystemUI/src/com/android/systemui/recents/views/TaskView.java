@@ -259,15 +259,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareAnimateEnterRecents(boolean isTaskViewFrontMost, int offsetY, int offscreenY,
-                                           Rect taskRect) {
+    public void prepareEnterRecentsAnimation(boolean isTaskViewFrontMost, int offsetY, int offscreenY,
+                                             Rect taskRect) {
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewFrontMost) {
                 // Hide the task view as we are going to animate the full screenshot into view
                 // and then replace it with this view once we are done
                 setVisibility(View.INVISIBLE);
                 // Also hide the front most task bar view so we can animate it in
-                mBarView.prepareAnimateEnterRecents();
+                mBarView.prepareEnterRecentsAnimation();
             } else {
                 // Top align the task views
                 setTranslationY(offsetY);
@@ -278,7 +278,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (isTaskViewFrontMost) {
                 // Hide the front most task bar view so we can animate it in
-                mBarView.prepareAnimateEnterRecents();
+                mBarView.prepareEnterRecentsAnimation();
                 // Set the dim to 0 so we can animate it in
                 setDim(0);
             }
@@ -286,13 +286,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (mConfig.launchedFromHome) {
             // Move the task view off screen (below) so we can animate it in
             setTranslationY(offscreenY);
+            setTranslationZ(0);
             setScaleX(1f);
             setScaleY(1f);
         }
     }
 
     /** Animates this task view as it enters recents */
-    public void animateOnEnterRecents(ViewAnimation.TaskViewEnterContext ctx) {
+    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         TaskViewTransform transform = ctx.transform;
 
         if (mConfig.launchedFromAppWithScreenshot) {
@@ -302,7 +303,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     @Override
                     public void run() {
                         // Animate the task bar of the first task view
-                        mBarView.animateOnEnterRecents(0, mEnableThumbnailClip);
+                        mBarView.startEnterRecentsAnimation(0, mEnableThumbnailClip);
                         setVisibility(View.VISIBLE);
                     }
                 });
@@ -324,7 +325,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (ctx.isFrontMost) {
                 // Animate the task bar of the first task view
-                mBarView.animateOnEnterRecents(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
+                mBarView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
 
                 // Animate the dim into view as well
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimOverlayFromScale());
@@ -345,6 +346,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .scaleX(transform.scale)
                     .scaleY(transform.scale)
                     .translationY(transform.translationY)
+                    .translationZ(transform.translationZ)
                     .setStartDelay(delay)
                     .setUpdateListener(null)
                     .setInterpolator(mConfig.quintOutInterpolator)
@@ -355,8 +357,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         }
     }
 
-    /** Animates this task view as it leaves recents */
-    public void animateOnExitRecents(ViewAnimation.TaskViewExitContext ctx) {
+    /** Animates this task view as it leaves recents by pressing home. */
+    public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         animate()
                 .translationY(ctx.offscreenTranslationY)
                 .setStartDelay(0)
@@ -369,32 +371,27 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         ctx.postAnimationTrigger.increment();
     }
 
-    /** Animates this task view if the user does not interact with the stack after a certain time. */
-    public void animateOnNoUserInteraction() {
-        mBarView.animateOnNoUserInteraction();
-    }
-
-    /** Mark this task view that the user does has not interacted with the stack after a certain time. */
-    public void setOnNoUserInteraction() {
-        mBarView.setOnNoUserInteraction();
-    }
-
     /** Animates this task view as it exits recents */
-    public void animateOnLaunchingTask(final Runnable r) {
-        // Disable the thumbnail clip and animate the bar out
-        mBarView.animateOnLaunchingTask(mDisableThumbnailClip, r);
+    public void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask) {
+        if (isLaunchingTask) {
+            // Disable the thumbnail clip and animate the bar out
+            mBarView.startLaunchTaskAnimation(mDisableThumbnailClip, r);
 
-        // Animate the dim
-        if (mDim > 0) {
-            ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
-            anim.setDuration(mConfig.taskBarExitAnimDuration);
-            anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
-            anim.start();
+            // Animate the dim
+            if (mDim > 0) {
+                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
+                anim.setDuration(mConfig.taskBarExitAnimDuration);
+                anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
+                anim.start();
+            }
+        } else {
+            // Hide the dismiss button
+            mBarView.startLaunchTaskDismissAnimation();
         }
     }
 
     /** Animates the deletion of this task view */
-    public void animateRemoval(final Runnable r) {
+    public void startDeleteTaskAnimation(final Runnable r) {
         // Disabling clipping with the stack while the view is animating away
         setClipViewInStack(false);
 
@@ -420,6 +417,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 }
             })
             .start();
+    }
+
+    /** Animates this task view if the user does not interact with the stack after a certain time. */
+    public void startNoUserInteractionAnimation() {
+        mBarView.startNoUserInteractionAnimation();
+    }
+
+    /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+    public void setNoUserInteractionState() {
+        mBarView.setNoUserInteractionState();
     }
 
     /** Returns the rect we want to clip (it may not be the full rect) */
@@ -489,10 +496,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     @Override
     public void draw(Canvas canvas) {
+        int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
         // Apply the rounded rect clip path on the whole view
         canvas.clipPath(mRoundedRectClipPath);
-
         super.draw(canvas);
+        canvas.restoreToCount(restoreCount);
 
         // Apply the dim if necessary
         if (mDim > 0) {
@@ -581,7 +589,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (v == mBarView.mDismissButton) {
             // Animate out the view and call the callback
             final TaskView tv = this;
-            animateRemoval(new Runnable() {
+            startDeleteTaskAnimation(new Runnable() {
                 @Override
                 public void run() {
                     mCb.onTaskDismissed(tv);

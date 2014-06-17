@@ -99,10 +99,15 @@ public class FullScreenTransitionView extends FrameLayout {
 
     @Override
     public void draw(Canvas canvas) {
-        int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
+        int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
         canvas.clipRect(mClipRect);
         super.draw(canvas);
         canvas.restoreToCount(restoreCount);
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 
     /** Prepares the screenshot view for the transition into Recents */
