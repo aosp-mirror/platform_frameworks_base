@@ -233,6 +233,13 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
             mTransitioningViews.removeAll(mSharedElements);
+            Rect r = new Rect();
+            for (int i = mTransitioningViews.size() - 1; i >= 0; i--) {
+                View view = mTransitioningViews.get(i);
+                if (!view.getGlobalVisibleRect(r)) {
+                    mTransitioningViews.remove(i);
+                }
+            }
         }
         setEpicenter();
     }
