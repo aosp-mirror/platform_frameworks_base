@@ -2190,6 +2190,22 @@
   <public type="attr" name="searchKeyphraseSupportedLocales" />
   <public type="attr" name="windowTransitionBackgroundFadeDuration" />
   <public type="attr" name="overlapAnchor" />
+  <public type="attr" name="progressTint" />
+  <public type="attr" name="progressTintMode" />
+  <public type="attr" name="progressBackgroundTint" />
+  <public type="attr" name="progressBackgroundTintMode" />
+  <public type="attr" name="secondaryProgressTint" />
+  <public type="attr" name="secondaryProgressTintMode" />
+  <public type="attr" name="indeterminateTint" />
+  <public type="attr" name="indeterminateTintMode" />
+  <public type="attr" name="backgroundTint" />
+  <public type="attr" name="backgroundTintMode" />
+  <public type="attr" name="foregroundTint" />
+  <public type="attr" name="foregroundTintMode" />
+  <public type="attr" name="buttonTint" />
+  <public type="attr" name="buttonTintMode" />
+  <public type="attr" name="thumbTint" />
+  <public type="attr" name="thumbTintMode" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
