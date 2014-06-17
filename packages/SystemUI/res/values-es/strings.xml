@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"¿Iniciar ahorro de batería?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Iniciar"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"Iniciar ahorro de batería"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reducirá el rendimiento del dispositivo.\n\nEsta función estará inhabilitada cuando el dispositivo esté conectado."</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reducirá el rendimiento del dispositivo.\n\nEsta función estará inhabilitada cuando el dispositivo esté enchufado."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ajustes"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Modo avión"</string>
