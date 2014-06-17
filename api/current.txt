@@ -15901,17 +15901,17 @@ package android.media.tv {
   public static final class TvContract.Programs.Genres {
     method public static java.lang.String[] decode(java.lang.String);
     method public static java.lang.String encode(java.lang.String...);
-    field public static final java.lang.String ANIMAL_WILDLIFE = "Animal/Wildlife";
-    field public static final java.lang.String COMEDY = "Comedy";
-    field public static final java.lang.String DRAMA = "Drama";
-    field public static final java.lang.String EDUCATION = "Education";
-    field public static final java.lang.String FAMILY_KIDS = "Family/Kids";
-    field public static final java.lang.String GAMING = "Gaming";
-    field public static final java.lang.String MOVIES = "Movies";
-    field public static final java.lang.String NEWS = "News";
-    field public static final java.lang.String SHOPPING = "Shopping";
-    field public static final java.lang.String SPORTS = "Sports";
-    field public static final java.lang.String TRAVEL = "Travel";
+    field public static final java.lang.String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
+    field public static final java.lang.String COMEDY = "COMEDY";
+    field public static final java.lang.String DRAMA = "DRAMA";
+    field public static final java.lang.String EDUCATION = "EDUCATION";
+    field public static final java.lang.String FAMILY_KIDS = "FAMILY_KIDS";
+    field public static final java.lang.String GAMING = "GAMING";
+    field public static final java.lang.String MOVIES = "MOVIES";
+    field public static final java.lang.String NEWS = "NEWS";
+    field public static final java.lang.String SHOPPING = "SHOPPING";
+    field public static final java.lang.String SPORTS = "SPORTS";
+    field public static final java.lang.String TRAVEL = "TRAVEL";
   }
 
   public final class TvInputInfo implements android.os.Parcelable {
