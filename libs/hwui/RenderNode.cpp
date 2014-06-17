@@ -118,7 +118,7 @@ void RenderNode::prepareTree(TreeInfo& info) {
 
 void RenderNode::damageSelf(TreeInfo& info) {
     if (isRenderable() && properties().getAlpha() > 0) {
-        if (properties().getClipToBounds()) {
+        if (properties().getClipDamageToBounds()) {
             info.damageAccumulator->dirty(0, 0, properties().getWidth(), properties().getHeight());
         } else {
             // Hope this is big enough?

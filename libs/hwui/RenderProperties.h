@@ -30,6 +30,7 @@
 #include "Rect.h"
 #include "RevealClip.h"
 #include "Outline.h"
+#include "utils/MathUtils.h"
 
 class SkBitmap;
 class SkColorFilter;
@@ -524,6 +525,15 @@ public:
 
     LayerProperties& mutateLayerProperties() {
         return mLayerProperties;
+    }
+
+    // Returns true if damage calculations should be clipped to bounds
+    // TODO: Figure out something better for getZ(), as children should still be
+    // clipped to this RP's bounds. But as we will damage -INT_MAX to INT_MAX
+    // for this RP's getZ() anyway, this can be optimized when we have a
+    // Z damage estimate instead of INT_MAX
+    bool getClipDamageToBounds() const {
+        return getClipToBounds() && (getZ() <= 0 || getOutline().isEmpty());
     }
 
 private:
