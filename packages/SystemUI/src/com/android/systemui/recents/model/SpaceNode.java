@@ -56,6 +56,13 @@ public class SpaceNode {
         return mStack;
     }
 
+    /** Returns whether there are any tasks in any stacks below this node. */
+    public boolean hasTasks() {
+        return (mStack.getTaskCount() > 0) ||
+                (mStartNode != null && mStartNode.hasTasks()) ||
+                (mEndNode != null && mEndNode.hasTasks());
+    }
+
     /** Returns whether this is a leaf node */
     boolean isLeafNode() {
         return (mStartNode == null) && (mEndNode == null);

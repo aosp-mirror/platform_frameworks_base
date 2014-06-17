@@ -124,6 +124,11 @@ class TaskBarView extends FrameLayout {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     /** Binds the bar view to the task */
     void rebindToTask(Task t, boolean animate) {
         mTask = t;
@@ -158,12 +163,12 @@ class TaskBarView extends FrameLayout {
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareAnimateEnterRecents() {
+    public void prepareEnterRecentsAnimation() {
         setVisibility(View.INVISIBLE);
     }
 
     /** Animates this task bar as it enters recents */
-    public void animateOnEnterRecents(int delay, Runnable postAnimRunnable) {
+    public void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
         // Animate the task bar of the first task view
         setVisibility(View.VISIBLE);
         setTranslationY(-getMeasuredHeight());
@@ -177,7 +182,7 @@ class TaskBarView extends FrameLayout {
     }
 
     /** Animates this task bar as it exits recents */
-    public void animateOnLaunchingTask(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
+    public void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
         // Animate the task bar out of the first task view
         animate()
                 .translationY(-getMeasuredHeight())
@@ -194,8 +199,22 @@ class TaskBarView extends FrameLayout {
                 .start();
     }
 
+    /** Animates this task bar dismiss button when launching a task. */
+    public void startLaunchTaskDismissAnimation() {
+        if (mDismissButton.getVisibility() == View.VISIBLE) {
+            mDismissButton.animate().cancel();
+            mDismissButton.animate()
+                    .alpha(0f)
+                    .setStartDelay(0)
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .withLayer()
+                    .start();
+        }
+    }
+
     /** Animates this task bar if the user does not interact with the stack after a certain time. */
-    public void animateOnNoUserInteraction() {
+    public void startNoUserInteractionAnimation() {
         mDismissButton.setVisibility(View.VISIBLE);
         mDismissButton.setAlpha(0f);
         mDismissButton.animate()
@@ -208,7 +227,7 @@ class TaskBarView extends FrameLayout {
     }
 
     /** Mark this task view that the user does has not interacted with the stack after a certain time. */
-    public void setOnNoUserInteraction() {
+    public void setNoUserInteractionState() {
         if (mDismissButton.getVisibility() != View.VISIBLE) {
             mDismissButton.animate().cancel();
             mDismissButton.setVisibility(View.VISIBLE);

@@ -394,7 +394,7 @@ public class RecentsTaskLoader {
 
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(25, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(100, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
         if (Console.Enabled) {
             Console.log(Constants.Log.App.TimeSystemCalls,

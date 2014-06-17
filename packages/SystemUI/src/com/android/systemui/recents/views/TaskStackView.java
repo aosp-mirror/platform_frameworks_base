@@ -116,7 +116,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 int childCount = getChildCount();
                 for (int i = 0; i < childCount; i++) {
                     TaskView tv = (TaskView) getChildAt(i);
-                    tv.animateOnNoUserInteraction();
+                    tv.startNoUserInteractionAnimation();
                 }
             }
         });
@@ -532,6 +532,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    /** Animates a task view in this stack as it launches. */
+    public void animateOnLaunchingTask(TaskView tv, final Runnable r) {
+        // Hide each of the task bar dismiss buttons
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TaskView t = (TaskView) getChildAt(i);
+            if (t == tv) {
+                t.startLaunchTaskAnimation(r, true);
+            } else {
+                t.startLaunchTaskAnimation(null, false);
+            }
+        }
+    }
+
     /** Focuses the task at the specified index in the stack */
     void focusTask(int taskIndex, boolean scrollToNewPosition) {
         if (Console.Enabled) {
@@ -818,14 +832,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int offscreenY = mRect.bottom - (mTaskRect.top - mRect.top);
             for (int i = childCount - 1; i >= 0; i--) {
                 TaskView tv = (TaskView) getChildAt(i);
-                tv.prepareAnimateEnterRecents((i == (getChildCount() - 1)), offsetTopAlign,
+                tv.prepareEnterRecentsAnimation((i == (getChildCount() - 1)), offsetTopAlign,
                         offscreenY, mTaskRect);
             }
 
             // If the enter animation started already and we haven't completed a layout yet, do the
             // enter animation now
             if (mStartEnterAnimationRequestedAfterLayout) {
-                startOnEnterAnimation(mStartEnterAnimationContext);
+                startEnterRecentsAnimation(mStartEnterAnimationContext);
                 mStartEnterAnimationRequestedAfterLayout = false;
                 mStartEnterAnimationContext = null;
             }
@@ -838,7 +852,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
-    public void startOnEnterAnimation(ViewAnimation.TaskViewEnterContext ctx) {
+    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         // If we are still waiting to layout, then just defer until then
         if (mAwaitingFirstLayout) {
             mStartEnterAnimationRequestedAfterLayout = true;
@@ -858,18 +872,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             ctx.stackViewCount = childCount;
             ctx.isFrontMost = (i == (getChildCount() - 1));
             ctx.transform = transform;
-            tv.animateOnEnterRecents(ctx);
+            tv.startEnterRecentsAnimation(ctx);
         }
     }
 
     /** Requests this task stacks to start it's exit-recents animation. */
-    public void startOnExitAnimation(ViewAnimation.TaskViewExitContext ctx) {
+    public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         // Animate all the task views into view
         ctx.offscreenTranslationY = mRect.bottom - (mTaskRect.top - mRect.top);
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskView tv = (TaskView) getChildAt(i);
-            tv.animateOnExitRecents(ctx);
+            tv.startExitToHomeAnimation(ctx);
         }
     }
 
@@ -1179,7 +1193,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // If the doze trigger has already fired, then update the state for this task view
         if (mDozeTrigger.hasTriggered()) {
-            tv.setOnNoUserInteraction();
+            tv.setNoUserInteractionState();
         }
 
         // Add/attach the view to the hierarchy
@@ -1275,7 +1289,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 TaskView tv = getChildViewForTask(t);
                 if (tv != null) {
                     // For visible children, defer removing the task until after the animation
-                    tv.animateRemoval(new Runnable() {
+                    tv.startDeleteTaskAnimation(new Runnable() {
                         @Override
                         public void run() {
                             mStack.removeTask(t);

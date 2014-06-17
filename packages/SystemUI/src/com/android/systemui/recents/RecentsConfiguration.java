@@ -97,6 +97,7 @@ public class RecentsConfiguration {
 
     /** Launch states */
     public boolean launchedWithAltTab;
+    public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
     public boolean launchedFromAppWithScreenshot;
     public boolean launchedFromHome;
@@ -245,6 +246,7 @@ public class RecentsConfiguration {
      * members. */
     public void updateOnConfigurationChange() {
         launchedWithAltTab = false;
+        launchedWithNoRecentTasks = false;
         launchedFromAppWithThumbnail = false;
         launchedFromAppWithScreenshot = false;
         launchedFromHome = false;
@@ -257,12 +259,14 @@ public class RecentsConfiguration {
 
     /** Returns whether the nav bar scrim should be animated when shown for the first time. */
     public boolean shouldAnimateNavBarScrim() {
-        return !launchedFromHome && !launchedFromAppWithScreenshot;
+        return true;
     }
 
     /** Returns whether the nav bar scrim should be visible. */
     public boolean hasNavBarScrim() {
-        return !transposeRecentsLayoutWithOrientation || !isLandscape;
+        // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
+        return !launchedWithNoRecentTasks &&
+                (!transposeRecentsLayoutWithOrientation || !isLandscape);
     }
 
     /**
