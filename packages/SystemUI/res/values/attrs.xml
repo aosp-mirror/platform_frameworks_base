@@ -54,5 +54,10 @@
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
     </attr>
+    <declare-styleable name="UserAvatarView">
+        <attr name="frameWidth" format="dimension" />
+        <attr name="activeFrameColor" format="color" />
+        <attr name="frameColor" />
+    </declare-styleable>
 </resources>
 

@@ -100,6 +100,13 @@
     <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
     </style>
 
+    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.UserName" />
+
     <style name="TextAppearance" />
     <style name="TextAppearance.QuickSettings" />
 

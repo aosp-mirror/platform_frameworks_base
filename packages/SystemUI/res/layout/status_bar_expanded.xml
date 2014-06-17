@@ -24,6 +24,7 @@
     android:id="@+id/notification_panel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     >
 
     <include
@@ -90,6 +91,14 @@
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
     <include layout="@layout/status_bar_expanded_header" />
+
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
+        android:layout_gravity="end"
+        android:layout="@layout/keyguard_user_switcher" />
 
     <include
         layout="@layout/keyguard_bottom_area"

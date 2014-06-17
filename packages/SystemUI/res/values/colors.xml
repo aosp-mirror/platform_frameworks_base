@@ -62,6 +62,9 @@
 
     <color name="keyguard_affordance">#ffffffff</color>
 
+    <!-- The color of the circle around the primary user in the user switcher -->
+    <color name="current_user_border_color">@color/primary_color</color>
+
     <!-- Our material color palette (deep teal) -->
     <color name="primary_color">#ff7fcac3</color>
     <color name="background_color_1">#ff384248</color>

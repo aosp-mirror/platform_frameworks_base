@@ -63,6 +63,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private boolean mShowEmergencyCallsOnly;
     private boolean mShowChargingInfo;
+    private boolean mKeyguardUserSwitcherShowing;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -72,6 +73,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private int mNormalWidth;
     private int mPadding;
     private int mMultiUserExpandedMargin;
+    private int mSystemIconsSwitcherHiddenExpandedMargin;
 
     private ActivityStarter mActivityStarter;
     private BrightnessController mBrightnessController;
@@ -125,7 +127,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mPadding = getResources().getDimensionPixelSize(R.dimen.notification_side_padding);
         mMultiUserExpandedMargin =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_expanded_margin);
-
+        mSystemIconsSwitcherHiddenExpandedMargin = getResources().getDimensionPixelSize(
+                R.dimen.system_icons_switcher_hidden_expanded_margin);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -216,12 +219,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 ? VISIBLE : GONE);
         mChargingInfo.setVisibility(mExpanded && !mOverscrolled && mShowChargingInfo
                 && !mShowEmergencyCallsOnly ? VISIBLE : GONE);
+        mMultiUserSwitch.setVisibility(mExpanded || !mKeyguardUserSwitcherShowing
+                ? VISIBLE : GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsContainer.getLayoutParams();
         boolean systemIconsAboveClock = mExpanded && !mOverscrolled
                 && mShowChargingInfo && !mShowEmergencyCallsOnly;
+        lp.setMarginEnd(0);
         if (systemIconsAboveClock) {
             lp.addRule(ALIGN_PARENT_START);
             lp.removeRule(START_OF);
@@ -230,7 +236,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                     ? mSettingsButton.getId()
                     : mMultiUserSwitch.getId());
             lp.removeRule(ALIGN_PARENT_START);
+            if (mMultiUserSwitch.getVisibility() == GONE) {
+                lp.setMarginEnd(mSystemIconsSwitcherHiddenExpandedMargin);
+            }
         }
+        mSystemIconsContainer.setLayoutParams(lp);
 
         RelativeLayout.LayoutParams clockLp = (LayoutParams) mDateTime.getLayoutParams();
         if (systemIconsAboveClock) {
@@ -238,6 +248,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else {
             clockLp.addRule(BELOW, mEmergencyCallsOnly.getId());
         }
+        mDateTime.setLayoutParams(clockLp);
     }
 
     private void updateBrightnessControllerState() {
@@ -384,5 +395,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setChargingInfo(CharSequence chargingInfo) {
         mChargingInfo.setText(chargingInfo);
+    }
+
+    public void setKeyguardUserSwitcherShowing(boolean showing) {
+        // STOPSHIP: NOT CALLED PROPERLY WHEN GOING TO FULL SHADE AND RETURNING!?!
+        mKeyguardUserSwitcherShowing = showing;
+        updateVisibilities();
+        updateSystemIconsLayoutParams();
     }
 }
