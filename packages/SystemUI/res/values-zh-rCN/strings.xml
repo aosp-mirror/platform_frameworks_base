@@ -32,26 +32,17 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"无通知"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"正在进行的"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <!-- no translation found for battery_low_title (6456385927409742437) -->
-    <skip />
+    <string name="battery_low_title" msgid="6456385927409742437">"电池电量偏低"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"还剩 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <!-- no translation found for battery_low_percent_format_saver_started (6534746636002666456) -->
-    <skip />
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"电量还剩<xliff:g id="NUMBER">%d%%</xliff:g>。节电助手已启用。"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。\n只能使用随附的充电器充电。"</string>
-    <!-- no translation found for invalid_charger_title (3515740382572798460) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (5474997287953892710) -->
-    <skip />
-    <!-- no translation found for battery_low_why (4553600287639198111) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_title (5987726159603849352) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7283108887345688413) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (7245333922937402896) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_text (8417584516834617662) -->
-    <skip />
+    <string name="invalid_charger_title" msgid="3515740382572798460">"不支持USB充电功能。"</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"仅限使用设备随附的充电器。"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"设置"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"启动节电助手？"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"启动"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"启动节电助手"</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"为了延长电池的续航时间，节电助手会减降设备的性能。\n\n设备接通电源后，节电助手会自动停用。"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
@@ -232,7 +223,7 @@
     <string name="recents_empty_message" msgid="7883614615463619450">"最近没有用过任何应用"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"应用信息"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已充电"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"充电完成"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"正在充电"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"还需<xliff:g id="CHARGING_TIME">%s</xliff:g>才能充满"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"未在充电"</string>
@@ -266,10 +257,7 @@
     <item quantity="one" msgid="3480040795582254384">"1小时"</item>
     <item quantity="other" msgid="5408537517529822157">"%d小时"</item>
   </plurals>
-    <!-- no translation found for battery_saver_notification_title (237918726750955859) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_text (7796554871101546872) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (7546297220816993504) -->
-    <skip />
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已启用"</string>
+    <string name="battery_saver_notification_text" msgid="7796554871101546872">"设备性能已减降。"</string>
+    <string name="battery_saver_notification_action_text" msgid="7546297220816993504">"打开节电助手设置"</string>
 </resources>

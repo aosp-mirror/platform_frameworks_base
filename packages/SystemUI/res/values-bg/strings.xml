@@ -243,10 +243,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"Прекарайте пръст наляво, за да включите камерата"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарежда се (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> до пълно зареждане)"</string>
-    <!-- no translation found for guest_nickname (8059989128963789678) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (4259024453643879653) -->
-    <skip />
+    <string name="guest_nickname" msgid="8059989128963789678">"Гост"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ гост"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"За една минута"</item>
     <item quantity="other" msgid="6924190729213550991">"За %d минути"</item>

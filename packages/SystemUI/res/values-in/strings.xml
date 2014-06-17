@@ -243,10 +243,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"Gesek ke kiri untuk kamera"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hingga Anda menonaktifkan ini"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Mengisi daya (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hingga penuh)"</string>
-    <!-- no translation found for guest_nickname (8059989128963789678) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (4259024453643879653) -->
-    <skip />
+    <string name="guest_nickname" msgid="8059989128963789678">"Tamu"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ Tamu"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Selama satu menit"</item>
     <item quantity="other" msgid="6924190729213550991">"Selama %d menit"</item>
