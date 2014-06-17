@@ -17,11 +17,13 @@ package android.animation;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.content.res.Resources.NotFoundException;
+import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.PathParser;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
@@ -158,7 +160,7 @@ public class AnimatorInflater {
                         int stateIndex = 0;
                         for (int i = 0; i < attributeCount; i++) {
                             int attrName = attributeSet.getAttributeNameResource(i);
-                            if (attrName == com.android.internal.R.attr.animation) {
+                            if (attrName == R.attr.animation) {
                                 animator = loadAnimator(context,
                                         attributeSet.getAttributeResourceValue(i, 0));
                             } else {
@@ -186,36 +188,43 @@ public class AnimatorInflater {
         }
     }
 
+    /**
+     * @param anim Null if this is a ValueAnimator, otherwise this is an
+     *            ObjectAnimator
+     * @param arrayAnimator Incoming typed array for Animator's attributes.
+     * @param arrayObjectAnimator Incoming typed array for Object Animator's
+     *            attributes.
+     */
+    private static void parseAnimatorFromTypeArray(ValueAnimator anim,
+            TypedArray arrayAnimator, TypedArray arrayObjectAnimator) {
+        long duration = arrayAnimator.getInt(R.styleable.Animator_duration, 300);
 
-    private static void parseAnimatorFromTypeArray(ValueAnimator anim, TypedArray a) {
-        long duration = a.getInt(com.android.internal.R.styleable.Animator_duration, 300);
+        long startDelay = arrayAnimator.getInt(R.styleable.Animator_startOffset, 0);
 
-        long startDelay = a.getInt(com.android.internal.R.styleable.Animator_startOffset, 0);
-
-        int valueType = a.getInt(com.android.internal.R.styleable.Animator_valueType,
+        int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType,
                 VALUE_TYPE_FLOAT);
 
         if (anim == null) {
             anim = new ValueAnimator();
         }
-        TypeEvaluator evaluator = null;
 
-        int valueFromIndex = com.android.internal.R.styleable.Animator_valueFrom;
-        int valueToIndex = com.android.internal.R.styleable.Animator_valueTo;
+        TypeEvaluator evaluator = null;
+        int valueFromIndex = R.styleable.Animator_valueFrom;
+        int valueToIndex = R.styleable.Animator_valueTo;
 
         boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
 
-        TypedValue tvFrom = a.peekValue(valueFromIndex);
+        TypedValue tvFrom = arrayAnimator.peekValue(valueFromIndex);
         boolean hasFrom = (tvFrom != null);
         int fromType = hasFrom ? tvFrom.type : 0;
-        TypedValue tvTo = a.peekValue(valueToIndex);
+        TypedValue tvTo = arrayAnimator.peekValue(valueToIndex);
         boolean hasTo = (tvTo != null);
         int toType = hasTo ? tvTo.type : 0;
 
         if ((hasFrom && (fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
                 (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) ||
-            (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
+                (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
+                        (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
             // special case for colors: ignore valueType and get ints
             getFloats = false;
             evaluator = ArgbEvaluator.getInstance();
@@ -226,15 +235,15 @@ public class AnimatorInflater {
             float valueTo;
             if (hasFrom) {
                 if (fromType == TypedValue.TYPE_DIMENSION) {
-                    valueFrom = a.getDimension(valueFromIndex, 0f);
+                    valueFrom = arrayAnimator.getDimension(valueFromIndex, 0f);
                 } else {
-                    valueFrom = a.getFloat(valueFromIndex, 0f);
+                    valueFrom = arrayAnimator.getFloat(valueFromIndex, 0f);
                 }
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
-                        valueTo = a.getDimension(valueToIndex, 0f);
+                        valueTo = arrayAnimator.getDimension(valueToIndex, 0f);
                     } else {
-                        valueTo = a.getFloat(valueToIndex, 0f);
+                        valueTo = arrayAnimator.getFloat(valueToIndex, 0f);
                     }
                     anim.setFloatValues(valueFrom, valueTo);
                 } else {
@@ -242,9 +251,9 @@ public class AnimatorInflater {
                 }
             } else {
                 if (toType == TypedValue.TYPE_DIMENSION) {
-                    valueTo = a.getDimension(valueToIndex, 0f);
+                    valueTo = arrayAnimator.getDimension(valueToIndex, 0f);
                 } else {
-                    valueTo = a.getFloat(valueToIndex, 0f);
+                    valueTo = arrayAnimator.getFloat(valueToIndex, 0f);
                 }
                 anim.setFloatValues(valueTo);
             }
@@ -253,21 +262,21 @@ public class AnimatorInflater {
             int valueTo;
             if (hasFrom) {
                 if (fromType == TypedValue.TYPE_DIMENSION) {
-                    valueFrom = (int) a.getDimension(valueFromIndex, 0f);
+                    valueFrom = (int) arrayAnimator.getDimension(valueFromIndex, 0f);
                 } else if ((fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
                         (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) {
-                    valueFrom = a.getColor(valueFromIndex, 0);
+                    valueFrom = arrayAnimator.getColor(valueFromIndex, 0);
                 } else {
-                    valueFrom = a.getInt(valueFromIndex, 0);
+                    valueFrom = arrayAnimator.getInt(valueFromIndex, 0);
                 }
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
-                        valueTo = (int) a.getDimension(valueToIndex, 0f);
+                        valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
                     } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
                             (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
-                        valueTo = a.getColor(valueToIndex, 0);
+                        valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
-                        valueTo = a.getInt(valueToIndex, 0);
+                        valueTo = arrayAnimator.getInt(valueToIndex, 0);
                     }
                     anim.setIntValues(valueFrom, valueTo);
                 } else {
@@ -276,12 +285,12 @@ public class AnimatorInflater {
             } else {
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
-                        valueTo = (int) a.getDimension(valueToIndex, 0f);
+                        valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
                     } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                        (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
-                        valueTo = a.getColor(valueToIndex, 0);
+                            (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                        valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
-                        valueTo = a.getInt(valueToIndex, 0);
+                        valueTo = arrayAnimator.getInt(valueToIndex, 0);
                     }
                     anim.setIntValues(valueTo);
                 }
@@ -291,17 +300,58 @@ public class AnimatorInflater {
         anim.setDuration(duration);
         anim.setStartDelay(startDelay);
 
-        if (a.hasValue(com.android.internal.R.styleable.Animator_repeatCount)) {
+        if (arrayAnimator.hasValue(R.styleable.Animator_repeatCount)) {
             anim.setRepeatCount(
-                    a.getInt(com.android.internal.R.styleable.Animator_repeatCount, 0));
+                    arrayAnimator.getInt(R.styleable.Animator_repeatCount, 0));
         }
-        if (a.hasValue(com.android.internal.R.styleable.Animator_repeatMode)) {
+        if (arrayAnimator.hasValue(R.styleable.Animator_repeatMode)) {
             anim.setRepeatMode(
-                    a.getInt(com.android.internal.R.styleable.Animator_repeatMode,
+                    arrayAnimator.getInt(R.styleable.Animator_repeatMode,
                             ValueAnimator.RESTART));
         }
         if (evaluator != null) {
             anim.setEvaluator(evaluator);
+        }
+
+        if (arrayObjectAnimator != null) {
+            ObjectAnimator oa = (ObjectAnimator) anim;
+            String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
+
+            // Note that if there is a pathData defined in the Object Animator,
+            // valueFrom / valueTo will be overwritten by the pathData.
+            if (pathData != null) {
+                String propertyXName =
+                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyXName);
+                String propertyYName =
+                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyYName);
+
+                if (propertyXName == null && propertyYName == null) {
+                    throw new IllegalArgumentException("propertyXName or propertyYName"
+                            + " is needed for PathData in Object Animator");
+                } else {
+                    Path path = PathParser.createPathFromPathData(pathData);
+                    Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, !getFloats);
+                    PropertyValuesHolder x = null;
+                    PropertyValuesHolder y = null;
+                    if (propertyXName != null) {
+                        x = PropertyValuesHolder.ofKeyframe(propertyXName, keyframes[0]);
+                    }
+                    if (propertyYName != null) {
+                        y = PropertyValuesHolder.ofKeyframe(propertyYName, keyframes[1]);
+                    }
+                    if (x == null) {
+                        oa.setValues(y);
+                    } else if (y == null) {
+                        oa.setValues(x);
+                    } else {
+                        oa.setValues(x, y);
+                    }
+                }
+            } else {
+                String propertyName =
+                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyName);
+                oa.setPropertyName(propertyName);
+            }
         }
     }
 
@@ -338,11 +388,11 @@ public class AnimatorInflater {
                 anim = new AnimatorSet();
                 TypedArray a;
                 if (theme != null) {
-                    a = theme.obtainStyledAttributes(attrs, com.android.internal.R.styleable.AnimatorSet, 0, 0);
+                    a = theme.obtainStyledAttributes(attrs, R.styleable.AnimatorSet, 0, 0);
                 } else {
-                    a = res.obtainAttributes(attrs, com.android.internal.R.styleable.AnimatorSet);
+                    a = res.obtainAttributes(attrs, R.styleable.AnimatorSet);
                 }
-                int ordering = a.getInt(com.android.internal.R.styleable.AnimatorSet_ordering,
+                int ordering = a.getInt(R.styleable.AnimatorSet_ordering,
                         TOGETHER);
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering);
                 a.recycle();
@@ -380,19 +430,6 @@ public class AnimatorInflater {
 
         loadAnimator(res, theme, attrs, anim);
 
-        TypedArray a;
-        if (theme != null) {
-            a = theme.obtainStyledAttributes(attrs, R.styleable.PropertyAnimator, 0, 0);
-        } else {
-            a = res.obtainAttributes(attrs, R.styleable.PropertyAnimator);
-        }
-
-        String propertyName = a.getString(R.styleable.PropertyAnimator_propertyName);
-
-        anim.setPropertyName(propertyName);
-
-        a.recycle();
-
         return anim;
     }
 
@@ -402,26 +439,41 @@ public class AnimatorInflater {
      *
      * @param res The resources
      * @param attrs The set of attributes holding the animation parameters
+     * @param anim Null if this is a ValueAnimator, otherwise this is an
+     *            ObjectAnimator
      */
     private static ValueAnimator loadAnimator(Resources res, Theme theme,
             AttributeSet attrs, ValueAnimator anim)
             throws NotFoundException {
 
-        TypedArray a;
+        TypedArray arrayAnimator = null;
+        TypedArray arrayObjectAnimator = null;
+
         if (theme != null) {
-            a = theme.obtainStyledAttributes(attrs, R.styleable.Animator, 0, 0);
+            arrayAnimator = theme.obtainStyledAttributes(attrs, R.styleable.Animator, 0, 0);
         } else {
-            a = res.obtainAttributes(attrs, R.styleable.Animator);
+            arrayAnimator = res.obtainAttributes(attrs, R.styleable.Animator);
         }
 
-        parseAnimatorFromTypeArray(anim, a);
+        // If anim is not null, then it is an object animator.
+        if (anim != null) {
+            if (theme != null) {
+                arrayObjectAnimator = theme.obtainStyledAttributes(attrs,
+                        R.styleable.PropertyAnimator, 0, 0);
+            } else {
+                arrayObjectAnimator = res.obtainAttributes(attrs, R.styleable.PropertyAnimator);
+            }
+        }
+        parseAnimatorFromTypeArray(anim, arrayAnimator, arrayObjectAnimator);
 
         final int resID =
-                a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
+                arrayAnimator.getResourceId(R.styleable.Animator_interpolator, 0);
         if (resID > 0) {
             anim.setInterpolator(AnimationUtils.loadInterpolator(res, theme, resID));
         }
-        a.recycle();
+
+        arrayAnimator.recycle();
+        arrayObjectAnimator.recycle();
 
         return anim;
     }

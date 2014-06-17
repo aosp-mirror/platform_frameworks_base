@@ -16,11 +16,9 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
-
     <objectAnimator
         android:duration="9000"
-        android:propertyName="rotation"
-        android:valueFrom="0"
-        android:valueTo="360"/>
-
+        android:propertyXName="translateX"
+        android:propertyYName="translateY"
+        android:pathData="m0,0 q 150, 300 150, 0 t 150, 0, t 150, 0 t -150 0 t -150 0 t -150 0 z" />
 </set>

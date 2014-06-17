@@ -32,5 +32,8 @@
     <target
         android:name="rotationGroupBlue"
         android:animation="@anim/trim_path_animation03" />
+    <target
+        android:name="rotationGroup"
+        android:animation="@anim/trim_path_animation04" />
 
 </animated-vector>

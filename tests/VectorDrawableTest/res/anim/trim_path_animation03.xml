@@ -21,6 +21,8 @@
         android:duration="6000"
         android:propertyName="rotation"
         android:valueFrom="0"
-        android:valueTo="360"/>
+        android:valueTo="360"
+        android:interpolator="@interpolator/custom_path_interpolator"
+        />
 
 </set>
