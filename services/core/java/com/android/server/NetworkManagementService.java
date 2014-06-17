@@ -41,6 +41,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
@@ -145,6 +146,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceClassActivity    = 613;
         public static final int InterfaceAddressChange    = 614;
         public static final int InterfaceDnsServerInfo    = 615;
+        public static final int RouteChange               = 616;
     }
 
     static final int DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
@@ -580,6 +582,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    /**
+     * Notify our observers of a route change.
+     */
+    private void notifyRouteChange(String action, RouteInfo route) {
+        final int length = mObservers.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    if (action.equals("updated")) {
+                        mObservers.getBroadcastItem(i).routeUpdated(route);
+                    } else {
+                        mObservers.getBroadcastItem(i).routeRemoved(route);
+                    }
+                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
+                }
+            }
+        } finally {
+            mObservers.finishBroadcast();
+        }
+    }
+
     //
     // Netd Callback handling
     //
@@ -721,6 +745,47 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         notifyInterfaceDnsServerInfo(cooked[3], lifetime, servers);
                     }
                     return true;
+                    // break;
+            case NetdResponseCode.RouteChange:
+                    /*
+                     * A route has been updated or removed.
+                     * Format: "NNN Route <updated|removed> <dst> [via <gateway] [dev <iface>]"
+                     */
+                    if (!cooked[1].equals("Route") || cooked.length < 6) {
+                        throw new IllegalStateException(errorMessage);
+                    }
+
+                    String via = null;
+                    String dev = null;
+                    boolean valid = true;
+                    for (int i = 4; (i + 1) < cooked.length && valid; i += 2) {
+                        if (cooked[i].equals("dev")) {
+                            if (dev == null) {
+                                dev = cooked[i+1];
+                            } else {
+                                valid = false;  // Duplicate interface.
+                            }
+                        } else if (cooked[i].equals("via")) {
+                            if (via == null) {
+                                via = cooked[i+1];
+                            } else {
+                                valid = false;  // Duplicate gateway.
+                            }
+                        } else {
+                            valid = false;      // Unknown syntax.
+                        }
+                    }
+                    if (valid) {
+                        try {
+                            // InetAddress.parseNumericAddress(null) inexplicably returns ::1.
+                            InetAddress gateway = null;
+                            if (via != null) gateway = InetAddress.parseNumericAddress(via);
+                            RouteInfo route = new RouteInfo(new IpPrefix(cooked[3]), gateway, dev);
+                            notifyRouteChange(cooked[2], route);
+                            return true;
+                        } catch (IllegalArgumentException e) {}
+                    }
+                    throw new IllegalStateException(errorMessage);
                     // break;
             default: break;
             }
