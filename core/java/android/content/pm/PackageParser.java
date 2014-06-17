@@ -2524,10 +2524,9 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
                     0);
 
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_persistable, false)) {
-                a.info.flags |= ActivityInfo.FLAG_PERSISTABLE;
-            }
+            a.info.persistableMode = sa.getInteger(
+                    com.android.internal.R.styleable.AndroidManifestActivity_persistableMode,
+                    ActivityInfo.PERSIST_ROOT_ONLY);
 
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_allowEmbedded,

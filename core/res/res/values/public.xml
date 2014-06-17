@@ -2136,7 +2136,7 @@
   <public type="attr" name="colorControlActivated" />
   <public type="attr" name="colorButtonNormal" />
   <public type="attr" name="colorControlHighlight" />
-  <public type="attr" name="persistable" />
+  <public type="attr" name="persistableMode" />
   <public type="attr" name="titleTextAppearance" />
   <public type="attr" name="subtitleTextAppearance" />
   <public type="attr" name="slideEdge" />

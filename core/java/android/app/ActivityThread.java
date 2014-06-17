@@ -317,7 +317,7 @@ public final class ActivityThread {
         }
 
         public boolean isPersistable() {
-            return (activityInfo.flags & ActivityInfo.FLAG_PERSISTABLE) != 0;
+            return activityInfo.persistableMode == ActivityInfo.PERSIST_ACROSS_REBOOTS;
         }
 
         public String toString() {
