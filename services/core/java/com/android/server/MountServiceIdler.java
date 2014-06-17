@@ -30,8 +30,7 @@ public class MountServiceIdler extends JobService {
     private static final String TAG = "MountServiceIdler";
 
     private static ComponentName sIdleService =
-            new ComponentName(MountServiceIdler.class.getPackage().getName(),
-                    MountServiceIdler.class.getName());
+            new ComponentName("android", MountServiceIdler.class.getName());
 
     private static int MOUNT_JOB_ID = 808;
 
