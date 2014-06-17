@@ -160,6 +160,7 @@ easier.
         <item name="preferenceInformationStyle">@style/Preference.DeviceDefault.Information</item>
         <item name="checkBoxPreferenceStyle">@style/Preference.DeviceDefault.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@style/Preference.DeviceDefault.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.DeviceDefault.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference.EditTextPreference</item>
@@ -421,6 +422,7 @@ easier.
         <item name="preferenceInformationStyle">@style/Preference.DeviceDefault.Information</item>
         <item name="checkBoxPreferenceStyle">@style/Preference.DeviceDefault.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@style/Preference.DeviceDefault.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.DeviceDefault.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference</item>
         <item name="editTextPreferenceStyle">@style/Preference.DeviceDefault.DialogPreference.EditTextPreference</item>

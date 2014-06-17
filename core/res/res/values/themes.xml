@@ -321,6 +321,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceInformationStyle">@android:style/Preference.Information</item>
         <item name="checkBoxPreferenceStyle">@android:style/Preference.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@android:style/Preference.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@android:style/Preference.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@android:style/Preference.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@android:style/Preference.DialogPreference</item>
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
@@ -1203,6 +1204,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceInformationStyle">@android:style/Preference.Holo.Information</item>
         <item name="checkBoxPreferenceStyle">@android:style/Preference.Holo.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@android:style/Preference.Holo.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@android:style/Preference.Holo.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@android:style/Preference.Holo.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@android:style/Preference.Holo.DialogPreference</item>
         <item name="editTextPreferenceStyle">@android:style/Preference.Holo.DialogPreference.EditTextPreference</item>
@@ -1543,6 +1545,7 @@ please see themes_device_defaults.xml.
         <item name="preferenceInformationStyle">@android:style/Preference.Holo.Information</item>
         <item name="checkBoxPreferenceStyle">@android:style/Preference.Holo.CheckBoxPreference</item>
         <item name="switchPreferenceStyle">@android:style/Preference.Holo.SwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@android:style/Preference.Holo.SeekBarPreference</item>
         <item name="yesNoPreferenceStyle">@android:style/Preference.Holo.DialogPreference.YesNoPreference</item>
         <item name="dialogPreferenceStyle">@android:style/Preference.Holo.DialogPreference</item>
         <item name="editTextPreferenceStyle">@android:style/Preference.Holo.DialogPreference.EditTextPreference</item>
