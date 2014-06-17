@@ -95,5 +95,7 @@ final class HdmiConstants {
     static final int POLL_ITERATION_IN_ORDER = 0x10000;
     static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
 
+    static final int UNKNOWN_VOLUME = -1;
+
     private HdmiConstants() { /* cannot be instantiated */ }
 }
