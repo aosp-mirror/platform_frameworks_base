@@ -15795,7 +15795,9 @@ package android.media.tv {
     method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName);
     method public static final android.net.Uri buildChannelsUriForInput(android.content.ComponentName, boolean);
     method public static final android.net.Uri buildProgramUri(long);
+    method public static final android.net.Uri buildProgramsUriForChannel(long);
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri);
+    method public static final android.net.Uri buildProgramsUriForChannel(long, long, long);
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri, long, long);
     field public static final java.lang.String AUTHORITY = "android.media.tv";
   }

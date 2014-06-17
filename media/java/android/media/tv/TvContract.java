@@ -144,15 +144,41 @@ public final class TvContract {
     /**
      * Builds a URI that points to all programs on a given channel.
      *
+     * @param channelId The ID of the channel to return programs for.
+     */
+    public static final Uri buildProgramsUriForChannel(long channelId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                .appendPath(PATH_CHANNEL).appendPath(String.valueOf(channelId))
+                .appendPath(PATH_PROGRAM).build();
+    }
+
+    /**
+     * Builds a URI that points to all programs on a given channel.
+     *
      * @param channelUri The URI of the channel to return programs for.
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri) {
         if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
-        String channelId = String.valueOf(ContentUris.parseId(channelUri));
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                .appendPath(PATH_CHANNEL).appendPath(channelId).appendPath(PATH_PROGRAM).build();
+        return buildProgramsUriForChannel(ContentUris.parseId(channelUri));
+    }
+
+    /**
+     * Builds a URI that points to programs on a specific channel whose schedules overlap with the
+     * given time frame.
+     *
+     * @param channelId The ID of the channel to return programs for.
+     * @param startTime The start time used to filter programs. The returned programs should have
+     *            {@link Programs#COLUMN_END_TIME_UTC_MILLIS} that is greater than this time.
+     * @param endTime The end time used to filter programs. The returned programs should have
+     *            {@link Programs#COLUMN_START_TIME_UTC_MILLIS} that is less than this time.
+     */
+    public static final Uri buildProgramsUriForChannel(long channelId, long startTime,
+            long endTime) {
+        Uri uri = buildProgramsUriForChannel(channelId);
+        return uri.buildUpon().appendQueryParameter(PARAM_START_TIME, String.valueOf(startTime))
+                .appendQueryParameter(PARAM_END_TIME, String.valueOf(endTime)).build();
     }
 
     /**
@@ -167,9 +193,10 @@ public final class TvContract {
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri, long startTime,
             long endTime) {
-        Uri uri = buildProgramsUriForChannel(channelUri);
-        return uri.buildUpon().appendQueryParameter(PARAM_START_TIME, String.valueOf(startTime))
-                .appendQueryParameter(PARAM_END_TIME, String.valueOf(endTime)).build();
+        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+            throw new IllegalArgumentException("Not a channel: " + channelUri);
+        }
+        return buildProgramsUriForChannel(ContentUris.parseId(channelUri), startTime, endTime);
     }
 
     /**
