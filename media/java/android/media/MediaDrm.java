@@ -254,6 +254,9 @@ public final class MediaDrm {
      * This event type indicates that the app needs to request a certificate from
      * the provisioning server.  The request message data is obtained using
      * {@link #getProvisionRequest}
+     *
+     * @deprecated Handle provisioning via {@link android.media.NotProvisionedException}
+     * instead.
      */
     public static final int EVENT_PROVISION_REQUIRED = 1;
 
