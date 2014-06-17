@@ -33,6 +33,7 @@ NullDamageAccumulator* NullDamageAccumulator::instance() {
 }
 
 enum TransformType {
+    TransformInvalid = 0,
     TransformRenderNode,
     TransformMatrix4,
     TransformNone,
@@ -56,6 +57,7 @@ DamageAccumulator::DamageAccumulator() {
     memset(mHead, 0, sizeof(DirtyStack));
     // Create a root that we will not pop off
     mHead->prev = mHead;
+    mHead->type = TransformNone;
 }
 
 void DamageAccumulator::pushCommon() {
@@ -100,6 +102,8 @@ void DamageAccumulator::popTransform() {
     case TransformNone:
         mHead->pendingDirty.join(dirtyFrame->pendingDirty);
         break;
+    default:
+        LOG_ALWAYS_FATAL("Tried to pop an invalid type: %d", dirtyFrame->type);
     }
 }
 
@@ -186,8 +190,6 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
         if (projectionReceiver) {
             applyTransforms(frame, projectionReceiver);
             projectionReceiver->pendingDirty.join(frame->pendingDirty);
-        } else {
-            ALOGW("Failed to find projection receiver? Dropping on the floor...");
         }
 
         frame->pendingDirty.setEmpty();
