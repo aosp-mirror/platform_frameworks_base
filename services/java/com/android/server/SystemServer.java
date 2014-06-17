@@ -935,13 +935,6 @@ public final class SystemServer {
             }
 
             try {
-                Slog.i(TAG, "IdleMaintenanceService");
-                new IdleMaintenanceService(context, battery);
-            } catch (Throwable e) {
-                reportWtf("starting IdleMaintenanceService", e);
-            }
-
-            try {
                 if (pm.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
                     mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
                 }
@@ -999,7 +992,7 @@ public final class SystemServer {
 
                 try {
                     Slog.i(TAG, "BackgroundDexOptService");
-                    new BackgroundDexOptService(context);
+                    BackgroundDexOptService.schedule(context);
                 } catch (Throwable e) {
                     reportWtf("starting BackgroundDexOptService", e);
                 }
