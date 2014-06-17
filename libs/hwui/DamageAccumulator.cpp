@@ -168,7 +168,7 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     const RenderProperties& props = frame->renderNode->properties();
 
     // Perform clipping
-    if (props.getClipToBounds() && !frame->pendingDirty.isEmpty()) {
+    if (props.getClipDamageToBounds() && !frame->pendingDirty.isEmpty()) {
         if (!frame->pendingDirty.intersect(0, 0, props.getWidth(), props.getHeight())) {
             frame->pendingDirty.setEmpty();
         }
