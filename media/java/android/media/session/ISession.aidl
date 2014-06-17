@@ -15,6 +15,7 @@
 
 package android.media.session;
 
+import android.content.ComponentName;
 import android.media.MediaMetadata;
 import android.media.session.ISessionController;
 import android.media.session.RouteOptions;
@@ -33,6 +34,7 @@ interface ISession {
     ISessionController getController();
     void setFlags(int flags);
     void setActive(boolean active);
+    void setMediaButtonReceiver(in ComponentName mbr);
     void destroy();
 
     // These commands are for setting up and communicating with routes

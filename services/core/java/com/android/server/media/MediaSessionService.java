@@ -23,6 +23,7 @@ import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -88,6 +89,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
+    private ContentResolver mContentResolver;
 
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
@@ -115,6 +117,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
+        mContentResolver = getContext().getContentResolver();
     }
 
     private IAudioService getAudioService() {
@@ -381,8 +384,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             return false;
         }
         if (compName != null) {
-            final String enabledNotifListeners = Settings.Secure.getStringForUser(
-                    getContext().getContentResolver(),
+            final String enabledNotifListeners = Settings.Secure.getStringForUser(mContentResolver,
                     Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                     userId);
             if (enabledNotifListeners != null) {
@@ -485,6 +487,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             List<MediaSessionRecord> records = mPriorityStack.getActiveSessions(userId);
             int size = records.size();
+            if (size > 0) {
+                persistMediaButtonReceiverLocked(records.get(0));
+            }
             ArrayList<MediaSessionToken> tokens = new ArrayList<MediaSessionToken>();
             for (int i = 0; i < size; i++) {
                 tokens.add(new MediaSessionToken(records.get(i).getControllerBinder()));
@@ -501,6 +506,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }
             }
+        }
+    }
+
+    private void persistMediaButtonReceiverLocked(MediaSessionRecord record) {
+        ComponentName receiver = record.getMediaButtonReceiver();
+        if (receiver != null) {
+            Settings.System.putStringForUser(mContentResolver,
+                    Settings.System.MEDIA_BUTTON_RECEIVER,
+                    receiver == null ? "" : receiver.flattenToString(),
+                    UserHandle.USER_CURRENT);
         }
     }
 

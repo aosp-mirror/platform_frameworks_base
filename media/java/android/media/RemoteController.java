@@ -361,18 +361,10 @@ public final class RemoteController
         if (timeMs < 0) {
             throw new IllegalArgumentException("illegal negative time value");
         }
-        if (USE_SESSIONS) {
-            synchronized (mInfoLock) {
-                if (mCurrentSession != null) {
-                    mCurrentSession.getTransportControls().seekTo(timeMs);
-                }
+        synchronized (mInfoLock) {
+            if (mCurrentSession != null) {
+                mCurrentSession.getTransportControls().seekTo(timeMs);
             }
-        } else {
-            final int genId;
-            synchronized (mGenLock) {
-                genId = mClientGenerationIdCurrent;
-            }
-            mAudioManager.setRemoteControlClientPlaybackPosition(genId, timeMs);
         }
         return true;
     }
@@ -534,34 +526,15 @@ public final class RemoteController
             if (!mMetadataChanged) {
                 return;
             }
-            if (USE_SESSIONS) {
-                synchronized (mInfoLock) {
-                    if (mCurrentSession != null) {
-                        if (mEditorMetadata.containsKey(
-                                String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER))) {
-                            Rating rating = (Rating) getObject(
-                                    MediaMetadataEditor.RATING_KEY_BY_USER, null);
-                            if (rating != null) {
-                                mCurrentSession.getTransportControls().setRating(rating);
-                            }
-                        }
-                    }
-                }
-            } else {
-                final int genId;
-                synchronized(mGenLock) {
-                    genId = mClientGenerationIdCurrent;
-                }
-                synchronized(mInfoLock) {
+            synchronized (mInfoLock) {
+                if (mCurrentSession != null) {
                     if (mEditorMetadata.containsKey(
                             String.valueOf(MediaMetadataEditor.RATING_KEY_BY_USER))) {
                         Rating rating = (Rating) getObject(
                                 MediaMetadataEditor.RATING_KEY_BY_USER, null);
-                        mAudioManager.updateRemoteControlClientMetadata(genId,
-                              MediaMetadataEditor.RATING_KEY_BY_USER,
-                              rating);
-                    } else {
-                        Log.e(TAG, "no metadata to apply");
+                        if (rating != null) {
+                            mCurrentSession.getTransportControls().setRating(rating);
+                        }
                     }
                 }
             }

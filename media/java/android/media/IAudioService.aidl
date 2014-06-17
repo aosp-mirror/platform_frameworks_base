@@ -122,12 +122,6 @@ interface IAudioService {
 
     int getCurrentAudioFocus();
 
-           void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c, IBinder token);
-    oneway void unregisterMediaButtonIntent(in PendingIntent pi);
-
-    oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
-    oneway void unregisterMediaButtonEventReceiverForCalls();
-
     /**
      * Register an IRemoteControlDisplay.
      * Success of registration is subject to a check on
@@ -180,41 +174,6 @@ interface IAudioService {
      */
     oneway void remoteControlDisplayWantsPlaybackPositionSync(in IRemoteControlDisplay rcd,
             boolean wantsSync);
-    /**
-     * Request the user of a RemoteControlClient to seek to the given playback position.
-     * @param generationId the RemoteControlClient generation counter for which this request is
-     *         issued. Requests for an older generation than current one will be ignored.
-     * @param timeMs the time in ms to seek to, must be positive.
-     */
-     void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
-     /**
-      * Notify the user of a RemoteControlClient that it should update its metadata with the
-      * new value for the given key.
-      * @param generationId the RemoteControlClient generation counter for which this request is
-      *         issued. Requests for an older generation than current one will be ignored.
-      * @param key the metadata key for which a new value exists
-      * @param value the new metadata value
-      */
-     void updateRemoteControlClientMetadata(int generationId, int key, in Rating value);
-
-    /**
-     * Do not use directly, use instead
-     *     {@link android.media.AudioManager#registerRemoteControlClient(RemoteControlClient)}
-     */
-    int registerRemoteControlClient(in PendingIntent mediaIntent,
-            in IRemoteControlClient rcClient, in String callingPackageName);
-    /**
-     * Do not use directly, use instead
-     *     {@link android.media.AudioManager#unregisterRemoteControlClient(RemoteControlClient)}
-     */
-    oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
-            in IRemoteControlClient rcClient);
-
-    oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
-    void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed);
-           int  getRemoteStreamMaxVolume();
-           int  getRemoteStreamVolume();
-    oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);
 
     void startBluetoothSco(IBinder cb, int targetSdkVersion);
     void startBluetoothScoVirtualCall(IBinder cb);
