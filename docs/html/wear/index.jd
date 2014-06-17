@@ -175,64 +175,12 @@ page.type=about
                   for a hands-free experience.
                 </p>
                 <p class="landing-small">
-                  <a href="{@docRoot}training/wearables/apps/voice-actions.html/">Integrate voice actions</a>
+                  <a href="{@docRoot}training/wearables/apps/voice-actions.html">Integrate voice actions</a>
                 </p>
               </div>
             </div>
           </div>
         </div> <!-- end .wrap -->
-      </div> <!-- end .landing-section -->
-
-<!--
-
-      <div class="landing-section landing-white-background">
-        <div class="wrap">
-          <div class="landing-section-header">
-            <div class="landing-h2">Building an Ecosystem</div>
-            <div class="landing-body landing-align-center">
-              <p class="landing-small">
-                We’re working with several partners to bring you watches powered by Android Wear later this year!
-              </p>
-            </div>
-          </div>
-
-          <div class="landing-partners cols">
-            <div class="col-4">
-              <img src="/wear/images/partners/asus.png" alt="Asus">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/broadcom.png" alt="Broadcom">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/fossil.png" alt="Fossil">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/htc.png" alt="HTC">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/intel.png" alt="Intel">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/lg.png" alt="LG">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/mediatek.png" alt="Mediatek">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/mips.png" alt="MIPS">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/motorola.png" alt="Motorola">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/qualcomm.png" alt="Qualcomm">
-            </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/samsung.png" alt="Samsung">
-            </div>
-          </div>
-        </div> <!-- end .wrap 
-
       </div> <!-- end .landing-section -->
 
       <div class="landing-section landing-red-background">
