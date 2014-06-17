@@ -401,10 +401,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"绑定到语音互动器"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"允许应用绑定到语音互动服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
-    <skip />
-    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
-    <skip />
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"管理语音关键短语"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"允许应用管理用于语音启动指令检测的关键短语。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"绑定至远程显示屏"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
@@ -1365,6 +1363,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允许应用检测信任状态的变化。"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理。"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允许应用提供信任的代理。"</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"绑定至信任的代理服务"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允许应用绑定至信任的代理服务。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>

@@ -1362,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Lubab rakendusel tuvastada muudatusi usaldusväärses olekus."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Usaldusväärse agendi esitamine."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Võimaldab rakendusel esitada usaldusväärset agenti."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Käivita usaldusväärse agendi seadete menüü."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Võimaldab rakendusel käivitada tegevuse, mis muudab usaldusväärse agendi käitumist."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Usaldusväärse agendi teenusega sidumine"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Lubab rakendusel ennast siduda usaldusväärse agendi teenusega."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Suhtlemine värskenduse ja taastesüsteemiga"</string>

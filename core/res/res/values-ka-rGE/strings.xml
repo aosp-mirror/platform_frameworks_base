@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"უსაფრთხო რეჟიმი"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-ის სისტემა"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"პერსონალური აპები"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android სამსახურისთვის"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"სერვისები, რომელშიც ფულის გადახდა გიწევთ"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ისეთი აქტივობების განხორციელება, რომლებშიც ფულის გადახდა მოგიწევთ."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"თქვენი შეტყობინებები"</string>
@@ -401,10 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"მფლობელს შეეძლება ფონის ზედა დონის ინტერფეისთან დაკავშირება. არასდროს გამოიყენება ჩვეულებრივ აპებში."</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"ხმის ინტერაქტორთან შეკავშირება"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"მფლობელს შეეძლება შეკავშირდეს ხმის ინტერაქციის სერვისების ზედა დონის ინტერფეისთან. ჩვეულებრივ აპს ეს წესით არასოდეს უნდა დასჭირდეს."</string>
-    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
-    <skip />
-    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
-    <skip />
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ხმოვანი საიდუმლო ფრაზების მართვა"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"საშუალებას აძლევს მფლობელს მართოს საიდუმლო ფრაზები ხმოვანი ჯადოსნური სიტყვის ამოცნობისათვის. ეს ჩვეულებრივ აპებს არ უნდა დაჭირდეს."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"დისტანციურ მონიტორზე მიბმა"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"მფლობელს შეეძლება მიებას დისტანციურ მონიტორის ზედა დონის ინტერფეისს. ჩვეულებრივ აპს ეს წესით არასოდეს უნდა დაჭირდეს."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ვიჯეტ სერვისთან დაკავშირება"</string>
@@ -1365,6 +1362,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"საშუალებას აძლევს აპლიკაციას მოუსმინოს ცვლილებებს სანდო მდგომარეობაში."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"სანდო აგენტის წარმოდგენა."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"საშუალებას აძლევს აპლიკაციას წარმოადგინოს სანდო აგენტი."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"სანდო აგენტის სერვისზე მიმაგრება."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"საშუალებას აძლევს აპლიკაციას მიემაგროს სანდო აგენტის სერვისს."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"განახლებასთან და აღდგენის სისტემასთან ინტერაქცია"</string>

@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"개인 앱"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"요금이 부과될 수 있는 작업을 수행할 수 있도록 합니다."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"메시지"</string>
@@ -1363,6 +1362,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"애플리케이션이 Trust 상태에서의 변경사항을 수신할 수 있도록 허용합니다."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust Agent 제공"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"애플리케이션이 Trust Agent를 제공할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Trust Agent 서비스에 연결"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>

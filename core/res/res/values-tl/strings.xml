@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Mga personal na app"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Mga serbisyong ginagastusan mo"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gumawa ng mga bagay na magpapagastos sa iyo."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Iyong mga mensahe"</string>
@@ -1363,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Pinapayagan ang isang application na makinig para sa mga pagbabago sa estado ng trust."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Magbigay ng trust agent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Pinapayagan ang isang application na magbigay ng trust agent."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Ilunsad ang menu ng mga setting ng trust agent."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Nagbibigay-daan sa isang application na maglunsad ng aktibidad na nagbabago sa pagkilos ng trust agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Sumailalim sa isang serbisyo ng trust agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>

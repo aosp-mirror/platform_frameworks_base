@@ -1362,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"ឲ្យ​កម្មវិធី​ស្ដាប់​ការ​ផ្លាស់ប្ដូរ​ក្នុង​ស្ថានភាព​ដែល​​ទុកចិត្ត។"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ផ្ដល់​ភ្នាក់ងារ​ដែល​ទុកចិត្ត។"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ឲ្យ​កម្មវិធី​ផ្ដល់​ភ្នាក់ងារ​ដែល​ទុកចិត្ត។"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"ចាប់ផ្ដើម​ម៉ឺនុយ​ការ​កំណត់​ភ្នាក់ងារ​ជឿ​ទុកចិត្ត។"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​ចាប់ផ្ដើម​សកម្ម​​ដែល​ផ្លាស់​ប្ដូរ​ឥរិយា​បថ​​ភ្នាក់ងារ​ជឿ​ទុកចិត្ត​​។"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ភ្ជាប់​ទៅ​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុកចិត្ត"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ឲ្យ​កម្មវិធី​ភ្ជាប់​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"អន្តរកម្ម​ជា​មួយ​បច្ចុប្បន្នភាព និង​ប្រព័ន្ធ​សង្គ្រោះ"</string>

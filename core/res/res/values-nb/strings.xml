@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Personlige apper"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Betaltjenester"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gjøre ting som kan koste deg penger."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Meldinger"</string>
@@ -1363,6 +1362,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Gir appen tillatelse til å oppdage endringer i tillitsstatusen."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Angivelse av en pålitelig agent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillater appen å angi en pålitelig agent."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Start innstillingsmenyen til tillitsagenten."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Tillater apper å starte en aktivitet som endrer atferden til tillitsagenter."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Tilknytt en tillitsagent-tjeneste."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en tillitsagent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Samhandling med oppdateringer og gjenopprettingssystem"</string>

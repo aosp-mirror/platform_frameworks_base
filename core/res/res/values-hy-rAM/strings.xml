@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Անվտանգ ռեժիմ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Անձնական ​​ծրագրեր"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Ծառայություններ, որոնց համար կգանձվեք"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Կատարել գործողություններ, որի դիմաց ձեր հաշվից գումար կծախսվի:"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ձեր հաղորդագրությունները"</string>
@@ -401,10 +400,8 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Թույլ է տալիս սեփականատիրոջը միանալ պաստառի վերին մակարդակի ինտերֆեյսին: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"կապվել ձայնային փոխազդիչին"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Թույլ է տալիս սեփականատիրոջը միանալ ձայնային փոխազդիչի բազային միջերեսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
-    <!-- no translation found for permlab_manageVoiceKeyphrases (1252285102392793548) -->
-    <skip />
-    <!-- no translation found for permdesc_manageVoiceKeyphrases (8476560722907530008) -->
-    <skip />
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"կառավարել ձայնային բանալի բառակապակցությունները"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Սեփականատիրոջը թույլ է տալիս կառավարել բանալի բառակապակցությունները՝ ձայնային թեժ բառերի հայտնաբերման համար: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"միանալ հեռակա էկրանին"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Թույլ է տալիս սեփականատիրոջը միանալ հեռակա էկրանի վերին մակարդակի ինտերֆեյսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"միանալ վիջեթ ծառայությանը"</string>
@@ -1365,6 +1362,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ծրագրին թույլ է տալիս լսել վստահության կարգավիճակի փոփոխությունները:"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Տրամադրել վստահելի գործակալ:"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ծրագրին թույլ է տալիս տրամադրել վստահելի գործակալ:"</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Կապվել վստահելի գործակալի ծառայությանը"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ծրագրին թույլ է տալիս կապվել վստահելի գործակալի ծառայությանը:"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Փոխազդել թարմացման և վերականգնման համակարգի հետ"</string>
