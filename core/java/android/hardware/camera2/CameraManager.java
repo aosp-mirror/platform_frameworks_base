@@ -19,8 +19,10 @@ package android.hardware.camera2;
 import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
+import android.hardware.CameraInfo;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.legacy.CameraDeviceUserShim;
+import android.hardware.camera2.legacy.LegacyMetadataMapper;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.BinderHolder;
@@ -56,6 +58,10 @@ public final class CameraManager {
      */
     private static final String CAMERA_SERVICE_BINDER_NAME = "media.camera";
     private static final int USE_CALLING_UID = -1;
+
+    @SuppressWarnings("unused")
+    private static final int API_VERSION_1 = 1;
+    private static final int API_VERSION_2 = 2;
 
     private final ICameraService mCameraService;
     private ArrayList<String> mDeviceIdList;
@@ -142,6 +148,9 @@ public final class CameraManager {
 
         synchronized (mLock) {
             mListenerMap.put(listener, handler);
+
+            // TODO: fire the current oldest known state when adding a new listener
+            //    (must be done while holding lock)
         }
     }
 
@@ -185,16 +194,46 @@ public final class CameraManager {
             }
         }
 
-        CameraMetadataNative info = new CameraMetadataNative();
-        try {
-            mCameraService.getCameraCharacteristics(Integer.valueOf(cameraId), info);
-        } catch(CameraRuntimeException e) {
-            throw e.asChecked();
-        } catch(RemoteException e) {
-            // impossible
-            return null;
+        int id = Integer.valueOf(cameraId);
+
+        /*
+         * Get the camera characteristics from the camera service directly if it supports it,
+         * otherwise get them from the legacy shim instead.
+         */
+
+        if (!supportsCamera2Api(cameraId)) {
+            // Legacy backwards compatibility path; build static info from the camera parameters
+            String[] outParameters = new String[1];
+            try {
+                mCameraService.getLegacyParameters(id, /*out*/outParameters);
+                String parameters = outParameters[0];
+
+                CameraInfo info = new CameraInfo();
+                mCameraService.getCameraInfo(id, /*out*/info);
+
+                return LegacyMetadataMapper.createCharacteristics(parameters, info);
+            } catch (RemoteException e) {
+                // Impossible
+                return null;
+            } catch (CameraRuntimeException e) {
+                throw e.asChecked();
+            }
+
+        } else {
+            // Normal path: Get the camera characteristics directly from the camera service
+            CameraMetadataNative info = new CameraMetadataNative();
+
+            try {
+                mCameraService.getCameraCharacteristics(id, info);
+            } catch(CameraRuntimeException e) {
+                throw e.asChecked();
+            } catch(RemoteException e) {
+                // impossible
+                return null;
+            }
+
+            return new CameraCharacteristics(info);
         }
-        return new CameraCharacteristics(info);
     }
 
     /**
@@ -453,6 +492,53 @@ public final class CameraManager {
                 break;
             default:
                 throw new IllegalStateException(msg, e.asChecked());
+        }
+    }
+
+    /**
+     * Queries the camera service if it supports the camera2 api directly, or needs a shim.
+     *
+     * @param cameraId a non-{@code null} camera identifier
+     * @return {@code false} if the legacy shim needs to be used, {@code true} otherwise.
+     */
+    private boolean supportsCamera2Api(String cameraId) {
+        return supportsCameraApi(cameraId, API_VERSION_2);
+    }
+
+    /**
+     * Queries the camera service if it supports a camera api directly, or needs a shim.
+     *
+     * @param cameraId a non-{@code null} camera identifier
+     * @param apiVersion the version, i.e. {@code API_VERSION_1} or {@code API_VERSION_2}
+     * @return {@code true} if connecting will work for that device version.
+     */
+    private boolean supportsCameraApi(String cameraId, int apiVersion) {
+        int id = Integer.parseInt(cameraId);
+
+        /*
+         * Possible return values:
+         * - NO_ERROR => Camera2 API is supported
+         * - CAMERA_DEPRECATED_HAL => Camera2 API is *not* supported (thrown as an exception)
+         *
+         * Anything else is an unexpected error we don't want to recover from.
+         */
+
+        try {
+            int res = mCameraService.supportsCameraApi(id, apiVersion);
+
+            if (res != CameraBinderDecorator.NO_ERROR) {
+                throw new AssertionError("Unexpected value " + res);
+            }
+
+            return true;
+        } catch (CameraRuntimeException e) {
+            if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
+                return false;
+            } else {
+                throw e;
+            }
+        } catch (RemoteException e) {
+            throw new AssertionError("Camera service unreachable", e);
         }
     }
 

@@ -69,4 +69,9 @@ interface ICameraService
      * well-formatted in the generated java method.
      */
     int getCameraVendorTagDescriptor(out BinderHolder desc);
+
+    // Writes the camera1 parameters into a single-element array.
+    int getLegacyParameters(int cameraId, out String[] parameters);
+    // Determines if a particular API version is supported; see ICameraService.h for version defines
+    int supportsCameraApi(int cameraId, int apiVersion);
 }

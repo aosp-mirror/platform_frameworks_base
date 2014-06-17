@@ -47,6 +47,8 @@ public class CameraBinderDecorator {
      * - POLICY_PROHIBITS
      * - RESOURCE_BUSY
      * - NO_SUCH_DEVICE
+     * - NOT_SUPPORTED
+     * - TOO_MANY_USERS
      */
     public static final int EACCES = -13;
     public static final int EBUSY = -16;

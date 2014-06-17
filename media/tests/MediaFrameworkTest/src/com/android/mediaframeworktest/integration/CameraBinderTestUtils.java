@@ -22,6 +22,7 @@ public class CameraBinderTestUtils {
     protected static final int INVALID_OPERATION = -38;
     protected static final int ALREADY_EXISTS = -17;
     public static final int NO_ERROR = 0;
+    public static final int EOPNOTSUPP = -95;
     private final Context mContext;
 
     public CameraBinderTestUtils(Context context) {
