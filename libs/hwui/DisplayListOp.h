@@ -1118,8 +1118,8 @@ public:
             const DeferredDisplayState& state) {
         DrawStrokableOp::onDefer(renderer, deferInfo, state);
         if (!mPaint->getPathEffect()) {
-            renderer.getCaches().tessellationCache.precacheRoundRect(state.mMatrix,
-                    mLocalBounds.getWidth(), mLocalBounds.getHeight(), mRx, mRy, mPaint);
+            renderer.getCaches().tessellationCache.precacheRoundRect(state.mMatrix, *mPaint,
+                    mLocalBounds.getWidth(), mLocalBounds.getHeight(), mRx, mRy);
         }
     }
 
