@@ -19,6 +19,7 @@ package com.android.internal.backup;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
+import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.ComponentName;
 import android.content.Context;
@@ -63,18 +64,24 @@ public class LocalTransport extends BackupTransport {
     private static final String TRANSPORT_DESTINATION_STRING
             = "Backing up to debug-only private cache";
 
+    private static final String INCREMENTAL_DIR = "_delta";
+    private static final String FULL_DATA_DIR = "_full";
+
     // The currently-active restore set always has the same (nonzero!) token
     private static final long CURRENT_SET_TOKEN = 1;
 
     private Context mContext;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
     private File mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
-    private File mCurrentSetIncrementalDir = new File(mCurrentSetDir, "_delta");
-    private File mCurrentSetFullDir = new File(mCurrentSetDir, "_full");
+    private File mCurrentSetIncrementalDir = new File(mCurrentSetDir, INCREMENTAL_DIR);
+    private File mCurrentSetFullDir = new File(mCurrentSetDir, FULL_DATA_DIR);
 
     private PackageInfo[] mRestorePackages = null;
     private int mRestorePackage = -1;  // Index into mRestorePackages
-    private File mRestoreDataDir;
+    private int mRestoreType;
+    private File mRestoreSetDir;
+    private File mRestoreSetIncrementalDir;
+    private File mRestoreSetFullDir;
     private long mRestoreToken;
 
     // Additional bookkeeping for full backup
@@ -361,30 +368,55 @@ public class LocalTransport extends BackupTransport {
         mRestorePackages = packages;
         mRestorePackage = -1;
         mRestoreToken = token;
-        mRestoreDataDir = new File(mDataDir, Long.toString(token));
+        mRestoreSetDir = new File(mDataDir, Long.toString(token));
+        mRestoreSetIncrementalDir = new File(mRestoreSetDir, INCREMENTAL_DIR);
+        mRestoreSetFullDir = new File(mRestoreSetDir, FULL_DATA_DIR);
         return BackupTransport.TRANSPORT_OK;
     }
 
-    public String nextRestorePackage() {
+    @Override
+    public RestoreDescription nextRestorePackage() {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
+
+        boolean found = false;
         while (++mRestorePackage < mRestorePackages.length) {
             String name = mRestorePackages[mRestorePackage].packageName;
+
+            // If we have key/value data for this package, deliver that
             // skip packages where we have a data dir but no actual contents
-            String[] contents = (new File(mRestoreDataDir, name)).list();
+            String[] contents = (new File(mRestoreSetIncrementalDir, name)).list();
             if (contents != null && contents.length > 0) {
-                if (DEBUG) Log.v(TAG, "  nextRestorePackage() = " + name);
-                return name;
+                if (DEBUG) Log.v(TAG, "  nextRestorePackage(TYPE_KEY_VALUE) = " + name);
+                mRestoreType = RestoreDescription.TYPE_KEY_VALUE;
+                found = true;
+            }
+
+            if (!found) {
+                // No key/value data; check for [non-empty] full data
+                File maybeFullData = new File(mRestoreSetFullDir, name);
+                if (maybeFullData.length() > 0) {
+                    if (DEBUG) Log.v(TAG, "  nextRestorePackage(TYPE_FULL_STREAM) = " + name);
+                    mRestoreType = RestoreDescription.TYPE_FULL_STREAM;
+                    found = true;
+                }
+            }
+
+            if (found) {
+                return new RestoreDescription(name, mRestoreType);
             }
         }
 
         if (DEBUG) Log.v(TAG, "  no more packages to restore");
-        return "";
+        return RestoreDescription.NO_MORE_PACKAGES;
     }
 
     public int getRestoreData(ParcelFileDescriptor outFd) {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
         if (mRestorePackage < 0) throw new IllegalStateException("nextRestorePackage not called");
-        File packageDir = new File(mRestoreDataDir, mRestorePackages[mRestorePackage].packageName);
+        if (mRestoreType != RestoreDescription.TYPE_KEY_VALUE) {
+            throw new IllegalStateException("getRestoreData(fd) for non-key/value dataset");
+        }
+        File packageDir = new File(mRestoreSetDir, mRestorePackages[mRestorePackage].packageName);
 
         // The restore set is the concatenation of the individual record blobs,
         // each of which is a file in the package's directory.  We return the
@@ -463,8 +495,8 @@ public class LocalTransport extends BackupTransport {
     // Full restore handling
 
     public int prepareFullRestore(long token, String[] targetPackages) {
-        mRestoreDataDir = new File(mDataDir, Long.toString(token));
-        mFullRestoreSetDir = new File(mRestoreDataDir, "_full");
+        mRestoreSetDir = new File(mDataDir, Long.toString(token));
+        mFullRestoreSetDir = new File(mRestoreSetDir, FULL_DATA_DIR);
         mFullRestorePackages = new HashSet<String>();
         if (mFullRestoreSetDir.exists()) {
             List<String> pkgs = Arrays.asList(mFullRestoreSetDir.list());
