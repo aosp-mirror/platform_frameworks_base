@@ -19,7 +19,7 @@ package android.net;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 
-import android.net.LinkAddress;
+import android.net.IpPrefix;
 import android.net.RouteInfo;
 import android.os.Parcel;
 
@@ -32,9 +32,8 @@ public class RouteInfoTest extends TestCase {
         return InetAddress.parseNumericAddress(addr);
     }
 
-    private LinkAddress Prefix(String prefix) {
-        String[] parts = prefix.split("/");
-        return new LinkAddress(Address(parts[0]), Integer.parseInt(parts[1]));
+    private IpPrefix Prefix(String prefix) {
+        return new IpPrefix(prefix);
     }
 
     @SmallTest
@@ -43,17 +42,17 @@ public class RouteInfoTest extends TestCase {
 
         // Invalid input.
         try {
-            r = new RouteInfo((LinkAddress) null, null, "rmnet0");
+            r = new RouteInfo((IpPrefix) null, null, "rmnet0");
             fail("Expected RuntimeException:  destination and gateway null");
         } catch(RuntimeException e) {}
 
         // Null destination is default route.
-        r = new RouteInfo((LinkAddress) null, Address("2001:db8::1"), null);
+        r = new RouteInfo((IpPrefix) null, Address("2001:db8::1"), null);
         assertEquals(Prefix("::/0"), r.getDestination());
         assertEquals(Address("2001:db8::1"), r.getGateway());
         assertNull(r.getInterface());
 
-        r = new RouteInfo((LinkAddress) null, Address("192.0.2.1"), "wlan0");
+        r = new RouteInfo((IpPrefix) null, Address("192.0.2.1"), "wlan0");
         assertEquals(Prefix("0.0.0.0/0"), r.getDestination());
         assertEquals(Address("192.0.2.1"), r.getGateway());
         assertEquals("wlan0", r.getInterface());
@@ -74,7 +73,7 @@ public class RouteInfoTest extends TestCase {
         class PatchedRouteInfo {
             private final RouteInfo mRouteInfo;
 
-            public PatchedRouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
+            public PatchedRouteInfo(IpPrefix destination, InetAddress gateway, String iface) {
                 mRouteInfo = new RouteInfo(destination, gateway, iface);
             }
 

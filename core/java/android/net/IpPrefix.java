@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Pair;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -46,9 +47,18 @@ public final class IpPrefix implements Parcelable {
     private final byte[] address;  // network byte order
     private final int prefixLength;
 
+    private void checkAndMaskAddressAndPrefixLength() {
+        if (address.length != 4 && address.length != 16) {
+            throw new IllegalArgumentException(
+                    "IpPrefix has " + address.length + " bytes which is neither 4 nor 16");
+        }
+        NetworkUtils.maskRawAddress(address, prefixLength);
+    }
+
     /**
      * Constructs a new {@code IpPrefix} from a byte array containing an IPv4 or IPv6 address in
-     * network byte order and a prefix length.
+     * network byte order and a prefix length. Silently truncates the address to the prefix length,
+     * so for example {@code 192.0.2.1/24} is silently converted to {@code 192.0.2.0/24}.
      *
      * @param address the IP address. Must be non-null and exactly 4 or 16 bytes long.
      * @param prefixLength the prefix length. Must be &gt;= 0 and &lt;= (32 or 128) (IPv4 or IPv6).
@@ -56,24 +66,46 @@ public final class IpPrefix implements Parcelable {
      * @hide
      */
     public IpPrefix(byte[] address, int prefixLength) {
-        if (address.length != 4 && address.length != 16) {
-            throw new IllegalArgumentException(
-                    "IpPrefix has " + address.length + " bytes which is neither 4 nor 16");
-        }
-        if (prefixLength < 0 || prefixLength > (address.length * 8)) {
-            throw new IllegalArgumentException("IpPrefix with " + address.length +
-                    " bytes has invalid prefix length " + prefixLength);
-        }
         this.address = address.clone();
         this.prefixLength = prefixLength;
-        // TODO: Validate that the non-prefix bits are zero
+        checkAndMaskAddressAndPrefixLength();
     }
 
     /**
+     * Constructs a new {@code IpPrefix} from an IPv4 or IPv6 address and a prefix length. Silently
+     * truncates the address to the prefix length, so for example {@code 192.0.2.1/24} is silently
+     * converted to {@code 192.0.2.0/24}.
+     *
+     * @param address the IP address. Must be non-null.
+     * @param prefixLength the prefix length. Must be &gt;= 0 and &lt;= (32 or 128) (IPv4 or IPv6).
      * @hide
      */
     public IpPrefix(InetAddress address, int prefixLength) {
-        this(address.getAddress(), prefixLength);
+        // We don't reuse the (byte[], int) constructor because it calls clone() on the byte array,
+        // which is unnecessary because getAddress() already returns a clone.
+        this.address = address.getAddress();
+        this.prefixLength = prefixLength;
+        checkAndMaskAddressAndPrefixLength();
+    }
+
+    /**
+     * Constructs a new IpPrefix from a string such as "192.0.2.1/24" or "2001:db8::1/64".
+     * Silently truncates the address to the prefix length, so for example {@code 192.0.2.1/24}
+     * is silently converted to {@code 192.0.2.0/24}.
+     *
+     * @param prefix the prefix to parse
+     *
+     * @hide
+     */
+    public IpPrefix(String prefix) {
+        // We don't reuse the (InetAddress, int) constructor because "error: call to this must be
+        // first statement in constructor". We could factor out setting the member variables to an
+        // init() method, but if we did, then we'd have to make the members non-final, or "error:
+        // cannot assign a value to final variable address". So we just duplicate the code here.
+        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(prefix);
+        this.address = ipAndMask.first.getAddress();
+        this.prefixLength = ipAndMask.second;
+        checkAndMaskAddressAndPrefixLength();
     }
 
     /**
@@ -129,12 +161,26 @@ public final class IpPrefix implements Parcelable {
     }
 
     /**
-     * Returns the prefix length of this {@code IpAddress}.
+     * Returns the prefix length of this {@code IpPrefix}.
      *
      * @return the prefix length.
      */
     public int getPrefixLength() {
         return prefixLength;
+    }
+
+    /**
+     * Returns a string representation of this {@code IpPrefix}.
+     *
+     * @return a string such as {@code "192.0.2.0/24"} or {@code "2001:db8:1:2::"}.
+     */
+    public String toString() {
+        try {
+            return InetAddress.getByAddress(address).getHostAddress() + "/" + prefixLength;
+        } catch(UnknownHostException e) {
+            // Cosmic rays?
+            throw new IllegalStateException("IpPrefix with invalid address! Shouldn't happen.", e);
+        }
     }
 
     /**
