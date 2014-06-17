@@ -148,6 +148,12 @@ public class GLThreadManager {
         Handler handler = mGLHandlerThread.getHandler();
         handler.sendMessageAtFrontOfQueue(handler.obtainMessage(MSG_CLEANUP));
         mGLHandlerThread.quitSafely();
+        try {
+            mGLHandlerThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, String.format("Thread %s (%d) interrupted while quitting.",
+                    mGLHandlerThread.getName(), mGLHandlerThread.getId()));
+        }
     }
 
     /**

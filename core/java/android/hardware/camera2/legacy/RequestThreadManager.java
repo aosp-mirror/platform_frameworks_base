@@ -20,6 +20,7 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.os.ConditionVariable;
@@ -28,12 +29,15 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.view.Surface;
 
 import java.io.IOError;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -64,6 +68,7 @@ public class RequestThreadManager {
     private static final int PREVIEW_FRAME_TIMEOUT = 300; // ms
     private static final int JPEG_FRAME_TIMEOUT = 1000; // ms
 
+    private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
     private boolean mPreviewRunning = false;
 
     private volatile RequestHolder mInFlightPreview;
@@ -73,6 +78,8 @@ public class RequestThreadManager {
     private List<Surface> mCallbackOutputs = new ArrayList<Surface>();
     private GLThreadManager mGLThreadManager;
     private SurfaceTexture mPreviewTexture;
+
+    private Size mIntermediateBufferSize;
 
     private final RequestQueue mRequestQueue = new RequestQueue();
     private SurfaceTexture mDummyTexture;
@@ -90,6 +97,31 @@ public class RequestThreadManager {
         public ConfigureHolder(ConditionVariable condition, Collection<Surface> surfaces) {
             this.condition = condition;
             this.surfaces = surfaces;
+        }
+    }
+
+
+    /**
+     * Comparator for {@link Size} objects.
+     *
+     * <p>This comparator compares by rectangle area.  Tiebreaks on width.</p>
+     */
+    private static class SizeComparator implements Comparator<Size> {
+        @Override
+        public int compare(Size size, Size size2) {
+            if (size == null || size2 == null) {
+                throw new NullPointerException("Null argument passed to compare");
+            }
+            if (size.equals(size2)) return 0;
+            long width = size.getWidth();
+            long width2 = size2.getWidth();
+            long area = width * size.getHeight();
+            long area2 = width2 * size2.getHeight();
+            if (area == area2) {
+                return (width > width2) ? 1 : -1;
+            }
+            return (area > area2) ? 1 : -1;
+
         }
     }
 
@@ -230,7 +262,13 @@ public class RequestThreadManager {
             return; // Already running
         }
 
-        mPreviewTexture.setDefaultBufferSize(640, 480); // TODO: size selection based on request
+        if (mPreviewTexture == null) {
+            throw new IllegalStateException(
+                    "Preview capture called with no preview surfaces configured.");
+        }
+
+        mPreviewTexture.setDefaultBufferSize(mIntermediateBufferSize.getWidth(),
+                mIntermediateBufferSize.getHeight());
         mCamera.setPreviewTexture(mPreviewTexture);
         Camera.Parameters params = mCamera.getParameters();
         List<int[]> supportedFpsRanges = params.getSupportedPreviewFpsRange();
@@ -248,6 +286,7 @@ public class RequestThreadManager {
         startPreview();
     }
 
+
     private void configureOutputs(Collection<Surface> outputs) throws IOException {
         stopPreview();
         if (mGLThreadManager != null) {
@@ -261,6 +300,7 @@ public class RequestThreadManager {
         mInFlightPreview = null;
         mInFlightJpeg = null;
 
+
         for (Surface s : outputs) {
             int format = LegacyCameraDevice.nativeDetectSurfaceType(s);
             switch (format) {
@@ -273,6 +313,52 @@ public class RequestThreadManager {
             }
         }
 
+        if (mPreviewOutputs.size() > 0) {
+            List<Size> outputSizes = new ArrayList<>(outputs.size());
+            for (Surface s : mPreviewOutputs) {
+                int[] dimens = {0, 0};
+                LegacyCameraDevice.nativeDetectSurfaceDimens(s, dimens);
+                outputSizes.add(new Size(dimens[0], dimens[1]));
+            }
+
+            Size largestOutput = findLargestByArea(outputSizes);
+
+            Camera.Parameters params = mCamera.getParameters();
+
+            // Find largest jpeg dimension - assume to have the same aspect ratio as sensor.
+            List<Size> supportedJpegSizes = convertSizeList(params.getSupportedPictureSizes());
+            Size largestJpegDimen = findLargestByArea(supportedJpegSizes);
+
+            List<Size> supportedPreviewSizes = convertSizeList(params.getSupportedPreviewSizes());
+
+            // Use smallest preview dimension with same aspect ratio as sensor that is >= than all
+            // of the configured output dimensions.  If none exists, fall back to using the largest
+            // supported preview size.
+            long largestOutputArea = largestOutput.getHeight() * (long) largestOutput.getWidth();
+            Size bestPreviewDimen = findLargestByArea(supportedPreviewSizes);
+            for (Size s : supportedPreviewSizes) {
+                long currArea = s.getWidth() * s.getHeight();
+                long bestArea = bestPreviewDimen.getWidth() * bestPreviewDimen.getHeight();
+                if (checkAspectRatiosMatch(largestJpegDimen, s) && (currArea < bestArea &&
+                        currArea >= largestOutputArea)) {
+                    bestPreviewDimen = s;
+                }
+            }
+
+            mIntermediateBufferSize = bestPreviewDimen;
+            if (DEBUG) {
+                Log.d(TAG, "Intermediate buffer selected with dimens: " +
+                        bestPreviewDimen.toString());
+            }
+        } else {
+            mIntermediateBufferSize = null;
+            if (DEBUG) {
+                Log.d(TAG, "No Intermediate buffer selected, no preview outputs were configured");
+            }
+        }
+
+
+
         // TODO: Detect and optimize single-output paths here to skip stream teeing.
         if (mGLThreadManager == null) {
             mGLThreadManager = new GLThreadManager(mCameraId);
@@ -282,7 +368,28 @@ public class RequestThreadManager {
         mGLThreadManager.setConfigurationAndWait(mPreviewOutputs);
         mGLThreadManager.allowNewFrames();
         mPreviewTexture = mGLThreadManager.getCurrentSurfaceTexture();
-        mPreviewTexture.setOnFrameAvailableListener(mPreviewCallback);
+        if (mPreviewTexture != null) {
+            mPreviewTexture.setOnFrameAvailableListener(mPreviewCallback);
+        }
+    }
+
+    private static Size findLargestByArea(List<Size> sizes) {
+        return Collections.max(sizes, new SizeComparator());
+    }
+
+    private static boolean checkAspectRatiosMatch(Size a, Size b) {
+        float aAspect = a.getWidth() / (float) a.getHeight();
+        float bAspect = b.getWidth() / (float) b.getHeight();
+
+        return Math.abs(aAspect - bAspect) < ASPECT_RATIO_TOLERANCE;
+    }
+
+    private static List<Size> convertSizeList(List<Camera.Size> sizeList) {
+        List<Size> sizes = new ArrayList<>(sizeList.size());
+        for (Camera.Size s : sizeList) {
+            sizes.add(new Size(s.width, s.height));
+        }
+        return sizes;
     }
 
     // Calculate the highest FPS range supported
@@ -376,8 +483,10 @@ public class RequestThreadManager {
                             // TODO: err handling
                             throw new IOError(e);
                         }
-                        // TODO: Set fields in result.
-                        mDeviceState.setCaptureResult(holder, new CameraMetadataNative());
+                        Camera.Parameters params = mCamera.getParameters();
+                        CameraMetadataNative result = convertResultMetadata(params,
+                                holder.getRequest());
+                        mDeviceState.setCaptureResult(holder, result);
                     }
                     break;
                 case MSG_CLEANUP:
@@ -396,6 +505,15 @@ public class RequestThreadManager {
             return true;
         }
     };
+
+    private CameraMetadataNative convertResultMetadata(Camera.Parameters params,
+                                                       CaptureRequest request) {
+        CameraMetadataNative result = new CameraMetadataNative();
+        result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
+
+        // TODO: Remaining result metadata tags conversions.
+        return result;
+    }
 
     /**
      * Create a new RequestThreadManager.
@@ -437,6 +555,12 @@ public class RequestThreadManager {
         Handler handler = mRequestThread.waitAndGetHandler();
         handler.sendMessageAtFrontOfQueue(handler.obtainMessage(MSG_CLEANUP));
         mRequestThread.quitSafely();
+        try {
+            mRequestThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, String.format("Thread %s (%d) interrupted while quitting.",
+                    mRequestThread.getName(), mRequestThread.getId()));
+        }
     }
 
     /**
