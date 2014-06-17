@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2014 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
@@ -98,14 +98,14 @@ public class SurfaceTextureRenderer {
      */
     private static final String VERTEX_SHADER =
             "uniform mat4 uMVPMatrix;\n" +
-                    "uniform mat4 uSTMatrix;\n" +
-                    "attribute vec4 aPosition;\n" +
-                    "attribute vec4 aTextureCoord;\n" +
-                    "varying vec2 vTextureCoord;\n" +
-                    "void main() {\n" +
-                    "  gl_Position = uMVPMatrix * aPosition;\n" +
-                    "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
-                    "}\n";
+            "uniform mat4 uSTMatrix;\n" +
+            "attribute vec4 aPosition;\n" +
+            "attribute vec4 aTextureCoord;\n" +
+            "varying vec2 vTextureCoord;\n" +
+            "void main() {\n" +
+            "  gl_Position = uMVPMatrix * aPosition;\n" +
+            "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
+            "}\n";
 
     /**
      * This fragment shader simply draws the color in the 2D texture at
@@ -113,12 +113,12 @@ public class SurfaceTextureRenderer {
      */
     private static final String FRAGMENT_SHADER =
             "#extension GL_OES_EGL_image_external : require\n" +
-                    "precision mediump float;\n" +
-                    "varying vec2 vTextureCoord;\n" +
-                    "uniform samplerExternalOES sTexture;\n" +
-                    "void main() {\n" +
-                    "  gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
-                    "}\n";
+            "precision mediump float;\n" +
+            "varying vec2 vTextureCoord;\n" +
+            "uniform samplerExternalOES sTexture;\n" +
+            "void main() {\n" +
+            "  gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
+            "}\n";
 
     private float[] mMVPMatrix = new float[GL_MATRIX_SIZE];
     private float[] mSTMatrix = new float[GL_MATRIX_SIZE];
@@ -189,12 +189,56 @@ public class SurfaceTextureRenderer {
         return program;
     }
 
-    private void drawFrame(SurfaceTexture st) {
+    private void drawFrame(SurfaceTexture st, int width, int height) {
         checkGlError("onDrawFrame start");
         st.getTransformMatrix(mSTMatrix);
 
+        Size dimens;
+        try {
+            dimens = LegacyCameraDevice.getTextureSize(st);
+        } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+            // Should never hit this.
+            throw new IllegalStateException("Surface abandoned, skipping drawFrame...", e);
+        }
+
+        Matrix.setIdentityM(mMVPMatrix, /*smOffset*/0);
+
+        float texWidth = dimens.getWidth();
+        float texHeight = dimens.getHeight();
+
+        if (texWidth <= 0 || texHeight <= 0) {
+            throw new IllegalStateException("Illegal intermediate texture with dimension of 0");
+        }
+
+        // Find largest scaling factor from the intermediate texture dimension to the
+        // output surface dimension.  Scaling the intermediate texture by this allows
+        // us to letterbox/pillerbox the output surface into the intermediate texture.
+        float widthRatio = width / texWidth;
+        float heightRatio = height / texHeight;
+        float actual = (widthRatio < heightRatio) ? heightRatio : widthRatio;
+
         if (DEBUG) {
-            GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            Log.d(TAG, "Scaling factor " + actual + " used for " + width + "x" + height +
+                    " surface, intermediate buffer size is " + texWidth + "x" + texHeight);
+        }
+
+        // Set the viewport height and width to be the scaled intermediate texture dimensions.
+        int viewportW = (int) (actual * texWidth);
+        int viewportH = (int) (actual * texHeight);
+
+        // Set the offset of the viewport so that the output surface is centered in the viewport.
+        float dx = (width - viewportW) / 2f;
+        float dy = (height - viewportH) / 2f;
+
+        if (DEBUG) {
+            Log.d(TAG, "Translation " + dx + "," + dy + " used for " + width + "x" + height +
+                    " surface");
+        }
+
+        GLES20.glViewport((int) dx, (int) dy, viewportW, viewportH);
+
+        if (DEBUG) {
+            GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         }
 
@@ -218,7 +262,6 @@ public class SurfaceTextureRenderer {
         GLES20.glEnableVertexAttribArray(maTextureHandle);
         checkGlError("glEnableVertexAttribArray maTextureHandle");
 
-        Matrix.setIdentityM(mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(muMVPMatrixHandle, /*count*/ 1, /*transpose*/ false, mMVPMatrix,
                 /*offset*/ 0);
         GLES20.glUniformMatrix4fv(muSTMatrixHandle, /*count*/ 1, /*transpose*/ false, mSTMatrix,
@@ -589,18 +632,19 @@ public class SurfaceTextureRenderer {
         for (EGLSurfaceHolder holder : mSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
-                drawFrame(mSurfaceTexture);
+                drawFrame(mSurfaceTexture, holder.width, holder.height);
                 swapBuffers(holder.eglSurface);
             }
         }
         for (EGLSurfaceHolder holder : mConversionSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
-                drawFrame(mSurfaceTexture);
+                drawFrame(mSurfaceTexture, holder.width, holder.height);
                 mPBufferPixels.clear();
-                GLES20.glReadPixels(/*x*/ 0, /*y*/ 0, holder.width, holder.height, GLES20.GL_RGBA,
-                        GLES20.GL_UNSIGNED_BYTE, mPBufferPixels);
+                GLES20.glReadPixels(/*x*/ 0, /*y*/ 0, holder.width, holder.height,
+                        GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mPBufferPixels);
                 checkGlError("glReadPixels");
+
                 try {
                     int format = LegacyCameraDevice.detectSurfaceType(holder.surface);
                     LegacyCameraDevice.produceFrame(holder.surface, mPBufferPixels.array(),

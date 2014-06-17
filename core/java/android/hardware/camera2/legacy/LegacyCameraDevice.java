@@ -17,6 +17,7 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
@@ -463,6 +464,24 @@ public class LegacyCameraDevice implements AutoCloseable {
         return ids.contains(id);
     }
 
+    static void setSurfaceOrientation(Surface surface, int facing, int sensorOrientation)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        LegacyExceptionUtils.throwOnError(nativeSetSurfaceOrientation(surface, facing,
+                sensorOrientation));
+    }
+
+    static Size getTextureSize(SurfaceTexture surfaceTexture)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surfaceTexture);
+
+        int[] dimens = new int[2];
+        LegacyExceptionUtils.throwOnError(nativeDetectTextureDimens(surfaceTexture,
+                /*out*/dimens));
+
+        return new Size(dimens[0], dimens[1]);
+    }
+
     private static native int nativeDetectSurfaceType(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
@@ -479,4 +498,11 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeSetSurfaceDimens(Surface surface, int width, int height);
 
     private static native long nativeGetSurfaceId(Surface surface);
+
+    private static native int nativeSetSurfaceOrientation(Surface surface, int facing,
+                                                             int sensorOrientation);
+
+    private static native int nativeDetectTextureDimens(SurfaceTexture surfaceTexture,
+            /*out*/int[/*2*/] dimens);
+
 }

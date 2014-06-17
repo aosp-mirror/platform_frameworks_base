@@ -292,10 +292,13 @@ public class RequestThreadManager {
         mInFlightPreview = null;
         mInFlightJpeg = null;
 
+        int facing = mCharacteristics.get(CameraCharacteristics.LENS_FACING);
+        int orientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
         if (outputs != null) {
             for (Surface s : outputs) {
                 try {
                     int format = LegacyCameraDevice.detectSurfaceType(s);
+                    LegacyCameraDevice.setSurfaceOrientation(s, facing, orientation);
                     switch (format) {
                         case CameraMetadataNative.NATIVE_JPEG_FORMAT:
                             mCallbackOutputs.add(s);

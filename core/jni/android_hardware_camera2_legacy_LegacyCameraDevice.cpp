@@ -19,17 +19,20 @@
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/Trace.h>
+#include <camera/CameraUtils.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
+#include "android_runtime/android_graphics_SurfaceTexture.h"
 
 #include <gui/Surface.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <ui/GraphicBuffer.h>
 #include <system/window.h>
 #include <hardware/camera3.h>
+#include <system/camera_metadata.h>
 
 #include <stdint.h>
 #include <inttypes.h>
@@ -335,6 +338,25 @@ static sp<ANativeWindow> getNativeWindow(JNIEnv* env, jobject surface) {
     return anw;
 }
 
+static sp<ANativeWindow> getNativeWindowFromTexture(JNIEnv* env, jobject surfaceTexture) {
+    sp<ANativeWindow> anw;
+    if (surfaceTexture) {
+        anw = android_SurfaceTexture_getNativeWindow(env, surfaceTexture);
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+    } else {
+        jniThrowNullPointerException(env, "surfaceTexture");
+        return NULL;
+    }
+    if (anw == NULL) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                "SurfaceTexture had no valid native window.");
+        return NULL;
+    }
+    return anw;
+}
+
 static sp<Surface> getSurface(JNIEnv* env, jobject surface) {
     sp<Surface> s;
     if (surface) {
@@ -376,6 +398,17 @@ static jint LegacyCameraDevice_nativeDetectSurfaceType(JNIEnv* env, jobject thiz
 static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject thiz,
           jobject surface, jintArray dimens) {
     ALOGV("nativeGetSurfaceDimens");
+
+    if (dimens == NULL) {
+        ALOGE("%s: Null dimens argument passed to nativeDetectSurfaceDimens", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    if (env->GetArrayLength(dimens) < 2) {
+        ALOGE("%s: Invalid length of dimens argument in nativeDetectSurfaceDimens", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
@@ -395,6 +428,37 @@ static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject th
         return err;
     }
     env->SetIntArrayRegion(dimens, /*start*/0, /*length*/ARRAY_SIZE(dimenBuf), dimenBuf);
+    return NO_ERROR;
+}
+
+static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject thiz,
+        jobject surfaceTexture, jintArray dimens) {
+    ALOGV("nativeDetectTextureDimens");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindowFromTexture(env, surfaceTexture)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from SurfaceTexture.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    int32_t dimenBuf[2];
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, dimenBuf);
+    if(err != NO_ERROR) {
+        ALOGE("%s: Error while querying SurfaceTexture width %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+
+    err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
+    if(err != NO_ERROR) {
+        ALOGE("%s: Error while querying SurfaceTexture height %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+
+    env->SetIntArrayRegion(dimens, /*start*/0, /*length*/ARRAY_SIZE(dimenBuf), dimenBuf);
+    if (env->ExceptionCheck()) {
+        return BAD_VALUE;
+    }
     return NO_ERROR;
 }
 
@@ -504,6 +568,42 @@ static jlong LegacyCameraDevice_nativeGetSurfaceId(JNIEnv* env, jobject thiz, jo
     return reinterpret_cast<jlong>(b.get());
 }
 
+static jint LegacyCameraDevice_nativeSetSurfaceOrientation(JNIEnv* env, jobject thiz,
+        jobject surface, jint facing, jint orientation) {
+    ALOGV("nativeSetSurfaceOrientation");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    status_t err = NO_ERROR;
+    CameraMetadata staticMetadata;
+
+    int32_t orientVal = static_cast<int32_t>(orientation);
+    uint8_t facingVal = static_cast<uint8_t>(facing);
+    staticMetadata.update(ANDROID_SENSOR_ORIENTATION, &orientVal, 1);
+    staticMetadata.update(ANDROID_LENS_FACING, &facingVal, 1);
+
+    int32_t transform = 0;
+
+    if ((err = CameraUtils::getRotationTransform(staticMetadata, /*out*/&transform)) != OK) {
+        ALOGE("%s: Invalid rotation transform %s (%d)", __FUNCTION__, strerror(-err),
+                err);
+        return err;
+    }
+
+    ALOGV("%s: Setting buffer sticky transform to %d", __FUNCTION__, transform);
+
+    if ((err = native_window_set_buffers_sticky_transform(anw.get(), transform)) != OK) {
+        ALOGE("%s: Unable to configure surface transform, error %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+
+    return NO_ERROR;
+}
+
 } // extern "C"
 
 static JNINativeMethod gCameraDeviceMethods[] = {
@@ -528,6 +628,12 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeGetSurfaceId",
     "(Landroid/view/Surface;)J",
     (void *)LegacyCameraDevice_nativeGetSurfaceId },
+    { "nativeDetectTextureDimens",
+    "(Landroid/graphics/SurfaceTexture;[I)I",
+    (void *)LegacyCameraDevice_nativeDetectTextureDimens },
+    { "nativeSetSurfaceOrientation",
+    "(Landroid/view/Surface;II)I",
+    (void *)LegacyCameraDevice_nativeSetSurfaceOrientation },
 };
 
 // Get all the required offsets in java class and register native functions
