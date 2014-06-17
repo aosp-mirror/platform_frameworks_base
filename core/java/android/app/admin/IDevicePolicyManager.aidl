@@ -115,8 +115,8 @@ interface IDevicePolicyManager {
     String getProfileOwnerName(int userHandle);
     void setProfileEnabled(in ComponentName who);
 
-    boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
-    void uninstallCaCert(in ComponentName admin, in String alias);
+    boolean installCaCert(in byte[] certBuffer);
+    void uninstallCaCert(in byte[] certBuffer);
 
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
