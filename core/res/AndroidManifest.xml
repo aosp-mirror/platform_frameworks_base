@@ -636,6 +636,13 @@
         android:label="@string/permlab_addVoicemail"
         android:description="@string/permdesc_addVoicemail" />
 
+    <!-- Allows an application to read all the voicemails in the system. -->
+    <permission android:name="com.android.voicemail.permission.READ_ALL_VOICEMAIL"
+        android:permissionGroup="android.permission-group.VOICEMAIL"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readAllVoicemail"
+        android:description="@string/permdesc_readAllVoicemail" />
+
     <!-- =============================================== -->
     <!-- Permissions for enabling accessibility features -->
     <!-- =============================================== -->

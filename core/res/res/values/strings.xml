@@ -2965,6 +2965,13 @@
       to your voicemail inbox.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_readAllVoicemail">read all voicemail</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_readAllVoicemail">Allows the app to read all your voicemails.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_writeGeolocationPermissions">modify Browser geolocation permissions</string>
     <!-- Description of an application permission, listed so the user can choose whether
