@@ -228,19 +228,35 @@ public class BackupTransport {
     }
 
     /**
-     * Get the package name of the next application with data in the backup store.
+     * Get the package name of the next application with data in the backup store, plus
+     * a description of the structure of the restored archive: either TYPE_KEY_VALUE for
+     * an original-API key/value dataset, or TYPE_FULL_STREAM for a tarball-type archive stream.
      *
-     * @return The name of one of the packages supplied to {@link #startRestore},
-     *   or "" (the empty string) if no more backup data is available,
-     *   or null if an error occurred (the restore should be aborted and rescheduled).
+     * <p>If the package name in the returned RestoreDescription object is the singleton
+     * {@link RestoreDescription#NO_MORE_PACKAGES}, it indicates that no further data is available
+     * in the current restore session: all packages described in startRestore() have been
+     * processed.
+     *
+     * <p>If this method returns {@code null}, it means that a transport-level error has
+     * occurred and the entire restore operation should be abandoned.
+     *
+     * @return A RestoreDescription object containing the name of one of the packages
+     *   supplied to {@link #startRestore} plus an indicator of the data type of that
+     *   restore data; or {@link RestoreDescription#NO_MORE_PACKAGES} to indicate that
+     *   no more packages can be restored in this session; or {@code null} to indicate
+     *   a transport-level error.
      */
-    public String nextRestorePackage() {
+    public RestoreDescription nextRestorePackage() {
         return null;
     }
 
     /**
-     * Get the data for the application returned by {@link #nextRestorePackage}.
-     * @param data An open, writable file into which the backup data should be stored.
+     * Get the data for the application returned by {@link #nextRestorePackage}, if that
+     * method reported {@link RestoreDescription#TYPE_KEY_VALUE} as its delivery type.
+     * If the package has only TYPE_FULL_STREAM data, then this method will return an
+     * error.
+     *
+     * @param data An open, writable file into which the key/value backup data should be stored.
      * @return the same error codes as {@link #startRestore}.
      */
     public int getRestoreData(ParcelFileDescriptor outFd) {
@@ -332,32 +348,11 @@ public class BackupTransport {
     // Full restore interfaces
 
     /**
-     * Ask the transport to set up to perform a full data restore of the given packages.
+     * Ask the transport to provide data for the "current" package being restored.  This
+     * is the package that was just reported by {@link #nextRestorePackage()} as having
+     * {@link RestoreDescription#TYPE_FULL_STREAM} data.
      *
-     * @param token A backup token as returned by {@link #getAvailableRestoreSets}
-     *    or {@link #getCurrentRestoreSet}.
-     * @param targetPackage The names of the packages whose data is being requested.
-     * @return TRANSPORT_OK to indicate that the OS may proceed with requesting
-     *    restore data; TRANSPORT_ERROR to indicate a fatal error condition that precludes
-     *    performing any restore at this time.
-     */
-    public int prepareFullRestore(long token, String[] targetPackages) {
-        return BackupTransport.TRANSPORT_OK;
-    }
-
-    /**
-     * Ask the transport what package's full data will be restored next.  When all apps'
-     * data has been delivered, the transport should return {@code null} here.
-     * @return The package name of the next application whose data will be restored, or
-     *    {@code null} if all available package has been delivered.
-     */
-    public String getNextFullRestorePackage() {
-        return null;
-    }
-
-    /**
-     * Ask the transport to provide data for the "current" package being restored.  The
-     * transport then writes some data to the socket supplied to this call, and returns
+     * The transport writes some data to the socket supplied to this call, and returns
      * the number of bytes written.  The system will then read that many bytes and
      * stream them to the application's agent for restore, then will call this method again
      * to receive the next chunk of the archive.  This sequence will be repeated until the
@@ -369,10 +364,14 @@ public class BackupTransport {
      * {@link #getNextFullRestorePackage()} to begin the restore process for the next
      * application, and the sequence begins again.
      *
+     * <p>The transport should always close this socket when returning from this method.
+     * Do not cache this socket across multiple calls or you may leak file descriptors.
+     *
      * @param socket The file descriptor that the transport will use for delivering the
-     *    streamed archive.
+     *    streamed archive.  The transport must close this socket in all cases when returning
+     *    from this method.
      * @return 0 when no more data for the current package is available.  A positive value
-     *    indicates the presence of that much data to be delivered to the app.  A negative
+     *    indicates the presence of that many bytes to be delivered to the app.  Any negative
      *    return value is treated as equivalent to {@link BackupTransport#TRANSPORT_ERROR},
      *    indicating a fatal error condition that precludes further restore operations
      *    on the current dataset.
@@ -380,6 +379,24 @@ public class BackupTransport {
     public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
         return 0;
     }
+
+    /**
+     * If the OS encounters an error while processing {@link RestoreDescription#TYPE_FULL_STREAM}
+     * data for restore, it will invoke this method to tell the transport that it should
+     * abandon the data download for the current package.  The OS will then either call
+     * {@link #nextRestorePackage()} again to move on to restoring the next package in the
+     * set being iterated over, or will call {@link #finishRestore()} to shut down the restore
+     * operation.
+     *
+     * @return {@link #TRANSPORT_OK} if the transport was successful in shutting down the
+     *    current stream cleanly, or {@link #TRANSPORT_ERROR} to indicate a serious
+     *    transport-level failure.  If the transport reports an error here, the entire restore
+     *    operation will immediately be finished with no further attempts to restore app data.
+     */
+    public int abortFullRestore() {
+        return BackupTransport.TRANSPORT_OK;
+    }
+
     /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
@@ -450,7 +467,7 @@ public class BackupTransport {
         }
 
         @Override
-        public String nextRestorePackage() throws RemoteException {
+        public RestoreDescription nextRestorePackage() throws RemoteException {
             return BackupTransport.this.nextRestorePackage();
         }
 
@@ -477,6 +494,16 @@ public class BackupTransport {
         @Override
         public int sendBackupData(int numBytes) throws RemoteException {
             return BackupTransport.this.sendBackupData(numBytes);
+        }
+
+        @Override
+        public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
+            return BackupTransport.this.getNextFullRestoreDataChunk(socket);
+        }
+
+        @Override
+        public int abortFullRestore() {
+            return BackupTransport.this.abortFullRestore();
         }
     }
 }

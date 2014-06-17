@@ -28,6 +28,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
 import android.app.backup.FullBackup;
+import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -5177,7 +5178,9 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         void restorePmMetadata() {
             try {
-                String packageName = mTransport.nextRestorePackage();
+                RestoreDescription desc = mTransport.nextRestorePackage();
+                // TODO: handle full-data stream restore payloads
+                String packageName = desc.getPackageName();
                 if (packageName == null) {
                     Slog.e(TAG, "Error getting first restore package");
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
@@ -5245,7 +5248,9 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         void restoreNextAgent() {
             try {
-                String packageName = mTransport.nextRestorePackage();
+                final RestoreDescription desc = mTransport.nextRestorePackage();
+                // TODO: handle full-data stream restore payloads
+                String packageName = desc.getPackageName();
 
                 if (packageName == null) {
                     Slog.e(TAG, "Error getting next restore package");
