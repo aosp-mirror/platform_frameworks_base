@@ -1324,7 +1324,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void manageMonitoringCertificateNotification(Intent intent) {
         final NotificationManager notificationManager = getNotificationManager();
 
-        final boolean hasCert = DevicePolicyManager.hasAnyCaCertsInstalled();
+        final boolean hasCert = !(new TrustedCertificateStore().userAliases().isEmpty());
         if (! hasCert) {
             if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
                 for (UserInfo user : mUserManager.getUsers()) {
@@ -2384,13 +2384,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return !"".equals(state);
     }
 
-    public boolean installCaCert(byte[] certBuffer) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
-        KeyChainConnection keyChainConnection = null;
+    public boolean installCaCert(ComponentName who, byte[] certBuffer) throws RemoteException {
+        if (who == null) {
+            mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+        } else {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
+        }
+
         byte[] pemCert;
         try {
             X509Certificate cert = parseCert(certBuffer);
-            pemCert =  Credentials.convertToPem(cert);
+            pemCert = Credentials.convertToPem(cert);
         } catch (CertificateException ce) {
             Log.e(LOG_TAG, "Problem converting cert", ce);
             return false;
@@ -2398,20 +2404,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.e(LOG_TAG, "Problem reading cert", ioe);
             return false;
         }
+
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final long id = Binder.clearCallingIdentity();
         try {
-            keyChainConnection = KeyChain.bind(mContext);
+            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
             try {
                 keyChainConnection.getService().installCaCertificate(pemCert);
                 return true;
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "installCaCertsToKeyChain(): ", e);
             } finally {
-                if (keyChainConnection != null) {
-                    keyChainConnection.close();
-                    keyChainConnection = null;
-                }
+                keyChainConnection.close();
             }
         } catch (InterruptedException e1) {
             Log.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
             Thread.currentThread().interrupt();
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
         return false;
     }
@@ -2423,34 +2433,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 certBuffer));
     }
 
-    public void uninstallCaCert(final byte[] certBuffer) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
-        TrustedCertificateStore certStore = new TrustedCertificateStore();
-        String alias = null;
-        try {
-            X509Certificate cert = parseCert(certBuffer);
-            alias = certStore.getCertificateAlias(cert);
-        } catch (CertificateException ce) {
-            Log.e(LOG_TAG, "Problem creating X509Certificate", ce);
-            return;
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Problem reading certificate", ioe);
-            return;
+    public void uninstallCaCert(ComponentName who, String alias) {
+        if (who == null) {
+            mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+        } else {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
         }
+
+        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final long id = Binder.clearCallingIdentity();
         try {
-            KeyChainConnection keyChainConnection = KeyChain.bind(mContext);
-            IKeyChainService service = keyChainConnection.getService();
+            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
             try {
-                service.deleteCaCertificate(alias);
+                keyChainConnection.getService().deleteCaCertificate(alias);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "from CaCertUninstaller: ", e);
             } finally {
                 keyChainConnection.close();
-                keyChainConnection = null;
             }
         } catch (InterruptedException ie) {
             Log.w(LOG_TAG, "CaCertUninstaller: ", ie);
             Thread.currentThread().interrupt();
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
     }
 

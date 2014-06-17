@@ -5224,7 +5224,10 @@ package android.app.admin {
     method public int getPasswordQuality(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
+    method public boolean hasAnyCaCertsInstalled();
+    method public boolean hasCaCertInstalled(byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
+    method public boolean installCaCert(android.content.ComponentName, byte[]);
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
     method public boolean isApplicationBlocked(android.content.ComponentName, java.lang.String);
@@ -5262,6 +5265,7 @@ package android.app.admin {
     method public void setRestrictionsProvider(android.content.ComponentName, android.content.ComponentName);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
+    method public void uninstallCaCert(android.content.ComponentName, byte[]);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
