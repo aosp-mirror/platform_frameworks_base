@@ -168,12 +168,34 @@ public class TransitionSet extends Transition {
 
     @Override
     public TransitionSet addTarget(View target) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).addTarget(target);
+        }
         return (TransitionSet) super.addTarget(target);
     }
 
     @Override
     public TransitionSet addTarget(int targetId) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).addTarget(targetId);
+        }
         return (TransitionSet) super.addTarget(targetId);
+    }
+
+    @Override
+    public TransitionSet addTarget(String targetName) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).addTarget(targetName);
+        }
+        return (TransitionSet) super.addTarget(targetName);
+    }
+
+    @Override
+    public TransitionSet addTarget(Class targetType) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).addTarget(targetType);
+        }
+        return (TransitionSet) super.addTarget(targetType);
     }
 
     @Override
@@ -183,12 +205,66 @@ public class TransitionSet extends Transition {
 
     @Override
     public TransitionSet removeTarget(int targetId) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).removeTarget(targetId);
+        }
         return (TransitionSet) super.removeTarget(targetId);
     }
 
     @Override
     public TransitionSet removeTarget(View target) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).removeTarget(target);
+        }
         return (TransitionSet) super.removeTarget(target);
+    }
+
+    @Override
+    public TransitionSet removeTarget(Class target) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).removeTarget(target);
+        }
+        return (TransitionSet) super.removeTarget(target);
+    }
+
+    @Override
+    public TransitionSet removeTarget(String target) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).removeTarget(target);
+        }
+        return (TransitionSet) super.removeTarget(target);
+    }
+
+    @Override
+    public Transition excludeTarget(View target, boolean exclude) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).excludeTarget(target, exclude);
+        }
+        return super.excludeTarget(target, exclude);
+    }
+
+    @Override
+    public Transition excludeTarget(String targetViewName, boolean exclude) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).excludeTarget(targetViewName, exclude);
+        }
+        return super.excludeTarget(targetViewName, exclude);
+    }
+
+    @Override
+    public Transition excludeTarget(int targetId, boolean exclude) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).excludeTarget(targetId, exclude);
+        }
+        return super.excludeTarget(targetId, exclude);
+    }
+
+    @Override
+    public Transition excludeTarget(Class type, boolean exclude) {
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).excludeTarget(type, exclude);
+        }
+        return super.excludeTarget(type, exclude);
     }
 
     @Override

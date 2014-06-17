@@ -18,6 +18,9 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -272,15 +275,23 @@ public abstract class Visibility extends Transition {
                 if (startView.getParent() == null) {
                     // no parent - safe to use
                     overlayView = startView;
-                } else if (startView.getParent() instanceof View &&
-                        startView.getParent().getParent() == null) {
+                } else if (startView.getParent() instanceof View) {
                     View startParent = (View) startView.getParent();
-                    int id = startParent.getId();
-                    if (id != View.NO_ID && sceneRoot.findViewById(id) != null && mCanRemoveViews) {
-                        // no parent, but its parent is unparented  but the parent
-                        // hierarchy has been replaced by a new hierarchy with the same id
-                        // and it is safe to un-parent startView
-                        overlayView = startView;
+                    if (!isValidTarget(startParent)) {
+                        if (startView.isAttachedToWindow()) {
+                            overlayView = copyViewImage(startView);
+                        } else {
+                            overlayView = startView;
+                        }
+                    } else if (startParent.getParent() == null) {
+                        int id = startParent.getId();
+                        if (id != View.NO_ID && sceneRoot.findViewById(id) != null
+                                && mCanRemoveViews) {
+                            // no parent, but its parent is unparented  but the parent
+                            // hierarchy has been replaced by a new hierarchy with the same id
+                            // and it is safe to un-parent startView
+                            overlayView = startView;
+                        }
                     }
                 }
             }
@@ -376,6 +387,26 @@ public abstract class Visibility extends Transition {
             return animator;
         }
         return null;
+    }
+
+    private View copyViewImage(View view) {
+        int width = view.getWidth();
+        int height = view.getHeight();
+        if (width <= 0 || height <= 0) {
+            return null;
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        final BitmapDrawable drawable = new BitmapDrawable(bitmap);
+
+        View overlayView = new View(view.getContext());
+        overlayView.setBackground(drawable);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
+        overlayView.measure(widthSpec, heightSpec);
+        overlayView.layout(0, 0, width, height);
+        return overlayView;
     }
 
     /**
