@@ -174,21 +174,21 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
 
     ssize_t pss = memtrack_proc_graphics_pss(p);
     if (pss < 0) {
-        ALOGW("failed to get graphics pss: %d", pss);
+        ALOGW("failed to get graphics pss: %zd", pss);
         return pss;
     }
     graphics_mem->graphics = pss / 1024;
 
     pss = memtrack_proc_gl_pss(p);
     if (pss < 0) {
-        ALOGW("failed to get gl pss: %d", pss);
+        ALOGW("failed to get gl pss: %zd", pss);
         return pss;
     }
     graphics_mem->gl = pss / 1024;
 
     pss = memtrack_proc_other_pss(p);
     if (pss < 0) {
-        ALOGW("failed to get other pss: %d", pss);
+        ALOGW("failed to get other pss: %zd", pss);
         return pss;
     }
     graphics_mem->other = pss / 1024;
@@ -231,9 +231,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     unsigned referenced = 0;
     unsigned temp;
 
-    unsigned long int start;
-    unsigned long int end = 0;
-    unsigned long int prevEnd = 0;
+    uint64_t start;
+    uint64_t end = 0;
+    uint64_t prevEnd = 0;
     char* name;
     int name_pos;
 
@@ -255,7 +255,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         if (len < 1) return;
         line[--len] = 0;
 
-        if (sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d%n", &start, &end, &name_pos) != 2) {
+        if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d%n", &start, &end, &name_pos) != 2) {
             skip = true;
         } else {
             while (isspace(line[name_pos])) {
@@ -371,7 +371,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 referenced = temp;
             } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
                 swapped_out = temp;
-            } else if (strlen(line) > 30 && line[8] == '-' && line[17] == ' ') {
+            } else if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d", &start, &end) == 2) {
                 // looks like a new mapping
                 // example: "10000000-10001000 ---p 10000000 00:00 0"
                 break;
