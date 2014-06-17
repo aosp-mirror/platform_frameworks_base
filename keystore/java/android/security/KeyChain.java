@@ -23,9 +23,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.security.InvalidKeyException;
@@ -439,14 +437,6 @@ public final class KeyChain {
      * Caller should call unbindService on the result when finished.
      */
     public static KeyChainConnection bind(Context context) throws InterruptedException {
-        return bindAsUser(context, Process.myUserHandle());
-    }
-
-    /**
-     * @hide
-     */
-    public static KeyChainConnection bindAsUser(Context context, UserHandle user)
-            throws InterruptedException {
         if (context == null) {
             throw new NullPointerException("context == null");
         }
@@ -469,10 +459,9 @@ public final class KeyChain {
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
         intent.setComponent(comp);
-        boolean isBound = context.bindServiceAsUser(intent,
-                                                    keyChainServiceConnection,
-                                                    Context.BIND_AUTO_CREATE,
-                                                    user);
+        boolean isBound = context.bindService(intent,
+                                              keyChainServiceConnection,
+                                              Context.BIND_AUTO_CREATE);
         if (!isBound) {
             throw new AssertionError("could not bind to KeyChainService");
         }
