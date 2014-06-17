@@ -80,5 +80,20 @@ final class HdmiConstants {
     static final int INVALID_PORT_ID = -1;
     static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
+    // Send result codes.
+    static final int SEND_RESULT_SUCCESS = 0;
+    static final int SEND_RESULT_NAK = -1;
+    static final int SEND_RESULT_FAILURE = -2;
+
+    // Strategy for device polling.
+    // Should use "OR(|) operation of POLL_STRATEGY_XXX and POLL_ITERATION_XXX.
+    static final int POLL_STRATEGY_MASK = 0x3;  // first and second bit.
+    static final int POLL_STRATEGY_REMOTES_DEVICES = 0x1;
+    static final int POLL_STRATEGY_SYSTEM_AUDIO = 0x2;
+
+    static final int POLL_ITERATION_STRATEGY_MASK = 0x30000;  // first and second bit.
+    static final int POLL_ITERATION_IN_ORDER = 0x10000;
+    static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
+
     private HdmiConstants() { /* cannot be instantiated */ }
 }

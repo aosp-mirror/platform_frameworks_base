@@ -68,7 +68,7 @@ final class SetArcTransmissionStateAction extends FeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiControlService.SEND_RESULT_SUCCESS) {
+                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
                     // Enable ARC status immediately after sending <Report Arc Initiated>.
                     // If AVR responds with <Feature Abort>, disable ARC status again.
                     // This is different from spec that says that turns ARC status to

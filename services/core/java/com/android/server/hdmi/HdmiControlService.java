@@ -54,18 +54,6 @@ public final class HdmiControlService extends SystemService {
     // TODO: Rename the permission to HDMI_CONTROL.
     private static final String PERMISSION = "android.permission.HDMI_CEC";
 
-    static final int SEND_RESULT_SUCCESS = 0;
-    static final int SEND_RESULT_NAK = -1;
-    static final int SEND_RESULT_FAILURE = -2;
-
-    static final int POLL_STRATEGY_MASK = 0x3;  // first and second bit.
-    static final int POLL_STRATEGY_REMOTES_DEVICES = 0x1;
-    static final int POLL_STRATEGY_SYSTEM_AUDIO = 0x2;
-
-    static final int POLL_ITERATION_STRATEGY_MASK = 0x30000;  // first and second bit.
-    static final int POLL_ITERATION_IN_ORDER = 0x10000;
-    static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
-
     /**
      * Interface to report send result.
      */
@@ -430,11 +418,11 @@ public final class HdmiControlService extends SystemService {
     }
 
     private int checkPollStrategy(int pickStrategy) {
-        int strategy = pickStrategy & POLL_STRATEGY_MASK;
+        int strategy = pickStrategy & HdmiConstants.POLL_STRATEGY_MASK;
         if (strategy == 0) {
             throw new IllegalArgumentException("Invalid poll strategy:" + pickStrategy);
         }
-        int iterationStrategy = pickStrategy & POLL_ITERATION_STRATEGY_MASK;
+        int iterationStrategy = pickStrategy & HdmiConstants.POLL_ITERATION_STRATEGY_MASK;
         if (iterationStrategy == 0) {
             throw new IllegalArgumentException("Invalid iteration strategy:" + pickStrategy);
         }

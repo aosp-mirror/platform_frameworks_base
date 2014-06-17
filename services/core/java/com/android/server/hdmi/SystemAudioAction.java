@@ -67,7 +67,7 @@ abstract class SystemAudioAction extends FeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiControlService.SEND_RESULT_SUCCESS) {
+                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
                     mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
                     addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
                 } else {
@@ -98,7 +98,7 @@ abstract class SystemAudioAction extends FeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiControlService.SEND_RESULT_SUCCESS) {
+                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
                     mState = STATE_WAIT_FOR_REPORT_AUDIO_STATUS;
                     addTimer(mState, TIMEOUT_MS);
                 } else {

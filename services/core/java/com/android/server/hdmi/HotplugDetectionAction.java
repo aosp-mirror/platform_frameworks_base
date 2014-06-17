@@ -125,8 +125,8 @@ final class HotplugDetectionAction extends FeatureAction {
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, false);
             }
-        }, HdmiControlService.POLL_ITERATION_IN_ORDER
-                | HdmiControlService.POLL_STRATEGY_REMOTES_DEVICES, POLL_RETRY_COUNT);
+        }, HdmiConstants.POLL_ITERATION_IN_ORDER
+                | HdmiConstants.POLL_STRATEGY_REMOTES_DEVICES, POLL_RETRY_COUNT);
     }
 
     private void pollAudioSystem() {
@@ -137,8 +137,8 @@ final class HotplugDetectionAction extends FeatureAction {
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, true);
             }
-        }, HdmiControlService.POLL_ITERATION_IN_ORDER
-                | HdmiControlService.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
+        }, HdmiConstants.POLL_ITERATION_IN_ORDER
+                | HdmiConstants.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {

@@ -366,29 +366,29 @@ final class HdmiCecController {
     }
 
     private List<Integer> pickPollCandidates(int pickStrategy) {
-        int strategy = pickStrategy & HdmiControlService.POLL_STRATEGY_MASK;
+        int strategy = pickStrategy & HdmiConstants.POLL_STRATEGY_MASK;
         Predicate<Integer> pickPredicate = null;
         switch (strategy) {
-            case HdmiControlService.POLL_STRATEGY_SYSTEM_AUDIO:
+            case HdmiConstants.POLL_STRATEGY_SYSTEM_AUDIO:
                 pickPredicate = mSystemAudioAddressPredicate;
                 break;
-            case HdmiControlService.POLL_STRATEGY_REMOTES_DEVICES:
+            case HdmiConstants.POLL_STRATEGY_REMOTES_DEVICES:
             default:  // The default is POLL_STRATEGY_REMOTES_DEVICES.
                 pickPredicate = mRemoteDeviceAddressPredicate;
                 break;
         }
 
-        int iterationStrategy = pickStrategy & HdmiControlService.POLL_ITERATION_STRATEGY_MASK;
+        int iterationStrategy = pickStrategy & HdmiConstants.POLL_ITERATION_STRATEGY_MASK;
         ArrayList<Integer> pollingCandidates = new ArrayList<>();
         switch (iterationStrategy) {
-            case HdmiControlService.POLL_ITERATION_IN_ORDER:
+            case HdmiConstants.POLL_ITERATION_IN_ORDER:
                 for (int i = HdmiCec.ADDR_TV; i <= HdmiCec.ADDR_SPECIFIC_USE; ++i) {
                     if (pickPredicate.apply(i)) {
                         pollingCandidates.add(i);
                     }
                 }
                 break;
-            case HdmiControlService.POLL_ITERATION_REVERSE_ORDER:
+            case HdmiConstants.POLL_ITERATION_REVERSE_ORDER:
             default:  // The default is reverse order.
                 for (int i = HdmiCec.ADDR_SPECIFIC_USE; i >= HdmiCec.ADDR_TV; --i) {
                     if (pickPredicate.apply(i)) {
@@ -442,7 +442,7 @@ final class HdmiCecController {
             // new logical address for the device because no device uses
             // it as logical address of the device.
             if (nativeSendCecCommand(mNativePtr, address, address, EMPTY_BODY)
-                    == HdmiControlService.SEND_RESULT_SUCCESS) {
+                    == HdmiConstants.SEND_RESULT_SUCCESS) {
                 return true;
             }
         }
@@ -509,7 +509,7 @@ final class HdmiCecController {
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 final int error = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
                         cecMessage.getDestination(), body);
-                if (error != HdmiControlService.SEND_RESULT_SUCCESS) {
+                if (error != HdmiConstants.SEND_RESULT_SUCCESS) {
                     Slog.w(TAG, "Failed to send " + cecMessage);
                 }
                 if (callback != null) {
