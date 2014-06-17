@@ -3028,28 +3028,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public int enableApnType(String type) {
-        try {
-            return getITelephony().enableApnType(type);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#enableApnType", e);
-        }
-        return PhoneConstants.APN_REQUEST_FAILED;
-    }
-
-    /** @hide */
-    @SystemApi
-    public int disableApnType(String type) {
-        try {
-            return getITelephony().disableApnType(type);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#disableApnType", e);
-        }
-        return PhoneConstants.APN_REQUEST_FAILED;
-    }
-
-    /** @hide */
-    @SystemApi
     public boolean enableDataConnectivity() {
         try {
             return getITelephony().enableDataConnectivity();
