@@ -14,7 +14,7 @@ ol.large > li {
   background:#eee;
 }
 ol.large > li:nth-child(odd) {
-} 
+}
 ol.large > li:before {
   display:inline;
   left:-40px;
@@ -76,7 +76,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
 
 <ol class="large">
 <li>
-  <h2 class="norule">Get the latest SDK tools</h2>
+  <h2 id="GetTools" class="norule">Get the latest SDK tools</h2>
 
 <img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
 
@@ -102,7 +102,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
 </li>
 
 <li>
-  <h2 class="norule">Get the support library for additional APIs</h2>
+  <h2 id="GetSupportLib" class="norule">Get the support library for additional APIs</h2>
 
   <div class="sidebox">
     <h3>Why use the support library?</h3>
@@ -145,7 +145,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
 
 
 <li>
-  <h2 class="norule">Get Google Play services for even more APIs</h2>
+  <h2 id="GetGoogle" class="norule">Get Google Play services for even more APIs</h2>
 
   <div class="sidebox">
     <h3>Why use Google Play services?</h3>
@@ -182,7 +182,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
 
 
 <li>
-  <h2 class="norule">Build something!</h2>
+  <h2 id="Build" class="norule">Build something!</h2>
 
 <p>With the above packages now in your Android SDK, you're ready to build apps
 for Android. As new tools and other APIs become available, simply launch the SDK Manager
@@ -208,8 +208,8 @@ the guide to <strong><a href="{@docRoot}training/basics/firstapp/index.html"
 <h3>Use Google APIs</h3>
 <p>To start using Google APIs, such as Maps or
 Play Game services, see the guide to
-<strong><a href="{@docRoot}google/auth/api-client.html">Accessing Google Play Services
-APIs</a></strong>.</p>
+<strong><a href="{@docRoot}google/play-services/setup.html">Setting Up Google Play
+Services</a></strong>.</p>
 
 </div>
 </div><!-- end cols -->
