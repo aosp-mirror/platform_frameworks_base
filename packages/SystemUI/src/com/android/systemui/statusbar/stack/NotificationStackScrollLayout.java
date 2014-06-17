@@ -969,7 +969,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param animate Should an animation be performed.
      */
     public void setOverScrolledPixels(float numPixels, boolean onTop, boolean animate) {
-        setOverScrollAmount(numPixels * getRubberBandFactor(), onTop, animate, true);
+        setOverScrollAmount(numPixels * getRubberBandFactor(onTop), onTop, animate, true);
     }
 
     /**
@@ -1005,7 +1005,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (animate) {
             mStateAnimator.animateOverScrollToAmount(amount, onTop);
         } else {
-            setOverScrolledPixels(amount / getRubberBandFactor(), onTop);
+            setOverScrolledPixels(amount / getRubberBandFactor(onTop), onTop);
             mAmbientState.setOverScrollAmount(amount, onTop);
             if (onTop) {
                 notifyOverscrollTopListener(amount);
@@ -1227,13 +1227,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mOwnScrollY -= (int) topAmount;
                 mDontReportNextOverScroll = true;
                 setOverScrollAmount(0, true, false);
-                mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor()
+                mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor(true /* onTop */)
                         * mOverflingDistance + topAmount;
             } else if (velocityY > 0 && bottomAmount > 0) {
                 mOwnScrollY += bottomAmount;
                 setOverScrollAmount(0, false, false);
-                mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor()
-                        * mOverflingDistance + bottomAmount;
+                mMaxOverScroll = Math.abs(velocityY) / 1000f
+                        * getRubberBandFactor(false /* onTop */) * mOverflingDistance
+                        +  bottomAmount;
             } else {
                 // it will be set once we reach the boundary
                 mMaxOverScroll = 0.0f;
@@ -1275,7 +1276,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         return Math.max(desiredPadding, mIntrinsicPadding);
     }
 
-    private float getRubberBandFactor() {
+    private float getRubberBandFactor(boolean onTop) {
+        if (!onTop) {
+            return RUBBER_BAND_FACTOR_NORMAL;
+        }
         if (mExpandedInThisMotion) {
             return RUBBER_BAND_FACTOR_AFTER_EXPAND;
         } else if (mIsExpansionChanging) {
