@@ -1194,7 +1194,14 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param args Optional arguments to supply to the fragment.
      */
     public void switchToHeader(String fragmentName, Bundle args) {
-        setSelectedHeader(null);
+        Header selectedHeader = null;
+        for (int i = 0; i < mHeaders.size(); i++) {
+            if (fragmentName.equals(mHeaders.get(i).fragment)) {
+                selectedHeader = mHeaders.get(i);
+                break;
+            }
+        }
+        setSelectedHeader(selectedHeader);
         switchToHeaderInner(fragmentName, args);
     }
 
