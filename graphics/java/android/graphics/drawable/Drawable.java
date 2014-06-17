@@ -1260,8 +1260,10 @@ public abstract class Drawable {
     /**
      * Parses a {@link android.graphics.PorterDuff.Mode} from a tintMode
      * attribute's enum value.
+     *
+     * @hide
      */
-    static PorterDuff.Mode parseTintMode(int value, Mode defaultMode) {
+    public static PorterDuff.Mode parseTintMode(int value, Mode defaultMode) {
         switch (value) {
             case 3: return Mode.SRC_OVER;
             case 5: return Mode.SRC_IN;

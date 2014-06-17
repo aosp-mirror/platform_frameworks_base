@@ -320,6 +320,8 @@ package android {
     field public static final int backgroundDimEnabled = 16843295; // 0x101021f
     field public static final int backgroundSplit = 16843659; // 0x101038b
     field public static final int backgroundStacked = 16843658; // 0x101038a
+    field public static final int backgroundTint = 16843885; // 0x101046d
+    field public static final int backgroundTintMode = 16843886; // 0x101046e
     field public static final int backupAgent = 16843391; // 0x101027f
     field public static final int banner = 16843762; // 0x10103f2
     field public static final int baseline = 16843548; // 0x101031c
@@ -344,6 +346,8 @@ package android {
     field public static final int buttonStyleInset = 16842826; // 0x101004a
     field public static final int buttonStyleSmall = 16842825; // 0x1010049
     field public static final int buttonStyleToggle = 16842827; // 0x101004b
+    field public static final int buttonTint = 16843889; // 0x1010471
+    field public static final int buttonTintMode = 16843890; // 0x1010472
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
@@ -554,6 +558,8 @@ package android {
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
+    field public static final int foregroundTint = 16843887; // 0x101046f
+    field public static final int foregroundTintMode = 16843888; // 0x1010470
     field public static final int format = 16843013; // 0x1010105
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
@@ -636,6 +642,8 @@ package android {
     field public static final int indeterminateDuration = 16843069; // 0x101013d
     field public static final int indeterminateOnly = 16843066; // 0x101013a
     field public static final int indeterminateProgressStyle = 16843544; // 0x1010318
+    field public static final int indeterminateTint = 16843883; // 0x101046b
+    field public static final int indeterminateTintMode = 16843884; // 0x101046c
     field public static final int indicatorEnd = 16843730; // 0x10103d2
     field public static final int indicatorLeft = 16843021; // 0x101010d
     field public static final int indicatorRight = 16843022; // 0x101010e
@@ -911,6 +919,8 @@ package android {
     field public static final int privateImeOptions = 16843299; // 0x1010223
     field public static final int process = 16842769; // 0x1010011
     field public static final int progress = 16843063; // 0x1010137
+    field public static final int progressBackgroundTint = 16843879; // 0x1010467
+    field public static final int progressBackgroundTintMode = 16843880; // 0x1010468
     field public static final int progressBarPadding = 16843545; // 0x1010319
     field public static final int progressBarStyle = 16842871; // 0x1010077
     field public static final int progressBarStyleHorizontal = 16842872; // 0x1010078
@@ -921,6 +931,8 @@ package android {
     field public static final int progressBarStyleSmallInverse = 16843400; // 0x1010288
     field public static final int progressBarStyleSmallTitle = 16843279; // 0x101020f
     field public static final int progressDrawable = 16843068; // 0x101013c
+    field public static final int progressTint = 16843877; // 0x1010465
+    field public static final int progressTintMode = 16843878; // 0x1010466
     field public static final int prompt = 16843131; // 0x101017b
     field public static final int propertyName = 16843489; // 0x10102e1
     field public static final int protectionLevel = 16842761; // 0x1010009
@@ -1013,6 +1025,8 @@ package android {
     field public static final int searchSuggestSelection = 16843224; // 0x10101d8
     field public static final int searchSuggestThreshold = 16843373; // 0x101026d
     field public static final int secondaryProgress = 16843064; // 0x1010138
+    field public static final int secondaryProgressTint = 16843881; // 0x1010469
+    field public static final int secondaryProgressTintMode = 16843882; // 0x101046a
     field public static final int seekBarStyle = 16842875; // 0x101007b
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
@@ -1216,6 +1230,8 @@ package android {
     field public static final int thumb = 16843074; // 0x1010142
     field public static final int thumbOffset = 16843075; // 0x1010143
     field public static final int thumbTextPadding = 16843634; // 0x1010372
+    field public static final int thumbTint = 16843891; // 0x1010473
+    field public static final int thumbTintMode = 16843892; // 0x1010474
     field public static final int thumbnail = 16843429; // 0x10102a5
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int timeZone = 16843724; // 0x10103cc
@@ -32516,6 +32532,8 @@ package android.view {
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
     method public android.graphics.drawable.Drawable getBackground();
+    method public android.content.res.ColorStateList getBackgroundTint();
+    method public android.graphics.PorterDuff.Mode getBackgroundTintMode();
     method public int getBaseline();
     method public final int getBottom();
     method protected float getBottomFadingEdgeStrength();
@@ -32793,6 +32811,8 @@ package android.view {
     method public void setBackgroundColor(int);
     method public deprecated void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundResource(int);
+    method public void setBackgroundTint(android.content.res.ColorStateList);
+    method public void setBackgroundTintMode(android.graphics.PorterDuff.Mode);
     method public final void setBottom(int);
     method public void setCameraDistance(float);
     method public void setClickable(boolean);
@@ -35759,10 +35779,14 @@ package android.widget {
     method public boolean getSplitTrack();
     method public android.graphics.drawable.Drawable getThumb();
     method public int getThumbOffset();
+    method public android.content.res.ColorStateList getThumbTint();
+    method public android.graphics.PorterDuff.Mode getThumbTintMode();
     method public void setKeyProgressIncrement(int);
     method public void setSplitTrack(boolean);
     method public void setThumb(android.graphics.drawable.Drawable);
     method public void setThumbOffset(int);
+    method public void setThumbTint(android.content.res.ColorStateList);
+    method public void setThumbTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public abstract class AbsSpinner extends android.widget.AdapterView {
@@ -36177,9 +36201,13 @@ package android.widget {
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int, int);
+    method public android.content.res.ColorStateList getButtonTint();
+    method public android.graphics.PorterDuff.Mode getButtonTintMode();
     method public boolean isChecked();
     method public void setButtonDrawable(int);
     method public void setButtonDrawable(android.graphics.drawable.Drawable);
+    method public void setButtonTint(android.content.res.ColorStateList);
+    method public void setButtonTintMode(android.graphics.PorterDuff.Mode);
     method public void setChecked(boolean);
     method public void setOnCheckedChangeListener(android.widget.CompoundButton.OnCheckedChangeListener);
     method public void toggle();
@@ -36440,10 +36468,14 @@ package android.widget {
     method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
     method public android.graphics.drawable.Drawable getForeground();
     method public int getForegroundGravity();
+    method public android.content.res.ColorStateList getForegroundTint();
+    method public android.graphics.PorterDuff.Mode getForegroundTintMode();
     method public boolean getMeasureAllChildren();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setForeground(android.graphics.drawable.Drawable);
     method public void setForegroundGravity(int);
+    method public void setForegroundTint(android.content.res.ColorStateList);
+    method public void setForegroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setMeasureAllChildren(boolean);
   }
 
@@ -36652,6 +36684,8 @@ package android.widget {
     method public int getMaxHeight();
     method public int getMaxWidth();
     method public android.widget.ImageView.ScaleType getScaleType();
+    method public android.content.res.ColorStateList getTint();
+    method public android.graphics.PorterDuff.Mode getTintMode();
     method public int[] onCreateDrawableState(int);
     method public void setAdjustViewBounds(boolean);
     method public deprecated void setAlpha(int);
@@ -36673,6 +36707,8 @@ package android.widget {
     method public void setMaxHeight(int);
     method public void setMaxWidth(int);
     method public void setScaleType(android.widget.ImageView.ScaleType);
+    method public void setTint(android.content.res.ColorStateList);
+    method public void setTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public static final class ImageView.ScaleType extends java.lang.Enum {
@@ -37045,11 +37081,19 @@ package android.widget {
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int);
     ctor public ProgressBar(android.content.Context, android.util.AttributeSet, int, int);
     method public android.graphics.drawable.Drawable getIndeterminateDrawable();
+    method public android.content.res.ColorStateList getIndeterminateTint();
+    method public android.graphics.PorterDuff.Mode getIndeterminateTintMode();
     method public android.view.animation.Interpolator getInterpolator();
     method public synchronized int getMax();
     method public synchronized int getProgress();
+    method public android.content.res.ColorStateList getProgressBackgroundTint();
+    method public android.graphics.PorterDuff.Mode getProgressBackgroundTintMode();
     method public android.graphics.drawable.Drawable getProgressDrawable();
+    method public android.content.res.ColorStateList getProgressTint();
+    method public android.graphics.PorterDuff.Mode getProgressTintMode();
     method public synchronized int getSecondaryProgress();
+    method public android.content.res.ColorStateList getSecondaryProgressTint();
+    method public android.graphics.PorterDuff.Mode getSecondaryProgressTintMode();
     method public final synchronized void incrementProgressBy(int);
     method public final synchronized void incrementSecondaryProgressBy(int);
     method public synchronized boolean isIndeterminate();
@@ -37058,13 +37102,21 @@ package android.widget {
     method public synchronized void setIndeterminate(boolean);
     method public void setIndeterminateDrawable(android.graphics.drawable.Drawable);
     method public void setIndeterminateDrawableTiled(android.graphics.drawable.Drawable);
+    method public void setIndeterminateTint(android.content.res.ColorStateList);
+    method public void setIndeterminateTintMode(android.graphics.PorterDuff.Mode);
     method public void setInterpolator(android.content.Context, int);
     method public void setInterpolator(android.view.animation.Interpolator);
     method public synchronized void setMax(int);
     method public synchronized void setProgress(int);
+    method public void setProgressBackgroundTint(android.content.res.ColorStateList);
+    method public void setProgressBackgroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setProgressDrawable(android.graphics.drawable.Drawable);
     method public void setProgressDrawableTiled(android.graphics.drawable.Drawable);
+    method public void setProgressTint(android.content.res.ColorStateList);
+    method public void setProgressTintMode(android.graphics.PorterDuff.Mode);
     method public synchronized void setSecondaryProgress(int);
+    method public void setSecondaryProgressTint(android.content.res.ColorStateList);
+    method public void setSecondaryProgressTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class QuickContactBadge extends android.widget.ImageView implements android.view.View.OnClickListener {
