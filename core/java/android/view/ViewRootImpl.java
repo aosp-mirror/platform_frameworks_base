@@ -656,7 +656,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public boolean invokeFunctor(long functor, boolean waitForCompletion) {
-        if (mAttachInfo.mHardwareRenderer == null || !mAttachInfo.mHardwareRenderer.isEnabled()) {
+        if (mAttachInfo.mHardwareRenderer == null) {
             return false;
         }
         mAttachInfo.mHardwareRenderer.invokeFunctor(functor, waitForCompletion);
