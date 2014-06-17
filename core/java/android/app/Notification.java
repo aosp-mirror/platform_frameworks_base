@@ -3102,14 +3102,16 @@ public class Notification implements Parcelable
          *         .build();</pre>
          *
          * <p>The activity to launch needs to allow embedding, must be exported, and
-         * should have an empty task affinity.
+         * should have an empty task affinity. It is also recommended to use the device
+         * default light theme.
          *
          * <p>Example AndroidManifest.xml entry:
          * <pre class="prettyprint">
          * &lt;activity android:name=&quot;com.example.MyDisplayActivity&quot;
          *     android:exported=&quot;true&quot;
          *     android:allowEmbedded=&quot;true&quot;
-         *     android:taskAffinity=&quot;&quot; /&gt;</pre>
+         *     android:taskAffinity=&quot;&quot;
+         *     android:theme=&quot;@android:style/Theme.DeviceDefault.Light&quot; /&gt;</pre>
          *
          * @param intent the {@link PendingIntent} for an activity
          * @return this object for method chaining
