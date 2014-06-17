@@ -619,7 +619,7 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("h1").text('Now downloading Android Studio...');
+      $("h1").text('Now redirecting to the install instructions...');
       $("#tos").slideUp();
       $("#jd-content .jd-descr").fadeOut('slow', function() {
         setTimeout(function() {

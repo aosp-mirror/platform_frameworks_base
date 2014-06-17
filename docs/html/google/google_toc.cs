@@ -3,11 +3,11 @@
      ########            ATTENTION             ###############
      ########                                  ###############
      #########################################################
-     
+
      IF YOU MAKE CHANGES TO THIS FILE, YOU MUST GENERATE THE
      GMS REFERENCE DOCS, BECAUSE THEY ARE NOT INCLUDED IN THE
      DOCS BUILD RULE.
-     
+
      #########################################################
      #########################################################
 ?>
@@ -73,11 +73,11 @@
     </div>
     <ul>
       <li><a href="<?cs var:toroot?>google/play-services/setup.html">
-          <span class="en">Setup</span></a>
+          <span class="en">Setting Up Google Play Services</span></a>
       </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>google/auth/api-client.html">
-          <span class="en">Accessing Google Play Services APIs</span></a>
+          <span class="en">Accessing Google APIs</span></a>
         </div>
         <ul>
           <li>
