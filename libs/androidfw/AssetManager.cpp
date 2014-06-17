@@ -1747,6 +1747,7 @@ bool AssetManager::fncScanAndMergeDirLocked(
     }
 
     mergeInfoLocked(pMergedInfo, pContents);
+    delete pContents;
     return true;
 }
 
