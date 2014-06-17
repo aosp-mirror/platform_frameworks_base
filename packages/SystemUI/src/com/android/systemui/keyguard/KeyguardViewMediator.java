@@ -239,6 +239,12 @@ public class KeyguardViewMediator extends SystemUI {
     private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
 
     /**
+     * Whether a hide is pending an we are just waiting for #startKeyguardExitAnimation to be
+     * called.
+     * */
+    private boolean mHiding;
+
+    /**
      * we send this intent when the keyguard is dismissed.
      */
     private static final Intent USER_PRESENT_INTENT = new Intent(Intent.ACTION_USER_PRESENT)
@@ -1169,6 +1175,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             mStatusBarKeyguardViewManager.show(options);
+            mHiding = false;
             mShowing = true;
             mKeyguardDonePending = false;
             updateActivityLockScreenState();
@@ -1191,7 +1198,7 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
             try {
-
+                mHiding = true;
                 if (mShowing) {
 
                     // Don't actually hide the Keyguard at the moment, wait for window manager until
@@ -1211,6 +1218,11 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void handleStartKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         synchronized (KeyguardViewMediator.this) {
+
+            if (!mHiding) {
+                return;
+            }
+            mHiding = false;
 
             // only play "unlock" noises if not on a call (since the incall UI
             // disables the keyguard)
