@@ -69,6 +69,7 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
 
             @Override
             public void onViewAttachedToWindow(View v) {
+                vp.updateStates();
                 volumeComponent.setVolumePanel(vp);
             }
         });
