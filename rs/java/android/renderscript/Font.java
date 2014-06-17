@@ -111,10 +111,10 @@ public class Font extends BaseObj {
 
         FontFamily serifFamily = new FontFamily();
         serifFamily.mNames = sSerifNames;
-        serifFamily.mNormalFileName = "DroidSerif-Regular.ttf";
-        serifFamily.mBoldFileName = "DroidSerif-Bold.ttf";
-        serifFamily.mItalicFileName = "DroidSerif-Italic.ttf";
-        serifFamily.mBoldItalicFileName = "DroidSerif-BoldItalic.ttf";
+        serifFamily.mNormalFileName = "NotoSerif-Regular.ttf";
+        serifFamily.mBoldFileName = "NotoSerif-Bold.ttf";
+        serifFamily.mItalicFileName = "NotoSerif-Italic.ttf";
+        serifFamily.mBoldItalicFileName = "NotoSerif-BoldItalic.ttf";
         addFamilyToMap(serifFamily);
 
         FontFamily monoFamily = new FontFamily();
