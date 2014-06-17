@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.AndroidException;
 import android.view.IWindowManager;
 import android.view.View;
@@ -1717,11 +1718,7 @@ public class Am extends BaseCommand {
             }
 
             System.out.println("config: " + Configuration.resourceQualifierString(config));
-            System.out.print("abi: " + Build.CPU_ABI);
-            if (!Build.CPU_ABI2.isEmpty()) {
-                System.out.print("," + Build.CPU_ABI2);
-            }
-            System.out.println();
+            System.out.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
 
         } catch (RemoteException e) {
         }
