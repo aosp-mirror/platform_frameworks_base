@@ -57,17 +57,26 @@ namespace uirenderer {
 #define ROUND_CAP_THRESH 0.25f
 #define PI 3.1415926535897932f
 
+// temporary error thresholds
+#define ERROR_DEPTH 20
+#define ERROR_SCALE 1e10
+#define ERROR_SQR_INV_THRESH 1e-20
+
 void PathTessellator::extractTessellationScales(const Matrix4& transform,
         float* scaleX, float* scaleY) {
-    *scaleX = 1.0f;
-    *scaleY = 1.0f;
-    if (CC_UNLIKELY(!transform.isPureTranslate())) {
+    if (CC_LIKELY(transform.isPureTranslate())) {
+        *scaleX = 1.0f;
+        *scaleY = 1.0f;
+    } else {
         float m00 = transform.data[Matrix4::kScaleX];
         float m01 = transform.data[Matrix4::kSkewY];
         float m10 = transform.data[Matrix4::kSkewX];
         float m11 = transform.data[Matrix4::kScaleY];
         *scaleX = sqrt(m00 * m00 + m01 * m01);
         *scaleY = sqrt(m10 * m10 + m11 * m11);
+
+        LOG_ALWAYS_FATAL_IF(*scaleX > ERROR_SCALE || *scaleY > ERROR_SCALE,
+                "scales %e x %e too large for tessellation", *scaleX, *scaleY);
     }
 }
 
@@ -92,10 +101,12 @@ struct PaintInfo {
 public:
     PaintInfo(const SkPaint* paint, const mat4& transform) :
             style(paint->getStyle()), cap(paint->getStrokeCap()), isAA(paint->isAntiAlias()),
-            inverseScaleX(1.0f), inverseScaleY(1.0f),
             halfStrokeWidth(paint->getStrokeWidth() * 0.5f), maxAlpha(1.0f) {
         // compute inverse scales
-        if (CC_UNLIKELY(!transform.isPureTranslate())) {
+        if (CC_LIKELY(transform.isPureTranslate())) {
+            inverseScaleX = 1.0f;
+            inverseScaleY = 1.0f;
+        } else {
             float scaleX, scaleY;
             PathTessellator::extractTessellationScales(transform, &scaleX, &scaleY);
             inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 1.0f;
@@ -922,6 +933,9 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
         Vector<Vertex>& outputVertices) {
     ATRACE_CALL();
 
+    LOG_ALWAYS_FATAL_IF(sqrInvScaleX < ERROR_SQR_INV_THRESH || sqrInvScaleY < ERROR_SQR_INV_THRESH,
+            "Invalid scale factors used for approx %e, %e", sqrInvScaleX, sqrInvScaleY);
+
     // TODO: to support joins other than sharp miter, join vertices should be labelled in the
     // perimeter, or resolved into more vertices. Reconsider forceClose-ing in that case.
     SkPath::Iter iter(path, forceClose);
@@ -975,14 +989,14 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
 // Bezier approximation
 ///////////////////////////////////////////////////////////////////////////////
 
-// Depth at which recursion is aborted
-#define ABORT_DEPTH 20
-
 void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
         float p2x, float p2y, float c2x, float c2y,
         float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
         Vector<Vertex>& outputVertices, int depth) {
+    LOG_ALWAYS_FATAL_IF(depth >= ERROR_DEPTH, "ERROR DEPTH exceeded: cubic approx, invscale %e x %e, vertcount %d",
+            sqrInvScaleX, sqrInvScaleY, outputVertices.size());
+
     float dx = p2x - p1x;
     float dy = p2y - p1y;
     float d1 = fabs((c1x - p2x) * dy - (c1y - p2y) * dx);
@@ -990,8 +1004,7 @@ void PathTessellator::recursiveCubicBezierVertices(
     float d = d1 + d2;
 
     // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
-
-    if (depth >= ABORT_DEPTH || d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    if (d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, p2x, p2y);
     } else {
@@ -1029,11 +1042,14 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float cx, float cy,
         float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
         Vector<Vertex>& outputVertices, int depth) {
+    LOG_ALWAYS_FATAL_IF(depth >= ERROR_DEPTH, "ERROR_DEPTH exceeded: quadratic approx, invscale %e x %e, vertcount %d",
+            sqrInvScaleX, sqrInvScaleY, outputVertices.size());
+
     float dx = bx - ax;
     float dy = by - ay;
     float d = (cx - bx) * dy - (cy - by) * dx;
 
-    if (depth >= ABORT_DEPTH || d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+    if (d * d < thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, bx, by);
     } else {
