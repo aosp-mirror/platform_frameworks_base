@@ -339,14 +339,8 @@ td.no {
   </tr>
 
     <tr>
-    <td>APK signing</td>
+    <td>APK signing and keystore management</td>
     <td class="yes">Yes</td>
-    <td class="yes">Yes</td>
-    </tr>
-
-    <tr>
-    <td>Keystore management</td>
-    <td class="no">Coming soon</td>
     <td class="yes">Yes</td>
     </tr>
 

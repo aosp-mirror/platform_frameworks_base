@@ -108,13 +108,13 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
       your JDK folder, for example <code>C:\Program Files\Java\jdk1.7.0_21</code>.</p>
     </p>
     </li>
-
+    
   </ol>
 
 
 <p>The individual tools and
 other SDK packages are saved within the Android Studio application directory.
-To access the tools directly, use a terminal to navigate into the application and locate
+If you need to access the tools directly, use a terminal to navigate into the application and locate
 the {@code sdk/} directory. For example:</p>
 <p><code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
 
@@ -140,7 +140,7 @@ the {@code sdk/} directory. For example:</p>
 
 <p>The individual tools and
 other SDK packages are saved within the Android Studio application directory.
-To access the tools directly, use a terminal to navigate into the application and locate
+If you need access the tools directly, use a terminal to navigate into the application and locate
 the {@code sdk/} directory. For example:</p>
 <p><code>/Applications/Android\ Studio.app/sdk/</code></p>
 
