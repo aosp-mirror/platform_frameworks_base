@@ -22,17 +22,20 @@ import android.service.fingerprint.IFingerprintServiceReceiver;
  * Communication channel from client to the fingerprint service.
  * @hide
  */
-interface IFingerprintService {
-    // Returns 0 if successfully started, -1 otherwise
-    int enroll(long timeout, int userId);
+oneway interface IFingerprintService {
+    // Any errors resulting from this call will be returned to the listener
+    void enroll(IBinder token, long timeout, int userId);
+    
+    // Any errors resulting from this call will be returned to the listener
+    void enrollCancel(IBinder token, int userId);
 
-    // Returns 0 if fingerprintId's template can be removed, -1 otherwise
-    int remove(int fingerprintId, int userId);
+    // Any errors resulting from this call will be returned to the listener
+    void remove(IBinder token, int fingerprintId, int userId);
 
     // Start listening for fingerprint events.  This has the side effect of starting
     // the hardware if not already started.
-    oneway void startListening(IFingerprintServiceReceiver receiver, int userId);
+    void startListening(IBinder token, IFingerprintServiceReceiver receiver, int userId);
 
     // Stops listening for fingerprints
-    oneway void stopListening(int userId);
+    void stopListening(IBinder token, int userId);
 }

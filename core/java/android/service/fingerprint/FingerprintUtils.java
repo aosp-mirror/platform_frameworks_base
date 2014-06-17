@@ -18,10 +18,12 @@ package android.service.fingerprint;
 
 import android.content.ContentResolver;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
 
+public
 class FingerprintUtils {
     private static final boolean DEBUG = true;
     private static final String TAG = "FingerprintUtils";
@@ -30,13 +32,16 @@ class FingerprintUtils {
         String fingerIdsRaw = Settings.Secure.getStringForUser(res,
                 Settings.Secure.USER_FINGERPRINT_IDS, userId);
 
-        String[] fingerStringIds = fingerIdsRaw.replace("[","").replace("]","").split(", ");
-        int result[] = new int[fingerStringIds.length];
-        for (int i = 0; i < result.length; i++) {
-            try {
-                result[i] = Integer.decode(fingerStringIds[i]);
-            } catch (NumberFormatException e) {
-                if (DEBUG) Log.d(TAG, "Error when parsing finger id " + fingerStringIds[i]);
+        int result[] = {};
+        if (!TextUtils.isEmpty(fingerIdsRaw)) {
+            String[] fingerStringIds = fingerIdsRaw.replace("[","").replace("]","").split(", ");
+            result = new int[fingerStringIds.length];
+            for (int i = 0; i < result.length; i++) {
+                try {
+                    result[i] = Integer.decode(fingerStringIds[i]);
+                } catch (NumberFormatException e) {
+                    if (DEBUG) Log.d(TAG, "Error when parsing finger id " + fingerStringIds[i]);
+                }
             }
         }
         return result;
