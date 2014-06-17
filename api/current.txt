@@ -91,6 +91,7 @@ package android {
     field public static final java.lang.String NFC = "android.permission.NFC";
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
+    field public static final java.lang.String READ_ALL_VOICEMAIL = "com.android.voicemail.permission.READ_ALL_VOICEMAIL";
     field public static final java.lang.String READ_CALENDAR = "android.permission.READ_CALENDAR";
     field public static final java.lang.String READ_CALL_LOG = "android.permission.READ_CALL_LOG";
     field public static final java.lang.String READ_CONTACTS = "android.permission.READ_CONTACTS";
