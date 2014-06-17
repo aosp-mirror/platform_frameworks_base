@@ -84,7 +84,7 @@ page.image={@docRoot}preview/images/hero.jpg
                    material design, the new Google-wide standard.
                 </p>
                 <p class="landing-small">
-                  <a href="/preview/quantum/index.html">Learn about</a>
+                  <a href="/preview/quantum/index.html">Learn about material</a>
                 </p>
               </div>
               <div class="col-4">
@@ -96,7 +96,7 @@ page.image={@docRoot}preview/images/hero.jpg
 
                 </p>
                 <p class="landing-small">
-                  <a href="/preview/api-overview.html#art">Learn more</a>
+                  <a href="/preview/api-overview.html#ART">Learn about ART</a>
                 </p>
               </div>
               <div class="col-4">
@@ -107,7 +107,7 @@ page.image={@docRoot}preview/images/hero.jpg
                    how they look, and automatic syncing to non-handheld devices.
                 </p>
                 <p class="landing-small">
-                  <a href="/preview/api-overview#graphics">Learn more</a>
+                  <a href="/preview/api-overview#UI">Learn more</a>
                 </p>
               </div>
               <div class="col-4">
@@ -118,7 +118,7 @@ page.image={@docRoot}preview/images/hero.jpg
                   to give you more control over resource usage.
                 </p>
                 <p class="landing-small">
-                  <a href="/preview/api-overview#multimedia.html">Learn more</a>
+                  <a href="/preview/api-overview.html#Power">Learn more</a>
                 </p>
               </div>
             </div>
