@@ -24,6 +24,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -284,31 +285,13 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void setTint(ColorStateList tint, Mode tintMode) {
-        if (mShapeState.mTint != tint || mShapeState.mTintMode != tintMode) {
-            mShapeState.mTint = tint;
-            mShapeState.mTintMode = tintMode;
-            updateTintFilter();
-            invalidateSelf();
-        }
-    }
+    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {
+        final ShapeState state = mShapeState;
+        state.mTint = tint;
+        state.mTintMode = tintMode;
 
-    /**
-     * Ensures the tint filter is consistent with the current tint color and
-     * mode.
-     */
-    private void updateTintFilter() {
-        final ColorStateList tint = mShapeState.mTint;
-        final Mode tintMode = mShapeState.mTintMode;
-        if (tint != null && tintMode != null) {
-            if (mTintFilter == null) {
-                mTintFilter = new PorterDuffColorFilter(0, tintMode);
-            } else {
-                mTintFilter.setMode(tintMode);
-            }
-        } else {
-            mTintFilter = null;
-        }
+        mTintFilter = updateTintFilter(mTintFilter, tint, tintMode);
+        invalidateSelf();
     }
 
     @Override
@@ -349,17 +332,11 @@ public class ShapeDrawable extends Drawable {
 
     @Override
     protected boolean onStateChange(int[] stateSet) {
-        final ColorStateList tint = mShapeState.mTint;
-        if (tint != null) {
-            final int newColor = tint.getColorForState(stateSet, 0);
-            final int oldColor = mTintFilter.getColor();
-            if (oldColor != newColor) {
-                mTintFilter.setColor(newColor);
-                invalidateSelf();
-                return true;
-            }
+        final ShapeState state = mShapeState;
+        if (state.mTint != null && state.mTintMode != null) {
+            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+            return true;
         }
-
         return false;
     }
 
