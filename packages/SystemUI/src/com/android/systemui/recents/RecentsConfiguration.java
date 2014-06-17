@@ -106,12 +106,30 @@ public class RecentsConfiguration {
     public boolean developerOptionsEnabled;
 
     /** Private constructor */
-    private RecentsConfiguration() {}
+    private RecentsConfiguration(Context context) {
+        // Properties that don't have to be reloaded with each configuration change can be loaded
+        // here.
+
+        // Interpolators
+        fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
+        fastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_linear_in);
+        linearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
+        quintOutInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.decelerate_quint);
+
+        // Check if the developer options are enabled
+        ContentResolver cr = context.getContentResolver();
+        developerOptionsEnabled = Settings.Global.getInt(cr,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
+    }
 
     /** Updates the configuration to the current context */
     public static RecentsConfiguration reinitialize(Context context) {
         if (sInstance == null) {
-            sInstance = new RecentsConfiguration();
+            sInstance = new RecentsConfiguration(context);
         }
         sInstance.update(context);
         return sInstance;
@@ -131,16 +149,6 @@ public class RecentsConfiguration {
         // Animations
         animationPxMovementPerSecond =
                 res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
-
-        // Interpolators
-        fastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
-        fastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
-        linearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.linear_out_slow_in);
-        quintOutInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.decelerate_quint);
 
         // Filtering
         filteringCurrentViewsMinAnimDuration =
@@ -217,11 +225,6 @@ public class RecentsConfiguration {
         navBarScrimEnterDuration =
                 res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
 
-        // Check if the developer options are enabled
-        ContentResolver cr = context.getContentResolver();
-        developerOptionsEnabled = Settings.Global.getInt(cr,
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
-
         if (Console.Enabled) {
             Console.log(Constants.Log.UI.MeasureAndLayout,
                     "[RecentsConfiguration|orientation]", isLandscape ? "Landscape" : "Portrait",
@@ -255,6 +258,16 @@ public class RecentsConfiguration {
     /** Returns whether the search bar app widget exists. */
     public boolean hasSearchBarAppWidget() {
         return searchBarAppWidgetId >= 0;
+    }
+
+    /** Returns whether the status bar scrim should be animated when shown for the first time. */
+    public boolean shouldAnimateStatusBarScrim() {
+        return launchedFromHome;
+    }
+
+    /** Returns whether the status bar scrim should be visible. */
+    public boolean hasStatusBarScrim() {
+        return !launchedWithNoRecentTasks;
     }
 
     /** Returns whether the nav bar scrim should be animated when shown for the first time. */
