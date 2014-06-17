@@ -206,6 +206,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
     final protected boolean mIsReturning;
+    private Runnable mPendingTransition;
+    private boolean mIsStartingTransition;
+
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
@@ -523,7 +526,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * @param transitionArgs Bundle to store shared element placement information.
      * @param tempBounds     A temporary Rect for capturing the current location of views.
      */
-    private static void captureSharedElementState(View view, String name, Bundle transitionArgs,
+    protected static void captureSharedElementState(View view, String name, Bundle transitionArgs,
             Rect tempBounds) {
         Bundle sharedElementBundle = new Bundle();
         tempBounds.set(0, 0, view.getWidth(), view.getHeight());
@@ -557,6 +560,28 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
 
         transitionArgs.putBundle(name, sharedElementBundle);
+    }
+
+
+    protected void startTransition(Runnable runnable) {
+        if (mIsStartingTransition) {
+            mPendingTransition = runnable;
+        } else {
+            mIsStartingTransition = true;
+            runnable.run();
+        }
+    }
+
+    protected class ContinueTransitionListener extends Transition.TransitionListenerAdapter {
+        @Override
+        public void onTransitionStart(Transition transition) {
+            mIsStartingTransition = false;
+            Runnable pending = mPendingTransition;
+            mPendingTransition = null;
+            if (pending != null) {
+                startTransition(pending);
+            }
+        }
     }
 
     private static int scaleTypeToInt(ImageView.ScaleType scaleType) {
