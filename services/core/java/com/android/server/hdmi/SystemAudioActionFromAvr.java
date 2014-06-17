@@ -25,16 +25,15 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
     /**
      * Constructor
      *
-     * @param service {@link HdmiControlService} instance
-     * @param tvAddress logical address of TV device
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
      * @throw IllegalArugmentException if device type of tvAddress and avrAddress is invalid
      */
-    SystemAudioActionFromAvr(HdmiControlService service, int tvAddress, int avrAddress,
+    SystemAudioActionFromAvr(HdmiCecLocalDevice source, int avrAddress,
             boolean targetStatus) {
-        super(service, tvAddress, avrAddress, targetStatus);
-        HdmiUtils.verifyAddressType(tvAddress, HdmiCec.DEVICE_TV);
+        super(source, avrAddress, targetStatus);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
     }
 
     @Override
@@ -45,13 +44,13 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
     }
 
     private void handleSystemAudioActionFromAvr() {
-        if (mTargetAudioStatus == mService.getSystemAudioMode()) {
+        if (mTargetAudioStatus == tv().getSystemAudioMode()) {
             finish();
             return;
         }
-        if (mService.isInPresetInstallationMode()) {
+        if (tv().isInPresetInstallationMode()) {
             sendCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                    mSourceAddress, mAvrLogicalAddress,
+                    getSourceAddress(), mAvrLogicalAddress,
                     HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE, HdmiConstants.ABORT_REFUSED));
             mTargetAudioStatus = false;
             sendSystemAudioModeRequest();

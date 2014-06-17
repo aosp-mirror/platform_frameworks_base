@@ -35,16 +35,14 @@ abstract class RequestArcAction extends FeatureAction {
     /**
      * @Constructor
      *
-     * @param service {@link HdmiControlService} instance
-     * @param sourceAddress logical address to be used as source address. It should
-     *                      TV type
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress address of AV receiver. It should be AUDIO_SYSTEM type
      * @throw IllegalArugmentException if device type of sourceAddress and avrAddress
      *                      is invalid
      */
-    RequestArcAction(HdmiControlService service, int sourceAddress, int avrAddress) {
-        super(service, sourceAddress);
-        HdmiUtils.verifyAddressType(sourceAddress, HdmiCec.DEVICE_TV);
+    RequestArcAction(HdmiCecLocalDevice source, int avrAddress) {
+        super(source);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
         HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
     }
@@ -72,9 +70,9 @@ abstract class RequestArcAction extends FeatureAction {
 
     protected final void disableArcTransmission() {
         // Start Set ARC Transmission State action.
-        SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(mService,
-                mSourceAddress, mAvrAddress, false);
-        mService.addAndStartAction(action);
+        SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(localDevice(),
+                mAvrAddress, false);
+        addAndStartAction(action);
     }
 
     @Override

@@ -16,10 +16,11 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.IHdmiControlCallback;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiTvClient;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -66,24 +67,20 @@ final class DeviceSelectAction extends FeatureAction {
 
     private final HdmiCecDeviceInfo mTarget;
     private final IHdmiControlCallback mCallback;
-    private final int mSourcePath;
 
     private int mPowerStatusCounter = 0;
 
     /**
      * Constructor.
      *
-     * @param service {@link HdmiControlService} instance
-     * @param sourceAddress logical address of TV initiating this action
-     * @param sourcePath physical address of TV
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param target target logical device that will be a new active source
      * @param callback callback object
      */
-    public DeviceSelectAction(HdmiControlService service, int sourceAddress, int sourcePath,
+    public DeviceSelectAction(HdmiCecLocalDevice source,
             HdmiCecDeviceInfo target, IHdmiControlCallback callback) {
-        super(service, sourceAddress);
+        super(source);
         mCallback = callback;
-        mSourcePath = sourcePath;
         mTarget = target;
     }
 
@@ -96,7 +93,7 @@ final class DeviceSelectAction extends FeatureAction {
 
     private void queryDevicePowerStatus() {
         sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                mSourceAddress, mTarget.getLogicalAddress()));
+                getSourceAddress(), mTarget.getLogicalAddress()));
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
         addTimer(mState, TIMEOUT_MS);
     }
@@ -118,7 +115,8 @@ final class DeviceSelectAction extends FeatureAction {
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
                 if (opcode == HdmiCec.MESSAGE_ACTIVE_SOURCE && params.length == 2) {
                     int activePath = HdmiUtils.twoBytesToInt(params);
-                    ActiveSourceHandler.create(mService, mSourceAddress, mSourcePath, mCallback)
+                    ActiveSourceHandler
+                            .create(localDevice(), mCallback)
                             .process(cmd.getSource(), activePath);
                     finish();
                     return true;
@@ -174,15 +172,15 @@ final class DeviceSelectAction extends FeatureAction {
 
     private void sendSetStreamPath() {
         sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
-                mSourceAddress, mTarget.getPhysicalAddress()));
+                getSourceAddress(), mTarget.getPhysicalAddress()));
         mState = STATE_WAIT_FOR_ACTIVE_SOURCE;
         addTimer(mState, TIMEOUT_ACTIVE_SOURCE_MS);
     }
 
     private void sendRemoteKeyCommand(int keyCode) {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(mSourceAddress,
+        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
                 mTarget.getLogicalAddress(), keyCode));
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(mSourceAddress,
+        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
                 mTarget.getLogicalAddress()));
     }
 

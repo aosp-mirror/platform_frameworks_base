@@ -56,15 +56,14 @@ final class NewDeviceAction extends FeatureAction {
     /**
      * Constructor.
      *
-     * @param service {@link HdmiControlService} instance
-     * @param sourceAddress logical address to be used as source address
+     * @param source {@link HdmiCecLocalDevice} instance
      * @param deviceLogicalAddress logical address of the device in interest
      * @param devicePhysicalAddress physical address of the device in interest
      * @param requireRoutingChange whether to initiate routing change or not
      */
-    NewDeviceAction(HdmiControlService service, int sourceAddress, int deviceLogicalAddress,
+    NewDeviceAction(HdmiCecLocalDevice source, int deviceLogicalAddress,
             int devicePhysicalAddress, boolean requireRoutingChange) {
-        super(service, sourceAddress);
+        super(source);
         mDeviceLogicalAddress = deviceLogicalAddress;
         mDevicePhysicalAddress = devicePhysicalAddress;
         mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
@@ -73,16 +72,16 @@ final class NewDeviceAction extends FeatureAction {
 
     @Override
     public boolean start() {
-        if (HdmiCec.getTypeFromAddress(mSourceAddress) == HdmiCec.DEVICE_AUDIO_SYSTEM) {
-            if (mService.getAvrDeviceInfo() == null) {
+        if (HdmiCec.getTypeFromAddress(getSourceAddress()) == HdmiCec.DEVICE_AUDIO_SYSTEM) {
+            if (tv().getAvrDeviceInfo() == null) {
                 // TODO: Start system audio initiation action
             }
 
             // If new device is connected through ARC enabled port,
             // initiates ARC channel establishment.
-            if (mService.isConnectedToArcPort(mDevicePhysicalAddress)) {
-                mService.addAndStartAction(new RequestArcInitiationAction(mService, mSourceAddress,
-                        mDeviceLogicalAddress));
+            if (tv().isConnectedToArcPort(mDevicePhysicalAddress)) {
+                addAndStartAction(new RequestArcInitiationAction(localDevice(),
+                                mDeviceLogicalAddress));
             }
         }
 
@@ -95,7 +94,7 @@ final class NewDeviceAction extends FeatureAction {
             return true;
         }
 
-        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(mSourceAddress,
+        sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(),
                 mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
         return true;
@@ -155,14 +154,14 @@ final class NewDeviceAction extends FeatureAction {
 
     private void startRoutingChange() {
         // Stop existing routing control.
-        mService.removeAction(RoutingControlAction.class);
+        removeAction(RoutingControlAction.class);
 
         // Send routing change. The the address is a path of the active port.
         int newPath = toTopMostPortPath(mDevicePhysicalAddress);
-        sendCommand(HdmiCecMessageBuilder.buildRoutingChange(mSourceAddress,
-                mService.getActivePath(), newPath));
-        mService.addAndStartAction(new RoutingControlAction(mService, mSourceAddress,
-                mService.pathToPortId(newPath), null));
+        sendCommand(HdmiCecMessageBuilder.buildRoutingChange(getSourceAddress(),
+                localDevice().getActivePath(), newPath));
+        addAndStartAction(new RoutingControlAction(localDevice(),
+                localDevice().pathToPortId(newPath), null));
     }
 
     private static int toTopMostPortPath(int physicalAddress) {
@@ -170,7 +169,7 @@ final class NewDeviceAction extends FeatureAction {
     }
 
     private boolean mayProcessCommandIfCached(int destAddress, int opcode) {
-        HdmiCecMessage message = mService.getCecMessageCache().getMessage(destAddress, opcode);
+        HdmiCecMessage message = getCecMessageCache().getMessage(destAddress, opcode);
         if (message != null) {
             return processCommand(message);
         }
@@ -184,7 +183,7 @@ final class NewDeviceAction extends FeatureAction {
         if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(mSourceAddress,
+        sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(getSourceAddress(),
                 mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
     }
@@ -193,7 +192,7 @@ final class NewDeviceAction extends FeatureAction {
         if (mDisplayName == null) {
             mDisplayName = HdmiCec.getDefaultDeviceName(mDeviceLogicalAddress);
         }
-        mService.addCecDevice(new HdmiCecDeviceInfo(
+        tv().addCecDevice(new HdmiCecDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 HdmiCec.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));

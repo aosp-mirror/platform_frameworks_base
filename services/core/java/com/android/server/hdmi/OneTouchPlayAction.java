@@ -30,7 +30,7 @@ import android.util.Slog;
  * <p>Package-private, accessed by {@link HdmiControlService} only.
  */
 
-public final class OneTouchPlayAction extends FeatureAction {
+final class OneTouchPlayAction extends FeatureAction {
     private static final String TAG = "OneTouchPlayAction";
 
     // State in which the action is waiting for <Report Power Status>. In normal situation
@@ -48,34 +48,32 @@ public final class OneTouchPlayAction extends FeatureAction {
     // We wait up to RESPONSE_TIMEOUT_MS * LOOP_COUNTER_MAX = 20 seconds.
     private static final int LOOP_COUNTER_MAX = 10;
 
-    private final int mSourcePath;
     private final int mTargetAddress;
     private final IHdmiControlCallback mCallback;
 
     private int mPowerStatusCounter = 0;
 
     // Factory method. Ensures arguments are valid.
-    static OneTouchPlayAction create(HdmiControlService service, int sourceAddress,
-            int sourcePath, int targetAddress, IHdmiControlCallback callback) {
-        if (service == null || callback == null) {
+    static OneTouchPlayAction create(HdmiCecLocalDevice source,
+            int targetAddress, IHdmiControlCallback callback) {
+        if (source == null || callback == null) {
             Slog.e(TAG, "Wrong arguments");
             return null;
         }
-        return new OneTouchPlayAction(service, sourceAddress, sourcePath, targetAddress, callback);
+        return new OneTouchPlayAction(source, targetAddress,
+                callback);
     }
 
-    private OneTouchPlayAction(HdmiControlService service, int sourceAddress, int sourcePath,
-            int targetAddress, IHdmiControlCallback callback) {
-        super(service, sourceAddress);
-        mSourcePath = sourcePath;
+    private OneTouchPlayAction(HdmiCecLocalDevice localDevice, int targetAddress,
+            IHdmiControlCallback callback) {
+        super(localDevice);
         mTargetAddress = targetAddress;
         mCallback = callback;
     }
 
     @Override
     boolean start() {
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildTextViewOn(mSourceAddress, mTargetAddress));
+        sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
         broadcastActiveSource();
         queryDevicePowerStatus();
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
@@ -84,13 +82,12 @@ public final class OneTouchPlayAction extends FeatureAction {
     }
 
     private void broadcastActiveSource() {
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildActiveSource(mSourceAddress, mSourcePath));
+        sendCommand(HdmiCecMessageBuilder.buildActiveSource(getSourceAddress(), getSourcePath()));
     }
 
     private void queryDevicePowerStatus() {
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(mSourceAddress, mTargetAddress));
+        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
+                mTargetAddress));
     }
 
     @Override

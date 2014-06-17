@@ -52,11 +52,10 @@ final class HotplugDetectionAction extends FeatureAction {
     /**
      * Constructor
      *
-     * @param service instance of {@link HdmiControlService}
-     * @param sourceAddress logical address of a device that initiate this action
+     * @param source {@link HdmiCecLocalDevice} instance
      */
-    HotplugDetectionAction(HdmiControlService service, int sourceAddress) {
-        super(service, sourceAddress);
+    HotplugDetectionAction(HdmiCecLocalDevice source) {
+        super(source);
     }
 
     @Override
@@ -110,7 +109,7 @@ final class HotplugDetectionAction extends FeatureAction {
         if (mTimeoutCount == 0) {
             pollAllDevices();
         } else {
-            if (mService.getSystemAudioMode()) {
+            if (tv().getSystemAudioMode()) {
                 pollAudioSystem();
             }
         }
@@ -121,7 +120,7 @@ final class HotplugDetectionAction extends FeatureAction {
     private void pollAllDevices() {
         Slog.v(TAG, "Poll all devices.");
 
-        mService.pollDevices(new DevicePollingCallback() {
+        pollDevices(new DevicePollingCallback() {
             @Override
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, false);
@@ -133,7 +132,7 @@ final class HotplugDetectionAction extends FeatureAction {
     private void pollAudioSystem() {
         Slog.v(TAG, "Poll audio system.");
 
-        mService.pollDevices(new DevicePollingCallback() {
+        pollDevices(new DevicePollingCallback() {
             @Override
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, true);
@@ -143,7 +142,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {
-        BitSet currentInfos = infoListToBitSet(mService.getDeviceInfoList(false), audioOnly);
+        BitSet currentInfos = infoListToBitSet(tv().getDeviceInfoList(false), audioOnly);
         BitSet polledResult = addressListToBitSet(ackedAddress);
 
         // At first, check removed devices.
@@ -195,7 +194,8 @@ final class HotplugDetectionAction extends FeatureAction {
 
     private void addDevice(int addedAddress) {
         // Send <Give Physical Address>.
-        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(mSourceAddress, addedAddress));
+        sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(),
+                addedAddress));
     }
 
     private void removeDevice(int removedAddress) {
@@ -206,7 +206,7 @@ final class HotplugDetectionAction extends FeatureAction {
         mayCancelOneTouchRecord(removedAddress);
         mayDisableSystemAudioAndARC(removedAddress);
 
-        mService.removeCecDevice(removedAddress);
+        tv().removeCecDevice(removedAddress);
     }
 
     private void mayChangeRoutingPath(int address) {
@@ -217,7 +217,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayCancelDeviceSelect(int address) {
-        List<DeviceSelectAction> actions = mService.getActions(DeviceSelectAction.class);
+        List<DeviceSelectAction> actions = getActions(DeviceSelectAction.class);
         if (actions.isEmpty()) {
             return;
         }
@@ -225,7 +225,7 @@ final class HotplugDetectionAction extends FeatureAction {
         // Should ave only one Device Select Action
         DeviceSelectAction action = actions.get(0);
         if (action.getTargetAddress() == address) {
-            mService.removeAction(DeviceSelectAction.class);
+            removeAction(DeviceSelectAction.class);
         }
     }
 
@@ -239,11 +239,9 @@ final class HotplugDetectionAction extends FeatureAction {
         }
 
         // Turn off system audio mode.
-        mService.setSystemAudioMode(false);
-        if (mService.getArcStatus()) {
-            mService.addAndStartAction(
-                    new RequestArcTerminationAction(mService, mSourceAddress, address));
+        tv().setSystemAudioMode(false);
+        if (tv().getArcStatus()) {
+            addAndStartAction(new RequestArcTerminationAction(localDevice(), address));
         }
-
     }
 }

@@ -22,6 +22,9 @@ import android.os.Message;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
+
+import java.util.List;
 
 /**
  * Encapsulates a sequence of CEC/MHL command exchange for a certain feature.
@@ -33,14 +36,13 @@ import com.android.internal.annotations.VisibleForTesting;
  * of the object. All the actual action classes inherit FeatureAction.
  *
  * <p>More than one FeatureAction objects can be up and running simultaneously,
- * maintained by {@link HdmiControlService}. Each action is passed a new command
+ * maintained by {@link HdmiCecLocalDevice}. Each action is passed a new command
  * arriving from the bus, and either consumes it if the command is what the action expects,
  * or yields it to other action.
  *
  * Declared as package private, accessed by {@link HdmiControlService} only.
  */
 abstract class FeatureAction {
-
     private static final String TAG = "FeatureAction";
 
     // Timer handler message used for timeout event
@@ -56,19 +58,16 @@ abstract class FeatureAction {
     // Internal state indicating the progress of action.
     protected int mState = STATE_NONE;
 
-    protected final HdmiControlService mService;
-
-    // Logical address of the device for which the feature action is taken. The commands
-    // generated in an action all use this field as source address.
-    protected final int mSourceAddress;
+    private final HdmiControlService mService;
+    private final HdmiCecLocalDevice mSource;
 
     // Timer that manages timeout events.
     protected ActionTimer mActionTimer;
 
-    FeatureAction(HdmiControlService service, int sourceAddress) {
-        mService = service;
-        mSourceAddress = sourceAddress;
-        mActionTimer = createActionTimer(service.getServiceLooper());
+    FeatureAction(HdmiCecLocalDevice source) {
+        mSource = source;
+        mService = mSource.getService();
+        mActionTimer = createActionTimer(mService.getServiceLooper());
     }
 
     @VisibleForTesting
@@ -175,6 +174,42 @@ abstract class FeatureAction {
         mService.sendCecCommand(cmd, callback);
     }
 
+    protected final void addAndStartAction(FeatureAction action) {
+        mSource.addAndStartAction(action);
+    }
+
+    protected final <T extends FeatureAction> List<T> getActions(final Class<T> clazz) {
+        return mSource.getActions(clazz);
+    }
+
+    protected final HdmiCecMessageCache getCecMessageCache() {
+        return mSource.getCecMessageCache();
+    }
+
+    /**
+     * Remove the action from the action queue. This is called after the action finishes
+     * its role.
+     *
+     * @param action
+     */
+    protected final void removeAction(FeatureAction action) {
+        mSource.removeAction(action);
+    }
+
+    protected final <T extends FeatureAction> void removeAction(final Class<T> clazz) {
+        mSource.removeActionExcept(clazz, null);
+    }
+
+    protected final <T extends FeatureAction> void removeActionExcept(final Class<T> clazz,
+            final FeatureAction exception) {
+        mSource.removeActionExcept(clazz, exception);
+    }
+
+    protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
+            int retryCount) {
+        mService.pollDevices(callback, pickStrategy, retryCount);
+    }
+
     /**
      * Clean up action's state.
      *
@@ -194,13 +229,23 @@ abstract class FeatureAction {
         removeAction(this);
     }
 
-    /**
-     * Remove the action from the action queue. This is called after the action finishes
-     * its role.
-     *
-     * @param action
-     */
-    private void removeAction(FeatureAction action) {
-        mService.removeAction(action);
+    protected final HdmiCecLocalDevice localDevice() {
+        return mSource;
+    }
+
+    protected final HdmiCecLocalDevicePlayback playback() {
+        return (HdmiCecLocalDevicePlayback) mSource;
+    }
+
+    protected final HdmiCecLocalDeviceTv tv() {
+        return (HdmiCecLocalDeviceTv) mSource;
+    }
+
+    protected final int getSourceAddress() {
+        return mSource.getDeviceInfo().getLogicalAddress();
+    }
+
+    protected final int getSourcePath() {
+        return mSource.getDeviceInfo().getPhysicalAddress();
     }
 }

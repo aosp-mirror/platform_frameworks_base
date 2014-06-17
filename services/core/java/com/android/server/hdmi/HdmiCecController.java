@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Handler;
@@ -108,10 +107,6 @@ final class HdmiCecController {
     private volatile long mNativePtr;
 
     private HdmiControlService mService;
-
-    // Map-like container of all cec devices including local ones.
-    // A logical address of device is used as key of container.
-    private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos = new SparseArray<>();
 
     // Stores the local CEC devices in the system. Device type is used for key.
     private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
@@ -224,90 +219,6 @@ final class HdmiCecController {
         return body;
     }
 
-    /**
-     * Add a new {@link HdmiCecDeviceInfo}. It returns old device info which has the same
-     * logical address as new device info's.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     *
-     * @param deviceInfo a new {@link HdmiCecDeviceInfo} to be added.
-     * @return {@code null} if it is new device. Otherwise, returns old {@HdmiCecDeviceInfo}
-     *         that has the same logical address as new one has.
-     */
-    HdmiCecDeviceInfo addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
-        assertRunOnServiceThread();
-        HdmiCecDeviceInfo oldDeviceInfo = getDeviceInfo(deviceInfo.getLogicalAddress());
-        if (oldDeviceInfo != null) {
-            removeDeviceInfo(deviceInfo.getLogicalAddress());
-        }
-        mDeviceInfos.append(deviceInfo.getLogicalAddress(), deviceInfo);
-        return oldDeviceInfo;
-    }
-
-    /**
-     * Remove a device info corresponding to the given {@code logicalAddress}.
-     * It returns removed {@link HdmiCecDeviceInfo} if exists.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     *
-     * @param logicalAddress logical address of device to be removed
-     * @return removed {@link HdmiCecDeviceInfo} it exists. Otherwise, returns {@code null}
-     */
-    HdmiCecDeviceInfo removeDeviceInfo(int logicalAddress) {
-        assertRunOnServiceThread();
-        HdmiCecDeviceInfo deviceInfo = mDeviceInfos.get(logicalAddress);
-        if (deviceInfo != null) {
-            mDeviceInfos.remove(logicalAddress);
-        }
-        return deviceInfo;
-    }
-
-    /**
-     * Clear all device info.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     */
-    void clearDeviceInfoList() {
-        assertRunOnServiceThread();
-        mDeviceInfos.clear();
-    }
-
-    /**
-     * Return a list of all {@link HdmiCecDeviceInfo}.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     *
-     * @param includeLocalDevice whether to add local device or not
-     */
-    List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includeLocalDevice) {
-        assertRunOnServiceThread();
-        if (includeLocalDevice) {
-            return sparseArrayToList(mDeviceInfos);
-        } else {
-            ArrayList<HdmiCecDeviceInfo> infoList = new ArrayList<>();
-            for (int i = 0; i < mDeviceInfos.size(); ++i) {
-                HdmiCecDeviceInfo info = mDeviceInfos.valueAt(i);
-                if (mRemoteDeviceAddressPredicate.apply(info.getLogicalAddress())) {
-                    infoList.add(info);
-                }
-            }
-            return infoList;
-        }
-    }
-
-    /**
-     * Return a {@link HdmiCecDeviceInfo} corresponding to the given {@code logicalAddress}.
-     *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     *
-     * @param logicalAddress logical address to be retrieved
-     * @return {@link HdmiCecDeviceInfo} matched with the given {@code logicalAddress}.
-     *         Returns null if no logical address matched
-     */
-    HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
-        assertRunOnServiceThread();
-        return mDeviceInfos.get(logicalAddress);
-    }
 
     HdmiPortInfo[] getPortInfos() {
         return nativeGetPortInfos(mNativePtr);
@@ -451,7 +362,7 @@ final class HdmiCecController {
      */
     List<HdmiCecLocalDevice> getLocalDeviceList() {
         assertRunOnServiceThread();
-        return sparseArrayToList(mLocalDevices);
+        return HdmiUtils.sparseArrayToList(mLocalDevices);
     }
 
     private List<Integer> pickPollCandidates(int pickStrategy) {
@@ -487,14 +398,6 @@ final class HdmiCecController {
                 break;
         }
         return pollingCandidates;
-    }
-
-    private static <T> List<T> sparseArrayToList(SparseArray<T> array) {
-        ArrayList<T> list = new ArrayList<>();
-        for (int i = 0; i < array.size(); ++i) {
-            list.add(array.valueAt(i));
-        }
-        return list;
     }
 
     private boolean isAllocatedLocalDeviceAddress(int address) {
