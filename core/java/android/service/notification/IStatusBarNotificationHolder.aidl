@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, The Android Open Source Project
+ * Copyright (c) 2014, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package android.service.notification;
 
-import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.StatusBarNotification;
 
 /** @hide */
-oneway interface INotificationListener
-{
-    void onListenerConnected(in String[] notificationKeys);
-    void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder);
-    void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder);
+interface IStatusBarNotificationHolder {
+    StatusBarNotification get();
 }
