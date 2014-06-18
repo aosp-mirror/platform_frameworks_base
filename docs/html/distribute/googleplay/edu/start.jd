@@ -1,4 +1,4 @@
-page.title=Get Started with Education
+page.title=Publish Android Apps for Education
 page.image=/distribute/images/play-education.jpg
 meta.tags="education", "guidelines", "quality"
 page.tags="education", "addendum"
@@ -16,21 +16,23 @@ page.metaDescription=Join Google Play for Education in just a few simple steps.
 </ol>
 </div></div>
 <p>
-  If you've got great apps for education and want to reach even more teachers
+  If you've got great Android apps for education and want to reach even more teachers
   and students, you can join the <strong>Google Play for Education</strong>
   program in a few simple steps. You do everything using the familiar tools and
   processes in Google Play.
 </p>
 
 <p>
-  Note that Google Play for Education is currently available to <strong>K-12
-  schools in the United States</strong> only.
+Note that Google Play for Education is currently available to <strong>K-12 schools in the United
+States</strong> only.</p>
+
+<p>If you have an educational Chrome app instead of an Android app, you can learn more about
+Chrome Apps in Google Play for Education at <a href=
+"https://developers.google.com/edu">developers.google.com/edu</a>.
 </p>
 
-<div class="center-img">
-  <img src="{@docRoot}images/gpfe-start-0.jpg" style=
-  "border:1px solid #ddd;padding:0px;width:100%;">
-</div>
+<img src="{@docRoot}images/gpfe-start-0.jpg" style=
+  "border:1px solid #ddd;padding:0px" width="760" height="403">
 
 <div class="headerLine">
   <h2 id="register">
