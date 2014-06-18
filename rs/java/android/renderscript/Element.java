@@ -140,23 +140,31 @@ public class Element extends BaseObj {
         MATRIX_3X3 (17, 36),
         MATRIX_2X2 (18, 16),
 
-        RS_ELEMENT (1000, 4),
-        RS_TYPE (1001, 4),
-        RS_ALLOCATION (1002, 4),
-        RS_SAMPLER (1003, 4),
-        RS_SCRIPT (1004, 4),
-        RS_MESH (1005, 4),
-        RS_PROGRAM_FRAGMENT (1006, 4),
-        RS_PROGRAM_VERTEX (1007, 4),
-        RS_PROGRAM_RASTER (1008, 4),
-        RS_PROGRAM_STORE (1009, 4),
-        RS_FONT (1010, 4);
+        RS_ELEMENT (1000),
+        RS_TYPE (1001),
+        RS_ALLOCATION (1002),
+        RS_SAMPLER (1003),
+        RS_SCRIPT (1004),
+        RS_MESH (1005),
+        RS_PROGRAM_FRAGMENT (1006),
+        RS_PROGRAM_VERTEX (1007),
+        RS_PROGRAM_RASTER (1008),
+        RS_PROGRAM_STORE (1009),
+        RS_FONT (1010);
 
         int mID;
         int mSize;
         DataType(int id, int size) {
             mID = id;
             mSize = size;
+        }
+
+        DataType(int id) {
+            mID = id;
+            mSize = 4;
+            if (RenderScript.sPointerSize == 8) {
+                mSize = 32;
+            }
         }
     }
 
