@@ -1,0 +1,6 @@
+#!/bin/bash
+
+aapt package -M AndroidManifest.xml -S res --feature-of ../basic/bundle.apk -F bundle.apk -f && \
+unzip bundle.apk resources.arsc && \
+mv resources.arsc feature.arsc && \
+xxd -i feature.arsc > feature_arsc.h

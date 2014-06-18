@@ -159,12 +159,16 @@ public:
     const android::Vector<android::String8>& getSplitConfigurations() const { return mPartialConfigurations; }
     const char* getResourceIntermediatesDir() const { return mResourceIntermediatesDir; }
     void setResourceIntermediatesDir(const char* dir) { mResourceIntermediatesDir = dir; }
-    const android::Vector<const char*>& getPackageIncludes() const { return mPackageIncludes; }
-    void addPackageInclude(const char* file) { mPackageIncludes.add(file); }
+    const android::Vector<android::String8>& getPackageIncludes() const { return mPackageIncludes; }
+    void addPackageInclude(const char* file) { mPackageIncludes.add(android::String8(file)); }
     const android::Vector<const char*>& getJarFiles() const { return mJarFiles; }
     void addJarFile(const char* file) { mJarFiles.add(file); }
     const android::Vector<const char*>& getNoCompressExtensions() const { return mNoCompressExtensions; }
     void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
+    void setFeatureOfPackage(const char* str) { mFeatureOfPackage = str; }
+    const android::String8& getFeatureOfPackage() const { return mFeatureOfPackage; }
+    void setFeatureAfterPackage(const char* str) { mFeatureAfterPackage = str; }
+    const android::String8& getFeatureAfterPackage() const { return mFeatureAfterPackage; }
 
     const char*  getManifestMinSdkVersion() const { return mManifestMinSdkVersion; }
     void setManifestMinSdkVersion(const char*  val) { mManifestMinSdkVersion = val; }
@@ -290,12 +294,14 @@ private:
     android::String8 mConfigurations;
     android::String8 mPreferredDensity;
     android::Vector<android::String8> mPartialConfigurations;
-    android::Vector<const char*> mPackageIncludes;
+    android::Vector<android::String8> mPackageIncludes;
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mAssetSourceDirs;
     android::Vector<const char*> mResourceSourceDirs;
 
+    android::String8 mFeatureOfPackage;
+    android::String8 mFeatureAfterPackage;
     const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;

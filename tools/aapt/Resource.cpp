@@ -860,6 +860,18 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         }
     }
     
+    // Generate split name if feature is present.
+    const XMLNode::attribute_entry* attr = root->getAttribute(String16(), String16("featureName"));
+    if (attr != NULL) {
+        String16 splitName("feature_");
+        splitName.append(attr->string);
+        status_t err = root->addAttribute(String16(), String16("split"), splitName);
+        if (err != NO_ERROR) {
+            ALOGE("Failed to insert split name into AndroidManifest.xml");
+            return err;
+        }
+    }
+
     return NO_ERROR;
 }
 
@@ -968,7 +980,16 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     NOISY(printf("Creating resources for package %s\n",
                  assets->getPackage().string()));
 
-    ResourceTable table(bundle, String16(assets->getPackage()));
+    ResourceTable::PackageType packageType = ResourceTable::App;
+    if (bundle->getBuildSharedLibrary()) {
+        packageType = ResourceTable::SharedLibrary;
+    } else if (bundle->getExtending()) {
+        packageType = ResourceTable::System;
+    } else if (!bundle->getFeatureOfPackage().isEmpty()) {
+        packageType = ResourceTable::AppFeature;
+    }
+
+    ResourceTable table(bundle, String16(assets->getPackage()), packageType);
     err = table.addIncludedResources(bundle, assets);
     if (err != NO_ERROR) {
         return err;

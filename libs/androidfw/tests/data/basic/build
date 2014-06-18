@@ -1,6 +1,9 @@
 #!/bin/bash
 
-aapt package -M AndroidManifest.xml -S res -F bundle.apk -f && \
+aapt package -M AndroidManifest.xml -S res --split fr,de -F bundle.apk -f && \
 unzip bundle.apk resources.arsc && \
 mv resources.arsc basic.arsc && \
-xxd -i basic.arsc > basic_arsc.h
+xxd -i basic.arsc > basic_arsc.h && \
+unzip bundle_de_fr.apk resources.arsc && \
+mv resources.arsc split_de_fr.arsc && \
+xxd -i split_de_fr.arsc > split_de_fr_arsc.h

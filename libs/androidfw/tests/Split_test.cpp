@@ -19,46 +19,37 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
+#include "data/R.h"
 
 #include <gtest/gtest.h>
+
+using namespace android;
+
+namespace {
 
 /**
  * Include a binary resource table. This table
  * is a base table for an APK split.
  *
- * Package: com.android.example.split
- *
- * layout/main          0x7f020000 {default, fr-sw600dp-v13}
- *
- * string/app_title     0x7f030000 {default}
- * string/test          0x7f030001 {default}
- * string/boom          0x7f030002 {default}
- * string/blah          0x7f030003 {default}
- *
- * array/lotsofstrings  0x7f040000 {default}
- * array/numList        0x7f040001 {default}
- * array/ary            0x7f040002 {default}
- *
+ * Package: com.android.test.basic
  */
-#include "data/split_base_arsc.h"
+#include "data/basic/basic_arsc.h"
 
 /**
  * Include a binary resource table. This table
  * is a configuration split table for an APK split.
  *
- * Package: com.android.example.split
- *
- * string/app_title     0x7f030000 {fr}
- * string/test          0x7f030001 {de,fr}
- * string/blah          0x7f030003 {fr}
- *
- * array/lotsofstrings  0x7f040000 {fr}
- *
+ * Package: com.android.test.basic
  */
-#include "data/split_de_fr_arsc.h"
+#include "data/basic/split_de_fr_arsc.h"
 
-
-using namespace android;
+/**
+ * Include a binary resource table. This table
+ * is a feature split table for an APK split.
+ *
+ * Package: com.android.test.basic
+ */
+#include "data/feature/feature_arsc.h"
 
 enum { MAY_NOT_BE_BAG = false };
 
@@ -70,7 +61,7 @@ void makeConfigFrench(ResTable_config* config) {
 
 TEST(SplitTest, TestLoadBase) {
     ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(split_base_arsc, split_base_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 }
 
 TEST(SplitTest, TestGetResourceFromBase) {
@@ -80,14 +71,14 @@ TEST(SplitTest, TestGetResourceFromBase) {
     ResTable table;
     table.setParameters(&frenchConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(split_base_arsc, split_base_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable_config expectedConfig;
     memset(&expectedConfig, 0, sizeof(expectedConfig));
 
     Res_value val;
     ResTable_config config;
-    ssize_t block = table.getResource(0x7f030000, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
 
     // The returned block should tell us which string pool to get the value, if it is a string.
     EXPECT_GE(block, 0);
@@ -105,12 +96,12 @@ TEST(SplitTest, TestGetResourceFromSplit) {
     ResTable table;
     table.setParameters(&expectedConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(split_base_arsc, split_base_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
     ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
 
     Res_value val;
     ResTable_config config;
-    ssize_t block = table.getResource(0x7f030000, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
 
     EXPECT_GE(block, 0);
 
@@ -126,15 +117,15 @@ TEST(SplitTest, ResourcesFromBaseAndSplitHaveSameNames) {
     ResTable table;
     table.setParameters(&expectedConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(split_base_arsc, split_base_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable::resource_name baseName;
-    EXPECT_TRUE(table.getResourceName(0x7f030003, false, &baseName));
+    EXPECT_TRUE(table.getResourceName(R::string::test1, false, &baseName));
 
     ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
 
     ResTable::resource_name frName;
-    EXPECT_TRUE(table.getResourceName(0x7f030003, false, &frName));
+    EXPECT_TRUE(table.getResourceName(R::string::test1, false, &frName));
 
     EXPECT_EQ(
             String16(baseName.package, baseName.packageLen),
@@ -154,11 +145,11 @@ TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
     memset(&defaultConfig, 0, sizeof(defaultConfig));
 
     ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(split_base_arsc, split_base_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
     uint32_t specFlags = 0;
-    ssize_t block = table.getResource(0x7f030000, &val, MAY_NOT_BE_BAG, 0, &specFlags, NULL);
+    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, &specFlags, NULL);
     EXPECT_GE(block, 0);
 
     EXPECT_EQ(static_cast<uint32_t>(0), specFlags);
@@ -166,8 +157,47 @@ TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
     ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
 
     uint32_t frSpecFlags = 0;
-    block = table.getResource(0x7f030000, &val, MAY_NOT_BE_BAG, 0, &frSpecFlags, NULL);
+    block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, &frSpecFlags, NULL);
     EXPECT_GE(block, 0);
 
     EXPECT_EQ(ResTable_config::CONFIG_LOCALE, frSpecFlags);
 }
+
+TEST(SplitFeatureTest, TestNewResourceIsAccessible) {
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+
+    Res_value val;
+    ssize_t block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+    EXPECT_LT(block, 0);
+
+    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+
+    block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+    EXPECT_GE(block, 0);
+
+    EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
+}
+
+TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+
+    ResTable::resource_name name;
+    EXPECT_FALSE(table.getResourceName(R::string::test3, false, &name));
+
+    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+
+    EXPECT_TRUE(table.getResourceName(R::string::test3, false, &name));
+
+    EXPECT_EQ(String16("com.android.test.basic"),
+            String16(name.package, name.packageLen));
+
+    EXPECT_EQ(String16("string"),
+            String16(name.type, name.typeLen));
+
+    EXPECT_EQ(String16("test3"),
+            String16(name.name, name.nameLen));
+}
+
+} // namespace

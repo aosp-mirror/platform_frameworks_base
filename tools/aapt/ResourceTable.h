@@ -74,11 +74,23 @@ struct AccessorCookie
 class ResourceTable : public ResTable::Accessor
 {
 public:
+    // The type of package to build.
+    enum PackageType {
+        App,
+        System,
+        SharedLibrary,
+        AppFeature
+    };
+
     class Package;
     class Type;
     class Entry;
 
-    ResourceTable(Bundle* bundle, const String16& assetsPackage);
+    ResourceTable(Bundle* bundle, const String16& assetsPackage, PackageType type);
+
+    const String16& getAssetsPackage() const {
+        return mAssetsPackage;
+    }
 
     status_t addIncludedResources(Bundle* bundle, const sp<AaptAssets>& assets);
 
@@ -448,7 +460,7 @@ public:
 
     class Package : public RefBase {
     public:
-        Package(const String16& name, ssize_t includedId=-1);
+        Package(const String16& name, size_t packageId);
         virtual ~Package() { }
 
         String16 getName() const { return mName; }
@@ -456,7 +468,7 @@ public:
                          const SourcePos& pos,
                          bool doSetIndex = false);
 
-        ssize_t getAssignedId() const { return mIncludedId; }
+        size_t getAssignedId() const { return mPackageId; }
 
         const ResStringPool& getTypeStrings() const { return mTypeStrings; }
         uint32_t indexOfTypeString(const String16& s) const { return mTypeStringsMapping.valueFor(s); }
@@ -479,7 +491,7 @@ public:
                             DefaultKeyedVector<String16, uint32_t>* mappings);
 
         const String16 mName;
-        const ssize_t mIncludedId;
+        const size_t mPackageId;
         DefaultKeyedVector<String16, sp<Type> > mTypes;
         Vector<sp<Type> > mOrderedTypes;
         sp<AaptFile> mTypeStringsData;
@@ -512,13 +524,11 @@ private:
 
 
     String16 mAssetsPackage;
+    PackageType mPackageType;
     sp<AaptAssets> mAssets;
+    uint32_t mTypeIdOffset;
     DefaultKeyedVector<String16, sp<Package> > mPackages;
     Vector<sp<Package> > mOrderedPackages;
-    uint32_t mNextPackageId;
-    bool mHaveAppPackage;
-    bool mIsAppPackage;
-    bool mIsSharedLibrary;
     size_t mNumLocal;
     SourcePos mCurrentXmlPos;
     Bundle* mBundle;
