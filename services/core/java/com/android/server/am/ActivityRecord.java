@@ -567,7 +567,10 @@ final class ActivityRecord {
     }
 
     boolean isPersistable() {
-        return (info.flags & ActivityInfo.FLAG_PERSISTABLE) != 0;
+        return (info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY ||
+                info.persistableMode == ActivityInfo.PERSIST_ACROSS_REBOOTS) &&
+                (intent == null ||
+                        (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
     void makeFinishing() {

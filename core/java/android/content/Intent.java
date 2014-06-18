@@ -7375,6 +7375,7 @@ public class Intent implements Parcelable, Cloneable {
             for (int categoryNdx = mCategories.size() - 1; categoryNdx >= 0; --categoryNdx) {
                 out.attribute(null, ATTR_CATEGORY, mCategories.valueAt(categoryNdx));
             }
+            out.endTag(null, TAG_CATEGORIES);
         }
     }
 

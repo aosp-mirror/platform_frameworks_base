@@ -873,17 +873,33 @@
     <!-- The name of the logical parent of the activity as it appears in the manifest. -->
     <attr name="parentActivityName" format="string" />
 
-    <!-- Define an activity that will persist across reboots. If such an activity is in the
-         Recents list when the device is shut off it will appear in the Recents list when
-         the device is next powered on. To be persisted all activities in the task from the
-         root activity up to the last activity before a <em>break</em> must be declared with
-         the persistable attribute. A <em>break</em> is the first activity after the root
-         started with Intent.FLAG_CLEAR_TASK_WHEN_RESET.
+    <!-- Define how an activity persist across reboots. Activities defined as "never" will not
+         be persisted. Those defined as "always" will be persisted. Those defined as "taskOnly"
+         will persist the root activity of the task only. See below for more detail as to
+         what gets persisted. -->
+    <attr name="persistableMode">
+        <!-- The default. If this activity forms the root of a task then that task will be
+             persisted across reboots but only the launching intent will be used. All
+             activities above this activity in the task will not be persisted. In addition
+             this activity will not be passed a PersistableBundle into which it could have
+             stored its state. -->
+        <enum name="persistRootOnly" value="0" />
+        <!-- If this activity forms the root of a task then that task will not be persisted
+             across reboots -->
+        <enum name="doNotPersist" value="1" />
+        <!-- If this activity forms the root of a task then the task and this activity will
+             be persisted across reboots. If the activity above this activity is also
+             tagged with the attribute <code>"persist"</code> then it will be persisted as well.
+             And so on up the task stack until either an activity without the
+             <code>persistableMode="persistAcrossReboots"</code> attribute or one that was launched
+             with the flag Intent.FLAG_CLEAR_TASK_WHEN_RESET is encountered.
 
-         <p>Activities that are declared with the persistable attribute will be provided with a
-         forced-persistable Bundle in onCreate() and onSavedInstanceState(), and must only
-         be passed a persistable Bundle in their Intent.extras. -->
-    <attr name="persistable" format="boolean" />
+             <p>Activities that are declared with the persistAcrossReboots attribute will be
+             provided with a PersistableBundle in onSavedInstanceState(), These activities may
+             use this PeristableBundle to save their state. Then, following a reboot, that
+             PersistableBundle will be provided back to the activity in its onCreate() method. -->
+        <enum name="persistAcrossReboots" value="2" />
+    </attr>
 
     <!-- This attribute specifies that an activity shall become the root activity of a
          new task each time it is launched. Using this attribute permits the user to
@@ -1623,7 +1639,7 @@
         <!-- @hide This broacast receiver will only receive broadcasts for the
              primary user.  Can only be used with receivers. -->
         <attr name="primaryUserOnly" format="boolean" />
-        <attr name="persistable" />
+        <attr name="persistableMode" />
         <attr name="allowEmbedded" />
         <attr name="documentLaunchMode" />
         <attr name="maxRecents" />

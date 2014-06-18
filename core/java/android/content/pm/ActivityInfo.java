@@ -104,6 +104,28 @@ public class ActivityInfo extends ComponentInfo
     public int documentLaunchMode;
 
     /**
+     * Constant corresponding to <code>persistRootOnly</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int PERSIST_ROOT_ONLY = 0;
+    /**
+     * Constant corresponding to <code>doNotPersist</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int DO_NOT_PERSIST = 1;
+    /**
+     * Constant corresponding to <code>persistAcrossReboots</code> in
+     * the {@link android.R.attr#persistableMode} attribute.
+     */
+    public static final int PERSIST_ACROSS_REBOOTS = 2;
+    /**
+     * Value indicating how this activity is to be persisted across
+     * reboots for restoring in the Recents list.
+     * {@link android.R.attr#persistableMode}
+     */
+    public int persistableMode;
+
+    /**
      * The maximum number of tasks rooted at this activity that can be in the recent task list.
      * Refer to {@link android.R.attr#maxRecents}.
      */
@@ -229,12 +251,6 @@ public class ActivityInfo extends ComponentInfo
      * @see android.app.Activity#setImmersive(boolean)
      */
     public static final int FLAG_IMMERSIVE = 0x0800;
-    /**
-     * Bit in {@link #flags} indicating that this activity is to be persisted across
-     * reboots for display in the Recents list.
-     * {@link android.R.attr#persistable}
-     */
-    public static final int FLAG_PERSISTABLE = 0x1000;
     /**
      * Bit in {@link #flags} indicating that tasks started with this activity are to be
      * removed from the recent list of tasks when the last activity in the task is finished.
@@ -641,13 +657,23 @@ public class ActivityInfo extends ComponentInfo
         return theme != 0 ? theme : applicationInfo.theme;
     }
 
+    private String persistableModeToString() {
+        switch(persistableMode) {
+            case PERSIST_ROOT_ONLY: return "PERSIST_ROOT_ONLY";
+            case DO_NOT_PERSIST: return "DO_NOT_PERSIST";
+            case PERSIST_ACROSS_REBOOTS: return "PERSIST_ACROSS_REBOOTS";
+            default: return "UNKNOWN=" + persistableMode;
+        }
+    }
+
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
         pw.println(prefix + "taskAffinity=" + taskAffinity
-                + " targetActivity=" + targetActivity);
+                + " targetActivity=" + targetActivity
+                + " persistableMode=" + persistableModeToString());
         if (launchMode != 0 || flags != 0 || theme != 0) {
             pw.println(prefix + "launchMode=" + launchMode
                     + " flags=0x" + Integer.toHexString(flags)
@@ -688,6 +714,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(softInputMode);
         dest.writeInt(uiOptions);
         dest.writeString(parentActivityName);
+        dest.writeInt(persistableMode);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -713,5 +740,6 @@ public class ActivityInfo extends ComponentInfo
         softInputMode = source.readInt();
         uiOptions = source.readInt();
         parentActivityName = source.readString();
+        persistableMode = source.readInt();
     }
 }

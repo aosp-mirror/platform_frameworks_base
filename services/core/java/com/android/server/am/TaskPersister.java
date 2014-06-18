@@ -45,7 +45,7 @@ public class TaskPersister {
     static final boolean DEBUG = false;
 
     /** When in slow mode don't write tasks out faster than this */
-    private static final long INTER_TASK_DELAY_MS = 60000;
+    private static final long INTER_TASK_DELAY_MS = 10000;
     private static final long DEBUG_INTER_TASK_DELAY_MS = 5000;
 
     private static final String RECENTS_FILENAME = "_task";
@@ -69,6 +69,7 @@ public class TaskPersister {
     TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor) {
         sTasksDir = new File(systemDir, TASKS_DIRNAME);
         if (!sTasksDir.exists()) {
+            if (DEBUG) Slog.d(TAG, "Creating tasks directory " + sTasksDir);
             if (!sTasksDir.mkdir()) {
                 Slog.e(TAG, "Failure creating tasks directory " + sTasksDir);
             }
@@ -76,6 +77,7 @@ public class TaskPersister {
 
         sImagesDir = new File(systemDir, IMAGES_DIRNAME);
         if (!sImagesDir.exists()) {
+            if (DEBUG) Slog.d(TAG, "Creating images directory " + sTasksDir);
             if (!sImagesDir.mkdir()) {
                 Slog.e(TAG, "Failure creating images directory " + sImagesDir);
             }
@@ -172,14 +174,15 @@ public class TaskPersister {
                                     TaskRecord.restoreFromXml(in, mStackSupervisor);
                             if (DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" + task);
                             if (task != null) {
+                                task.isPersistable = true;
                                 tasks.add(task);
                                 final int taskId = task.taskId;
                                 recoveredTaskIds.add(taskId);
                                 mStackSupervisor.setNextTaskId(taskId);
                             }
                         } else {
-                            Slog.e(TAG, "restoreTasksLocked Unknown xml event=" + event + " name="
-                                    + name);
+                            Slog.wtf(TAG, "restoreTasksLocked Unknown xml event=" + event +
+                                    " name=" + name);
                         }
                     }
                     XmlUtils.skipCurrentTag(in);
@@ -195,6 +198,7 @@ public class TaskPersister {
                     }
                 }
                 if (!DEBUG && deleteFile) {
+                    if (DEBUG) Slog.d(TAG, "Deleting file=" + taskFile.getName());
                     taskFile.delete();
                 }
             }
@@ -209,7 +213,7 @@ public class TaskPersister {
         Arrays.sort(tasksArray, new Comparator<TaskRecord>() {
             @Override
             public int compare(TaskRecord lhs, TaskRecord rhs) {
-                final long diff = lhs.mLastTimeMoved - rhs.mLastTimeMoved;
+                final long diff = rhs.mLastTimeMoved - lhs.mLastTimeMoved;
                 if (diff < 0) {
                     return -1;
                 } else if (diff > 0) {
@@ -233,8 +237,7 @@ public class TaskPersister {
                 try {
                     taskId = Integer.valueOf(filename.substring(0, taskIdEnd));
                 } catch (Exception e) {
-                    if (DEBUG) Slog.d(TAG, "removeObsoleteFile: Can't parse file=" +
-                            file.getName());
+                    Slog.wtf(TAG, "removeObsoleteFile: Can't parse file=" + file.getName());
                     file.delete();
                     continue;
                 }
@@ -288,15 +291,18 @@ public class TaskPersister {
                 synchronized(mService) {
                     final ArrayList<TaskRecord> tasks = mService.mRecentTasks;
                     persistentTaskIds.clear();
+                    if (DEBUG) Slog.d(TAG, "mRecents=" + tasks);
                     for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                         task = tasks.get(taskNdx);
                         if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task + " persistable=" +
                                 task.isPersistable + " needsPersisting=" + task.needsPersisting);
-                        if (task.isPersistable) {
+                        if (task.isPersistable && !task.stack.isHomeStack()) {
+                            if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                             persistentTaskIds.add(task.taskId);
 
                             if (task.needsPersisting) {
                                 try {
+                                    if (DEBUG) Slog.d(TAG, "Saving task=" + task);
                                     stringWriter = saveToXml(task);
                                     break;
                                 } catch (IOException e) {
@@ -305,6 +311,8 @@ public class TaskPersister {
                                     task.needsPersisting = false;
                                 }
                             }
+                        } else {
+                            if (DEBUG) Slog.d(TAG, "omitting from persistentTaskIds task=" + task);
                         }
                     }
                 }
@@ -330,6 +338,8 @@ public class TaskPersister {
                     // Made it through the entire list and didn't find anything new that needed
                     // persisting.
                     if (!DEBUG) {
+                        if (DEBUG) Slog.d(TAG, "Calling removeObsoleteFiles persistentTaskIds=" +
+                                persistentTaskIds);
                         removeObsoleteFiles(persistentTaskIds);
                     }
 

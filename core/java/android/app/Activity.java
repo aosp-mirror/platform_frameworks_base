@@ -929,7 +929,8 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Same as {@link #onCreate(android.os.Bundle)} but called for those activities created with
-     * the attribute {@link android.R.attr#persistable} set true.
+     * the attribute {@link android.R.attr#persistableMode} set to
+     * <code>persistAcrossReboots</code>.
      *
      * @param savedInstanceState if the activity is being re-initialized after
      *     previously being shut down then this Bundle contains the data it most
@@ -1012,8 +1013,9 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * This is the same as {@link #onRestoreInstanceState(Bundle)} but is called for activities
-     * created with the attribute {@link android.R.attr#persistable}. The {@link
-     * android.os.PersistableBundle} passed came from the restored PersistableBundle first
+     * created with the attribute {@link android.R.attr#persistableMode} set to
+     * <code>persistAcrossReboots</code>. The {@link android.os.PersistableBundle} passed
+     * came from the restored PersistableBundle first
      * saved in {@link #onSaveInstanceState(Bundle, PersistableBundle)}.
      *
      * <p>This method is called between {@link #onStart} and
@@ -1111,7 +1113,8 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * This is the same as {@link #onPostCreate(Bundle)} but is called for activities
-     * created with the attribute {@link android.R.attr#persistable}.
+     * created with the attribute {@link android.R.attr#persistableMode} set to
+     * <code>persistAcrossReboots</code>.
      *
      * @param savedInstanceState The data most recently supplied in {@link #onSaveInstanceState}
      * @param persistentState The data caming from the PersistableBundle first
@@ -1352,10 +1355,10 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * This is the same as {@link #onSaveInstanceState} but is called for activities
-     * created with the attribute {@link android.R.attr#persistable}. The {@link
-     * android.os.PersistableBundle} passed in will be saved and presented in
-     * {@link #onCreate(Bundle, PersistableBundle)} the first time that this activity
-     * is restarted following the next device reboot.
+     * created with the attribute {@link android.R.attr#persistableMode} set to
+     * <code>persistAcrossReboots</code>. The {@link android.os.PersistableBundle} passed
+     * in will be saved and presented in {@link #onCreate(Bundle, PersistableBundle)}
+     * the first time that this activity is restarted following the next device reboot.
      *
      * @param outState Bundle in which to place your saved state.
      * @param outPersistentState State which will be saved across reboots.
