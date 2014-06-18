@@ -18,9 +18,11 @@ package android.app;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.Window;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -30,10 +32,6 @@ import java.util.ArrayList;
 class ActivityTransitionState {
 
     private static final String ENTERING_SHARED_ELEMENTS = "android:enteringSharedElements";
-
-    private static final String ENTERING_MAPPED_FROM = "android:enteringMappedFrom";
-
-    private static final String ENTERING_MAPPED_TO = "android:enteringMappedTo";
 
     private static final String EXITING_MAPPED_FROM = "android:exitingMappedFrom";
 
@@ -46,16 +44,6 @@ class ActivityTransitionState {
     private ArrayList<String> mEnteringNames;
 
     /**
-     * The shared elements that this Activity as accepted and mapped to local Views.
-     */
-    private ArrayList<String> mEnteringFrom;
-
-    /**
-     * The names of local Views that are mapped to those elements in mEnteringFrom.
-     */
-    private ArrayList<String> mEnteringTo;
-
-    /**
      * The names of shared elements that were shared to the called Activity.
      */
     private ArrayList<String> mExitingFrom;
@@ -66,10 +54,15 @@ class ActivityTransitionState {
     private ArrayList<String> mExitingTo;
 
     /**
-     * The ActivityOptions used to call an Activity. Used to make the elements restore
+     * The local Views that were shared out, mapped to those elements in mExitingFrom.
+     */
+    private ArrayList<View> mExitingToView;
+
+    /**
+     * The ExitTransitionCoordinator used to start an Activity. Used to make the elements restore
      * Visibility of exited Views.
      */
-    private ActivityOptions mCalledActivityOptions;
+    private ExitTransitionCoordinator mCalledExitCoordinator;
 
     /**
      * We must be able to cancel entering transitions to stop changing the Window to
@@ -92,15 +85,42 @@ class ActivityTransitionState {
      */
     private boolean mIsEnterPostponed;
 
+    /**
+     * Potential exit transition coordinators.
+     */
+    private SparseArray<WeakReference<ExitTransitionCoordinator>> mExitTransitionCoordinators;
+
+    /**
+     * Next key for mExitTransitionCoordinator.
+     */
+    private int mExitTransitionCoordinatorsKey = 1;
+
     public ActivityTransitionState() {
+    }
+
+    public int addExitTransitionCoordinator(ExitTransitionCoordinator exitTransitionCoordinator) {
+        if (mExitTransitionCoordinators == null) {
+            mExitTransitionCoordinators =
+                    new SparseArray<WeakReference<ExitTransitionCoordinator>>();
+        }
+        WeakReference<ExitTransitionCoordinator> ref = new WeakReference(exitTransitionCoordinator);
+        // clean up old references:
+        for (int i = mExitTransitionCoordinators.size() - 1; i >= 0; i--) {
+            WeakReference<ExitTransitionCoordinator> oldRef
+                    = mExitTransitionCoordinators.valueAt(i);
+            if (oldRef.get() == null) {
+                mExitTransitionCoordinators.removeAt(i);
+            }
+        }
+        int newKey = mExitTransitionCoordinatorsKey++;
+        mExitTransitionCoordinators.append(newKey, ref);
+        return newKey;
     }
 
     public void readState(Bundle bundle) {
         if (bundle != null) {
             if (mEnterTransitionCoordinator == null || mEnterTransitionCoordinator.isReturning()) {
                 mEnteringNames = bundle.getStringArrayList(ENTERING_SHARED_ELEMENTS);
-                mEnteringFrom = bundle.getStringArrayList(ENTERING_MAPPED_FROM);
-                mEnteringTo = bundle.getStringArrayList(ENTERING_MAPPED_TO);
             }
             if (mEnterTransitionCoordinator == null) {
                 mExitingFrom = bundle.getStringArrayList(EXITING_MAPPED_FROM);
@@ -112,8 +132,6 @@ class ActivityTransitionState {
     public void saveState(Bundle bundle) {
         if (mEnteringNames != null) {
             bundle.putStringArrayList(ENTERING_SHARED_ELEMENTS, mEnteringNames);
-            bundle.putStringArrayList(ENTERING_MAPPED_FROM, mEnteringFrom);
-            bundle.putStringArrayList(ENTERING_MAPPED_TO, mEnteringTo);
         }
         if (mExitingFrom != null) {
             bundle.putStringArrayList(EXITING_MAPPED_FROM, mExitingFrom);
@@ -169,16 +187,19 @@ class ActivityTransitionState {
 
     private void startEnter() {
         if (mEnterActivityOptions.isReturning()) {
-            mEnterTransitionCoordinator.viewsReady(mExitingFrom, mExitingTo);
+            if (mExitingToView != null) {
+                mEnterTransitionCoordinator.viewInstancesReady(mExitingFrom, mExitingToView);
+            } else {
+                mEnterTransitionCoordinator.namedViewsReady(mExitingFrom, mExitingTo);
+            }
         } else {
-            mEnterTransitionCoordinator.viewsReady(null, null);
+            mEnterTransitionCoordinator.namedViewsReady(null, null);
             mEnteringNames = mEnterTransitionCoordinator.getAllSharedElementNames();
-            mEnteringFrom = mEnterTransitionCoordinator.getAcceptedNames();
-            mEnteringTo = mEnterTransitionCoordinator.getMappedNames();
         }
 
         mExitingFrom = null;
         mExitingTo = null;
+        mExitingToView = null;
         mEnterActivityOptions = null;
     }
 
@@ -195,9 +216,9 @@ class ActivityTransitionState {
     }
 
     private void restoreExitedViews() {
-        if (mCalledActivityOptions != null) {
-            mCalledActivityOptions.dispatchActivityStopped();
-            mCalledActivityOptions = null;
+        if (mCalledExitCoordinator != null) {
+            mCalledExitCoordinator.resetViews();
+            mCalledExitCoordinator = null;
         }
     }
 
@@ -215,8 +236,7 @@ class ActivityTransitionState {
                 activity.getWindow().getDecorView().findNamedViews(sharedElements);
 
                 ExitTransitionCoordinator exitCoordinator =
-                        new ExitTransitionCoordinator(activity, mEnteringNames, mEnteringFrom,
-                                mEnteringTo, true);
+                        new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
                 exitCoordinator.startExit(activity.mResultCode, activity.mResultData);
             }
             return true;
@@ -227,11 +247,20 @@ class ActivityTransitionState {
         if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
             return;
         }
-        mCalledActivityOptions = new ActivityOptions(options);
-        if (mCalledActivityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-            mExitingFrom = mCalledActivityOptions.getSharedElementNames();
-            mExitingTo = mCalledActivityOptions.getLocalSharedElementNames();
-            mCalledActivityOptions.dispatchStartExit();
+        ActivityOptions activityOptions = new ActivityOptions(options);
+        if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+            int key = activityOptions.getExitCoordinatorKey();
+            int index = mExitTransitionCoordinators.indexOfKey(key);
+            if (index >= 0) {
+                mCalledExitCoordinator = mExitTransitionCoordinators.valueAt(index).get();
+                mExitTransitionCoordinators.removeAt(index);
+                if (mCalledExitCoordinator != null) {
+                    mExitingFrom = mCalledExitCoordinator.getAcceptedNames();
+                    mExitingTo = mCalledExitCoordinator.getMappedNames();
+                    mExitingToView = mCalledExitCoordinator.getMappedViews();
+                    mCalledExitCoordinator.startExit();
+                }
+            }
         }
     }
 }

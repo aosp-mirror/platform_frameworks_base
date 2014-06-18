@@ -780,7 +780,7 @@ public class Activity extends ContextThemeWrapper
     private Thread mUiThread;
     final Handler mHandler = new Handler();
 
-    private ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
+    ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementListener mEnterTransitionListener = SharedElementListener.NULL_LISTENER;
     SharedElementListener mExitTransitionListener = SharedElementListener.NULL_LISTENER;
 

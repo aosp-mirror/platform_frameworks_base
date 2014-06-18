@@ -151,12 +151,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     public static final int MSG_HIDE_SHARED_ELEMENTS = 101;
 
     /**
-     * Sent by the exiting Activity in ActivityOptions#dispatchActivityStopped
-     * to leave the Activity in a good state after it has been hidden.
-     */
-    public static final int MSG_ACTIVITY_STOPPED = 102;
-
-    /**
      * Sent by the exiting coordinator (either EnterTransitionCoordinator
      * or ExitTransitionCoordinator) after the shared elements have
      * become stationary (shared element transition completes). This tells
@@ -209,15 +203,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private Runnable mPendingTransition;
     private boolean mIsStartingTransition;
 
-
-    public ActivityTransitionCoordinator(Window window,
-            ArrayList<String> allSharedElementNames,
-            ArrayList<String> accepted, ArrayList<String> localNames,
-            SharedElementListener listener, boolean isReturning) {
-        this(window, allSharedElementNames, listener, isReturning);
-        viewsReady(accepted, localNames);
-    }
-
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
             SharedElementListener listener, boolean isReturning) {
@@ -228,8 +213,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mIsReturning = isReturning;
     }
 
-    protected void viewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
-        setSharedElements(accepted, localNames);
+    protected void viewsReady(ArrayMap<String, View> sharedElements) {
+        setSharedElements(sharedElements);
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
             mTransitioningViews.removeAll(mSharedElements);
@@ -286,6 +271,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return names;
     }
 
+    public ArrayList<View> getMappedViews() {
+        return mSharedElements;
+    }
+
     public ArrayList<String> getAllSharedElementNames() { return mAllSharedElementNames; }
 
     public static void setViewVisibility(Collection<View> views, int visibility) {
@@ -335,36 +324,31 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
     }
 
-    private void setSharedElements(ArrayList<String> accepted, ArrayList<String> localNames) {
+    protected ArrayMap<String, View> mapSharedElements(ArrayList<String> accepted,
+            ArrayList<View> localViews) {
+        ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
         if (!mAllSharedElementNames.isEmpty()) {
-            ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
-            getDecor().findNamedViews(sharedElements);
             if (accepted != null) {
-                for (int i = 0; i < localNames.size(); i++) {
-                    String localName = localNames.get(i);
-                    String acceptedName = accepted.get(i);
-                    if (!localName.equals(acceptedName)) {
-                        View view = sharedElements.remove(localName);
-                        if (view != null) {
-                            sharedElements.put(acceptedName, view);
-                        }
-                    }
+                for (int i = 0; i < accepted.size(); i++) {
+                    sharedElements.put(accepted.get(i), localViews.get(i));
                 }
+            } else {
+                getDecor().findNamedViews(sharedElements);
             }
-            sharedElements.retainAll(mAllSharedElementNames);
-            mListener.remapSharedElements(mAllSharedElementNames, sharedElements);
-            sharedElements.retainAll(mAllSharedElementNames);
-            for (int i = 0; i < mAllSharedElementNames.size(); i++) {
-                String name = mAllSharedElementNames.get(i);
-                View sharedElement = sharedElements.get(name);
-                if (sharedElement != null) {
-                    if (sharedElement.getTransitionName() == null) {
-                        throw new IllegalArgumentException("Shared elements must have " +
-                                "non-null transitionNames");
-                    }
-                    mSharedElementNames.add(name);
-                    mSharedElements.add(sharedElement);
-                }
+        }
+        return sharedElements;
+    }
+
+    private void setSharedElements(ArrayMap<String, View> sharedElements) {
+        sharedElements.retainAll(mAllSharedElementNames);
+        mListener.remapSharedElements(mAllSharedElementNames, sharedElements);
+        sharedElements.retainAll(mAllSharedElementNames);
+        for (int i = 0; i < mAllSharedElementNames.size(); i++) {
+            String name = mAllSharedElementNames.get(i);
+            View sharedElement = sharedElements.get(name);
+            if (sharedElement != null) {
+                mSharedElementNames.add(name);
+                mSharedElements.add(sharedElement);
             }
         }
     }
