@@ -16,38 +16,86 @@
 
 package android.telecomm;
 
+import android.content.ComponentName;
+import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 
+import com.android.internal.telecomm.ICallService;
 import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.RemoteServiceCallback;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides methods for ICallService implementations to interact with the system phone app.
  * TODO(santoscordon): Need final public-facing comments in this file.
+ * TODO(santoscordon): Rename this to CallServiceAdapterDemultiplexer (or something).
  */
-public final class CallServiceAdapter {
-    private final ICallServiceAdapter mAdapter;
+public final class CallServiceAdapter implements DeathRecipient {
+    private final Set<ICallServiceAdapter> mAdapters = new HashSet<>();
 
     /**
-     * {@hide}
+     * @hide
      */
-    public CallServiceAdapter(ICallServiceAdapter adapter) {
-        mAdapter = adapter;
+    public CallServiceAdapter() {
+    }
+
+    /**
+     * @hide
+     */
+    public void addAdapter(ICallServiceAdapter adapter) {
+        if (mAdapters.add(adapter)) {
+            try {
+                adapter.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                mAdapters.remove(adapter);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void removeAdapter(ICallServiceAdapter adapter) {
+        if (mAdapters.remove(adapter)) {
+            adapter.asBinder().unlinkToDeath(this, 0);
+        }
+    }
+
+    /** ${inheritDoc} */
+    @Override
+    public void binderDied() {
+        ICallServiceAdapter adapterToRemove = null;
+        for (ICallServiceAdapter adapter : mAdapters) {
+            if (!adapter.asBinder().isBinderAlive()) {
+                adapterToRemove = adapter;
+                break;
+            }
+        }
+
+        if (adapterToRemove != null) {
+            removeAdapter(adapterToRemove);
+        }
     }
 
     /**
      * Provides Telecomm with the details of an incoming call. An invocation of this method must
-     * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon
-     * the invocation of this method, Telecomm will bring up the incoming-call interface where the
-     * user can elect to answer or reject a call.
+     * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon the
+     * invocation of this method, Telecomm will bring up the incoming-call interface where the user
+     * can elect to answer or reject a call.
      *
      * @param callInfo The details of the relevant call.
      */
     public void notifyIncomingCall(CallInfo callInfo) {
-        try {
-            mAdapter.notifyIncomingCall(callInfo);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.notifyIncomingCall(callInfo);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -59,9 +107,11 @@ public final class CallServiceAdapter {
      * @param callId The ID of the outgoing call.
      */
     public void handleSuccessfulOutgoingCall(String callId) {
-        try {
-            mAdapter.handleSuccessfulOutgoingCall(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.handleSuccessfulOutgoingCall(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -76,9 +126,11 @@ public final class CallServiceAdapter {
             ConnectionRequest request,
             int errorCode,
             String errorMsg) {
-        try {
-            mAdapter.handleFailedOutgoingCall(request, errorCode, errorMsg);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.handleFailedOutgoingCall(request, errorCode, errorMsg);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -89,9 +141,11 @@ public final class CallServiceAdapter {
      * @param callId The unique ID of the call whose state is changing to active.
      */
     public void setActive(String callId) {
-        try {
-            mAdapter.setActive(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setActive(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -101,9 +155,11 @@ public final class CallServiceAdapter {
      * @param callId The unique ID of the call whose state is changing to ringing.
      */
     public void setRinging(String callId) {
-        try {
-            mAdapter.setRinging(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setRinging(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -113,9 +169,11 @@ public final class CallServiceAdapter {
      * @param callId The unique ID of the call whose state is changing to dialing.
      */
     public void setDialing(String callId) {
-        try {
-            mAdapter.setDialing(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setDialing(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -124,13 +182,15 @@ public final class CallServiceAdapter {
      *
      * @param callId The unique ID of the call whose state is changing to disconnected.
      * @param disconnectCause The reason for the disconnection, any of
-     *         {@link android.telephony.DisconnectCause}.
+     *            {@link android.telephony.DisconnectCause}.
      * @param disconnectMessage Optional call-service-provided message about the disconnect.
      */
     public void setDisconnected(String callId, int disconnectCause, String disconnectMessage) {
-        try {
-            mAdapter.setDisconnected(callId, disconnectCause, disconnectMessage);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setDisconnected(callId, disconnectCause, disconnectMessage);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -140,9 +200,11 @@ public final class CallServiceAdapter {
      * @param callId - The unique ID of the call whose state is changing to be on hold.
      */
     public void setOnHold(String callId) {
-        try {
-            mAdapter.setOnHold(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setOnHold(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -153,9 +215,11 @@ public final class CallServiceAdapter {
      * @param ringback Whether Telecomm should start playing a ringback tone.
      */
     public void setRequestingRingback(String callId, boolean ringback) {
-        try {
-            mAdapter.setRequestingRingback(callId, ringback);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setRequestingRingback(callId, ringback);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -167,9 +231,11 @@ public final class CallServiceAdapter {
      * @hide
      */
     public void setCanConference(String callId, boolean canConference) {
-        try {
-            mAdapter.setCanConference(callId, canConference);
-        } catch (RemoteException ignored) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setCanConference(callId, canConference);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
@@ -179,13 +245,15 @@ public final class CallServiceAdapter {
      *
      * @param callId The unique ID of the call being conferenced.
      * @param conferenceCallId The unique ID of the conference call. Null if call is not
-     *         conferenced.
+     *            conferenced.
      * @hide
      */
     public void setIsConferenced(String callId, String conferenceCallId) {
-        try {
-            mAdapter.setIsConferenced(callId, conferenceCallId);
-        } catch (RemoteException ignored) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setIsConferenced(callId, conferenceCallId);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
@@ -197,16 +265,20 @@ public final class CallServiceAdapter {
      * @hide
      */
     public void removeCall(String callId) {
-        try {
-            mAdapter.removeCall(callId);
-        } catch (RemoteException ignored) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.removeCall(callId);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
     public void onPostDialWait(String callId, String remaining) {
-        try {
-            mAdapter.onPostDialWait(callId, remaining);
-        } catch (RemoteException ignored) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onPostDialWait(callId, remaining);
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
@@ -216,9 +288,11 @@ public final class CallServiceAdapter {
      * @param callId The identifier of the call to handoff.
      */
     public void handoffCall(String callId) {
-        try {
-            mAdapter.handoffCall(callId);
-        } catch (RemoteException e) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.handoffCall(callId);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -228,9 +302,26 @@ public final class CallServiceAdapter {
      * @param callId The unique ID of the conference call.
      */
     public void addConferenceCall(String callId) {
-        try {
-            mAdapter.addConferenceCall(callId, null);
-        } catch (RemoteException ignored) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.addConferenceCall(callId, null);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Retrieves a list of remote connection services usable to place calls.
+     * @hide
+     */
+    public void queryRemoteConnectionServices(RemoteServiceCallback callback) {
+        // Only supported when there is only one adapter.
+        if (mAdapters.size() == 1) {
+            try {
+                mAdapters.iterator().next().queryRemoteConnectionServices(callback);
+            } catch (RemoteException e) {
+                Log.e(this, e, "Exception trying to query for remote CSs");
+            }
         }
     }
 }

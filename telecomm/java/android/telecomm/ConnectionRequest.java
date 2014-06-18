@@ -33,16 +33,27 @@ public final class ConnectionRequest implements Parcelable {
     private final String mCallId;
     private final Uri mHandle;
     private final Bundle mExtras;
+    private final Subscription mSubscription;
 
     public ConnectionRequest(Uri handle, Bundle extras) {
         this(null, handle, extras);
     }
 
     public ConnectionRequest(String callId, Uri handle, Bundle extras) {
+        this(null, callId, handle, extras);
+    }
+
+    public ConnectionRequest(Subscription subscription, String callId, Uri handle, Bundle extras) {
         mCallId = callId;
         mHandle = handle;
         mExtras = extras;
+        mSubscription = subscription;
     }
+
+    /**
+     * The subscription which should be used to place the call.
+     */
+    public Subscription getSubscription() { return mSubscription; }
 
     /**
      * An identifier for this call.
