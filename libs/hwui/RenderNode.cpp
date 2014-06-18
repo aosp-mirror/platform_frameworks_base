@@ -20,6 +20,7 @@
 #include "RenderNode.h"
 
 #include <algorithm>
+#include <string>
 
 #include <SkCanvas.h>
 #include <algorithm>
@@ -158,13 +159,25 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         applyLayerPropertiesToLayer(info);
         damageSelf(info);
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
-        LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight());
+        if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
+            LayerRenderer::destroyLayer(mLayer);
+            mLayer = 0;
+        }
         damageSelf(info);
     }
 
     SkRect dirty;
     info.damageAccumulator->peekAtDirty(&dirty);
     info.damageAccumulator->popTransform();
+
+    if (!mLayer) {
+        if (info.errorHandler) {
+            std::string msg = "Unable to create layer for ";
+            msg += getName();
+            info.errorHandler->onError(msg);
+        }
+        return;
+    }
 
     if (!dirty.isEmpty()) {
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);

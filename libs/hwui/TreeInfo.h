@@ -16,6 +16,8 @@
 #ifndef TREEINFO_H
 #define TREEINFO_H
 
+#include <string>
+
 #include <utils/Timers.h>
 
 #include "DamageAccumulator.h"
@@ -33,6 +35,13 @@ public:
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) = 0;
 protected:
     ~AnimationHook() {}
+};
+
+class ErrorHandler {
+public:
+    virtual void onError(const std::string& message) = 0;
+protected:
+    ~ErrorHandler() {}
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -65,6 +74,7 @@ public:
         , prepareTextures(mode == MODE_FULL)
         , damageAccumulator(NullDamageAccumulator::instance())
         , renderer(0)
+        , errorHandler(0)
     {}
 
     const TraversalMode mode;
@@ -78,6 +88,7 @@ public:
     // The renderer that will be drawing the next frame. Use this to push any
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer;
+    ErrorHandler* errorHandler;
 
     struct Out {
         Out()

@@ -49,6 +49,14 @@ using namespace android::uirenderer::renderthread;
 
 static jmethodID gRunnableMethod;
 
+static JNIEnv* getenv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
 class JavaTask : public RenderTask {
 public:
     JavaTask(JNIEnv* env, jobject jrunnable) {
@@ -57,20 +65,13 @@ public:
     }
 
     virtual void run() {
-        env()->CallVoidMethod(mRunnable, gRunnableMethod);
-        env()->DeleteGlobalRef(mRunnable);
+        JNIEnv* env = getenv(mVm);
+        env->CallVoidMethod(mRunnable, gRunnableMethod);
+        env->DeleteGlobalRef(mRunnable);
         delete this;
     };
 
 private:
-    JNIEnv* env() {
-        JNIEnv* env;
-        if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-            return 0;
-        }
-        return env;
-    }
-
     JavaVM* mVm;
     jobject mRunnable;
 };
@@ -122,12 +123,34 @@ private:
     std::vector<OnFinishedEvent> mOnFinishedEvents;
 };
 
-class RootRenderNode : public RenderNode, public AnimationHook {
+class RenderingException : public MessageHandler {
 public:
-    RootRenderNode() : RenderNode() {
+    RenderingException(JavaVM* vm, const std::string& message)
+            : mVm(vm)
+            , mMessage(message) {
+    }
+
+    virtual void handleMessage(const Message&) {
+        throwException(mVm, mMessage);
+    }
+
+    static void throwException(JavaVM* vm, const std::string& message) {
+        JNIEnv* env = getenv(vm);
+        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
+    }
+
+private:
+    JavaVM* mVm;
+    std::string mMessage;
+};
+
+class RootRenderNode : public RenderNode, AnimationHook, ErrorHandler {
+public:
+    RootRenderNode(JNIEnv* env) : RenderNode() {
         mLooper = Looper::getForThread();
         LOG_ALWAYS_FATAL_IF(!mLooper.get(),
                 "Must create RootRenderNode on a thread with a looper!");
+        env->GetJavaVM(&mVm);
     }
 
     virtual ~RootRenderNode() {}
@@ -137,10 +160,16 @@ public:
         mOnFinishedEvents.push_back(event);
     }
 
+    virtual void onError(const std::string& message) {
+        mLooper->sendMessage(new RenderingException(mVm, message), 0);
+    }
+
     virtual void prepareTree(TreeInfo& info) {
         info.animationHook = this;
+        info.errorHandler = this;
         RenderNode::prepareTree(info);
         info.animationHook = NULL;
+        info.errorHandler = NULL;
 
         // post all the finished stuff
         if (mOnFinishedEvents.size()) {
@@ -160,6 +189,7 @@ protected:
 private:
     sp<Looper> mLooper;
     std::vector<OnFinishedEvent> mOnFinishedEvents;
+    JavaVM* mVm;
 };
 
 static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
@@ -178,7 +208,7 @@ static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
 }
 
 static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
-    RootRenderNode* node = new RootRenderNode();
+    RootRenderNode* node = new RootRenderNode(env);
     node->incStrong(0);
     node->setName("RootRenderNode");
     return reinterpret_cast<jlong>(node);
