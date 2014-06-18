@@ -66,7 +66,7 @@ page.type=about
         </a>
       </div>
     </div> <!-- end .landing-section .landing-hero -->
-  </div> <!-- end .landing-hero-container -->
+
 
     <div class="landing-rest-of-page">
       <div class="landing-section" id="extending-android-to-wearables">
@@ -264,7 +264,7 @@ page.type=about
     <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
       <div class="layout-content-col col-16" style="padding-top:4px">
         <style>#___plusone_0 {float:right !important;}</style>
-        <div id="___plusone_0" style="text-indent: 0px; margin: 0px; padding: 0px; border-style: none; float: none; line-height: normal; font-size: 1px; vertical-align: baseline; display: inline-block; width: 90px; height: 20px; background: transparent;"><iframe frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" style="position: static; top: 0px; width: 90px; margin: 0px; border-style: none; left: 0px; visibility: visible; height: 20px;" tabindex="0" vspace="0" width="100%" id="I0_1402525433965" name="I0_1402525433965" src="https://apis.google.com/u/0/_/+1/fastbutton?usegapi=1&amp;size=medium&amp;origin=http%3A%2F%2Frobertly.mtv%3A8080&amp;url=http%3A%2F%2Frobertly.mtv%3A8080%2Fwear%2Findex.html&amp;gsrc=3p&amp;jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.QxHQHBkhz7M.O%2Fm%3D__features__%2Fam%3DUQ%2Frt%3Dj%2Fd%3D1%2Fz%3Dzcms%2Frs%3DAItRSTMLrMyRVKsu2FQoRingre3w1MT49A#_methods=onPlusOne%2C_ready%2C_close%2C_open%2C_resizeMe%2C_renderstart%2Concircled%2Cdrefresh%2Cerefresh%2Conload&amp;id=I0_1402525433965&amp;parent=http%3A%2F%2Frobertly.mtv%3A8080&amp;pfname=&amp;rpctoken=32453860" data-gapiattached="true" title="+1"></iframe></div>
+        <div class="g-plusone" data-size="medium"></div>
       </div>
     </div>
     <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
@@ -276,5 +276,16 @@ page.type=about
         License</a>.
       </div>
     </div>
-  </div> <!-- end landing-body-content -->
+  </div> <!-- end .landing-hero-container -->
+
+  <script>
+  $("a.landing-down-arrow").on("click", function(e) {
+    $("body").animate({
+      scrollTop: $(".wear-hero").height() + 120
+    }, 1000, "easeOutQuint");
+    e.preventDefault();
+  });
+  </script>
+
+</div> <!-- end landing-body-content -->
 
