@@ -89,7 +89,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         @Override
         public String toString() {
-            return "{pkgForDebug=" + pkgForDebug + " callerUid=" + callerUid +
+            return "{pkgForDebug=" + pkgForDebug + " callerUid=" + callerUid + " subId=" + subId +
                     " events=" + Integer.toHexString(events) + "}";
         }
     }
@@ -208,11 +208,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             String action = intent.getAction();
             Slog.d(TAG, "mBroadcastReceiver: action=" + action);
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
-                       intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
+                int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                if (DBG) Slog.d(TAG, "onReceive: userHandle=" + userHandle);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED, userHandle, 0));
             } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
                 mDefaultSubId = intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY,
                         SubscriptionManager.getDefaultSubId());
+                if (DBG) Slog.d(TAG, "onReceive: mDefaultSubId=" + mDefaultSubId);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB, 0, 0));
             }
         }
@@ -340,18 +342,19 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     // the received subId value update the isLegacyApp field
                     if ((r.subId <= 0) || (r.subId == SubscriptionManager.INVALID_SUB_ID)) {
                         r.subId = mDefaultSubId;
-                        r.isLegacyApp = true; // FIXME: is this needed ??
+                        r.isLegacyApp = true; // r.subId is to be update when default changes.
                     }
                     if (r.subId == SubscriptionManager.DEFAULT_SUB_ID) {
                         r.subId = mDefaultSubId;
+                        r.isLegacyApp = true; // r.subId is to be update when default changes.
                         if (DBG) Slog.i(TAG, "listen: DEFAULT_SUB_ID");
                     }
                     mRecords.add(r);
-                    if (DBG) Slog.i(TAG, "listen: add new record=" + r);
+                    if (DBG) Slog.i(TAG, "listen: add new record");
                 }
                 int phoneId = SubscriptionManager.getPhoneId(subId);
-                int send = events & (events ^ r.events);
                 r.events = events;
+                if (DBG) Slog.i(TAG, "listen: set events record=" + r);
                 if (notifyNow && validatePhoneId(phoneId)) {
                     if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
                         try {
@@ -1063,6 +1066,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties);
             pw.println("  mDataConnectionNetworkCapabilities=" +
                     mDataConnectionNetworkCapabilities);
+            pw.println("  mDefaultSubId=" + mDefaultSubId);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("  mCellInfo=" + mCellInfo);
             pw.println("  mDcRtInfo=" + mDcRtInfo);

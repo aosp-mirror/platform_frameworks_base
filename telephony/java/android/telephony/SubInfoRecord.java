@@ -105,4 +105,11 @@ public class SubInfoRecord implements Parcelable {
         return 0;
     }
 
+    public String toString() {
+        return "{mSubId=" + mSubId + ", mIccId=" + mIccId + " mSlotId=" + mSlotId
+                + " mDisplayName=" + mDisplayName + " mNameSource=" + mNameSource
+                + " mColor=" + mColor + " mNumber=" + mNumber
+                + " mDispalyNumberFormat=" + mDispalyNumberFormat + " mDataRoaming=" + mDataRoaming
+                + " mSimIconRes=" + mSimIconRes + "}";
+    }
 }
