@@ -63,6 +63,7 @@ import android.os.SystemProperties;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -240,15 +241,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mThread = new Thread(mConnector, NETD_TAG);
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
-        mPhoneStateListener = new PhoneStateListener(
-                SubscriptionManager.DEFAULT_SUB_ID, // FIXME: What Subscription should be used??
+
+        mPhoneStateListener = new PhoneStateListener(SubscriptionManager.DEFAULT_SUB_ID,
                 mDaemonHandler.getLooper()) {
+            @Override
             public void onDataConnectionRealTimeInfoChanged(
                     DataConnectionRealTimeInfo dcRtInfo) {
+                if (DBG) Slog.d(TAG, "onDataConnectionRealTimeInfoChanged: " + dcRtInfo);
                 notifyInterfaceClassActivity(ConnectivityManager.TYPE_MOBILE,
                         dcRtInfo.getDcPowerState(), dcRtInfo.getTime(), true);
             }
         };
+        TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (tm != null) {
+            tm.listen(mPhoneStateListener,
+                    PhoneStateListener.LISTEN_DATA_CONNECTION_REAL_TIME_INFO);
+        }
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
