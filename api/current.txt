@@ -21563,7 +21563,7 @@ package android.os {
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
     field public static final java.lang.String DISALLOW_ADD_USER = "no_add_user";
     field public static final java.lang.String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
-    field public static final java.lang.String DISALLOW_CONFIG_APPS = "no_config_apps";
+    field public static final java.lang.String DISALLOW_APPS_CONTROL = "no_control_apps";
     field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
     field public static final java.lang.String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
