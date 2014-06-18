@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Безбедни режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android систем"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Личне апликације"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android за посао"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Услуге које се плаћају"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Покреће радње које могу да се плаћају."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Поруке"</string>
