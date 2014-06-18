@@ -18,7 +18,7 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:detachWallpaper="true" android:shareInterpolator="false" android:startOffset="60">
+    android:detachWallpaper="true" android:shareInterpolator="false" android:startOffset="100">
     <alpha
         android:fromAlpha="0.0" android:toAlpha="1.0"
         android:fillEnabled="true" android:fillBefore="true"
