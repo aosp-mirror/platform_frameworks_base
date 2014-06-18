@@ -8265,13 +8265,24 @@ package android.content.pm {
   }
 
   public class LauncherApps {
+    method public void addOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
     method public void addOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
     method public boolean isActivityEnabledForProfile(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabledForProfile(java.lang.String, android.os.UserHandle);
+    method public void removeOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
     method public void removeOnAppsChangedListener(android.content.pm.LauncherApps.OnAppsChangedListener);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void startActivityForProfile(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
+  }
+
+  public static abstract class LauncherApps.OnAppsChangedCallback {
+    ctor public LauncherApps.OnAppsChangedCallback();
+    method public abstract void onPackageAdded(java.lang.String, android.os.UserHandle);
+    method public abstract void onPackageChanged(java.lang.String, android.os.UserHandle);
+    method public abstract void onPackageRemoved(java.lang.String, android.os.UserHandle);
+    method public abstract void onPackagesAvailable(java.lang.String[], android.os.UserHandle, boolean);
+    method public abstract void onPackagesUnavailable(java.lang.String[], android.os.UserHandle, boolean);
   }
 
   public static abstract interface LauncherApps.OnAppsChangedListener {
