@@ -28,11 +28,13 @@ import java.util.ArrayList;
  */
 public class AudioSystem
 {
-    /* These values must be kept in sync with AudioSystem.h */
+    /* These values must be kept in sync with system/audio.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
      */
+    /* The default audio stream */
+    public static final int STREAM_DEFAULT = -1;
     /* The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = 0;
     /* The audio stream for system sounds */

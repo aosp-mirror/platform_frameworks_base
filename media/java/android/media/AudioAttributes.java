@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -154,6 +155,7 @@ public final class AudioAttributes implements Parcelable {
     private int mContentType = CONTENT_TYPE_UNKNOWN;
     private int mFlags = 0x0;
     private HashSet<String> mTags;
+    private String mFormattedTags;
 
     private AudioAttributes() {
     }
@@ -241,6 +243,12 @@ public final class AudioAttributes implements Parcelable {
             aa.mUsage = mUsage;
             aa.mFlags = mFlags;
             aa.mTags = (HashSet<String>) mTags.clone();
+            final Iterator<String> tagIterator = mTags.iterator();
+            String allTagsInOne = new String();
+            while (tagIterator.hasNext()) {
+                allTagsInOne += tagIterator.next() + ";";
+            }
+            aa.mFormattedTags = allTagsInOne;
             return aa;
         }
 

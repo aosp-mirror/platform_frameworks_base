@@ -21,6 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
+import java.util.Iterator;
+import java.util.Set;
 
 import android.annotation.IntDef;
 import android.app.ActivityThread;
@@ -233,6 +235,8 @@ public class AudioTrack
      *   {@link AudioManager#STREAM_DTMF}.
      */
     private int mStreamType = AudioManager.STREAM_MUSIC;
+
+    private final AudioAttributes mAttributes;
     /**
      * The way audio is consumed by the audio sink, streaming or static.
      */
@@ -349,20 +353,68 @@ public class AudioTrack
             int bufferSizeInBytes, int mode, int sessionId)
     throws IllegalArgumentException {
         // mState already == STATE_UNINITIALIZED
+        this((new AudioAttributes.Builder())
+                    .setLegacyStreamType(streamType)
+                    .build(),
+                (new AudioFormat.Builder())
+                    .setChannelMask(channelConfig)
+                    .setEncoding(audioFormat)
+                    .setSampleRate(sampleRateInHz)
+                    .build(),
+                bufferSizeInBytes,
+                mode, sessionId);
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Constructor with AudioAttributes and AudioFormat
+     * @param aa
+     * @param format
+     * @param bufferSizeInBytes
+     * @param mode
+     * @param sessionId
+     */
+    public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
+            int mode, int sessionId)
+                    throws IllegalArgumentException {
+        // mState already == STATE_UNINITIALIZED
 
         // remember which looper is associated with the AudioTrack instantiation
         Looper looper;
         if ((looper = Looper.myLooper()) == null) {
             looper = Looper.getMainLooper();
         }
-        mInitializationLooper = looper;
 
-        audioParamCheck(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
+        int rate = 0;
+        if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) != 0)
+        {
+            rate = format.getSampleRate();
+        } else {
+            rate = AudioSystem.getPrimaryOutputSamplingRate();
+            if (rate <= 0) {
+                rate = 44100;
+            }
+        }
+        int channelMask = AudioFormat.CHANNEL_OUT_FRONT_LEFT | AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
+        if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
+        {
+            channelMask = format.getChannelMask();
+        }
+        int encoding = AudioFormat.ENCODING_DEFAULT;
+        if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_ENCODING) != 0) {
+            encoding = format.getEncoding();
+        }
+        audioParamCheck(rate, channelMask, encoding, mode);
+        mStreamType = AudioSystem.STREAM_DEFAULT;
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
+        mInitializationLooper = looper;
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
+
+        mAttributes = (new AudioAttributes.Builder(attributes).build());
 
         if (sessionId < 0) {
             throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
@@ -371,8 +423,8 @@ public class AudioTrack
         int[] session = new int[1];
         session[0] = sessionId;
         // native initialization
-        int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                mStreamType, mSampleRate, mChannels, mAudioFormat,
+        int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
+                mSampleRate, mChannels, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
@@ -401,27 +453,13 @@ public class AudioTrack
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
     // postconditions:
-    //    mStreamType is valid
     //    mChannelCount is valid
     //    mChannels is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     //    mDataLoadMode is valid
-    private void audioParamCheck(int streamType, int sampleRateInHz,
+    private void audioParamCheck(int sampleRateInHz,
                                  int channelConfig, int audioFormat, int mode) {
-
-        //--------------
-        // stream type
-        if( (streamType != AudioManager.STREAM_ALARM) && (streamType != AudioManager.STREAM_MUSIC)
-           && (streamType != AudioManager.STREAM_RING) && (streamType != AudioManager.STREAM_SYSTEM)
-           && (streamType != AudioManager.STREAM_VOICE_CALL)
-           && (streamType != AudioManager.STREAM_NOTIFICATION)
-           && (streamType != AudioManager.STREAM_BLUETOOTH_SCO)
-           && (streamType != AudioManager.STREAM_DTMF)) {
-            throw new IllegalArgumentException("Invalid stream type.");
-        }
-        mStreamType = streamType;
-
         //--------------
         // sample rate, note these values are subject to change
         if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
@@ -1559,8 +1597,12 @@ public class AudioTrack
     // Native methods called from the Java side
     //--------------------
 
-    private native final int native_setup(Object audiotrack_this,
-            int streamType, int sampleRate, int channelMask, int audioFormat,
+    // post-condition: mStreamType is overwritten with a value
+    //     that reflects the audio attributes (e.g. an AudioAttributes object with a usage of
+    //     AudioAttributes.USAGE_MEDIA will map to AudioManager.STREAM_MUSIC
+    private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
+            Object /*AudioAttributes*/ attributes,
+            int sampleRate, int channelMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId);
 
     private native final void native_finalize();
