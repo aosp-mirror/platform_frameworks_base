@@ -391,7 +391,7 @@ public class WindowAnimator {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     winAnimator.setAnimation(a);
                     winAnimator.mAnimationIsEntrance = true;
-                    if (startKeyguardExit) {
+                    if (startKeyguardExit && mKeyguardGoingAway) {
                         // Do one time only.
                         mPolicy.startKeyguardExitAnimation(mCurrentTime + a.getStartOffset(),
                                 a.getDuration());
