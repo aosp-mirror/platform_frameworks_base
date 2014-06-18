@@ -241,7 +241,7 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"ເລື່ອນ​ຂຶ້ນ​ເພື່ອ​ປົດ​ລັອກ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ປັດ​ຂວາ​ເພື່ອ​ໃຊ້​ໂທ​ລະ​ສັບ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ປັດ​ຊ້າຍ​ເພື່ອ​ໃຊ້​ກ້ອງ"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
