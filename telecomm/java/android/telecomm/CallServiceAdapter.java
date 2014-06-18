@@ -37,22 +37,6 @@ public final class CallServiceAdapter {
     }
 
     /**
-     * Receives confirmation of a call service's ability to place a call. This method is used in
-     * response to {@link CallService#isCompatibleWith}.
-     *
-     * @param callId The identifier of the call for which compatibility is being received. This ID
-     *     should correspond to the ID given as part of the call information in
-     *     {@link CallService#isCompatibleWith}.
-     * @param isCompatible True if the call service can place the call.
-     */
-    public void setIsCompatibleWith(String callId, boolean isCompatible) {
-        try {
-            mAdapter.setIsCompatibleWith(callId, isCompatible);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Provides Telecomm with the details of an incoming call. An invocation of this method must
      * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon
      * the invocation of this method, Telecomm will bring up the incoming-call interface where the

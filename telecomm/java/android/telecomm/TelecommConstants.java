@@ -51,11 +51,6 @@ public final class TelecommConstants {
     public static final String ACTION_CALL_SERVICE = CallService.class.getName();
 
     /**
-     * The service action used to bind to {@link CallServiceSelector} implementations.
-     */
-    public static final String ACTION_CALL_SERVICE_SELECTOR = CallServiceSelector.class.getName();
-
-    /**
      * Optional extra for {@link Intent#ACTION_CALL} containing a boolean that determines whether
      * the speakerphone should be automatically turned on for an outgoing call.
      */

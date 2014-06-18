@@ -32,8 +32,6 @@ import com.android.internal.telecomm.ICallServiceAdapter;
 oneway interface ICallService {
     void setCallServiceAdapter(in ICallServiceAdapter callServiceAdapter);
 
-    void isCompatibleWith(in CallInfo callInfo);
-
     void call(in CallInfo callInfo);
 
     void abort(String callId);

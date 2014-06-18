@@ -49,21 +49,20 @@ import java.util.List;
 public abstract class CallService extends Service {
 
     private static final int MSG_SET_CALL_SERVICE_ADAPTER = 1;
-    private static final int MSG_IS_COMPATIBLE_WITH = 2;
-    private static final int MSG_CALL = 3;
-    private static final int MSG_ABORT = 4;
-    private static final int MSG_SET_INCOMING_CALL_ID = 5;
-    private static final int MSG_ANSWER = 6;
-    private static final int MSG_REJECT = 7;
-    private static final int MSG_DISCONNECT = 8;
-    private static final int MSG_HOLD = 9;
-    private static final int MSG_UNHOLD = 10;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 11;
-    private static final int MSG_PLAY_DTMF_TONE = 12;
-    private static final int MSG_STOP_DTMF_TONE = 13;
-    private static final int MSG_CONFERENCE = 14;
-    private static final int MSG_SPLIT_FROM_CONFERENCE = 15;
-    private static final int MSG_ON_POST_DIAL_CONTINUE = 16;
+    private static final int MSG_CALL = 2;
+    private static final int MSG_ABORT = 3;
+    private static final int MSG_SET_INCOMING_CALL_ID = 4;
+    private static final int MSG_ANSWER = 5;
+    private static final int MSG_REJECT = 6;
+    private static final int MSG_DISCONNECT = 7;
+    private static final int MSG_HOLD = 8;
+    private static final int MSG_UNHOLD = 9;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 10;
+    private static final int MSG_PLAY_DTMF_TONE = 11;
+    private static final int MSG_STOP_DTMF_TONE = 12;
+    private static final int MSG_CONFERENCE = 13;
+    private static final int MSG_SPLIT_FROM_CONFERENCE = 14;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -75,9 +74,6 @@ public abstract class CallService extends Service {
                 case MSG_SET_CALL_SERVICE_ADAPTER:
                     mAdapter = new CallServiceAdapter((ICallServiceAdapter) msg.obj);
                     onAdapterAttached(mAdapter);
-                    break;
-                case MSG_IS_COMPATIBLE_WITH:
-                    isCompatibleWith((CallInfo) msg.obj);
                     break;
                 case MSG_CALL:
                     call((CallInfo) msg.obj);
@@ -167,11 +163,6 @@ public abstract class CallService extends Service {
         public void setCallServiceAdapter(ICallServiceAdapter callServiceAdapter) {
             mMessageHandler.obtainMessage(MSG_SET_CALL_SERVICE_ADAPTER, callServiceAdapter)
                     .sendToTarget();
-        }
-
-        @Override
-        public void isCompatibleWith(CallInfo callInfo) {
-            mMessageHandler.obtainMessage(MSG_IS_COMPATIBLE_WITH, callInfo).sendToTarget();
         }
 
         @Override
@@ -300,21 +291,10 @@ public abstract class CallService extends Service {
     }
 
     /**
-     * Determines if the CallService can place the specified call. Response is sent via
-     * {@link CallServiceAdapter#setIsCompatibleWith}. When responding, the correct call ID must be
-     * specified.  Only used in the context of outgoing calls and call switching (handoff).
-     *
-     * @param callInfo The details of the relevant call.
-     */
-    public abstract void isCompatibleWith(CallInfo callInfo);
-
-    /**
      * Attempts to call the relevant party using the specified call's handle, be it a phone number,
      * SIP address, or some other kind of user ID.  Note that the set of handle types is
      * dynamically extensible since call providers should be able to implement arbitrary
-     * handle-calling systems.  See {@link #isCompatibleWith}. It is expected that the
-     * call service respond via {@link CallServiceAdapter#handleSuccessfulOutgoingCall(String)}
-     * if it can successfully make the call.  Only used in the context of outgoing calls.
+     * handle-calling systems.
      *
      * @param callInfo The details of the relevant call.
      */

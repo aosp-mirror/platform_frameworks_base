@@ -114,28 +114,6 @@ public abstract class ConnectionService extends CallService {
     };
 
     @Override
-    public final void isCompatibleWith(final CallInfo callInfo) {
-        Log.d(this, "isCompatibleWith %s", callInfo);
-        onFindSubscriptions(
-                callInfo.getHandle(),
-                new Response<Uri, Subscription>() {
-                    @Override
-                    public void onResult(Uri handle, Subscription... result) {
-                        boolean isCompatible = result.length > 0;
-                        Log.d(this, "adapter setIsCompatibleWith ");
-                        getAdapter().setIsCompatibleWith(callInfo.getId(), isCompatible);
-                    }
-
-                    @Override
-                    public void onError(Uri handle, int code, String msg) {
-                        Log.w(this, "Error in onFindSubscriptions %s %d %s", handle, code, msg);
-                        getAdapter().setIsCompatibleWith(callInfo.getId(), false);
-                    }
-                }
-        );
-    }
-
-    @Override
     public final void call(final CallInfo callInfo) {
         Log.d(this, "call %s", callInfo);
         onCreateConnections(
@@ -341,16 +319,6 @@ public abstract class ConnectionService extends CallService {
     public Collection<Connection> getAllConnections() {
         return mConnectionById.values();
     }
-
-    /**
-     * Find a set of Subscriptions matching a given handle (e.g. phone number).
-     *
-     * @param handle A handle (e.g. phone number) with which to connect.
-     * @param callback A callback for providing the result.
-     */
-    public void onFindSubscriptions(
-            Uri handle,
-            Response<Uri, Subscription> callback) {}
 
     /**
      * Create a Connection given a request.
