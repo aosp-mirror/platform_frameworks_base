@@ -147,10 +147,12 @@ public class VectorDrawable extends Drawable {
     }
 
     private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
-        mVectorState = new VectorDrawableState(state);
-
-        if (theme != null && canApplyTheme()) {
+        if (theme != null && state.canApplyTheme()) {
+            // If we need to apply a theme, implicitly mutate.
+            mVectorState = new VectorDrawableState(state);
             applyTheme(theme);
+        } else {
+            mVectorState = state;
         }
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);

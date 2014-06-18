@@ -33,6 +33,16 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="BitmapDrawableDupe"
+            android:label="Bitmap Performance of clones" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+
+        </activity>
+        <activity
             android:name="VectorDrawableAnimation"
             android:label="VectorTestAnimation" >
             <intent-filter>
