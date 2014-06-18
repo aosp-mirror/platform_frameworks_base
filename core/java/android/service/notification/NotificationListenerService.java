@@ -22,6 +22,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -213,7 +214,14 @@ public abstract class NotificationListenerService extends Service {
 
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
-        public void onNotificationPosted(StatusBarNotification sbn) {
+        public void onNotificationPosted(IStatusBarNotificationHolder sbnHolder) {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification", e);
+                return;
+            }
             try {
                 NotificationListenerService.this.onNotificationPosted(sbn);
             } catch (Throwable t) {
@@ -221,7 +229,14 @@ public abstract class NotificationListenerService extends Service {
             }
         }
         @Override
-        public void onNotificationRemoved(StatusBarNotification sbn) {
+        public void onNotificationRemoved(IStatusBarNotificationHolder sbnHolder) {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification", e);
+                return;
+            }
             try {
                 NotificationListenerService.this.onNotificationRemoved(sbn);
             } catch (Throwable t) {

@@ -59,6 +59,7 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.INotificationListener;
+import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telephony.TelephonyManager;
@@ -241,21 +242,21 @@ public class NotificationManagerService extends SystemService {
             return (nid == UserHandle.USER_ALL || nid == this.userid);
         }
 
-        public void notifyPostedIfUserMatch(StatusBarNotification sbn) {
-            if (!enabledAndUserMatches(sbn)) {
+        public void notifyPostedIfUserMatch(StatusBarNotificationHolder sbnHolder) {
+            if (!enabledAndUserMatches(sbnHolder.get())) {
                 return;
             }
             try {
-                listener.onNotificationPosted(sbn);
+                listener.onNotificationPosted(sbnHolder);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
             }
         }
 
-        public void notifyRemovedIfUserMatch(StatusBarNotification sbn) {
-            if (!enabledAndUserMatches(sbn)) return;
+        public void notifyRemovedIfUserMatch(StatusBarNotificationHolder sbnHolder) {
+            if (!enabledAndUserMatches(sbnHolder.get())) return;
             try {
-                listener.onNotificationRemoved(sbn);
+                listener.onNotificationRemoved(sbnHolder);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }
@@ -711,12 +712,13 @@ public class NotificationManagerService extends SystemService {
      */
     void notifyPostedLocked(NotificationRecord n) {
         // make a copy in case changes are made to the underlying Notification object
-        final StatusBarNotification sbn = n.sbn.clone();
+        final StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(
+                n.sbn.clone());
         for (final NotificationListenerInfo info : mListeners) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    info.notifyPostedIfUserMatch(sbn);
+                    info.notifyPostedIfUserMatch(sbnHolder);
                 }});
         }
     }
@@ -727,13 +729,14 @@ public class NotificationManagerService extends SystemService {
     void notifyRemovedLocked(NotificationRecord n) {
         // make a copy in case changes are made to the underlying Notification object
         // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the notification
-        final StatusBarNotification sbn_light = n.sbn.cloneLight();
+        final StatusBarNotificationHolder sbnLightHolder = new StatusBarNotificationHolder(
+                n.sbn.cloneLight());
 
         for (final NotificationListenerInfo info : mListeners) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    info.notifyRemovedIfUserMatch(sbn_light);
+                    info.notifyRemovedIfUserMatch(sbnLightHolder);
                 }});
         }
     }
@@ -2529,6 +2532,24 @@ public class NotificationManagerService extends SystemService {
     private void updateNotificationPulse() {
         synchronized (mNotificationList) {
             updateLightsLocked();
+        }
+    }
+
+    /**
+     * Wrapper for a StatusBarNotification object that allows transfer across a oneway
+     * binder without sending large amounts of data over a oneway transaction.
+     */
+    private static final class StatusBarNotificationHolder
+            extends IStatusBarNotificationHolder.Stub {
+        private final StatusBarNotification mValue;
+
+        public StatusBarNotificationHolder(StatusBarNotification value) {
+            mValue = value;
+        }
+
+        @Override
+        public StatusBarNotification get() {
+            return mValue;
         }
     }
 }
