@@ -776,10 +776,11 @@ public class Allocation extends BaseObj {
         mRS.validate();
         int eSize = mType.mElement.getBytesSize();
         final byte[] data = fp.getData();
+        int data_length = fp.getPos();
 
-        int count = data.length / eSize;
-        if ((eSize * count) != data.length) {
-            throw new RSIllegalArgumentException("Field packer length " + data.length +
+        int count = data_length / eSize;
+        if ((eSize * count) != data_length) {
+            throw new RSIllegalArgumentException("Field packer length " + data_length +
                                                " not divisible by element size " + eSize + ".");
         }
         copy1DRangeFromUnchecked(xoff, count, data);
@@ -803,16 +804,17 @@ public class Allocation extends BaseObj {
         }
 
         final byte[] data = fp.getData();
+        int data_length = fp.getPos();
         int eSize = mType.mElement.mElements[component_number].getBytesSize();
         eSize *= mType.mElement.mArraySizes[component_number];
 
-        if (data.length != eSize) {
-            throw new RSIllegalArgumentException("Field packer sizelength " + data.length +
+        if (data_length != eSize) {
+            throw new RSIllegalArgumentException("Field packer sizelength " + data_length +
                                                " does not match component size " + eSize + ".");
         }
 
         mRS.nAllocationElementData1D(getIDSafe(), xoff, mSelectedLOD,
-                                     component_number, data, data.length);
+                                     component_number, data, data_length);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {
