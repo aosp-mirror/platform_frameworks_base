@@ -152,6 +152,8 @@ public class AudioFormat {
         switch (audioFormat) {
         case ENCODING_PCM_8BIT:
             return 1;
+        case ENCODING_PCM_FLOAT:
+            return 4;
         case ENCODING_PCM_16BIT:
         case ENCODING_DEFAULT:
             return 2;
