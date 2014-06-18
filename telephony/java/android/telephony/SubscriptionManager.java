@@ -697,12 +697,16 @@ public class SubscriptionManager implements BaseColumns {
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         long [] subId = SubscriptionManager.getSubId(phoneId);
         if ((subId != null) && (subId.length >= 1)) {
-            if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
-            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId); //FIXME: RENAME TO PHONE_ID_KEY ??
-            intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId[0]);
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId[0]);
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
         }
+    }
+
+    public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, long subId) {
+        if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
+        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId); //FIXME: RENAME TO PHONE_ID_KEY ??
+        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
     }
 }
 
