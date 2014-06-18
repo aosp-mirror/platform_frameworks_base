@@ -48,7 +48,7 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
     }
 
     if ((entryOffset & 0x3) != 0) {
-        ALOGE("Index %u points to entry with unaligned offset %p", mIndex, (void*) entryOffset);
+        ALOGE("Index %u points to entry with unaligned offset 0x%08x", mIndex, entryOffset);
         return NULL;
     }
 
