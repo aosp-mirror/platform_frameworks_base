@@ -59,7 +59,7 @@
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"S\'ha iniciat la reorganització del widget."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ha finalitzat la reorganització del widget."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"S\'ha suprimit el widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Amplia l\'àrea de desbloqueig."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Desplega l\'àrea de desbloqueig."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig lliscant el dit"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig mitjançant patró"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial"</string>
