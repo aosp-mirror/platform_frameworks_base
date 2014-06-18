@@ -15,7 +15,9 @@ sdk.platform.apiLevel=20
 <ol id="toc44" class="hide-nested">
   <li><a href="#Behaviors">Important Behavior Changes</a>
     <ol>
+      <li><a href="#ART">New Android Runtime (ART)</a></li>
       <li><a href="#BehaviorNotifications">If your app implements notifications...</a></li>
+      <li><a href="#BehaviorMediaControl">If your app uses RemoteControlClient...</a></li>
       <li><a href="#BehaviorFullscreen">If your app uses fullScreenIntent...</a></li>
       <li><a href="#BehaviorGetRecentTasks">If your app uses ActivityManager.getRecentTasks()...</a></li>
     </ol>
@@ -23,9 +25,10 @@ sdk.platform.apiLevel=20
   <li><a href="#UI">User Interface</a>
     <ol>
       <li><a href="#MaterialDesign">Material design support</a></li>
+      <li><a href="#DoNotDisturb">Do Not Disturb mode</a></li>
       <li><a href="#LockscreenNotifications">Lockscreen notifications</a></li>
       <li><a href="#NotificationsMetadata">Notifications metadata</a></li>
-      <li><a href="#Recents">Concurrent documents and activities in Recents screen</a></li>
+      <li><a href="#Recents">Concurrent documents and activities in the Recents screen</a></li>
       <li><a href="#WebView">WebView updates</a></li>
     </ol>
   </li>
@@ -41,7 +44,7 @@ sdk.platform.apiLevel=20
   </li>
   <li><a href="#Multimedia">Multimedia</a>
     <ol>
-      <li><a href="#Camera-v2">Camera V2</a></li>
+      <li><a href="#Camera-v2">Camera v2 API</a></li>
       <li><a href="#AudioPlayback">Audio playback</a></li>
       <li><a href="#MediaPlaybackControl">Media playback control</a></li>
     </ol>
@@ -55,7 +58,7 @@ sdk.platform.apiLevel=20
     <ol>
       <li><a href="#Multinetwork">Dynamic network selection and seamless handoff</a></li>
       <li><a href="#BluetoothBroadcasting">Bluetooth broadcasting</a></li>
-      <li><a href="#NFCEnhancements">NFC enhancements for payments</a></li>
+      <li><a href="#NFCEnhancements">NFC enhancements</a></li>
     </ol>
   </li>
   <li><a href="#Power">Power Efficiency</a>
@@ -71,7 +74,7 @@ sdk.platform.apiLevel=20
   </li>
   <li><a href="#Printing">Printing Framework</a>
     <ol>
-      <li><a href="#PDFRender">PDF rendering</a></li>
+      <li><a href="#PDFRender">Render PDF as bitmap</a></li>
     </ol>
   </li>
   <li><a href="#TestingA11y">Testing &amp; Accessibility</a>
@@ -96,73 +99,130 @@ Differences Report &raquo;</a> </li>
 </div>
 </div>
 
-<p>L is an upcoming release for the Android platform
-that offers new features for users and app developers. This document provides
-an introduction to the most notable new APIs.</p>
+<p>The L Developer Preview gives you an advance look at the upcoming release for
+the Android platform,
+which offers new features for users and app developers. This document provides
+an introduction to the most notable APIs.</p>
 
-<p>L is currently available as a <strong>developer preview</strong> intended
-for early adopters and testers. If you are interested in influencing the
-direction of the Android framework,
-<a href="{@docRoot}preview/setup-sdk.html">give the L Developer Preview a
-try</a> and send us your feedback!</p>
+<p>The L Developer Preview is intended for <strong>developer early adopters</strong> and
+<strong>testers</strong>. If you are interested in influencing the direction of the
+Android framework, <a href="{@docRoot}preview/setup-sdk.html">give the L
+Developer Preview a try</a> and send us your feedback!</p>
 
-<p class="caution"><strong>Caution:</strong>You should not publish apps
-using L Developer Preview to the Google Play store.</p>
+<p class="caution"><strong>Caution:</strong> Do not not publish apps
+that use the L Developer Preview to the Google Play store.</p>
+
+<p class="note"><strong>Note:</strong> This document often refers to classes and
+methods that do not yet have reference material available on <a
+href="{@docRoot}">developer.android.com</a>. These API elements are
+formatted in {@code code style} in this document (without hyperlinks). For the
+preliminary API documentation for these elements, download the <a
+href="{@docRoot}preview/l-developer-preview-reference.zip">preview
+reference</a>.</p>
 
 <h2 id="Behaviors">Important Behavior Changes</h2>
 
 <p>If you have previously published an app for Android, be aware that your app
-  might be affected by changes in L.</p>
+  might be affected by changes in the upcoming release.</p>
+
+<h3 id="ART">New Android Runtime (ART)</h3>
+
+<p>The 4.4 release introduced a new, experimental Android runtime, ART. Under
+4.4, ART was optional, and the default runtime remained Dalvik. With the L Developer Preview, ART is
+now the default runtime.</p>
+
+<p>For an overview of ART's new features, see
+<a href="https://source.android.com/devices/tech/dalvik/art.html">Introducing
+ART</a>. Some of the major new features are:</p>
+
+<ul>
+  <li>Ahead-of-Time (AOT) compilation</li>
+  <li>Improved garbage collection (GC)</li>
+  <li>Improved debugging support</li>
+</ul>
+
+<p>Most Android apps should just work without change under ART. However, some
+techniques that work on Dalvik do not work on ART. For information about the
+most important issues, see
+<a href="{@docRoot}guide/practices/verifying-apps-art.html">Verifying App
+Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
+
+<ul>
+  <li>Your app uses Java Native Interface (JNI) to run C/C++ code.</li>
+  <li>You use development tools that generate non-standard code (such as some
+      obfuscators).</li>
+  <li>You use techniques that are incompatible with compacting garbage
+      collection. (ART does not currently implement compacting GC, but
+      compacting GC is under development in the Android Open-Source
+      Project.)</li>
+</ul>
 
 <h3 id="BehaviorNotifications">If your app implements notifications...</h3>
 
-<p>Notifications will be drawn with dark text atop white (or very light)
+<p>Notifications are drawn with dark text atop white (or very light)
 backgrounds to match the new material design widgets. Make sure that all your
-notifications look right with the new color scheme. You should remove or update
-assets and text styles that involve color. The system will automatically invert
-action icons in notifications. Use
-{@code android.app.Notification.Builder.setColor()} to set an accent color
-in a circle behind your {@code Notification.icon} image.</p>
+notifications look right with the new color scheme:</p>
 
-<p>The system will ignore all non-alpha channels in action icons and the main
-notification icon, so you should assume that these icons will be alpha-only.
-</p>
+<ul>
+
+  <li>Update or remove assets that involve color.</li>
+
+  <li>The system automatically inverts action icons in notifications. Use
+  {@code android.app.Notification.Builder.setColor()} to set an accent color
+  in a circle behind your {@link android.app.Notification#icon} image.</li>
+
+  <li>The system ignores all non-alpha channels in action icons and the main
+  notification icon. You should assume that these icons are alpha-only.</li>
+
+</ul>
 
 <p>If you are currently adding sounds and vibrations to your notifications by
 using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
-or {@link android.os.Vibrator} classes, make sure to remove this code so that
-the system can present notifications correctly in Do not disturb mode. You
-should use the {@link android.app.Notification.Builder} methods instead to add
-sounds and vibration.
-</p>
+or {@link android.os.Vibrator} classes, remove this code so that
+the system can present notifications correctly in <a href="#DoNotDisturb">Do Not Disturb</a> mode.
+Instead, use the {@link android.app.Notification.Builder} methods instead to add
+sounds and vibration.</p>
 
 <h3 id="BehaviorMediaControl">If your app uses RemoteControlClient...</h3>
 
-<p>Lockscreens in L will not show transport controls for your
+<p>Lockscreens in the L Developer Preview do not show transport controls for your
 {@link android.media.RemoteControlClient}. Instead, your app can provide
 media playback control from the lockscreen through a media notification. This
 gives your app more control over the presentation of media buttons, while
 providing a consistent experience for users across the lockscreen and
 unlocked device.</p>
 
-<p>You must call {@code Notification.Builder.setVisibility(Notification.VISIBILITY_PUBLIC)} to mark your media notification as safe to reveal, even when the lockscreen is secured
-with a PIN, pattern, or password.</p>
+<p>Call {@code
+Notification.Builder.setVisibility(Notification.VISIBILITY_PUBLIC)} to mark a
+notification as safe to display on the lockscreen (even when the lockscreen is
+secured with a PIN, pattern, or password). For more information, see
+<a href="#LockscreenNotifications">Lockscreen Notifications</a>.</p>
 
 <h3 id="BehaviorFullscreen">If your app uses fullScreenIntent...</h3>
 
 <p>Notifications now appear in a small floating window if all these conditions
-are met: the user’s activity is in fullscreen mode, the screen is on, and the
-device is unlocked. If your app implements fullscreen activities, make sure that
+are met:</p>
+
+<ul>
+  <li>The user’s activity is in fullscreen mode,</li>
+  <li>The screen is on, and</li>
+  <li>The device is unlocked</li>
+</ul>
+
+<p>If your app implements fullscreen activities, make sure that
 these heads-up notifications are presented correctly.</p>
 
 <h3 id="BehaviorGetRecentTasks">If your app uses ActivityManager.getRecentTasks()...</h3>
 
-<p>With the introduction of the new document tasks feature in L (see below),
-the {@code android.app.ActivityManager.getRecentTasks()} method is now
-deprecated to improve user privacy. For backwards
-compatibility, it will still return a small subset of its data including the
+<p>With the introduction of the new <em>concurrent documents and activities tasks</em> feature in the upcoming
+release (see <a href="#Recents">Concurrent documents and activities in Recents
+screen</a> below),
+the {@link android.app.ActivityManager#getRecentTasks
+ActivityManager.getRecentTasks()} method is now
+deprecated to improve user privacy. For backward
+compatibility, this method still returns a small subset of its data, including the
 calling application’s own tasks and possibly some other non-sensitive tasks
-such as home. If your app is using this method to retrieve its own tasks,
+(such as Home). If your app is using this method to retrieve its own tasks,
 use {@code android.app.ActivityManager.getAppTasks()} instead to retrieve that
 information.</p>
 
@@ -170,11 +230,15 @@ information.</p>
 
 <h3 id="MaterialDesign">Material design support</h3>
 
-<p>The L Developer Preview adds support for the material design style. You can create
-material design apps that are visually dynamic and have UI element transitions
-which feel natural and delightful to users. This support includes:</p>
+
+<p>The upcoming release adds support for Android's new <em>material</em> design
+style. You can create
+apps with material design that are visually dynamic and have UI element transitions
+that feel natural to users. This support includes:</p>
+
 <ul>
-  <li>The Material theme</li>
+
+  <li>The material theme</li>
   <li>View shadows</li>
   <li>The {@code RecyclerView} widget</li>
   <li>Drawable animation and styling effects</li>
@@ -182,8 +246,9 @@ which feel natural and delightful to users. This support includes:</p>
   <li>Animators for view properties based on the state of a view</li>
   <li>Customizable UI widgets and app bars with color palettes that you control</li>
 </ul>
+
 <p>To learn more about adding material design functionality to your app, see
-<a href="{@docRoot}preview/material/index.html">Material design on Android</a>.</p>
+<a href="{@docRoot}preview/material/index.html">Material Design</a>.</p>
 
 <h3 id="LockscreenNotifications">Lockscreen notifications</h3>
 <p>Lockscreens in the L Developer Preview have the ability to present notifications.
@@ -194,29 +259,57 @@ content to be shown over a secure lockscreen.</p>
 displayed over the secure lockscreen. To control the visibility level, call
 {@code android.app.Notification.Builder.setVisibility()} and specify one of these
 values:</p>
+
 <ul>
 <li>{@code VISIBILITY_PRIVATE}. Shows basic information, such as the
 notification’s icon, but hides the notification’s full content. If you want to
 provide a redacted public version of your notification for the system to display
-on a secure lockscreen, set the public notification object in the <code>publicVersion</code>
-field.</li>
+on a secure lockscreen, create a public notification object and put a reference
+to it in the private notification's {@code publicVersion} field.</li>
 <li>{@code VISIBILITY_PUBLIC}. Shows the notification’s full content. This is
   the system default if visibility is left unspecified.</li>
 <li>{@code VISIBILITY_SECRET}. Shows only the most minimal information,
 excluding even the notification’s icon.</li>
 </ul>
 
-<h3 id="NotificationsMetadata">Notifications metadata</h3>
-<p>The L Developer Preview uses metadata associated with your app notifications
-to more intelligently sort your notifications. The metadata you set also
-controls how the system presents your app notifications when the user is in <em>Do
-not disturb</em> mode. When constructing your notification, you can call the
-following methods in {@code android.app.Notification.Builder}:</p>
+<h3 id="DoNotDisturb">Do Not Disturb mode</h3>
+
+<p>The L Developer Preview introduces a new <em>Do Not Disturb</em> mode. When
+the user puts the device in <em>Do Not Disturb</em> mode, the device limits
+the frequency of the notifications it shows the user (when the user
+wants to avoid distractions). The user can
+customize the feature in a number of ways, such as:</p>
 
 <ul>
-<li>{@code setCategory()}. Allows the system to handle your app notifications
-in <em>Do not disturb mode</em> (for example, if your notification represents an
-incoming call, instant message, or alarm).</li>
+  <li>Specifying important people, whose calls should go through even when
+    the device is in <em>Do Not Disturb</em> mode.</li>
+  <li>Setting custom categories to allow notifications when the device is in
+    <em>Do Not Disturb</em> mode. Examples of such categories include phone
+    calls and direct communications (like Hangouts and Skype calls).</li>
+  <li>Setting rules so <em>Do Not Disturb</em> automatically goes into effect in
+    certain conditions (like at particular times of day).</li>
+</ul>
+
+<p>You should add the appropriate metadata to your app notifications to help
+make sure <em>Do Not Disturb</em> mode handles them properly. For example, if
+your app is an alarm clock,
+you can tag the notification as an alarm so it will wake the user up even if the
+device is in <em>Do Not Disturb</em> mode. For more information, see <a
+href="NotificationsMetadata">Notifications metadata</a>.</p>
+
+<h3 id="NotificationsMetadata">Notifications metadata</h3>
+<p>The L Developer Preview uses metadata associated with your app notifications
+to sort the notifications more intelligently. The metadata you set also
+controls how the system presents your app notifications when the user is in <em>Do
+Not Disturb</em> mode. To set the metadata, call the following methods in
+{@code android.app.Notification.Builder} when you construct the
+notification:</p>
+
+<ul>
+<li>{@code setCategory()}. Depending on the message category, this tells
+the system how to handle your app notifications when the device is
+in <em>Do Not Disturb</em> mode (for example, if your notification represents an
+incoming call, instant message, or alarm).
 <li>{@code setPriority()}. Notifications with the priority field set to
 {@code PRIORITY_MAX} or {@code PRIORITY_HIGH} will appear in a small floating
 window if the notification also has sound or vibration.</li>
@@ -231,30 +324,35 @@ people as being more important.</li>
 <p>In previous releases, the
 <a href="{@docRoot}design/get-started/ui-overview.html">Recents screen</a>
 could only display a single task for each app that the user interacted with
-most recently. The L Developer Preview allows your app to open additional tasks
-for concurrent activities or documents. This feature facilitates multitasking
+most recently. The L Developer Preview enables your app to open more tasks as
+needed for additional concurrent activities for documents.
+This feature facilitates multitasking
 by letting users quickly switch between individual activities and documents
-from the Recents screen. Examples of such concurrent tasks might include web
-pages in a browser app, documents in a productivity app, concurrent matches in
+from the Recents screen, with a consistent switching experience across all apps.
+Examples of such concurrent tasks might include open tabs in a web
+browser app, documents in a productivity app, concurrent matches in
 a game, or chats in a messaging app. Your app can manage its tasks
 through the {@code android.app.ActivityManager.AppTask} class.</p>
 
 <p>To insert a logical break so that the system treats your activity as a new
-document, use {@code android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT} when
+task, use {@code android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT} when
 launching the activity with {@link android.app.Activity#startActivity(android.content.Intent) startActivity()}. You can also get this behavior by declaring the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
 attribute {@code documentLaunchMode="intoExisting"} or {@code ="always"} in your
 manifest.</p>
 
 <p>You can also mark that a task should be removed from the Recents screen
-when all its activities are closed by using {@code android.content.Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS} when starting the root activity for
+when all its activities are closed. To do this, use {@code
+android.content.Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS} when starting the
+root activity for
 the task. You can also set this behavior for an activity by declaring the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
 attribute {@code autoRemoveFromRecents=“true”} in your manifest.</p>
 
 <p>To avoid cluttering the Recents screen, you can set the maximum number of
-tasks from your app that can appear in the Recents screen through the
-<a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> attribute {@code android:maxRecent}. The current maximum that can be specified
+tasks from your app that can appear in that screen. To do this, set the
+<a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+attribute {@code android:maxRecent}. The current maximum that can be specified
 is 100 tasks per user.</a></p>
 
 <h3 id="WebView">WebView updates</h3>
@@ -274,16 +372,20 @@ the new features included in this release, see <a href="https://developer.chrome
 <h3 id="IME">IME bug fixes and improvements</h3>
 
 <p>Beginning in the L Developer Preview, users can more easily switch between
-all input method editors (IME) <a href="{@docRoot}guide/topics/text/creating-input-method.html">supported by the platform</a>. Performing the designated
+all <a href="{@docRoot}guide/topics/text/creating-input-method.html">input
+method editors (IME)</a> supported by the platform. Performing the designated
 switching action (usually touching a Globe icon on the soft keyboard) will cycle
 among all such IMEs. This change takes place in
-{@code android.view.inputmethod.InputMethodManager.shouldOfferSwitchingToNextInputMethod()}.</p>
+{@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod
+InputMethodManager.shouldOfferSwitchingToNextInputMethod()}.</p>
 
-<p>In addition, the framework will now check whether the next IME includes a
-switching mechanism at all, thus supporting switching to the IME after it. An
+<p>In addition, the framework now checks whether the next IME includes a
+switching mechanism at all (and, thus, whether that IME supports switching to
+the IME after it). An
 IME with a switching mechanism will not cycle to an IME without one. This
 change takes place in
-{@code android.view.inputmethod.InputMethodManager.switchToNextInputMethod()}.
+{@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod
+InputMethodManager.switchToNextInputMethod}.
 
 <p>To see an example of how to use the updated IME-switching APIs, refer to the
 updated soft-keyboard implementation sample in this release.</p>
@@ -314,17 +416,20 @@ ES 3.1. Key new functionality provided in OpenGL ES 3.1 includes:</p>
 &lt;/manifest&gt;
 </pre>
 
-<p>For more information about using OpenGL ES, including how to check the device’s supported OpenGL ES version at runtime, see the <a href="{@docRoot}/guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
+<p>For more information about using OpenGL ES, including how to check the device’s supported OpenGL ES version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
 
 <h2 id="Multimedia">Multimedia</h2>
 
-<h3 id="Camera=v2">Camera v2 API</h3>
+<h3 id="Camera-v2">Camera v2 API</h3>
 
 <p>The L Developer Preview introduces the new {@code android.hardware.camera2}
-API to facilitate fine grain photo capture and image processing. You can now programmatically access the camera devices available to the system with {@code CameraManager.getCameraIdList()} and connect to a specific device with {@code CameraManager.openCamera()}. To start capturing images, you
-need to create a {@code CameraCaptureSession} and specify the
-{@link android.view.Surface} objects to send the captured images. The {@code CameraCaptureSession} can be configured to take single shots or multiple images
-in a burst.</p>
+API to facilitate fine-grain photo capture and image processing. You can now
+programmatically access the camera devices available to the system with {@code
+CameraManager.getCameraIdList()} and connect to a specific device with {@code
+CameraManager.openCamera()}. To start capturing images, create a {@code
+CameraCaptureSession} and specify the {@link android.view.Surface} objects for
+the captured images. The {@code CameraCaptureSession} can be configured to take
+single shots or multiple images in a burst.</p>
 
 <p>To be notified when new images are captured, implement the
 {@code CameraCaptureSession.CaptureListener()} interface and set it in your
@@ -334,16 +439,17 @@ capture request. Now when the system completes the image capture request, your
 {@code CaptureResult}.</p>
 
 <h3 id="AudioPlayback">Audio playback</h3>
-<p>This release includes the following changes for
-  {@code android.media.AudioTrack}:</p>
+<p>This release includes the following changes to
+  {@link android.media.AudioTrack}:</p>
 <ul>
   <li>Your app can now supply audio data in floating-point format
 ({@code android.media.AudioFormat.ENCODING_PCM_FLOAT}). This permits greater
 dynamic range, more consistent precision, and greater headroom. Floating-point arithmetic is especially useful during intermediate calculations. Playback
-end-points use integer format for audio data, and with lower bit-depth. In L
-Developer Preview, portions of the internal pipeline are not yet floating-point.
-  <li>Your app can now supply audio data as a {@code ByteBuffer}, in the same
-format as provided by {@code MediaCodec}.
+end-points use integer format for audio data, and with lower bit-depth. (In the
+L Developer Preview, portions of the internal pipeline are not yet
+floating-point.)
+  <li>Your app can now supply audio data as a {@link java.nio.ByteBuffer}, in the same
+format as provided by {@link android.media.MediaCodec}.
   <li>The {@code WRITE_NON_BLOCKING} option can simplify buffering and
     multithreading for some apps.
 </ul>
@@ -352,8 +458,8 @@ format as provided by {@code MediaCodec}.
 <p>You can now build your own media controller app with the new
 {@code android.media.session.MediaController} class, which provides
 simplified transport controls APIs that replace those in
-{@code android.media.RemoteControlClient}. The {@code MediaController} class
-allows thread-safe control of playback from a non UI process, making it easier
+{@link android.media.RemoteControlClient}. The {@code MediaController} class
+allows thread-safe control of playback from a non-UI process, making it easier
 to control your media playback service from your app’s user interface.
 
 <p>You can also create multiple controllers to send playback commands,
@@ -362,14 +468,16 @@ media keys, and other events to the same ongoing
 call {@code MediaSession.getSessionToken()} to request an access
 token in order for your app to interact with the session.</p>
 
-<p>Send transport commands such as "play", "stop", "skip", and
+<p>You can now send transport commands such as "play", "stop", "skip", and
 "set rating" by using {@code MediaController.TransportControls}. To handle
-in-bound media transport commands from controllers attached to the session, you
-should override the callback methods in
+in-bound media transport commands from controllers attached to the session,
+override the callback methods in
 {@code MediaSession.TransportControlsCallback}.</p>
 
 <p>You can also create rich notifications that allow playback control tied to a
-media session with the new {@code android.app.Notification.MediaStyle} class.</p>
+media session with the new {@code android.app.Notification.MediaStyle} class. By
+using the new notification and media APIs, you will ensure that the System UI
+knows about your playback and can extract and show album art.</p>
 
 <h2 id="Storage">Storage</h2>
 
@@ -381,46 +489,58 @@ read/write access to media files. When a directory is selected, your app also
 has access to all its child directories and content.</p>
 
 <p>To get the absolute paths to directories on external storage devices where
-applications can store media files, call the
-{@code android.content.Context.getExternalMediaDirs()} method. No additional
+applications can store media files, call the new
+{@code android.content.Context.getExternalMediaDirs()} method. No
+additional
 permissions are needed by your app to read or write to the returned paths.
-External storage devices here are those considered by the system to be a
+In this context, "external storage devices" are those devices which the system
+considers to be a
 permanent part of the device, and includes emulated external storage and
 physical media slots such as SD cards in battery compartments.</p>
 
 <p>If you want to access a document in an existing directory, call the
-{@code android.provider.DocumentsContract.buildDocumentViaUri()} method and pass
-in a Uri representing the path to the parent directory and the target document
-ID. The method returns a new {@link android.net.Uri} with which your app can
+{@code android.provider.DocumentsContract.buildDocumentViaUri()} method.
+Pass the method a URI representing the path to the parent directory, and the
+target document
+ID. The method returns a new {@link android.net.Uri} which your app can
 use to write media content with {@code DocumentsContract.createDocument()}.
 
 <h2 id="Wireless">Wireless &amp; Connectivity</h2>
 
 <h3 id="Multinetwork">Dynamic network selection and seamless handoff</h3>
-<p>The L Developer Preview provides new multi-networking APIs for your app to
+<p>The L Developer Preview provides new multi-networking APIs. These let your app
 dynamically scan for available networks with specific capabilities, and
 establish a connection to them. This is useful when your app requires a
 specialized network, such as an SUPL, MMS, or carrier-billing network, or if
 you want to send data using a particular type of transport protocol.</p>
 
-<p>To select and connect to a network dynamically from your app, first
-instantiate a {@code android.net.ConnectivityManager}. Next, create a
-{@code android.net.NetworkRequest} to specify the network features and transport
-type your app is interested in. To start scanning for suitable networks, call
-{@code ConnectivityManager.requestNetwork()} or
-{@code ConnectivityManager.registerNetworkCallback(), and pass in the
-{@code NetworkRequest} object and an implementation of
-{@code ConnectivityManager.NetworkCallbackListener}.</p>
+<p>To select and connect to a network dynamically from your app follow these
+steps:</p>
+
+<ol>
+ <li>Create a {@link android.net.ConnectivityManager}.</li>
+ <li>Create a
+  {@code android.net.NetworkRequest} to specify the network features and transport
+  type your app is interested in.</li>
+  <li>To scan for suitable networks, call
+  {@code ConnectivityManager.requestNetwork()} or
+  {@code ConnectivityManager.registerNetworkCallback()}, and pass in the
+  {@code NetworkRequest} object and an implementation of
+  {@code ConnectivityManager.NetworkCallbackListener}.</li>
+
+</ol>
 
 <p>When the system detects a suitable network, it connects to the network and
 invokes the {@code NetworkCallbackListener.onAvailable()} callback. You can use
 the {@code android.net.Network} object from the callback to get additional
-information about the network, or to establish a socket connection.</p>
+information about the network, or to direct traffic to use the selected
+network.</p>
 
 <h3 id="BluetoothBroadcasting">Bluetooth broadcasting</h3>
 <p>Android 4.3 introduced platform support for <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a>
 (BLE) in the central role. In the L Developer Preview, an Android device can now
-act as a Bluetooth LE <em>peripheral device</em> and make its presence known to
+act as a Bluetooth LE <em>peripheral device</em>. Apps can use this capability
+to make their presence known to
 nearby devices. For instance, you can build apps that allow a device to
 function as a pedometer or health monitor and communicate its data with another
 BLE device.</p>
@@ -429,16 +549,19 @@ BLE device.</p>
 You must add the {@code android.permission.BLUETOOTH_ADMIN} permission in your
 manifest in order for your app to use the new advertising and scanning features.</a>
 
-<p>To begin Bluetooth LE advertising so that other devices can discover the
-device running your app, call {@code android.bluetooth.le.BluetoothAdvertiser.startAdvisertising()} and pass in an implementation of the
-{@code android.bluetooth.le.AdvertiseCallback} class to report the success
-or failure of the advertising operation.</p>
+<p>To begin Bluetooth LE advertising so that other devices can discover
+your app, call {@code android.bluetooth.le.BluetoothAdvertiser.startAdvisertising()}
+and pass in an implementation of the
+{@code android.bluetooth.le.AdvertiseCallback} class. The callback object
+receives a report of the success or failure of the advertising operation.</p>
 
-<p>Conversely, if you want to scan for Bluetooth LE devices nearby, call
-{@code android.bluetooth.le.BluetoothLeScanner.startScan()} and pass in an
+<p> The L Developer Preview introduces the {@code
+android.bluetooth.le.ScanFilter} class so that your app can scan for only the
+specific types of devices it is interested in. To begin scanning for Bluetooth
+LE devices, call {@code android.bluetooth.le.BluetoothLeScanner.startScan()} and
+pass in a list of filters. In the method call, you must also provide an
 implementation of {@code android.bluetooth.le.ScanCallback} to report if a
-Bluetooth LE advertisement is found. Optionally, you can pass in filters to scan
-for a specific type of device.</p>
+Bluetooth LE advertisement is found. </p>
 
 <h3 id="NFCEnhancements">NFC enhancements</h3>
 <p>The L Developer Preview adds these enhancements to enable wider and more
@@ -446,13 +569,12 @@ flexible use of NFC:</p>
 
 <ul>
 <li>Android Beam is now available in the share menu.
-<li>Support for the <a href="http://www.wi-fi.org/discover-wi-fi/wi-fi-direct">Wi-fi Direct standard</a>.
 <li>Your app can invoke the Android Beam on the user’s device to share data by
 calling {@code android.nfc.NfcAdapter.invokeBeam()}. This avoids the need for
 the user to manually tap the device against another NFC-capable device to
 complete the data transfer.
-<li>Use the new {@code android.nfc.NdefRecord.createTextRecord()} method if
-  you want to create an NDEF record containing UTF-8 text data.
+<li>You can use the new {@code android.nfc.NdefRecord.createTextRecord()} method
+to create an NDEF record containing UTF-8 text data.
 <li>If you are developing a payment app, you now have the ability to
 register an NFC application ID (AID) dynamically by calling
 {@code android.nfc.cardemulation.CardEmulation.registerAidsForService()}.
@@ -466,18 +588,31 @@ activity is in the foreground.
 <h3 id="JobScheduler">Scheduling jobs</h3>
 <p>The L Developer Preview provides a new {@code android.app.job.JobScheduler}
 API that lets you optimize battery life by defining jobs for the system to run
-asynchronously at a later time, such as when the device is charging. This is
-useful when you want to defer non user-facing units of work, have application
-code that accesses the network, or want to run a number of tasks as a batch on
-a regular schedule.</p>
+asynchronously at a later time or under specified conditions (such as when the
+device is charging). This is useful in such situations as:</p>
+<ul>
+  <li>The app has non-user-facing work that you want to defer until the unit is
+    plugged in.</li>
+  <li>The app has a task that requires network access (or requires a wifi
+    connection).</li>
+  <li>The app has a number of tasks that you want to run as a batch on a regular
+   schedule.</li>
 
-<p>A {@code android.app.job.JobInfo} object encapsulates such a unit of work,
-and provides an exact description of the criteria you are scheduling.</p>
+</ul>
+
+<p>A unit of work is encapsulated by a {@code android.app.job.JobInfo} object.
+This object provides an exact description of the criteria to be used for
+scheduling.</p>
 
 <p>Use the {@code android.app.job.JobInfo.Builder} to configure how the
 scheduled task should run. You can schedule the task to run under specific
-conditions such as only while the device is charging, when connected to an
-unmetered network, or when the system deems the device is idle.</p>
+conditions, such as:</p>
+
+<ul>
+  <li>The device is charging</li>
+  <li>The device is connected to an unmetered network</li>
+  <li>The system deems the device to be idle</li>
+</ul>
 
 <p>For example, you can add code like this to run your task on an
 unmetered network:</p>
@@ -513,23 +648,33 @@ statistical data about battery usage on a device, organized by unique user ID
 </ul>
 
 <p>Use the {@code --help} option to learn about the various options for
-tailoring the output. For example, to run the tool to print battery usage
-statistics since the device was last charged for a given app package, run this
+tailoring the output. For example, to print battery usage
+statistics for a given app package since the device was last charged, run this
 command:
 <pre>
-$ adb shell dumpsys batterystats --charged <package-name>
+$ adb shell dumpsys batterystats --charged &lt;package-name&gt;
 </pre>
 </dd>
 
 <dt><strong>Battery Historian</strong></dt>
 <dd>
-<p>The Battery Historian tool ({@code historian.par}) analyzes L-based Android
-bug reports and creates an HTML visualization of power-related events. It can
-also visualize power consumption data from a power monitor, and will attempt to
-map power usage to the wakelocks seen. You can find the Battery Historian tool
+<p>The Battery Historian tool ({@code historian.par}) analyzes Android
+bug reports from the L Developer Preview and creates an HTML visualization of
+power-related events. It can
+also visualize power consumption data from a power monitor, and attempts to
+map power usage to the wake locks seen. You can find the Battery Historian tool
 in {@code &lt;sdk&gt;/tools}.</p>
 
-<p>For best results, you should first enable full wakelock reporting to allow
+<img src="images/battery_historian.png"
+     srcset="images/battery_historian@2x.png 2x"
+    alt="" width="440" height="240"
+    id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong>HTML visualization generated by the Battery
+      Historian tool.
+</p>
+
+<p>For best results, you should first enable full wake lock reporting, to allow
 the Battery Historian tool to monitor uninterrupted over an extended period of
 time:</p>
 <pre>
@@ -548,93 +693,70 @@ $ historian.par [-p powerfile] bugreport.txt > out.html
 </pre>
 </dd>
 
-<dt><strong>On-device power management</strong></dt>
-<dd>
-<p>You can use the {@code android.os.BatteryManager} API to obtain power
-consumption information based on the battery fuel gauge included in Android
-phones and tablets. This is useful in cases when it is not convenient to
-connect external measurement equipment to the Android device.</p>
-<p>To retrieve the battery properties, call {@code BatteryManager.getIntProperty()}
-or {@code BatteryManager.getLongProperty()}. The properties available, the
-exact resolution of the values of each, and other characteristics such as
-update frequency depend on the particular device being tested.</p>
-
-<p>The following properties can be inspected on all Android devices:</p>
-
-<table>
-  <tr>
-     <th>Property</th>
-     <th>Description</th>
-  </tr>
-  <tr>
-     <td>{@code BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER}</td>
-     <td>Remaining battery capacity in microampere-hours.</td>
-  </tr>
-  <tr>
-     <td>{@code BatteryManager.BATTERY_PROPERTY_CURRENT_NOW}</td>
-     <td>Instantaneous battery current in microamperes.</td>
-  </tr>
-  <tr>
-     <td>{@code BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE}</td>
-     <td>Average battery current in microamperes</td>
-  </tr>
-  <tr>
-     <td>{@code BatteryManager.BATTERY_PROPERTY_CAPACITY}</td>
-     <td>Remaining battery capacity as an integer percentage.</td>
-  </tr>
-  <tr>
-     <td>{@code BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER}</td>
-     <td>Remaining energy in nanowatt-hours.</td>
-  </tr>
-</table>
-<dd>
 </dl>
 
 <h2 id="Enterprise">Enterprise</h2>
 <h3 id="ManagedProvisioning">Managed provisioning</h3>
 
+<div class="figure" style="width:360px">
+  <img src="images/managed_apps_launcher.png"
+    srcset="images/managed_apps_launcher@2x.png 2x"
+    alt="" width="360" height="572" id="figure2" />
+  <p class="img-caption">
+    <strong>Figure 2.</strong> Launcher screen showing managed apps (marked with
+    a lock badge)
+  </p>
+</div>
+
 <p>The L Developer Preview provides new functionality for running apps within
 an enterprise environment:</p>
 <ul>
 <li><strong>Create managed user profiles</strong>. A device administrator can
-initiate a managed provisioning process to enroll a user device with an
-existing personal account into a co-present but separate managed profile that
-the administrator controls.
-<li><strong>Set device owner scope</strong>. Device administrators can also
-apply managed provisioning to configure a device that has no previous user
-accounts installed, so that they have full control over the device.
+initiate a managed provisioning process to add a co-present but separate managed
+profile to a device with an existing personal account. The administrator has
+control over the managed profile.</li>
+<li><strong>Set device owner</strong>. Device administrators can also initiate a
+managed provisioning process to automatically provision a
+currently-unprovisioned device such that they have full control over the
+device.</li>
 </ul>
 
-<p>To start the manged provisioning process, send
-{@code ACTION_PROVISION_MANAGED_PROFILE} in an {@link android.content.Intent}. A
-user may be associated with more than one managed profile. To get a list of the
-managed profiles associated with the user, call
-{@code android.os.UserManager.getUserProfiles()}.</p>
+<p>To start the managed provisioning process, send {@code
+ACTION_PROVISION_MANAGED_PROFILE} in an {@link android.content.Intent}. If the
+call is successful, the system triggers the {@code
+android.app.admin.DeviceAdminReceiver. onProfileProvisioningComplete()} callback.
+You can then call {@code app.admin.DevicePolicyManager. setProfileEnabled()} to
+set this profile to the enabled state.</p>
+
+<p>A user may be associated with more than one managed profile. To get a list of
+the managed profiles associated with the user, call
+{@code android.os.UserManager. getUserProfiles()}.</p>
 
 <p>Once a managed profile is created for a user, apps that are managed by the
 device administrator will appear alongside non-managed apps in the user’s
-Launcher, Recent apps screen, and notifications. A device policy management app
-can make the managed apps visually prominent by appending a “work” badge to the
-icon drawable with {@code android.os.UserManager.getBadgeDrawableForUser()}.</p>
+Launcher, Recent apps screen, and notifications.</p>
 
-<p>If you are developing a Launcher app, you can use the new {@code android.content.pm.LauncherApps} class to get a list of launchable activities for the current user
-and any associated managed profiles.</p>
+<p>If you are developing a Launcher app, you can use the new {@code
+android.content.pm.LauncherApps} class to get a list of launchable activities
+for the current user and any associated managed profiles. Your Launcher can make
+the managed apps visually prominent by appending a “work” badge to the icon
+drawable with {@code android.os.UserManager.getBadgeDrawableForUser()}.</p>
 
 <h2 id="Printing">Printing Framework</h2>
 
 <h3 id="PDFRender">Render PDF as bitmap</h3>
 <p>You can now render PDF document pages into bitmap images for printing by
 using the new {@code android.graphics.pdf.PdfRenderer} class. You must specify a
-{@code ParcelFileDescriptor} that is seekable (that is, the file can be randomly
+{@link android.os.ParcelFileDescriptor} that is seekable (that is, the content can be randomly
 accessed) on which the system writes the the printable content. Your app can
 obtain a page for rendering with {@code openPage()}, then call {@code render()}
 to turn the opened {@code PdfRenderer.Page} into a bitmap. You can also set
-additional parameters if you only wan to convert a portion of the document into
+additional parameters if you only want to convert a portion of the document into
 a bitmap image (for example, to implement <a href="http://en.wikipedia.org/wiki/Tiled_rendering">tile rendering</a> in order to zoom in on the document).</p>
 
 <h2 id="TestingA11y">Testing &amp; Accessibility </h2>
 
-<h3 id="Testing A11yImprovements">Testing and accessibility improvements</h3>
+<h3 id="TestingA11yImprovements">Testing and accessibility improvements</h3>
 <p>The L Developer Preview adds the following support for testing and
 accessibility:</p>
 
@@ -644,44 +766,45 @@ and {@code android.app.UiAutomation.getWindowContentFrameStats()} methods to
 capture frame statistics for window animations and content. This lets you
 write instrumentation tests to evaluate if the app under test is rendering
 frames at a sufficient refresh frequency to provide a smooth user experience.
+
 <li>You can execute shell commands from your instrumentation test with the new
 {@code android.app.UiAutomation.executeShellCommand()}. The command execution
-is similar to running 'adb shell' from a host connected to the device. This
+is similar to running {@code adb shell} from a host connected to the device. This
 allows you to use shell based tools such as {@code dumpsys}, {@code am},
 {@code content}, and {@code pm}.
+
 <li>Accessibility services and test tools that use the accessibility APIs
-(such as <a href="{@docRoot}tools/help/uiautomator/index.html">UiAutomator</a>)
+(such as <a href="{@docRoot}tools/help/uiautomator/index.html">uiautomator</a>)
 can now retrieve detailed information about the properties of windows on the
 screen that sighted users can interact with. To retrieve a list of
-{@code android.view.accessibility.AccessibilityWindowInfo} representing the
+{@code android.view.accessibility.AccessibilityWindowInfo} objects
+representing the
 windows information, call the new
 {@code android.accessibilityservice.AccessibilityService.getWindows()} method.
 <li>You can use the new {@code android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} to define standard or customized
-actions to perform on an {@code android.view.accessibility.AccessibilityNodeInfo}.
+actions to perform on an {@link android.view.accessibility.AccessibilityNodeInfo}.
 The new {@code AccessibilityAction} class replaces the actions-related APIs
 previously found in {@code AccessibilityNodeInfo}.
 </ul>
 
-<h2 id="manifest">Manifest Declarations</h2>
+<h2 id="Manifest">Manifest Declarations</h2>
 
 <h3 id="ManifestFeatures">Declarable required features</h3>
-<p>The following values are now supported in the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> element so you
+<p>The following values are now supported in the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> element, so you
 can ensure that your app is installed only on devices that provide the features
 your app needs.</p>
 
 <ul>
-<li>{@code FEATURE_LEANBACK}. Declares that your app must be installed only on devices that support the <a href="{@docRoot}tv}">Android TV</a> user interface. Example:
+<li>{@code FEATURE_LEANBACK}. Declares that your app must be installed only on
+devices that support the <a href="{@docRoot}training/tv}">Android TV</a> user
+interface. Example:
 <pre>
 &lt;uses-feature android:name="android.software.leanback"
               android:required="true" /&gt;
 </pre>
 
-<li>{@code FEATURE_MANAGEDPROFILES}. Declares that your app must only be installed on devices that support managed profiles for enterprise users. Example:
-<pre>
-&lt;uses-feature android:name="android.software.managedprofiles"
-              android:required="true" /&gt;
-</pre>
-<li>{@code FEATURE_WEBVIEW}. Declares that your app must only be installed on devices that fully implement the android.webkit.* APIs. Example:
+<li>{@code FEATURE_WEBVIEW}. Declares that your app must only be installed on
+devices that fully implement the {@code android.webkit.*} APIs. Example:
 <pre>
 &lt;uses-feature android:name="android.software.webview"
               android:required="true" /&gt;
