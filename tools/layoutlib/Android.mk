@@ -28,8 +28,8 @@ include $(CLEAR_VARS)
 built_framework_dep := $(call java-lib-deps,framework-base)
 built_framework_classes := $(call java-lib-files,framework-base)
 
-built_core_dep := $(call java-lib-deps,core)
-built_core_classes := $(call java-lib-files,core)
+built_core_dep := $(call java-lib-deps,core-libart)
+built_core_classes := $(call java-lib-files,core-libart)
 
 built_ext_dep := $(call java-lib-deps,ext)
 built_ext_classes := $(call java-lib-files,ext)
