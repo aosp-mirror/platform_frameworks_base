@@ -50,30 +50,28 @@ public:
         enum Type {
             kNone,
             kRoundRect,
-            kAmbientShadow,
-            kSpotShadow
         };
 
         Type type;
+        float scaleX;
+        float scaleY;
         bool aa;
         SkPaint::Cap cap;
         SkPaint::Style style;
         float strokeWidth;
         union Shape {
             struct RoundRect {
-                float mScaleX;
-                float mScaleY;
-                float mWidth;
-                float mHeight;
-                float mRx;
-                float mRy;
+                float width;
+                float height;
+                float rx;
+                float ry;
             } roundRect;
         } shape;
 
         Description();
-        Description(Type type);
-        Description(Type type, const SkPaint* paint);
+        Description(Type type, const Matrix4& transform, const SkPaint& paint);
         hash_t hash() const;
+        void setupMatrixAndPaint(Matrix4* matrix, SkPaint* paint) const;
     };
 
     struct ShadowDescription {
@@ -123,12 +121,12 @@ public:
 
     // TODO: precache/get for Oval, Lines, Points, etc.
 
-    void precacheRoundRect(const Matrix4& transform,
-            float width, float height, float rx, float ry, const SkPaint* paint) {
-        getRoundRectBuffer(transform, width, height, rx, ry, paint);
+    void precacheRoundRect(const Matrix4& transform, const SkPaint& paint,
+            float width, float height, float rx, float ry) {
+        getRoundRectBuffer(transform, paint, width, height, rx, ry);
     }
-    const VertexBuffer* getRoundRect(const Matrix4& transform,
-            float width, float height, float rx, float ry, const SkPaint* paint);
+    const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint,
+            float width, float height, float rx, float ry);
 
     void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
@@ -146,14 +144,14 @@ private:
     class TessellationTask;
     class TessellationProcessor;
 
+    typedef VertexBuffer* (*Tessellator)(const Description&);
 
-    typedef VertexBuffer* (*Tessellator)(const Description&, const SkPaint&);
+    Buffer* getRectBuffer(const Matrix4& transform, const SkPaint& paint,
+            float width, float height);
+    Buffer* getRoundRectBuffer(const Matrix4& transform, const SkPaint& paint,
+            float width, float height, float rx, float ry);
 
-    Buffer* getRoundRectBuffer(const Matrix4& transform,
-            float width, float height, float rx, float ry, const SkPaint* paint);
-
-    Buffer* getOrCreateBuffer(const Description& entry,
-            Tessellator tessellator, const SkPaint* paint);
+    Buffer* getOrCreateBuffer(const Description& entry, Tessellator tessellator);
 
     uint32_t mSize;
     uint32_t mMaxSize;

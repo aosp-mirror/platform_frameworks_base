@@ -2556,8 +2556,8 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
         return drawShape(left, top, texture, p);
     }
 
-    const VertexBuffer* vertexBuffer = mCaches.tessellationCache.getRoundRect(*currentTransform(),
-            right - left, bottom - top, rx, ry, p);
+    const VertexBuffer* vertexBuffer = mCaches.tessellationCache.getRoundRect(
+            *currentTransform(), *p, right - left, bottom - top, rx, ry);
     return drawVertexBuffer(left, top, *vertexBuffer, p);
 }
 
@@ -2609,10 +2609,6 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
             (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
         return DrawGlInfo::kStatusDone;
-    }
-
-    if (fabs(sweepAngle) >= 360.0f) {
-        return drawOval(left, top, right, bottom, p);
     }
 
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)

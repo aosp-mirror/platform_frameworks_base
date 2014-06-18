@@ -39,6 +39,8 @@ namespace uirenderer {
 
 TessellationCache::Description::Description()
         : type(kNone)
+        , scaleX(1.0f)
+        , scaleY(1.0f)
         , aa(false)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
@@ -46,21 +48,13 @@ TessellationCache::Description::Description()
     memset(&shape, 0, sizeof(Shape));
 }
 
-TessellationCache::Description::Description(Type type)
+TessellationCache::Description::Description(Type type, const Matrix4& transform, const SkPaint& paint)
         : type(type)
-        , aa(false)
-        , cap(SkPaint::kDefault_Cap)
-        , style(SkPaint::kFill_Style)
-        , strokeWidth(1.0f) {
-    memset(&shape, 0, sizeof(Shape));
-}
-
-TessellationCache::Description::Description(Type type, const SkPaint* paint)
-        : type(type)
-        , aa(paint->isAntiAlias())
-        , cap(paint->getStrokeCap())
-        , style(paint->getStyle())
-        , strokeWidth(paint->getStrokeWidth()) {
+        , aa(paint.isAntiAlias())
+        , cap(paint.getStrokeCap())
+        , style(paint.getStyle())
+        , strokeWidth(paint.getStrokeWidth()) {
+    PathTessellator::extractTessellationScales(transform, &scaleX, &scaleY);
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -70,8 +64,18 @@ hash_t TessellationCache::Description::hash() const {
     hash = JenkinsHashMix(hash, cap);
     hash = JenkinsHashMix(hash, style);
     hash = JenkinsHashMix(hash, android::hash_type(strokeWidth));
+    hash = JenkinsHashMix(hash, android::hash_type(scaleX));
+    hash = JenkinsHashMix(hash, android::hash_type(scaleY));
     hash = JenkinsHashMixBytes(hash, (uint8_t*) &shape, sizeof(Shape));
     return JenkinsHashWhiten(hash);
+}
+
+void TessellationCache::Description::setupMatrixAndPaint(Matrix4* matrix, SkPaint* paint) const {
+    matrix->loadScale(scaleX, scaleY, 1.0f);
+    paint->setAntiAlias(aa);
+    paint->setStrokeCap(cap);
+    paint->setStyle(style);
+    paint->setStrokeWidth(strokeWidth);
 }
 
 TessellationCache::ShadowDescription::ShadowDescription()
@@ -96,20 +100,15 @@ hash_t TessellationCache::ShadowDescription::hash() const {
 
 class TessellationCache::TessellationTask : public Task<VertexBuffer*> {
 public:
-    TessellationTask(Tessellator tessellator, const Description& description,
-                const SkPaint* paint)
+    TessellationTask(Tessellator tessellator, const Description& description)
         : tessellator(tessellator)
-        , description(description)
-        , paint(*paint) {
+        , description(description) {
     }
 
     ~TessellationTask() {}
 
     Tessellator tessellator;
     Description description;
-
-    //copied, since input paint may not be immutable
-    const SkPaint paint;
 };
 
 class TessellationCache::TessellationProcessor : public TaskProcessor<VertexBuffer*> {
@@ -121,7 +120,7 @@ public:
     virtual void onProcess(const sp<Task<VertexBuffer*> >& task) {
         TessellationTask* t = static_cast<TessellationTask*>(task.get());
         ATRACE_NAME("shape tessellation");
-        VertexBuffer* buffer = t->tessellator(t->description, t->paint);
+        VertexBuffer* buffer = t->tessellator(t->description);
         t->setResult(buffer);
     }
 };
@@ -416,21 +415,12 @@ void TessellationCache::getShadowBuffers(const Matrix4* drawTransform, const Rec
 // Tessellation precaching
 ///////////////////////////////////////////////////////////////////////////////
 
-static VertexBuffer* tessellatePath(const SkPath& path, const SkPaint* paint,
-        float scaleX, float scaleY) {
-    VertexBuffer* buffer = new VertexBuffer();
-    Matrix4 matrix;
-    matrix.loadScale(scaleX, scaleY, 1);
-    PathTessellator::tessellatePath(path, paint, matrix, *buffer);
-    return buffer;
-}
-
 TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
-        const Description& entry, Tessellator tessellator, const SkPaint* paint) {
+        const Description& entry, Tessellator tessellator) {
     Buffer* buffer = mCache.get(entry);
     if (!buffer) {
         // not cached, enqueue a task to fill the buffer
-        sp<TessellationTask> task = new TessellationTask(tessellator, entry, paint);
+        sp<TessellationTask> task = new TessellationTask(tessellator, entry);
         buffer = new Buffer(task);
 
         if (mProcessor == NULL) {
@@ -442,43 +432,49 @@ TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
     return buffer;
 }
 
+static VertexBuffer* tessellatePath(const TessellationCache::Description& description,
+        const SkPath& path) {
+    Matrix4 matrix;
+    SkPaint paint;
+    description.setupMatrixAndPaint(&matrix, &paint);
+    VertexBuffer* buffer = new VertexBuffer();
+    PathTessellator::tessellatePath(path, &paint, matrix, *buffer);
+    return buffer;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-// Rounded rects
+// RoundRect
 ///////////////////////////////////////////////////////////////////////////////
 
-static VertexBuffer* tessellateRoundRect(const TessellationCache::Description& description,
-        const SkPaint& paint) {
-    SkRect rect = SkRect::MakeWH(description.shape.roundRect.mWidth,
-            description.shape.roundRect.mHeight);
-    float rx = description.shape.roundRect.mRx;
-    float ry = description.shape.roundRect.mRy;
-    if (paint.getStyle() == SkPaint::kStrokeAndFill_Style) {
-        float outset = paint.getStrokeWidth() / 2;
+static VertexBuffer* tessellateRoundRect(const TessellationCache::Description& description) {
+    SkRect rect = SkRect::MakeWH(description.shape.roundRect.width,
+            description.shape.roundRect.height);
+    float rx = description.shape.roundRect.rx;
+    float ry = description.shape.roundRect.ry;
+    if (description.style == SkPaint::kStrokeAndFill_Style) {
+        float outset = description.strokeWidth / 2;
         rect.outset(outset, outset);
         rx += outset;
         ry += outset;
     }
     SkPath path;
     path.addRoundRect(rect, rx, ry);
-    return tessellatePath(path, &paint,
-            description.shape.roundRect.mScaleX, description.shape.roundRect.mScaleY);
+    return tessellatePath(description, path);
 }
 
-TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(const Matrix4& transform,
-        float width, float height, float rx, float ry, const SkPaint* paint) {
-    Description entry(Description::kRoundRect, paint);
-    entry.shape.roundRect.mWidth = width;
-    entry.shape.roundRect.mHeight = height;
-    entry.shape.roundRect.mRx = rx;
-    entry.shape.roundRect.mRy = ry;
-    PathTessellator::extractTessellationScales(transform,
-            &entry.shape.roundRect.mScaleX, &entry.shape.roundRect.mScaleY);
-
-    return getOrCreateBuffer(entry, &tessellateRoundRect, paint);
+TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(
+        const Matrix4& transform, const SkPaint& paint,
+        float width, float height, float rx, float ry) {
+    Description entry(Description::kRoundRect, transform, paint);
+    entry.shape.roundRect.width = width;
+    entry.shape.roundRect.height = height;
+    entry.shape.roundRect.rx = rx;
+    entry.shape.roundRect.ry = ry;
+    return getOrCreateBuffer(entry, &tessellateRoundRect);
 }
-const VertexBuffer* TessellationCache::getRoundRect(const Matrix4& transform,
-        float width, float height, float rx, float ry, const SkPaint* paint) {
-    return getRoundRectBuffer(transform, width, height, rx, ry, paint)->getVertexBuffer();
+const VertexBuffer* TessellationCache::getRoundRect(const Matrix4& transform, const SkPaint& paint,
+        float width, float height, float rx, float ry) {
+    return getRoundRectBuffer(transform, paint, width, height, rx, ry)->getVertexBuffer();
 }
 
 }; // namespace uirenderer
