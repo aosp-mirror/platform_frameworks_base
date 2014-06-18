@@ -5,7 +5,8 @@ parent.link=manifest-intro.html
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;activity android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+<dd><pre class="stx">&lt;activity android:<a href="#embedded">allowEmbedded</a>=["true" | "false"]
+          android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
           android:<a href="#always">alwaysRetainTaskState</a>=["true" | "false"]
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
@@ -62,6 +63,17 @@ by the system and will never be run.
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
+<dt><a name="embedded"></a>{@code android:allowEmbedded}</dt>
+<dd>
+    Indicate that the activity can be launched as the embedded child of another
+    activity. Particularly in the case where the child lives in a container
+    such as a Display owned by another activity. For example, activities
+    that are used for Wear custom notifications must declare this so
+    Wear can display the activity in it's context stream, which resides
+    in another process.
+
+    <p>The default value of this attribute is <code>false</code>.
+</dd>
 <dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
 <dd>Whether or not the activity can move from the task that started it to
 the task it has an affinity for when that task is next brought to the
