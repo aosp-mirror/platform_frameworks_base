@@ -36,6 +36,7 @@ public:
 
     static float xOffsetForTextAlign(SkPaint* paint, const Layout& layout);
 
+    static float hOffsetForTextAlign(SkPaint* paint, const Layout& layout, const SkPath& path);
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
     static void forFontRun(const Layout& layout, SkPaint* paint, F& f) {

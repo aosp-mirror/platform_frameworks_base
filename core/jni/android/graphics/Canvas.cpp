@@ -1123,29 +1123,82 @@ public:
         delete[] posPtr;
     }
 
+#ifdef USE_MINIKIN
+    class DrawTextOnPathFunctor {
+    public:
+        DrawTextOnPathFunctor(const Layout& layout, SkCanvas* canvas, float hOffset,
+                    float vOffset, SkPaint* paint, SkPath* path)
+                : layout(layout), canvas(canvas), hOffset(hOffset), vOffset(vOffset),
+                    paint(paint), path(path) {
+        }
+        void operator()(size_t start, size_t end) {
+            uint16_t glyphs[1];
+            for (size_t i = start; i < end; i++) {
+                glyphs[0] = layout.getGlyphId(i);
+                float x = hOffset + layout.getX(i);
+                float y = vOffset + layout.getY(i);
+                canvas->drawTextOnPathHV(glyphs, sizeof(glyphs), *path, x, y, *paint);
+            }
+        }
+    private:
+        const Layout& layout;
+        SkCanvas* canvas;
+        float hOffset;
+        float vOffset;
+        SkPaint* paint;
+        SkPath* path;
+    };
+#endif
+
+    static void doDrawTextOnPath(SkPaint* paint, const jchar* text, int count, int bidiFlags,
+            float hOffset, float vOffset, SkPath* path, SkCanvas* canvas, TypefaceImpl* typeface) {
+#ifdef USE_MINIKIN
+        Layout layout;
+        std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+        layout.doLayout(text, 0, count, count, css);
+        hOffset += MinikinUtils::hOffsetForTextAlign(paint, layout, *path);
+        // Set align to left for drawing, as we don't want individual
+        // glyphs centered or right-aligned; the offset above takes
+        // care of all alignment.
+        SkPaint::Align align = paint->getTextAlign();
+        paint->setTextAlign(SkPaint::kLeft_Align);
+
+        DrawTextOnPathFunctor f(layout, canvas, hOffset, vOffset, paint, path);
+        MinikinUtils::forFontRun(layout, paint, f);
+        paint->setTextAlign(align);
+#else
+        TextLayout::drawTextOnPath(paint, text, count, bidiFlags, hOffset, vOffset, path, canvas);
+#endif
+    }
+
     static void drawTextOnPath___CIIPathFFPaint(JNIEnv* env, jobject,
             jlong canvasHandle, jcharArray text, jint index, jint count,
-            jlong pathHandle, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle) {
+            jlong pathHandle, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle,
+            jlong typefaceHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        TextLayout::drawTextOnPath(paint, textArray + index, count, bidiFlags, hOffset, vOffset,
-                                   path, canvas);
+        doDrawTextOnPath(paint, textArray + index, count, bidiFlags, hOffset, vOffset,
+                                   path, canvas, typeface);
         env->ReleaseCharArrayElements(text, textArray, 0);
     }
 
     static void drawTextOnPath__StringPathFFPaint(JNIEnv* env, jobject,
             jlong canvasHandle, jstring text, jlong pathHandle,
-            jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle) {
+            jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintHandle,
+            jlong typefaceHandle) {
         SkCanvas* canvas = getNativeCanvas(canvasHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+
         const jchar* text_ = env->GetStringChars(text, NULL);
         int count = env->GetStringLength(text);
-        TextLayout::drawTextOnPath(paint, text_, count, bidiFlags, hOffset, vOffset,
-                                   path, canvas);
+        doDrawTextOnPath(paint, text_, count, bidiFlags, hOffset, vOffset,
+                                   path, canvas, typeface);
         env->ReleaseStringChars(text, text_);
     }
 
@@ -1271,9 +1324,9 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawPosText___CII_FPaint},
     {"native_drawPosText","(JLjava/lang/String;[FJ)V",
         (void*) SkCanvasGlue::drawPosText__String_FPaint},
-    {"native_drawTextOnPath","(J[CIIJFFIJ)V",
+    {"native_drawTextOnPath","(J[CIIJFFIJJ)V",
         (void*) SkCanvasGlue::drawTextOnPath___CIIPathFFPaint},
-    {"native_drawTextOnPath","(JLjava/lang/String;JFFIJ)V",
+    {"native_drawTextOnPath","(JLjava/lang/String;JFFIJJ)V",
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
 
     {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches},

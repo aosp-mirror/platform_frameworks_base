@@ -669,8 +669,48 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 #endif
 }
 
+#ifdef USE_MINIKIN
+class RenderTextOnPathFunctor {
+public:
+    RenderTextOnPathFunctor(const Layout& layout, OpenGLRenderer* renderer, float hOffset,
+                float vOffset, SkPaint* paint, SkPath* path)
+            : layout(layout), renderer(renderer), hOffset(hOffset), vOffset(vOffset),
+                paint(paint), path(path) {
+    }
+    void operator()(size_t start, size_t end) {
+        uint16_t glyphs[1];
+        for (size_t i = start; i < end; i++) {
+            glyphs[0] = layout.getGlyphId(i);
+            float x = hOffset + layout.getX(i);
+            float y = vOffset + layout.getY(i);
+            renderer->drawTextOnPath((const char*) glyphs, sizeof(glyphs), 1, path, x, y, paint);
+        }
+    }
+private:
+    const Layout& layout;
+    OpenGLRenderer* renderer;
+    float hOffset;
+    float vOffset;
+    SkPaint* paint;
+    SkPath* path;
+};
+#endif
+
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
-        SkPath* path, jfloat hOffset, jfloat vOffset, int bidiFlags, SkPaint* paint) {
+        SkPath* path, jfloat hOffset, jfloat vOffset, int bidiFlags, SkPaint* paint,
+        TypefaceImpl* typeface) {
+#ifdef USE_MINIKIN
+    Layout layout;
+    std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
+    layout.doLayout(text, 0, count, count, css);
+    hOffset += MinikinUtils::hOffsetForTextAlign(paint, layout, *path);
+    SkPaint::Align align = paint->getTextAlign();
+    paint->setTextAlign(SkPaint::kLeft_Align);
+
+    RenderTextOnPathFunctor f(layout, renderer, hOffset, vOffset, paint, path);
+    MinikinUtils::forFontRun(layout, paint, f);
+    paint->setTextAlign(align);
+#else
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
             text, 0, count, count, bidiFlags);
     if (value == NULL) {
@@ -681,6 +721,7 @@ static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int co
     int bytesCount = glyphsCount * sizeof(jchar);
     renderer->drawTextOnPath((const char*) glyphs, bytesCount, glyphsCount, path,
             hOffset, vOffset, paint);
+#endif
 }
 
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
@@ -739,27 +780,31 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject clazz,
 
 static void android_view_GLES20Canvas_drawTextArrayOnPath(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jcharArray text, jint index, jint count,
-        jlong pathPtr, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintPtr) {
+        jlong pathPtr, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintPtr,
+        jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     SkPath* path = reinterpret_cast<SkPath*>(pathPtr);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
     renderTextOnPath(renderer, textArray + index, count, path,
-            hOffset, vOffset, bidiFlags, paint);
+            hOffset, vOffset, bidiFlags, paint, typeface);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
 static void android_view_GLES20Canvas_drawTextOnPath(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jstring text, jint start, jint end,
-        jlong pathPtr, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintPtr) {
+        jlong pathPtr, jfloat hOffset, jfloat vOffset, jint bidiFlags, jlong paintPtr,
+        jlong typefacePtr) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
     const jchar* textArray = env->GetStringChars(text, NULL);
     SkPath* path = reinterpret_cast<SkPath*>(pathPtr);
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
     renderTextOnPath(renderer, textArray + start, end - start, path,
-            hOffset, vOffset, bidiFlags, paint);
+            hOffset, vOffset, bidiFlags, paint, typeface);
     env->ReleaseStringChars(text, textArray);
 }
 
@@ -986,8 +1031,8 @@ static JNINativeMethod gMethods[] = {
     { "nDrawText",          "(JLjava/lang/String;IIFFIJJ)V",
             (void*) android_view_GLES20Canvas_drawText },
 
-    { "nDrawTextOnPath",    "(J[CIIJFFIJ)V",   (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
-    { "nDrawTextOnPath",    "(JLjava/lang/String;IIJFFIJ)V",
+    { "nDrawTextOnPath",    "(J[CIIJFFIJJ)V",  (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
+    { "nDrawTextOnPath",    "(JLjava/lang/String;IIJFFIJJ)V",
             (void*) android_view_GLES20Canvas_drawTextOnPath },
 
     { "nDrawTextRun",       "(J[CIIIIFFZJJ)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
