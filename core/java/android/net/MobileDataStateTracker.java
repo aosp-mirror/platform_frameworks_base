@@ -699,15 +699,15 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
                 break;
             }
 
-            try {
-                if (enable) {
-                    return mPhoneService.enableApnType(apnType);
-                } else {
-                    return mPhoneService.disableApnType(apnType);
-                }
-            } catch (RemoteException e) {
-                if (retry == 0) getPhoneService(true);
-            }
+//            try {
+//                if (enable) {
+//                    return mPhoneService.enableApnType(apnType);
+//                } else {
+//                    return mPhoneService.disableApnType(apnType);
+//                }
+//            } catch (RemoteException e) {
+//                if (retry == 0) getPhoneService(true);
+//            }
         }
 
         loge("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");

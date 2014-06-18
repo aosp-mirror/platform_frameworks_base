@@ -310,27 +310,6 @@ interface ITelephony {
      */
     void disableLocationUpdatesUsingSubId(long subId);
 
-
-    /**
-     * Enable a specific APN type.
-     */
-    int enableApnType(String type);
-
-    /**
-     * Disable a specific APN type.
-     */
-    int disableApnType(String type);
-
-    /**
-     * Enable a specific APN type with subscription.
-     */
-    int enableApnTypeUsingSub(long subId, String type);
-
-    /**
-     * Disable a specific APN type with subscription.
-     */
-    int disableApnTypeUsingSub(long subId, String type);
-
     /**
      * Allow mobile data connections.
      */
