@@ -18,6 +18,7 @@ package android.app.admin;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -2340,15 +2341,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets which components may enter lock task mode.
+     * Sets which packages may enter lock task mode.
+     *
+     * <p>Any packages that shares uid with an allowed package will also be allowed
+     * to activate lock task.
      *
      * This function can only be called by the device owner or the profile owner.
-     * @param components The list of components allowed to enter lock task mode
+     * @param packages The list of packages allowed to enter lock task mode
+     *
+     * @see Activity#startLockTask()
      */
-    public void setLockTaskComponents(ComponentName[] components) throws SecurityException {
+    public void setLockTaskPackages(String[] packages) throws SecurityException {
         if (mService != null) {
             try {
-                mService.setLockTaskComponents(components);
+                mService.setLockTaskPackages(packages);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2356,13 +2362,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * This function returns the list of components allowed to start the lock task mode.
+     * This function returns the list of packages allowed to start the lock task mode.
      * @hide
      */
-    public ComponentName[] getLockTaskComponents() {
+    public String[] getLockTaskPackages() {
         if (mService != null) {
             try {
-                return mService.getLockTaskComponents();
+                return mService.getLockTaskPackages();
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2373,12 +2379,12 @@ public class DevicePolicyManager {
     /**
      * This function lets the caller know whether the given component is allowed to start the
      * lock task mode.
-     * @param component The component to check
+     * @param pkg The package to check
      */
-    public boolean isLockTaskPermitted(ComponentName component) {
+    public boolean isLockTaskPermitted(String pkg) {
         if (mService != null) {
             try {
-                return mService.isLockTaskPermitted(component);
+                return mService.isLockTaskPermitted(pkg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

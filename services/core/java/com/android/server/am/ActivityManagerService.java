@@ -7630,14 +7630,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private boolean isLockTaskAuthorized(ComponentName name) {
+    private boolean isLockTaskAuthorized(String pkg) {
         final DevicePolicyManager dpm = (DevicePolicyManager)
                 mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return dpm != null && dpm.isLockTaskPermitted(name);
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(pkg,
+                    Binder.getCallingUserHandle().getIdentifier());
+            return (uid == Binder.getCallingUid()) && dpm != null && dpm.isLockTaskPermitted(pkg);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
     }
 
     private void startLockTaskMode(TaskRecord task) {
-        if (!isLockTaskAuthorized(task.intent.getComponent())) {
+        final String pkg;
+        synchronized (this) {
+            pkg = task.intent.getComponent().getPackageName();
+        }
+        if (!isLockTaskAuthorized(pkg)) {
             return;
         }
         long ident = Binder.clearCallingIdentity();
@@ -7646,6 +7656,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Since we lost lock on task, make sure it is still there.
                 task = mStackSupervisor.anyTaskForIdLocked(task.taskId);
                 if (task != null) {
+                    if ((mFocusedActivity == null) || (task != mFocusedActivity.task)) {
+                        throw new IllegalArgumentException("Invalid task, not in foreground");
+                    }
                     mStackSupervisor.setLockTaskModeLocked(task);
                 }
             }
@@ -7656,25 +7669,25 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void startLockTaskMode(int taskId) {
+        final TaskRecord task;
         long ident = Binder.clearCallingIdentity();
         try {
-            final TaskRecord task;
             synchronized (this) {
                 task = mStackSupervisor.anyTaskForIdLocked(taskId);
             }
-            if (task != null) {
-                startLockTaskMode(task);
-            }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+        if (task != null) {
+            startLockTaskMode(task);
         }
     }
 
     @Override
     public void startLockTaskMode(IBinder token) {
+        final TaskRecord task;
         long ident = Binder.clearCallingIdentity();
         try {
-            final TaskRecord task;
             synchronized (this) {
                 final ActivityRecord r = ActivityRecord.forToken(token);
                 if (r == null) {
@@ -7682,24 +7695,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 task = r.task;
             }
-            if (task != null) {
-                startLockTaskMode(task);
-            }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+        if (task != null) {
+            startLockTaskMode(task);
         }
     }
 
     @Override
     public void stopLockTaskMode() {
-        // Check if the calling task is eligible to use lock task
-        final int uid = Binder.getCallingUid();
+        // Verify that the user matches the package of the intent for the TaskRecord
+        // we are locked to.  This will ensure the same caller for startLockTaskMode and
+        // stopLockTaskMode.
         try {
-            final String name = AppGlobals.getPackageManager().getNameForUid(uid);
-            if (!isLockTaskAuthorized(new ComponentName(name, name))) {
-                return;
+            String pkg = mStackSupervisor.mLockTaskModeTask.intent.getPackage();
+            int uid = mContext.getPackageManager().getPackageUid(pkg,
+                    Binder.getCallingUserHandle().getIdentifier());
+            if (uid != Binder.getCallingUid()) {
+                throw new SecurityException("Invalid uid, expected " + uid);
             }
-        } catch (RemoteException e) {
+        } catch (NameNotFoundException e) {
             Log.d(TAG, "stopLockTaskMode " + e);
             return;
         }
