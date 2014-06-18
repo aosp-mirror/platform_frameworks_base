@@ -16,9 +16,14 @@
 
 package android.content.pm;
 
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -33,6 +38,8 @@ import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -41,12 +48,18 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 
-import java.io.BufferedInputStream;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -58,20 +71,18 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
-
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Package archive parsing
@@ -153,16 +164,20 @@ public class PackageParser {
                     android.os.Build.VERSION_CODES.JELLY_BEAN)
     };
 
+    /**
+     * @deprecated callers should move to explicitly passing around source path.
+     */
+    @Deprecated
     private String mArchiveSourcePath;
+
     private String[] mSeparateProcesses;
     private boolean mOnlyCoreApps;
+    private DisplayMetrics mMetrics;
+
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
-
-    private static final Object mSync = new Object();
-    private static WeakReference<byte[]> mReadBuffer;
 
     private static boolean sCompatibilityModeEnabled = true;
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
@@ -247,12 +262,9 @@ public class PackageParser {
 
     private static final String TAG = "PackageParser";
 
-    public PackageParser(String archiveSourcePath) {
-        mArchiveSourcePath = archiveSourcePath;
-    }
-
-    public PackageParser(File archiveSource) {
-        this(archiveSource.getAbsolutePath());
+    public PackageParser() {
+        mMetrics = new DisplayMetrics();
+        mMetrics.setToDefaults();
     }
 
     public void setSeparateProcesses(String[] procs) {
@@ -261,6 +273,10 @@ public class PackageParser {
 
     public void setOnlyCoreApps(boolean onlyCoreApps) {
         mOnlyCoreApps = onlyCoreApps;
+    }
+
+    public void setDisplayMetrics(DisplayMetrics metrics) {
+        mMetrics = metrics;
     }
 
     private static final boolean isPackageFilename(File file) {
@@ -480,23 +496,21 @@ public class PackageParser {
         return pi;
     }
 
-    private static Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry je,
-            byte[] readBuffer) {
+    private static Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry entry)
+            throws PackageParserException {
+        InputStream is = null;
         try {
             // We must read the stream for the JarEntry to retrieve
             // its certificates.
-            InputStream is = new BufferedInputStream(jarFile.getInputStream(je));
-            while (is.read(readBuffer, 0, readBuffer.length) != -1) {
-                // not using
-            }
-            is.close();
-            return je != null ? jarFile.getCertificateChains(je) : null;
-        } catch (IOException e) {
-            Slog.w(TAG, "Exception reading " + je.getName() + " in " + jarFile, e);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Exception reading " + je.getName() + " in " + jarFile, e);
+            is = jarFile.getInputStream(entry);
+            readFullyIgnoringContents(is);
+            return jarFile.getCertificateChains(entry);
+        } catch (IOException | RuntimeException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Failed reading " + entry.getName() + " in " + jarFile, e);
+        } finally {
+            IoUtils.closeQuietly(is);
         }
-        return null;
     }
 
     public final static int PARSE_IS_SYSTEM = 1<<0;
@@ -508,67 +522,116 @@ public class PackageParser {
     public final static int PARSE_IS_SYSTEM_DIR = 1<<6;
     public final static int PARSE_IS_PRIVILEGED = 1<<7;
     public final static int PARSE_GET_SIGNATURES = 1<<8;
+    public final static int PARSE_TRUSTED_OVERLAY = 1<<9;
+
+    private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 
     /**
-     * Parse all APK files under the given directory as a single package.
+     * Used to sort a set of APKs based on their split names, always placing the
+     * base APK (with {@code null} split name) first.
      */
-    public Package parseSplitPackage(File apkDir, DisplayMetrics metrics, int flags,
-            boolean trustedOverlay) throws PackageParserException {
+    private static class SplitNameComparator implements Comparator<String> {
+        @Override
+        public int compare(String lhs, String rhs) {
+            if (lhs == null) {
+                return -1;
+            } else if (rhs == null) {
+                return 1;
+            } else {
+                return lhs.compareTo(rhs);
+            }
+        }
+    }
+
+    /**
+     * Parse all APKs contained in the given directory, treating them as a
+     * single package. This also performs sanity checking, such as requiring
+     * identical package name and version codes, a single base APK, and unique
+     * split names.
+     * <p>
+     * Note that this <em>does not</em> perform signature verification; that
+     * must be done separately in {@link #collectCertificates(Package, int)}.
+     */
+    public Package parseSplitPackage(File apkDir, int flags) throws PackageParserException {
         final File[] files = apkDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "No packages found in split");
         }
 
-        File baseFile = null;
+        String packageName = null;
+        int versionCode = 0;
+
+        final ArrayMap<String, File> apks = new ArrayMap<>();
         for (File file : files) {
             if (file.isFile() && isPackageFilename(file)) {
-                ApkLite lite = parseApkLite(file.getAbsolutePath(), 0);
-                if (lite == null) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                            "Invalid package file: " + file);
+                final ApkLite lite = parseApkLite(file, 0);
+
+                // Assert that all package names and version codes are
+                // consistent with the first one we encounter.
+                if (packageName == null) {
+                    packageName = lite.packageName;
+                    versionCode = lite.versionCode;
+                } else {
+                    if (!packageName.equals(lite.packageName)) {
+                        throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                                "Inconsistent package " + lite.packageName + " in " + file
+                                + "; expected " + packageName);
+                    }
+                    if (versionCode != lite.versionCode) {
+                        throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                                "Inconsistent version " + lite.versionCode + " in " + file
+                                + "; expected " + versionCode);
+                    }
                 }
 
-                if (TextUtils.isEmpty(lite.splitName)) {
-                    baseFile = file;
-                    break;
+                // Assert that each split is defined only once
+                if (apks.put(lite.splitName, file) != null) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                            "Split name " + lite.splitName
+                            + " defined more than once; most recent was " + file);
                 }
             }
         }
 
+        final File baseFile = apks.remove(null);
         if (baseFile == null) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+            throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Missing base APK in " + apkDir);
         }
 
-        final Package pkg = parseBaseApk(baseFile, metrics, flags, trustedOverlay);
+        // Always apply deterministic ordering based on splitName
+        final int size = apks.size();
+
+        final String[] splitNames = apks.keySet().toArray(new String[size]);
+        Arrays.sort(splitNames, sSplitNameComparator);
+
+        final File[] splitFiles = new File[size];
+        for (int i = 0; i < size; i++) {
+            splitFiles[i] = apks.get(splitNames[i]);
+        }
+
+        final Package pkg = parseBaseApk(baseFile, flags);
         if (pkg == null) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "Failed to parse base APK: " + baseFile);
         }
 
-        for (File file : files) {
-            if (file.isFile() && isPackageFilename(file) && !file.equals(baseFile)) {
-                parseSplitApk(pkg, file, metrics, flags, trustedOverlay);
-            }
-        }
-
-        // Always use a well-defined sort order
-        if (pkg.splitCodePaths != null) {
-            Arrays.sort(pkg.splitCodePaths);
+        for (File splitFile : splitFiles) {
+            parseSplitApk(pkg, splitFile, flags);
         }
 
         return pkg;
     }
 
-    public Package parseMonolithicPackage(File apkFile, DisplayMetrics metrics, int flags)
-            throws PackageParserException {
-        return parseMonolithicPackage(apkFile, metrics, flags, false);
-    }
-
-    public Package parseMonolithicPackage(File apkFile, DisplayMetrics metrics, int flags,
-            boolean trustedOverlay) throws PackageParserException {
-        final Package pkg = parseBaseApk(apkFile, metrics, flags, trustedOverlay);
+    /**
+     * Parse the given APK file, treating it as as a single monolithic package.
+     * <p>
+     * Note that this <em>does not</em> perform signature verification; that
+     * must be done separately in {@link #collectCertificates(Package, int)}.
+     */
+    public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
+        final Package pkg = parseBaseApk(apkFile, flags);
         if (pkg != null) {
             return pkg;
         } else {
@@ -576,13 +639,15 @@ public class PackageParser {
         }
     }
 
-    private Package parseBaseApk(File apkFile, DisplayMetrics metrics, int flags,
-            boolean trustedOverlay) {
+    private Package parseBaseApk(File apkFile, int flags) {
+        final boolean trustedOverlay = (flags & PARSE_TRUSTED_OVERLAY) != 0;
+
         mParseError = PackageManager.INSTALL_SUCCEEDED;
 
+        final String apkPath = apkFile.getAbsolutePath();
         mArchiveSourcePath = apkFile.getAbsolutePath();
         if (!apkFile.isFile()) {
-            Slog.w(TAG, "Skipping dir: " + mArchiveSourcePath);
+            Slog.w(TAG, "Skipping dir: " + apkPath);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
             return null;
         }
@@ -591,14 +656,14 @@ public class PackageParser {
             if ((flags&PARSE_IS_SYSTEM) == 0) {
                 // We expect to have non-.apk files in the system dir,
                 // so don't warn about them.
-                Slog.w(TAG, "Skipping non-package file: " + mArchiveSourcePath);
+                Slog.w(TAG, "Skipping non-package file: " + apkPath);
             }
             mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
             return null;
         }
 
         if (DEBUG_JAR)
-            Slog.d(TAG, "Scanning package: " + mArchiveSourcePath);
+            Slog.d(TAG, "Scanning package: " + apkPath);
 
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
@@ -606,19 +671,18 @@ public class PackageParser {
         boolean assetError = true;
         try {
             assmgr = new AssetManager();
-            int cookie = assmgr.addAssetPath(mArchiveSourcePath);
+            int cookie = assmgr.addAssetPath(apkPath);
             if (cookie != 0) {
-                res = new Resources(assmgr, metrics, null);
+                res = new Resources(assmgr, mMetrics, null);
                 assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         Build.VERSION.RESOURCES_SDK_INT);
                 parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
                 assetError = false;
             } else {
-                Slog.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);
+                Slog.w(TAG, "Failed adding asset path:" + apkPath);
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Unable to read AndroidManifest.xml of "
-                    + mArchiveSourcePath, e);
+            Slog.w(TAG, "Unable to read AndroidManifest.xml of " + apkPath, e);
         }
         if (assetError) {
             if (assmgr != null) assmgr.close();
@@ -641,9 +705,9 @@ public class PackageParser {
             // just means to skip this app so don't make a fuss about it.
             if (!mOnlyCoreApps || mParseError != PackageManager.INSTALL_SUCCEEDED) {
                 if (errorException != null) {
-                    Slog.w(TAG, mArchiveSourcePath, errorException);
+                    Slog.w(TAG, apkPath, errorException);
                 } else {
-                    Slog.w(TAG, mArchiveSourcePath + " (at "
+                    Slog.w(TAG, apkPath + " (at "
                             + parser.getPositionDescription()
                             + "): " + errorText[0]);
                 }
@@ -659,14 +723,16 @@ public class PackageParser {
         parser.close();
         assmgr.close();
 
-        pkg.codePath = mArchiveSourcePath;
+        pkg.codePath = apkPath;
         pkg.mSignatures = null;
 
         return pkg;
     }
 
-    private void parseSplitApk(Package pkg, File apkFile, DisplayMetrics metrics, int flags,
-            boolean trustedOverlay) throws PackageParserException {
+    private void parseSplitApk(Package pkg, File apkFile, int flags) throws PackageParserException {
+        final String apkPath = apkFile.getAbsolutePath();
+        mArchiveSourcePath = apkFile.getAbsolutePath();
+
         // TODO: expand split APK parsing
         pkg.splitCodePaths = ArrayUtils.appendElement(String.class, pkg.splitCodePaths,
                 apkFile.getAbsolutePath());
@@ -678,8 +744,9 @@ public class PackageParser {
      * {@code AndroidManifest.xml}, {@code true} is returned.
      */
     public void collectManifestDigest(Package pkg) throws PackageParserException {
+        // TODO: extend to gather digest for split APKs
         try {
-            final StrictJarFile jarFile = new StrictJarFile(mArchiveSourcePath);
+            final StrictJarFile jarFile = new StrictJarFile(pkg.codePath);
             try {
                 final ZipEntry je = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
                 if (je != null) {
@@ -688,186 +755,127 @@ public class PackageParser {
             } finally {
                 jarFile.close();
             }
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "Failed to collect manifest digest");
         }
     }
 
+    /**
+     * Collect certificates from all the APKs described in the given package,
+     * populating {@link Package#mSignatures}. This also asserts that all APK
+     * contents are signed correctly and consistently.
+     */
     public void collectCertificates(Package pkg, int flags) throws PackageParserException {
-        if (!collectCertificatesInternal(pkg, flags)) {
-            throw new PackageParserException(mParseError, "Failed to collect certificates");
+        pkg.mCertificates = null;
+        pkg.mSignatures = null;
+        pkg.mSigningKeys = null;
+
+        collectCertificates(pkg, new File(pkg.codePath), flags);
+
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (String splitCodePath : pkg.splitCodePaths) {
+                collectCertificates(pkg, new File(splitCodePath), flags);
+            }
         }
     }
 
-    private boolean collectCertificatesInternal(Package pkg, int flags) {
-        pkg.mSignatures = null;
+    private static void collectCertificates(Package pkg, File apkFile, int flags)
+            throws PackageParserException {
+        final String apkPath = apkFile.getAbsolutePath();
 
-        WeakReference<byte[]> readBufferRef;
-        byte[] readBuffer = null;
-        synchronized (mSync) {
-            readBufferRef = mReadBuffer;
-            if (readBufferRef != null) {
-                mReadBuffer = null;
-                readBuffer = readBufferRef.get();
-            }
-            if (readBuffer == null) {
-                readBuffer = new byte[8192];
-                readBufferRef = new WeakReference<byte[]>(readBuffer);
-            }
-        }
-
+        StrictJarFile jarFile = null;
         try {
-            StrictJarFile jarFile = new StrictJarFile(mArchiveSourcePath);
+            jarFile = new StrictJarFile(apkPath);
 
-            Certificate[][] certs = null;
+            // Always verify manifest, regardless of source
+            final ZipEntry manifestEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
+            if (manifestEntry == null) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                        "Package " + apkPath + " has no manifest");
+            }
 
-            if ((flags&PARSE_IS_SYSTEM) != 0) {
-                // If this package comes from the system image, then we
-                // can trust it...  we'll just use the AndroidManifest.xml
-                // to retrieve its signatures, not validating all of the
-                // files.
-                ZipEntry jarEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
-                certs = loadCertificates(jarFile, jarEntry, readBuffer);
-                if (certs == null) {
-                    Slog.e(TAG, "Package " + pkg.packageName
-                            + " has no certificates at entry "
-                            + jarEntry.getName() + "; ignoring!");
-                    jarFile.close();
-                    mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
-                    return false;
+            final List<ZipEntry> toVerify = new ArrayList<>();
+            toVerify.add(manifestEntry);
+
+            // If we're parsing an untrusted package, verify all contents
+            if ((flags & PARSE_IS_SYSTEM) == 0) {
+                final Iterator<ZipEntry> i = jarFile.iterator();
+                while (i.hasNext()) {
+                    final ZipEntry entry = i.next();
+
+                    if (entry.isDirectory()) continue;
+                    if (entry.getName().startsWith("META-INF/")) continue;
+                    if (entry.getName().equals(ANDROID_MANIFEST_FILENAME)) continue;
+
+                    toVerify.add(entry);
                 }
-                if (DEBUG_JAR) {
-                    Slog.i(TAG, "File " + mArchiveSourcePath + ": entry=" + jarEntry
-                            + " certs=" + (certs != null ? certs.length : 0));
-                    if (certs != null) {
-                        final int N = certs.length;
-                        for (int i=0; i<N; i++) {
-                            Slog.i(TAG, "  Public key: "
-                                    + certs[i][0].getPublicKey().getEncoded()
-                                    + " " + certs[i][0].getPublicKey());
-                        }
-                    }
+            }
+
+            // Verify that entries are signed consistently with the first entry
+            // we encountered. Note that for splits, certificates may have
+            // already been populated during an earlier parse of a base APK.
+            for (ZipEntry entry : toVerify) {
+                final Certificate[][] entryCerts = loadCertificates(jarFile, entry);
+                if (ArrayUtils.isEmpty(entryCerts)) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                            "Package " + apkPath + " has no certificates at entry "
+                            + entry.getName());
                 }
-            } else {
-                Iterator<ZipEntry> entries = jarFile.iterator();
-                while (entries.hasNext()) {
-                    final ZipEntry je = entries.next();
-                    if (je.isDirectory()) continue;
 
-                    final String name = je.getName();
-
-                    if (name.startsWith("META-INF/"))
-                        continue;
-
-                    if (ANDROID_MANIFEST_FILENAME.equals(name)) {
-                        pkg.manifestDigest =
-                                ManifestDigest.fromInputStream(jarFile.getInputStream(je));
+                if (pkg.mCertificates == null) {
+                    pkg.mCertificates = entryCerts;
+                    pkg.mSignatures = convertToSignatures(entryCerts);
+                    pkg.mSigningKeys = new ArraySet<>();
+                    for (int i = 0; i < entryCerts.length; i++) {
+                        pkg.mSigningKeys.add(entryCerts[i][0].getPublicKey());
                     }
-
-                    final Certificate[][] localCerts = loadCertificates(jarFile, je, readBuffer);
-                    if (DEBUG_JAR) {
-                        Slog.i(TAG, "File " + mArchiveSourcePath + " entry " + je.getName()
-                                + ": certs=" + certs + " ("
-                                + (certs != null ? certs.length : 0) + ")");
-                    }
-
-                    if (localCerts == null) {
-                        Slog.e(TAG, "Package " + pkg.packageName
-                                + " has no certificates at entry "
-                                + je.getName() + "; ignoring!");
-                        jarFile.close();
-                        mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
-                        return false;
-                    } else if (certs == null) {
-                        certs = localCerts;
-                    } else {
-                        // Ensure all certificates match.
-                        for (int i=0; i<certs.length; i++) {
-                            boolean found = false;
-                            for (int j=0; j<localCerts.length; j++) {
-                                if (certs[i] != null &&
-                                        certs[i].equals(localCerts[j])) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found || certs.length != localCerts.length) {
-                                Slog.e(TAG, "Package " + pkg.packageName
+                } else {
+                    final boolean certsMatch = (pkg.mCertificates.length == entryCerts.length)
+                            && ArrayUtils.containsAll(pkg.mCertificates, entryCerts)
+                            && ArrayUtils.containsAll(entryCerts, pkg.mCertificates);
+                    if (!certsMatch) {
+                        throw new PackageParserException(
+                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES, "Package " + apkPath
                                         + " has mismatched certificates at entry "
-                                        + je.getName() + "; ignoring!");
-                                jarFile.close();
-                                mParseError = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-                                return false;
-                            }
-                        }
+                                        + entry.getName());
                     }
                 }
             }
-            jarFile.close();
-
-            synchronized (mSync) {
-                mReadBuffer = readBufferRef;
-            }
-
-            if (!ArrayUtils.isEmpty(certs)) {
-                pkg.mSignatures = convertToSignatures(certs);
-            } else {
-                Slog.e(TAG, "Package " + pkg.packageName
-                        + " has no certificates; ignoring!");
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
-                return false;
-            }
-
-            // Add the signing KeySet to the system
-            pkg.mSigningKeys = new HashSet<PublicKey>();
-            for (int i=0; i < certs.length; i++) {
-                pkg.mSigningKeys.add(certs[i][0].getPublicKey());
-            }
-
-        } catch (CertificateEncodingException e) {
-            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
-            return false;
-        } catch (IOException e) {
-            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
-            return false;
-        } catch (SecurityException e) {
-            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
-            return false;
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
-            return false;
+        } catch (GeneralSecurityException | IOException | RuntimeException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
+                    "Failed to collect certificates from " + apkPath, e);
+        } finally {
+            closeQuietly(jarFile);
         }
-
-        return true;
     }
 
     /**
      * Only collect certificates on the manifest; does not validate signatures
      * across remainder of package.
      */
-    private static Signature[] collectCertificates(String packageFilePath) {
+    private static Signature[] collectManifestCertificates(File apkFile)
+            throws PackageParserException {
+        final String apkPath = apkFile.getAbsolutePath();
         try {
-            final StrictJarFile jarFile = new StrictJarFile(packageFilePath);
+            final StrictJarFile jarFile = new StrictJarFile(apkPath);
             try {
                 final ZipEntry jarEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
-                if (jarEntry != null) {
-                    final Certificate[][] certs = loadCertificates(jarFile, jarEntry, null);
-                    return convertToSignatures(certs);
+                if (jarEntry == null) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                            "Package " + apkPath + " has no manifest");
                 }
+
+                final Certificate[][] certs = loadCertificates(jarFile, jarEntry);
+                return convertToSignatures(certs);
+
             } finally {
                 jarFile.close();
             }
-        } catch (GeneralSecurityException e) {
-            Slog.w(TAG, "Failed to collect certs from " + packageFilePath + ": " + e);
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed to collect certs from " + packageFilePath + ": " + e);
+        } catch (GeneralSecurityException | IOException | RuntimeException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
+                    "Failed to collect certificates from " + apkPath, e);
         }
-        return null;
     }
 
     private static Signature[] convertToSignatures(Certificate[][] certs)
@@ -879,67 +887,55 @@ public class PackageParser {
         return res;
     }
 
-    /*
-     * Utility method that retrieves just the package name and install
-     * location from the apk location at the given file path.
-     * @param packageFilePath file location of the apk
-     * @param flags Special parse flags
-     * @return PackageLite object with package information or null on failure.
+    /**
+     * Utility method that retrieves lightweight details about a single APK
+     * file, including package name, split name, and install location.
+     *
+     * @param apkFile path to a single APK
+     * @param flags optional parse flags, such as {@link #PARSE_GET_SIGNATURES}
      */
-    public static ApkLite parseApkLite(String packageFilePath, int flags) {
+    public static ApkLite parseApkLite(File apkFile, int flags)
+            throws PackageParserException {
+        final String apkPath = apkFile.getAbsolutePath();
+
         AssetManager assmgr = null;
-        final XmlResourceParser parser;
-        final Resources res;
+        XmlResourceParser parser = null;
         try {
             assmgr = new AssetManager();
             assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
 
-            int cookie = assmgr.addAssetPath(packageFilePath);
+            int cookie = assmgr.addAssetPath(apkPath);
             if (cookie == 0) {
-                return null;
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                        "Failed to parse " + apkPath);
             }
 
             final DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
-            res = new Resources(assmgr, metrics, null);
+
+            final Resources res = new Resources(assmgr, metrics, null);
             parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
-        } catch (Exception e) {
-            if (assmgr != null) assmgr.close();
-            Slog.w(TAG, "Unable to read AndroidManifest.xml of "
-                    + packageFilePath, e);
-            return null;
-        }
 
-        // Only collect certificates on the manifest; does not validate
-        // signatures across remainder of package.
-        final Signature[] signatures;
-        if ((flags & PARSE_GET_SIGNATURES) != 0) {
-            signatures = collectCertificates(packageFilePath);
-        } else {
-            signatures = null;
-        }
+            // Only collect certificates on the manifest; does not validate
+            // signatures across remainder of package.
+            final Signature[] signatures;
+            if ((flags & PARSE_GET_SIGNATURES) != 0) {
+                signatures = collectManifestCertificates(apkFile);
+            } else {
+                signatures = null;
+            }
 
-        final AttributeSet attrs = parser;
-        final String errors[] = new String[1];
-        ApkLite packageLite = null;
-        try {
-            packageLite = parseApkLite(res, parser, attrs, flags, signatures, errors);
-        } catch (PackageParserException e) {
-            Slog.w(TAG, packageFilePath, e);
-        } catch (IOException e) {
-            Slog.w(TAG, packageFilePath, e);
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, packageFilePath, e);
+            final AttributeSet attrs = parser;
+            return parseApkLite(res, parser, attrs, flags, signatures);
+
+        } catch (XmlPullParserException | IOException | RuntimeException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                    "Failed to parse " + apkPath, e);
         } finally {
             if (parser != null) parser.close();
             if (assmgr != null) assmgr.close();
         }
-        if (packageLite == null) {
-            Slog.e(TAG, "parsePackageLite error: " + errors[0]);
-            return null;
-        }
-        return packageLite;
     }
 
     private static String validateName(String name, boolean requiresSeparator) {
@@ -995,12 +991,16 @@ public class PackageParser {
             }
         }
 
-        final String splitName = attrs.getAttributeValue(null, "split");
+        String splitName = attrs.getAttributeValue(null, "split");
         if (splitName != null) {
-            final String error = validateName(splitName, true);
-            if (error != null) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
-                        "Invalid manifest split: " + error);
+            if (splitName.length() == 0) {
+                splitName = null;
+            } else {
+                final String error = validateName(splitName, true);
+                if (error != null) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
+                            "Invalid manifest split: " + error);
+                }
             }
         }
 
@@ -1009,8 +1009,8 @@ public class PackageParser {
     }
 
     private static ApkLite parseApkLite(Resources res, XmlPullParser parser,
-            AttributeSet attrs, int flags, Signature[] signatures, String[] outError)
-            throws IOException, XmlPullParserException, PackageParserException {
+            AttributeSet attrs, int flags, Signature[] signatures) throws IOException,
+            XmlPullParserException, PackageParserException {
         final Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs, flags);
 
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
@@ -1043,7 +1043,7 @@ public class PackageParser {
             }
 
             if (parser.getDepth() == searchDepth && "package-verifier".equals(parser.getName())) {
-                final VerifierInfo verifier = parseVerifier(res, parser, attrs, flags, outError);
+                final VerifierInfo verifier = parseVerifier(res, parser, attrs, flags);
                 if (verifier != null) {
                     verifiers.add(verifier);
                 }
@@ -1793,7 +1793,7 @@ public class PackageParser {
             }
         }
 
-        owner.mKeySetMapping = new HashMap<String, Set<PublicKey>>();
+        owner.mKeySetMapping = new ArrayMap<String, ArraySet<PublicKey>>();
         for (Map.Entry<PublicKey, Set<String>> e : definedKeySets.entrySet()) {
             PublicKey key = e.getKey();
             Set<String> keySetNames = e.getValue();
@@ -1801,7 +1801,7 @@ public class PackageParser {
                 if (owner.mKeySetMapping.containsKey(alias)) {
                     owner.mKeySetMapping.get(alias).add(key);
                 } else {
-                    Set<PublicKey> keys = new HashSet<PublicKey>();
+                    ArraySet<PublicKey> keys = new ArraySet<PublicKey>();
                     keys.add(key);
                     owner.mKeySetMapping.put(alias, keys);
                 }
@@ -3427,8 +3427,7 @@ public class PackageParser {
     }
 
     private static VerifierInfo parseVerifier(Resources res, XmlPullParser parser,
-            AttributeSet attrs, int flags, String[] outError) throws XmlPullParserException,
-            IOException {
+            AttributeSet attrs, int flags) {
         final TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestPackageVerifier);
 
@@ -3671,7 +3670,10 @@ public class PackageParser {
         public String packageName;
 
         // TODO: work towards making these paths invariant
+
+        /** Base APK */
         public String codePath;
+        /** Split APKs, ordered by parsed splitName */
         public String[] splitCodePaths;
 
         // For now we only support one application per package.
@@ -3717,7 +3719,8 @@ public class PackageParser {
         public int mSharedUserLabel;
 
         // Signatures that were read from the package.
-        public Signature mSignatures[];
+        public Signature[] mSignatures;
+        public Certificate[][] mCertificates;
 
         // For use by package manager service for quick lookup of
         // preferred up order.
@@ -3779,13 +3782,22 @@ public class PackageParser {
         /**
          * Data used to feed the KeySetManager
          */
-        public Set<PublicKey> mSigningKeys;
-        public Map<String, Set<PublicKey>> mKeySetMapping;
+        public ArraySet<PublicKey> mSigningKeys;
+        public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping;
 
         public Package(String packageName) {
             this.packageName = packageName;
             applicationInfo.packageName = packageName;
             applicationInfo.uid = -1;
+        }
+
+        public Collection<String> getAllCodePaths() {
+            ArrayList<String> paths = new ArrayList<>();
+            paths.add(codePath);
+            if (!ArrayUtils.isEmpty(splitCodePaths)) {
+                Collections.addAll(paths, splitCodePaths);
+            }
+            return paths;
         }
 
         public void setPackageName(String newName) {
@@ -4390,11 +4402,43 @@ public class PackageParser {
         sCompatibilityModeEnabled = compatibilityModeEnabled;
     }
 
+    private static AtomicReference<byte[]> sBuffer = new AtomicReference<byte[]>();
+
+    public static long readFullyIgnoringContents(InputStream in) throws IOException {
+        byte[] buffer = sBuffer.getAndSet(null);
+        if (buffer == null) {
+            buffer = new byte[4096];
+        }
+
+        int n = 0;
+        int count = 0;
+        while ((n = in.read(buffer, 0, buffer.length)) != -1) {
+            count += n;
+        }
+
+        sBuffer.set(buffer);
+        return count;
+    }
+
+    public static void closeQuietly(StrictJarFile jarFile) {
+        if (jarFile != null) {
+            try {
+                jarFile.close();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     public static class PackageParserException extends Exception {
         public final int error;
 
         public PackageParserException(int error, String detailMessage) {
             super(detailMessage);
+            this.error = error;
+        }
+
+        public PackageParserException(int error, String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
             this.error = error;
         }
     }

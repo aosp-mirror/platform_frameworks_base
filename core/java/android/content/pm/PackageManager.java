@@ -2870,15 +2870,12 @@ public abstract class PackageManager {
      *
      */
     public PackageInfo getPackageArchiveInfo(String archiveFilePath, int flags) {
-        PackageParser packageParser = new PackageParser(archiveFilePath);
-        DisplayMetrics metrics = new DisplayMetrics();
-        metrics.setToDefaults();
-        final File sourceFile = new File(archiveFilePath);
+        final PackageParser parser = new PackageParser();
+        final File apkFile = new File(archiveFilePath);
         try {
-            PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, metrics,
-                    0);
+            PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
-                packageParser.collectCertificates(pkg, 0);
+                parser.collectCertificates(pkg, 0);
             }
             PackageUserState state = new PackageUserState();
             return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);

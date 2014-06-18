@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.net.Uri;
@@ -157,6 +158,7 @@ public class DefaultContainerService extends IntentService {
          * @return Returns PackageInfoLite object containing
          * the package info and recommended app location.
          */
+        @Override
         public PackageInfoLite getMinimalPackageInfo(final String packagePath, int flags,
                 long threshold, String abiOverride) {
             PackageInfoLite ret = new PackageInfoLite();
@@ -167,14 +169,13 @@ public class DefaultContainerService extends IntentService {
                 return ret;
             }
 
-            DisplayMetrics metrics = new DisplayMetrics();
-            metrics.setToDefaults();
-
-            PackageParser.ApkLite pkg = PackageParser.parseApkLite(packagePath, 0);
-            if (pkg == null) {
+            final File apkFile = new File(packagePath);
+            final PackageParser.ApkLite pkg;
+            try {
+                pkg = PackageParser.parseApkLite(apkFile, 0);
+            } catch (PackageParserException e) {
                 Slog.w(TAG, "Failed to parse package");
 
-                final File apkFile = new File(packagePath);
                 if (!apkFile.exists()) {
                     ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
                 } else {

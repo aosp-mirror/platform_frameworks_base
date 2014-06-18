@@ -29,6 +29,7 @@ import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,14 +51,10 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import libcore.io.IoUtils;
 import libcore.io.Libcore;
-import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -297,11 +294,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all staged packages are internally consistent
         for (File file : files) {
-            final ApkLite info = PackageParser.parseApkLite(file.getAbsolutePath(),
-                    PackageParser.PARSE_GET_SIGNATURES);
-            if (info == null) {
+            final ApkLite info;
+            try {
+                info = PackageParser.parseApkLite(file, PackageParser.PARSE_GET_SIGNATURES);
+            } catch (PackageParserException e) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse " + file);
+                        "Failed to parse " + file + ": " + e);
             }
 
             if (!seenSplits.add(info.splitName)) {
@@ -356,11 +354,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Missing existing base package for " + mPackageName);
             }
 
-            final ApkLite info = PackageParser.parseApkLite(app.sourceDir,
-                    PackageParser.PARSE_GET_SIGNATURES);
-            if (info == null) {
+            final ApkLite info;
+            try {
+                info = PackageParser.parseApkLite(new File(app.sourceDir),
+                        PackageParser.PARSE_GET_SIGNATURES);
+            } catch (PackageParserException e) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse existing base " + app.sourceDir);
+                        "Failed to parse existing base " + app.sourceDir + ": " + e);
             }
 
             assertPackageConsistent("Existing base", info.packageName, info.versionCode,

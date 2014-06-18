@@ -305,11 +305,9 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private PackageParser.Package parsePackage(Uri packageURI) throws PackageParserException {
         final String archiveFilePath = packageURI.getPath();
-        PackageParser packageParser = new PackageParser(archiveFilePath);
+        PackageParser packageParser = new PackageParser();
         File sourceFile = new File(archiveFilePath);
-        DisplayMetrics metrics = new DisplayMetrics();
-        metrics.setToDefaults();
-        PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, metrics, 0);
+        PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, 0);
         packageParser = null;
         return pkg;
     }
