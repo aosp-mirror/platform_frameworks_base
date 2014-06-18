@@ -72,6 +72,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     FrameLayout mContainerView;
     RecentsView mRecentsView;
     View mEmptyView;
+    View mStatusBarScrimView;
     View mNavBarScrimView;
     FullScreenTransitionView mFullScreenshotView;
 
@@ -180,13 +181,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
 
-        if (mConfig.shouldAnimateNavBarScrim()) {
-            // Hide the scrim if we animate into Recents with window transitions
-            mNavBarScrimView.setVisibility(View.INVISIBLE);
-        } else {
-            // Show the scrim if we animate into Recents without window transitions
-            mNavBarScrimView.setVisibility(View.VISIBLE);
-        }
+        // Show the scrim if we animate into Recents without window transitions
+        mNavBarScrimView.setVisibility(mConfig.hasNavBarScrim() &&
+                !mConfig.shouldAnimateNavBarScrim() ? View.VISIBLE : View.INVISIBLE);
+        mStatusBarScrimView.setVisibility(mConfig.hasStatusBarScrim() &&
+                !mConfig.shouldAnimateStatusBarScrim() ? View.VISIBLE : View.INVISIBLE);
 
         // Add the default no-recents layout
         if (mConfig.launchedWithNoRecentTasks) {
@@ -325,6 +324,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Create the empty view
         LayoutInflater inflater = LayoutInflater.from(this);
         mEmptyView = inflater.inflate(R.layout.recents_empty, mContainerView, false);
+        mStatusBarScrimView = inflater.inflate(R.layout.recents_status_bar_scrim, mContainerView, false);
+        mStatusBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
         mNavBarScrimView = inflater.inflate(R.layout.recents_nav_bar_scrim, mContainerView, false);
         mNavBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -336,6 +339,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         mContainerView = new FrameLayout(this);
+        mContainerView.addView(mStatusBarScrimView);
         mContainerView.addView(mRecentsView);
         mContainerView.addView(mEmptyView);
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
@@ -563,8 +567,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     public void onEnterAnimationTriggered() {
-        // Fade in the scrim
-        if (mConfig.shouldAnimateNavBarScrim() && mConfig.hasNavBarScrim()) {
+        // Fade in the scrims
+        if (mConfig.hasStatusBarScrim() && mConfig.shouldAnimateStatusBarScrim()) {
+            mStatusBarScrimView.setVisibility(View.VISIBLE);
+            mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
+            mStatusBarScrimView.animate()
+                    .translationY(0)
+                    .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                    .setDuration(mConfig.navBarScrimEnterDuration)
+                    .setInterpolator(mConfig.quintOutInterpolator)
+                    .start();
+        }
+        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
             mNavBarScrimView.setVisibility(View.VISIBLE);
             mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
             mNavBarScrimView.animate()
@@ -579,7 +593,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onExitAnimationTriggered() {
         // Fade out the scrim
-        if (mConfig.shouldAnimateNavBarScrim() && mConfig.hasNavBarScrim()) {
+        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
             mNavBarScrimView.animate()
                     .translationY(mNavBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
