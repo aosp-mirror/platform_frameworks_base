@@ -4199,14 +4199,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         String scanPath = scanFile.getPath();
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanPath);
         parseFlags |= mDefParseFlags;
-        PackageParser pp = new PackageParser(scanPath);
+        PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setOnlyCoreApps(mOnlyCore);
+        pp.setDisplayMetrics(mMetrics);
+
+        if ((scanMode & SCAN_TRUSTED_OVERLAY) != 0) {
+            parseFlags |= PackageParser.PARSE_TRUSTED_OVERLAY;
+        }
 
         final PackageParser.Package pkg;
         try {
-            pkg = pp.parseMonolithicPackage(scanFile, mMetrics, parseFlags,
-                (scanMode & SCAN_TRUSTED_OVERLAY) != 0);
+            pkg = pp.parseMonolithicPackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
             mLastScanError = e.error;
             return null;
@@ -4637,12 +4641,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            final ArrayList<String> paths = new ArrayList<>();
-            paths.add(pkg.codePath);
-            if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-                Collections.addAll(paths, pkg.splitCodePaths);
-            }
-
+            final Collection<String> paths = pkg.getAllCodePaths();
             for (String path : paths) {
                 try {
                     boolean isDexOptNeededInternal = DexFile.isDexOptNeededInternal(path,
@@ -4832,10 +4831,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if (p != null) {
-            usesLibraryFiles.add(p.codePath);
-            if (!ArrayUtils.isEmpty(p.splitCodePaths)) {
-                Collections.addAll(usesLibraryFiles, p.splitCodePaths);
-            }
+            usesLibraryFiles.addAll(p.getAllCodePaths());
         }
     }
 
@@ -5674,7 +5670,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 ksm.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
                 if (pkg.mKeySetMapping != null) {
-                    for (Map.Entry<String, Set<PublicKey>> entry : pkg.mKeySetMapping.entrySet()) {
+                    for (Map.Entry<String, ArraySet<PublicKey>> entry :
+                            pkg.mKeySetMapping.entrySet()) {
                         if (entry.getValue() != null) {
                             ksm.addDefinedKeySetToPackage(pkg.packageName,
                                 entry.getValue(), entry.getKey());
@@ -9713,7 +9710,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             return PackageManager.INSTALL_SUCCEEDED;
         }
-    };
+    }
 
     static String getAsecPackageName(String packageCid) {
         int idx = packageCid.lastIndexOf("-");
@@ -10206,13 +10203,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
                 | (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
-        PackageParser pp = new PackageParser(tmpPackageFile.getPath());
+        PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
+        pp.setDisplayMetrics(mMetrics);
 
         final PackageParser.Package pkg;
         try {
-            pkg = pp.parseMonolithicPackage(tmpPackageFile, mMetrics,
-                parseFlags);
+            pkg = pp.parseMonolithicPackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
             res.returnCode = e.error;
             return;
