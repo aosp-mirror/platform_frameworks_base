@@ -19,7 +19,7 @@
 #include "SkCanvas.h"
 #include "SkStream.h"
 
-using namespace android;
+namespace android {
 
 Picture::Picture(const Picture* src) {
     if (NULL != src) {
@@ -113,3 +113,5 @@ SkPicture* Picture::makePartialCopy() const {
     mRecorder->partialReplay(canvas);
     return reRecorder.endRecording();
 }
+
+}; // namespace android
