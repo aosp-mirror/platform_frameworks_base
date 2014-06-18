@@ -1845,6 +1845,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         return true;
     }
 
+    public void setScrimAlpha(float progress) {
+        mAmbientState.setScrimAmount(progress);
+        requestChildrenUpdate();
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */

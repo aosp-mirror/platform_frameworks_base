@@ -320,6 +320,9 @@
          device. -->
     <dimen name="unlock_move_distance">75dp</dimen>
 
+    <!-- Distance after which the scrim starts fading in when dragging down the quick settings -->
+    <dimen name="notification_scrim_wait_distance">100dp</dimen>
+
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
 

@@ -176,6 +176,9 @@ public class StackStateAnimator {
         // start dimmed animation
         child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
 
+        // apply scrimming
+        child.setScrimAmount(viewState.scrimAmount);
+
         if (wasAdded) {
             child.performAddAnimation(delay);
         }

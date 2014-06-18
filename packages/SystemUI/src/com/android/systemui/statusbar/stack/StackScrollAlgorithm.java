@@ -154,6 +154,17 @@ public class StackScrollAlgorithm {
         handleDraggedViews(ambientState, resultState, algorithmState);
         updateDimmedActivated(ambientState, resultState, algorithmState);
         updateClipping(resultState, algorithmState);
+        updateScrimAmount(resultState, algorithmState, ambientState.getScrimAmount());
+    }
+
+    private void updateScrimAmount(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState, float scrimAmount) {
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
+            childViewState.scrimAmount = scrimAmount;
+        }
     }
 
     private void updateClipping(StackScrollState resultState,
