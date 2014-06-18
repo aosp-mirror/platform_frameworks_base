@@ -152,6 +152,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.invalid_charger_text))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_CHARGER), true);
         final Notification n = nb.build();
         if (n.headsUpContentView != null) {
@@ -171,6 +172,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_WARNING), true);
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
@@ -197,7 +199,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.battery_saver_notification_text))
                 .setOngoing(true)
                 .setShowWhen(false)
-                .setCategory(Notification.CATEGORY_SYSTEM);
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasSaverSettings()) {
             nb.addAction(0,
                     mContext.getString(R.string.battery_saver_notification_action_text),
