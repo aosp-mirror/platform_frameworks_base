@@ -343,7 +343,7 @@ public final class Message implements Parcelable {
     }
 
     /**
-     * Sets a Bundle of arbitrary data values. Use arg1 and arg1 members 
+     * Sets a Bundle of arbitrary data values. Use arg1 and arg2 members
      * as a lower cost way to send a few simple integer values, if you can.
      * @see #getData() 
      * @see #peekData()
