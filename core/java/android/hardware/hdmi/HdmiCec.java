@@ -185,6 +185,7 @@ public final class HdmiCec {
     public static final int RESULT_TARGET_NOT_AVAILABLE = 3;
     public static final int RESULT_ALREADY_IN_PROGRESS = 4;
     public static final int RESULT_EXCEPTION = 5;
+    public static final int RESULT_INCORRECT_MODE = 6;
 
     private static final int[] ADDRESS_TO_TYPE = {
         DEVICE_TV,  // ADDR_TV

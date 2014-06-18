@@ -72,9 +72,9 @@ final class ActiveSourceHandler {
         }
 
         if (!mSource.isInPresetInstallationMode()) {
-            int prevActiveInput = mSource.getActiveInput();
+            int prevActiveInput = mSource.getActivePortId();
             mSource.updateActiveDevice(deviceLogicalAddress, routingPath);
-            if (prevActiveInput != mSource.getActiveInput()) {
+            if (prevActiveInput != mSource.getActivePortId()) {
                 // TODO: change port input here.
             }
             invokeCallback(HdmiCec.RESULT_SUCCESS);

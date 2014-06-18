@@ -87,6 +87,60 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(new DeviceSelectAction(this, targetDevice, callback));
     }
 
+    /**
+     * Performs the action routing control.
+     *
+     * @param portId new HDMI port to route to
+     * @param callback callback object to report the result with
+     */
+    void portSelect(int portId, IHdmiControlCallback callback) {
+        assertRunOnServiceThread();
+        if (isInPresetInstallationMode()) {
+            invokeCallback(callback, HdmiCec.RESULT_INCORRECT_MODE);
+            return;
+        }
+        // Make sure this call does not stem from <Active Source> message reception, in
+        // which case the two ports will be the same.
+        if (portId == getActivePortId()) {
+            invokeCallback(callback, HdmiCec.RESULT_SUCCESS);
+            return;
+        }
+        setActivePortId(portId);
+
+        // TODO: Return immediately if the operation is triggered by <Text/Image View On>
+        // TODO: Handle invalid port id / active input which should be treated as an
+        //        internal tuner.
+
+        removeAction(RoutingControlAction.class);
+
+        int oldPath = mService.portIdToPath(mService.portIdToPath(getActivePortId()));
+        int newPath = mService.portIdToPath(portId);
+        HdmiCecMessage routingChange =
+                HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
+        mService.sendCecCommand(routingChange);
+        addAndStartAction(new RoutingControlAction(this, newPath, callback));
+    }
+
+    /**
+     * Sends key to a target CEC device.
+     *
+     * @param keyCode key code to send. Defined in {@link KeyEvent}.
+     * @param isPressed true if this is keypress event
+     */
+    void sendKeyEvent(int keyCode, boolean isPressed) {
+        assertRunOnServiceThread();
+        List<SendKeyAction> action = getActions(SendKeyAction.class);
+        if (!action.isEmpty()) {
+            action.get(0).processKeyEvent(keyCode, isPressed);
+        } else {
+            if (isPressed) {
+                addAndStartAction(new SendKeyAction(this, getActiveSource(), keyCode));
+            } else {
+                Slog.w(TAG, "Discard key release event");
+            }
+        }
+    }
+
     private static void invokeCallback(IHdmiControlCallback callback, int result) {
         try {
             callback.onComplete(result);

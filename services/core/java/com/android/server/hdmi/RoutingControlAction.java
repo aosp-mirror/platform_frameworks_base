@@ -196,7 +196,7 @@ final class RoutingControlAction extends FeatureAction {
 
     // Called whenever an HDMI input of the TV shall become the active input.
     private boolean maybeChangeActiveInput(int path) {
-        if (localDevice().getActiveInput() == localDevice().pathToPortId(path)) {
+        if (localDevice().getActivePortId() == localDevice().pathToPortId(path)) {
             return false;
         }
         // TODO: Remember the currently active input

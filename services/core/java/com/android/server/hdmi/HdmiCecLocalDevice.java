@@ -372,12 +372,25 @@ abstract class HdmiCecLocalDevice {
     }
 
     /**
-     * Returns the ID of the active HDMI port. The active input is the port that has the active
-     * routing path connected directly or indirectly under the device hierarchy.
+     * Returns the ID of the active HDMI port. The active port is the one that has the active
+     * routing path connected to it directly or indirectly under the device hierarchy.
      */
-    int getActiveInput() {
+    int getActivePortId() {
         synchronized (mLock) {
             return mService.pathToPortId(mActiveRoutingPath);
+        }
+    }
+
+    /**
+     * Update the active port.
+     *
+     * @param portId the new active port id
+     */
+    void setActivePortId(int portId) {
+        synchronized (mLock) {
+            // We update active routing path instead, since we get the active port id from
+            // the active routing path.
+            mActiveRoutingPath = mService.portIdToPath(portId);
         }
     }
 

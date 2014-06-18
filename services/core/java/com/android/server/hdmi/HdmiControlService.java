@@ -507,11 +507,46 @@ public final class HdmiControlService extends SystemService {
                 public void run() {
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
-                        Slog.w(TAG, "Local playback device not available");
+                        Slog.w(TAG, "Local tv device not available");
                         invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
                     tv.deviceSelect(logicalAddress, callback);
+                }
+            });
+        }
+
+        @Override
+        public void portSelect(final int portId, final IHdmiControlCallback callback) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available");
+                        invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+                        return;
+                    }
+                    tv.portSelect(portId, callback);
+                }
+            });
+        }
+
+        @Override
+        public void sendKeyEvent(final int keyCode, final boolean isPressed) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    // TODO: sendKeyEvent is for TV device only for now. Allow other
+                    //       local devices of different types to use this as well.
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available");
+                        return;
+                    }
+                    tv.sendKeyEvent(keyCode, isPressed);
                 }
             });
         }
@@ -569,16 +604,6 @@ public final class HdmiControlService extends SystemService {
                     HdmiControlService.this.addDeviceEventListener(listener);
                 }
             });
-        }
-
-        @Override
-        public void portSelect(int portId, IHdmiControlCallback callback) {
-            // TODO: Implement this
-        }
-
-        @Override
-        public void sendKeyEvent(int keyCode, boolean isPressed) {
-            // TODO: Implement this
         }
 
         @Override
