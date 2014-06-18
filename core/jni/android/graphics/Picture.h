@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_PICTURE_H
-#define ANDROID_PICTURE_H
+#ifndef ANDROID_GRAPHICS_PICTURE_H
+#define ANDROID_GRAPHICS_PICTURE_H
 
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
@@ -28,13 +28,15 @@ class SkPictureRecorder;
 class SkStream;
 class SkWStream;
 
+namespace android {
+
 // Skia's SkPicture class has been split into an SkPictureRecorder
 // and an SkPicture. AndroidPicture recreates the functionality
 // of the old SkPicture interface by flip-flopping between the two
 // new classes.
-class AndroidPicture {
+class Picture {
 public:
-    explicit AndroidPicture(const AndroidPicture* src = NULL);
+    explicit Picture(const Picture* src = NULL);
 
     SkCanvas* beginRecording(int width, int height);
 
@@ -44,7 +46,7 @@ public:
 
     int height() const;
 
-    static AndroidPicture* CreateFromStream(SkStream* stream);
+    static Picture* CreateFromStream(SkStream* stream);
 
     void serialize(SkWStream* stream) const;
 
@@ -60,4 +62,6 @@ private:
     // resulting picture will have balanced saves and restores.
     SkPicture* makePartialCopy() const;
 };
-#endif // ANDROID_PICTURE_H
+
+}; // namespace android
+#endif // ANDROID_GRAPHICS_PICTURE_H
