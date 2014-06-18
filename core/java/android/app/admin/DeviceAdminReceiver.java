@@ -376,7 +376,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Called when a device is entering or exiting lock task mode by a package
-     * authorized by {@link DevicePolicyManager#isLockTaskPermitted(ComponentName)}
+     * authorized by {@link DevicePolicyManager#isLockTaskPermitted(String)}
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
