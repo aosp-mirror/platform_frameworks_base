@@ -111,9 +111,9 @@
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">3</integer>
     <!-- The min animation duration for animating views that are currently visible. -->
-    <integer name="recents_filter_animate_current_views_min_duration">175</integer>
+    <integer name="recents_filter_animate_current_views_duration">250</integer>
     <!-- The min animation duration for animating views that are newly visible. -->
-    <integer name="recents_filter_animate_new_views_min_duration">125</integer>
+    <integer name="recents_filter_animate_new_views_duration">250</integer>
     <!-- The min animation duration for animating the task bar in. -->
     <integer name="recents_animate_task_bar_enter_duration">275</integer>
     <!-- The animation delay for animating the first task in. This should roughly be the animation

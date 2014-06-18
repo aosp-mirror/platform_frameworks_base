@@ -47,8 +47,8 @@ public class RecentsConfiguration {
     public Interpolator quintOutInterpolator;
 
     /** Filtering */
-    public int filteringCurrentViewsMinAnimDuration;
-    public int filteringNewViewsMinAnimDuration;
+    public int filteringCurrentViewsAnimDuration;
+    public int filteringNewViewsAnimDuration;
 
     /** Insets */
     public Rect systemInsets = new Rect();
@@ -151,10 +151,10 @@ public class RecentsConfiguration {
                 res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
 
         // Filtering
-        filteringCurrentViewsMinAnimDuration =
-                res.getInteger(R.integer.recents_filter_animate_current_views_min_duration);
-        filteringNewViewsMinAnimDuration =
-                res.getInteger(R.integer.recents_filter_animate_new_views_min_duration);
+        filteringCurrentViewsAnimDuration =
+                res.getInteger(R.integer.recents_filter_animate_current_views_duration);
+        filteringNewViewsAnimDuration =
+                res.getInteger(R.integer.recents_filter_animate_new_views_duration);
 
         // Insets
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);

@@ -392,6 +392,43 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mCb.onTaskLaunching();
         }
 
+        // Upfront the processing of the thumbnail
+        TaskViewTransform transform;
+        View sourceView = tv;
+        int offsetX = 0;
+        int offsetY = 0;
+        int stackScroll = stackView.getStackScroll();
+        if (tv == null) {
+            // If there is no actual task view, then use the stack view as the source view
+            // and then offset to the expected transform rect, but bound this to just
+            // outside the display rect (to ensure we don't animate from too far away)
+            sourceView = stackView;
+            transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
+            offsetX = transform.rect.left;
+            offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
+        } else {
+            transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
+        }
+
+        // Compute the thumbnail to scale up from
+        ActivityOptions opts = null;
+        int thumbnailWidth = transform.rect.width();
+        int thumbnailHeight = transform.rect.height();
+        if (task.thumbnail != null && thumbnailWidth > 0 && thumbnailHeight > 0 &&
+                task.thumbnail.getWidth() > 0 && task.thumbnail.getHeight() > 0) {
+            // Resize the thumbnail to the size of the view that we are animating from
+            Bitmap b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight,
+                    Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b);
+            c.drawBitmap(task.thumbnail,
+                    new Rect(0, 0, task.thumbnail.getWidth(), task.thumbnail.getHeight()),
+                    new Rect(0, 0, thumbnailWidth, thumbnailHeight), null);
+            c.setBitmap(null);
+            opts = ActivityOptions.makeThumbnailScaleUpAnimation(sourceView,
+                    b, offsetX, offsetY);
+        }
+
+        final ActivityOptions launchOpts = opts;
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
@@ -400,45 +437,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             Constants.Log.App.TimeRecentsLaunchKey, "preStartActivity");
                 }
 
-                TaskViewTransform transform;
-                View sourceView = tv;
-                int offsetX = 0;
-                int offsetY = 0;
-                int stackScroll = stackView.getStackScroll();
-                if (tv == null) {
-                    // If there is no actual task view, then use the stack view as the source view
-                    // and then offset to the expected transform rect, but bound this to just
-                    // outside the display rect (to ensure we don't animate from too far away)
-                    sourceView = stackView;
-                    transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
-                    offsetX = transform.rect.left;
-                    offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
-                } else {
-                    transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
-                }
-
-                // Compute the thumbnail to scale up from
-                ActivityOptions opts = null;
-                int thumbnailWidth = transform.rect.width();
-                int thumbnailHeight = transform.rect.height();
-                if (task.thumbnail != null && thumbnailWidth > 0 && thumbnailHeight > 0 &&
-                        task.thumbnail.getWidth() > 0 && task.thumbnail.getHeight() > 0) {
-                    // Resize the thumbnail to the size of the view that we are animating from
-                    Bitmap b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight,
-                            Bitmap.Config.ARGB_8888);
-                    Canvas c = new Canvas(b);
-                    c.drawBitmap(task.thumbnail,
-                            new Rect(0, 0, task.thumbnail.getWidth(), task.thumbnail.getHeight()),
-                            new Rect(0, 0, thumbnailWidth, thumbnailHeight), null);
-                    c.setBitmap(null);
-                    opts = ActivityOptions.makeThumbnailScaleUpAnimation(sourceView,
-                            b, offsetX, offsetY);
-                }
-
                 if (task.isActive) {
                     // Bring an active task to the foreground
                     RecentsTaskLoader.getInstance().getSystemServicesProxy()
-                            .moveTaskToFront(task.key.id, opts);
+                            .moveTaskToFront(task.key.id, launchOpts);
                 } else {
                     // Launch the activity anew with the desired animation
                     Intent i = new Intent(task.key.baseIntent);
@@ -447,8 +449,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
                     try {
                         UserHandle taskUser = new UserHandle(task.userId);
-                        if (opts != null) {
-                            getContext().startActivityAsUser(i, opts.toBundle(), taskUser);
+                        if (launchOpts != null) {
+                            getContext().startActivityAsUser(i, launchOpts.toBundle(), taskUser);
                         } else {
                             getContext().startActivityAsUser(i, taskUser);
                         }
