@@ -134,6 +134,11 @@ public class WifiInfo implements Parcelable {
     /**
      * @hide
      */
+    public int linkStuckCount;
+
+    /**
+     * @hide
+     */
     public int lowRssiCount;
 
     /**
@@ -237,6 +242,7 @@ public class WifiInfo implements Parcelable {
         txRetriesRate = 0;
         lowRssiCount = 0;
         badRssiCount = 0;
+        linkStuckCount = 0;
         score = 0;
     }
 
@@ -267,6 +273,7 @@ public class WifiInfo implements Parcelable {
             score = source.score;
             badRssiCount = source.badRssiCount;
             lowRssiCount = source.lowRssiCount;
+            linkStuckCount = source.linkStuckCount;
         }
     }
 

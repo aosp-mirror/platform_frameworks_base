@@ -376,7 +376,7 @@ public class WifiConfiguration implements Parcelable {
     public static int LOW_RSSI_24 = -75;
 
     /** @hide **/
-    public static int BAD_RSSI_24 = -85;
+    public static int BAD_RSSI_24 = -87;
 
     /** @hide **/
     public static int GOOD_RSSI_5 = -55;
@@ -394,7 +394,7 @@ public class WifiConfiguration implements Parcelable {
     public static int UNWANTED_BLACKLIST_HARD_BUMP = 8;
 
     /** @hide **/
-    public static int UNBLACKLIST_THRESHOLD_24_SOFT = -75;
+    public static int UNBLACKLIST_THRESHOLD_24_SOFT = -77;
 
     /** @hide **/
     public static int UNBLACKLIST_THRESHOLD_24_HARD = -68;
@@ -414,6 +414,10 @@ public class WifiConfiguration implements Parcelable {
     /** @hide
      * 5GHz band is prefered over 2.4 if the 5GHz RSSI is higher than this threshold **/
     public static int A_BAND_PREFERENCE_RSSI_THRESHOLD = -65;
+
+    /** @hide
+     * 5GHz band is penalized if the 5GHz RSSI is lower than this threshold **/
+    public static int G_BAND_PREFERENCE_RSSI_THRESHOLD = -75;
 
     /**
      * @hide
