@@ -116,6 +116,19 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    private boolean checkUidChangedLocked(
+            Connection connection, int callingUid, int resolvedUserId) {
+        Integer connectionCallingUid = connection.getCallingUidLocked();
+        Integer connectionResolvedUserId = connection.getResolvedUserIdLocked();
+        if (connectionCallingUid == null || connectionResolvedUserId == null) {
+            return true;
+        }
+        if (connectionCallingUid != callingUid || connectionResolvedUserId != resolvedUserId) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Create a TvInputHardware object with a specific deviceId. One service at a time can access
      * the object, and if more than one process attempts to create hardware with the same deviceId,
@@ -133,8 +146,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 Slog.e(TAG, "Invalid deviceId : " + deviceId);
                 return null;
             }
-            if (connection.getCallingUidLocked() != callingUid
-                    || connection.getResolvedUserIdLocked() != resolvedUserId) {
+            if (checkUidChangedLocked(connection, callingUid, resolvedUserId)) {
                 TvInputHardwareImpl hardware = new TvInputHardwareImpl(connection.getInfoLocked());
                 try {
                     callback.asBinder().linkToDeath(connection, 0);
@@ -160,8 +172,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
             if (connection.getHardwareLocked() != hardware
-                    || connection.getCallingUidLocked() != callingUid
-                    || connection.getResolvedUserIdLocked() != resolvedUserId) {
+                    || checkUidChangedLocked(connection, callingUid, resolvedUserId)) {
                 return;
             }
             connection.resetLocked(null, null, null, null);
@@ -226,11 +237,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             return mConfigs;
         }
 
-        public int getCallingUidLocked() {
+        public Integer getCallingUidLocked() {
             return mCallingUid;
         }
 
-        public int getResolvedUserIdLocked() {
+        public Integer getResolvedUserIdLocked() {
             return mResolvedUserId;
         }
 
