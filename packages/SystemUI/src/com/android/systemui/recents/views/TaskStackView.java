@@ -958,6 +958,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         ArrayList<TaskView> childrenToRemoveOut) {
         // Animate all of the existing views out of view (if they are not in the visible range in
         // the new stack) or to their final positions in the new stack
+        int offset = 0;
         int movement = 0;
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -982,10 +983,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 movement = Math.max(movement, Math.abs(toTransform.translationY -
                         (int) tv.getTranslationY()));
             }
-            childViewTransformsOut.put(tv, new Pair(0, toTransform));
+
+            int startDelay = offset *
+                    Constants.Values.TaskStackView.FilterStartDelay;
+            childViewTransformsOut.put(tv, new Pair(startDelay, toTransform));
+            offset++;
         }
-        return Utilities.calculateTranslationAnimationDuration(movement,
-                mConfig.filteringCurrentViewsMinAnimDuration);
+        return mConfig.filteringCurrentViewsAnimDuration;
     }
 
     /**
@@ -1023,8 +1027,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         }
-        return Utilities.calculateTranslationAnimationDuration(movement,
-                mConfig.filteringNewViewsMinAnimDuration);
+        return mConfig.filteringNewViewsAnimDuration;
     }
 
     /** Orchestrates the animations of the current child views and any new views. */

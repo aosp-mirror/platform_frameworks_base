@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -91,6 +92,13 @@ class TaskBarView extends FrameLayout {
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
+
+        // Hide the backgrounds if they are ripple drawables
+        if (!Constants.DebugFlags.App.EnableTaskFiltering) {
+            if (mApplicationIcon.getBackground() instanceof RippleDrawable) {
+                mApplicationIcon.setBackground(null);
+            }
+        }
     }
 
     @Override

@@ -34,7 +34,8 @@
             android:layout_height="@dimen/recents_task_view_application_icon_size"
             android:layout_marginStart="8dp"
             android:layout_gravity="center_vertical|start"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:background="@drawable/recents_button_bg" />
         <TextView
             android:id="@+id/activity_description"
             android:layout_width="match_parent"
@@ -57,6 +58,7 @@
             android:layout_marginEnd="4dp"
             android:layout_gravity="center_vertical|end"
             android:padding="18dp"
+            android:background="@drawable/recents_button_bg"
             android:visibility="invisible"
             android:src="@drawable/recents_dismiss_light" />
     </com.android.systemui.recents.views.TaskBarView>
