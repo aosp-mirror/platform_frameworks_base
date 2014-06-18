@@ -3005,13 +3005,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void setLockTaskModeLocked(TaskRecord task) {
-        final Message lockTaskMsg = Message.obtain();
         if (task == null) {
-            // Take out of lock task mode.
-            lockTaskMsg.arg1 = mLockTaskModeTask.userId;
-            lockTaskMsg.what = LOCK_TASK_END_MSG;
-            mLockTaskModeTask = null;
-            mHandler.sendMessage(lockTaskMsg);
+            // Take out of lock task mode if necessary
+            if (mLockTaskModeTask != null) {
+                final Message lockTaskMsg = Message.obtain();
+                lockTaskMsg.arg1 = mLockTaskModeTask.userId;
+                lockTaskMsg.what = LOCK_TASK_END_MSG;
+                mLockTaskModeTask = null;
+                mHandler.sendMessage(lockTaskMsg);
+            }
             return;
         }
         if (isLockTaskModeViolation(task)) {
@@ -3021,6 +3023,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLockTaskModeTask = task;
         findTaskToMoveToFrontLocked(task, 0, null);
         resumeTopActivitiesLocked();
+
+        final Message lockTaskMsg = Message.obtain();
         lockTaskMsg.obj = mLockTaskModeTask.intent.getComponent().getPackageName();
         lockTaskMsg.arg1 = mLockTaskModeTask.userId;
         lockTaskMsg.what = LOCK_TASK_START_MSG;
