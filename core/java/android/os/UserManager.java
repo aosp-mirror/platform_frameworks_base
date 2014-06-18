@@ -719,6 +719,26 @@ public class UserManager {
 
     /**
      * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a copy of the label with
+     * badging for accessibility services like talkback. E.g. passing in "Email"
+     * and it might return "Work Email" for Email in the work profile.
+     *
+     * @param label The label to change.
+     * @param user The target user.
+     * @return A label that combines the original label and a badge as
+     *         determined by the system.
+     */
+    public String getBadgedLabelForUser(String label, UserHandle user) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return Resources.getSystem().getString(
+                    R.string.managed_profile_label_badge, label);
+        }
+        return label;
+    }
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
      * is itself a managed profile, then this returns a drawable to use as a small
      * icon to include in a view to distinguish it from the original icon.
      *

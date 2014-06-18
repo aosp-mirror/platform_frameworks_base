@@ -21586,6 +21586,7 @@ package android.os {
   public class UserManager {
     method public android.os.Bundle getApplicationRestrictions(java.lang.String);
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public java.lang.String getBadgedLabelForUser(java.lang.String, android.os.UserHandle);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);

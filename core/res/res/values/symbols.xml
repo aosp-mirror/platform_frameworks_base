@@ -863,6 +863,7 @@
   <java-symbol type="string" name="action_bar_home_description_format" />
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
+  <java-symbol type="string" name="managed_profile_label_badge" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />

@@ -4728,6 +4728,13 @@
     <!-- Accessibility announcement when a number that had been typed in is deleted [CHAR_LIMIT=NONE] -->
     <string name="deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> deleted</string>
 
+    <!--
+        Used to wrap a label for content description for a managed profile, e.g. "Work Email" instead
+        of email when there are two email apps.
+        [CHAR LIMIT=20]
+     -->
+    <string name="managed_profile_label_badge">Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
