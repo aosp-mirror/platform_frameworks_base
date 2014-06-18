@@ -73,6 +73,11 @@ import java.util.List;
  *
  * {@sample development/samples/ApiDemos/res/transition/explode_move_together.xml MultipleTransform}
  *
+ * <p>Custom transition classes may be instantiated with a <code>transition</code> tag:</p>
+ * <pre>&lt;transition class="my.app.transition.CustomTransition"/></pre>
+ * <p>Custom transition classes loaded from XML must have a public nullary (no argument)
+ * constructor.</p>
+ *
  * <p>Note that attributes for the transition are not required, just as they are
  * optional when declared in code; Transitions created from XML resources will use
  * the same defaults as their code-created equivalents. Here is a slightly more
