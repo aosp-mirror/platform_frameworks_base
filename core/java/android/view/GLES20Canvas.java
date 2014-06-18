@@ -853,31 +853,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDrawPoints(long renderer, float[] points,
             int offset, int count, long paint);
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public void drawPosText(char[] text, int index, int count, float[] pos, Paint paint) {
-        if (index < 0 || index + count > text.length || count * 2 > pos.length) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        nDrawPosText(mRenderer, text, index, count, pos, paint.mNativePaint);
-    }
-
-    private static native void nDrawPosText(long renderer, char[] text, int index, int count,
-            float[] pos, long paint);
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void drawPosText(String text, float[] pos, Paint paint) {
-        if (text.length() * 2 > pos.length) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-
-        nDrawPosText(mRenderer, text, 0, text.length(), pos, paint.mNativePaint);
-    }
-
-    private static native void nDrawPosText(long renderer, String text, int start, int end,
-            float[] pos, long paint);
+    // Note: drawPosText just uses implementation in Canvas
 
     @Override
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
