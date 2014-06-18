@@ -191,6 +191,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final int mWidth;
         private final int mHeight;
         private final float mRefreshRate;
+        private final long mDisplayPresentationDeadlineNanos;
         private final int mDensityDpi;
         private final boolean mSecure;
 
@@ -200,7 +201,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
-                int width, int height, float refreshRate,
+                int width, int height, float refreshRate, long presentationDeadlineNanos,
                 int densityDpi, boolean secure, int state,
                 SurfaceTexture surfaceTexture) {
             super(OverlayDisplayAdapter.this, displayToken);
@@ -208,6 +209,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             mWidth = width;
             mHeight = height;
             mRefreshRate = refreshRate;
+            mDisplayPresentationDeadlineNanos = presentationDeadlineNanos;
             mDensityDpi = densityDpi;
             mSecure = secure;
             mState = state;
@@ -249,6 +251,8 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
+                mInfo.presentationDeadlineNanos = mDisplayPresentationDeadlineNanos +
+                        1000000000L / (int) mRefreshRate;   // display's deadline + 1 frame
                 mInfo.flags = DisplayDeviceInfo.FLAG_PRESENTATION;
                 if (mSecure) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
@@ -297,12 +301,13 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
 
         // Called on the UI thread.
         @Override
-        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate, int state) {
+        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate,
+                long presentationDeadlineNanos, int state) {
             synchronized (getSyncRoot()) {
                 IBinder displayToken = SurfaceControl.createDisplay(mName, mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
-                        mWidth, mHeight, refreshRate, mDensityDpi, mSecure,
-                        state, surfaceTexture);
+                        mWidth, mHeight, refreshRate, presentationDeadlineNanos,
+                        mDensityDpi, mSecure, state, surfaceTexture);
 
                 sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
             }

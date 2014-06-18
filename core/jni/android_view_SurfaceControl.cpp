@@ -61,6 +61,8 @@ static struct {
     jfieldID xDpi;
     jfieldID yDpi;
     jfieldID secure;
+    jfieldID appVsyncOffsetNanos;
+    jfieldID presentationDeadlineNanos;
 } gPhysicalDisplayInfoClassInfo;
 
 static struct {
@@ -392,6 +394,10 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
         env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.xDpi, info.xdpi);
         env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.yDpi, info.ydpi);
         env->SetBooleanField(infoObj, gPhysicalDisplayInfoClassInfo.secure, info.secure);
+        env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos,
+                info.appVsyncOffset);
+        env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos,
+                info.presentationDeadline);
         env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
         env->DeleteLocalRef(infoObj);
     }
@@ -648,6 +654,10 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gPhysicalDisplayInfoClassInfo.xDpi = env->GetFieldID(clazz, "xDpi", "F");
     gPhysicalDisplayInfoClassInfo.yDpi = env->GetFieldID(clazz, "yDpi", "F");
     gPhysicalDisplayInfoClassInfo.secure = env->GetFieldID(clazz, "secure", "Z");
+    gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos = env->GetFieldID(clazz,
+            "appVsyncOffsetNanos", "J");
+    gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = env->GetFieldID(clazz,
+            "presentationDeadlineNanos", "J");
 
     jclass rectClazz = env->FindClass("android/graphics/Rect");
     gRectClassInfo.bottom = env->GetFieldID(rectClazz, "bottom", "I");

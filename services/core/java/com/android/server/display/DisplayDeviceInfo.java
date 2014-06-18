@@ -119,7 +119,7 @@ final class DisplayDeviceInfo {
     public int height;
 
     /**
-     * The refresh rate of the display.
+     * The refresh rate of the display, in frames per second.
      */
     public float refreshRate;
 
@@ -142,6 +142,20 @@ final class DisplayDeviceInfo {
      * This density should specify the physical size of each pixel.
      */
     public float yDpi;
+
+    /**
+     * This is a positive value indicating the phase offset of the VSYNC events provided by
+     * Choreographer relative to the display refresh.  For example, if Choreographer reports
+     * that the refresh occurred at time N, it actually occurred at (N - appVsyncOffsetNanos).
+     */
+    public long appVsyncOffsetNanos;
+
+    /**
+     * This is how far in advance a buffer must be queued for presentation at
+     * a given time.  If you want a buffer to appear on the screen at
+     * time N, you must submit the buffer before (N - bufferDeadlineNanos).
+     */
+    public long presentationDeadlineNanos;
 
     /**
      * Display flags.
@@ -219,6 +233,8 @@ final class DisplayDeviceInfo {
                 && densityDpi == other.densityDpi
                 && xDpi == other.xDpi
                 && yDpi == other.yDpi
+                && appVsyncOffsetNanos == other.appVsyncOffsetNanos
+                && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && flags == other.flags
                 && touch == other.touch
                 && rotation == other.rotation
@@ -242,6 +258,8 @@ final class DisplayDeviceInfo {
         densityDpi = other.densityDpi;
         xDpi = other.xDpi;
         yDpi = other.yDpi;
+        appVsyncOffsetNanos = other.appVsyncOffsetNanos;
+        presentationDeadlineNanos = other.presentationDeadlineNanos;
         flags = other.flags;
         touch = other.touch;
         rotation = other.rotation;
@@ -261,6 +279,8 @@ final class DisplayDeviceInfo {
         sb.append(", ").append(refreshRate).append(" fps, ");
         sb.append("density ").append(densityDpi);
         sb.append(", ").append(xDpi).append(" x ").append(yDpi).append(" dpi");
+        sb.append(", appVsyncOff ").append(appVsyncOffsetNanos);
+        sb.append(", presDeadline ").append(presentationDeadlineNanos);
         sb.append(", touch ").append(touchToString(touch));
         sb.append(", rotation ").append(rotation);
         sb.append(", type ").append(Display.typeToString(type));

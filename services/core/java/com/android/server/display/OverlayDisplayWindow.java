@@ -303,7 +303,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture,
                 int width, int height) {
             mListener.onWindowCreated(surfaceTexture, mDefaultDisplayInfo.refreshRate,
-                    mDefaultDisplayInfo.state);
+                    mDefaultDisplayInfo.presentationDeadlineNanos, mDefaultDisplayInfo.state);
         }
 
         @Override
@@ -373,7 +373,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
      */
     public interface Listener {
         public void onWindowCreated(SurfaceTexture surfaceTexture,
-                float refreshRate, int state);
+                float refreshRate, long presentationDeadlineNanos, int state);
         public void onWindowDestroyed();
         public void onStateChanged(int state);
     }

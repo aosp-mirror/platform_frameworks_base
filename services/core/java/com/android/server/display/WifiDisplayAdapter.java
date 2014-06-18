@@ -127,7 +127,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
         pw.println("mPendingNotificationUpdate=" + mPendingNotificationUpdate);
         pw.println("mSupportsProtectedBuffers=" + mSupportsProtectedBuffers);
- 
+
         // Try to dump the controller state.
         if (mDisplayController == null) {
             pw.println("mDisplayController=null");
@@ -729,6 +729,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
+                mInfo.presentationDeadlineNanos = 1000000000L / (int) mRefreshRate; // 1 frame
                 mInfo.flags = mFlags;
                 mInfo.type = Display.TYPE_WIFI;
                 mInfo.address = mAddress;
