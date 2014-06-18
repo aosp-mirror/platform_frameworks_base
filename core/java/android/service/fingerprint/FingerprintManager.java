@@ -96,6 +96,9 @@ public class FingerprintManager {
         }
     };
 
+    /**
+     * @hide
+     */
     public FingerprintManager(Context context, IFingerprintService service) {
         mContext = context;
         mService = service;

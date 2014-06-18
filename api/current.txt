@@ -26037,7 +26037,6 @@ package android.service.dreams {
 package android.service.fingerprint {
 
   public class FingerprintManager {
-    ctor public FingerprintManager(android.content.Context, android.service.fingerprint.IFingerprintService);
     method public void enroll(long);
     method public void enrollCancel();
     method public boolean enrolledAndEnabled();
@@ -26076,22 +26075,6 @@ package android.service.fingerprint {
     method public static void addFingerprintIdForUser(int, android.content.ContentResolver, int);
     method public static int[] getFingerprintIdsForUser(android.content.ContentResolver, int);
     method public static boolean removeFingerprintIdForUser(int, android.content.ContentResolver, int);
-  }
-
-  public abstract interface IFingerprintService implements android.os.IInterface {
-    method public abstract void enroll(android.os.IBinder, long, int) throws android.os.RemoteException;
-    method public abstract void enrollCancel(android.os.IBinder, int) throws android.os.RemoteException;
-    method public abstract void remove(android.os.IBinder, int, int) throws android.os.RemoteException;
-    method public abstract void startListening(android.os.IBinder, android.service.fingerprint.IFingerprintServiceReceiver, int) throws android.os.RemoteException;
-    method public abstract void stopListening(android.os.IBinder, int) throws android.os.RemoteException;
-  }
-
-  public abstract interface IFingerprintServiceReceiver implements android.os.IInterface {
-    method public abstract void onAcquired(int) throws android.os.RemoteException;
-    method public abstract void onEnrollResult(int, int) throws android.os.RemoteException;
-    method public abstract void onError(int) throws android.os.RemoteException;
-    method public abstract void onProcessed(int) throws android.os.RemoteException;
-    method public abstract void onRemoved(int) throws android.os.RemoteException;
   }
 
 }

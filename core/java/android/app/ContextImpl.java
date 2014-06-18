@@ -697,8 +697,8 @@ class ContextImpl extends Context {
 
         registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(FINGERPRINT_SERVICE);
-                IFingerprintService service = IFingerprintService.Stub.asInterface(b);
+                IBinder binder = ServiceManager.getService(FINGERPRINT_SERVICE);
+                IFingerprintService service = IFingerprintService.Stub.asInterface(binder);
                 return new FingerprintManager(ctx.getOuterContext(), service);
             }
         });
