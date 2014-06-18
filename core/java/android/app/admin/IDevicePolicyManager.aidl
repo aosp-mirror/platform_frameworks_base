@@ -151,4 +151,6 @@ interface IDevicePolicyManager {
 
     void setMasterVolumeMuted(in ComponentName admin, boolean on);
     boolean isMasterVolumeMuted(in ComponentName admin);
+
+    void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userId);
 }

@@ -46,6 +46,8 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -143,6 +145,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Status Bar Service **/
     private IBinder mToken = new Binder();
     private IStatusBarService mStatusBarService;
+    private IDevicePolicyManager mDevicePolicyManager;
 
     // For debugging to make sure the caller when acquiring/releasing our
     // wake lock is the system process.
@@ -282,6 +285,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
             return mStatusBarService;
+        }
+    }
+
+    private IDevicePolicyManager getDevicePolicyManager() {
+        synchronized (mService) {
+            if (mDevicePolicyManager == null) {
+                mDevicePolicyManager = IDevicePolicyManager.Stub.asInterface(
+                    ServiceManager.checkService(Context.DEVICE_POLICY_SERVICE));
+                if (mDevicePolicyManager == null) {
+                    Slog.w(TAG, "warning: no DEVICE_POLICY_SERVICE");
+                }
+            }
+            return mDevicePolicyManager;
         }
     }
 
@@ -2992,8 +3008,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final Message lockTaskMsg = Message.obtain();
         if (task == null) {
             // Take out of lock task mode.
-            mLockTaskModeTask = null;
+            lockTaskMsg.arg1 = mLockTaskModeTask.userId;
             lockTaskMsg.what = LOCK_TASK_END_MSG;
+            mLockTaskModeTask = null;
             mHandler.sendMessage(lockTaskMsg);
             return;
         }
@@ -3004,6 +3021,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLockTaskModeTask = task;
         findTaskToMoveToFrontLocked(task, 0, null);
         resumeTopActivitiesLocked();
+        lockTaskMsg.obj = mLockTaskModeTask.intent.getComponent().getPackageName();
+        lockTaskMsg.arg1 = mLockTaskModeTask.userId;
         lockTaskMsg.what = LOCK_TASK_START_MSG;
         mHandler.sendMessage(lockTaskMsg);
     }
@@ -3112,6 +3131,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 (StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK,
                                 mToken, mService.mContext.getPackageName());
                         }
+                        if (getDevicePolicyManager() != null) {
+                            getDevicePolicyManager().notifyLockTaskModeChanged(true,
+                                    (String)msg.obj,
+                                    msg.arg1);
+                        }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -3124,6 +3148,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                (StatusBarManager.DISABLE_NONE,
                                mToken, mService.mContext.getPackageName());
                        }
+                        if (getDevicePolicyManager() != null) {
+                            getDevicePolicyManager().notifyLockTaskModeChanged(false, null,
+                                    msg.arg1);
+                        }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
