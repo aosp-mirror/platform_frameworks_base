@@ -23,6 +23,7 @@ interface IFaceLockInterface {
     void startUi(IBinder containingWindowToken, int x, int y, int width, int height,
             boolean useLiveliness);
     void stopUi();
+    void startWithoutUi();
     void registerCallback(IFaceLockCallback cb);
     void unregisterCallback(IFaceLockCallback cb);
 }
