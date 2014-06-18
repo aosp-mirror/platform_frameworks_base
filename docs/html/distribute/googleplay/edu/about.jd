@@ -9,7 +9,7 @@ Xnonavpage=true
 
 <p>
   Google Play for Education is an extension of Google Play designed for
-  schools. Here educators can discover apps approved by teachers for teachers,
+  schools. Here educators can discover Android and Chrome apps approved by teachers for teachers,
   as well as educational videos and a collection of classic books for their
   classroom.
 </p>
@@ -22,7 +22,7 @@ Xnonavpage=true
 </p>
 
 
-<div class="resource-widget resource-flow-layout col-13"
+<div class="resource-widget resource-flow-layout col-13" style="height:323px"
   data-query="collection:distribute/googleplay/gpfe/highlight"
   data-sortOrder="-timestamp"
   data-cardSizes="18x6,"
