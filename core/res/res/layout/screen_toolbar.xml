@@ -34,7 +34,7 @@ This is an optimized layout for a screen with a toolbar enabled.
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         style="?attr/actionBarStyle"
-        android:viewName="android:action_bar"
+        android:transitionName="android:action_bar"
         android:gravity="top">
         <Toolbar
             android:id="@+id/action_bar"

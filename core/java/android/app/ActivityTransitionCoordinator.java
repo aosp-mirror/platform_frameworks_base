@@ -274,7 +274,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     public ArrayList<String> getMappedNames() {
         ArrayList<String> names = new ArrayList<String>(mSharedElements.size());
         for (int i = 0; i < mSharedElements.size(); i++) {
-            names.add(mSharedElements.get(i).getViewName());
+            names.add(mSharedElements.get(i).getTransitionName());
         }
         return names;
     }
@@ -351,9 +351,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 String name = mAllSharedElementNames.get(i);
                 View sharedElement = sharedElements.get(name);
                 if (sharedElement != null) {
-                    if (sharedElement.getViewName() == null) {
+                    if (sharedElement.getTransitionName() == null) {
                         throw new IllegalArgumentException("Shared elements must have " +
-                                "non-null viewNames");
+                                "non-null transitionNames");
                     }
                     mSharedElementNames.add(name);
                     mSharedElements.add(sharedElement);
@@ -487,7 +487,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 if (bitmap != null) {
                     snapshot.setBackground(new BitmapDrawable(resources, bitmap));
                 }
-                snapshot.setViewName(name);
+                snapshot.setTransitionName(name);
                 setSharedElementState(snapshot, name, state, parentLoc);
                 snapshots.add(snapshot);
             }

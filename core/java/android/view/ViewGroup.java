@@ -2326,13 +2326,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * individually during the transition.
      * @return True if the ViewGroup should be acted on together during an Activity transition.
      * The default value is false when the background is null and true when the background
-     * is not null or if {@link #getViewName()} is not null.
+     * is not null or if {@link #getTransitionName()} is not null.
      */
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
         } else {
-            return getBackground() != null || getViewName() != null;
+            return getBackground() != null || getTransitionName() != null;
         }
     }
 

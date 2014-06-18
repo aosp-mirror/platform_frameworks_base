@@ -510,7 +510,7 @@ package android {
     field public static final int excludeClass = 16843844; // 0x1010444
     field public static final int excludeFromRecents = 16842775; // 0x1010017
     field public static final int excludeId = 16843843; // 0x1010443
-    field public static final int excludeViewName = 16843856; // 0x1010450
+    field public static final int excludeName = 16843856; // 0x1010450
     field public static final int exitFadeDuration = 16843533; // 0x101030d
     field public static final int expandableListPreferredChildIndicatorLeft = 16842834; // 0x1010052
     field public static final int expandableListPreferredChildIndicatorRight = 16842835; // 0x1010053
@@ -1151,9 +1151,9 @@ package android {
     field public static final int targetClass = 16842799; // 0x101002f
     field public static final int targetDescriptions = 16843680; // 0x10103a0
     field public static final int targetId = 16843740; // 0x10103dc
+    field public static final int targetName = 16843855; // 0x101044f
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
-    field public static final int targetViewName = 16843855; // 0x101044f
     field public static final int taskAffinity = 16842770; // 0x1010012
     field public static final int taskCloseEnterAnimation = 16842942; // 0x10100be
     field public static final int taskCloseExitAnimation = 16842943; // 0x10100bf
@@ -1263,6 +1263,7 @@ package android {
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
     field public static final int transitionGroup = 16843803; // 0x101041b
+    field public static final int transitionName = 16843802; // 0x101041a
     field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translateX = 16843868; // 0x101045c
     field public static final int translateY = 16843869; // 0x101045d
@@ -1297,7 +1298,6 @@ package android {
     field public static final int verticalGap = 16843328; // 0x1010240
     field public static final int verticalScrollbarPosition = 16843572; // 0x1010334
     field public static final int verticalSpacing = 16843029; // 0x1010115
-    field public static final int viewName = 16843802; // 0x101041a
     field public static final int viewportHeight = 16843805; // 0x101041d
     field public static final int viewportWidth = 16843804; // 0x101041c
     field public static final int visibility = 16842972; // 0x10100dc
@@ -30500,8 +30500,8 @@ package android.transition {
     method public android.transition.TransitionPropagation getPropagation();
     method public long getStartDelay();
     method public java.util.List<java.lang.Integer> getTargetIds();
+    method public java.util.List<java.lang.String> getTargetNames();
     method public java.util.List<java.lang.Class> getTargetTypes();
-    method public java.util.List<java.lang.String> getTargetViewNames();
     method public java.util.List<android.view.View> getTargets();
     method public java.lang.String[] getTransitionProperties();
     method public android.transition.TransitionValues getTransitionValues(android.view.View, boolean);
@@ -30519,7 +30519,7 @@ package android.transition {
     field public static final int MATCH_ID = 3; // 0x3
     field public static final int MATCH_INSTANCE = 1; // 0x1
     field public static final int MATCH_ITEM_ID = 4; // 0x4
-    field public static final int MATCH_VIEW_NAME = 2; // 0x2
+    field public static final int MATCH_NAME = 2; // 0x2
   }
 
   public static abstract class Transition.EpicenterCallback {
@@ -32710,13 +32710,13 @@ package android.view {
     method protected int getTopPaddingOffset();
     method public android.view.TouchDelegate getTouchDelegate();
     method public java.util.ArrayList<android.view.View> getTouchables();
+    method public java.lang.String getTransitionName();
     method public float getTranslationX();
     method public float getTranslationY();
     method public float getTranslationZ();
     method public int getVerticalFadingEdgeLength();
     method public int getVerticalScrollbarPosition();
     method public int getVerticalScrollbarWidth();
-    method public java.lang.String getViewName();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
     method public final int getWidth();
@@ -32973,13 +32973,13 @@ package android.view {
     method public void setTextDirection(int);
     method public final void setTop(int);
     method public void setTouchDelegate(android.view.TouchDelegate);
+    method public final void setTransitionName(java.lang.String);
     method public void setTranslationX(float);
     method public void setTranslationY(float);
     method public void setTranslationZ(float);
     method public void setVerticalFadingEdgeEnabled(boolean);
     method public void setVerticalScrollBarEnabled(boolean);
     method public void setVerticalScrollbarPosition(int);
-    method public final void setViewName(java.lang.String);
     method public void setVisibility(int);
     method public void setWillNotCacheDrawing(boolean);
     method public void setWillNotDraw(boolean);
