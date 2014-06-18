@@ -118,6 +118,7 @@ class TaskResourceLoader implements Runnable {
     TaskResourceLoadQueue mLoadQueue;
     DrawableLruCache mApplicationIconCache;
     BitmapLruCache mThumbnailCache;
+    Bitmap mDefaultThumbnail;
 
     boolean mCancelled;
     boolean mWaitingOnLoadQueue;
@@ -125,10 +126,12 @@ class TaskResourceLoader implements Runnable {
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public TaskResourceLoader(TaskResourceLoadQueue loadQueue,
                               DrawableLruCache applicationIconCache,
-                              BitmapLruCache thumbnailCache) {
+                              BitmapLruCache thumbnailCache,
+                              Bitmap defaultThumbnail) {
         mLoadQueue = loadQueue;
         mApplicationIconCache = applicationIconCache;
         mThumbnailCache = thumbnailCache;
+        mDefaultThumbnail = defaultThumbnail;
         mMainThreadHandler = new Handler();
         mLoadThread = new HandlerThread("Recents-TaskResourceLoader");
         mLoadThread.setPriority(Thread.NORM_PRIORITY - 1);
@@ -238,6 +241,7 @@ class TaskResourceLoader implements Runnable {
                                 loadThumbnail = thumbnail;
                                 mThumbnailCache.put(t.key, thumbnail);
                             } else {
+                                loadThumbnail = mDefaultThumbnail;
                                 Console.logError(mContext,
                                         "Failed to load task top thumbnail for: " +
                                                 t.key.baseIntent.getComponent().getPackageName());
@@ -330,6 +334,7 @@ public class RecentsTaskLoader {
 
     BitmapDrawable mDefaultApplicationIcon;
     Bitmap mDefaultThumbnail;
+    Bitmap mLoadingThumbnail;
 
     /** Private Constructor */
     private RecentsTaskLoader(Context context) {
@@ -356,18 +361,22 @@ public class RecentsTaskLoader {
         mLoadQueue = new TaskResourceLoadQueue();
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
-        mLoader = new TaskResourceLoader(mLoadQueue, mApplicationIconCache, mThumbnailCache);
+        mLoader = new TaskResourceLoader(mLoadQueue, mApplicationIconCache, mThumbnailCache,
+                mDefaultThumbnail);
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         icon.eraseColor(0x00000000);
         mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        mDefaultThumbnail.eraseColor(0x00000000);
+        mDefaultThumbnail.eraseColor(0xFFffffff);
+        mLoadingThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        mLoadingThumbnail.eraseColor(0x00000000);
         mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
         if (Console.Enabled) {
             Console.log(Constants.Log.App.TaskDataLoader,
                     "[RecentsTaskLoader|defaultBitmaps]",
-                    "icon: " + mDefaultApplicationIcon + " thumbnail: " + mDefaultThumbnail, Console.AnsiRed);
+                    "icon: " + mDefaultApplicationIcon +
+                    " default thumbnail: " + mDefaultThumbnail, Console.AnsiRed);
         }
     }
 
@@ -394,7 +403,7 @@ public class RecentsTaskLoader {
 
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(100, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(50, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
         if (Console.Enabled) {
             Console.log(Constants.Log.App.TimeSystemCalls,
@@ -544,7 +553,7 @@ public class RecentsTaskLoader {
             requiresLoad = true;
         }
         if (thumbnail == null) {
-            thumbnail = mDefaultThumbnail;
+            thumbnail = mLoadingThumbnail;
             requiresLoad = true;
         }
         if (requiresLoad) {

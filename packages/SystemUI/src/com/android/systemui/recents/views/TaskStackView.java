@@ -187,12 +187,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return null;
     }
 
-    /** Update/get the transform */
+    /** Update/get the transform (creates a new TaskViewTransform) */
     public TaskViewTransform getStackTransform(int indexInStack, int stackScroll) {
         TaskViewTransform transform = new TaskViewTransform();
+        return getStackTransform(indexInStack, stackScroll, transform);
+    }
 
+    /** Update/get the transform */
+    public TaskViewTransform getStackTransform(int indexInStack, int stackScroll,
+                                               TaskViewTransform transformOut) {
         // Return early if we have an invalid index
-        if (indexInStack < 0) return transform;
+        if (indexInStack < 0) {
+            transformOut.reset();
+            return transformOut;
+        }
 
         // Map the items to an continuous position relative to the specified scroll
         int numPeekCards = Constants.Values.TaskStackView.StackPeekNumCards;
@@ -209,35 +217,35 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         float scale = Math.max(minScale, Math.min(1f, minScale + 
             ((boundedT + (numPeekCards + 1)) * scaleInc)));
         float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
-        transform.scale = scale;
+        transformOut.scale = scale;
 
         // Set the y translation
         if (boundedT < 0f) {
-            transform.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
+            transformOut.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
                     numPeekCards) * peekHeight - scaleYOffset);
         } else {
-            transform.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
+            transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
         }
 
         // Set the z translation
         int minZ = mConfig.taskViewTranslationZMinPx;
         int incZ = mConfig.taskViewTranslationZIncrementPx;
-        transform.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
+        transformOut.translationZ = (int) Math.max(minZ, minZ + ((boundedT + numPeekCards) * incZ));
 
         // Set the alphas
-        transform.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
+        transformOut.dismissAlpha = Math.max(-1f, Math.min(0f, t + 1)) + 1f;
 
         // Update the rect and visibility
-        transform.rect.set(mTaskRect);
+        transformOut.rect.set(mTaskRect);
         if (t < -(numPeekCards + 1)) {
-            transform.visible = false;
+            transformOut.visible = false;
         } else {
-            transform.rect.offset(0, transform.translationY);
-            Utilities.scaleRectAboutCenter(transform.rect, transform.scale);
-            transform.visible = Rect.intersects(mRect, transform.rect);
+            transformOut.rect.offset(0, transformOut.translationY);
+            Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
+            transformOut.visible = Rect.intersects(mRect, transformOut.rect);
         }
-        transform.t = t;
-        return transform;
+        transformOut.t = t;
+        return transformOut;
     }
 
     /**
@@ -250,14 +258,25 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                        boolean boundTranslationsToRect) {
         // XXX: Optimization: Use binary search to find the visible range
 
+        int taskTransformCount = taskTransforms.size();
         int taskCount = tasks.size();
         int firstVisibleIndex = -1;
         int lastVisibleIndex = -1;
-        taskTransforms.clear();
-        taskTransforms.ensureCapacity(taskCount);
+
+        // We can reuse the task transforms where possible to reduce object allocation
+        if (taskTransformCount < taskCount) {
+            // If there are less transforms than tasks, then add as many transforms as necessary
+            for (int i = taskTransformCount; i < taskCount; i++) {
+                taskTransforms.add(new TaskViewTransform());
+            }
+        } else if (taskTransformCount > taskCount) {
+            // If there are more transforms than tasks, then just subset the transform list
+            taskTransforms.subList(0, taskCount);
+        }
+
+        // Update the stack transforms
         for (int i = 0; i < taskCount; i++) {
-            TaskViewTransform transform = getStackTransform(i, stackScroll);
-            taskTransforms.add(transform);
+            TaskViewTransform transform = getStackTransform(i, stackScroll, taskTransforms.get(i));
             if (transform.visible) {
                 if (firstVisibleIndex < 0) {
                     firstVisibleIndex = i;

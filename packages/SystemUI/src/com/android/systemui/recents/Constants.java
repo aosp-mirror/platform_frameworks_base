@@ -48,7 +48,7 @@ public class Constants {
             // For debugging, this defines the number of mock recents packages to create
             public static final int SystemServicesProxyMockPackageCount = 3;
             // For debugging, this defines the number of mock recents tasks to create
-            public static final int SystemServicesProxyMockTaskCount = 75;
+            public static final int SystemServicesProxyMockTaskCount = 100;
         }
     }
 

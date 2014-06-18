@@ -605,13 +605,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
-    public void onTaskLaunching(boolean isTaskInStackBounds) {
+    public void onTaskLaunching() {
         mTaskLaunched = true;
-
-        // Fade out the scrim
-        if (!isTaskInStackBounds && mConfig.hasNavBarScrim()) {
-            onExitAnimationTriggered();
-        }
 
         // Mark recents as no longer visible
         AlternateRecentsComponent.notifyVisibilityChanged(false);

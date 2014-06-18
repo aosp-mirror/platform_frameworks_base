@@ -23,6 +23,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +50,8 @@ public class FullScreenTransitionView extends FrameLayout {
     FullScreenTransitionViewCallbacks mCb;
 
     ImageView mScreenshotView;
-
     Rect mClipRect = new Rect();
+    Paint mLayerPaint = new Paint();
 
     boolean mIsAnimating;
     AnimatorSet mEnterAnimation;
@@ -159,7 +160,7 @@ public class FullScreenTransitionView extends FrameLayout {
         int clipBottom = mConfig.systemInsets.top + (int) (ctx.taskRect.height() / scale);
 
         // Enable the HW Layers on the screenshot view
-        mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
 
         // Compose the animation
         mEnterAnimation = new AnimatorSet();
@@ -173,7 +174,7 @@ public class FullScreenTransitionView extends FrameLayout {
                 // Mark that we are no longer animating
                 mIsAnimating = false;
                 // Disable the HW Layers on this view
-                setLayerType(View.LAYER_TYPE_NONE, null);
+                setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
 
                 if (Console.Enabled) {
                     Console.logTraceTime(Constants.Log.App.TimeRecentsScreenshotTransition,
@@ -217,7 +218,7 @@ public class FullScreenTransitionView extends FrameLayout {
                     // Mark that we are no longer animating
                     mIsAnimating = false;
                     // Disable the HW Layers on the screenshot view
-                    mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
+                    mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
                 }
             });
             mEnterAnimation.setDuration(475);
