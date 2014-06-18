@@ -377,6 +377,17 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_RELEASED);
     }
 
+    /**
+     * Build &lt;Give System Audio Mode Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildGiveSystemAudioModeStatus(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS);
+    }
+
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**

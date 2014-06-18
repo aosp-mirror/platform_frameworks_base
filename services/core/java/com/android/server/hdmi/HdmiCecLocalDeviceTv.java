@@ -52,6 +52,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCec.DEVICE_TV);
+
+        // TODO: load system audio mode and set it to mSystemAudioMode.
     }
 
     @Override
@@ -174,6 +176,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         }
 
                         addAndStartAction(new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
+
+                        // If there is AVR, initiate System Audio Auto initiation action,
+                        // which turns on and off system audio according to last system
+                        // audio setting.
+                        HdmiCecDeviceInfo avrInfo = getAvrDeviceInfo();
+                        if (avrInfo != null) {
+                            addAndStartAction(new SystemAudioAutoInitiationAction(
+                                    HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
+                        }
                     }
                 });
         addAndStartAction(action);
@@ -455,5 +466,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // "pollAllDevicesNow" cleans up timer and start poll action immediately.
             hotplugActions.get(0).pollAllDevicesNow();
         }
+    }
+
+    boolean canChangeSystemAudio() {
+        // TODO: implement this.
+        // return true if no system audio control sequence is running.
+        return false;
     }
 }
