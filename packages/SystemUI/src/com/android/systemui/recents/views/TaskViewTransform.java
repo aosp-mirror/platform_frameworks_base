@@ -21,6 +21,7 @@ import android.graphics.Rect;
 
 /* The transform state for a task view */
 public class TaskViewTransform {
+    public int startDelay = 0;
     public int translationY = 0;
     public int translationZ = 0;
     public float scale = 1f;
@@ -35,6 +36,7 @@ public class TaskViewTransform {
     }
 
     public TaskViewTransform(TaskViewTransform o) {
+        startDelay = o.startDelay;
         translationY = o.translationY;
         translationZ = o.translationZ;
         scale = o.scale;
@@ -47,6 +49,7 @@ public class TaskViewTransform {
 
     /** Resets the current transform */
     public void reset() {
+        startDelay = 0;
         translationY = 0;
         translationZ = 0;
         scale = 1f;
@@ -76,8 +79,8 @@ public class TaskViewTransform {
 
     @Override
     public String toString() {
-        return "TaskViewTransform y: " + translationY + " z: " + translationZ + " scale: " + scale +
-                " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
+        return "TaskViewTransform delay: " + startDelay + " y: " + translationY + " z: " + translationZ +
+                " scale: " + scale + " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
                 " dismissAlpha: " + dismissAlpha;
     }
 }
