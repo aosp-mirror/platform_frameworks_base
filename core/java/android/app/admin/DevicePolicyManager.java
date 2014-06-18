@@ -1840,11 +1840,13 @@ public class DevicePolicyManager {
      * This function should be used cautiously as once it is called it cannot
      * be undone.  The device owner can only be set as a part of device setup
      * before setup completes.
+     *
+     * @param packageName The package name of the device owner.
      */
-    public void clearDeviceOwnerApp() {
+    public void clearDeviceOwnerApp(String packageName) {
         if (mService != null) {
             try {
-                mService.clearDeviceOwner(mContext.getPackageName());
+                mService.clearDeviceOwner(packageName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to clear device owner");
             }
