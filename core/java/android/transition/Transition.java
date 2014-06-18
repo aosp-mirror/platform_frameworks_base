@@ -673,7 +673,7 @@ public abstract class Transition implements Cloneable {
                             startDelays.put(mAnimators.size(), delay);
                             minStartDelay = Math.min(delay, minStartDelay);
                         }
-                        AnimationInfo info = new AnimationInfo(view, getName(),
+                        AnimationInfo info = new AnimationInfo(view, getName(), this,
                                 sceneRoot.getWindowId(), infoValues);
                         runningAnimators.put(animator, info);
                         mAnimators.add(animator);
@@ -1587,30 +1587,10 @@ public abstract class Transition implements Cloneable {
                 AnimationInfo oldInfo = runningAnimators.get(anim);
                 if (oldInfo != null && oldInfo.view != null &&
                         oldInfo.view.getContext() == sceneRoot.getContext()) {
-                    boolean cancel = false;
                     TransitionValues oldValues = oldInfo.values;
                     View oldView = oldInfo.view;
                     TransitionValues newValues = mEndValues.viewValues.get(oldView);
-                    if (oldValues != null) {
-                        // if oldValues null, then transition didn't care to stash values,
-                        // and won't get canceled
-                        if (newValues != null) {
-                            for (String key : oldValues.values.keySet()) {
-                                Object oldValue = oldValues.values.get(key);
-                                Object newValue = newValues.values.get(key);
-                                if (oldValue != null && newValue != null &&
-                                        !oldValue.equals(newValue)) {
-                                    cancel = true;
-                                    if (DBG) {
-                                        Log.d(LOG_TAG, "Transition.playTransition: " +
-                                                "oldValue != newValue for " + key +
-                                                ": old, new = " + oldValue + ", " + newValue);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    boolean cancel = oldInfo.transition.areValuesChanged(oldValues, newValues);
                     if (cancel) {
                         if (anim.isRunning() || anim.isStarted()) {
                             if (DBG) {
@@ -1630,6 +1610,29 @@ public abstract class Transition implements Cloneable {
 
         createAnimators(sceneRoot, mStartValues, mEndValues);
         runAnimators();
+    }
+
+    boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+        boolean valuesChanged = false;
+        // if oldValues null, then transition didn't care to stash values,
+        // and won't get canceled
+        if (oldValues != null && newValues != null) {
+            for (String key : oldValues.values.keySet()) {
+                Object oldValue = oldValues.values.get(key);
+                Object newValue = newValues.values.get(key);
+                if (oldValue != null && newValue != null &&
+                        !oldValue.equals(newValue)) {
+                    valuesChanged = true;
+                    if (DBG) {
+                        Log.d(LOG_TAG, "Transition.playTransition: " +
+                                "oldValue != newValue for " + key +
+                                ": old, new = " + oldValue + ", " + newValue);
+                    }
+                    break;
+                }
+            }
+        }
+        return valuesChanged;
     }
 
     /**
@@ -2070,12 +2073,15 @@ public abstract class Transition implements Cloneable {
         String name;
         TransitionValues values;
         WindowId windowId;
+        Transition transition;
 
-        AnimationInfo(View view, String name, WindowId windowId, TransitionValues values) {
+        AnimationInfo(View view, String name, Transition transition,
+                WindowId windowId, TransitionValues values) {
             this.view = view;
             this.name = name;
             this.values = values;
             this.windowId = windowId;
+            this.transition = transition;
         }
     }
 

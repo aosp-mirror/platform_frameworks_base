@@ -331,16 +331,6 @@ public abstract class Visibility extends Transition {
                     public void onAnimationEnd(Animator animation) {
                         finalSceneRoot.getOverlay().remove(finalOverlayView);
                     }
-
-                    @Override
-                    public void onAnimationPause(Animator animation) {
-                        finalSceneRoot.getOverlay().remove(finalOverlayView);
-                    }
-
-                    @Override
-                    public void onAnimationResume(Animator animation) {
-                        finalSceneRoot.getOverlay().add(finalOverlayView);
-                    }
                 });
             }
             return animator;
@@ -407,6 +397,16 @@ public abstract class Visibility extends Transition {
         overlayView.measure(widthSpec, heightSpec);
         overlayView.layout(0, 0, width, height);
         return overlayView;
+    }
+
+    @Override
+    boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+        VisibilityInfo changeInfo = getVisibilityChangeInfo(oldValues, newValues);
+        if (oldValues == null && newValues == null) {
+            return false;
+        }
+        return changeInfo.visibilityChange && (changeInfo.startVisibility == View.VISIBLE ||
+            changeInfo.endVisibility == View.VISIBLE);
     }
 
     /**
