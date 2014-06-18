@@ -202,7 +202,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             if (useLayers) {
                 anim.withLayer();
             }
-            anim.setStartDelay(0)
+            anim.setStartDelay(toTransform.startDelay)
                 .setDuration(duration)
                 .setInterpolator(mConfig.fastOutSlowInInterpolator)
                 .start();
@@ -248,6 +248,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         // Fade the view out and slide it away
         toTransform.alpha = 0f;
         toTransform.translationY += 200;
+        toTransform.translationZ = 0;
     }
 
     /**
@@ -585,19 +586,25 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     }
 
     @Override
-    public void onClick(View v) {
-        if (v == mBarView.mApplicationIcon) {
-            mCb.onTaskIconClicked(this);
-        } else if (v == mBarView.mDismissButton) {
-            // Animate out the view and call the callback
-            final TaskView tv = this;
-            startDeleteTaskAnimation(new Runnable() {
-                @Override
-                public void run() {
-                    mCb.onTaskDismissed(tv);
+    public void onClick(final View v) {
+        // We purposely post the handler delayed to allow for the touch feedback to draw
+        final TaskView tv = this;
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (v == mBarView.mApplicationIcon) {
+                    mCb.onTaskIconClicked(tv);
+                } else if (v == mBarView.mDismissButton) {
+                    // Animate out the view and call the callback
+                    startDeleteTaskAnimation(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCb.onTaskDismissed(tv);
+                        }
+                    });
                 }
-            });
-        }
+            }
+        }, 125);
     }
 
     @Override

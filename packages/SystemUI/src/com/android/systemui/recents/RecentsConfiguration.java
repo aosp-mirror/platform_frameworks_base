@@ -81,7 +81,6 @@ public class RecentsConfiguration {
 
     /** Task bar colors */
     public int taskBarViewDefaultBackgroundColor;
-    public int taskBarViewDefaultTextColor;
     public int taskBarViewLightTextColor;
     public int taskBarViewDarkTextColor;
     public int taskBarViewHighlightColor;
@@ -202,8 +201,6 @@ public class RecentsConfiguration {
         // Task bar colors
         taskBarViewDefaultBackgroundColor =
                 res.getColor(R.color.recents_task_bar_default_background_color);
-        taskBarViewDefaultTextColor =
-                res.getColor(R.color.recents_task_bar_default_text_color);
         taskBarViewLightTextColor =
                 res.getColor(R.color.recents_task_bar_light_text_color);
         taskBarViewDarkTextColor =

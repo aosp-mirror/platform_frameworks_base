@@ -46,9 +46,7 @@
     <color name="keyguard_overflow_content_color">#ff686868</color>
 
     <!-- The default recents task bar background color. -->
-    <color name="recents_task_bar_default_background_color">#e6444444</color>
-    <!-- The default recents task bar text color. -->
-    <color name="recents_task_bar_default_text_color">#ffeeeeee</color>
+    <color name="recents_task_bar_default_background_color">#ffe6e6e6</color>
     <!-- The recents task bar light text color to be drawn on top of dark backgrounds. -->
     <color name="recents_task_bar_light_text_color">#ffeeeeee</color>
     <!-- The recents task bar dark text color to be drawn on top of light backgrounds. -->

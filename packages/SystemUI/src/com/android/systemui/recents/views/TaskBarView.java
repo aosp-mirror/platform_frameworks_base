@@ -151,16 +151,14 @@ class TaskBarView extends FrameLayout {
         mActivityDescription.setText(t.activityLabel);
         // Try and apply the system ui tint
         int tint = t.colorPrimary;
-        if (Constants.DebugFlags.App.EnableTaskBarThemeColors && tint != 0) {
-            setBackgroundColor(tint);
-            mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColor(tint,
-                    mConfig.taskBarViewLightTextColor, mConfig.taskBarViewDarkTextColor));
-            mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColor(tint,
-                    mLightDismissDrawable, mDarkDismissDrawable));
-        } else {
-            setBackgroundColor(mConfig.taskBarViewDefaultBackgroundColor);
-            mActivityDescription.setTextColor(mConfig.taskBarViewDefaultTextColor);
+        if (!Constants.DebugFlags.App.EnableTaskBarThemeColors || tint == 0) {
+            tint = mConfig.taskBarViewDefaultBackgroundColor;
         }
+        setBackgroundColor(tint);
+        mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColor(tint,
+                mConfig.taskBarViewLightTextColor, mConfig.taskBarViewDarkTextColor));
+        mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColor(tint,
+                mLightDismissDrawable, mDarkDismissDrawable));
     }
 
     /** Unbinds the bar view from the task */

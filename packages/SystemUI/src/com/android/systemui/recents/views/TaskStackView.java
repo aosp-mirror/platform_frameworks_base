@@ -973,7 +973,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int getExitTransformsForFilterAnimation(ArrayList<Task> curTasks,
                         ArrayList<TaskViewTransform> curTaskTransforms,
                         ArrayList<Task> tasks, ArrayList<TaskViewTransform> taskTransforms,
-                        HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut,
+                        HashMap<TaskView, TaskViewTransform> childViewTransformsOut,
                         ArrayList<TaskView> childrenToRemoveOut) {
         // Animate all of the existing views out of view (if they are not in the visible range in
         // the new stack) or to their final positions in the new stack
@@ -1003,9 +1003,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         (int) tv.getTranslationY()));
             }
 
-            int startDelay = offset *
-                    Constants.Values.TaskStackView.FilterStartDelay;
-            childViewTransformsOut.put(tv, new Pair(startDelay, toTransform));
+            toTransform.startDelay = offset * Constants.Values.TaskStackView.FilterStartDelay;
+            childViewTransformsOut.put(tv, toTransform);
             offset++;
         }
         return mConfig.filteringCurrentViewsAnimDuration;
@@ -1017,7 +1016,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     int getEnterTransformsForFilterAnimation(ArrayList<Task> tasks,
                          ArrayList<TaskViewTransform> taskTransforms,
-                         HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransformsOut) {
+                         HashMap<TaskView, TaskViewTransform> childViewTransformsOut) {
         int offset = 0;
         int movement = 0;
         int taskCount = tasks.size();
@@ -1035,9 +1034,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
                     tv.updateViewPropertiesToTaskTransform(fromTransform, 0);
 
-                    int startDelay = offset *
-                            Constants.Values.TaskStackView.FilterStartDelay;
-                    childViewTransformsOut.put(tv, new Pair(startDelay, toTransform));
+                    toTransform.startDelay = offset * Constants.Values.TaskStackView.FilterStartDelay;
+                    childViewTransformsOut.put(tv, toTransform);
 
                     // Use the movement of the new views to calculate the duration of the animation
                     movement = Math.max(movement,
@@ -1057,8 +1055,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Calculate the transforms to animate out all the existing views if they are not in the
         // new visible range (or to their final positions in the stack if they are)
         final ArrayList<TaskView> childrenToRemove = new ArrayList<TaskView>();
-        final HashMap<TaskView, Pair<Integer, TaskViewTransform>> childViewTransforms =
-                new HashMap<TaskView, Pair<Integer, TaskViewTransform>>();
+        final HashMap<TaskView, TaskViewTransform> childViewTransforms =
+                new HashMap<TaskView, TaskViewTransform>();
         int duration = getExitTransformsForFilterAnimation(curTasks, curTaskTransforms, tasks,
                 taskTransforms, childViewTransforms, childrenToRemove);
 
@@ -1073,10 +1071,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Animate all the views to their final transforms
         for (final TaskView tv : childViewTransforms.keySet()) {
-            Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
+            TaskViewTransform t = childViewTransforms.get(tv);
             tv.animate().cancel();
             tv.animate()
-                    .setStartDelay(t.first)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -1093,15 +1090,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                     int duration = getEnterTransformsForFilterAnimation(tasks,
                                             taskTransforms, childViewTransforms);
                                     for (final TaskView tv : childViewTransforms.keySet()) {
-                                        Pair<Integer, TaskViewTransform> t = childViewTransforms.get(tv);
-                                        tv.animate().setStartDelay(t.first);
-                                        tv.updateViewPropertiesToTaskTransform(t.second, duration);
+                                        TaskViewTransform t = childViewTransforms.get(tv);
+                                        tv.updateViewPropertiesToTaskTransform(t, duration);
                                     }
                                 }
                             }
                         }
                     });
-            tv.updateViewPropertiesToTaskTransform(t.second, duration);
+            tv.updateViewPropertiesToTaskTransform(t, duration);
         }
     }
 
