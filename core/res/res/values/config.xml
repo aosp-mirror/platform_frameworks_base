@@ -1611,4 +1611,8 @@
          IMS service implementation will do both.i.e.hold followed by merge. -->
     <bool name="skipHoldBeforeMerge">true</bool>
 
+    <!-- Flag indicating emergency calls will always use IMS irrespective of the state of
+         the IMS connection -->
+    <bool name="useImsAlwaysForEmergencyCall">true</bool>
+
 </resources>
