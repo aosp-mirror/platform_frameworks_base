@@ -606,7 +606,6 @@ public final class Display {
      * <p>
      * Apps generally do not need to be aware of this.  It's only useful for fine-grained
      * A/V synchronization.
-     * @hide
      */
     public long getAppVsyncOffsetNanos() {
         synchronized (this) {
@@ -625,7 +624,6 @@ public final class Display {
      * {@link android.media.MediaCodec#releaseOutputBuffer(int, long)}.  Times are
      * expressed in nanoseconds, using the system monotonic clock
      * ({@link System#nanoTime}).
-     * @hide
      */
     public long getPresentationDeadlineNanos() {
         synchronized (this) {
