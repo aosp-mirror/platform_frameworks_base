@@ -401,7 +401,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"csatlakozás egy hangvezérlőhöz"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Lehetővé teszi a használó számára, hogy csatlakozzon egy hangvezérlő szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"hangalapú kulcskifejezések kezelése"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"A használó kezelheti a hangalapú hotwordök felismerésére szolgáló kulcskifejezéseket. Az átlagos alkalmazásoknak nem lehet rá szükségük."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Az engedély birtokosa kezelheti a hangalapú hotwordök felismerésére szolgáló kulcskifejezéseket. Az átlagos alkalmazásoknak nem lehet rá szükségük."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"csatlakozás egy távoli kijelzőhöz"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Lehetővé teszi a használó számára, hogy csatlakozzon egy távoli kijelző legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"csatlakozás modulszolgáltatáshoz"</string>
@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lehetővé teszi az alkalmazás számára, hogy ébresztőt állítson be egy telepített ébresztőóra alkalmazásban. Egyes ilyen alkalmazásokban lehet, hogy nem működik ez a funkció."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"hangposta hozzáadása"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lehetővé teszi az alkalmazás számára, hogy üzeneteket adjon hozzá bejövő hangpostájához."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"az összes hangüzenet olvasása"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Engedélyezi az alkalmazásnak az összes hangüzenet olvasását."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"a böngésző helymeghatározási engedélyeinek módosítása"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a böngésző helymeghatározási engedélyeit. Rosszindulatú alkalmazások ezt arra használhatják, hogy a helyére vonatkozó információkat küldjenek tetszőleges webhelyeknek."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"csomagok ellenőrzése"</string>

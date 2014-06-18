@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Consente all\'applicazione di impostare un allarme in un\'applicazione sveglia installata. È possibile che alcune applicazioni sveglia non possano implementare questa funzione."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"aggiunta di un messaggio vocale"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Consente all\'applicazione di aggiungere messaggi alla casella della segreteria."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"accesso alla segreteria"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Consente all\'app di accedere alla segreteria."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modifica delle autorizzazioni di localizzazione geografica del browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Consente all\'applicazione di modificare le autorizzazioni di geolocalizzazione del Browser. Le applicazioni dannose potrebbero farne uso per consentire l\'invio di informazioni sulla posizione a siti web arbitrari."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verifica dei pacchetti"</string>

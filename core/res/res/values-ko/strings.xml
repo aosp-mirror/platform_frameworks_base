@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"앱이 설치된 알람 시계 앱에서 알람을 설정할 수 있도록 허용합니다. 일부 알람 시계 앱에는 이 기능이 구현되지 않을 수 있습니다."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"음성사서함 추가"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"앱이 음성사서함에 메시지를 추가할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"브라우저 위치 정보 권한 수정"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"앱이 브라우저의 위치 정보 권한을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 임의의 웹사이트에 위치 정보를 보낼 수 있습니다."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"패키지 확인"</string>
@@ -1362,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"애플리케이션이 Trust 상태에서의 변경사항을 수신할 수 있도록 허용합니다."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust Agent 제공"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"애플리케이션이 Trust Agent를 제공할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Trust Agent 설정 메뉴를 실행합니다."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"애플리케이션에서 Trust Agent의 동작을 변경하는 활동을 실행하도록 허용합니다."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Trust Agent 서비스에 연결"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>

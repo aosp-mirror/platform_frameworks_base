@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Безопасен режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Системно от Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Лични приложения"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Служебен под Android"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Услуги, които ви струват пари"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Извършват неща, които могат да ви струват пари."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Вашите съобщения"</string>
@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавяне на гласова поща"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Разрешава на приложението да добавя съобщения към входящата ви гласова поща."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"промяна на разрешенията за местоположение в браузъра"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Разрешава на приложението да променя разрешенията на браузъра за местоположение. Злонамерените приложения могат да използват това, за да изпращат информация за местоположението до произволни уебсайтове."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"проверка на пакетите"</string>
@@ -1362,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Разрешава на приложението да следи за промени в състоянието на надеждност."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Предоставяне на trust agent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Разрешава на приложението да предоставя trust agent."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Стартиране на менюто за настройки за trust agent."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Разрешава на приложението да стартира активност, която променя поведението на trust agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Обвързване с услуга за trust agents"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Разрешава на приложението да се обвърже с услуга за trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Взаимодействие със системата за актуализации и възстановяване"</string>

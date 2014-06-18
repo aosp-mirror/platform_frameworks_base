@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikácii nastaviť budík v nainštalovanej aplikácii budík. Niektoré aplikácie budíka nemusia túto funkciu implementovať."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridať hlasovú schránku"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožní aplikácii pridávať správy do doručenej pošty hlasovej schránky."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"zmeniť povolenia prehliadača poskytovať informácie o zemepisnej polohe"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikácii zmeniť povolenia prehliadača na poskytovanie údajov o zemepisnej polohe. Škodlivé aplikácie to môžu použiť na odosielanie informácií o polohe ľubovoľným webovým stránkam."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"overiť balíky"</string>

@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"sesli mesaj ekle"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Uygulamaya, sesli mesaj gelen kutunuza mesaj ekleme izni verir."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Tarayıcı\'nın coğrafi konum izinlerini değiştir"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Uygulamaya, Tarayıcı\'nın coğrafi konum izinlerini değiştirme izni verir. Kötü amaçlı uygulamalar keyfi web sitelerine konum bilgisi gönderilmesini sağlamak için bunu kullanabilirler."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketleri doğrula"</string>
@@ -1362,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Bir uygulamanın, güven durumundaki değişiklikleri dinlemesine izin verir."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Güven aracısı sağlama."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Bir uygulamanın güven aracısı sağlamasına izin verir."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Güven aracısı ayarlar menüsünü başlat."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Bir uygulamanın güven aracısının çalışma biçimini değiştiren bir etkinlik başlatmasına izin verir."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Güven aracı hizmetine bağlan"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Bir uygulamanın, güven aracı hizmetine bağlanmasına izin verir."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Güncelleme ve kurtarma sistemiyle etkileşim kur"</string>

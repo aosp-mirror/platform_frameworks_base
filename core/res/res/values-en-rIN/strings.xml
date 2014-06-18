@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Allows the app to set an alarm in an installed alarm clock app. Some alarm clock apps may not implement this feature."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"add voicemail"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Allows the app to add messages to your voicemail inbox."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"read all voicemail"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Allows the app to read all your voicemails."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modify Browser geo-location permissions"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Allows the app to modify the Browser\'s geo-location permissions. Malicious apps may use this to allow sending location information to arbitrary websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verify packages"</string>

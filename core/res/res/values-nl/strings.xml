@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een alarm instellen in een geïnstalleerde wekkerapp. Deze functie wordt door sommige wekkerapps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voicemail toevoegen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van uw voicemail."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"alle voicemails lezen"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Hiermee kan de app al uw voicemails lezen."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatierechten voor browser aanpassen"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatierechten van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakketten controleren"</string>

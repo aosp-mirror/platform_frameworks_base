@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ボイスメールの追加"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ボイスメール受信トレイにメッセージを追加することをアプリに許可します｡"</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ブラウザの現在地情報に対する権限の変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ブラウザの現在地情報に対する権限の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、任意のウェブサイトに現在地情報が送信される恐れがあります。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"パッケージのベリファイ"</string>

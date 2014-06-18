@@ -401,7 +401,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"binde seg til en tjeneste for talehandlinger"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en tjeneste for talehandlinger. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"administrer nøkkelfraser for stemmebruk"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Tillater innehaveren å administrere nøkkelfraser for gjenkjennelse av talekommandoord. Skal aldri være nødvendig for normale apper."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Tillater eieren å administrere nøkkelfraser for gjenkjennelse av talekommandoord. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"binde til ekstern skjerm"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Lar innehaveren binde seg til det øverste grensesnittnivået for ekstern skjerm. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"binde til modultjenste"</string>
@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legge til talepost"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar appen legge til meldinger i talepostkassen din."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"endre nettleserens tillatelser for geoposisjonering"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Lar appen endre nettleserens tillatelser for geoposisjonering. Ondsinnede apper kan bruke dette for å tillate sending av posisjonsinformasjon til vilkårlige nettsteder."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekrefte pakker"</string>

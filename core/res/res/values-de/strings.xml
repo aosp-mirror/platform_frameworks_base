@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Alarm in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailbox-Nachrichten hinzufügen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ermöglicht der App, Nachrichten zu Ihrem Mailbox-Posteingang hinzuzufügen"</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"Alle Mailboxnachrichten abrufen"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Ermöglicht der App das Abrufen aller Ihrer Mailboxnachrichten"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ermöglicht der App, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Apps können so Standortinformationen an beliebige Websites senden."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"Pakete überprüfen"</string>

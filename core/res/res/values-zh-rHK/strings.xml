@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能沒有這項功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增留言"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件箱。"</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允許應用程式修改瀏覽器的地理資訊權限。惡意應用程式可能會藉此允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"驗證套件"</string>

@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ऐप्स को इंस्‍टॉल किए गए अलार्म घड़ी ऐप्स में अलार्म सेट करने देता है. हो सकता है कुछ अलार्म घड़ी ऐप्स में यह सुविधा न हो."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ध्‍वनिमेल जोड़ें"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ऐप्स  को आपके ध्‍वनिमेल इनबॉक्‍स में संदेश जोड़ने देता है."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को बदलें"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ऐप्स को ब्राउज़र के भौगोलिक-स्‍थान की अनुमतियां संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स इसका उपयोग एकपक्षीय वेबसाइट को स्‍थान जानकारी भेजने में कर सकते हैं."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पैकेज सत्‍यापि‍त करें"</string>

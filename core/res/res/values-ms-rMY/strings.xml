@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Mod selamat"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Apl peribadi"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Kerja Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Perkhidmatan yang anda perlu bayar"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Melakukan perkara yang boleh mengenakan bayaran kepada anda."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesej anda"</string>
@@ -402,7 +401,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"terikat kepada interaksi suara"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan interaksi suara. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"urus frasa kunci suara"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Membenarkan pemegang menguruskan frasa kunci untuk pengesahan sebutan laluan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Membenarkan pemegang mengurus frasa kunci untuk pengesahan sebutan laluan suara. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"terikat kepada paparan jauh"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi paparan jauh. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
@@ -1002,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Membenarkan apl untuk menambahkan mesej pada peti masuk mel suara anda."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Membenarkan apl untuk mengubah suai kebenaran geolokasi Penyemak Imbas. Apl hasad boleh menggunakannya untuk membenarkan menghantar maklumat lokasi kepada laman web sembarangan."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"sahkan pakej"</string>
@@ -1363,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Membenarkan aplikasi mendengar perubahan dalam keadaan amanah."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Sediakan ejen amanah."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Membenarkan aplikasi menyediakan ejen amanah."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Lancarkan menu tetapan ejen amanah."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Membenarkan aplikasi melancarkan aktiviti yang mengubah tingkah laku ejen amanah."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Mengikat kepada perkhidmatan ejen amanah"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Membenarkan aplikasi terikat kepada perkhidmatan ejen amanah."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Berinteraksi dengan kemas kini dan sistem pemulihan"</string>
