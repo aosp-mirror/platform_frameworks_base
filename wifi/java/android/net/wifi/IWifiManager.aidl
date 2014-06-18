@@ -132,5 +132,13 @@ interface IWifiManager
     void enableVerboseLogging(int verbose);
 
     int getVerboseLoggingLevel();
+
+    int getAggressiveHandover();
+
+    void enableAggressiveHandover(int enabled);
+
+    int getAllowScansWithTraffic();
+
+    void setAllowScansWithTraffic(int enabled);
 }
 
