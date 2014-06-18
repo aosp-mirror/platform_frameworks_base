@@ -248,6 +248,10 @@ public class StatusBarKeyguardViewManager {
         return false;
     }
 
+    public boolean isBouncerShowing() {
+        return mBouncer.isShowing();
+    }
+
     private void updateStates() {
         int vis = mContainer.getSystemUiVisibility();
         boolean showing = mShowing;

@@ -99,6 +99,10 @@ public class UnlockMethodCache {
         public void onScreenTurnedOn() {
             updateMethodSecure(false /* updateAlways */);
         }
+
+        public void onFingerprintRecognized(int userId) {
+            updateMethodSecure(false /* updateAlways */);
+        }
     };
 
     public static interface OnUnlockMethodChangedListener {
