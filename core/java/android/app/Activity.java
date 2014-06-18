@@ -5323,13 +5323,15 @@ public class Activity extends ContextThemeWrapper
      * drawn and it is safe to make this Activity translucent again.
      * @param options activity options delivered to the activity below this one. The options
      * are retrieved using {@link #getActivityOptions}.
+     * @return <code>true</code> if Window was opaque and will become translucent or
+     * <code>false</code> if window was translucent and no change needed to be made.
      *
      * @see #convertFromTranslucent()
      * @see TranslucentConversionListener
      *
      * @hide
      */
-    public void convertToTranslucent(TranslucentConversionListener callback, 
+    public boolean convertToTranslucent(TranslucentConversionListener callback,
             ActivityOptions options) {
         boolean drawComplete;
         try {
@@ -5346,6 +5348,7 @@ public class Activity extends ContextThemeWrapper
             // Window is already translucent.
             mTranslucentCallback.onTranslucentConversionComplete(drawComplete);
         }
+        return mChangeCanvasToTranslucent;
     }
 
     /** @hide */

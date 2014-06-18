@@ -55,6 +55,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsExitTransitionComplete;
     private boolean mIsReadyForTransition;
     private Bundle mSharedElementsBundle;
+    private boolean mWasOpaque;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning) {
@@ -191,7 +192,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     protected void prepareEnter() {
         mActivity.overridePendingTransition(0, 0);
         if (!mIsReturning) {
-            mActivity.convertToTranslucent(null, null);
+            mWasOpaque = mActivity.convertToTranslucent(null, null);
             Drawable background = getDecor().getBackground();
             if (background != null) {
                 getWindow().setBackgroundDrawable(null);
@@ -376,7 +377,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void makeOpaque() {
         if (!mHasStopped && mActivity != null) {
-            mActivity.convertFromTranslucent();
+            if (mWasOpaque) {
+                mActivity.convertFromTranslucent();
+            }
             mActivity = null;
         }
     }
