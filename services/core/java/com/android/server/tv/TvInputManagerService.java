@@ -51,6 +51,7 @@ import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputService;
+import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -1251,6 +1252,49 @@ public final class TvInputManagerService extends SystemService {
             try {
                 mTvInputHardwareManager.releaseHardware(
                         deviceId, hardware, callingUid, resolvedUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<TvStreamConfig> getAvailableTvStreamConfigList(String inputId, int userId)
+                throws RemoteException {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.CAPTURE_TV_INPUT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires CAPTURE_TV_INPUT permission");
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "getAvailableTvStreamConfigList");
+            try {
+                return mTvInputHardwareManager.getAvailableTvStreamConfigList(
+                        inputId, callingUid, resolvedUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean captureFrame(String inputId, Surface surface, TvStreamConfig config,
+                int userId)
+                throws RemoteException {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.CAPTURE_TV_INPUT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires CAPTURE_TV_INPUT permission");
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "captureFrame");
+            try {
+                return mTvInputHardwareManager.captureFrame(
+                        inputId, surface, config, callingUid, resolvedUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
