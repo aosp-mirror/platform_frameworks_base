@@ -2088,6 +2088,11 @@ public class PackageParser {
                         false)) {
                     ai.flags |= ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
                 }
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_fullBackupOnly,
+                        false)) {
+                    ai.flags |= ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
+                }
             }
         }
 

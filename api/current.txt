@@ -580,6 +580,7 @@ package android {
     field public static final int fromXScale = 16843202; // 0x10101c2
     field public static final int fromYDelta = 16843208; // 0x10101c8
     field public static final int fromYScale = 16843204; // 0x10101c4
+    field public static final int fullBackupOnly = 16843893; // 0x1010475
     field public static final int fullBright = 16842954; // 0x10100ca
     field public static final int fullDark = 16842950; // 0x10100c6
     field public static final int functionalTest = 16842787; // 0x1010023
@@ -8125,6 +8126,7 @@ package android.content.pm {
     field public static final int FLAG_DEBUGGABLE = 2; // 0x2
     field public static final int FLAG_EXTERNAL_STORAGE = 262144; // 0x40000
     field public static final int FLAG_FACTORY_TEST = 16; // 0x10
+    field public static final int FLAG_FULL_BACKUP_ONLY = 67108864; // 0x4000000
     field public static final int FLAG_HAS_CODE = 4; // 0x4
     field public static final int FLAG_INSTALLED = 8388608; // 0x800000
     field public static final int FLAG_IS_DATA_ONLY = 16777216; // 0x1000000
