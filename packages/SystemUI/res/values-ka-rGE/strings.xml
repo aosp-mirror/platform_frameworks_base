@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"გსურთ ბატარეის დამზოგის დაწყება?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"დაწყება"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"ბატარეის დამზოგის დაწყება"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"ბატარეის მოქმედების გასახანგრძლივებლად, ბატარეის დამზოგი შეამცირებს თქვენი მოწყობილობის წარმადობას.\n\nბატარეის დამზოგი გამოირთვება, როდესაც მოწყობილობას ელკვებაზე მიაერთებთ."</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"ბატარეის მოქმედების გასახანგრძლივებლად ბატარეის დამზოგი შეამცირებს თქვენი მოწყობილობის წარმადობას.\n\nბატარეის დამზოგი გამოირთვება, როდესაც მოწყობილობას ელკვებაზე მიაერთებთ."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"პარამეტრები"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"თვითმფრინავის რეჟიმი"</string>

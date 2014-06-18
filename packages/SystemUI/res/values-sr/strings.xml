@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Желите ли да покренете Штедњу батерије?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Покрени"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"Покрените Штедњу батерије"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Да би продужила век трајања батерије, Штедња батерије ће умањити перформансе уређаја.\n\nШтедња батерије ће се искључити када укључите уређај."</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Да би продужила век трајања батерије, Штедња батерије умањује перформансе уређаја.\n\nШтедња батерије ће се искључити када прикључите уређај на напајање."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Подешавања"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим рада у авиону"</string>

@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Khởi động trình tiết kiệm pin?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Bắt đầu"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"Khởi động trình tiết kiệm pin"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất của thiết bị.\n\nTrình tiết kiệm pin sẽ tắt khi thiết bị của bạn được cắm vào."</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất của thiết bị.\n\nTrình tiết kiệm pin sẽ tắt khi thiết bị của bạn được cắm vào nguồn điện."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Cài đặt"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Chế độ trên máy bay"</string>

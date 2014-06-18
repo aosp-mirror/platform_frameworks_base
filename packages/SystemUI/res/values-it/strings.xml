@@ -40,7 +40,7 @@
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utilizza solo il caricabatterie fornito in dotazione."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Impostazioni"</string>
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Avviare risparmio batteria?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Inizia"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Avvia"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"Avvia risparmio batteria"</string>
     <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Per aumentare la durata della batteria, Risparmio batteria riduce le prestazioni del tuo dispositivo.\n\nRisparmio batteria si disattiva quando il dispositivo è collegato alla corrente."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Impostazioni"</string>

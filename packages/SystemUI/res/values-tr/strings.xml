@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Pil tasarrufu başlatılsın mı?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Başlat"</string>
     <string name="battery_saver_start_action" msgid="7245333922937402896">"Pil tasarrufunu başlat"</string>
-    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Pil tasarrufu, pil ömrünü iyileştirmeye yardımcı olmak için cihazınızın performansını düşürür.\n\nCihazınız fişe takılıyken Pil tasarrufu devre dışı bırakılır."</string>
+    <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Pil tasarrufu, pil ömrünü iyileştirmeye yardımcı olmak için cihazınızın performansını düşürür.\n\nCihazınız fişe takıldığında Pil tasarrufu devre dışı bırakılır."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ayarlar"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Kablosuz"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Uçak modu"</string>
