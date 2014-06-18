@@ -928,7 +928,7 @@ public class BitmapDrawable extends Drawable {
             mTargetDensity = state.mTargetDensity;
         }
 
-        updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
         computeBitmapSize();
     }
 }
