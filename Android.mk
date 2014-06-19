@@ -289,7 +289,7 @@ LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/com/android/internal/R.java
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := bouncycastle conscrypt core core-junit ext okhttp
+LOCAL_JAVA_LIBRARIES := core-libart conscrypt okhttp core-junit bouncycastle ext
 
 LOCAL_MODULE := framework-base
 
@@ -495,9 +495,9 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 	$(framework_res_source_path)/com/android/internal/R.java
 
 framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
-	bouncycastle \
+	core-libart \
 	conscrypt \
-	core \
+	bouncycastle \
 	okhttp \
 	ext \
 	framework \
@@ -535,7 +535,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/17.txt 17 \
     -since $(SRC_API_DIR)/18.txt 18 \
     -since $(SRC_API_DIR)/19.txt 19 \
-		-werror -hide 113 \
+		-werror -hide 111 -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
@@ -802,7 +802,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(ext_src_files)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core
+LOCAL_JAVA_LIBRARIES := core-libart
 LOCAL_JAVA_RESOURCE_DIRS := $(ext_res_dirs)
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
