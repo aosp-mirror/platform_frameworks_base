@@ -1709,7 +1709,9 @@ public class RemoteViews implements Parcelable, Filter {
         Parcel p = Parcel.obtain();
         writeToParcel(p, 0);
         p.setDataPosition(0);
-        return new RemoteViews(p);
+        RemoteViews rv = new RemoteViews(p);
+        p.recycle();
+        return rv;
     }
 
     public String getPackage() {
