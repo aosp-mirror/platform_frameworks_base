@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.util.ArraySet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,14 @@ public final class TvContract {
     public static final String PARAM_BROWSABLE_ONLY = "browsable_only";
 
     /**
+     * A optional query, update or delete URI parameter that allows the caller to specify canonical
+     * genre to filter programs.
+     *
+     * @hide
+     */
+    public static final String PARAM_CANONICAL_GENRE = "canonical_genre";
+
+    /**
      * Builds a URI that points to a specific channel.
      *
      * @param channelId The ID of the channel to point to.
@@ -132,6 +141,34 @@ public final class TvContract {
                 .appendPath(PATH_INPUT).appendPath(name.getPackageName())
                 .appendPath(name.getClassName()).appendPath(PATH_CHANNEL)
                 .appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly)).build();
+    }
+
+    /**
+     * Builds a URI that points to all or browsable-only channels which have programs with the given
+     * genre from the given TV input.
+     *
+     * @param name {@link ComponentName} of the {@link android.media.tv.TvInputService} that
+     *            implements the given TV input. If null, builds a URI for all the TV inputs.
+     * @param genre {@link Programs.Genres} to search.
+     * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
+     *            to {@code false} the URI points to all channels regardless of whether they are
+     *            browsable or not.
+     * @hide
+     */
+    public static final Uri buildChannelsUriForCanonicalGenre(ComponentName name, String genre,
+            boolean browsableOnly) {
+        if (!Programs.Genres.isCanonical(genre)) {
+            throw new IllegalArgumentException("Not a canonical genre: '" + genre + "'");
+        }
+
+        Uri uri;
+        if (name == null) {
+            uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                    .appendPath(PATH_CHANNEL).build();
+        } else {
+            uri = buildChannelsUriForInput(name, browsableOnly);
+        }
+        return uri.buildUpon().appendQueryParameter(PARAM_CANONICAL_GENRE, genre).build();
     }
 
     /**
@@ -931,6 +968,21 @@ public final class TvContract {
             /** The genre for Gaming. */
             public static final String GAMING = "GAMING";
 
+            private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<String>();
+            static {
+                CANONICAL_GENRES.add(FAMILY_KIDS);
+                CANONICAL_GENRES.add(SPORTS);
+                CANONICAL_GENRES.add(SHOPPING);
+                CANONICAL_GENRES.add(MOVIES);
+                CANONICAL_GENRES.add(COMEDY);
+                CANONICAL_GENRES.add(TRAVEL);
+                CANONICAL_GENRES.add(DRAMA);
+                CANONICAL_GENRES.add(EDUCATION);
+                CANONICAL_GENRES.add(ANIMAL_WILDLIFE);
+                CANONICAL_GENRES.add(NEWS);
+                CANONICAL_GENRES.add(GAMING);
+            }
+
             private Genres() {}
 
             /**
@@ -959,6 +1011,17 @@ public final class TvContract {
              */
             public static String[] decode(String genres) {
                 return genres.split("\\s*,\\s*");
+            }
+
+            /**
+             * Check whether a given genre is canonical or not.
+             *
+             * @param genre The name of genre to be checked.
+             * @return {@code true} if the genre is canonical, otherwise {@code false}.
+             * @hide
+             */
+            public static boolean isCanonical(String genre) {
+                return CANONICAL_GENRES.contains(genre);
             }
         }
     }
