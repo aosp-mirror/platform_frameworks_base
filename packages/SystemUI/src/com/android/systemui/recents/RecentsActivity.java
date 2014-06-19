@@ -277,13 +277,21 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     !mFullScreenshotView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
                 // If we have a focused task, then launch that task
                 if (!mRecentsView.launchFocusedTask()) {
-                    // If there are any tasks, then launch the first task
-                    if (!mRecentsView.launchFirstTask()) {
-                        // We really shouldn't hit this, but if we do, just animate out (aka. finish)
+                    if (mConfig.launchedFromHome) {
+                        // Just start the animation out of recents
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
                                 null, mFinishRunnable, null);
                         mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
+                    } else {
+                        // Otherwise, try and launch the first task
+                        if (!mRecentsView.launchFirstTask()) {
+                            // If there are no tasks, then just finish recents
+                            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
+                                    null, mFinishRunnable, null);
+                            mRecentsView.startExitToHomeAnimation(
+                                    new ViewAnimation.TaskViewExitContext(exitTrigger));
+                        }
                     }
                 }
             }
