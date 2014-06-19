@@ -15,6 +15,17 @@
 
 DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
+    "title":"Android L Developer Preview",
+    "titleFriendly":"",
+    "summary":"<p style='font-size:18px;'>Get an early look at the next release and get your apps ready when the platform officially launches.</p>",
+    "url":"preview/index.html",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"preview/images/l-dev-prev.png",
+    "type":""
+  },
+  {
     "title":"Developer Registration",
     "titleFriendly":"",
     "summary":"Additional information about the registration process.",
