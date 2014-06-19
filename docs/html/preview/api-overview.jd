@@ -18,7 +18,6 @@ sdk.platform.apiLevel=20
       <li><a href="#ART">New Android Runtime (ART)</a></li>
       <li><a href="#BehaviorNotifications">If your app implements notifications...</a></li>
       <li><a href="#BehaviorMediaControl">If your app uses RemoteControlClient...</a></li>
-      <li><a href="#BehaviorFullscreen">If your app uses fullScreenIntent...</a></li>
       <li><a href="#BehaviorGetRecentTasks">If your app uses ActivityManager.getRecentTasks()...</a></li>
     </ol>
   </li>
@@ -64,12 +63,13 @@ sdk.platform.apiLevel=20
   <li><a href="#Power">Power Efficiency</a>
     <ol>
       <li><a href="#JobScheduler">Scheduling Jobs</a></li>
-      <li><a href="#PowerMeasurementTools">Developer tools and APIs for power measurement</a>
+      <li><a href="#PowerMeasurementTools">Developer tools for power measurement</a>
     </ol>
   </li>
   <li><a href="#Enterprise">Enterprise</a>
     <ol>
       <li><a href="#ManagedProvisioning">Managed provisioning</a></li>
+      <li><a href="#LockToAppMode">Lock-to-App mode</a></li>
     </ol>
   </li>
   <li><a href="#Printing">Printing Framework</a>
@@ -99,15 +99,15 @@ Differences Report &raquo;</a> </li>
 </div>
 </div>
 
-<p>The L Developer Preview gives you an advance look at the upcoming release for
-the Android platform,
-which offers new features for users and app developers. This document provides
-an introduction to the most notable APIs.</p>
+<p>The L Developer Preview gives you an advance look at the upcoming release
+for the Android platform, which offers new features for users and app
+developers. This document provides an introduction to the most notable APIs.</p>
 
-<p>The L Developer Preview is intended for <strong>developer early adopters</strong> and
-<strong>testers</strong>. If you are interested in influencing the direction of the
-Android framework, <a href="{@docRoot}preview/setup-sdk.html">give the L
-Developer Preview a try</a> and send us your feedback!</p>
+<p>The L Developer Preview is intended for <strong>developer early
+adopters</strong> and <strong>testers</strong>. If you are interested in
+influencing the direction of the Android framework,
+<a href="{@docRoot}preview/setup-sdk.html">give the L Developer Preview a
+try</a> and send us your feedback!</p>
 
 <p class="caution"><strong>Caution:</strong> Do not not publish apps
 that use the L Developer Preview to the Google Play store.</p>
@@ -128,8 +128,8 @@ reference</a>.</p>
 <h3 id="ART">New Android Runtime (ART)</h3>
 
 <p>The 4.4 release introduced a new, experimental Android runtime, ART. Under
-4.4, ART was optional, and the default runtime remained Dalvik. With the L Developer Preview, ART is
-now the default runtime.</p>
+4.4, ART was optional, and the default runtime remained Dalvik. With the L
+Developer Preview, ART is now the default runtime.</p>
 
 <p>For an overview of ART's new features, see
 <a href="https://source.android.com/devices/tech/dalvik/art.html">Introducing
@@ -163,6 +163,15 @@ Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
 backgrounds to match the new material design widgets. Make sure that all your
 notifications look right with the new color scheme:</p>
 
+<div class="figure" style="width:220px">
+  <img src="images/hun-example.png"
+    srcset="images/hun-example@2x.png 2x"
+    alt="" width="220" height="372" id="figure1" />
+  <p class="img-caption">
+    <strong>Figure 1.</strong> Fullscreen activity showing a heads-up notification
+  </p>
+</div>
+
 <ul>
 
   <li>Update or remove assets that involve color.</li>
@@ -179,38 +188,47 @@ notifications look right with the new color scheme:</p>
 <p>If you are currently adding sounds and vibrations to your notifications by
 using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
 or {@link android.os.Vibrator} classes, remove this code so that
-the system can present notifications correctly in <a href="#DoNotDisturb">Do Not Disturb</a> mode.
-Instead, use the {@link android.app.Notification.Builder} methods instead to add
-sounds and vibration.</p>
+the system can present notifications correctly in <a href="#DoNotDisturb">Do Not Disturb</a> mode. Instead, use the {@link android.app.Notification.Builder} methods instead to add sounds and vibration.</p>
+
+<p>Notifications now appear in a small floating window
+(also called a <em>heads-up notification</em>) when the device is active
+(that is, the device is unlocked and its screen is on). These notifications
+appear similar to the compact form of your notification, except that the
+heads-up notification also shows action buttons. Users can act on, or dismiss,
+a heads-up notification without leaving the current app.</p>
+
+<p>Examples of conditions that may trigger heads-up notifications include:</p>
+
+<ul>
+  <li>The user's activity is in fullscreen mode (the app uses
+{@link android.app.Notification#fullScreenIntent}), or</li>
+  <li>The notification has high priority and uses ringtones or
+    vibrations</li>
+</ul>
+
+<p>If your app implements notifications under those scenarios, make sure that
+heads-up notifications are presented correctly.</p>
 
 <h3 id="BehaviorMediaControl">If your app uses RemoteControlClient...</h3>
 
-<p>Lockscreens in the L Developer Preview do not show transport controls for your
-{@link android.media.RemoteControlClient}. Instead, your app can provide
-media playback control from the lockscreen through a media notification. This
+<p>Lockscreens in the L Developer Preview do not show transport controls for
+your {@link android.media.RemoteControlClient}. Instead, your app can provide
+media playback control from the lockscreen through a notification. This
 gives your app more control over the presentation of media buttons, while
 providing a consistent experience for users across the lockscreen and
 unlocked device.</p>
 
+<p>The L Developer Preview introduces a new {@code android.app.Notification.MediaStyle} template which is recommended for this purpose. {@code MediaStyle} converts notification actions that you added with {@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence, android.app.PendingIntent) Notification.Builder.addAction()} into compact buttons embedded in your app's media playback notifications.</p>
+
+<p>If you are using the new
+{@code android.media.session.MediaSession} class (see <a href="#MediaPlaybackControl">Media Playback Control</a> below), attach your session
+token with {@code Notification.MediaStyle.setMediaToken()} to inform the
+system that this notification controls an ongoing media session.</p>
+
 <p>Call {@code
 Notification.Builder.setVisibility(Notification.VISIBILITY_PUBLIC)} to mark a
-notification as safe to display on the lockscreen (even when the lockscreen is
-secured with a PIN, pattern, or password). For more information, see
+notification as safe to show atop any lockscreen (secure or otherwise). For more information, see
 <a href="#LockscreenNotifications">Lockscreen Notifications</a>.</p>
-
-<h3 id="BehaviorFullscreen">If your app uses fullScreenIntent...</h3>
-
-<p>Notifications now appear in a small floating window if all these conditions
-are met:</p>
-
-<ul>
-  <li>The user’s activity is in fullscreen mode,</li>
-  <li>The screen is on, and</li>
-  <li>The device is unlocked</li>
-</ul>
-
-<p>If your app implements fullscreen activities, make sure that
-these heads-up notifications are presented correctly.</p>
 
 <h3 id="BehaviorGetRecentTasks">If your app uses ActivityManager.getRecentTasks()...</h3>
 
@@ -229,7 +247,6 @@ information.</p>
 <h2 id="UI">User Interface</h2>
 
 <h3 id="MaterialDesign">Material design support</h3>
-
 
 <p>The upcoming release adds support for Android's new <em>material</em> design
 style. You can create
@@ -262,15 +279,16 @@ values:</p>
 
 <ul>
 <li>{@code VISIBILITY_PRIVATE}. Shows basic information, such as the
-notification’s icon, but hides the notification’s full content. If you want to
-provide a redacted public version of your notification for the system to display
-on a secure lockscreen, create a public notification object and put a reference
-to it in the private notification's {@code publicVersion} field.</li>
-<li>{@code VISIBILITY_PUBLIC}. Shows the notification’s full content. This is
-  the system default if visibility is left unspecified.</li>
-<li>{@code VISIBILITY_SECRET}. Shows only the most minimal information,
-excluding even the notification’s icon.</li>
+notification’s icon, but hides the notification’s full content.</li>
+<li>{@code VISIBILITY_PUBLIC}. Shows the notification’s full content.</li>
+<li>{@code VISIBILITY_SECRET}. Shows nothing, excluding even the
+notification’s icon.</li>
 </ul>
+
+<p>When {@code VISIBILITY_PRIVATE} is set, you can also provide a redacted
+version of the notification content that hides personal details. For example,
+an SMS app might display a notification that shows "You have 3 new text messages." but hides the message content and senders. To provide this alternative notification, first create the replacement notification using {@link android.app.Notification.Builder}. When you create the private notification object, attach
+the replacement notification to it through the {@code Notification.Builder.setPublicVersion()} method.</p>
 
 <h3 id="DoNotDisturb">Do Not Disturb mode</h3>
 
@@ -295,7 +313,7 @@ make sure <em>Do Not Disturb</em> mode handles them properly. For example, if
 your app is an alarm clock,
 you can tag the notification as an alarm so it will wake the user up even if the
 device is in <em>Do Not Disturb</em> mode. For more information, see <a
-href="NotificationsMetadata">Notifications metadata</a>.</p>
+href="#NotificationsMetadata">Notifications metadata</a>.</p>
 
 <h3 id="NotificationsMetadata">Notifications metadata</h3>
 <p>The L Developer Preview uses metadata associated with your app notifications
@@ -483,10 +501,9 @@ knows about your playback and can extract and show album art.</p>
 
 <h3 id="DirectorySelection">Directory selection</h3>
 
-<p>The L Developer Preview extends the <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage Access Framework</a> to let users
-select an entire directory, rather than individual files, to give your app
-read/write access to media files. When a directory is selected, your app also
-has access to all its child directories and content.</p>
+<p>The L Developer Preview extends the <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage Access Framework</a> to let users select an entire directory, rather than individual files, to
+give your app read/write access to media files. When a directory is selected,
+your app also has access to all its child directories and content.</p>
 
 <p>To get the absolute paths to directories on external storage devices where
 applications can store media files, call the new
@@ -497,6 +514,13 @@ In this context, "external storage devices" are those devices which the system
 considers to be a
 permanent part of the device, and includes emulated external storage and
 physical media slots such as SD cards in battery compartments.</p>
+
+<p>You can bring up a system UI to allow the user to pick a directory subtree.
+To do so, send  {@code android.intent.action.OPEN_DOCUMENT_TREE} in an
+{@link android.content.Intent}. If the call is successful, the system displays
+the {@link android.provider.DocumentsProvider} instances installed on the
+device for the user to select. When the user selects a directory from this UI,
+the system returns a URI representing the selected directory tree.</p>
 
 <p>If you want to access a document in an existing directory, call the
 {@code android.provider.DocumentsContract.buildDocumentViaUri()} method.
@@ -591,9 +615,9 @@ API that lets you optimize battery life by defining jobs for the system to run
 asynchronously at a later time or under specified conditions (such as when the
 device is charging). This is useful in such situations as:</p>
 <ul>
-  <li>The app has non-user-facing work that you want to defer until the unit is
-    plugged in.</li>
-  <li>The app has a task that requires network access (or requires a wifi
+  <li>The app has non-user-facing work that you can defer.</li>
+  <li>The app has work you'd prefer to do when the unit is plugged in.</li>
+  <li>The app has a task that requires network access (or requires a Wi-Fi
     connection).</li>
   <li>The app has a number of tasks that you want to run as a batch on a regular
    schedule.</li>
@@ -612,6 +636,7 @@ conditions, such as:</p>
   <li>The device is charging</li>
   <li>The device is connected to an unmetered network</li>
   <li>The system deems the device to be idle</li>
+  <li>Completion with a minimum delay or within a specific deadline.</li>
 </ul>
 
 <p>For example, you can add code like this to run your task on an
@@ -627,7 +652,7 @@ JobScheduler jobScheduler =
 jobScheduler.schedule(uploadTask);
 </pre>
 
-<h3 id="PowerMeasurementTools">Developer tools and APIs for power measurement</h3>
+<h3 id="PowerMeasurementTools">Developer tools for power measurement</h3>
 <p>The L Developer Preview provides several new developer tools and APIs to help
 you better measure and understand your app's power usage.</p>
 
@@ -668,9 +693,9 @@ in {@code &lt;sdk&gt;/tools}.</p>
 <img src="images/battery_historian.png"
      srcset="images/battery_historian@2x.png 2x"
     alt="" width="440" height="240"
-    id="figure1" />
+    id="figure2" />
 <p class="img-caption">
-  <strong>Figure 1.</strong>HTML visualization generated by the Battery
+  <strong>Figure 2.</strong>HTML visualization generated by the Battery
       Historian tool.
 </p>
 
@@ -701,9 +726,9 @@ $ historian.par [-p powerfile] bugreport.txt > out.html
 <div class="figure" style="width:360px">
   <img src="images/managed_apps_launcher.png"
     srcset="images/managed_apps_launcher@2x.png 2x"
-    alt="" width="360" height="572" id="figure2" />
+    alt="" width="360" height="572" id="figure3" />
   <p class="img-caption">
-    <strong>Figure 2.</strong> Launcher screen showing managed apps (marked with
+    <strong>Figure 3.</strong> Launcher screen showing managed apps (marked with
     a lock badge)
   </p>
 </div>
@@ -742,6 +767,36 @@ for the current user and any associated managed profiles. Your Launcher can make
 the managed apps visually prominent by appending a “work” badge to the icon
 drawable with {@code android.os.UserManager.getBadgeDrawableForUser()}.</p>
 
+<h3 id="LockToAppMode">Lock-to-App mode</h3>
+<p>The L Developer Preview introduces a new <em>Lock-to-App</em> mode that
+lets you temporarily restrict users from leaving your app or being interrupted
+by notifications. Once your app activates this mode, users will not be able to
+see notifications, access other apps, or return to the Home screen, until your
+app exits the mode.</p>
+
+<p>To prevent unauthorized usage, the device on which you want to activate
+this mode must have managed profiles or must be fully controlled by a device administrator (see <a href="#ManagedProvisioning">Managed Provisioning</a> for more information). Furthermore, the device or managed profile owner must
+authorize apps to use this mode by calling {@code android.app.admin.DevicePolicyManager.setLockTaskComponents()}.</p>
+
+<p>Before activating this mode in your app, verify that your activity is authorized by calling {@code DevicePolicyManager.isLockTaskPermitted()}.</p>
+
+<p>To activate <em>Lock-to-App</em> mode, call
+{@code android.app.Activity.startLockTask()} from your authorized activity.</p>
+
+<p>When <em>Lock-to-App</em> mode is active, the following behavior takes
+effect:</p>
+
+<ul>
+<li>The status bar is blank, and user notifications and status information is hidden.</li>
+<li>The Home and Recent Apps button is hidden.</li>
+<li>Other apps may not launch new activities.</li>
+<li>The current app may start new activities, as long as doing so does not
+create new tasks.</li>
+</ul>
+
+<p>The device will remain in this mode until an authorized activity calls
+{@code Activity.stopLockTask()}.
+
 <h2 id="Printing">Printing Framework</h2>
 
 <h3 id="PDFRender">Render PDF as bitmap</h3>
@@ -752,7 +807,7 @@ accessed) on which the system writes the the printable content. Your app can
 obtain a page for rendering with {@code openPage()}, then call {@code render()}
 to turn the opened {@code PdfRenderer.Page} into a bitmap. You can also set
 additional parameters if you only want to convert a portion of the document into
-a bitmap image (for example, to implement <a href="http://en.wikipedia.org/wiki/Tiled_rendering">tile rendering</a> in order to zoom in on the document).</p>
+a bitmap image (for example, to implement <a href="http://en.wikipedia.org/wiki/Tiled_rendering">tiled rendering</a> in order to zoom in on the document).</p>
 
 <h2 id="TestingA11y">Testing &amp; Accessibility </h2>
 
@@ -796,8 +851,7 @@ your app needs.</p>
 
 <ul>
 <li>{@code FEATURE_LEANBACK}. Declares that your app must be installed only on
-devices that support the <a href="{@docRoot}training/tv}">Android TV</a> user
-interface. Example:
+devices that support the <a href="{@docRoot}training/tv/index.html}">Android TV</a>user interface. Example:
 <pre>
 &lt;uses-feature android:name="android.software.leanback"
               android:required="true" /&gt;
