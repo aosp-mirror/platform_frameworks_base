@@ -123,6 +123,7 @@ import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
+import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
@@ -211,6 +212,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     ZenModeController mZenModeController;
     CastControllerImpl mCastController;
     VolumeComponent mVolumeComponent;
+    KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -713,6 +715,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
 
+        mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
+                (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher), mHeader);
 
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
@@ -2913,9 +2917,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
+            mKeyguardUserSwitcher.setKeyguard(true);
         } else {
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardIndicationController.setVisible(false);
+            mKeyguardUserSwitcher.setKeyguard(false);
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);

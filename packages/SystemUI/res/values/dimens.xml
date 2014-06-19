@@ -332,4 +332,11 @@
 
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
+
+    <!-- end margin for system icons if multi user switch is hidden -->
+    <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>
+
+    <!-- The thickness of the colored border around the current user. -->
+    <dimen name="keyguard_user_switcher_border_thickness">2dp</dimen>
+
 </resources>
