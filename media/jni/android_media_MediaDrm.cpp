@@ -110,6 +110,11 @@ struct CertificateFields {
     jfieldID certificateData;
 };
 
+struct StateExceptionFields {
+    jmethodID init;
+    jclass classId;
+};
+
 struct fields_t {
     jfieldID context;
     jmethodID post_event;
@@ -121,6 +126,7 @@ struct fields_t {
     IteratorFields iterator;
     EntryFields entry;
     CertificateFields certificate;
+    StateExceptionFields stateException;
     jclass certificateClassId;
     jclass hashmapClassId;
     jclass arraylistClassId;
@@ -212,6 +218,14 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
     }
 }
 
+static void throwStateException(JNIEnv *env, const char *msg, status_t err) {
+    ALOGE("Illegal state exception: %s (%d)", msg, err);
+
+    jobject exception = env->NewObject(gFields.stateException.classId,
+            gFields.stateException.init, static_cast<int>(err),
+            env->NewStringUTF(msg));
+    env->Throw(static_cast<jthrowable>(exception));
+}
 
 static bool throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
@@ -275,8 +289,7 @@ static bool throwExceptionAsNecessary(
                 msg = errbuf.string();
             }
         }
-        ALOGE("Illegal state exception: %s", msg);
-        jniThrowException(env, "java/lang/IllegalStateException", msg);
+        throwStateException(env, msg, err);
         return true;
     }
     return false;
@@ -608,6 +621,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
 
     FIND_CLASS(clazz, "java/util/ArrayList");
     gFields.arraylistClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+    FIND_CLASS(clazz, "android/media/MediaDrm$MediaDrmStateException");
+    GET_METHOD_ID(gFields.stateException.init, clazz, "<init>", "(ILjava/lang/String;)V");
+    gFields.stateException.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
 }
 
 static void android_media_MediaDrm_native_setup(
