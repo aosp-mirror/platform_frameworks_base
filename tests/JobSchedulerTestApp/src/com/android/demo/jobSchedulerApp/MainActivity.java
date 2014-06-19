@@ -19,7 +19,9 @@ package com.android.demo.jobSchedulerApp;
 import android.app.Activity;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -60,7 +63,8 @@ public class MainActivity extends Activity {
         mDeadlineEditText = (EditText) findViewById(R.id.deadline_time);
         mWiFiConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_unmetered);
         mAnyConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_any);
-
+        mRequiresChargingCheckBox = (CheckBox) findViewById(R.id.checkbox_charging);
+        mRequiresIdleCheckbox = (CheckBox) findViewById(R.id.checkbox_idle);
         mServiceComponent = new ComponentName(this, TestJobService.class);
         // Start service and provide it a way to communicate with us.
         Intent startServiceIntent = new Intent(this, TestJobService.class);
@@ -79,6 +83,9 @@ public class MainActivity extends Activity {
     EditText mDeadlineEditText;
     RadioButton mWiFiConnectivityRadioButton;
     RadioButton mAnyConnectivityRadioButton;
+    CheckBox mRequiresChargingCheckBox;
+    CheckBox mRequiresIdleCheckbox;
+
     ComponentName mServiceComponent;
     /** Service object to interact scheduled jobs. */
     TestJobService mTestService;
@@ -124,22 +131,30 @@ public class MainActivity extends Activity {
 
         String delay = mDelayEditText.getText().toString();
         if (delay != null && !TextUtils.isEmpty(delay)) {
-            builder.setMinimumLatency(Long.valueOf(delay));
+            builder.setMinimumLatency(Long.valueOf(delay) * 1000);
         }
         String deadline = mDeadlineEditText.getText().toString();
         if (deadline != null && !TextUtils.isEmpty(deadline)) {
-            builder.setOverrideDeadline(Long.valueOf(deadline));
+            builder.setOverrideDeadline(Long.valueOf(deadline) * 1000);
         }
-        boolean requiresUnmetered = mWiFiConnectivityRadioButton.isSelected();
-        boolean requiresAnyConnectivity = mAnyConnectivityRadioButton.isSelected();
+        boolean requiresUnmetered = mWiFiConnectivityRadioButton.isChecked();
+        boolean requiresAnyConnectivity = mAnyConnectivityRadioButton.isChecked();
         if (requiresUnmetered) {
             builder.setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED);
         } else if (requiresAnyConnectivity) {
             builder.setRequiredNetworkCapabilities(JobInfo.NetworkType.ANY);
         }
+        builder.setRequiresDeviceIdle(mRequiresIdleCheckbox.isChecked());
+        builder.setRequiresCharging(mRequiresChargingCheckBox.isChecked());
 
         mTestService.scheduleJob(builder.build());
 
+    }
+
+    public void cancelAllJobs(View v) {
+        JobScheduler tm =
+                (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        tm.cancelAll();
     }
 
     /**
