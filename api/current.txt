@@ -15851,6 +15851,7 @@ package android.media.tv {
   }
 
   public static final class TvContract.Channels implements android.media.tv.TvContract.BaseTvColumns {
+    method public static final java.lang.String getVideoResolution(java.lang.String);
     field public static final java.lang.String COLUMN_BROWSABLE = "browsable";
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
@@ -15864,6 +15865,7 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_TRANSPORT_STREAM_ID = "transport_stream_id";
     field public static final java.lang.String COLUMN_TYPE = "type";
     field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
+    field public static final java.lang.String COLUMN_VIDEO_FORMAT = "video_format";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/channel";
     field public static final android.net.Uri CONTENT_URI;
@@ -15895,6 +15897,22 @@ package android.media.tv {
     field public static final int TYPE_SECAM = 3; // 0x3
     field public static final int TYPE_S_DMB = 393472; // 0x60100
     field public static final int TYPE_T_DMB = 393216; // 0x60000
+    field public static final java.lang.String VIDEO_FORMAT_1080I = "VIDEO_FORMAT_1080I";
+    field public static final java.lang.String VIDEO_FORMAT_1080P = "VIDEO_FORMAT_1080P";
+    field public static final java.lang.String VIDEO_FORMAT_2160P = "VIDEO_FORMAT_2160P";
+    field public static final java.lang.String VIDEO_FORMAT_240P = "VIDEO_FORMAT_240P";
+    field public static final java.lang.String VIDEO_FORMAT_360P = "VIDEO_FORMAT_360P";
+    field public static final java.lang.String VIDEO_FORMAT_4320P = "VIDEO_FORMAT_4320P";
+    field public static final java.lang.String VIDEO_FORMAT_480I = "VIDEO_FORMAT_480I";
+    field public static final java.lang.String VIDEO_FORMAT_480P = "VIDEO_FORMAT_480P";
+    field public static final java.lang.String VIDEO_FORMAT_576I = "VIDEO_FORMAT_576I";
+    field public static final java.lang.String VIDEO_FORMAT_576P = "VIDEO_FORMAT_576P";
+    field public static final java.lang.String VIDEO_FORMAT_720P = "VIDEO_FORMAT_720P";
+    field public static final java.lang.String VIDEO_RESOLUTION_ED = "VIDEO_RESOLUTION_ED";
+    field public static final java.lang.String VIDEO_RESOLUTION_FHD = "VIDEO_RESOLUTION_FHD";
+    field public static final java.lang.String VIDEO_RESOLUTION_HD = "VIDEO_RESOLUTION_HD";
+    field public static final java.lang.String VIDEO_RESOLUTION_SD = "VIDEO_RESOLUTION_SD";
+    field public static final java.lang.String VIDEO_RESOLUTION_UHD = "VIDEO_RESOLUTION_UHD";
   }
 
   public static final class TvContract.Channels.Logo {
@@ -15915,6 +15933,8 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
     field public static final java.lang.String COLUMN_TITLE = "title";
     field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
+    field public static final java.lang.String COLUMN_VIDEO_HEIGHT = "video_height";
+    field public static final java.lang.String COLUMN_VIDEO_WIDTH = "video_width";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/program";
     field public static final android.net.Uri CONTENT_URI;
