@@ -1712,7 +1712,8 @@ public class Canvas {
      * the pos array.
      *
      * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts.
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      *
      * @param text     The text to be drawn
      * @param index    The index of the first character to draw
@@ -1727,8 +1728,9 @@ public class Canvas {
         if (index < 0 || index + count > text.length || count*2 > pos.length) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawPosText(mNativeCanvasWrapper, text, index, count, pos,
-                paint.mNativePaint);
+        for (int i = 0; i < count; i++) {
+            drawText(text, index + i, 1, pos[i * 2], pos[i * 2 + 1], paint);
+        }
     }
 
     /**
@@ -1736,7 +1738,8 @@ public class Canvas {
      * the pos array.
      *
      * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts.
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      *
      * @param text  The text to be drawn
      * @param pos   Array of [x,y] positions, used to position each character
@@ -1744,10 +1747,7 @@ public class Canvas {
      */
     @Deprecated
     public void drawPosText(@NonNull String text, @NonNull float[] pos, @NonNull Paint paint) {
-        if (text.length()*2 > pos.length) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        native_drawPosText(mNativeCanvasWrapper, text, pos, paint.mNativePaint);
+        drawPosText(text.toCharArray(), 0, text.length(), pos, paint);
     }
 
     /**
@@ -2009,13 +2009,6 @@ public class Canvas {
             int start, int count, int contextStart, int contextCount,
             float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
-    private static native void native_drawPosText(long nativeCanvas,
-                                                  char[] text, int index,
-                                                  int count, float[] pos,
-                                                  long nativePaint);
-    private static native void native_drawPosText(long nativeCanvas,
-                                                  String text, float[] pos,
-                                                  long nativePaint);
     private static native void native_drawTextOnPath(long nativeCanvas,
                                                      char[] text, int index,
                                                      int count, long nativePath,

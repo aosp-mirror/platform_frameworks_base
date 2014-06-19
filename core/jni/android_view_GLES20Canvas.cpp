@@ -840,49 +840,6 @@ static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject clazz,
     env->ReleaseStringChars(text, textArray);
 }
 
-static void renderPosText(OpenGLRenderer* renderer, const jchar* text, int count,
-        const jfloat* positions, jint bidiFlags, SkPaint* paint) {
-    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count, bidiFlags);
-    if (value == NULL) {
-        return;
-    }
-    const jchar* glyphs = value->getGlyphs();
-    size_t glyphsCount = value->getGlyphsCount();
-    if (count < int(glyphsCount)) glyphsCount = count;
-    int bytesCount = glyphsCount * sizeof(jchar);
-
-    renderer->drawPosText((const char*) glyphs, bytesCount, glyphsCount, positions, paint);
-}
-
-static void android_view_GLES20Canvas_drawPosTextArray(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jcharArray text, jint index, jint count,
-        jfloatArray pos, jlong paintPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    jchar* textArray = env->GetCharArrayElements(text, NULL);
-    jfloat* positions = env->GetFloatArrayElements(pos, NULL);
-    SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-
-    renderPosText(renderer, textArray + index, count, positions, kBidi_LTR, paint);
-
-    env->ReleaseFloatArrayElements(pos, positions, JNI_ABORT);
-    env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
-}
-
-static void android_view_GLES20Canvas_drawPosText(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jstring text, jint start, jint end,
-        jfloatArray pos, jlong paintPtr) {
-    OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    const jchar* textArray = env->GetStringChars(text, NULL);
-    jfloat* positions = env->GetFloatArrayElements(pos, NULL);
-    SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
-
-    renderPosText(renderer, textArray + start, end - start, positions, kBidi_LTR, paint);
-
-    env->ReleaseFloatArrayElements(pos, positions, JNI_ABORT);
-    env->ReleaseStringChars(text, textArray);
-}
-
 // ----------------------------------------------------------------------------
 // Display lists
 // ----------------------------------------------------------------------------
@@ -1038,10 +995,6 @@ static JNINativeMethod gMethods[] = {
     { "nDrawTextRun",       "(J[CIIIIFFZJJ)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
     { "nDrawTextRun",       "(JLjava/lang/String;IIIIFFZJJ)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
-
-    { "nDrawPosText",       "(J[CII[FJ)V",     (void*) android_view_GLES20Canvas_drawPosTextArray },
-    { "nDrawPosText",       "(JLjava/lang/String;II[FJ)V",
-            (void*) android_view_GLES20Canvas_drawPosText },
 
     { "nGetClipBounds",     "(JLandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
