@@ -373,19 +373,19 @@ public class WifiConfiguration implements Parcelable {
     public static int GOOD_RSSI_24 = -65;
 
     /** @hide **/
-    public static int LOW_RSSI_24 = -75;
+    public static int LOW_RSSI_24 = -77;
 
     /** @hide **/
     public static int BAD_RSSI_24 = -87;
 
     /** @hide **/
-    public static int GOOD_RSSI_5 = -55;
+    public static int GOOD_RSSI_5 = -60;
 
     /** @hide **/
-    public static int LOW_RSSI_5 = -65;
+    public static int LOW_RSSI_5 = -72;
 
     /** @hide **/
-    public static int BAD_RSSI_5 = -75;
+    public static int BAD_RSSI_5 = -82;
 
     /** @hide **/
     public static int UNWANTED_BLACKLIST_SOFT_BUMP = 4;
@@ -418,6 +418,15 @@ public class WifiConfiguration implements Parcelable {
     /** @hide
      * 5GHz band is penalized if the 5GHz RSSI is lower than this threshold **/
     public static int G_BAND_PREFERENCE_RSSI_THRESHOLD = -75;
+
+    /** @hide
+     * Boost given to RSSI on a home network for the purpose of calculating the score
+     * This adds stickiness to home networks, as defined by:
+     * - less than 4 known BSSIDs
+     * - PSK only
+     * - TODO: add a test to verify that all BSSIDs are behind same gateway
+     ***/
+    public static int HOME_NETWORK_RSSI_BOOST = 5;
 
     /**
      * @hide
