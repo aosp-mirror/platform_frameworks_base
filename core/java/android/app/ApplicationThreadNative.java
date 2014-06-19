@@ -1188,6 +1188,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(level);
         mRemote.transact(SCHEDULE_TRIM_MEMORY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
+        data.recycle();
     }
 
     public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
