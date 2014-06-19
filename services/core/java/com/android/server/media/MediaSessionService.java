@@ -896,14 +896,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void dispatchAdjustVolumeByLocked(int suggestedStream, int delta, int flags,
                 MediaSessionRecord session) {
-            int direction = 0;
-            int steps = delta;
-            if (delta > 0) {
-                direction = 1;
-            } else if (delta < 0) {
-                direction = -1;
-                steps = -delta;
-            }
             if (DEBUG) {
                 String sessionInfo = session == null ? null : session.getSessionInfo().toString();
                 Log.d(TAG, "Adjusting session " + sessionInfo + " by " + delta + ". flags=" + flags
@@ -916,6 +908,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mAudioService.adjustSuggestedStreamVolume(delta, suggestedStream, flags,
                                 getContext().getOpPackageName());
                     } else {
+                        int direction = 0;
+                        int steps = delta;
+                        if (delta > 0) {
+                            direction = 1;
+                        } else if (delta < 0) {
+                            direction = -1;
+                            steps = -delta;
+                        }
                         for (int i = 0; i < steps; i++) {
                             mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
                                     flags, getContext().getOpPackageName());
@@ -925,26 +925,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     Log.e(TAG, "Error adjusting default volume.", e);
                 }
             } else {
-                if (session.getPlaybackType() == MediaSession.VOLUME_TYPE_LOCAL) {
-                    try {
-                        if (delta == 0) {
-                            mAudioService.adjustSuggestedStreamVolume(delta,
-                                    session.getAudioStream(), flags,
-                                    getContext().getOpPackageName());
-                        } else {
-                            for (int i = 0; i < steps; i++) {
-                                mAudioService.adjustSuggestedStreamVolume(direction,
-                                        session.getAudioStream(), flags,
-                                        getContext().getOpPackageName());
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error adjusting volume for stream "
-                                + session.getAudioStream(), e);
-                    }
-                } else if (session.getPlaybackType() == MediaSession.VOLUME_TYPE_REMOTE) {
-                    session.adjustVolumeBy(delta);
-                }
+                session.adjustVolumeBy(delta, flags);
             }
         }
 

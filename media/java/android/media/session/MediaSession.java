@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.VolumeProvider;
 import android.media.session.ISessionController;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -126,18 +127,12 @@ public final class MediaSession {
     public static final int DISCONNECT_REASON_SESSION_DESTROYED = 5;
 
     /**
-     * The session uses local playback. Used for configuring volume handling
-     * with the system.
-     *
-     * @hide
+     * The session uses local playback.
      */
     public static final int VOLUME_TYPE_LOCAL = 1;
 
     /**
-     * The session uses remote playback. Used for configuring volume handling
-     * with the system.
-     *
-     * @hide
+     * The session uses remote playback.
      */
     public static final int VOLUME_TYPE_REMOTE = 2;
 
@@ -156,7 +151,7 @@ public final class MediaSession {
             = new ArrayMap<String, RouteInterface.EventListener>();
 
     private Route mRoute;
-    private RemoteVolumeProvider mVolumeProvider;
+    private VolumeProvider mVolumeProvider;
 
     private boolean mActive = false;;
 
@@ -288,7 +283,7 @@ public final class MediaSession {
      * @param volumeProvider The provider that will handle volume changes. May
      *            not be null.
      */
-    public void setPlaybackToRemote(RemoteVolumeProvider volumeProvider) {
+    public void setPlaybackToRemote(VolumeProvider volumeProvider) {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
@@ -540,12 +535,12 @@ public final class MediaSession {
     }
 
     /**
-     * Notify the system that the remove volume changed.
+     * Notify the system that the remote volume changed.
      *
      * @param provider The provider that is handling volume changes.
      * @hide
      */
-    void notifyRemoteVolumeChanged(RemoteVolumeProvider provider) {
+    public void notifyRemoteVolumeChanged(VolumeProvider provider) {
         if (provider == null || provider != mVolumeProvider) {
             Log.w(TAG, "Received update from stale volume provider");
             return;

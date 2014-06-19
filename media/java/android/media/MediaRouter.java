@@ -29,7 +29,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.session.MediaSession;
-import android.media.session.RemoteVolumeProvider;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -2204,10 +2203,10 @@ public class MediaRouter {
                 return;
             }
             if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
-                int volumeControl = RemoteVolumeProvider.VOLUME_CONTROL_FIXED;
+                int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
                 switch (mVolumeHandling) {
                     case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
-                        volumeControl = RemoteVolumeProvider.VOLUME_CONTROL_ABSOLUTE;
+                        volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
                         break;
                     case RemoteControlClient.PLAYBACK_VOLUME_FIXED:
                     default:
@@ -2226,7 +2225,7 @@ public class MediaRouter {
             }
         }
 
-        class SessionVolumeProvider extends RemoteVolumeProvider {
+        class SessionVolumeProvider extends VolumeProvider {
 
             public SessionVolumeProvider(int volumeControl, int maxVolume) {
                 super(volumeControl, maxVolume);

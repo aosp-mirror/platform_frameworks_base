@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
@@ -26,7 +27,6 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.MediaController;
-import android.media.session.RemoteVolumeProvider;
 import android.media.session.RouteCommand;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
@@ -35,9 +35,11 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionInfo;
 import android.media.session.RouteInterface;
 import android.media.session.PlaybackState;
+import android.media.session.ParcelableVolumeInfo;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.VolumeProvider;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -119,9 +121,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     // End TransportPerformer fields
 
     // Volume handling fields
-    private int mPlaybackType = MediaSession.VOLUME_TYPE_LOCAL;
+    private AudioManager mAudioManager;
+    private int mVolumeType = MediaSession.VOLUME_TYPE_LOCAL;
     private int mAudioStream = AudioManager.STREAM_MUSIC;
-    private int mVolumeControlType = RemoteVolumeProvider.VOLUME_CONTROL_ABSOLUTE;
+    private int mVolumeControlType = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
     private int mMaxVolume = 0;
     private int mCurrentVolume = 0;
     // End volume handling fields
@@ -142,6 +145,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mSessionCb = new SessionCb(cb);
         mService = service;
         mHandler = new MessageHandler(handler.getLooper());
+        mAudioManager = (AudioManager) service.getContext().getSystemService(Context.AUDIO_SERVICE);
     }
 
     /**
@@ -271,20 +275,42 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @param delta The amount to adjust the volume by.
      */
-    public void adjustVolumeBy(int delta) {
-        if (mVolumeControlType == RemoteVolumeProvider.VOLUME_CONTROL_FIXED) {
-            // Nothing to do, the volume cannot be changed
-            return;
+    public void adjustVolumeBy(int delta, int flags) {
+        if (mVolumeType == MediaSession.VOLUME_TYPE_LOCAL) {
+            if (delta == 0) {
+                mAudioManager.adjustStreamVolume(mAudioStream, delta, flags);
+            } else {
+                int direction = 0;
+                int steps = delta;
+                if (delta > 0) {
+                    direction = 1;
+                } else if (delta < 0) {
+                    direction = -1;
+                    steps = -delta;
+                }
+                for (int i = 0; i < steps; i++) {
+                    mAudioManager.adjustStreamVolume(mAudioStream, direction, flags);
+                }
+            }
+        } else {
+            if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
+                // Nothing to do, the volume cannot be changed
+                return;
+            }
+            mSessionCb.adjustVolumeBy(delta);
         }
-        mSessionCb.adjustVolumeBy(delta);
     }
 
-    public void setVolumeTo(int value) {
-        if (mVolumeControlType != RemoteVolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
-            // Nothing to do. The volume can't be set directly.
-            return;
+    public void setVolumeTo(int value, int flags) {
+        if (mVolumeType == MediaSession.VOLUME_TYPE_LOCAL) {
+            mAudioManager.setStreamVolume(mAudioStream, value, flags);
+        } else {
+            if (mVolumeControlType != VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
+                // Nothing to do. The volume can't be set directly.
+                return;
+            }
+            mSessionCb.setVolumeTo(value);
         }
-        mSessionCb.setVolumeTo(value);
     }
 
     /**
@@ -358,7 +384,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @return The current type of playback.
      */
     public int getPlaybackType() {
-        return mPlaybackType;
+        return mVolumeType;
     }
 
     /**
@@ -765,7 +791,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void configureVolumeHandling(int type, int arg1, int arg2) throws RemoteException {
             switch(type) {
                 case MediaSession.VOLUME_TYPE_LOCAL:
-                    mPlaybackType = type;
+                    mVolumeType = type;
                     int audioStream = arg1;
                     if (isValidStream(audioStream)) {
                         mAudioStream = audioStream;
@@ -775,7 +801,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     }
                     break;
                 case MediaSession.VOLUME_TYPE_REMOTE:
-                    mPlaybackType = type;
+                    mVolumeType = type;
                     mVolumeControlType = arg1;
                     mMaxVolume = arg2;
                     break;
@@ -993,6 +1019,35 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public long getFlags() {
             return mFlags;
+        }
+
+        @Override
+        public ParcelableVolumeInfo getVolumeAttributes() {
+            synchronized (mLock) {
+                int type;
+                int max;
+                int current;
+                if (mVolumeType == MediaSession.VOLUME_TYPE_REMOTE) {
+                    type = mVolumeControlType;
+                    max = mMaxVolume;
+                    current = mCurrentVolume;
+                } else {
+                    type = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
+                    max = mAudioManager.getStreamMaxVolume(mAudioStream);
+                    current = mAudioManager.getStreamVolume(mAudioStream);
+                }
+                return new ParcelableVolumeInfo(mVolumeType, mAudioStream, type, max, current);
+            }
+        }
+
+        @Override
+        public void adjustVolumeBy(int delta, int flags) {
+            MediaSessionRecord.this.adjustVolumeBy(delta, flags);
+        }
+
+        @Override
+        public void setVolumeTo(int value, int flags) {
+            MediaSessionRecord.this.setVolumeTo(value, flags);
         }
 
         @Override

@@ -20,6 +20,7 @@ import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaSessionInfo;
+import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -38,6 +39,9 @@ interface ISessionController {
     void showRoutePicker();
     MediaSessionInfo getSessionInfo();
     long getFlags();
+    ParcelableVolumeInfo getVolumeAttributes();
+    void adjustVolumeBy(int delta, int flags);
+    void setVolumeTo(int value, int flags);
 
     // These commands are for the TransportController
     void play();

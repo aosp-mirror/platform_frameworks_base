@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.session;
+package android.media;
 
+import android.media.session.MediaSession;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -24,8 +25,8 @@ import android.util.Log;
  * You can set a volume provider on a session by calling
  * {@link MediaSession#setPlaybackToRemote}.
  */
-public abstract class RemoteVolumeProvider {
-    private static final String TAG = "RemoteVolumeProvider";
+public abstract class VolumeProvider {
+    private static final String TAG = "VolumeProvider";
 
     /**
      * The volume is fixed and can not be modified. Requests to change volume
@@ -60,7 +61,7 @@ public abstract class RemoteVolumeProvider {
      *            this provider.
      * @param maxVolume The maximum allowed volume.
      */
-    public RemoteVolumeProvider(int volumeControl, int maxVolume) {
+    public VolumeProvider(int volumeControl, int maxVolume) {
         mControlType = volumeControl;
         mMaxVolume = maxVolume;
     }
@@ -117,7 +118,7 @@ public abstract class RemoteVolumeProvider {
     /**
      * @hide
      */
-    void setSession(MediaSession session) {
+    public void setSession(MediaSession session) {
         mSession = session;
     }
 }
