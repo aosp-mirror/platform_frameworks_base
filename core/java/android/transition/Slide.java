@@ -16,14 +16,7 @@
 package android.transition;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.animation.ValueAnimator;
-import android.graphics.Rect;
-import android.util.Log;
-import android.util.Property;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,71 +34,60 @@ import android.view.animation.DecelerateInterpolator;
  */
 public class Slide extends Visibility {
     private static final String TAG = "Slide";
-
     private static final TimeInterpolator sDecelerate = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerate = new AccelerateInterpolator();
-
+    private static final String PROPNAME_SCREEN_POSITION = "android:slide:screenPosition";
     private CalculateSlide mSlideCalculator = sCalculateBottom;
 
     private interface CalculateSlide {
-        /** Returns the translation value for view when it out of the scene */
-        float getGone(ViewGroup sceneRoot, View view);
 
-        /** Returns the translation value for view when it is in the scene */
-        float getHere(View view);
+        /** Returns the translation value for view when it goes out of the scene */
+        float getGoneX(ViewGroup sceneRoot, View view);
 
-        /** Returns the property to animate translation */
-        Property<View, Float> getProperty();
+        /** Returns the translation value for view when it goes out of the scene */
+        float getGoneY(ViewGroup sceneRoot, View view);
     }
 
     private static abstract class CalculateSlideHorizontal implements CalculateSlide {
-        @Override
-        public float getHere(View view) {
-            return view.getTranslationX();
-        }
 
         @Override
-        public Property<View, Float> getProperty() {
-            return View.TRANSLATION_X;
+        public float getGoneY(ViewGroup sceneRoot, View view) {
+            return view.getTranslationY();
         }
     }
 
     private static abstract class CalculateSlideVertical implements CalculateSlide {
-        @Override
-        public float getHere(View view) {
-            return view.getTranslationY();
-        }
 
         @Override
-        public Property<View, Float> getProperty() {
-            return View.TRANSLATION_Y;
+        public float getGoneX(ViewGroup sceneRoot, View view) {
+            return view.getTranslationX();
         }
     }
 
     private static final CalculateSlide sCalculateLeft = new CalculateSlideHorizontal() {
         @Override
-        public float getGone(ViewGroup sceneRoot, View view) {
+        public float getGoneX(ViewGroup sceneRoot, View view) {
             return view.getTranslationX() - sceneRoot.getWidth();
         }
     };
 
     private static final CalculateSlide sCalculateTop = new CalculateSlideVertical() {
         @Override
-        public float getGone(ViewGroup sceneRoot, View view) {
+        public float getGoneY(ViewGroup sceneRoot, View view) {
             return view.getTranslationY() - sceneRoot.getHeight();
         }
     };
 
     private static final CalculateSlide sCalculateRight = new CalculateSlideHorizontal() {
         @Override
-        public float getGone(ViewGroup sceneRoot, View view) {
+        public float getGoneX(ViewGroup sceneRoot, View view) {
             return view.getTranslationX() + sceneRoot.getWidth();
         }
     };
 
     private static final CalculateSlide sCalculateBottom = new CalculateSlideVertical() {
         @Override
-        public float getGone(ViewGroup sceneRoot, View view) {
+        public float getGoneY(ViewGroup sceneRoot, View view) {
             return view.getTranslationY() + sceneRoot.getHeight();
         }
     };
@@ -125,8 +107,28 @@ public class Slide extends Visibility {
         setSlideEdge(slideEdge);
     }
 
+    private void captureValues(TransitionValues transitionValues) {
+        View view = transitionValues.view;
+        int[] position = new int[2];
+        view.getLocationOnScreen(position);
+        transitionValues.values.put(PROPNAME_SCREEN_POSITION, position);
+    }
+
+    @Override
+    public void captureStartValues(TransitionValues transitionValues) {
+        super.captureStartValues(transitionValues);
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        super.captureEndValues(transitionValues);
+        captureValues(transitionValues);
+    }
+
     /**
      * Change the edge that Views appear and disappear from.
+     *
      * @param slideEdge The edge of the scene to use for Views appearing and disappearing. One of
      *                  {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
      *                  {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
@@ -153,77 +155,35 @@ public class Slide extends Visibility {
         setPropagation(propagation);
     }
 
-    private Animator createAnimation(final View view, Property<View, Float> property,
-            float start, float end, float terminalValue, TimeInterpolator interpolator) {
-        view.setTranslationY(start);
-        if (start == end) {
-            return null;
-        }
-        final ObjectAnimator anim = ObjectAnimator.ofFloat(view, property, start, end);
-
-        SlideAnimatorListener listener = new SlideAnimatorListener(view, terminalValue, end);
-        anim.addListener(listener);
-        anim.addPauseListener(listener);
-        anim.setInterpolator(interpolator);
-        return anim;
-    }
-
     @Override
     public Animator onAppear(ViewGroup sceneRoot, View view,
             TransitionValues startValues, TransitionValues endValues) {
         if (endValues == null) {
             return null;
         }
-        float end = mSlideCalculator.getHere(view);
-        float start = mSlideCalculator.getGone(sceneRoot, view);
-        return createAnimation(view, mSlideCalculator.getProperty(), start, end, end, sDecelerate);
+        int[] position = (int[]) endValues.values.get(PROPNAME_SCREEN_POSITION);
+        float endX = view.getTranslationX();
+        float endY = view.getTranslationY();
+        float startX = mSlideCalculator.getGoneX(sceneRoot, view);
+        float startY = mSlideCalculator.getGoneY(sceneRoot, view);
+        return TranslationAnimationCreator
+                .createAnimation(view, endValues, position[0], position[1],
+                        startX, startY, endX, endY, sDecelerate);
     }
 
     @Override
     public Animator onDisappear(ViewGroup sceneRoot, View view,
             TransitionValues startValues, TransitionValues endValues) {
-        float start = mSlideCalculator.getHere(view);
-        float end = mSlideCalculator.getGone(sceneRoot, view);
-
-        return createAnimation(view, mSlideCalculator.getProperty(), start, end, start,
-                sAccelerate);
-    }
-
-    private static class SlideAnimatorListener extends AnimatorListenerAdapter {
-        private boolean mCanceled = false;
-        private float mPausedY;
-        private final View mView;
-        private final float mEndY;
-        private final float mTerminalY;
-
-        public SlideAnimatorListener(View view, float terminalY, float endY) {
-            mView = view;
-            mTerminalY = terminalY;
-            mEndY = endY;
+        if (startValues == null) {
+            return null;
         }
-
-        @Override
-        public void onAnimationCancel(Animator animator) {
-            mView.setTranslationY(mTerminalY);
-            mCanceled = true;
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animator) {
-            if (!mCanceled) {
-                mView.setTranslationY(mTerminalY);
-            }
-        }
-
-        @Override
-        public void onAnimationPause(Animator animator) {
-            mPausedY = mView.getTranslationY();
-            mView.setTranslationY(mEndY);
-        }
-
-        @Override
-        public void onAnimationResume(Animator animator) {
-            mView.setTranslationY(mPausedY);
-        }
+        int[] position = (int[]) startValues.values.get(PROPNAME_SCREEN_POSITION);
+        float startX = view.getTranslationX();
+        float startY = view.getTranslationY();
+        float endX = mSlideCalculator.getGoneX(sceneRoot, view);
+        float endY = mSlideCalculator.getGoneY(sceneRoot, view);
+        return TranslationAnimationCreator
+                .createAnimation(view, startValues, position[0], position[1],
+                        startX, startY, endX, endY, sAccelerate);
     }
 }

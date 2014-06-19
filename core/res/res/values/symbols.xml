@@ -218,6 +218,7 @@
   <java-symbol type="id" name="pin_error_message" />
   <java-symbol type="id" name="timePickerLayout" />
   <java-symbol type="id" name="profile_icon" />
+  <java-symbol type="id" name="transitionPosition" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />

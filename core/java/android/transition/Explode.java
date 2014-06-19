@@ -15,20 +15,16 @@
  */
 package android.transition;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-
 /**
  * This transition tracks changes to the visibility of target views in the
  * start and end scenes and moves views in or out from the edges of the
@@ -44,8 +40,7 @@ public class Explode extends Visibility {
     private static final TimeInterpolator sDecelerate = new DecelerateInterpolator();
     private static final TimeInterpolator sAccelerate = new AccelerateInterpolator();
     private static final String TAG = "Explode";
-
-    private static final String PROPNAME_SCREEN_BOUNDS = "android:out:screenBounds";
+    private static final String PROPNAME_SCREEN_BOUNDS = "android:explode:screenBounds";
 
     private int[] mTempLoc = new int[2];
 
@@ -56,8 +51,8 @@ public class Explode extends Visibility {
     private void captureValues(TransitionValues transitionValues) {
         View view = transitionValues.view;
         view.getLocationOnScreen(mTempLoc);
-        int left = mTempLoc[0] + Math.round(view.getTranslationX());
-        int top = mTempLoc[1] + Math.round(view.getTranslationY());
+        int left = mTempLoc[0];
+        int top = mTempLoc[1];
         int right = left + view.getWidth();
         int bottom = top + view.getHeight();
         transitionValues.values.put(PROPNAME_SCREEN_BOUNDS, new Rect(left, top, right, bottom));
@@ -75,27 +70,6 @@ public class Explode extends Visibility {
         captureValues(transitionValues);
     }
 
-    private Animator createAnimation(final View view, float startX, float startY, float endX,
-            float endY, float terminalX, float terminalY, TimeInterpolator interpolator) {
-        view.setTranslationX(startX);
-        view.setTranslationY(startY);
-        if (startY == endY && startX == endX) {
-            return null;
-        }
-        Path path = new Path();
-        path.moveTo(startX, startY);
-        path.lineTo(endX, endY);
-        ObjectAnimator pathAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_X,
-                View.TRANSLATION_Y, path);
-        pathAnimator.setInterpolator(interpolator);
-        OutAnimatorListener listener = new OutAnimatorListener(view, terminalX, terminalY,
-                endX, endY);
-        pathAnimator.addListener(listener);
-        pathAnimator.addPauseListener(listener);
-
-        return pathAnimator;
-    }
-
     @Override
     public Animator onAppear(ViewGroup sceneRoot, View view,
             TransitionValues startValues, TransitionValues endValues) {
@@ -103,29 +77,43 @@ public class Explode extends Visibility {
             return null;
         }
         Rect bounds = (Rect) endValues.values.get(PROPNAME_SCREEN_BOUNDS);
+        float endX = view.getTranslationX();
+        float endY = view.getTranslationY();
         calculateOut(sceneRoot, bounds, mTempLoc);
+        float startX = endX + mTempLoc[0];
+        float startY = endY + mTempLoc[1];
 
-        final float endX = view.getTranslationX();
-        final float startX = endX + mTempLoc[0];
-        final float endY = view.getTranslationY();
-        final float startY = endY + mTempLoc[1];
-
-        return createAnimation(view, startX, startY, endX, endY, endX, endY, sDecelerate);
+        return TranslationAnimationCreator.createAnimation(view, endValues, bounds.left, bounds.top,
+                startX, startY, endX, endY, sDecelerate);
     }
 
     @Override
     public Animator onDisappear(ViewGroup sceneRoot, View view,
             TransitionValues startValues, TransitionValues endValues) {
+        if (startValues == null) {
+            return null;
+        }
         Rect bounds = (Rect) startValues.values.get(PROPNAME_SCREEN_BOUNDS);
+        int viewPosX = bounds.left;
+        int viewPosY = bounds.top;
+        float startX = view.getTranslationX();
+        float startY = view.getTranslationY();
+        float endX = startX;
+        float endY = startY;
+        int[] interruptedPosition = (int[]) startValues.view.getTag(R.id.transitionPosition);
+        if (interruptedPosition != null) {
+            // We want to have the end position relative to the interrupted position, not
+            // the position it was supposed to start at.
+            endX += interruptedPosition[0] - bounds.left;
+            endY += interruptedPosition[1] - bounds.top;
+            bounds.offsetTo(interruptedPosition[0], interruptedPosition[1]);
+        }
         calculateOut(sceneRoot, bounds, mTempLoc);
+        endX += mTempLoc[0];
+        endY += mTempLoc[1];
 
-        final float startX = view.getTranslationX();
-        final float endX = startX + mTempLoc[0];
-        final float startY = view.getTranslationY();
-        final float endY = startY + mTempLoc[1];
-
-        return createAnimation(view, startX, startY, endX, endY, startX, startY,
-                sAccelerate);
+        return TranslationAnimationCreator.createAnimation(view, startValues,
+                viewPosX, viewPosY, startX, startY, endX, endY, sAccelerate);
     }
 
     private void calculateOut(View sceneRoot, Rect bounds, int[] outVector) {
@@ -153,8 +141,8 @@ public class Explode extends Visibility {
 
         if (xVector == 0 && yVector == 0) {
             // Random direction when View is centered on focal View.
-            xVector = (float)(Math.random() * 2) - 1;
-            yVector = (float)(Math.random() * 2) - 1;
+            xVector = (float) (Math.random() * 2) - 1;
+            yVector = (float) (Math.random() * 2) - 1;
         }
         float vectorSize = calculateDistance(xVector, yVector);
         xVector /= vectorSize;
@@ -175,54 +163,5 @@ public class Explode extends Visibility {
 
     private static float calculateDistance(float x, float y) {
         return FloatMath.sqrt((x * x) + (y * y));
-    }
-
-    private static class OutAnimatorListener extends AnimatorListenerAdapter {
-        private final View mView;
-        private boolean mCanceled = false;
-        private float mPausedX;
-        private float mPausedY;
-        private final float mTerminalX;
-        private final float mTerminalY;
-        private final float mEndX;
-        private final float mEndY;
-
-        public OutAnimatorListener(View view, float terminalX, float terminalY,
-                float endX, float endY) {
-            mView = view;
-            mTerminalX = terminalX;
-            mTerminalY = terminalY;
-            mEndX = endX;
-            mEndY = endY;
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animator) {
-            mView.setTranslationX(mTerminalX);
-            mView.setTranslationY(mTerminalY);
-            mCanceled = true;
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animator) {
-            if (!mCanceled) {
-                mView.setTranslationX(mTerminalX);
-                mView.setTranslationY(mTerminalY);
-            }
-        }
-
-        @Override
-        public void onAnimationPause(Animator animator) {
-            mPausedX = mView.getTranslationX();
-            mPausedY = mView.getTranslationY();
-            mView.setTranslationY(mEndX);
-            mView.setTranslationY(mEndY);
-        }
-
-        @Override
-        public void onAnimationResume(Animator animator) {
-            mView.setTranslationX(mPausedX);
-            mView.setTranslationY(mPausedY);
-        }
     }
 }
