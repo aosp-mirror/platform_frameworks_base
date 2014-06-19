@@ -75,7 +75,7 @@ public class FieldPacker {
         mPos = 0;
     }
     public void reset(int i) {
-        if ((i < 0) || (i >= mLen)) {
+        if ((i < 0) || (i > mLen)) {
             throw new RSIllegalArgumentException("out of range argument: " + i);
         }
         mPos = i;
@@ -603,6 +603,15 @@ public class FieldPacker {
 
     public final byte[] getData() {
         return mData;
+    }
+
+    /**
+     * Get the actual length used for the FieldPacker.
+     *
+     * @hide
+     */
+    public int getPos() {
+        return mPos;
     }
 
     private final byte mData[];
