@@ -32,35 +32,31 @@ import android.os.UserHandle;
  */
 class CrossProfileIntentFilter extends IntentFilter {
     private static final String ATTR_TARGET_USER_ID = "targetUserId";
-    private static final String ATTR_USER_ID_DEST = "userIdDest";//Old name. Kept for compatibility.
-    private static final String ATTR_REMOVABLE = "removable";
+    private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_FILTER = "filter";
 
     private static final String TAG = "CrossProfileIntentFilter";
 
     // If the intent matches the IntentFilter, then it can be forwarded to this userId.
     final int mTargetUserId;
-    boolean mRemovable;
+    final int mFlags;
 
-    CrossProfileIntentFilter(IntentFilter filter, boolean removable, int targetUserId) {
+    CrossProfileIntentFilter(IntentFilter filter, int targetUserId, int flags) {
         super(filter);
         mTargetUserId = targetUserId;
-        mRemovable = removable;
+        mFlags = flags;
     }
 
     public int getTargetUserId() {
         return mTargetUserId;
     }
 
-    public boolean isRemovable() {
-        return mRemovable;
+    public int getFlags() {
+        return mFlags;
     }
 
     CrossProfileIntentFilter(XmlPullParser parser) throws XmlPullParserException, IOException {
         String targetUserIdString = parser.getAttributeValue(null, ATTR_TARGET_USER_ID);
-        if (targetUserIdString == null) {
-            targetUserIdString = parser.getAttributeValue(null, ATTR_USER_ID_DEST);
-        }
         if (targetUserIdString == null) {
             String msg = "Missing element under " + TAG +": " + ATTR_TARGET_USER_ID + " at " +
                     parser.getPositionDescription();
@@ -69,9 +65,14 @@ class CrossProfileIntentFilter extends IntentFilter {
         } else {
             mTargetUserId = Integer.parseInt(targetUserIdString);
         }
-        String removableString = parser.getAttributeValue(null, ATTR_REMOVABLE);
-        if (removableString != null) {
-            mRemovable = Boolean.parseBoolean(removableString);
+        String flagsString = parser.getAttributeValue(null, ATTR_FLAGS);
+        if (flagsString == null) {
+            String msg = "Missing element under " + TAG +": " + ATTR_FLAGS + " at " +
+                    parser.getPositionDescription();
+            PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+            mFlags = 0;
+        } else {
+            mFlags = Integer.parseInt(flagsString);
         }
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -104,7 +105,7 @@ class CrossProfileIntentFilter extends IntentFilter {
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_TARGET_USER_ID, Integer.toString(mTargetUserId));
-        serializer.attribute(null, ATTR_REMOVABLE, Boolean.toString(mRemovable));
+        serializer.attribute(null, ATTR_FLAGS, Integer.toString(mFlags));
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);

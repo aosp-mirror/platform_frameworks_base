@@ -1457,22 +1457,13 @@ final class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void addCrossProfileIntentFilter(IntentFilter filter, boolean removable,
-            int sourceUserId, int targetUserId) {
+    public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
+            int flags) {
         try {
-            mPM.addCrossProfileIntentFilter(filter, removable, sourceUserId, targetUserId);
+            mPM.addCrossProfileIntentFilter(filter, sourceUserId, targetUserId, flags);
         } catch (RemoteException e) {
             // Should never happen!
         }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void addForwardingIntentFilter(IntentFilter filter, boolean removable, int sourceUserId,
-            int targetUserId) {
-        addCrossProfileIntentFilter(filter, removable, sourceUserId, targetUserId);
     }
 
     /**
@@ -1485,14 +1476,6 @@ final class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             // Should never happen!
         }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void clearForwardingIntentFilters(int sourceUserId) {
-        clearCrossProfileIntentFilters(sourceUserId);
     }
 
     private final ContextImpl mContext;

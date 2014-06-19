@@ -196,6 +196,22 @@ public abstract class PackageManager {
      */
     public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
 
+    /**
+     * Flag for {@link addCrossProfileIntentFilter}: if the cross-profile intent has been set by the
+     * profile owner.
+     * @hide
+     */
+    public static final int SET_BY_PROFILE_OWNER= 0x00000001;
+
+    /**
+     * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
+     * when resolving an intent that matches the {@link CrossProfileIntentFilter}, the current
+     * profile will be skipped.
+     * Only activities in the target user can respond to the intent.
+     * @hide
+     */
+    public static final int SKIP_CURRENT_PROFILE = 0x00000002;
+
     /** @hide */
     @IntDef({PERMISSION_GRANTED, PERMISSION_DENIED})
     @Retention(RetentionPolicy.SOURCE)
@@ -3583,30 +3599,14 @@ public abstract class PackageManager {
      * {@link CrossProfileIntentFilter}
      * @hide
      */
-    public abstract void addCrossProfileIntentFilter(IntentFilter filter, boolean removable,
-            int sourceUserId, int targetUserId);
+    public abstract void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
+            int targetUserId, int flags);
 
     /**
-     * @hide
-     * @deprecated
-     * TODO: remove it as soon as the code of ManagedProvisionning is updated
-    */
-    public abstract void addForwardingIntentFilter(IntentFilter filter, boolean removable,
-            int sourceUserId, int targetUserId);
-
-    /**
-     * Clearing removable {@link CrossProfileIntentFilter}s which have the specified user as their
-     * source
+     * Clearing {@link CrossProfileIntentFilter}s which have the specified user as their
+     * source, and have been set by the profile owner
      * @param sourceUserId
-     * be cleared.
      * @hide
      */
     public abstract void clearCrossProfileIntentFilters(int sourceUserId);
-
-    /**
-     * @hide
-     * @deprecated
-     * TODO: remove it as soon as the code of ManagedProvisionning is updated
-    */
-    public abstract void clearForwardingIntentFilters(int sourceUserId);
 }
