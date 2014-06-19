@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
@@ -94,21 +95,25 @@ public final class HdmiControlService extends SystemService {
 
     // List of listeners registered by callers that want to get notified of
     // hotplug events.
+    @GuardedBy("mLock")
     private final ArrayList<IHdmiHotplugEventListener> mHotplugEventListeners = new ArrayList<>();
 
     // List of records for hotplug event listener to handle the the caller killed in action.
+    @GuardedBy("mLock")
     private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
             new ArrayList<>();
 
     // List of listeners registered by callers that want to get notified of
     // device status events.
+    @GuardedBy("mLock")
     private final ArrayList<IHdmiDeviceEventListener> mDeviceEventListeners = new ArrayList<>();
 
     // List of records for device event listener to handle the the caller killed in action.
+    @GuardedBy("mLock")
     private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
             new ArrayList<>();
 
-    // Handler running on service thread. It's used to run a task in service thread.
+    // Handler used to run a task in service thread.
     private final Handler mHandler = new Handler();
 
     @Nullable
@@ -171,8 +176,7 @@ public final class HdmiControlService extends SystemService {
                     }
                     finished.append(deviceType, logicalAddress);
 
-                    // Once finish address allocation for all devices, notify
-                    // it to each device.
+                    // Address allocation completed for all devices. Notify each device.
                     if (deviceTypes.size() == finished.size()) {
                         notifyAddressAllocated(devices);
                     }
@@ -663,15 +667,28 @@ public final class HdmiControlService extends SystemService {
     }
 
     private void addDeviceEventListener(IHdmiDeviceEventListener listener) {
+        DeviceEventListenerRecord record = new DeviceEventListenerRecord(listener);
+        try {
+            listener.asBinder().linkToDeath(record, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Listener already died");
+            return;
+        }
         synchronized (mLock) {
-            for (DeviceEventListenerRecord record : mDeviceEventListenerRecords) {
-                if (record.mListener.asBinder() == listener.asBinder()) {
-                    listener.asBinder().unlinkToDeath(record, 0);
-                    mDeviceEventListenerRecords.remove(record);
-                    break;
+            mDeviceEventListeners.add(listener);
+            mDeviceEventListenerRecords.add(record);
+        }
+    }
+
+    void invokeDeviceEventListeners(HdmiCecDeviceInfo device, boolean activated) {
+        synchronized (mLock) {
+            for (IHdmiDeviceEventListener listener : mDeviceEventListeners) {
+                try {
+                    listener.onStatusChanged(device, activated);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report device event:" + e);
                 }
             }
-            mHotplugEventListeners.remove(listener);
         }
     }
 
@@ -683,16 +700,16 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private void announceHotplugEvent(int portNo, boolean connected) {
-        HdmiHotplugEvent event = new HdmiHotplugEvent(portNo, connected);
+    private void announceHotplugEvent(int portId, boolean connected) {
+        HdmiHotplugEvent event = new HdmiHotplugEvent(portId, connected);
         synchronized (mLock) {
             for (IHdmiHotplugEventListener listener : mHotplugEventListeners) {
-                invokeHotplugEventListener(listener, event);
+                invokeHotplugEventListenerLocked(listener, event);
             }
         }
     }
 
-    private void invokeHotplugEventListener(IHdmiHotplugEventListener listener,
+    private void invokeHotplugEventListenerLocked(IHdmiHotplugEventListener listener,
             HdmiHotplugEvent event) {
         try {
             listener.onReceived(event);
