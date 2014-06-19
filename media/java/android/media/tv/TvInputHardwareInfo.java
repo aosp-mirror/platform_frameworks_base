@@ -59,7 +59,7 @@ public final class TvInputHardwareInfo implements Parcelable {
     private int mType;
     private int mAudioType;
     private String mAudioAddress;
-    // TODO: Add HDMI handle for HDMI service.
+    private int mHdmiPortId;
 
     private TvInputHardwareInfo() {
     }
@@ -80,6 +80,13 @@ public final class TvInputHardwareInfo implements Parcelable {
         return mAudioAddress;
     }
 
+    public int getHdmiPortId() {
+        if (mType != TV_INPUT_TYPE_HDMI) {
+            throw new IllegalStateException();
+        }
+        return mHdmiPortId;
+    }
+
     // Parcelable
     @Override
     public int describeContents() {
@@ -92,6 +99,9 @@ public final class TvInputHardwareInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeInt(mAudioType);
         dest.writeString(mAudioAddress);
+        if (mType == TV_INPUT_TYPE_HDMI) {
+            dest.writeInt(mHdmiPortId);
+        }
     }
 
     public void readFromParcel(Parcel source) {
@@ -99,6 +109,9 @@ public final class TvInputHardwareInfo implements Parcelable {
         mType = source.readInt();
         mAudioType = source.readInt();
         mAudioAddress = source.readString();
+        if (mType == TV_INPUT_TYPE_HDMI) {
+            mHdmiPortId = source.readInt();
+        }
     }
 
     public static final class Builder {
@@ -106,6 +119,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         private Integer mType = null;
         private int mAudioType = AudioManager.DEVICE_NONE;
         private String mAudioAddress = "";
+        private Integer mHdmiPortId = null;
 
         public Builder() {
         }
@@ -130,8 +144,17 @@ public final class TvInputHardwareInfo implements Parcelable {
             return this;
         }
 
+        public Builder hdmiPortId(int hdmiPortId) {
+            mHdmiPortId = hdmiPortId;
+            return this;
+        }
+
         public TvInputHardwareInfo build() {
             if (mDeviceId == null || mType == null) {
+                throw new UnsupportedOperationException();
+            }
+            if ((mType == TV_INPUT_TYPE_HDMI && mHdmiPortId == null) ||
+                    (mType != TV_INPUT_TYPE_HDMI && mHdmiPortId != null)) {
                 throw new UnsupportedOperationException();
             }
 
@@ -141,6 +164,9 @@ public final class TvInputHardwareInfo implements Parcelable {
             info.mAudioType = mAudioType;
             if (info.mAudioType != AudioManager.DEVICE_NONE) {
                 info.mAudioAddress = mAudioAddress;
+            }
+            if (mHdmiPortId != null) {
+                info.mHdmiPortId = mHdmiPortId;
             }
             return info;
         }
