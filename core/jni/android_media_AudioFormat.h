@@ -20,11 +20,15 @@
 #include <system/audio.h>
 
 // keep these values in sync with AudioFormat.java
-#define ENCODING_PCM_16BIT 2
-#define ENCODING_PCM_8BIT  3
-#define ENCODING_PCM_FLOAT 4
-#define ENCODING_INVALID 0
-#define ENCODING_DEFAULT 1
+#define ENCODING_PCM_16BIT  2
+#define ENCODING_PCM_8BIT   3
+#define ENCODING_PCM_FLOAT  4
+#define ENCODING_AC3        5
+#define ENCODING_E_AC3      6
+#define ENCODING_INVALID    0
+#define ENCODING_DEFAULT    1
+
+
 
 #define CHANNEL_INVALID 0
 #define CHANNEL_OUT_DEFAULT 1
@@ -38,6 +42,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_PCM_8_BIT;
     case ENCODING_PCM_FLOAT:
         return AUDIO_FORMAT_PCM_FLOAT;
+    case ENCODING_AC3:
+        return AUDIO_FORMAT_AC3;
+    case ENCODING_E_AC3:
+        return AUDIO_FORMAT_E_AC3;
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -54,6 +62,10 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_PCM_8BIT;
     case AUDIO_FORMAT_PCM_FLOAT:
         return ENCODING_PCM_FLOAT;
+    case AUDIO_FORMAT_AC3:
+        return ENCODING_AC3;
+    case AUDIO_FORMAT_E_AC3:
+        return ENCODING_E_AC3;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:

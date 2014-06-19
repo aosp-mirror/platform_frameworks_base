@@ -13739,7 +13739,9 @@ package android.media {
     field public static final int CHANNEL_OUT_QUAD = 204; // 0xcc
     field public static final int CHANNEL_OUT_STEREO = 12; // 0xc
     field public static final int CHANNEL_OUT_SURROUND = 1052; // 0x41c
+    field public static final int ENCODING_AC3 = 5; // 0x5
     field public static final int ENCODING_DEFAULT = 1; // 0x1
+    field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
     field public static final int ENCODING_PCM_8BIT = 3; // 0x3
@@ -13813,6 +13815,7 @@ package android.media {
     field public static final int AUDIOFOCUS_REQUEST_FAILED = 0; // 0x0
     field public static final int AUDIOFOCUS_REQUEST_GRANTED = 1; // 0x1
     field public static final int ERROR = -1; // 0xffffffff
+    field public static final int ERROR_DEAD_OBJECT = -6; // 0xfffffffa
     field public static final java.lang.String EXTRA_RINGER_MODE = "android.media.EXTRA_RINGER_MODE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_PREVIOUS_STATE = "android.media.extra.SCO_AUDIO_PREVIOUS_STATE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_STATE = "android.media.extra.SCO_AUDIO_STATE";
