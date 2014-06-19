@@ -219,6 +219,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         // Wait for a down key event to start processing.
         if (!mKeyEventSequenceStarted) {
             if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                super.onInputEvent(event, policyFlags);
                 return;
             }
             mKeyEventSequenceStarted = true;
