@@ -31349,6 +31349,7 @@ package android.view {
   }
 
   public final class Display {
+    method public long getAppVsyncOffsetNanos();
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method public int getDisplayId();
     method public int getFlags();
@@ -31357,6 +31358,7 @@ package android.view {
     method public java.lang.String getName();
     method public deprecated int getOrientation();
     method public deprecated int getPixelFormat();
+    method public long getPresentationDeadlineNanos();
     method public void getRealMetrics(android.util.DisplayMetrics);
     method public void getRealSize(android.graphics.Point);
     method public void getRectSize(android.graphics.Rect);
