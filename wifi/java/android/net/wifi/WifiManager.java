@@ -2226,7 +2226,6 @@ public class WifiManager {
         }
     }
 
-
     /**
      * Set wifi verbose log. Called from developer settings.
      * @hide
@@ -2247,6 +2246,55 @@ public class WifiManager {
     public int getVerboseLoggingLevel() {
         try {
             return mService.getVerboseLoggingLevel();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Set wifi Aggressive Handover. Called from developer settings.
+     * @hide
+     */
+    public void enableAggressiveHandover(int enabled) {
+        try {
+            mService.enableAggressiveHandover(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * Get the WiFi Handover aggressiveness.This is used by settings
+     * to decide what to show within the picker.
+     * @hide
+     */
+    public int getAggressiveHandover() {
+        try {
+            return mService.getAggressiveHandover();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Set setting for allowing Scans when traffic is ongoing.
+     * @hide
+     */
+    public void setAllowScansWithTraffic(int enabled) {
+        try {
+            mService.setAllowScansWithTraffic(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * Get setting for allowing Scans when traffic is ongoing.
+     * @hide
+     */
+    public int getAllowScansWithTraffic() {
+        try {
+            return mService.getAllowScansWithTraffic();
         } catch (RemoteException e) {
             return 0;
         }
