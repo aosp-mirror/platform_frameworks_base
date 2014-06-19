@@ -65,8 +65,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private long mExitAnimationEnd;
     private Drawable mLastDrawable;
 
-    private Insets mInsets = Insets.NONE;
-
     // overrides from Drawable
 
     @Override
@@ -118,7 +116,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      */
     @Override
     public Insets getOpticalInsets() {
-        return mInsets;
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.getOpticalInsets();
+        }
+        return Insets.NONE;
     }
 
     @Override
@@ -203,9 +204,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.setBounds(bounds);
-
-            // Must obtain optical insets after setting bounds.
-            mInsets = mCurrDrawable.getOpticalInsets();
         }
     }
 
@@ -422,15 +420,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
                 d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
-
-                // Must obtain optical insets after setting bounds.
-                mInsets = d.getOpticalInsets();
-            } else {
-                mInsets = Insets.NONE;
             }
         } else {
             mCurrDrawable = null;
-            mInsets = Insets.NONE;
             mCurIndex = -1;
         }
 

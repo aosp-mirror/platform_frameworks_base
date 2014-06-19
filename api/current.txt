@@ -32562,6 +32562,7 @@ package android.view {
     method public void dispatchWindowSystemUiVisiblityChanged(int);
     method public void dispatchWindowVisibilityChanged(int);
     method public void draw(android.graphics.Canvas);
+    method public void drawableHotspotChanged(float, float);
     method protected void drawableStateChanged();
     method public android.view.View findFocus();
     method public final android.view.View findViewById(int);
