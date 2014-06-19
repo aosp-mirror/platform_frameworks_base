@@ -23461,7 +23461,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_DIRECTORY = "data";
   }
 
-  public static final class ContactsContract.Contacts.Entity implements android.provider.BaseColumns android.provider.ContactsContract.BaseSyncColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.StatusColumns android.provider.ContactsContract.SyncColumns {
+  public static final class ContactsContract.Contacts.Entity implements android.provider.BaseColumns android.provider.ContactsContract.BaseSyncColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.DataUsageStatColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.StatusColumns android.provider.ContactsContract.SyncColumns {
     field public static final java.lang.String CONTENT_DIRECTORY = "entities";
     field public static final java.lang.String DATA_ID = "data_id";
     field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
