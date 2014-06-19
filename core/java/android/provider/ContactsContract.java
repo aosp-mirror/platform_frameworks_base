@@ -1694,7 +1694,7 @@ public final class ContactsContract {
          */
         public static final class Entity implements BaseColumns, ContactsColumns,
                 ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
-                StatusColumns, ContactOptionsColumns, ContactStatusColumns {
+                StatusColumns, ContactOptionsColumns, ContactStatusColumns, DataUsageStatColumns {
             /**
              * no public constructor since this is a utility class
              */
