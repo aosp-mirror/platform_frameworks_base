@@ -50,6 +50,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     public static final String DEBUG_PROP = "HAL1ShimLogging";
     private final String TAG;
 
+    private static final boolean DEBUG = false;
     private final int mCameraId;
     private final ICameraDeviceCallbacks mDeviceCallbacks;
     private final CameraDeviceState mDeviceState = new CameraDeviceState();
@@ -84,6 +85,9 @@ public class LegacyCameraDevice implements AutoCloseable {
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onError callback.");
+                    }
                     try {
                         mDeviceCallbacks.onCameraError(errorCode, extras);
                     } catch (RemoteException e) {
@@ -92,13 +96,14 @@ public class LegacyCameraDevice implements AutoCloseable {
                     }
                 }
             });
-
-
         }
 
         @Override
         public void onConfiguring() {
             // Do nothing
+            if (DEBUG) {
+                Log.d(TAG, "doing onConfiguring callback.");
+            }
         }
 
         @Override
@@ -108,6 +113,9 @@ public class LegacyCameraDevice implements AutoCloseable {
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onIdle callback.");
+                    }
                     try {
                         mDeviceCallbacks.onCameraIdle();
                     } catch (RemoteException e) {
@@ -126,6 +134,9 @@ public class LegacyCameraDevice implements AutoCloseable {
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onCaptureStarted callback.");
+                    }
                     try {
                         // TODO: Don't fake timestamp
                         mDeviceCallbacks.onCaptureStarted(extras, timestamp);
@@ -135,7 +146,6 @@ public class LegacyCameraDevice implements AutoCloseable {
                     }
                 }
             });
-
         }
 
         @Override
@@ -145,6 +155,9 @@ public class LegacyCameraDevice implements AutoCloseable {
             mResultHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onCaptureResult callback.");
+                    }
                     try {
                         // TODO: Don't fake metadata
                         mDeviceCallbacks.onResultReceived(result, extras);

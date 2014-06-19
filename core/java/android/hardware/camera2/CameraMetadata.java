@@ -248,7 +248,6 @@ public abstract class CameraMetadata<TKey> {
      * <li>Manual frame duration control<ul>
      * <li>{@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}</li>
      * <li>{@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
-     * <li>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}</li>
      * </ul>
      * </li>
      * <li>Manual exposure control<ul>
@@ -279,6 +278,9 @@ public abstract class CameraMetadata<TKey> {
      * result.</p>
      * <p>A given camera device may also support additional manual sensor controls,
      * but this capability only covers the above list of controls.</p>
+     * <p>If this is supported, {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} will
+     * additionally return a min frame duration that is greater than
+     * zero for each supported size-format combination.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP

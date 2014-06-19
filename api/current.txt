@@ -12834,6 +12834,7 @@ package android.hardware.camera2.params {
     method public boolean isOutputSupportedFor(int);
     method public static boolean isOutputSupportedFor(java.lang.Class<T>);
     method public boolean isOutputSupportedFor(android.view.Surface);
+    field public static final long NO_MIN_FRAME_DURATION = 0L; // 0x0L
   }
 
   public final class TonemapCurve {
