@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
@@ -31,8 +32,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
@@ -616,10 +617,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         // job that runs one of the app's services, as well as verifying that the
         // named service properly requires the BIND_JOB_SERVICE permission
         private void enforceValidJobRequest(int uid, JobInfo job) {
-            final PackageManager pm = getContext().getPackageManager();
+            final IPackageManager pm = AppGlobals.getPackageManager();
             final ComponentName service = job.getService();
             try {
-                ServiceInfo si = pm.getServiceInfo(service, 0);
+                ServiceInfo si = pm.getServiceInfo(service, 0, UserHandle.getUserId(uid));
+                if (si == null) {
+                    throw new IllegalArgumentException("No such service " + service);
+                }
                 if (si.applicationInfo.uid != uid) {
                     throw new IllegalArgumentException("uid " + uid +
                             " cannot schedule job in " + service.getPackageName());
@@ -628,8 +632,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     throw new IllegalArgumentException("Scheduled service " + service
                             + " does not require android.permission.BIND_JOB_SERVICE permission");
                 }
-            } catch (NameNotFoundException e) {
-                throw new IllegalArgumentException("No such service: " + service);
+            } catch (RemoteException e) {
+                // Can't happen; the Package Manager is in this same process
             }
         }
 
