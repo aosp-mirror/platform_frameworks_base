@@ -1066,40 +1066,6 @@ final class ActivityStack {
         }
     }
 
-    /**
-     * Determine if home should be visible below the passed record.
-     * @param record activity we are querying for.
-     * @return true if home is visible below the passed activity, false otherwise.
-     */
-    boolean isActivityOverHome(ActivityRecord record) {
-        // Start at record and go down, look for either home or a visible fullscreen activity.
-        final TaskRecord recordTask = record.task;
-        for (int taskNdx = mTaskHistory.indexOf(recordTask); taskNdx >= 0; --taskNdx) {
-            TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            final int startNdx =
-                    task == recordTask ? activities.indexOf(record) : activities.size() - 1;
-            for (int activityNdx = startNdx; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                if (r.isHomeActivity()) {
-                    return true;
-                }
-                if (!r.finishing && r.fullscreen) {
-                    // Passed activity is over a fullscreen activity.
-                    return false;
-                }
-            }
-            if (task.mOnTopOfHome) {
-                // Got to the bottom of a task on top of home without finding a visible fullscreen
-                // activity. Home is visible.
-                return true;
-            }
-        }
-        // Got to the bottom of this stack and still don't know. If this is over the home stack
-        // then record is over home. May not work if we ever get more than two layers.
-        return mStackSupervisor.isFrontStack(this);
-    }
-
     private void setVisibile(ActivityRecord r, boolean visible) {
         r.visible = visible;
         mWindowManager.setAppVisibility(r.appToken, visible);
@@ -1954,8 +1920,7 @@ final class ActivityStack {
                 // existing activities from other tasks in to it.
                 // If the caller has requested that the target task be
                 // reset, then do so.
-                if ((r.intent.getFlags()
-                        & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+                if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
                     resetTaskIfNeededLocked(r, r);
                     doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
@@ -2048,7 +2013,8 @@ final class ActivityStack {
         // the root, we may no longer have the task!).
         final ArrayList<ActivityRecord> activities = task.mActivities;
         final int numActivities = activities.size();
-        for (int i = numActivities - 1; i > 0; --i ) {
+        final int rootActivityNdx = task.findEffectiveRootIndex();
+        for (int i = numActivities - 1; i > rootActivityNdx; --i ) {
             ActivityRecord target = activities.get(i);
 
             final int flags = target.info.flags;
@@ -2207,8 +2173,10 @@ final class ActivityStack {
 
         final ArrayList<ActivityRecord> activities = affinityTask.mActivities;
         final int numActivities = activities.size();
-        // Do not operate on the root Activity.
-        for (int i = numActivities - 1; i > 0; --i) {
+        final int rootActivityNdx = affinityTask.findEffectiveRootIndex();
+
+        // Do not operate on or below the effective root Activity.
+        for (int i = numActivities - 1; i > rootActivityNdx; --i) {
             ActivityRecord target = activities.get(i);
 
             final int flags = target.info.flags;

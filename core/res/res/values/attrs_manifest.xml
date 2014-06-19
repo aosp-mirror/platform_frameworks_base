@@ -985,6 +985,14 @@
          Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS} -->
     <attr name="autoRemoveFromRecents" format="boolean" />
 
+    <!-- Tasks whose root has this attribute set to true will replace baseIntent with that of the
+         next activity in the task. If the next activity also has this attribute set to true then
+         it will yield the baseIntent to any activity that it launches in the same task. This
+         continues until an activity is encountered which has this attribute set to false. False
+         is the default. This attribute set to true also permits activity's use of the
+         TaskDescription to change labels, colors and icons in the recent task list. -->
+    <attr name="relinquishTaskIdentity" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1653,6 +1661,7 @@
         <attr name="documentLaunchMode" />
         <attr name="maxRecents" />
         <attr name="autoRemoveFromRecents" />
+        <attr name="relinquishTaskIdentity" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

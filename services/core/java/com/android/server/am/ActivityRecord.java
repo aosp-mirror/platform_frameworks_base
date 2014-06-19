@@ -582,11 +582,6 @@ final class ActivityRecord {
         }
     }
 
-    boolean isRootActivity() {
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        return activities.size() == 0 || this == activities.get(0);
-    }
-
     UriPermissionOwner getUriPermissionsLocked() {
         if (uriPermissions == null) {
             uriPermissions = new UriPermissionOwner(service, this);
@@ -1035,11 +1030,11 @@ final class ActivityRecord {
             return -1;
         }
         final TaskRecord task = r.task;
-        switch (task.mActivities.indexOf(r)) {
-            case -1: return -1;
-            case 0: return task.taskId;
-            default: return onlyRoot ? -1 : task.taskId;
+        final int activityNdx = task.mActivities.indexOf(r);
+        if (activityNdx < 0 || (onlyRoot && activityNdx > task.findEffectiveRootIndex())) {
+            return -1;
         }
+        return task.taskId;
     }
 
     static ActivityRecord isInStackLocked(IBinder token) {

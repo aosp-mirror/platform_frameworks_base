@@ -27,7 +27,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
@@ -57,11 +56,12 @@ final class TaskRecord extends ThumbnailHolder {
     private static final String ATTR_ONTOPOFHOME = "on_top_of_home";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
+    private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     final int taskId;       // Unique identifier for this task.
-    final String affinity;  // The affinity name for this task, or null.
+    String affinity;        // The affinity name for this task, or null.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
     final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task.
@@ -111,13 +111,15 @@ final class TaskRecord extends ThumbnailHolder {
      * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
 
+    /** If original intent did not allow relinquishing task identity, save that information */
+    boolean mNeverRelinquishIdentity = true;
+
     final ActivityManagerService mService;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
         taskId = _taskId;
-        affinity = info.taskAffinity;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
         setIntent(_intent, info);
@@ -128,7 +130,7 @@ final class TaskRecord extends ThumbnailHolder {
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _askedCompatMode, int _taskType, boolean _onTopOfHome,
             int _userId, String _lastDescription, ArrayList<ActivityRecord> activities,
-            long lastTimeMoved) {
+            long lastTimeMoved, boolean neverRelinquishIdentity) {
         mService = service;
         taskId = _taskId;
         intent = _intent;
@@ -146,6 +148,7 @@ final class TaskRecord extends ThumbnailHolder {
         lastDescription = _lastDescription;
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
+        mNeverRelinquishIdentity = neverRelinquishIdentity;
     }
 
     void touchActiveTime() {
@@ -157,6 +160,14 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     void setIntent(Intent _intent, ActivityInfo info) {
+        if (intent == null) {
+            mNeverRelinquishIdentity =
+                    (info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+        } else if (mNeverRelinquishIdentity) {
+            return;
+        }
+
+        affinity = info.taskAffinity;
         stringName = null;
 
         if (info.targetActivity == null) {
@@ -282,6 +293,7 @@ final class TaskRecord extends ThumbnailHolder {
 
         mActivities.remove(newTop);
         mActivities.add(newTop);
+        updateEffectiveIntent();
 
         setFrontOfTask();
     }
@@ -311,6 +323,7 @@ final class TaskRecord extends ThumbnailHolder {
             r.mActivityType = taskType;
         }
         mActivities.add(index, r);
+        updateEffectiveIntent();
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
         }
@@ -322,6 +335,7 @@ final class TaskRecord extends ThumbnailHolder {
             // Was previously in list.
             numFullscreen--;
         }
+        updateEffectiveIntent();
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
         }
@@ -579,12 +593,19 @@ final class TaskRecord extends ThumbnailHolder {
         // utility activities.
         int activityNdx;
         final int numActivities = mActivities.size();
+        final boolean relinquish = numActivities == 0 ? false :
+                (mActivities.get(0).info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) != 0;
         for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
                 ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
+            if (relinquish && (r.info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+                // This will be the top activity for determining taskDescription. Pre-inc to
+                // overcome initial decrement below.
+                ++activityNdx;
+                break;
+            }
             if (r.intent != null &&
-                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                            != 0) {
+                    (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                 break;
             }
         }
@@ -615,6 +636,27 @@ final class TaskRecord extends ThumbnailHolder {
         }
     }
 
+    int findEffectiveRootIndex() {
+        int activityNdx;
+        final int topActivityNdx = mActivities.size() - 1;
+        for (activityNdx = 0; activityNdx < topActivityNdx; ++activityNdx) {
+            final ActivityRecord r = mActivities.get(activityNdx);
+            if (r.finishing) {
+                continue;
+            }
+            if ((r.info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+                break;
+            }
+        }
+        return activityNdx;
+    }
+
+    void updateEffectiveIntent() {
+        final int effectiveRootIndex = findEffectiveRootIndex();
+        final ActivityRecord r = mActivities.get(effectiveRootIndex);
+        setIntent(r.intent, r.info);
+    }
+
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         Slog.i(TAG, "Saving task=" + this);
 
@@ -634,6 +676,7 @@ final class TaskRecord extends ThumbnailHolder {
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
         out.attribute(null, ATTR_ONTOPOFHOME, String.valueOf(mOnTopOfHome));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
+        out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
         if (lastDescription != null) {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
@@ -684,6 +727,7 @@ final class TaskRecord extends ThumbnailHolder {
         int userId = 0;
         String lastDescription = null;
         long lastTimeOnTop = 0;
+        boolean neverRelinquishIdentity = true;
         int taskId = -1;
         final int outerDepth = in.getDepth();
 
@@ -714,6 +758,8 @@ final class TaskRecord extends ThumbnailHolder {
                 lastDescription = attrValue;
             } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
                 lastTimeOnTop = Long.valueOf(attrValue);
+            } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
+                neverRelinquishIdentity = Boolean.valueOf(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -748,7 +794,7 @@ final class TaskRecord extends ThumbnailHolder {
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
                 askedCompatMode, taskType, onTopOfHome, userId, lastDescription, activities,
-                lastTimeOnTop);
+                lastTimeOnTop, neverRelinquishIdentity);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);

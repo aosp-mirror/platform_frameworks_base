@@ -2629,6 +2629,12 @@ public class PackageParser {
                     false)) {
                 a.info.flags |= ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS;
             }
+
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_relinquishTaskIdentity,
+                    false)) {
+                a.info.flags |= ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
+            }
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
