@@ -37,6 +37,7 @@
 #include "TextLayout.h"
 
 #ifdef USE_MINIKIN
+#include <minikin/GraphemeBreak.h>
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
@@ -778,6 +779,11 @@ public:
 
     static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
             jint count, jint flags, jint offset, jint opt) {
+#ifdef USE_MINIKIN
+        GraphemeBreak::MoveOpt moveOpt = GraphemeBreak::MoveOpt(opt);
+        size_t result = GraphemeBreak::getTextRunCursor(text, start, count, offset, moveOpt);
+        return static_cast<jint>(result);
+#else
         jfloat scalarArray[count];
 
         TextLayout::getTextRunAdvances(paint, text, start, count, start + count, flags,
@@ -818,6 +824,7 @@ public:
         }
 
         return pos;
+#endif
     }
 
     static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, jlong paintHandle, jcharArray text,
