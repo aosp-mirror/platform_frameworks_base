@@ -135,7 +135,6 @@ public class GradientDrawable extends Drawable {
     private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
     private int mAlpha = 0xFF;  // modified by the caller
-    private boolean mDither;
 
     private final Path mPath = new Path();
     private final RectF mRect = new RectF();
@@ -543,7 +542,7 @@ public class GradientDrawable extends Drawable {
             if (mLayerPaint == null) {
                 mLayerPaint = new Paint();
             }
-            mLayerPaint.setDither(mDither);
+            mLayerPaint.setDither(st.mDither);
             mLayerPaint.setAlpha(mAlpha);
             mLayerPaint.setColorFilter(mColorFilter);
 
@@ -561,14 +560,14 @@ public class GradientDrawable extends Drawable {
                 individual paints
             */
             mFillPaint.setAlpha(currFillAlpha);
-            mFillPaint.setDither(mDither);
+            mFillPaint.setDither(st.mDither);
             mFillPaint.setColorFilter(mColorFilter);
-            if (mColorFilter != null && mGradientState.mColorStateList == null) {
+            if (mColorFilter != null && st.mColorStateList == null) {
                 mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
                 mStrokePaint.setAlpha(currStrokeAlpha);
-                mStrokePaint.setDither(mDither);
+                mStrokePaint.setDither(st.mDither);
                 mStrokePaint.setColorFilter(mColorFilter);
             }
         }
@@ -804,8 +803,8 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public void setDither(boolean dither) {
-        if (dither != mDither) {
-            mDither = dither;
+        if (dither != mGradientState.mDither) {
+            mGradientState.mDither = dither;
             invalidateSelf();
         }
     }
@@ -1015,7 +1014,7 @@ public class GradientDrawable extends Drawable {
         state.mThemeAttrs = a.extractThemeAttrs();
 
         state.mShape = a.getInt(R.styleable.GradientDrawable_shape, state.mShape);
-        mDither = a.getBoolean(R.styleable.GradientDrawable_dither, mDither);
+        state.mDither = a.getBoolean(R.styleable.GradientDrawable_dither, state.mDither);
 
         if (state.mShape == RING) {
             state.mInnerRadius = a.getDimensionPixelSize(
@@ -1459,6 +1458,8 @@ public class GradientDrawable extends Drawable {
         public float mThicknessRatio = DEFAULT_THICKNESS_RATIO;
         public int mInnerRadius = -1;
         public int mThickness = -1;
+        public boolean mDither = false;
+
         private float mCenterX = 0.5f;
         private float mCenterY = 0.5f;
         private float mGradientRadius = 0.5f;
@@ -1510,6 +1511,7 @@ public class GradientDrawable extends Drawable {
             mThicknessRatio = state.mThicknessRatio;
             mInnerRadius = state.mInnerRadius;
             mThickness = state.mThickness;
+            mDither = state.mDither;
             mCenterX = state.mCenterX;
             mCenterY = state.mCenterY;
             mGradientRadius = state.mGradientRadius;

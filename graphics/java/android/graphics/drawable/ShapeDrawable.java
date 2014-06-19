@@ -416,6 +416,9 @@ public class ShapeDrawable extends Drawable {
         final ShapeState state = mShapeState;
         final Paint paint = state.mPaint;
 
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
         int color = paint.getColor();
         color = a.getColor(R.styleable.ShapeDrawable_color, color);
         paint.setColor(color);
