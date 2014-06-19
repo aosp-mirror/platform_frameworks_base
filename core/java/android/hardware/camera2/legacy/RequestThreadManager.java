@@ -71,6 +71,8 @@ public class RequestThreadManager {
     private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
     private boolean mPreviewRunning = false;
 
+    private volatile long mLastJpegTimestamp;
+    private volatile long mLastPreviewTimestamp;
     private volatile RequestHolder mInFlightPreview;
     private volatile RequestHolder mInFlightJpeg;
 
@@ -78,6 +80,7 @@ public class RequestThreadManager {
     private List<Surface> mCallbackOutputs = new ArrayList<Surface>();
     private GLThreadManager mGLThreadManager;
     private SurfaceTexture mPreviewTexture;
+    private Camera.Parameters mParams;
 
     private Size mIntermediateBufferSize;
 
@@ -86,6 +89,7 @@ public class RequestThreadManager {
     private Surface mDummySurface;
 
     private final FpsCounter mPrevCounter = new FpsCounter("Incoming Preview");
+    private final FpsCounter mRequestCounter = new FpsCounter("Incoming Requests");
 
     /**
      * Container object for Configure messages.
@@ -209,23 +213,34 @@ public class RequestThreadManager {
         }
     };
 
+    private final Camera.ShutterCallback mJpegShutterCallback = new Camera.ShutterCallback() {
+        @Override
+        public void onShutter() {
+            mLastJpegTimestamp = SystemClock.elapsedRealtimeNanos();
+        }
+    };
+
     private final SurfaceTexture.OnFrameAvailableListener mPreviewCallback =
             new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                    RequestHolder holder = mInFlightPreview;
+                    if (holder == null) {
+                        mGLThreadManager.queueNewFrame(null);
+                        Log.w(TAG, "Dropping preview frame.");
+                        return;
+                    }
+
                     if (DEBUG) {
                         mPrevCounter.countAndLog();
                     }
-                    RequestHolder holder = mInFlightPreview;
-                    if (holder == null) {
-                        Log.w(TAG, "Dropping preview frame.");
-                        mInFlightPreview = null;
-                        return;
-                    }
+                    mInFlightPreview = null;
+
                     if (holder.hasPreviewTargets()) {
                         mGLThreadManager.queueNewFrame(holder.getHolderTargets());
                     }
 
+                    mLastPreviewTimestamp = surfaceTexture.getTimestamp();
                     mReceivedPreview.open();
                 }
             };
@@ -252,7 +267,7 @@ public class RequestThreadManager {
         }
         mInFlightJpeg = request;
         // TODO: Hook up shutter callback to CameraDeviceStateListener#onCaptureStarted
-        mCamera.takePicture(/*shutter*/null, /*raw*/null, mJpegCallback);
+        mCamera.takePicture(mJpegShutterCallback, /*raw*/null, mJpegCallback);
         mPreviewRunning = false;
     }
 
@@ -312,7 +327,7 @@ public class RequestThreadManager {
                     break;
             }
         }
-
+        mParams = mCamera.getParameters();
         if (mPreviewOutputs.size() > 0) {
             List<Size> outputSizes = new ArrayList<>(outputs.size());
             for (Surface s : mPreviewOutputs) {
@@ -323,13 +338,11 @@ public class RequestThreadManager {
 
             Size largestOutput = findLargestByArea(outputSizes);
 
-            Camera.Parameters params = mCamera.getParameters();
-
             // Find largest jpeg dimension - assume to have the same aspect ratio as sensor.
-            List<Size> supportedJpegSizes = convertSizeList(params.getSupportedPictureSizes());
+            List<Size> supportedJpegSizes = convertSizeList(mParams.getSupportedPictureSizes());
             Size largestJpegDimen = findLargestByArea(supportedJpegSizes);
 
-            List<Size> supportedPreviewSizes = convertSizeList(params.getSupportedPreviewSizes());
+            List<Size> supportedPreviewSizes = convertSizeList(mParams.getSupportedPreviewSizes());
 
             // Use smallest preview dimension with same aspect ratio as sensor that is >= than all
             // of the configured output dimensions.  If none exists, fall back to using the largest
@@ -428,6 +441,9 @@ public class RequestThreadManager {
                 return true;
             }
 
+            if (DEBUG) {
+                Log.d(TAG, "Request thread handling message:" + msg.what);
+            }
             switch (msg.what) {
                 case MSG_CONFIGURE_OUTPUTS:
                     ConfigureHolder config = (ConfigureHolder) msg.obj;
@@ -460,6 +476,7 @@ public class RequestThreadManager {
                             nextBurst.first.produceRequestHolders(nextBurst.second);
                     for (RequestHolder holder : requests) {
                         mDeviceState.setCaptureStart(holder);
+                        long timestamp = 0;
                         try {
                             if (holder.hasPreviewTargets()) {
                                 mReceivedPreview.close();
@@ -468,6 +485,7 @@ public class RequestThreadManager {
                                     // TODO: report error to CameraDevice
                                     Log.e(TAG, "Hit timeout for preview callback!");
                                 }
+                                timestamp = mLastPreviewTimestamp;
                             }
                             if (holder.hasJpegTargets()) {
                                 mReceivedJpeg.close();
@@ -478,15 +496,18 @@ public class RequestThreadManager {
                                     Log.e(TAG, "Hit timeout for jpeg callback!");
                                 }
                                 mInFlightJpeg = null;
+                                timestamp = mLastJpegTimestamp;
                             }
                         } catch (IOException e) {
                             // TODO: err handling
                             throw new IOError(e);
                         }
-                        Camera.Parameters params = mCamera.getParameters();
-                        CameraMetadataNative result = convertResultMetadata(params,
-                                holder.getRequest());
+                        CameraMetadataNative result = convertResultMetadata(mParams,
+                                holder.getRequest(), timestamp);
                         mDeviceState.setCaptureResult(holder, result);
+                    }
+                    if (DEBUG) {
+                        mRequestCounter.countAndLog();
                     }
                     break;
                 case MSG_CLEANUP:
@@ -507,9 +528,11 @@ public class RequestThreadManager {
     };
 
     private CameraMetadataNative convertResultMetadata(Camera.Parameters params,
-                                                       CaptureRequest request) {
+                                                       CaptureRequest request,
+                                                       long timestamp) {
         CameraMetadataNative result = new CameraMetadataNative();
         result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
+        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
 
         // TODO: Remaining result metadata tags conversions.
         return result;

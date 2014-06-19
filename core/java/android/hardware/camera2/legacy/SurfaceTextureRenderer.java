@@ -486,6 +486,7 @@ public class SurfaceTextureRenderer {
         }
         checkGlError("before updateTexImage");
         mSurfaceTexture.updateTexImage();
+        if (targetSurfaces == null) return;
         for (EGLSurfaceHolder holder : mSurfaces) {
             if (targetSurfaces.contains(holder.surface)) {
                 makeCurrent(holder.eglSurface);

@@ -44,6 +44,11 @@ public class LegacyMetadataMapper {
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
 
+    private static final long APPROXIMATE_CAPTURE_DELAY_MS = 200; // ms
+    private static final long APPROXIMATE_SENSOR_AREA = (1 << 20); // 8mp
+    private static final long APPROXIMATE_JPEG_ENCODE_TIME = 600; // ms
+    private static final long NS_PER_MS = 1000000;
+
     /**
      * Create characteristics for a legacy device by mapping the {@code parameters}
      * and {@code info}
@@ -91,9 +96,6 @@ public class LegacyMetadataMapper {
     }
 
     private static void mapStreamConfigs(CameraMetadataNative m, Camera.Parameters p) {
-        // TODO: set non-empty durations
-        m.set(SCALER_AVAILABLE_MIN_FRAME_DURATIONS, new StreamConfigurationDuration[] {} );
-        m.set(SCALER_AVAILABLE_STALL_DURATIONS, new StreamConfigurationDuration[] {} );
 
         ArrayList<StreamConfiguration> availableStreamConfigs = new ArrayList<>();
         /*
@@ -122,10 +124,25 @@ public class LegacyMetadataMapper {
                         String.format("mapStreamConfigs - Skipping non-public format %x", format));
             }
         }
+
+        List<Camera.Size> jpegSizes = p.getSupportedPictureSizes();
         appendStreamConfig(availableStreamConfigs,
                 HAL_PIXEL_FORMAT_BLOB, p.getSupportedPictureSizes());
         m.set(SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
                 availableStreamConfigs.toArray(new StreamConfiguration[0]));
+
+        // No frame durations available
+        m.set(SCALER_AVAILABLE_MIN_FRAME_DURATIONS, new StreamConfigurationDuration[0]);
+
+        StreamConfigurationDuration[] jpegStalls =
+                new StreamConfigurationDuration[jpegSizes.size()];
+        int i = 0;
+        for (Camera.Size s : jpegSizes) {
+            jpegStalls[i++] = new StreamConfigurationDuration(HAL_PIXEL_FORMAT_BLOB, s.width,
+                    s.height, calculateJpegStallDuration(s));
+        }
+        // Set stall durations for jpeg, other formats use default stall duration
+        m.set(SCALER_AVAILABLE_STALL_DURATIONS, jpegStalls);
     }
 
     private static void appendStreamConfig(
@@ -135,5 +152,18 @@ public class LegacyMetadataMapper {
                     new StreamConfiguration(format, size.width, size.height, /*input*/false);
             configs.add(config);
         }
+    }
+
+    /**
+     * Return the stall duration for a given output jpeg size in nanoseconds.
+     *
+     * <p>An 8mp image is chosen to have a stall duration of 0.8 seconds.</p>
+     */
+    private static long calculateJpegStallDuration(Camera.Size size) {
+        long baseDuration = APPROXIMATE_CAPTURE_DELAY_MS * NS_PER_MS; // 200ms for capture
+        long area = size.width * (long) size.height;
+        long stallPerArea = APPROXIMATE_JPEG_ENCODE_TIME * NS_PER_MS /
+                APPROXIMATE_SENSOR_AREA; // 600ms stall for 8mp
+        return baseDuration + area * stallPerArea;
     }
 }

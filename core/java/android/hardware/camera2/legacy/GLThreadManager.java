@@ -100,6 +100,7 @@ public class GLThreadManager {
                     break;
                 case MSG_ALLOW_FRAMES:
                     mDroppingFrames = false;
+                    break;
                 default:
                     Log.e(TAG, "Unhandled message " + msg.what + " on GLThread.");
                     break;

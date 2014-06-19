@@ -63,6 +63,12 @@ import static com.android.internal.util.Preconditions.*;
 public final class StreamConfigurationMap {
 
     private static final String TAG = "StreamConfigurationMap";
+
+    /**
+     * Indicates that a minimum frame duration is not available for a particular configuration.
+     */
+    public static final long NO_MIN_FRAME_DURATION = 0;
+
     /**
      * Create a new {@link StreamConfigurationMap}.
      *
@@ -359,7 +365,9 @@ public final class StreamConfigurationMap {
      *
      * @param format an image format from {@link ImageFormat} or {@link PixelFormat}
      * @param size an output-compatible size
-     * @return a minimum frame duration {@code >=} 0 in nanoseconds
+     * @return a minimum frame duration {@code >} 0 in nanoseconds, or
+     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available (this
+     *          can only occur on limited mode devices).
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
      * @throws NullPointerException if {@code size} was {@code null}
@@ -406,7 +414,9 @@ public final class StreamConfigurationMap {
      *          a class which is supported by {@link #isOutputSupportedFor(Class)} and has a
      *          non-empty array returned by {@link #getOutputSizes(Class)}
      * @param size an output-compatible size
-     * @return a minimum frame duration {@code >=} 0 in nanoseconds
+     * @return a minimum frame duration {@code >} 0 in nanoseconds, or
+     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available (this
+     *          can only occur on limited mode devices).
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
      * @throws NullPointerException if {@code size} or {@code klass} was {@code null}
@@ -892,7 +902,7 @@ public final class StreamConfigurationMap {
     private long getDurationDefault(int duration) {
         switch (duration) {
             case DURATION_MIN_FRAME:
-                throw new AssertionError("Minimum frame durations are required to be listed");
+                return NO_MIN_FRAME_DURATION;
             case DURATION_STALL:
                 return 0L; // OK. A lack of a stall duration implies a 0 stall duration
             default:

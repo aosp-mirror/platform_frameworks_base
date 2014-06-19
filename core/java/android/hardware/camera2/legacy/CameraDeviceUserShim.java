@@ -169,7 +169,6 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             }
             int numSurfaces = mSurfaces.size();
             if (numSurfaces > 0) {
-                surfaces = new ArrayList<Surface>();
                 for (int i = 0; i < numSurfaces; ++i) {
                     surfaces.add(mSurfaces.valueAt(i));
                 }
