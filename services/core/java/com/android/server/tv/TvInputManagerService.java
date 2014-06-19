@@ -631,7 +631,9 @@ public final class TvInputManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-            return false;
+            // STOPSHIP: Redesign the API around the availability change. For now, the service
+            // will be always available.
+            return true;
         }
 
         @Override
