@@ -91,8 +91,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
     protected static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
-    private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
-    protected static final int MSG_SET_PLAYBACK_STATE = 316;
     protected static final int MSG_USER_INFO_CHANGED = 317;
     protected static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_SCREEN_TURNED_ON = 319;
@@ -184,12 +182,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 case MSG_BOOT_COMPLETED:
                     handleBootCompleted();
                     break;
-                case MSG_SET_CURRENT_CLIENT_ID:
-                    handleSetGenerationId(msg.arg1, msg.arg2 != 0, (PendingIntent) msg.obj);
-                    break;
-                case MSG_SET_PLAYBACK_STATE:
-                    handleSetPlaybackState(msg.arg1, msg.arg2, (Long) msg.obj);
-                    break;
                 case MSG_USER_INFO_CHANGED:
                     handleUserInfoChanged(msg.arg1);
                     break;
@@ -205,8 +197,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
     };
-
-    private AudioManager mAudioManager;
 
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
 
@@ -256,49 +246,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private DisplayClientState mDisplayClientState = new DisplayClientState();
-
-    /**
-     * This currently implements the bare minimum required to enable showing and hiding
-     * KeyguardTransportControl.  There's a lot of client state to maintain which is why
-     * KeyguardTransportControl maintains an independent connection while it's showing.
-     */
-    private final IRemoteControlDisplay.Stub mRemoteControlDisplay =
-                new IRemoteControlDisplay.Stub() {
-
-        public void setPlaybackState(int generationId, int state, long stateChangeTimeMs,
-                long currentPosMs, float speed) {
-            Message msg = mHandler.obtainMessage(MSG_SET_PLAYBACK_STATE,
-                    generationId, state, stateChangeTimeMs);
-            mHandler.sendMessage(msg);
-        }
-
-        public void setMetadata(int generationId, Bundle metadata) {
-
-        }
-
-        public void setTransportControlInfo(int generationId, int flags, int posCapabilities) {
-
-        }
-
-        public void setArtwork(int generationId, Bitmap bitmap) {
-
-        }
-
-        public void setAllMetadata(int generationId, Bundle metadata, Bitmap bitmap) {
-
-        }
-
-        public void setEnabled(boolean enabled) {
-            // no-op: this RemoteControlDisplay is not subject to being disabled.
-        }
-
-        public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
-                boolean clearing) throws RemoteException {
-            Message msg = mHandler.obtainMessage(MSG_SET_CURRENT_CLIENT_ID,
-                        clientGeneration, (clearing ? 1 : 0), mediaIntent);
-            mHandler.sendMessage(msg);
-        }
-    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -501,38 +448,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    protected void handleSetGenerationId(int clientGeneration, boolean clearing, PendingIntent p) {
-        mDisplayClientState.clientGeneration = clientGeneration;
-        mDisplayClientState.clearing = clearing;
-        mDisplayClientState.intent = p;
-        if (DEBUG)
-            Log.v(TAG, "handleSetGenerationId(g=" + clientGeneration + ", clear=" + clearing + ")");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onMusicClientIdChanged(clientGeneration, clearing, p);
-            }
-        }
-    }
-
-    protected void handleSetPlaybackState(int generationId, int playbackState, long eventTime) {
-        if (DEBUG)
-            Log.v(TAG, "handleSetPlaybackState(gen=" + generationId
-                + ", state=" + playbackState + ", t=" + eventTime + ")");
-        mDisplayClientState.playbackState = playbackState;
-        mDisplayClientState.playbackEventTime = eventTime;
-        if (generationId == mDisplayClientState.clientGeneration) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onMusicPlaybackStateChanged(playbackState, eventTime);
-                }
-            }
-        } else {
-            Log.w(TAG, "Ignoring generation id " + generationId + " because it's not current");
-        }
-    }
-
     private void handleUserInfoChanged(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -694,8 +609,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     protected void handleBootCompleted() {
         if (mBootCompleted) return;
         mBootCompleted = true;
-        mAudioManager = new AudioManager(mContext);
-        mAudioManager.registerRemoteControlDisplay(mRemoteControlDisplay);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1013,12 +926,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         callback.onClockVisibilityChanged();
         callback.onSimStateChanged(mSimState);
-        callback.onMusicClientIdChanged(
-                mDisplayClientState.clientGeneration,
-                mDisplayClientState.clearing,
-                mDisplayClientState.intent);
-        callback.onMusicPlaybackStateChanged(mDisplayClientState.playbackState,
-                mDisplayClientState.playbackEventTime);
     }
 
     public void sendKeyguardVisibilityChanged(boolean showing) {

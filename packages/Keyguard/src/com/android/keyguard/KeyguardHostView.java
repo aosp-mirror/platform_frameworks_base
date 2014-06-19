@@ -71,6 +71,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;
+    // TODO remove transport control references, these don't exist anymore
     private KeyguardTransportControlView mTransportControl;
     private int mAppWidgetToShow;
 
@@ -233,36 +234,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         public void onUserSwitchComplete(int userId) {
             if (mKeyguardMultiUserSelectorView != null) {
                 mKeyguardMultiUserSelectorView.finalizeActiveUserView(true);
-            }
-        }
-        @Override
-        public void onMusicClientIdChanged(
-                int clientGeneration, boolean clearing, android.app.PendingIntent intent) {
-            // Set transport state to invisible until we know music is playing (below)
-            if (DEBUGXPORT && (mClientGeneration != clientGeneration || clearing)) {
-                Log.v(TAG, (clearing ? "hide" : "show") + " transport, gen:" + clientGeneration);
-            }
-            mClientGeneration = clientGeneration;
-            final int newState = (clearing ? TRANSPORT_GONE
-                    : (mTransportState == TRANSPORT_VISIBLE ?
-                    TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
-            if (newState != mTransportState) {
-                mTransportState = newState;
-                if (DEBUGXPORT) Log.v(TAG, "update widget: transport state changed");
-                KeyguardHostView.this.post(mSwitchPageRunnable);
-            }
-        }
-        @Override
-        public void onMusicPlaybackStateChanged(int playbackState, long eventTime) {
-            if (DEBUGXPORT) Log.v(TAG, "music state changed: " + playbackState);
-            if (mTransportState != TRANSPORT_GONE) {
-                final int newState = (isMusicPlaying(playbackState) ?
-                        TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE);
-                if (newState != mTransportState) {
-                    mTransportState = newState;
-                    if (DEBUGXPORT) Log.v(TAG, "update widget: play state changed");
-                    KeyguardHostView.this.post(mSwitchPageRunnable);
-                }
             }
         }
     };
