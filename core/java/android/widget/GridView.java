@@ -1326,12 +1326,28 @@ public class GridView extends AbsListView {
             if (sel != null) {
                positionSelector(INVALID_POSITION, sel);
                mSelectedTop = sel.getTop();
-            } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
-                View child = getChildAt(mMotionPosition - mFirstPosition);
-                if (child != null) positionSelector(mMotionPosition, child);
             } else {
-                mSelectedTop = 0;
-                mSelectorRect.setEmpty();
+                final boolean inTouchMode = mTouchMode > TOUCH_MODE_DOWN
+                        && mTouchMode < TOUCH_MODE_SCROLL;
+                if (inTouchMode) {
+                    // If the user's finger is down, select the motion position.
+                    final View child = getChildAt(mMotionPosition - mFirstPosition);
+                    if (child != null) {
+                        positionSelector(mMotionPosition, child);
+                    }
+                } else if (mSelectedPosition != INVALID_POSITION) {
+                    // If we had previously positioned the selector somewhere,
+                    // put it back there. It might not match up with the data,
+                    // but it's transitioning out so it's not a big deal.
+                    final View child = getChildAt(mSelectorPosition - mFirstPosition);
+                    if (child != null) {
+                        positionSelector(mSelectorPosition, child);
+                    }
+                } else {
+                    // Otherwise, clear selection.
+                    mSelectedTop = 0;
+                    mSelectorRect.setEmpty();
+                }
             }
 
             // Attempt to restore accessibility focus, if necessary.

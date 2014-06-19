@@ -14240,6 +14240,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the view is attached to a window and the window is
      *         hardware accelerated; false in any other case.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isHardwareAccelerated() {
         return mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
     }

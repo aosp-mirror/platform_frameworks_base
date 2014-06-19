@@ -645,25 +645,29 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public Rect getDirtyBounds() {
-        final Rect drawingBounds = mDrawingBounds;
-        final Rect dirtyBounds = mDirtyBounds;
-        dirtyBounds.set(drawingBounds);
-        drawingBounds.setEmpty();
+        if (isProjected()) {
+            final Rect drawingBounds = mDrawingBounds;
+            final Rect dirtyBounds = mDirtyBounds;
+            dirtyBounds.set(drawingBounds);
+            drawingBounds.setEmpty();
 
-        final int cX = (int) mHotspotBounds.exactCenterX();
-        final int cY = (int) mHotspotBounds.exactCenterY();
-        final Rect rippleBounds = mTempRect;
-        final Ripple[] activeRipples = mAnimatingRipples;
-        final int N = mAnimatingRipplesCount;
-        for (int i = 0; i < N; i++) {
-            activeRipples[i].getBounds(rippleBounds);
-            rippleBounds.offset(cX, cY);
-            drawingBounds.union(rippleBounds);
+            final int cX = (int) mHotspotBounds.exactCenterX();
+            final int cY = (int) mHotspotBounds.exactCenterY();
+            final Rect rippleBounds = mTempRect;
+            final Ripple[] activeRipples = mAnimatingRipples;
+            final int N = mAnimatingRipplesCount;
+            for (int i = 0; i < N; i++) {
+                activeRipples[i].getBounds(rippleBounds);
+                rippleBounds.offset(cX, cY);
+                drawingBounds.union(rippleBounds);
+            }
+
+            dirtyBounds.union(drawingBounds);
+            dirtyBounds.union(super.getDirtyBounds());
+            return dirtyBounds;
+        } else {
+            return getBounds();
         }
-
-        dirtyBounds.union(drawingBounds);
-        dirtyBounds.union(super.getDirtyBounds());
-        return dirtyBounds;
     }
 
     @Override

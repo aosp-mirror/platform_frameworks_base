@@ -1718,14 +1718,24 @@ public class ListView extends AbsListView {
                 }
                 mSelectedTop = sel.getTop();
             } else {
-                // If the user's finger is down, select the motion position.
-                // Otherwise, clear selection.
-                if (mTouchMode == TOUCH_MODE_TAP || mTouchMode == TOUCH_MODE_DONE_WAITING) {
+                final boolean inTouchMode = mTouchMode == TOUCH_MODE_TAP
+                        || mTouchMode == TOUCH_MODE_DONE_WAITING;
+                if (inTouchMode) {
+                    // If the user's finger is down, select the motion position.
                     final View child = getChildAt(mMotionPosition - mFirstPosition);
-                    if (child != null)  {
+                    if (child != null) {
                         positionSelector(mMotionPosition, child);
                     }
+                } else if (mSelectorPosition != INVALID_POSITION) {
+                    // If we had previously positioned the selector somewhere,
+                    // put it back there. It might not match up with the data,
+                    // but it's transitioning out so it's not a big deal.
+                    final View child = getChildAt(mSelectorPosition - mFirstPosition);
+                    if (child != null) {
+                        positionSelector(mSelectorPosition, child);
+                    }
                 } else {
+                    // Otherwise, clear selection.
                     mSelectedTop = 0;
                     mSelectorRect.setEmpty();
                 }
