@@ -171,4 +171,23 @@ public class SELinux {
             return false;
         }
     }
+
+    /**
+     * Recursively restores all files under the given path to their default
+     * SELinux security context. If the system is not compiled with SELinux,
+     * then {@code true} is automatically returned. If SELinux is compiled in,
+     * but disabled, then {@code true} is returned.
+     *
+     * @return a boolean indicating whether the relabeling succeeded.
+     */
+    public static boolean restoreconTree(File dir) {
+        final File[] files = dir.listFiles();
+        boolean success = true;
+        if (files != null) {
+            for (File file : files) {
+                success &= restorecon(file);
+            }
+        }
+        return success;
+    }
 }

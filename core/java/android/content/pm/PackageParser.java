@@ -279,11 +279,11 @@ public class PackageParser {
         mMetrics = metrics;
     }
 
-    private static final boolean isPackageFilename(File file) {
+    public static final boolean isPackageFilename(File file) {
         return isPackageFilename(file.getName());
     }
 
-    private static final boolean isPackageFilename(String name) {
+    public static final boolean isPackageFilename(String name) {
         return name.endsWith(".apk");
     }
 
@@ -552,7 +552,7 @@ public class PackageParser {
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in {@link #collectCertificates(Package, int)}.
      */
-    public Package parseSplitPackage(File apkDir, int flags) throws PackageParserException {
+    public Package parseClusterPackage(File apkDir, int flags) throws PackageParserException {
         final File[] files = apkDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
@@ -600,27 +600,23 @@ public class PackageParser {
                     "Missing base APK in " + apkDir);
         }
 
-        // Always apply deterministic ordering based on splitName
-        final int size = apks.size();
-
-        final String[] splitNames = apks.keySet().toArray(new String[size]);
-        Arrays.sort(splitNames, sSplitNameComparator);
-
-        final File[] splitFiles = new File[size];
-        for (int i = 0; i < size; i++) {
-            splitFiles[i] = apks.get(splitNames[i]);
-        }
-
         final Package pkg = parseBaseApk(baseFile, flags);
         if (pkg == null) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                     "Failed to parse base APK: " + baseFile);
         }
 
-        for (File splitFile : splitFiles) {
-            parseSplitApk(pkg, splitFile, flags);
+        // Always apply deterministic ordering based on splitName
+        final int size = apks.size();
+        final String[] splitNames = apks.keySet().toArray(new String[size]);
+        Arrays.sort(splitNames, sSplitNameComparator);
+
+        for (String splitName : splitNames) {
+            final File splitFile = apks.get(splitName);
+            parseSplitApk(pkg, splitFile, splitName, flags);
         }
 
+        pkg.codePath = apkDir.getAbsolutePath();
         return pkg;
     }
 
@@ -632,11 +628,12 @@ public class PackageParser {
      */
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
         final Package pkg = parseBaseApk(apkFile, flags);
-        if (pkg != null) {
-            return pkg;
-        } else {
+        if (pkg == null) {
             throw new PackageParserException(mParseError, "Failed to parse " + apkFile);
         }
+
+        pkg.codePath = apkFile.getAbsolutePath();
+        return pkg;
     }
 
     private Package parseBaseApk(File apkFile, int flags) {
@@ -723,19 +720,22 @@ public class PackageParser {
         parser.close();
         assmgr.close();
 
-        pkg.codePath = apkPath;
+        pkg.baseCodePath = apkPath;
         pkg.mSignatures = null;
 
         return pkg;
     }
 
-    private void parseSplitApk(Package pkg, File apkFile, int flags) throws PackageParserException {
-        final String apkPath = apkFile.getAbsolutePath();
+    private void parseSplitApk(Package pkg, File apkFile, String splitName, int flags)
+            throws PackageParserException {
+        final String splitCodePath = apkFile.getAbsolutePath();
         mArchiveSourcePath = apkFile.getAbsolutePath();
 
         // TODO: expand split APK parsing
+        // TODO: extract splitName during parse
+        pkg.splitNames = ArrayUtils.appendElement(String.class, pkg.splitNames, splitName);
         pkg.splitCodePaths = ArrayUtils.appendElement(String.class, pkg.splitCodePaths,
-                apkFile.getAbsolutePath());
+                splitCodePath);
     }
 
     /**
@@ -748,7 +748,7 @@ public class PackageParser {
 
         // TODO: extend to gather digest for split APKs
         try {
-            final StrictJarFile jarFile = new StrictJarFile(pkg.codePath);
+            final StrictJarFile jarFile = new StrictJarFile(pkg.baseCodePath);
             try {
                 final ZipEntry je = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
                 if (je != null) {
@@ -773,7 +773,7 @@ public class PackageParser {
         pkg.mSignatures = null;
         pkg.mSigningKeys = null;
 
-        collectCertificates(pkg, new File(pkg.codePath), flags);
+        collectCertificates(pkg, new File(pkg.baseCodePath), flags);
 
         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
             for (String splitCodePath : pkg.splitCodePaths) {
@@ -3692,12 +3692,21 @@ public class PackageParser {
     public final static class Package {
 
         public String packageName;
+        /** Names of any split APKs, ordered by parsed splitName */
+        public String[] splitNames;
 
         // TODO: work towards making these paths invariant
 
-        /** Base APK */
+        /**
+         * Path where this package was found on disk. For monolithic packages
+         * this is path to single base APK file; for cluster packages this is
+         * path to the cluster directory.
+         */
         public String codePath;
-        /** Split APKs, ordered by parsed splitName */
+
+        /** Path of base APK */
+        public String baseCodePath;
+        /** Paths of any split APKs, ordered by parsed splitName */
         public String[] splitCodePaths;
 
         // For now we only support one application per package.
@@ -3816,9 +3825,9 @@ public class PackageParser {
             applicationInfo.uid = -1;
         }
 
-        public Collection<String> getAllCodePaths() {
+        public List<String> getAllCodePaths() {
             ArrayList<String> paths = new ArrayList<>();
-            paths.add(codePath);
+            paths.add(baseCodePath);
             if (!ArrayUtils.isEmpty(splitCodePaths)) {
                 Collections.addAll(paths, splitCodePaths);
             }

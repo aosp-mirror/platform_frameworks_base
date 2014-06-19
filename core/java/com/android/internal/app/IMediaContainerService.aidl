@@ -16,27 +16,25 @@
 
 package com.android.internal.app;
 
-import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.PackageInfoLite;
 import android.content.res.ObbInfo;
 
 interface IMediaContainerService {
-    String copyResourceToContainer(in Uri packageURI, String containerId, String key,
+    String copyResourceToContainer(String packagePath, String containerId, String key,
             String resFileName, String publicResFileName, boolean isExternal,
-            boolean isForwardLocked, in String abiOverride);
-    int copyResource(in Uri packageURI, in ContainerEncryptionParams encryptionParams,
+            boolean isForwardLocked, String abiOverride);
+    int copyResource(String packagePath, in ContainerEncryptionParams encryptionParams,
             in ParcelFileDescriptor outStream);
-    PackageInfoLite getMinimalPackageInfo(in String packagePath, in int flags, in long threshold,
-            in String abiOverride);
-    boolean checkInternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in long threshold);
-    boolean checkExternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in String abiOverride);
-    ObbInfo getObbInfo(in String filename);
-    long calculateDirectorySize(in String directory);
+    PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, long threshold,
+            String abiOverride);
+    boolean checkInternalFreeStorage(String packagePath, boolean isForwardLocked, long threshold);
+    boolean checkExternalFreeStorage(String packagePath, boolean isForwardLocked, String abiOverride);
+    ObbInfo getObbInfo(String filename);
+    long calculateDirectorySize(String directory);
     /** Return file system stats: [0] is total bytes, [1] is available bytes */
-    long[] getFileSystemStats(in String path);
-    void clearDirectory(in String directory);
-    long calculateInstalledSize(in String packagePath, boolean isForwardLocked,
-            in String abiOverride);
+    long[] getFileSystemStats(String path);
+    void clearDirectory(String directory);
+    long calculateInstalledSize(String packagePath, boolean isForwardLocked, String abiOverride);
 }

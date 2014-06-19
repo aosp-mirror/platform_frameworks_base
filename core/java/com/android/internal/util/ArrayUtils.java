@@ -138,6 +138,7 @@ public class ArrayUtils
      * not found.
      */
     public static <T> int indexOf(T[] array, T value) {
+        if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
             if (array[i] == null) {
                 if (value == null) return i;
@@ -161,6 +162,7 @@ public class ArrayUtils
     }
 
     public static boolean contains(int[] array, int value) {
+        if (array == null) return false;
         for (int element : array) {
             if (element == value) {
                 return true;
@@ -170,6 +172,7 @@ public class ArrayUtils
     }
 
     public static boolean contains(long[] array, long value) {
+        if (array == null) return false;
         for (long element : array) {
             if (element == value) {
                 return true;
@@ -324,5 +327,9 @@ public class ArrayUtils
             }
         }
         return cur;
+    }
+
+    public static long[] cloneOrNull(long[] array) {
+        return (array != null) ? array.clone() : null;
     }
 }

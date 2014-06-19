@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageParser.isPackageFilename;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.S_IRGRP;
@@ -46,6 +47,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
@@ -92,6 +94,7 @@ import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
+import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageParserException;
@@ -349,6 +352,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // LOCK HELD.  Can be called with mInstallLock held.
     final Installer mInstaller;
 
+    /** Directory where installed third-party apps stored */
     final File mAppInstallDir;
 
     /**
@@ -361,6 +365,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // apps.
     final File mDrmAppPrivateInstallDir;
 
+    /** Directory where third-party apps are staged before install */
     final File mAppStagingDir;
 
     // ----------------------------------------------------------------
@@ -1143,17 +1148,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if ((state != null) && !state.timeoutExtended()) {
                         final InstallArgs args = state.getInstallArgs();
-                        Slog.i(TAG, "Verification timed out for " + args.packageURI.toString());
+                        final Uri fromUri = Uri.fromFile(args.fromFile);
+
+                        Slog.i(TAG, "Verification timed out for " + fromUri);
                         mPendingVerification.remove(verificationId);
 
                         int ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 
                         if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
-                            Slog.i(TAG, "Continuing with installation of "
-                                    + args.packageURI.toString());
+                            Slog.i(TAG, "Continuing with installation of " + fromUri);
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
-                            broadcastPackageVerified(verificationId, args.packageURI,
+                            broadcastPackageVerified(verificationId, fromUri,
                                     PackageManager.VERIFICATION_ALLOW,
                                     state.getInstallArgs().getUser());
                             try {
@@ -1162,7 +1168,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 Slog.e(TAG, "Could not contact the ContainerService");
                             }
                         } else {
-                            broadcastPackageVerified(verificationId, args.packageURI,
+                            broadcastPackageVerified(verificationId, fromUri,
                                     PackageManager.VERIFICATION_REJECT,
                                     state.getInstallArgs().getUser());
                         }
@@ -1189,11 +1195,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mPendingVerification.remove(verificationId);
 
                         final InstallArgs args = state.getInstallArgs();
+                        final Uri fromUri = Uri.fromFile(args.fromFile);
 
                         int ret;
                         if (state.isInstallAllowed()) {
                             ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                            broadcastPackageVerified(verificationId, args.packageURI,
+                            broadcastPackageVerified(verificationId, fromUri,
                                     response.code, state.getInstallArgs().getUser());
                             try {
                                 ret = args.copyApk(mContainerService, true);
@@ -1528,14 +1535,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // overlay packages if they reside in VENDOR_OVERLAY_DIR.
             File vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
             mVendorOverlayInstallObserver = new AppDirObserver(
-                vendorOverlayDir.getPath(), OBSERVER_EVENTS, true, false);
+                    vendorOverlayDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorOverlayInstallObserver.startWatching();
             scanDirLI(vendorOverlayDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode | SCAN_TRUSTED_OVERLAY, 0);
 
             // Find base frameworks (resource packages without code).
             mFrameworkInstallObserver = new AppDirObserver(
-                frameworkDir.getPath(), OBSERVER_EVENTS, true, false);
+                    frameworkDir.getPath(), OBSERVER_EVENTS, true, false);
             mFrameworkInstallObserver.startWatching();
             scanDirLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
@@ -1547,14 +1554,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             mPrivilegedInstallObserver = new AppDirObserver(
                     privilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
             mPrivilegedInstallObserver.startWatching();
-                scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
-                        | PackageParser.PARSE_IS_SYSTEM_DIR
-                        | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
+            scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                    | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
 
             // Collect ordinary system packages.
             File systemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
-                systemAppDir.getPath(), OBSERVER_EVENTS, true, false);
+                    systemAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mSystemInstallObserver.startWatching();
             scanDirLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
@@ -1567,7 +1574,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // failed to look up canonical path, continue with original one
             }
             mVendorInstallObserver = new AppDirObserver(
-                vendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
+                    vendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorInstallObserver.startWatching();
             scanDirLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
@@ -1825,6 +1832,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         removeDataDirsLI(ps.name);
+
+        // TODO: try cleaning up codePath directory contents first, since it
+        // might be a cluster
+
         if (ps.codePath != null) {
             if (!ps.codePath.delete()) {
                 Slog.w(TAG, "Unable to remove old code file: " + ps.codePath);
@@ -2071,15 +2082,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) == 0) {
                     return null;
                 }
-                // App code is gone, so we aren't worried about split paths
+                // Only data remains, so we aren't worried about code paths
                 pkg = new PackageParser.Package(packageName);
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
-                pkg.applicationInfo.sourceDir = ps.codePathString;
-                pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 pkg.applicationInfo.dataDir =
                         getDataPathForPackage(packageName, 0).getPath();
-                pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
                 pkg.applicationInfo.cpuAbi = ps.cpuAbiString;
             }
             return generatePackageInfo(pkg, flags, userId);
@@ -4041,20 +4049,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean createIdmapForPackagePairLI(PackageParser.Package pkg,
             PackageParser.Package opkg) {
         if (!opkg.mTrustedOverlay) {
-            Slog.w(TAG, "Skipping target and overlay pair " + pkg.codePath + " and " +
-                    opkg.codePath + ": overlay not trusted");
+            Slog.w(TAG, "Skipping target and overlay pair " + pkg.baseCodePath + " and " +
+                    opkg.baseCodePath + ": overlay not trusted");
             return false;
         }
         HashMap<String, PackageParser.Package> overlaySet = mOverlays.get(pkg.packageName);
         if (overlaySet == null) {
-            Slog.e(TAG, "was about to create idmap for " + pkg.codePath + " and " +
-                    opkg.codePath + " but target package has no known overlays");
+            Slog.e(TAG, "was about to create idmap for " + pkg.baseCodePath + " and " +
+                    opkg.baseCodePath + " but target package has no known overlays");
             return false;
         }
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
         // TODO: generate idmap for split APKs
-        if (mInstaller.idmap(pkg.codePath, opkg.codePath, sharedGid) != 0) {
-            Slog.e(TAG, "Failed to generate idmap for " + pkg.codePath + " and " + opkg.codePath);
+        if (mInstaller.idmap(pkg.baseCodePath, opkg.baseCodePath, sharedGid) != 0) {
+            Slog.e(TAG, "Failed to generate idmap for " + pkg.baseCodePath + " and "
+                    + opkg.baseCodePath);
             return false;
         }
         PackageParser.Package[] overlayArray =
@@ -4075,8 +4084,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void scanDirLI(File dir, int flags, int scanMode, long currentTime) {
-        String[] files = dir.list();
-        if (files == null) {
+        final File[] files = dir.listFiles();
+        if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + dir);
             return;
         }
@@ -4086,10 +4095,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + " flags=0x" + Integer.toHexString(flags));
         }
 
-        int i;
-        for (i=0; i<files.length; i++) {
-            File file = new File(dir, files[i]);
-            if (!isPackageFilename(files[i])) {
+        for (File file : files) {
+            if (!isPackageFilename(file)) {
                 // Ignore entries which are not apk's
                 continue;
             }
@@ -4258,7 +4265,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
 
-                    InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
+                    InstallArgs args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
                             ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString,
                             getAppInstructionSetFromSettings(ps));
                     synchronized (mInstallLock) {
@@ -4323,7 +4330,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Package " + ps.name + " at " + scanFile + "reverting from "
                             + ps.codePathString + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
-                    InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
+                    InstallArgs args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
                             ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString,
                             getAppInstructionSetFromSettings(ps));
                     synchronized (mInstallLock) {
@@ -4343,29 +4350,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final String codePath = pkg.codePath;
+        final String baseCodePath = pkg.baseCodePath;
         final String[] splitCodePaths = pkg.splitCodePaths;
 
-        String resPath = null;
-        String[] splitResPaths = null;
+        // TODO: extend to support forward-locked splits
+        String baseResPath = null;
         if ((parseFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
             if (ps != null && ps.resourcePathString != null) {
-                resPath = ps.resourcePathString;
-                splitResPaths = deriveSplitResPaths(pkg.splitCodePaths);
+                baseResPath = ps.resourcePathString;
             } else {
                 // Should not happen at all. Just log an error.
                 Slog.e(TAG, "Resource path not set for pkg : " + pkg.packageName);
             }
         } else {
-            resPath = pkg.codePath;
-            splitResPaths = pkg.splitCodePaths;
+            baseResPath = pkg.baseCodePath;
         }
 
         // Set application objects path explicitly.
-        pkg.applicationInfo.sourceDir = codePath;
-        pkg.applicationInfo.publicSourceDir = resPath;
+        pkg.applicationInfo.sourceDir = baseCodePath;
+        pkg.applicationInfo.publicSourceDir = baseResPath;
         pkg.applicationInfo.splitSourceDirs = splitCodePaths;
-        pkg.applicationInfo.splitPublicSourceDirs = splitResPaths;
+        pkg.applicationInfo.splitPublicSourceDirs = splitCodePaths;
 
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
@@ -6419,10 +6424,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static final boolean isPackageFilename(String name) {
-        return name != null && name.endsWith(".apk");
-    }
-
     private static boolean hasPermission(PackageParser.Package pkgInfo, String perm) {
         for (int i=pkgInfo.permissions.size()-1; i>=0; i--) {
             if (pkgInfo.permissions.get(i).info.name.equals(perm)) {
@@ -7701,8 +7702,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         verificationParams.setInstallerUid(uid);
 
+        if (!"file".equals(packageURI.getScheme())) {
+            throw new UnsupportedOperationException("Only file:// URIs are supported");
+        }
+        final File fromFile = new File(packageURI.getPath());
+
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(packageURI, observer, observer2, filteredFlags,
+        msg.obj = new InstallParams(fromFile, observer, observer2, filteredFlags,
                 installerPackageName, verificationParams, encryptionParams, user,
                 packageAbiOverride);
         mHandler.sendMessage(msg);
@@ -7820,11 +7826,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void installStage(String basePackageName, File stageDir, IPackageInstallObserver2 observer,
-            int flags) {
-        // TODO: install stage!
+    void installStage(String packageName, File stageDir, IPackageInstallObserver2 observer2,
+            PackageInstallerParams params, String installerPackageName, int installerUid,
+            UserHandle user) {
+        Slog.e(TAG, "TODO: install stage!");
         try {
-            observer.packageInstalled(basePackageName, null,
+            observer2.packageInstalled(packageName, null,
                     PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
         } catch (RemoteException ignored) {
         }
@@ -8407,30 +8414,38 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     class InstallParams extends HandlerParams {
+        /**
+         * Location where install is coming from, before it has been
+         * copied/renamed into place. This could be a single monolithic APK
+         * file, or a cluster directory. This location may be untrusted.
+         */
+        private final File mFromFile;
+
+        /**
+         * Local copy of {@link #mFromFile}, if generated.
+         */
+        private File mLocalFromFile;
+
         final IPackageInstallObserver observer;
         final IPackageInstallObserver2 observer2;
         int flags;
-
-        private final Uri mPackageURI;
         final String installerPackageName;
         final VerificationParams verificationParams;
         private InstallArgs mArgs;
         private int mRet;
-        private File mTempPackage;
         final ContainerEncryptionParams encryptionParams;
         final String packageAbiOverride;
         final String packageInstructionSetOverride;
 
-        InstallParams(Uri packageURI,
-                IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-                int flags, String installerPackageName, VerificationParams verificationParams,
-                ContainerEncryptionParams encryptionParams, UserHandle user,
-                String packageAbiOverride) {
+        InstallParams(File fromFile, IPackageInstallObserver observer,
+                IPackageInstallObserver2 observer2, int flags, String installerPackageName,
+                VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
+                UserHandle user, String packageAbiOverride) {
             super(user);
-            this.mPackageURI = packageURI;
-            this.flags = flags;
+            mFromFile = Preconditions.checkNotNull(fromFile);
             this.observer = observer;
             this.observer2 = observer2;
+            this.flags = flags;
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
@@ -8443,7 +8458,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         public String toString() {
             return "InstallParams{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " " + mPackageURI + "}";
+                + " " + mFromFile + "}";
         }
 
         public ManifestDigest getManifestDigest() {
@@ -8543,76 +8558,55 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
                 }
 
-                try {
-                    mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, mPackageURI,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    final File packageFile;
-                    if (encryptionParams != null || !"file".equals(mPackageURI.getScheme())) {
-                        mTempPackage = createTempPackageFile(mDrmAppPrivateInstallDir);
-                        if (mTempPackage != null) {
-                            ParcelFileDescriptor out;
-                            try {
-                                out = ParcelFileDescriptor.open(mTempPackage,
-                                        ParcelFileDescriptor.MODE_READ_WRITE);
-                            } catch (FileNotFoundException e) {
-                                out = null;
-                                Slog.e(TAG, "Failed to create temporary file for : " + mPackageURI);
-                            }
-
-                            // Make a temporary file for decryption.
-                            ret = mContainerService
-                                    .copyResource(mPackageURI, encryptionParams, out);
+                if (encryptionParams != null) {
+                    // Make a temporary file for decryption.
+                    mLocalFromFile = createTempPackageFile(mDrmAppPrivateInstallDir);
+                    if (mLocalFromFile != null) {
+                        ParcelFileDescriptor out = null;
+                        try {
+                            out = ParcelFileDescriptor.open(mLocalFromFile,
+                                    ParcelFileDescriptor.MODE_READ_WRITE);
+                            ret = mContainerService.copyResource(mFromFile.getAbsolutePath(),
+                                    encryptionParams, out);
+                        } catch (FileNotFoundException e) {
+                            Slog.e(TAG, "Failed to create temporary file for: " + mFromFile);
+                        } finally {
                             IoUtils.closeQuietly(out);
-
-                            packageFile = mTempPackage;
-
-                            FileUtils.setPermissions(packageFile.getAbsolutePath(),
-                                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP
-                                            | FileUtils.S_IROTH,
-                                    -1, -1);
-                        } else {
-                            packageFile = null;
                         }
-                    } else {
-                        packageFile = new File(mPackageURI.getPath());
-                    }
 
-                    if (packageFile != null) {
-                        // Remote call to find out default install location
-                        final String packageFilePath = packageFile.getAbsolutePath();
-                        pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath, flags,
-                                lowThreshold, packageAbiOverride);
-
-                        /*
-                         * If we have too little free space, try to free cache
-                         * before giving up.
-                         */
-                        if (pkgLite.recommendedInstallLocation
-                                == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-                            final long size = mContainerService.calculateInstalledSize(
-                                    packageFilePath, isForwardLocked(), packageAbiOverride);
-                            if (mInstaller.freeCache(size + lowThreshold) >= 0) {
-                                pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath,
-                                        flags, lowThreshold, packageAbiOverride);
-                            }
-                            /*
-                             * The cache free must have deleted the file we
-                             * downloaded to install.
-                             *
-                             * TODO: fix the "freeCache" call to not delete
-                             *       the file we care about.
-                             */
-                            if (pkgLite.recommendedInstallLocation
-                                    == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
-                                pkgLite.recommendedInstallLocation
-                                    = PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
-                            }
-                        }
+                        FileUtils.setPermissions(mLocalFromFile, 0644, -1, -1);
                     }
-                } finally {
-                    mContext.revokeUriPermission(mPackageURI,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
+                // Remote call to find out default install location
+                final String fromPath = getFromFile().getAbsolutePath();
+                pkgLite = mContainerService.getMinimalPackageInfo(fromPath, flags, lowThreshold,
+                        packageAbiOverride);
+
+                /*
+                 * If we have too little free space, try to free cache
+                 * before giving up.
+                 */
+                if (pkgLite.recommendedInstallLocation
+                        == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                    final long size = mContainerService.calculateInstalledSize(
+                            fromPath, isForwardLocked(), packageAbiOverride);
+                    if (mInstaller.freeCache(size + lowThreshold) >= 0) {
+                        pkgLite = mContainerService.getMinimalPackageInfo(fromPath,
+                                flags, lowThreshold, packageAbiOverride);
+                    }
+                    /*
+                     * The cache free must have deleted the file we
+                     * downloaded to install.
+                     *
+                     * TODO: fix the "freeCache" call to not delete
+                     *       the file we care about.
+                     */
+                    if (pkgLite.recommendedInstallLocation
+                            == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                        pkgLite.recommendedInstallLocation
+                            = PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+                    }
                 }
             }
 
@@ -8672,9 +8666,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage, userIdentifier);
                 if (requiredUid != -1 && isVerificationEnabled(userIdentifier, flags)) {
+                    // TODO: send verifier the install session instead of uri
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
-                    verification.setDataAndType(getPackageUri(), PACKAGE_MIME_TYPE);
+                    verification.setDataAndType(Uri.fromFile(getFromFile()), PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     final List<ResolveInfo> receivers = queryIntentReceivers(verification,
@@ -8802,10 +8797,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (mArgs != null) {
                 processPendingInstall(mArgs, mRet);
 
-                if (mTempPackage != null) {
-                    if (!mTempPackage.delete()) {
-                        Slog.w(TAG, "Couldn't delete temporary file: " +
-                                mTempPackage.getAbsolutePath());
+                if (mLocalFromFile != null) {
+                    if (!mLocalFromFile.delete()) {
+                        Slog.w(TAG, "Couldn't delete temporary file: " + mLocalFromFile);
                     }
                 }
             }
@@ -8821,11 +8815,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
         }
 
-        public Uri getPackageUri() {
-            if (mTempPackage != null) {
-                return Uri.fromFile(mTempPackage);
+        public File getFromFile() {
+            if (mLocalFromFile != null) {
+                return mLocalFromFile;
             } else {
-                return mPackageURI;
+                return mFromFile;
             }
         }
     }
@@ -8856,8 +8850,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.packageName = packageName;
             this.uid = uid;
             if (srcArgs != null) {
-                Uri packageUri = Uri.fromFile(new File(srcArgs.getCodePath()));
-                targetArgs = createInstallArgs(packageUri, flags, packageName, dataDir, instructionSet);
+                final String codePath = srcArgs.getCodePath();
+                targetArgs = createInstallArgsForMoveTarget(codePath, flags, packageName, dataDir,
+                        instructionSet);
             } else {
                 targetArgs = null;
             }
@@ -8958,6 +8953,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private InstallArgs createInstallArgs(InstallParams params) {
+        // TODO: extend to support incoming zero-copy locations
+
         if (installOnSd(params.flags) || params.isForwardLocked()) {
             return new AsecInstallArgs(params);
         } else {
@@ -8965,14 +8962,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath,
-            String nativeLibraryPath, String instructionSet) {
+    /**
+     * Create args that describe an existing installed package. Typically used
+     * when cleaning up old installs, or used as a move source.
+     */
+    private InstallArgs createInstallArgsForExisting(int flags, String codePath,
+            String resourcePath, String nativeLibraryPath, String instructionSet) {
         final boolean isInAsec;
         if (installOnSd(flags)) {
             /* Apps on SD card are always in ASEC containers. */
             isInAsec = true;
         } else if (installForwardLocked(flags)
-                && !fullCodePath.startsWith(mDrmAppPrivateInstallDir.getAbsolutePath())) {
+                && !codePath.startsWith(mDrmAppPrivateInstallDir.getAbsolutePath())) {
             /*
              * Forward-locked apps are only in ASEC containers if they're the
              * new style
@@ -8983,44 +8984,49 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (isInAsec) {
-            return new AsecInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath,
+            return new AsecInstallArgs(codePath, resourcePath, nativeLibraryPath,
                     instructionSet, installOnSd(flags), installForwardLocked(flags));
         } else {
-            return new FileInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath,
-                    instructionSet);
+            return new FileInstallArgs(codePath, resourcePath, nativeLibraryPath, instructionSet);
         }
     }
 
-    // Used by package mover
-    private InstallArgs createInstallArgs(Uri packageURI, int flags, String pkgName, String dataDir,
-            String instructionSet) {
+    private InstallArgs createInstallArgsForMoveTarget(String codePath, int flags, String pkgName,
+            String dataDir, String instructionSet) {
+        final File codeFile = new File(codePath);
         if (installOnSd(flags) || installForwardLocked(flags)) {
-            String cid = getNextCodePath(packageURI.getPath(), pkgName, "/"
+            String cid = getNextCodePath(codePath, pkgName, "/"
                     + AsecInstallArgs.RES_FILE_NAME);
-            return new AsecInstallArgs(packageURI, cid, instructionSet, installOnSd(flags),
+            return new AsecInstallArgs(codeFile, cid, instructionSet, installOnSd(flags),
                     installForwardLocked(flags));
         } else {
-            return new FileInstallArgs(packageURI, pkgName, dataDir, instructionSet);
+            return new FileInstallArgs(codeFile, pkgName, dataDir, instructionSet);
         }
     }
 
     static abstract class InstallArgs {
+        /**
+         * Location where install is coming from, before it has been
+         * copied/renamed into place. This could be a single monolithic APK
+         * file, or a cluster directory. This location is typically untrusted.
+         */
+        final File fromFile;
+
         final IPackageInstallObserver observer;
         final IPackageInstallObserver2 observer2;
         // Always refers to PackageManager flags only
         final int flags;
-        final Uri packageURI;
         final String installerPackageName;
         final ManifestDigest manifestDigest;
         final UserHandle user;
         final String instructionSet;
         final String abiOverride;
 
-        InstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-                int flags, String installerPackageName, ManifestDigest manifestDigest,
-                UserHandle user, String instructionSet, String abiOverride) {
-            this.packageURI = packageURI;
+        InstallArgs(File fromFile, IPackageInstallObserver observer,
+                IPackageInstallObserver2 observer2, int flags, String installerPackageName,
+                ManifestDigest manifestDigest, UserHandle user, String instructionSet,
+                String abiOverride) {
+            this.fromFile = fromFile;
             this.flags = flags;
             this.observer = observer;
             this.observer2 = observer2;
@@ -9031,23 +9037,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.abiOverride = abiOverride;
         }
 
-        abstract void createCopyFile();
         abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
         abstract int doPreInstall(int status);
         abstract boolean doRename(int status, String pkgName, String oldCodePath);
-
         abstract int doPostInstall(int status, int uid);
+
+        /** @see PackageSettingBase#codePathString */
         abstract String getCodePath();
+        /** @see PackageSettingBase#resourcePathString */
         abstract String getResourcePath();
+        /** @see PackageSettingBase#nativeLibraryPathString */
         abstract String getNativeLibraryPath();
+
         // Need installer lock especially for dex file removal.
         abstract void cleanUpResourcesLI();
         abstract boolean doPostDeleteLI(boolean delete);
         abstract boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException;
-
-        String[] getSplitCodePaths() {
-            return null;
-        }
 
         /**
          * Called before the source arguments are copied. This is used mostly
@@ -9078,20 +9083,27 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Logic to handle installation of non-ASEC applications, including copying
+     * and renaming logic.
+     */
     class FileInstallArgs extends InstallArgs {
+        // TODO: teach about handling cluster directories
+
         File installDir;
         String codeFileName;
         String resourceFileName;
         String libraryPath;
         boolean created = false;
 
+        /** New install */
         FileInstallArgs(InstallParams params) {
-            super(params.getPackageUri(), params.observer, params.observer2, params.flags,
-                    params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), params.packageInstructionSetOverride,
-                    params.packageAbiOverride);
+            super(params.getFromFile(), params.observer, params.observer2, params.flags,
+                    params.installerPackageName, params.getManifestDigest(), params.getUser(),
+                    params.packageInstructionSetOverride, params.packageAbiOverride);
         }
 
+        /** Existing install */
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 String instructionSet) {
             super(null, null, null, 0, null, null, null, instructionSet, null);
@@ -9102,8 +9114,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             libraryPath = nativeLibraryPath;
         }
 
-        FileInstallArgs(Uri packageURI, String pkgName, String dataDir, String instructionSet) {
-            super(packageURI, null, null, 0, null, null, null, instructionSet, null);
+        /** New install from existing */
+        FileInstallArgs(File fromFile, String pkgName, String dataDir, String instructionSet) {
+            super(fromFile, null, null, 0, null, null, null, instructionSet, null);
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
@@ -9128,13 +9141,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 lowThreshold = dsm.getMemoryLowThreshold();
             }
 
-            try {
-                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkInternalFreeStorage(packageURI, isFwdLocked(), lowThreshold);
-            } finally {
-                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
+            return imcs.checkInternalFreeStorage(fromFile.getAbsolutePath(), isFwdLocked(),
+                    lowThreshold);
         }
 
         void createCopyFile() {
@@ -9175,12 +9183,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Copy the resource now
             int ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             try {
-                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                ret = imcs.copyResource(packageURI, null, out);
+                ret = imcs.copyResource(fromFile.getAbsolutePath(), null, out);
             } finally {
                 IoUtils.closeQuietly(out);
-                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
             if (isFwdLocked()) {
@@ -9432,7 +9437,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         return subStr1.substring(sidx+1, eidx);
     }
 
+    /**
+     * Logic to handle installation of ASEC applications, including copying and
+     * renaming logic.
+     */
     class AsecInstallArgs extends InstallArgs {
+        // TODO: teach about handling cluster directories
+
         static final String RES_FILE_NAME = "pkg.apk";
         static final String PUBLIC_RES_FILE_NAME = "res.zip";
 
@@ -9441,13 +9452,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         String resourcePath;
         String libraryPath;
 
+        /** New install */
         AsecInstallArgs(InstallParams params) {
-            super(params.getPackageUri(), params.observer, params.observer2, params.flags,
-                    params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), params.packageInstructionSetOverride,
-                    params.packageAbiOverride);
+            super(params.getFromFile(), params.observer, params.observer2, params.flags,
+                    params.installerPackageName, params.getManifestDigest(), params.getUser(),
+                    params.packageInstructionSetOverride, params.packageAbiOverride);
         }
 
+        /** Existing install */
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 String instructionSet, boolean isExternal, boolean isForwardLocked) {
             super(null, null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
@@ -9469,9 +9481,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             setCachePath(PackageHelper.getSdDir(cid));
         }
 
-        AsecInstallArgs(Uri packageURI, String cid, String instructionSet,
+        /** New install from existing */
+        AsecInstallArgs(File fromFile, String cid, String instructionSet,
                 boolean isExternal, boolean isForwardLocked) {
-            super(packageURI, null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
+            super(fromFile, null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0),
                     null, null, null, instructionSet, null);
             this.cid = cid;
@@ -9482,13 +9495,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
-            try {
-                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkExternalFreeStorage(packageURI, isFwdLocked(), abiOverride);
-            } finally {
-                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
+            return imcs.checkExternalFreeStorage(fromFile.getAbsolutePath(), isFwdLocked(),
+                    abiOverride);
         }
 
         private final boolean isExternal() {
@@ -9506,16 +9514,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageHelper.destroySdDir(cid);
             }
 
-            final String newCachePath;
-            try {
-                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                newCachePath = imcs.copyResourceToContainer(packageURI, cid, getEncryptKey(),
-                        RES_FILE_NAME, PUBLIC_RES_FILE_NAME, isExternal(), isFwdLocked(),
-                        abiOverride);
-            } finally {
-                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
+            final String newCachePath = imcs.copyResourceToContainer(fromFile.getAbsolutePath(),
+                    cid, getEncryptKey(), RES_FILE_NAME, PUBLIC_RES_FILE_NAME, isExternal(),
+                    isFwdLocked(), abiOverride);
 
             if (newCachePath != null) {
                 setCachePath(newCachePath);
@@ -10078,7 +10079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // We didn't need to disable the .apk as a current system package,
                 // which means we are replacing another update that is already
                 // installed.  We need to make sure to delete the older one's .apk.
-                res.removedInfo.args = createInstallArgs(0,
+                res.removedInfo.args = createInstallArgsForExisting(0,
                         deletedPackage.applicationInfo.sourceDir,
                         deletedPackage.applicationInfo.publicSourceDir,
                         deletedPackage.applicationInfo.nativeLibraryDir,
@@ -10143,7 +10144,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // TODO: extend to move split APK dex files
         if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             final String instructionSet = getAppInstructionSet(newPackage.applicationInfo);
-            int retCode = mInstaller.movedex(oldCodePath, newPackage.codePath,
+            int retCode = mInstaller.movedex(oldCodePath, newPackage.baseCodePath,
                                              instructionSet);
             if (retCode != 0) {
                 /*
@@ -10156,7 +10157,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  */
                 newPackage.mDexOptNeeded = true;
                 mInstaller.rmdex(oldCodePath, instructionSet);
-                mInstaller.rmdex(newPackage.codePath, instructionSet);
+                mInstaller.rmdex(newPackage.baseCodePath, instructionSet);
             }
         }
         return PackageManager.INSTALL_SUCCEEDED;
@@ -10221,8 +10222,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void installPackageLI(InstallArgs args,
-            boolean newInstall, PackageInstalledInfo res) {
+    private void installPackageLI(InstallArgs args, boolean newInstall, PackageInstalledInfo res) {
         int pFlags = args.flags;
         String installerPackageName = args.installerPackageName;
         File tmpPackageFile = new File(args.getCodePath());
@@ -10367,14 +10367,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             return;
         }
+
         // Set application objects path explicitly after the rename
+        // TODO: derive split paths from original scan after rename
         pkg.codePath = args.getCodePath();
+        pkg.baseCodePath = args.getCodePath();
+        pkg.splitCodePaths = null;
         pkg.applicationInfo.sourceDir = args.getCodePath();
         pkg.applicationInfo.publicSourceDir = args.getResourcePath();
-        pkg.applicationInfo.splitSourceDirs = args.getSplitCodePaths();
-        pkg.applicationInfo.splitPublicSourceDirs = deriveSplitResPaths(
-                pkg.applicationInfo.splitSourceDirs);
+        pkg.applicationInfo.splitSourceDirs = null;
+        pkg.applicationInfo.splitPublicSourceDirs = null;
         pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
+
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,
                     installerPackageName, res, args.abiOverride);
@@ -10847,8 +10851,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Delete application code and resources
         if (deleteCodeAndResources && (outInfo != null)) {
-            outInfo.args = createInstallArgs(packageFlagsToInstallFlags(ps), ps.codePathString,
-                    ps.resourcePathString, ps.nativeLibraryPathString,
+            outInfo.args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
+                    ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString,
                     getAppInstructionSetFromSettings(ps));
         }
         return true;
@@ -11253,7 +11257,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 publicSrcDir = applicationInfo.publicSourceDir;
             }
         }
-        int res = mInstaller.getSizeInfo(packageName, userHandle, p.codePath, libDirPath,
+        // TODO: extend to measure size of split APKs
+        int res = mInstaller.getSizeInfo(packageName, userHandle, p.baseCodePath, libDirPath,
                 publicSrcDir, asecPath, getAppInstructionSetFromSettings(ps),
                 pStats);
         if (res < 0) {
@@ -12843,9 +12848,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 Message msg = mHandler.obtainMessage(INIT_COPY);
                 final String instructionSet = getAppInstructionSet(pkg.applicationInfo);
-                InstallArgs srcArgs = createInstallArgs(currFlags, pkg.applicationInfo.sourceDir,
-                        pkg.applicationInfo.publicSourceDir, pkg.applicationInfo.nativeLibraryDir,
-                        instructionSet);
+                InstallArgs srcArgs = createInstallArgsForExisting(currFlags,
+                        pkg.applicationInfo.sourceDir, pkg.applicationInfo.publicSourceDir,
+                        pkg.applicationInfo.nativeLibraryDir, instructionSet);
                 MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
                         pkg.applicationInfo.dataDir, instructionSet, pkg.applicationInfo.uid, user);
                 msg.obj = mp;
@@ -12943,11 +12948,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                                         pkg.codePath = newCodePath;
+                                        pkg.baseCodePath = newCodePath;
                                         // Move dex files around
                                         if (moveDexFilesLI(oldCodePath, pkg) != PackageManager.INSTALL_SUCCEEDED) {
                                             // Moving of dex files failed. Set
                                             // error code and abort move.
                                             pkg.codePath = oldCodePath;
+                                            pkg.baseCodePath = oldCodePath;
                                             returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                         }
                                     }

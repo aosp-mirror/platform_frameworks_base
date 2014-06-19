@@ -413,6 +413,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Full path to the base APK for this application.
      */
+    // TODO: verify that nobody is doing codePath comparisons against this
     public String sourceDir;
 
     /**
