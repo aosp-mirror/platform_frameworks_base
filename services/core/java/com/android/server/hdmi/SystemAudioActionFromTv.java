@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.IHdmiControlCallback;
 
 
 /**
@@ -29,11 +30,12 @@ final class SystemAudioActionFromTv extends SystemAudioAction {
      * @param sourceAddress {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
+     * @param callback callback interface to be notified when it's done
      * @throw IllegalArugmentException if device type of tvAddress is invalid
      */
     SystemAudioActionFromTv(HdmiCecLocalDevice sourceAddress, int avrAddress,
-            boolean targetStatus) {
-        super(sourceAddress, avrAddress, targetStatus);
+            boolean targetStatus, IHdmiControlCallback callback) {
+        super(sourceAddress, avrAddress, targetStatus, callback);
         HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
     }
 

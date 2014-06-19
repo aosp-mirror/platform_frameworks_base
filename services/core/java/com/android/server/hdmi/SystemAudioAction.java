@@ -16,8 +16,12 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.IHdmiControlCallback;
+import android.os.RemoteException;
+import android.util.Slog;
 
 /**
  * Base feature action class for SystemAudioActionFromTv and SystemAudioActionFromAvr.
@@ -39,6 +43,8 @@ abstract class SystemAudioAction extends FeatureAction {
     // The target audio status of the action, whether to enable the system audio mode or not.
     protected boolean mTargetAudioStatus;
 
+    @Nullable private final IHdmiControlCallback mCallback;
+
     private int mSendRetryCount = 0;
 
     /**
@@ -47,13 +53,16 @@ abstract class SystemAudioAction extends FeatureAction {
      * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
+     * @param callback callback interface to be notified when it's done
      * @throw IllegalArugmentException if device type of sourceAddress and avrAddress is invalid
      */
-    SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus) {
+    SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus,
+            IHdmiControlCallback callback) {
         super(source);
         HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
+        mCallback = callback;
     }
 
     protected void sendSystemAudioModeRequest() {
@@ -69,7 +78,7 @@ abstract class SystemAudioAction extends FeatureAction {
                     addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
                 } else {
                     setSystemAudioMode(false);
-                    finish();
+                    finishWithCallback(HdmiCec.RESULT_EXCEPTION);
                 }
             }
         });
@@ -79,7 +88,7 @@ abstract class SystemAudioAction extends FeatureAction {
         if (!mTargetAudioStatus  // Don't retry for Off case.
                 || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
             setSystemAudioMode(false);
-            finish();
+            finishWithCallback(HdmiCec.RESULT_TIMEOUT);
             return;
         }
         sendSystemAudioModeRequest();
@@ -107,7 +116,7 @@ abstract class SystemAudioAction extends FeatureAction {
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'false' will initiate new SystemAudioActionFromAvr by the control
                     // service.
-                    finish();
+                    finishWithCallback(HdmiCec.RESULT_EXCEPTION);
                     return false;
                 }
             default:
@@ -116,7 +125,7 @@ abstract class SystemAudioAction extends FeatureAction {
     }
 
     protected void startAudioStatusAction() {
-        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress));
+        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress, mCallback));
         finish();
     }
 
@@ -135,5 +144,18 @@ abstract class SystemAudioAction extends FeatureAction {
                 handleSendSystemAudioModeRequestTimeout();
                 return;
         }
+    }
+
+    // TODO: if IHdmiControlCallback is general to other FeatureAction,
+    //       move it into FeatureAction.
+    protected void finishWithCallback(int returnCode) {
+        if (mCallback != null) {
+            try {
+                mCallback.onComplete(returnCode);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to invoke callback.", e);
+            }
+        }
+        finish();
     }
 }

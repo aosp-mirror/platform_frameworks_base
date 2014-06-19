@@ -77,14 +77,14 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
         // If the last setting is system audio, turn on system audio whatever AVR status is.
         if (tv().getSystemAudioMode()) {
             if (canChangeSystemAudio()) {
-                addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true));
+                addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true, null));
             }
         } else {
             // If the last setting is non-system audio, turn off system audio mode
             // and update system audio status (volume or mute).
             tv().setSystemAudioMode(false);
             if (canChangeSystemAudio()) {
-                addAndStartAction(new SystemAudioStatusAction(tv(), mAvrAddress));
+                addAndStartAction(new SystemAudioStatusAction(tv(), mAvrAddress, null));
             }
         }
         finish();

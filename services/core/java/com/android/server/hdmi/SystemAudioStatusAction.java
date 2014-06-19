@@ -16,8 +16,11 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.IHdmiControlCallback;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
@@ -32,10 +35,13 @@ final class SystemAudioStatusAction extends FeatureAction {
     private static final int STATE_WAIT_FOR_REPORT_AUDIO_STATUS = 1;
 
     private final int mAvrAddress;
+    @Nullable private final IHdmiControlCallback mCallback;
 
-    SystemAudioStatusAction(HdmiCecLocalDevice source, int avrAddress) {
+    SystemAudioStatusAction(HdmiCecLocalDevice source, int avrAddress,
+            IHdmiControlCallback callback) {
         super(source);
         mAvrAddress = avrAddress;
+        mCallback = callback;
     }
 
     @Override
@@ -67,7 +73,9 @@ final class SystemAudioStatusAction extends FeatureAction {
                 ? HdmiConstants.UI_COMMAND_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
                 : HdmiConstants.UI_COMMAND_MUTE_FUNCTION;           // SystemAudioMode: OFF
         sendUserControlPressedAndReleased(uiCommand);
-        finish();
+
+        // Still return SUCCESS to callback.
+        finishWithCallback(HdmiCec.RESULT_SUCCESS);
     }
 
     private void sendUserControlPressedAndReleased(int uiCommand) {
@@ -103,12 +111,23 @@ final class SystemAudioStatusAction extends FeatureAction {
                 // Toggle AVR's mute status to match with the system audio status.
                 sendUserControlPressedAndReleased(HdmiConstants.UI_COMMAND_MUTE);
             }
-            finish();
+            finishWithCallback(HdmiCec.RESULT_SUCCESS);
         } else {
             Slog.e(TAG, "Invalid <Report Audio Status> message:" + cmd);
             handleSendGiveAudioStatusFailure();
             return;
         }
+    }
+
+    private void finishWithCallback(int returnCode) {
+        if (mCallback != null) {
+            try {
+                mCallback.onComplete(returnCode);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to invoke callback.", e);
+            }
+        }
+        finish();
     }
 
     @Override
