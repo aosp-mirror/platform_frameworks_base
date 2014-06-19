@@ -142,14 +142,16 @@ class Ripple {
     }
 
     private void clampStartingPosition() {
-        final float dX = mStartingX - mBounds.exactCenterX();
-        final float dY = mStartingY - mBounds.exactCenterY();
+        final float cX = mBounds.exactCenterX();
+        final float cY = mBounds.exactCenterY();
+        final float dX = mStartingX - cX;
+        final float dY = mStartingY - cY;
         final float r = mOuterRadius;
         if (dX * dX + dY * dY > r * r) {
             // Point is outside the circle, clamp to the circumference.
             final double angle = Math.atan2(dY, dX);
-            mClampedStartingX = (float) (Math.cos(angle) * r);
-            mClampedStartingY = (float) (Math.sin(angle) * r);
+            mClampedStartingX = cX + (float) (Math.cos(angle) * r);
+            mClampedStartingY = cY + (float) (Math.sin(angle) * r);
         } else {
             mClampedStartingX = mStartingX;
             mClampedStartingY = mStartingY;
