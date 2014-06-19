@@ -25,7 +25,6 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 /**
  * Action to update audio status (volume or mute) of audio amplifier
  */
-// TODO: refactor SystemAudioMode so that it uses this class instead of internal state.
 final class SystemAudioStatusAction extends FeatureAction {
     private static final String TAG = "SystemAudioStatusAction";
 

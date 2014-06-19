@@ -28,9 +28,6 @@ abstract class SystemAudioAction extends FeatureAction {
     // State in which waits for <SetSystemAudioMode>.
     private static final int STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE = 1;
 
-    // State in which waits for <ReportAudioStatus>.
-    private static final int STATE_WAIT_FOR_REPORT_AUDIO_STATUS = 2;
-
     private static final int MAX_SEND_RETRY_COUNT = 2;
 
     private static final int ON_TIMEOUT_MS = 5000;
@@ -92,39 +89,6 @@ abstract class SystemAudioAction extends FeatureAction {
         tv().setSystemAudioMode(mode);
     }
 
-    protected void sendGiveAudioStatus() {
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildGiveAudioStatus(getSourceAddress(),
-                mAvrLogicalAddress);
-        sendCommand(command, new HdmiControlService.SendMessageCallback() {
-            @Override
-            public void onSendCompleted(int error) {
-                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
-                    mState = STATE_WAIT_FOR_REPORT_AUDIO_STATUS;
-                    addTimer(mState, TIMEOUT_MS);
-                } else {
-                    handleSendGiveAudioStatusFailure();
-                }
-            }
-        });
-    }
-
-    private void handleSendGiveAudioStatusFailure() {
-        // TODO: Notify the failure status.
-
-        int uiCommand = tv().getSystemAudioMode()
-                ? HdmiConstants.UI_COMMAND_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
-                : HdmiConstants.UI_COMMAND_MUTE_FUNCTION;           // SystemAudioMode: OFF
-        sendUserControlPressedAndReleased(uiCommand);
-        finish();
-    }
-
-    private void sendUserControlPressedAndReleased(int uiCommand) {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(
-                getSourceAddress(), mAvrLogicalAddress, uiCommand));
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
-                getSourceAddress(), mAvrLogicalAddress));
-    }
-
     @Override
     final boolean processCommand(HdmiCecMessage cmd) {
         switch (mState) {
@@ -137,7 +101,8 @@ abstract class SystemAudioAction extends FeatureAction {
                 boolean receivedStatus = HdmiUtils.parseCommandParamSystemAudioStatus(cmd);
                 if (receivedStatus == mTargetAudioStatus) {
                     setSystemAudioMode(receivedStatus);
-                    sendGiveAudioStatus();
+                    startAudioStatusAction();
+                    return true;
                 } else {
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'false' will initiate new SystemAudioActionFromAvr by the control
@@ -145,28 +110,14 @@ abstract class SystemAudioAction extends FeatureAction {
                     finish();
                     return false;
                 }
-                return true;
-
-            case STATE_WAIT_FOR_REPORT_AUDIO_STATUS:
-                // TODO: Handle <FeatureAbort> of <GiveAudioStatus>
-                if (cmd.getOpcode() != HdmiCec.MESSAGE_REPORT_AUDIO_STATUS
-                        || !HdmiUtils.checkCommandSource(cmd, mAvrLogicalAddress, TAG)) {
-                    return false;
-                }
-                byte[] params = cmd.getParams();
-                if (params.length > 0) {
-                    boolean mute = (params[0] & 0x80) == 0x80;
-                    int volume = params[0] & 0x7F;
-                    tv().setAudioStatus(mute, volume);
-                    if (mTargetAudioStatus && mute || !mTargetAudioStatus && !mute) {
-                        // Toggle AVR's mute status to match with the system audio status.
-                        sendUserControlPressedAndReleased(HdmiConstants.UI_COMMAND_MUTE);
-                    }
-                }
-                finish();
-                return true;
+            default:
+                return false;
         }
-        return false;
+    }
+
+    protected void startAudioStatusAction() {
+        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress));
+        finish();
     }
 
     protected void removeSystemAudioActionInProgress() {
@@ -182,9 +133,6 @@ abstract class SystemAudioAction extends FeatureAction {
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 handleSendSystemAudioModeRequestTimeout();
-                return;
-            case STATE_WAIT_FOR_REPORT_AUDIO_STATUS:
-                handleSendGiveAudioStatusFailure();
                 return;
         }
     }
