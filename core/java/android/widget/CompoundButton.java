@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -431,10 +430,9 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
         if (mButtonDrawable != null) {
             mButtonDrawable.setHotspot(x, y);

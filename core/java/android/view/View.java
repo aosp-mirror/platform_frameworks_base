@@ -45,7 +45,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
@@ -4822,20 +4821,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final float x = r.exactCenterX();
         final float y = r.exactCenterY();
-        setDrawableHotspot(x, y);
-    }
-
-    /**
-     * Sets the hotspot position for this View's drawables.
-     *
-     * @param x hotspot x coordinate
-     * @param y hotspot y coordinate
-     * @hide
-     */
-    protected void setDrawableHotspot(float x, float y) {
-        if (mBackground != null) {
-            mBackground.setHotspot(x, y);
-        }
+        drawableHotspotChanged(x, y);
     }
 
     /**
@@ -6798,7 +6784,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void setPressed(boolean pressed, float x, float y) {
         if (pressed) {
-            setDrawableHotspot(x, y);
+            drawableHotspotChanged(x, y);
         }
 
         setPressed(pressed);
@@ -9149,7 +9135,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    setDrawableHotspot(x, y);
+                    drawableHotspotChanged(x, y);
 
                     // Be lenient about moving outside of buttons
                     if (!pointInView(x, y, mTouchSlop)) {
@@ -15527,6 +15513,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (mStateListAnimator != null) {
             mStateListAnimator.setState(getDrawableState());
+        }
+    }
+
+    /**
+     * This function is called whenever the drawable hotspot changes.
+     * <p>
+     * Be sure to call through to the superclass when overriding this function.
+     *
+     * @param x hotspot x coordinate
+     * @param y hotspot y coordinate
+     */
+    public void drawableHotspotChanged(float x, float y) {
+        if (mBackground != null) {
+            mBackground.setHotspot(x, y);
         }
     }
 

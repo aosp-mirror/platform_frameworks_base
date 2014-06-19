@@ -1623,10 +1623,9 @@ public class ProgressBar extends View {
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
         if (mProgressDrawable != null) {
             mProgressDrawable.setHotspot(x, y);

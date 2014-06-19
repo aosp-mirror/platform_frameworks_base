@@ -3503,10 +3503,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
         final Drawables dr = mDrawables;
         if (dr != null) {

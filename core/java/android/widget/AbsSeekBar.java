@@ -24,7 +24,6 @@ import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -343,7 +342,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     @Override
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
-        if (mThumb != null) mThumb.jumpToCurrentState();
+
+        if (mThumb != null) {
+            mThumb.jumpToCurrentState();
+        }
     }
 
     @Override
@@ -361,29 +363,12 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
-        final Drawable progressDrawable = getProgressDrawable();
-        if (progressDrawable != null) {
-            progressDrawable.setHotspot(x, y);
-        }
-
-        final Drawable thumb = mThumb;
-        if (thumb != null) {
-            thumb.setHotspot(x, y);
-        }
-    }
-
-    @Override
-    public void invalidateDrawable(Drawable dr) {
-        super.invalidateDrawable(dr);
-
-        if (dr == mThumb) {
-            // Handle changes to thumb width and height.
-            requestLayout();
+        if (mThumb != null) {
+            mThumb.setHotspot(x, y);
         }
     }
 
@@ -479,7 +464,7 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         final Drawable background = getBackground();
         if (background != null) {
-            final Rect bounds = mThumb.getBounds();
+            final Rect bounds = thumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
             background.setHotspotBounds(left + offsetX, bounds.top + offsetY,
@@ -505,8 +490,8 @@ public abstract class AbsSeekBar extends ProgressBar {
     @Override
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         drawThumb(canvas);
+
     }
 
     @Override

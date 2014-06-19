@@ -307,10 +307,9 @@ public class CheckedTextView extends TextView implements Checkable {
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
         if (mCheckMarkDrawable != null) {
             mCheckMarkDrawable.setHotspot(x, y);

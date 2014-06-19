@@ -112,10 +112,9 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         }
     }
 
-    /** @hide */
     @Override
-    protected void setDrawableHotspot(float x, float y) {
-        super.setDrawableHotspot(x, y);
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
 
         if (mOverlay != null) {
             mOverlay.setHotspot(x, y);
