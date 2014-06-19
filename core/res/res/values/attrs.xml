@@ -5250,10 +5250,18 @@
     </declare-styleable>
 
     <declare-styleable name="PathInterpolator">
+        <!-- The x coordinate of the first control point of the cubic Bezier -->
         <attr name="controlX1" format="float" />
+        <!-- The y coordinate of the first control point of the cubic Bezier -->
         <attr name="controlY1" format="float" />
+        <!-- The x coordinate of the second control point of the cubic Bezier -->
         <attr name="controlX2" format="float" />
+        <!-- The y coordinate of the second control point of the cubic Bezier -->
         <attr name="controlY2" format="float" />
+        <!-- The control points defined as a path.
+             When pathData is defined, then both of the control points of the
+             cubic Bezier will be ignored. -->
+        <attr name="pathData"/>
     </declare-styleable>
 
     <!-- ========================== -->
@@ -5403,6 +5411,12 @@
     <declare-styleable name="PropertyAnimator">
         <!-- Name of the property being animated. -->
         <attr name="propertyName" format="string"/>
+        <!-- Name of the property being animated as the X coordinate of the pathData. -->
+        <attr name="propertyXName" format="string"/>
+        <!-- Name of the property being animated as the Y coordinate of the pathData. -->
+        <attr name="propertyYName" format="string"/>
+        <!-- The path used to animate the properties in the ObjectAnimator -->
+        <attr name="pathData"/>
     </declare-styleable>
 
 

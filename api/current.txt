@@ -937,6 +937,8 @@ package android {
     field public static final int progressTintMode = 16843878; // 0x1010466
     field public static final int prompt = 16843131; // 0x101017b
     field public static final int propertyName = 16843489; // 0x10102e1
+    field public static final int propertyXName = 16843894; // 0x1010476
+    field public static final int propertyYName = 16843895; // 0x1010477
     field public static final int protectionLevel = 16842761; // 0x1010009
     field public static final int publicKey = 16843686; // 0x10103a6
     field public static final int queryActionMsg = 16843227; // 0x10101db

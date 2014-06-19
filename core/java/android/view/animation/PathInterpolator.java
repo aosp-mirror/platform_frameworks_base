@@ -21,6 +21,7 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.PathParser;
 import android.view.InflateException;
 
 import com.android.internal.R;
@@ -102,28 +103,40 @@ public class PathInterpolator implements Interpolator {
     }
 
     private void parseInterpolatorFromTypeArray(TypedArray a) {
-        if (!a.hasValue(R.styleable.PathInterpolator_controlX1)) {
-            throw new InflateException("pathInterpolator requires the controlX1 attribute");
-        } else if (!a.hasValue(R.styleable.PathInterpolator_controlY1)) {
-            throw new InflateException("pathInterpolator requires the controlY1 attribute");
-        }
-        float x1 = a.getFloat(R.styleable.PathInterpolator_controlX1, 0);
-        float y1 = a.getFloat(R.styleable.PathInterpolator_controlY1, 0);
-
-        boolean hasX2 = a.hasValue(R.styleable.PathInterpolator_controlX2);
-        boolean hasY2 = a.hasValue(R.styleable.PathInterpolator_controlY2);
-
-        if (hasX2 != hasY2) {
-            throw new InflateException(
-                    "pathInterpolator requires both controlX2 and controlY2 for cubic Beziers.");
-        }
-
-        if (!hasX2) {
-            initQuad(x1, y1);
+        // If there is pathData defined in the xml file, then the controls points
+        // will be all coming from pathData.
+        if (a.hasValue(R.styleable.PathInterpolator_pathData)) {
+            String pathData = a.getString(R.styleable.PathInterpolator_pathData);
+            Path path = PathParser.createPathFromPathData(pathData);
+            if (path == null) {
+                throw new InflateException("The path is null, which is created"
+                        + " from " + pathData);
+            }
+            initPath(path);
         } else {
-            float x2 = a.getFloat(R.styleable.PathInterpolator_controlX2, 0);
-            float y2 = a.getFloat(R.styleable.PathInterpolator_controlY2, 0);
-            initCubic(x1, y1, x2, y2);
+            if (!a.hasValue(R.styleable.PathInterpolator_controlX1)) {
+                throw new InflateException("pathInterpolator requires the controlX1 attribute");
+            } else if (!a.hasValue(R.styleable.PathInterpolator_controlY1)) {
+                throw new InflateException("pathInterpolator requires the controlY1 attribute");
+            }
+            float x1 = a.getFloat(R.styleable.PathInterpolator_controlX1, 0);
+            float y1 = a.getFloat(R.styleable.PathInterpolator_controlY1, 0);
+
+            boolean hasX2 = a.hasValue(R.styleable.PathInterpolator_controlX2);
+            boolean hasY2 = a.hasValue(R.styleable.PathInterpolator_controlY2);
+
+            if (hasX2 != hasY2) {
+                throw new InflateException(
+                        "pathInterpolator requires both controlX2 and controlY2 for cubic Beziers.");
+            }
+
+            if (!hasX2) {
+                initQuad(x1, y1);
+            } else {
+                float x2 = a.getFloat(R.styleable.PathInterpolator_controlX2, 0);
+                float y2 = a.getFloat(R.styleable.PathInterpolator_controlY2, 0);
+                initCubic(x1, y1, x2, y2);
+            }
         }
     }
 
@@ -216,5 +229,4 @@ public class PathInterpolator implements Interpolator {
         float endY = mY[endIndex];
         return startY + (fraction * (endY - startY));
     }
-
 }
