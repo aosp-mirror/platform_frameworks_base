@@ -16,9 +16,14 @@
 
 package android.transition;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,6 +95,13 @@ public class Fade extends Visibility {
      * {@link #IN} and {@link #OUT}.
      */
     public Fade(int fadingMode) {
+        setMode(fadingMode);
+    }
+
+    public Fade(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Fade);
+        int fadingMode = a.getInt(R.styleable.Fade_fadingMode, getMode());
         setMode(fadingMode);
     }
 

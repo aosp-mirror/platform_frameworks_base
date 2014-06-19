@@ -5429,6 +5429,28 @@
         <attr name="toScene" format="reference" />
     </declare-styleable>
 
+    <!-- Use <code>arcMotion</code> as the root tag of the XML resource that
+         describes a {@link android.transition.ArcMotion}. This must be used
+         within a transition with which the PathMotion should be associated. -->
+    <declare-styleable name="ArcMotion">
+        <!-- The minimum arc angle in degrees between the start and end points when
+             they are close to horizontal. -->
+        <attr name="minimumHorizontalAngle" format="float" />
+        <!-- The minimum arc angle in degrees between the start and end points when
+             they are close to vertical. -->
+        <attr name="minimumVerticalAngle" format="float" />
+        <!-- The maximum arc angle in degrees between the start and end points. -->
+        <attr name="maximumAngle" format="float" />
+    </declare-styleable>
+
+    <!-- Use <code>patternMotion</code> as the root tag of the XML resource that
+         describes a {@link android.transition.PatternMotion}. This must be used
+         within a transition with which the PathMotion should be associated. -->
+    <declare-styleable name="PatternMotion">
+        <!-- The path string describing the pattern to use for the PathMotion. -->
+        <attr name="pathData" />
+    </declare-styleable>
+
     <!-- ========================== -->
     <!-- ValueAnimator class attributes -->
     <!-- ========================== -->

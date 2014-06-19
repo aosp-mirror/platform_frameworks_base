@@ -19,7 +19,9 @@ import com.android.internal.R;
 
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
+import android.content.Context;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +48,10 @@ public class Explode extends Visibility {
 
     public Explode() {
         setPropagation(new CircularPropagation());
+    }
+
+    public Explode(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 
     private void captureValues(TransitionValues transitionValues) {

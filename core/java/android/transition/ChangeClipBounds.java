@@ -18,7 +18,9 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.RectEvaluator;
+import android.content.Context;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,6 +38,12 @@ public class ChangeClipBounds extends Transition {
     private static final String[] sTransitionProperties = {
             PROPNAME_CLIP,
     };
+
+    public ChangeClipBounds() {}
+
+    public ChangeClipBounds(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     @Override
     public String[] getTransitionProperties() {

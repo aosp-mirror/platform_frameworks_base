@@ -16,15 +16,24 @@
 
 package android.transition;
 
+import android.animation.TypeConverter;
+import android.content.Context;
+import android.graphics.PointF;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.RectEvaluator;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.util.Property;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,12 +60,36 @@ public class ChangeBounds extends Transition {
             PROPNAME_WINDOW_Y
     };
 
+    private static final Property<Drawable, PointF> DRAWABLE_ORIGIN_PROPERTY =
+            new Property<Drawable, PointF>(PointF.class, "boundsOrigin") {
+                private Rect mBounds = new Rect();
+
+                @Override
+                public void set(Drawable object, PointF value) {
+                    object.copyBounds(mBounds);
+                    mBounds.offsetTo(Math.round(value.x), Math.round(value.y));
+                    object.setBounds(mBounds);
+                }
+
+                @Override
+                public PointF get(Drawable object) {
+                    object.copyBounds(mBounds);
+                    return new PointF(mBounds.left, mBounds.top);
+                }
+    };
+
     int[] tempLocation = new int[2];
     boolean mResizeClip = false;
     boolean mReparent = false;
     private static final String LOG_TAG = "ChangeBounds";
 
     private static RectEvaluator sRectEvaluator = new RectEvaluator();
+
+    public ChangeBounds() {}
+
+    public ChangeBounds(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     @Override
     public String[] getTransitionProperties() {
@@ -138,34 +171,29 @@ public class ChangeBounds extends Transition {
             int endHeight = endBottom - endTop;
             int numChanges = 0;
             if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
-                if (startLeft != endLeft) ++numChanges;
-                if (startTop != endTop) ++numChanges;
-                if (startRight != endRight) ++numChanges;
-                if (startBottom != endBottom) ++numChanges;
+                if (startLeft != endLeft || startTop != endTop) ++numChanges;
+                if (startRight != endRight || startBottom != endBottom) ++numChanges;
             }
             if (numChanges > 0) {
                 if (!mResizeClip) {
-                    PropertyValuesHolder pvh[] = new PropertyValuesHolder[numChanges];
-                    int pvhIndex = 0;
                     if (startLeft != endLeft) view.setLeft(startLeft);
                     if (startTop != endTop) view.setTop(startTop);
                     if (startRight != endRight) view.setRight(startRight);
                     if (startBottom != endBottom) view.setBottom(startBottom);
-                    if (startLeft != endLeft) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("left", startLeft, endLeft);
+                    ObjectAnimator topLeftAnimator = null;
+                    if (startLeft != endLeft || startTop != endTop) {
+                        Path topLeftPath = getPathMotion().getPath(startLeft, startTop,
+                                endLeft, endTop);
+                        topLeftAnimator = ObjectAnimator.ofInt(view, "left", "top", topLeftPath);
                     }
-                    if (startTop != endTop) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("top", startTop, endTop);
+                    ObjectAnimator bottomRightAnimator = null;
+                    if (startRight != endRight || startBottom != endBottom) {
+                        Path bottomRightPath = getPathMotion().getPath(startRight, startBottom,
+                                endRight, endBottom);
+                        bottomRightAnimator = ObjectAnimator.ofInt(view, "right", "bottom",
+                                bottomRightPath);
                     }
-                    if (startRight != endRight) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("right",
-                                startRight, endRight);
-                    }
-                    if (startBottom != endBottom) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofInt("bottom",
-                                startBottom, endBottom);
-                    }
-                    ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(view, pvh);
+                    Animator anim = mergeAnimators(topLeftAnimator, bottomRightAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -215,23 +243,20 @@ public class ChangeBounds extends Transition {
                     if (transXDelta != 0) numChanges++;
                     if (transYDelta != 0) numChanges++;
                     if (widthDelta != 0 || heightDelta != 0) numChanges++;
-                    PropertyValuesHolder pvh[] = new PropertyValuesHolder[numChanges];
-                    int pvhIndex = 0;
-                    if (transXDelta != 0) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofFloat("translationX",
-                                view.getTranslationX(), 0);
+                    ObjectAnimator translationAnimator = null;
+                    if (transXDelta != 0 || transYDelta != 0) {
+                        Path topLeftPath = getPathMotion().getPath(0, 0, transXDelta, transYDelta);
+                        translationAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_X,
+                                View.TRANSLATION_Y, topLeftPath);
                     }
-                    if (transYDelta != 0) {
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofFloat("translationY",
-                                view.getTranslationY(), 0);
-                    }
+                    ObjectAnimator clipAnimator = null;
                     if (widthDelta != 0 || heightDelta != 0) {
                         Rect tempStartBounds = new Rect(0, 0, startWidth, startHeight);
                         Rect tempEndBounds = new Rect(0, 0, endWidth, endHeight);
-                        pvh[pvhIndex++] = PropertyValuesHolder.ofObject("clipBounds",
-                                sRectEvaluator, tempStartBounds, tempEndBounds);
+                        clipAnimator = ObjectAnimator.ofObject(view, "clipBounds", sRectEvaluator,
+                                tempStartBounds, tempEndBounds);
                     }
-                    ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(view, pvh);
+                    Animator anim = mergeAnimators(translationAnimator, clipAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -287,14 +312,11 @@ public class ChangeBounds extends Transition {
                 final BitmapDrawable drawable = new BitmapDrawable(bitmap);
                 view.setVisibility(View.INVISIBLE);
                 sceneRoot.getOverlay().add(drawable);
-                Rect startBounds1 = new Rect(startX - tempLocation[0], startY - tempLocation[1],
-                        startX - tempLocation[0] + view.getWidth(),
-                        startY - tempLocation[1] + view.getHeight());
-                Rect endBounds1 = new Rect(endX - tempLocation[0], endY - tempLocation[1],
-                        endX - tempLocation[0] + view.getWidth(),
-                        endY - tempLocation[1] + view.getHeight());
-                ObjectAnimator anim = ObjectAnimator.ofObject(drawable, "bounds",
-                        sRectEvaluator, startBounds1, endBounds1);
+                Path topLeftPath = getPathMotion().getPath(startX - tempLocation[0],
+                        startY - tempLocation[1], endX - tempLocation[0], endY - tempLocation[1]);
+                PropertyValuesHolder origin = PropertyValuesHolder.ofObject(
+                        DRAWABLE_ORIGIN_PROPERTY, null, topLeftPath);
+                ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(drawable, origin);
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -306,5 +328,17 @@ public class ChangeBounds extends Transition {
             }
         }
         return null;
+    }
+
+    private static Animator mergeAnimators(Animator animator1, Animator animator2) {
+        if (animator1 == null) {
+            return animator2;
+        } else if (animator2 == null) {
+            return animator1;
+        } else {
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(animator1, animator2);
+            return animatorSet;
+        }
     }
 }

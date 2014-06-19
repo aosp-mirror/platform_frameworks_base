@@ -19,23 +19,32 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArrayMap;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
+import android.view.InflateException;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOverlay;
 import android.view.WindowId;
+import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
+
+import com.android.internal.R;
 
 /**
  * A Transition holds information about animations that will be run on its
@@ -139,11 +148,28 @@ public abstract class Transition implements Cloneable {
 
     private static final int MATCH_LAST = MATCH_ITEM_ID;
 
+    private static final String MATCH_INSTANCE_STR = "instance";
+    private static final String MATCH_NAME_STR = "name";
+    /** To be removed before L release */
+    private static final String MATCH_VIEW_NAME_STR = "viewName";
+    private static final String MATCH_ID_STR = "id";
+    private static final String MATCH_ITEM_ID_STR = "itemId";
+
     private static final int[] DEFAULT_MATCH_ORDER = {
         MATCH_NAME,
         MATCH_INSTANCE,
         MATCH_ID,
         MATCH_ITEM_ID,
+    };
+
+    private static final PathMotion STRAIGHT_PATH_MOTION = new PathMotion() {
+        @Override
+        public Path getPath(float startX, float startY, float endX, float endY) {
+            Path path = new Path();
+            path.moveTo(startX, startY);
+            path.lineTo(endX, endY);
+            return path;
+        }
     };
 
     private String mName = getClass().getName();
@@ -215,6 +241,10 @@ public abstract class Transition implements Cloneable {
     // transitionNames.
     ArrayMap<String, String> mNameOverrides;
 
+    // The function used to interpolate along two-dimensional points. Typically used
+    // for adding curves to x/y View motion.
+    private PathMotion mPathMotion = STRAIGHT_PATH_MOTION;
+
     /**
      * Constructs a Transition object with no target objects. A transition with
      * no targets defaults to running on all target objects in the scene hierarchy
@@ -222,6 +252,66 @@ public abstract class Transition implements Cloneable {
      * objects passed down from its parent (if it is in a TransitionSet).
      */
     public Transition() {}
+
+    /**
+     * Perform inflation from XML and apply a class-specific base style from a
+     * theme attribute or style resource. This constructor of Transition allows
+     * subclasses to use their own base style when they are inflating.
+     *
+     * @param context The Context the transition is running in, through which it can
+     *        access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the transition.
+     */
+    public Transition(Context context, AttributeSet attrs) {
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Transition);
+        long duration = a.getInt(R.styleable.Transition_duration, -1);
+        if (duration >= 0) {
+            setDuration(duration);
+        }
+        long startDelay = a.getInt(R.styleable.Transition_startDelay, -1);
+        if (startDelay > 0) {
+            setStartDelay(startDelay);
+        }
+        final int resID = a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
+        if (resID > 0) {
+            setInterpolator(AnimationUtils.loadInterpolator(context, resID));
+        }
+        String matchOrder = a.getString(R.styleable.Transition_matchOrder);
+        if (matchOrder != null) {
+            setMatchOrder(parseMatchOrder(matchOrder));
+        }
+        a.recycle();
+    }
+
+    private static int[] parseMatchOrder(String matchOrderString) {
+        StringTokenizer st = new StringTokenizer(matchOrderString, ",");
+        int matches[] = new int[st.countTokens()];
+        int index = 0;
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken().trim();
+            if (MATCH_ID_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ID;
+            } else if (MATCH_INSTANCE_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_INSTANCE;
+            } else if (MATCH_NAME_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_NAME;
+            } else if (MATCH_VIEW_NAME_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_NAME;
+            } else if (MATCH_ITEM_ID_STR.equalsIgnoreCase(token)) {
+                matches[index] = Transition.MATCH_ITEM_ID;
+            } else if (token.isEmpty()) {
+                int[] smallerMatches = new int[matches.length - 1];
+                System.arraycopy(matches, 0, smallerMatches, 0, index);
+                matches = smallerMatches;
+                index--;
+            } else {
+                throw new InflateException("Unknown match type in matchOrder: '" + token + "'");
+            }
+            index++;
+        }
+        return matches;
+    }
 
     /**
      * Sets the duration of this transition. By default, there is no duration
@@ -1837,6 +1927,36 @@ public abstract class Transition implements Cloneable {
             return null;
         }
         return mEpicenterCallback.onGetEpicenter(this);
+    }
+
+    /**
+     * Sets the algorithm used to calculate two-dimensional interpolation.
+     * <p>
+     *     Transitions such as {@link android.transition.ChangeBounds} move Views, typically
+     *     in a straight path between the start and end positions. Applications that desire to
+     *     have these motions move in a curve can change how Views interpolate in two dimensions
+     *     by extending PathMotion and implementing
+     *     {@link android.transition.PathMotion#getPath(float, float, float, float)}.
+     * </p>
+     * @param pathMotion Algorithm object to use for determining how to interpolate in two
+     *                   dimensions. If null, a straight-path algorithm will be used.
+     */
+    public void setPathMotion(PathMotion pathMotion) {
+        if (pathMotion == null) {
+            mPathMotion = STRAIGHT_PATH_MOTION;
+        } else {
+            mPathMotion = pathMotion;
+        }
+    }
+
+    /**
+     * Returns the algorithm object used to interpolate along two dimensions. This is typically
+     * used to determine the View motion between two points.
+     *
+     * @return The algorithm object used to interpolate along two dimensions.
+     */
+    public PathMotion getPathMotion() {
+        return mPathMotion;
     }
 
     /**

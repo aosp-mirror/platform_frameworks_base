@@ -19,9 +19,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.util.Property;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,10 +39,10 @@ import java.util.Map;
  */
 public class ChangeImageTransform extends Transition {
 
-    private static final String TAG = "ChangeScaleType";
+    private static final String TAG = "ChangeImageTransform";
 
-    private static final String PROPNAME_MATRIX = "android:changeScaleType:matrix";
-    private static final String PROPNAME_BOUNDS = "android:changeScaleType:bounds";
+    private static final String PROPNAME_MATRIX = "android:changeImageTransform:matrix";
+    private static final String PROPNAME_BOUNDS = "android:changeImageTransform:bounds";
 
     private static final String[] sTransitionProperties = {
             PROPNAME_MATRIX,
@@ -66,6 +68,12 @@ public class ChangeImageTransform extends Transition {
             return null;
         }
     };
+
+    public ChangeImageTransform() {}
+
+    public ChangeImageTransform(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     private void captureValues(TransitionValues transitionValues) {
         View view = transitionValues.view;
