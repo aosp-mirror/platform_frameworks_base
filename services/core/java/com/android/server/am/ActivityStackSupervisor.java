@@ -1178,7 +1178,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // to run in multiple processes, because this is actually
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
-                    app.addPackage(r.info.packageName, mService.mProcessStats);
+                    app.addPackage(r.info.packageName, r.info.applicationInfo.versionCode,
+                            mService.mProcessStats);
                 }
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
