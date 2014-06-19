@@ -14,26 +14,38 @@
      limitations under the License.
 -->
 <resources>
-    <style name="Theme.Leanback.Dialog.Alert" parent="Theme.Holo.Dialog.BaseAlert">
-      <item name="windowTitleStyle">@style/DialogWindowTitle.Leanback</item>
+    <style name="Theme.Leanback.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert">
+      <item name="colorBackground">@color/background_leanback_dark</item>
+      <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
+      <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
       <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
-      <item name="buttonBarStyle">@style/Leanback.ButtonBar</item>
-      <item name="listDividerAlertDialog">@null</item>
     </style>
 
-    <style name="Theme.Leanback.Light.Dialog.Alert" parent="Theme.Holo.Light.Dialog.BaseAlert">
-      <item name="windowTitleStyle">@style/DialogWindowTitle.Leanback</item>
+    <style name="Theme.Leanback.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert">
+      <item name="colorBackground">@color/background_leanback_light</item>
+      <item name="textColorPrimary">@color/primary_text_leanback_light</item>
+      <item name="textColorSecondary">@color/secondary_text_leanback_light</item>
       <item name="alertDialogStyle">@style/AlertDialog.Leanback.Light</item>
-      <item name="buttonBarStyle">@style/Leanback.ButtonBar</item>
-      <item name="listDividerAlertDialog">@null</item>
     </style>
 
-    <style name="Theme.Leanback.Light.Dialog" parent="Theme.Holo.Light.Dialog">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Leanback</item>
+    <style name="Theme.Leanback.Dialog.TimePicker" parent="Theme.Material.Dialog.BaseTimePicker">
+      <item name="colorBackground">@color/background_leanback_dark</item>
+      <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
+      <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
+      <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
     </style>
 
-    <style name="Theme.Leanback.Dialog" parent="Theme.Holo.Dialog">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.Leanback</item>
+    <style name="Theme.Leanback.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker">
+      <item name="colorBackground">@color/background_leanback_light</item>
+      <item name="textColorPrimary">@color/primary_text_leanback_light</item>
+      <item name="textColorSecondary">@color/secondary_text_leanback_light</item>
+      <item name="alertDialogStyle">@style/AlertDialog.Leanback.Light</item>
+    </style>
+
+    <style name="Theme.Leanback.Light.Dialog" parent="Theme.Material.Light.Dialog">
+    </style>
+
+    <style name="Theme.Leanback.Dialog" parent="Theme.Material.Dialog">
     </style>
 
     <style name="Theme.Leanback.Dialog.AppError" parent="Theme.Leanback.Dialog">

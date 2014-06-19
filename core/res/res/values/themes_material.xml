@@ -1092,25 +1092,29 @@ please see themes_device_defaults.xml.
         <item name="windowCloseOnTouchOutside">false</item>
     </style>
 
-    <!-- Material theme for alert dialog windows, which is used by the
-         {@link android.app.AlertDialog} class.  This is basically a dialog
-         but sets the background to empty so it can do two-tone backgrounds.
-         For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
-    <style name="Theme.Material.Dialog.Alert">
+    <style name="Theme.Material.Dialog.BaseAlert">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Material theme for the TimePicker dialog windows, which is used by the
-         {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Material.Dialog.TimePicker">
+    <!-- Material theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Theme.Material.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert"/>
+
+    <style name="Theme.Material.Dialog.BaseTimePicker">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowContentOverlay">@null</item>
     </style>
+
+    <!-- Material theme for the TimePicker dialog windows, which is used by the
+         {@link android.app.TimePickerDialog} class. -->
+    <style name="Theme.Material.Dialog.TimePicker" parent="Theme.Material.Dialog.BaseTimePicker"/>
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
@@ -1206,24 +1210,28 @@ please see themes_device_defaults.xml.
          (large, xlarge). -->
     <style name="Theme.Material.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.Material.Light.NoActionBar" />
 
-    <!-- Material light theme for alert dialog windows, which is used by the
-         {@link android.app.AlertDialog} class.  This is basically a dialog
-         but sets the background to empty so it can do two-tone backgrounds.
-         For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
-    <style name="Theme.Material.Light.Dialog.Alert">
+    <style name="Theme.Material.Light.Dialog.BaseAlert">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Material Light theme for the TimePicker dialog windows, which is used by the
-         {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Material.Light.Dialog.TimePicker">
+    <!-- Material light theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert"/>
+
+    <style name="Theme.Material.Light.Dialog.BaseTimePicker">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
     </style>
+
+    <!-- Material Light theme for the TimePicker dialog windows, which is used by the
+         {@link android.app.TimePickerDialog} class. -->
+    <style name="Theme.Material.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker"/>
 
     <!-- Theme for a presentation window on a secondary display. -->
     <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" />

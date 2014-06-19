@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
+<!-- Colors specific to Leanback themes. -->
 <resources>
-    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
-    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
-    <style name="Theme.DeviceDefault.Dialog.TimePicker" parent="Theme.Leanback.Dialog.TimePicker" />
-    <style name="Theme.DeviceDefault.Light.Dialog.TimePicker" parent="Theme.Leanback.Light.Dialog.TimePicker" />
+    <color name="background_leanback_dark">#ff324248</color>
+    <color name="background_leanback_light">#ffeeeeee</color>
+
+    <color name="primary_text_leanback_dark">#cceeeeee</color>
+    <color name="secondary_text_leanback_dark">#99eeeeee</color>
+
+    <color name="primary_text_leanback_light">#cc222222</color>
+    <color name="secondary_text_leanback_light">#99222222</color>
+
 </resources>
