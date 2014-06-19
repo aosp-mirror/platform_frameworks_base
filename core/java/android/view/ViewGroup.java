@@ -4386,7 +4386,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // Make sure we do not set both flags at the same time
             int opaqueFlag = isOpaque ? PFLAG_DIRTY_OPAQUE : PFLAG_DIRTY;
 
-            if (child.mLayerType == LAYER_TYPE_SOFTWARE) {
+            if (child.mLayerType != LAYER_TYPE_NONE) {
                 mPrivateFlags |= PFLAG_INVALIDATED;
                 mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
             }
@@ -4497,7 +4497,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 location[CHILD_LEFT_INDEX] = left;
                 location[CHILD_TOP_INDEX] = top;
 
-                if (mLayerType == LAYER_TYPE_SOFTWARE) {
+                if (mLayerType != LAYER_TYPE_NONE) {
                     mPrivateFlags |= PFLAG_INVALIDATED;
                 }
 
@@ -4515,7 +4515,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
                 }
 
-                if (mLayerType == LAYER_TYPE_SOFTWARE) {
+                if (mLayerType != LAYER_TYPE_NONE) {
                     mPrivateFlags |= PFLAG_INVALIDATED;
                 }
 
