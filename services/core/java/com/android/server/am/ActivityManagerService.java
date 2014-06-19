@@ -7230,7 +7230,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Compose the recent task info
         ActivityManager.RecentTaskInfo rti
                 = new ActivityManager.RecentTaskInfo();
-        rti.id = tr.mActivities.isEmpty() ? -1 : tr.taskId;
+        rti.id = tr.getTopActivity() == null ? -1 : tr.taskId;
         rti.persistentId = tr.taskId;
         rti.baseIntent = new Intent(tr.getBaseIntent());
         rti.origActivity = tr.origActivity;
@@ -7296,6 +7296,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (!tr.isHomeTask() && tr.creatorUid != callingUid) {
                             continue;
                         }
+                    }
+                    if (tr.intent != null &&
+                            (tr.intent.getFlags() & Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS)
+                            != 0 && tr.getTopActivity() == null) {
+                        // Don't include auto remove tasks that are finished or finishing.
+                        continue;
                     }
 
                     ActivityManager.RecentTaskInfo rti = createRecentTaskInfoFromTaskRecord(tr);

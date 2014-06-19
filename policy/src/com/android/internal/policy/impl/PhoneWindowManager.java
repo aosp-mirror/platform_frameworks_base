@@ -521,6 +521,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_KEYGUARD_DRAWN_TIMEOUT = 6;
     private static final int MSG_WINDOW_MANAGER_DRAWN_COMPLETE = 7;
     private static final int MSG_WAKING_UP = 8;
+    private static final int MSG_DISPATCH_SHOW_RECENTS = 9;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -537,6 +538,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK:
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
+                    break;
+                case MSG_DISPATCH_SHOW_RECENTS:
+                    showRecentApps(false);
                     break;
                 case MSG_KEYGUARD_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
@@ -2587,6 +2591,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // re-acquire status bar service next time it is needed.
             mStatusBarService = null;
         }
+    }
+
+    @Override
+    public void showRecentApps() {
+        mHandler.removeMessages(MSG_DISPATCH_SHOW_RECENTS);
+        mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_RECENTS);
     }
 
     private void showRecentApps(boolean triggeredFromAltTab) {
