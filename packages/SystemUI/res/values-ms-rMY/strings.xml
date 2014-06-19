@@ -32,16 +32,16 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tiada pemberitahuan"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Sedang berlangsung"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Pemberitahuan"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Bateri rendah"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Bateri lemah"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Berbaki <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> yang tinggal. Penjimat bateri dihidupkan."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Tinggal <xliff:g id="NUMBER">%d%%</xliff:g>. Penjimat bateri dihidupkan."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Pengecasan USB tidak disokong.\nGunakan hanya pengecas yang dibekalkan."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Pengecasan USB tidak disokong."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Gunakan pengecas yang dibekalkan sahaja."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Tetapan"</string>
-    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Hidupkan penjimat bateri?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Bermula"</string>
-    <string name="battery_saver_start_action" msgid="7245333922937402896">"Hidupkan penjimat bateri"</string>
+    <string name="battery_saver_confirmation_title" msgid="5987726159603849352">"Mulakan penjimat bateri?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7283108887345688413">"Mula"</string>
+    <string name="battery_saver_start_action" msgid="7245333922937402896">"Mulakan penjimat bateri"</string>
     <string name="battery_saver_confirmation_text" msgid="8417584516834617662">"Untuk membantu meningkatkan hayat bateri, penjimat Bateri akan mengurangkan prestasi peranti anda.\n\nPenjimat bateri akan dilumpuhkan apabila peranti anda disambungkan kepada sumber kuasa."</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Tetapan"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -243,10 +243,8 @@
     <string name="camera_hint" msgid="5241441720959174226">"Leret ke kiri untuk kamera"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Sehingga anda matikan"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Mengecas (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> sehingga penuh)"</string>
-    <!-- no translation found for guest_nickname (8059989128963789678) -->
-    <skip />
-    <!-- no translation found for guest_new_guest (4259024453643879653) -->
-    <skip />
+    <string name="guest_nickname" msgid="8059989128963789678">"Tetamu"</string>
+    <string name="guest_new_guest" msgid="4259024453643879653">"+ Tetamu"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Selama satu minit"</item>
     <item quantity="other" msgid="6924190729213550991">"Selama %d minit"</item>
