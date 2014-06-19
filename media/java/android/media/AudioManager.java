@@ -2534,6 +2534,9 @@ public class AudioManager {
     // from AudioManager. AudioSystem is an internal class used by AudioManager and AudioService.
 
     /** @hide
+     * The audio device code for representing "no device." */
+    public static final int DEVICE_NONE = AudioSystem.DEVICE_NONE;
+    /** @hide
      *  The audio output device code for the small speaker at the front of the device used
      *  when placing calls.  Does not refer to an in-ear headphone without attached microphone,
      *  such as earbuds, earphones, or in-ear monitors (IEM). Those would be handled as a

@@ -94,8 +94,7 @@ final class TvInputHal {
     }
 
     // Called from native
-    private void deviceAvailableFromNative(int deviceId, int type) {
-        final TvInputHardwareInfo info = new TvInputHardwareInfo(deviceId, type);
+    private void deviceAvailableFromNative(final TvInputHardwareInfo info) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -105,23 +104,21 @@ final class TvInputHal {
         });
     }
 
-    private void deviceUnavailableFromNative(int deviceId) {
-        final int id = deviceId;
+    private void deviceUnavailableFromNative(final int deviceId) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mCallback.onDeviceUnavailable(id);
+                mCallback.onDeviceUnavailable(deviceId);
             }
         });
     }
 
-    private void streamConfigsChangedFromNative(int deviceId) {
-        final int id = deviceId;
+    private void streamConfigsChangedFromNative(final int deviceId) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                retrieveStreamConfigs(id);
-                mCallback.onStreamConfigurationChanged(id, mStreamConfigs);
+                retrieveStreamConfigs(deviceId);
+                mCallback.onStreamConfigurationChanged(deviceId, mStreamConfigs);
             }
         });
     }

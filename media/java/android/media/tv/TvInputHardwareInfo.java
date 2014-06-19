@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -56,14 +57,11 @@ public final class TvInputHardwareInfo implements Parcelable {
 
     private int mDeviceId;
     private int mType;
-    // TODO: Add audio port & audio address for audio service.
+    private int mAudioType;
+    private String mAudioAddress;
     // TODO: Add HDMI handle for HDMI service.
 
-    public TvInputHardwareInfo() { }
-
-    public TvInputHardwareInfo(int deviceId, int type) {
-        mDeviceId = deviceId;
-        mType = type;
+    private TvInputHardwareInfo() {
     }
 
     public int getDeviceId() {
@@ -72,6 +70,14 @@ public final class TvInputHardwareInfo implements Parcelable {
 
     public int getType() {
         return mType;
+    }
+
+    public int getAudioType() {
+        return mAudioType;
+    }
+
+    public String getAudioAddress() {
+        return mAudioAddress;
     }
 
     // Parcelable
@@ -84,10 +90,59 @@ public final class TvInputHardwareInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mDeviceId);
         dest.writeInt(mType);
+        dest.writeInt(mAudioType);
+        dest.writeString(mAudioAddress);
     }
 
     public void readFromParcel(Parcel source) {
         mDeviceId = source.readInt();
         mType = source.readInt();
+        mAudioType = source.readInt();
+        mAudioAddress = source.readString();
+    }
+
+    public static final class Builder {
+        private Integer mDeviceId = null;
+        private Integer mType = null;
+        private int mAudioType = AudioManager.DEVICE_NONE;
+        private String mAudioAddress = "";
+
+        public Builder() {
+        }
+
+        public Builder deviceId(int deviceId) {
+            mDeviceId = deviceId;
+            return this;
+        }
+
+        public Builder type(int type) {
+            mType = type;
+            return this;
+        }
+
+        public Builder audioType(int audioType) {
+            mAudioType = audioType;
+            return this;
+        }
+
+        public Builder audioAddress(String audioAddress) {
+            mAudioAddress = audioAddress;
+            return this;
+        }
+
+        public TvInputHardwareInfo build() {
+            if (mDeviceId == null || mType == null) {
+                throw new UnsupportedOperationException();
+            }
+
+            TvInputHardwareInfo info = new TvInputHardwareInfo();
+            info.mDeviceId = mDeviceId;
+            info.mType = mType;
+            info.mAudioType = mAudioType;
+            if (info.mAudioType != AudioManager.DEVICE_NONE) {
+                info.mAudioAddress = mAudioAddress;
+            }
+            return info;
+        }
     }
 }

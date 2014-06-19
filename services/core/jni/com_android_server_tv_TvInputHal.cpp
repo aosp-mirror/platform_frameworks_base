@@ -54,6 +54,17 @@ static struct {
     jmethodID build;
 } gTvStreamConfigBuilderClassInfo;
 
+static struct {
+    jclass clazz;
+
+    jmethodID constructor;
+    jmethodID deviceId;
+    jmethodID type;
+    jmethodID audioType;
+    jmethodID audioAddress;
+    jmethodID build;
+} gTvInputHardwareInfoBuilderClassInfo;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class JTvInputHal {
@@ -209,7 +220,6 @@ const tv_stream_config_t* JTvInputHal::getStreamConfigs(int deviceId, int* numCo
     return configs;
 }
 
-
 // static
 void JTvInputHal::notify(
         tv_input_device_t* dev, tv_input_event_t* event, void* data) {
@@ -232,11 +242,32 @@ void JTvInputHal::notify(
 void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     mConnections.add(info.device_id, Connection());
+
+    jobject builder = env->NewObject(
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            gTvInputHardwareInfoBuilderClassInfo.constructor);
+    env->CallObjectMethod(
+            builder, gTvInputHardwareInfoBuilderClassInfo.deviceId, info.device_id);
+    env->CallObjectMethod(
+            builder, gTvInputHardwareInfoBuilderClassInfo.type, info.type);
+    env->CallObjectMethod(
+            builder, gTvInputHardwareInfoBuilderClassInfo.audioType, info.audio_type);
+    if (info.audio_type != AUDIO_DEVICE_NONE) {
+        jstring audioAddress = env->NewStringUTF(info.audio_address);
+        env->CallObjectMethod(
+                builder, gTvInputHardwareInfoBuilderClassInfo.audioAddress, audioAddress);
+        env->DeleteLocalRef(audioAddress);
+    }
+
+    jobject infoObject = env->CallObjectMethod(builder, gTvInputHardwareInfoBuilderClassInfo.build);
+
     env->CallVoidMethod(
             mThiz,
             gTvInputHalClassInfo.deviceAvailable,
-            info.device_id,
-            info.type);
+            infoObject);
+
+    env->DeleteLocalRef(builder);
+    env->DeleteLocalRef(infoObject);
 }
 
 void JTvInputHal::onDeviceUnavailable(int deviceId) {
@@ -339,7 +370,8 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
     FIND_CLASS(clazz, "com/android/server/tv/TvInputHal");
 
     GET_METHOD_ID(
-            gTvInputHalClassInfo.deviceAvailable, clazz, "deviceAvailableFromNative", "(II)V");
+            gTvInputHalClassInfo.deviceAvailable, clazz,
+            "deviceAvailableFromNative", "(Landroid/media/tv/TvInputHardwareInfo;)V");
     GET_METHOD_ID(
             gTvInputHalClassInfo.deviceUnavailable, clazz, "deviceUnavailableFromNative", "(I)V");
     GET_METHOD_ID(
@@ -381,6 +413,36 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
             gTvStreamConfigBuilderClassInfo.build,
             gTvStreamConfigBuilderClassInfo.clazz,
             "build", "()Landroid/media/tv/TvStreamConfig;");
+
+    FIND_CLASS(gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "android/media/tv/TvInputHardwareInfo$Builder");
+    gTvInputHardwareInfoBuilderClassInfo.clazz =
+            jclass(env->NewGlobalRef(gTvInputHardwareInfoBuilderClassInfo.clazz));
+
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.constructor,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "<init>", "()V");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.deviceId,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "deviceId", "(I)Landroid/media/tv/TvInputHardwareInfo$Builder;");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.type,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "type", "(I)Landroid/media/tv/TvInputHardwareInfo$Builder;");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.audioType,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "audioType", "(I)Landroid/media/tv/TvInputHardwareInfo$Builder;");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.audioAddress,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "audioAddress", "(Ljava/lang/String;)Landroid/media/tv/TvInputHardwareInfo$Builder;");
+    GET_METHOD_ID(
+            gTvInputHardwareInfoBuilderClassInfo.build,
+            gTvInputHardwareInfoBuilderClassInfo.clazz,
+            "build", "()Landroid/media/tv/TvInputHardwareInfo;");
 
     return 0;
 }
