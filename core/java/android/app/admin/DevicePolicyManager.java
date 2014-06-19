@@ -1507,12 +1507,11 @@ public class DevicePolicyManager {
      *
      * @return false if the certBuffer cannot be parsed or installation is
      *         interrupted, otherwise true
-     * @hide
      */
-    public boolean installCaCert(byte[] certBuffer) {
+    public boolean installCaCert(ComponentName who, byte[] certBuffer) {
         if (mService != null) {
             try {
-                return mService.installCaCert(certBuffer);
+                return mService.installCaCert(who, certBuffer);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1522,13 +1521,14 @@ public class DevicePolicyManager {
 
     /**
      * Uninstalls the given certificate from the list of User CAs, if present.
-     *
-     * @hide
      */
-    public void uninstallCaCert(byte[] certBuffer) {
+    public void uninstallCaCert(ComponentName who, byte[] certBuffer) {
         if (mService != null) {
             try {
-                mService.uninstallCaCert(certBuffer);
+                final String alias = getCaCertAlias(certBuffer);
+                mService.uninstallCaCert(who, alias);
+            } catch (CertificateException e) {
+                Log.w(TAG, "Unable to parse certificate", e);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1537,10 +1537,8 @@ public class DevicePolicyManager {
 
     /**
      * Returns whether there are any user-installed CA certificates.
-     *
-     * @hide
      */
-    public static boolean hasAnyCaCertsInstalled() {
+    public boolean hasAnyCaCertsInstalled() {
         TrustedCertificateStore certStore = new TrustedCertificateStore();
         Set<String> aliases = certStore.userAliases();
         return aliases != null && !aliases.isEmpty();
@@ -1548,22 +1546,25 @@ public class DevicePolicyManager {
 
     /**
      * Returns whether this certificate has been installed as a User CA.
-     *
-     * @hide
      */
     public boolean hasCaCertInstalled(byte[] certBuffer) {
-        TrustedCertificateStore certStore = new TrustedCertificateStore();
-        String alias;
-        byte[] pemCert;
         try {
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
-                            new ByteArrayInputStream(certBuffer));
-            return certStore.getCertificateAlias(cert) != null;
+            return getCaCertAlias(certBuffer) != null;
         } catch (CertificateException ce) {
             Log.w(TAG, "Could not parse certificate", ce);
         }
         return false;
+    }
+
+    /**
+     * Returns the alias of a given CA certificate in the certificate store, or null if it
+     * doesn't exist.
+     */
+    private static String getCaCertAlias(byte[] certBuffer) throws CertificateException {
+        final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        final X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
+                              new ByteArrayInputStream(certBuffer));
+        return new TrustedCertificateStore().getCertificateAlias(cert);
     }
 
     /**
