@@ -142,6 +142,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private static void invokeCallback(IHdmiControlCallback callback, int result) {
+        if (callback == null) {
+            return;
+        }
         try {
             callback.onComplete(result);
         } catch (RemoteException e) {
@@ -455,7 +458,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     final void addCecDevice(HdmiCecDeviceInfo info) {
         assertRunOnServiceThread();
         addDeviceInfo(info);
-
+        mService.invokeDeviceEventListeners(info, true);
         // TODO: announce new device detection.
     }
 
@@ -466,10 +469,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      */
     final void removeCecDevice(int address) {
         assertRunOnServiceThread();
-        removeDeviceInfo(address);
+        HdmiCecDeviceInfo info = removeDeviceInfo(address);
         mCecMessageCache.flushMessagesFrom(address);
-
-        // TODO: announce a device removal.
+        mService.invokeDeviceEventListeners(info, false);
     }
 
     /**
