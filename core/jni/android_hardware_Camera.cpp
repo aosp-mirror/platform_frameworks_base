@@ -466,7 +466,7 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 
 // connect to camera service
 static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
-    jobject weak_this, jint cameraId, jstring clientPackageName)
+    jobject weak_this, jint cameraId, jint halVersion, jstring clientPackageName)
 {
     // Convert jstring to String16
     const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
@@ -474,8 +474,18 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     String16 clientName(rawClientName, rawClientNameLen);
     env->ReleaseStringChars(clientPackageName, rawClientName);
 
-    sp<Camera> camera = Camera::connect(cameraId, clientName,
-            Camera::USE_CALLING_UID);
+    sp<Camera> camera;
+    if (halVersion == ICameraService::CAMERA_HAL_API_VERSION_UNSPECIFIED) {
+        // Default path: hal version is unspecified, do normal camera open.
+        camera = Camera::connect(cameraId, clientName,
+                Camera::USE_CALLING_UID);
+    } else {
+        jint status = Camera::connectLegacy(cameraId, halVersion, clientName,
+                Camera::USE_CALLING_UID, camera);
+        if (status != NO_ERROR) {
+            return status;
+        }
+    }
 
     if (camera == NULL) {
         return -EACCES;
@@ -510,7 +520,6 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 // finalizer is invoked later.
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
-    // TODO: Change to ALOGV
     ALOGV("release camera");
     JNICameraContext* context = NULL;
     sp<Camera> camera;
@@ -891,7 +900,7 @@ static JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;ILjava/lang/String;)I",
+    "(Ljava/lang/Object;IILjava/lang/String;)I",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",
