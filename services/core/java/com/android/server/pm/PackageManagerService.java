@@ -4229,6 +4229,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try {
             pp.collectCertificates(pkg, parseFlags);
+            pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
             mLastScanError = e.error;
             return false;
@@ -10272,6 +10273,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try {
             pp.collectCertificates(pkg, parseFlags);
+            pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
             res.returnCode = e.error;
             return;

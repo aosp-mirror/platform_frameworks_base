@@ -744,6 +744,8 @@ public class PackageParser {
      * {@code AndroidManifest.xml}, {@code true} is returned.
      */
     public void collectManifestDigest(Package pkg) throws PackageParserException {
+        pkg.manifestDigest = null;
+
         // TODO: extend to gather digest for split APKs
         try {
             final StrictJarFile jarFile = new StrictJarFile(pkg.codePath);
