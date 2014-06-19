@@ -7813,6 +7813,25 @@ public final class ContactsContract {
                 "pinned_position_update");
 
         /**
+         * <p>
+         * The method to invoke in order to undemote a formerly demoted contact. The contact id of
+         * the contact must be provided as an argument. If the contact was not previously demoted,
+         * nothing will be done.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * final long contactId = 10;
+         * resolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
+         *         String.valueOf(contactId), null);
+         * </pre>
+         *
+         * </p>
+         */
+        public static final String UNDEMOTE_METHOD = "undemote";
+
+        /**
          * Default value for the pinned position of an unpinned contact. Also equal to
          * {@link Integer#MAX_VALUE}.
          */
