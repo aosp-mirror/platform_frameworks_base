@@ -325,6 +325,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_IS_GAME = 1<<25;
 
     /**
+     * Value for {@link #flags}: {@code true} if the application asks that only
+     * full-data streaming backups of its data be performed even though it defines
+     * a {@link android.app.backup.BackupAgent BackupAgent}, which normally
+     * indicates that the app will manage its backed-up data via incremental
+     * key/value updates.
+     */
+    public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
+
+    /**
      * Value for {@link #flags}: set to {@code true} if the application
      * is permitted to hold privileged permissions.
      *

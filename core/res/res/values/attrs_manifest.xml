@@ -814,6 +814,14 @@
          via adb.  The default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
+    <!-- Indicates that even though the application provides a <code>BackupAgent</code>,
+         only full-data streaming backup operations are to be performed to save the app's
+         data.  This lets the app rely on full-data backups while still participating in
+         the backup and restore process via the BackupAgent's full-data backup APIs.
+         When this attribute is <code>true</code> the app's BackupAgent overrides of
+         the onBackup() and onRestore() callbacks can be empty stubs. -->
+    <attr name="fullBackupOnly" format="boolean" />
+
     <!-- Whether the application in question should be terminated after its
          settings have been restored during a full-system restore operation.
          Single-package restore operations will never cause the application to
@@ -1060,6 +1068,7 @@
         <attr name="testOnly" />
         <attr name="backupAgent" />
         <attr name="allowBackup" />
+        <attr name="fullBackupOnly" />
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
