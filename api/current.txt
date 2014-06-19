@@ -957,6 +957,7 @@ package android {
     field public static final int ratingBarStyleIndicator = 16843280; // 0x1010210
     field public static final int ratingBarStyleSmall = 16842877; // 0x101007d
     field public static final int readPermission = 16842759; // 0x1010007
+    field public static final int relinquishTaskIdentity = 16843893; // 0x1010475
     field public static final int repeatCount = 16843199; // 0x10101bf
     field public static final int repeatMode = 16843200; // 0x10101c0
     field public static final int reqFiveWayNav = 16843314; // 0x1010232
@@ -8085,6 +8086,7 @@ package android.content.pm {
     field public static final int FLAG_IMMERSIVE = 2048; // 0x800
     field public static final int FLAG_MULTIPROCESS = 1; // 0x1
     field public static final int FLAG_NO_HISTORY = 128; // 0x80
+    field public static final int FLAG_RELINQUISH_TASK_IDENTITY = 4096; // 0x1000
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0

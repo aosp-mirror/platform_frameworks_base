@@ -2742,7 +2742,8 @@
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true"
-                android:documentLaunchMode="never">
+                android:documentLaunchMode="never"
+                android:relinquishTaskIdentity="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.DEFAULT" />

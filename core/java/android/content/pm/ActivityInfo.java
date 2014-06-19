@@ -252,6 +252,13 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0800;
     /**
+     * Bit in {@link #flags}: If set, a task rooted at this activity will have its
+     * baseIntent replaced by the activity immediately above this. Each activity may further
+     * relinquish its identity to the activity above it using this flag. Set from the
+     * android.R.attr#relinquishTaskIdentity attribute.
+     */
+    public static final int FLAG_RELINQUISH_TASK_IDENTITY = 0x1000;
+    /**
      * Bit in {@link #flags} indicating that tasks started with this activity are to be
      * removed from the recent list of tasks when the last activity in the task is finished.
      * {@link android.R.attr#autoRemoveFromRecents}
