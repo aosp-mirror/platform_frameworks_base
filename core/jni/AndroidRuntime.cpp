@@ -488,8 +488,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char profile_duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
     char profile_interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
     char profile_backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
-    char profile_top_k_threshold[sizeof("-Xprofile-top-k-threshold") + PROPERTY_VALUE_MAX];
-    char profile_top_k_change_threshold[sizeof("-Xprofile-top-k-change-threshold") + PROPERTY_VALUE_MAX];
+    char profile_top_k_threshold[sizeof("-Xprofile-top-k-threshold:") + PROPERTY_VALUE_MAX];
+    char profile_top_k_change_threshold[sizeof("-Xprofile-top-k-change-threshold:") + PROPERTY_VALUE_MAX];
     char langOption[sizeof("-Duser.language=") + 3];
     char regionOption[sizeof("-Duser.region=") + 3];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:") + sizeof(propBuf)];
