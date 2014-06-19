@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ivumela uhlelo lokusebenza ukuthi isethe i-alamu ensizeni efkiwe ye-alamu. Ezinye izinhlelo zokusebenza ze-alamu kungenzeka zingakusebenzisi lokho."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"engeza imeyili yezwi"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ivumela uhlelo lokusebenza ukwengeza imiyalezo kwibhokisi lakho lemeyili yezwi."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"funda wonke amavoyisimeyili"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Ivumela uhlelo lokusebenza ukuthi lufunde wonke amavoyisimeyili wakho."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Gugula izimvume zendawo Yesiphequluli"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ivumela uhlelo lokusebenza ukuthi iguqule izimvume eziphathelene nezindawo Zesiphequluli. Izuhlelo lokusebenza eziyingozi zingasebenzisa lokhu ukuvumela ukuvumela imininingwane yendawo kunoma imaphi amawebusayithi."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"qinisekisa amaphakheji"</string>

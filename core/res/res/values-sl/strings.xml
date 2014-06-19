@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Programu omogoča nastavitev alarma v nameščenem programu budilke. Nekateri programi budilke morda nimajo te funkcije."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodajanje odzivnika"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Programu omogoča dodajanje sporočil prejetim sporočilom odzivnika."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Spreminjanje dovoljenj za geolokacijo brskalnika"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Programu omogoča spreminjanje geolokacijskih dovoljenj v brskalniku. Zlonamerni programi lahko to izkoristijo za pošiljanje podatkov o lokaciji poljubnim spletnim mestom."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"preveri pakete"</string>

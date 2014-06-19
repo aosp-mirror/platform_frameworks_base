@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Leidžiama programai nustatyti signalą įdiegtoje žadintuvo programoje. Kai kuriose žadintuvo programose ši funkcija gali nebūti nevykdoma."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridėti balso pašto pranešimų"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Leidžia programai pridėti pranešimų prie jūsų balso pašto gautųjų."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"skaityti visus balso pašto pranešimus"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Programai leidžiama skaityti visus balso pašto pranešimus."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"keisti naršyklės geografinės vietos leidimus"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Leidžiama programai keisti naršyklės geografinės vietos leidimus. Kenkėjiškos programos gali tai naudoti, kad leistų siųsti vietos informaciją abejotinoms svetainėms."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"patikrinti paketus"</string>

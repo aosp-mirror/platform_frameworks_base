@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que o aplicativo defina um alarme em um aplicativo despertador instalado. Alguns aplicativos despertador podem não implementar este recurso."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adicionar correio de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que o aplicativo adicione mensagens a sua caixa de entrada do correio de voz."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifique as permissões de geolocalização de seu navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que o aplicativo modifique as permissões de geolocalização do navegador. Aplicativos maliciosos podem usar isso para permitir o envio de informações locais para sites arbitrários."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar pacotes"</string>
@@ -1362,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite que o aplicativo detecte alterações no estado de confiança."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Fornecer um agente de confiança."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite que um aplicativo forneça um agente de confiança."</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Abra o menu de configurações do agente de confiança."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Permite que um aplicativo inicie uma atividade que altera o comportamento do agente de confiança."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Associar a um serviço de agente de confiança"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite que o aplicativo se associe a um serviço de agente de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagir com o sistema de atualizações e recuperação"</string>

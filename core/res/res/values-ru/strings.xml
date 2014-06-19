@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Приложение сможет настраивать будильник. Функция поддерживается не во всех программах."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Добавление голосовых сообщений"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Приложение сможет добавлять голосовые сообщения в папку \"Входящие\"."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"Доступ к голосовой почте"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Чтение голосовых сообщений."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Изменение прав доступа к геоданным в браузере"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Приложение сможет изменять настройки доступа к геоданным в браузере. Вредоносные программы смогут таким образом отправлять информацию о местоположении на любые веб-сайты."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"Проверка пакетов"</string>

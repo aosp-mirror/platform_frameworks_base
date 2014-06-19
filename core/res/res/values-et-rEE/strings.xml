@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Võimaldab rakendusel seada installitud äratuskellarakenduses äratuse. Mõned äratuskellarakendused ei pruugi seda funktsiooni juurutada."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisa kõneposti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Võimaldab rakendusel lisada sõnumeid teie kõneposti postkasti."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"kogu kõneposti lugemine"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Võimaldab rakendusel kogu kõneposti lugeda."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Brauseri geolokatsiooniõiguste muutmine"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Võimaldab rakendusel muuta brauseri geolokatsiooniõigusi. Pahatahtlikud rakendused võivad seda kasutada asukohateabe saatmise lubamiseks suvalistele veebisaitidele."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakettide kinnitamine"</string>

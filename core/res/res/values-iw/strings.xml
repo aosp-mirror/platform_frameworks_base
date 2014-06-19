@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"מאפשר לאפליקציה להגדיר התראה באפליקציה מותקנת של שעון מעורר. אפליקציות מסוימות של שעון מעורר אינן מיישמות תכונה זו."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"הוסף דואר קולי"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"מאפשר לאפליקציה להוסיף הודעות לתיבת הדואר הקולי."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"קריאת כל הדואר הקולי"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"מאפשרת לאפליקציה לקרוא את כל הודעות הדואר הקולי שלך."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"שינוי הרשאות המיקום הגיאוגרפי של הדפדפן"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"מאפשר לאפליקציה לשנות את הרשאות המיקום הגיאוגרפי של הדפדפן. אפליקציות זדוניות עלולות להשתמש בכך כדי לאפשר משלוח של פרטי מיקום לאתרים זדוניים אחרים."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"אימות חבילות"</string>

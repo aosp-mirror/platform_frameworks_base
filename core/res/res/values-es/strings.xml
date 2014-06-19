@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de reloj instalada. Es posible que algunas aplicaciones de reloj no incluyan esta función."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"añadir buzón de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que la aplicación añada mensajes a la bandeja de entrada del buzón de voz."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"consultar todos los mensajes de voz"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permite que la aplicación consulte todos tus mensajes de voz."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que la aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones malintencionadas pueden usar este permiso para autorizar el envío de información sobre la ubicación a sitios web arbitrarios."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"verificar paquetes"</string>

@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"للسماح للتطبيق بضبط المنبه في تطبيق المنبه المثبّت. ربما لا تنفذ بعض تطبيقات المنبه هذه الميزة."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"قراءة جميع رسائل البريد الصوتي"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"للسماح للتطبيق بقراءة جميع رسائل البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"التحقق من الحزم"</string>

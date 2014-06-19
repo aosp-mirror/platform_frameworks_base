@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pozwala aplikacji na ustawienie alarmu w zainstalowanej aplikacji budzika. Funkcja ta może nie być zaimplementowana w niektórych aplikacjach tego typu."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodawanie poczty głosowej"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Pozwala aplikacji na dodawanie wiadomości do skrzynki odbiorczej poczty głosowej."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"odczyt całej poczty głosowej"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Zezwala aplikacji na odczyt całej Twojej poczty głosowej."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modyfikowanie pozwoleń przeglądarki dotyczących lokalizacji geograficznej"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Pozwala aplikacji na modyfikowanie uprawnień przeglądarki dotyczących lokalizacji geograficznej. Złośliwe aplikacje mogą używać tej opcji do wysyłania informacji o lokalizacji do dowolnych witryn."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"weryfikowanie pakietów"</string>

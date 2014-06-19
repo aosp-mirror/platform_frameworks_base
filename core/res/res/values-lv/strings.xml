@@ -1001,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ļauj lietotnei iestatīt signālu instalētajā modinātājpulksteņa lietotnē. Dažās modinātājpulksteņu lietotnēs šo funkciju, iespējams, nevar ieviest."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pievienot balss pastu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ļauj lietotnei pievienot ziņojumus jūsu balss pasta iesūtnei."</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ļauj lietotnei modificēt pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietotnes to var izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakotņu verificēšana"</string>

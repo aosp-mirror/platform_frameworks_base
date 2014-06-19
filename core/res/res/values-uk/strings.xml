@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавати голосову пошту"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозволяє програмі додавати повідомлення в папку \"Вхідні\" голосової пошти."</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"читати всі голосові повідомлення"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Додаток може читати всі голосові повідомлення."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"змінювати дозволи географічного місцезнаходження у веб-переглядачі"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозволяє програмі змінювати дозволи географічного місцезнаходження у веб-переглядачі. Шкідливі програми можуть використовувати це, щоб дозволяти надсилати інформацію про місцезнаходження довільним веб-сайтам."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"перевіряти пакети"</string>

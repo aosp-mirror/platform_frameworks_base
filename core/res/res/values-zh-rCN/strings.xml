@@ -189,8 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"个人应用"</string>
-    <!-- no translation found for managed_profile_label (4287077106125758391) -->
-    <skip />
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"执行可能需要您付费的操作。"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"您的信息"</string>
@@ -1002,6 +1001,10 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允许应用向您的语音信箱收件箱添加邮件。"</string>
+    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
+    <skip />
+    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改“浏览器”地理位置的权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允许应用修改“浏览器”的地理位置权限。恶意应用可能借此向任意网站发送位置信息。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"验证软件包"</string>
@@ -1363,10 +1366,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允许应用检测信任状态的变化。"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理。"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允许应用提供信任的代理。"</string>
-    <!-- no translation found for permlab_launch_trust_agent_settings (7494179366945389098) -->
-    <skip />
-    <!-- no translation found for permdesc_launch_trust_agent_settings (985453787420853278) -->
-    <skip />
+    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"启动信任的代理设置菜单。"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"允许应用启动可变更信任的代理行为的活动。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"绑定至信任的代理服务"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允许应用绑定至信任的代理服务。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>

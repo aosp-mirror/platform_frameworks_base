@@ -401,7 +401,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"เชื่อมโยงกับโปรแกรมโต้ตอบด้วยเสียง"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"อนุญาตให้ผู้ใช้อุปกรณ์เชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการโต้ตอบด้วยเสียง ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"จัดการเสียงพูดวลีคำหลัก"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"ให้ผู้ใช้อุปกรณ์สามารถจัดการวลีคำหลักสำหรับการตรวจหาเสียงพูดคำที่นิยม ไม่จำเป็นสำหรับแอปทั่วไป"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"ให้แอปสามารถจัดการวลีคำหลักสำหรับการตรวจหาเสียงพูดคำที่นิยม ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ผูกกับจอแสดงผลระยะไกล"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"อนุญาตให้ผู้ใช้ผูกกับอินเทอร์เฟซระดับสูงสุดของจอแสดงผลระยะไกล ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"เชื่อมโยงกับบริการวิดเจ็ต"</string>
@@ -1001,6 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"อ่านข้อความเสียงทั้งหมด"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"อนุญาตให้แอปอ่านข้อความเสียงทั้งหมดของคุณ"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการส่งข้อมูลตำแหน่งไปยังเว็บไซต์ต่างๆ ได้ตามต้องการ"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ยืนยันแพ็กเกจ"</string>
