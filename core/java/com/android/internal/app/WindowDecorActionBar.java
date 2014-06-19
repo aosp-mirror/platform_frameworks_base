@@ -830,7 +830,9 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public boolean isShowing() {
-        return mNowShowing && getHideOffset() < getHeight();
+        final int height = getHeight();
+        // Take into account the case where the bar has a 0 height due to not being measured yet.
+        return mNowShowing && (height == 0 || getHideOffset() < height);
     }
 
     void animateToMode(boolean toActionMode) {
