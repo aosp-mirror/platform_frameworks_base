@@ -541,8 +541,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (slidingChild.getVisibility() == GONE) {
                 continue;
             }
-            float top = slidingChild.getTranslationY();
-            float bottom = top + slidingChild.getActualHeight();
+            float childTop = slidingChild.getTranslationY();
+            float top = childTop + slidingChild.getClipTopAmount();
+            float bottom = childTop + slidingChild.getActualHeight();
             int left = slidingChild.getLeft();
             int right = slidingChild.getRight();
 

@@ -109,6 +109,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mBlockTouches;
     private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
     private int mNotificationScrimWaitDistance;
+    private boolean mOnNotificationsOnDown;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -347,6 +348,7 @@ public class NotificationPanelView extends PanelView implements
                 mInitialTouchX = x;
                 initVelocityTracker();
                 trackMovement(event);
+                mOnNotificationsOnDown = isOnNotifications(x, y);
                 if (shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
@@ -394,11 +396,17 @@ public class NotificationPanelView extends PanelView implements
                 if (mQsTracking) {
                     flingQsWithCurrentVelocity();
                     mQsTracking = false;
+                } else if (mQsFullyExpanded && mOnNotificationsOnDown) {
+                    flingSettings(0 /* vel */, false /* expand */);
                 }
                 mIntercepting = false;
                 break;
         }
         return !mQsExpanded && super.onInterceptTouchEvent(event);
+    }
+
+    private boolean isOnNotifications(float x, float y) {
+        return mNotificationStackScroller.getChildAtPosition(x, y) != null;
     }
 
     @Override
