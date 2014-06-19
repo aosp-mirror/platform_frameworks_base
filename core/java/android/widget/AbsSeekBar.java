@@ -467,8 +467,8 @@ public abstract class AbsSeekBar extends ProgressBar {
             final Rect bounds = thumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
-            background.setHotspotBounds(left + offsetX, bounds.top + offsetY,
-                    right + offsetX, bounds.bottom + offsetY);
+            background.setHotspotBounds(left + offsetX, top + offsetY,
+                    right + offsetX, bottom + offsetY);
         }
 
         // Canvas will be translated, so 0,0 is where we start drawing
