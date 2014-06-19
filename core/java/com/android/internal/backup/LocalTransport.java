@@ -93,6 +93,9 @@ public class LocalTransport extends BackupTransport {
 
     private File mFullRestoreSetDir;
     private HashSet<String> mFullRestorePackages;
+    private FileInputStream mCurFullRestoreStream;
+    private FileOutputStream mFullRestoreSocketStream;
+    private byte[] mFullRestoreBuffer;
 
     public LocalTransport(Context context) {
         mContext = context;
@@ -104,34 +107,41 @@ public class LocalTransport extends BackupTransport {
         }
     }
 
+    @Override
     public String name() {
         return new ComponentName(mContext, this.getClass()).flattenToShortString();
     }
 
+    @Override
     public Intent configurationIntent() {
         // The local transport is not user-configurable
         return null;
     }
 
+    @Override
     public String currentDestinationString() {
         return TRANSPORT_DESTINATION_STRING;
     }
 
+    @Override
     public String transportDirName() {
         return TRANSPORT_DIR_NAME;
     }
 
+    @Override
     public long requestBackupTime() {
         // any time is a good time for local backup
         return 0;
     }
 
+    @Override
     public int initializeDevice() {
         if (DEBUG) Log.v(TAG, "wiping all data");
         deleteContents(mCurrentSetDir);
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
+    @Override
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
         if (DEBUG) {
             try {
@@ -191,7 +201,7 @@ public class LocalTransport extends BackupTransport {
                         entity.write(buf, 0, dataSize);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
-                        return BackupTransport.TRANSPORT_ERROR;
+                        return TRANSPORT_ERROR;
                     } finally {
                         entity.close();
                     }
@@ -199,11 +209,11 @@ public class LocalTransport extends BackupTransport {
                     entityFile.delete();
                 }
             }
-            return BackupTransport.TRANSPORT_OK;
+            return TRANSPORT_OK;
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
             Log.v(TAG, "Exception reading backup input:", e);
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
     }
 
@@ -222,6 +232,7 @@ public class LocalTransport extends BackupTransport {
         }
     }
 
+    @Override
     public int clearBackupData(PackageInfo packageInfo) {
         if (DEBUG) Log.v(TAG, "clearBackupData() pkg=" + packageInfo.packageName);
 
@@ -243,9 +254,10 @@ public class LocalTransport extends BackupTransport {
             packageDir.delete();
         }
 
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
+    @Override
     public int finishBackup() {
         if (DEBUG) Log.v(TAG, "finishBackup()");
         if (mSocket != null) {
@@ -259,24 +271,27 @@ public class LocalTransport extends BackupTransport {
                 mFullTargetPackage = null;
                 mSocket.close();
             } catch (IOException e) {
-                return BackupTransport.TRANSPORT_ERROR;
+                return TRANSPORT_ERROR;
             } finally {
                 mSocket = null;
             }
         }
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
     // ------------------------------------------------------------------------------------
     // Full backup handling
+
+    @Override
     public long requestFullBackupTime() {
         return 0;
     }
 
+    @Override
     public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) {
         if (mSocket != null) {
             Log.e(TAG, "Attempt to initiate full backup while one is in progress");
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
 
         if (DEBUG) {
@@ -291,7 +306,7 @@ public class LocalTransport extends BackupTransport {
             mSocketInputStream = new FileInputStream(mSocket.getFileDescriptor());
         } catch (IOException e) {
             Log.e(TAG, "Unable to process socket for full backup");
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
 
         mFullTargetPackage = targetPackage.packageName;
@@ -300,18 +315,19 @@ public class LocalTransport extends BackupTransport {
             File tarball = new File(mCurrentSetFullDir, mFullTargetPackage);
             tarstream = new FileOutputStream(tarball);
         } catch (FileNotFoundException e) {
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
         mFullBackupOutputStream = new BufferedOutputStream(tarstream);
         mFullBackupBuffer = new byte[4096];
 
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
+    @Override
     public int sendBackupData(int numBytes) {
         if (mFullBackupBuffer == null) {
             Log.w(TAG, "Attempted sendBackupData before performFullBackup");
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
 
         if (numBytes > mFullBackupBuffer.length) {
@@ -323,21 +339,23 @@ public class LocalTransport extends BackupTransport {
             if (nRead < 0) {
                 // Something went wrong if we expect data but saw EOD
                 Log.w(TAG, "Unexpected EOD; failing backup");
-                return BackupTransport.TRANSPORT_ERROR;
+                return TRANSPORT_ERROR;
             }
             mFullBackupOutputStream.write(mFullBackupBuffer, 0, nRead);
             numBytes -= nRead;
             } catch (IOException e) {
                 Log.e(TAG, "Error handling backup data for " + mFullTargetPackage);
-                return BackupTransport.TRANSPORT_ERROR;
+                return TRANSPORT_ERROR;
             }
         }
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
     // ------------------------------------------------------------------------------------
     // Restore handling
     static final long[] POSSIBLE_SETS = { 2, 3, 4, 5, 6, 7, 8, 9 }; 
+
+    @Override
     public RestoreSet[] getAvailableRestoreSets() {
         long[] existing = new long[POSSIBLE_SETS.length + 1];
         int num = 0;
@@ -358,11 +376,13 @@ public class LocalTransport extends BackupTransport {
         return available;
     }
 
+    @Override
     public long getCurrentRestoreSet() {
         // The current restore set always has the same token
         return CURRENT_SET_TOKEN;
     }
 
+    @Override
     public int startRestore(long token, PackageInfo[] packages) {
         if (DEBUG) Log.v(TAG, "start restore " + token);
         mRestorePackages = packages;
@@ -371,7 +391,7 @@ public class LocalTransport extends BackupTransport {
         mRestoreSetDir = new File(mDataDir, Long.toString(token));
         mRestoreSetIncrementalDir = new File(mRestoreSetDir, INCREMENTAL_DIR);
         mRestoreSetFullDir = new File(mRestoreSetDir, FULL_DATA_DIR);
-        return BackupTransport.TRANSPORT_OK;
+        return TRANSPORT_OK;
     }
 
     @Override
@@ -397,6 +417,7 @@ public class LocalTransport extends BackupTransport {
                 if (maybeFullData.length() > 0) {
                     if (DEBUG) Log.v(TAG, "  nextRestorePackage(TYPE_FULL_STREAM) = " + name);
                     mRestoreType = RestoreDescription.TYPE_FULL_STREAM;
+                    mCurFullRestoreStream = null;   // ensure starting from the ground state
                     found = true;
                 }
             }
@@ -410,6 +431,7 @@ public class LocalTransport extends BackupTransport {
         return RestoreDescription.NO_MORE_PACKAGES;
     }
 
+    @Override
     public int getRestoreData(ParcelFileDescriptor outFd) {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
         if (mRestorePackage < 0) throw new IllegalStateException("nextRestorePackage not called");
@@ -426,7 +448,7 @@ public class LocalTransport extends BackupTransport {
         ArrayList<DecodedFilename> blobs = contentsByKey(packageDir);
         if (blobs == null) {  // nextRestorePackage() ensures the dir exists, so this is an error
             Log.e(TAG, "No keys for package: " + packageDir);
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
 
         // We expect at least some data if the directory exists in the first place
@@ -447,10 +469,10 @@ public class LocalTransport extends BackupTransport {
                     in.close();
                 }
             }
-            return BackupTransport.TRANSPORT_OK;
+            return TRANSPORT_OK;
         } catch (IOException e) {
             Log.e(TAG, "Unable to read backup records", e);
-            return BackupTransport.TRANSPORT_ERROR;
+            return TRANSPORT_ERROR;
         }
     }
 
@@ -487,38 +509,27 @@ public class LocalTransport extends BackupTransport {
         return contents;
     }
 
+    @Override
     public void finishRestore() {
         if (DEBUG) Log.v(TAG, "finishRestore()");
+        if (mRestoreType == RestoreDescription.TYPE_FULL_STREAM) {
+            resetFullRestoreState();
+        }
+        mRestoreType = 0;
     }
 
     // ------------------------------------------------------------------------------------
     // Full restore handling
 
-    public int prepareFullRestore(long token, String[] targetPackages) {
-        mRestoreSetDir = new File(mDataDir, Long.toString(token));
-        mFullRestoreSetDir = new File(mRestoreSetDir, FULL_DATA_DIR);
-        mFullRestorePackages = new HashSet<String>();
-        if (mFullRestoreSetDir.exists()) {
-            List<String> pkgs = Arrays.asList(mFullRestoreSetDir.list());
-            HashSet<String> available = new HashSet<String>(pkgs);
-
-            for (int i = 0; i < targetPackages.length; i++) {
-                if (available.contains(targetPackages[i])) {
-                    mFullRestorePackages.add(targetPackages[i]);
-                }
-            }
+    private void resetFullRestoreState() {
+        try {
+        mCurFullRestoreStream.close();
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to close full restore input stream");
         }
-        return BackupTransport.TRANSPORT_OK;
-    }
-
-    /**
-     * Ask the transport what package's full data will be restored next.  When all apps'
-     * data has been delivered, the transport should return {@code null} here.
-     * @return The package name of the next application whose data will be restored, or
-     *    {@code null} if all available package has been delivered.
-     */
-    public String getNextFullRestorePackage() {
-        return null;
+        mCurFullRestoreStream = null;
+        mFullRestoreSocketStream = null;
+        mFullRestoreBuffer = null;
     }
 
     /**
@@ -543,7 +554,79 @@ public class LocalTransport extends BackupTransport {
      *    indicating a fatal error condition that precludes further restore operations
      *    on the current dataset.
      */
+    @Override
     public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
-        return 0;
+        if (mRestoreType != RestoreDescription.TYPE_FULL_STREAM) {
+            throw new IllegalStateException("Asked for full restore data for non-stream package");
+        }
+
+        // first chunk?
+        if (mCurFullRestoreStream == null) {
+            final String name = mRestorePackages[mRestorePackage].packageName;
+            if (DEBUG) Log.i(TAG, "Starting full restore of " + name);
+            File dataset = new File(mRestoreSetFullDir, name);
+            try {
+                mCurFullRestoreStream = new FileInputStream(dataset);
+            } catch (IOException e) {
+                // If we can't open the target package's tarball, we return the single-package
+                // error code and let the caller go on to the next package.
+                Log.e(TAG, "Unable to read archive for " + name);
+                return TRANSPORT_PACKAGE_REJECTED;
+            }
+            mFullRestoreSocketStream = new FileOutputStream(socket.getFileDescriptor());
+            mFullRestoreBuffer = new byte[32*1024];
+        }
+
+        int nRead;
+        try {
+            nRead = mCurFullRestoreStream.read(mFullRestoreBuffer);
+            if (nRead < 0) {
+                // EOF: tell the caller we're done
+                nRead = NO_MORE_DATA;
+            } else if (nRead == 0) {
+                // This shouldn't happen when reading a FileInputStream; we should always
+                // get either a positive nonzero byte count or -1.  Log the situation and
+                // treat it as EOF.
+                Log.w(TAG, "read() of archive file returned 0; treating as EOF");
+                nRead = NO_MORE_DATA;
+            } else {
+                if (DEBUG) {
+                    Log.i(TAG, "   delivering restore chunk: " + nRead);
+                }
+                mFullRestoreSocketStream.write(mFullRestoreBuffer, 0, nRead);
+            }
+        } catch (IOException e) {
+            return TRANSPORT_ERROR;  // Hard error accessing the file; shouldn't happen
+        } finally {
+            // Most transports will need to explicitly close 'socket' here, but this transport
+            // is in the same process as the caller so it can leave it up to the backup manager
+            // to manage both socket fds.
+        }
+
+        return nRead;
     }
+
+    /**
+     * If the OS encounters an error while processing {@link RestoreDescription#TYPE_FULL_STREAM}
+     * data for restore, it will invoke this method to tell the transport that it should
+     * abandon the data download for the current package.  The OS will then either call
+     * {@link #nextRestorePackage()} again to move on to restoring the next package in the
+     * set being iterated over, or will call {@link #finishRestore()} to shut down the restore
+     * operation.
+     *
+     * @return {@link #TRANSPORT_OK} if the transport was successful in shutting down the
+     *    current stream cleanly, or {@link #TRANSPORT_ERROR} to indicate a serious
+     *    transport-level failure.  If the transport reports an error here, the entire restore
+     *    operation will immediately be finished with no further attempts to restore app data.
+     */
+    @Override
+    public int abortFullRestore() {
+        if (mRestoreType != RestoreDescription.TYPE_FULL_STREAM) {
+            throw new IllegalStateException("abortFullRestore() but not currently restoring");
+        }
+        resetFullRestoreState();
+        mRestoreType = 0;
+        return TRANSPORT_OK;
+    }
+
 }

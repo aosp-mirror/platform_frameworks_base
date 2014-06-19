@@ -31,12 +31,22 @@ import com.android.internal.backup.IBackupTransport;
  * @hide
  */
 public class BackupTransport {
+    // Zero return always means things are okay.  If returned from
+    // getNextFullRestoreDataChunk(), it means that no data could be delivered at
+    // this time, but the restore is still running and the caller should simply
+    // retry.
     public static final int TRANSPORT_OK = 0;
-    public static final int TRANSPORT_ERROR = 1;
-    public static final int TRANSPORT_NOT_INITIALIZED = 2;
-    public static final int TRANSPORT_PACKAGE_REJECTED = 3;
-    public static final int AGENT_ERROR = 4;
-    public static final int AGENT_UNKNOWN = 5;
+
+    // -1 is special; it is used in getNextFullRestoreDataChunk() to indicate that
+    // we've delivered the entire data stream for the current restore target.
+    public static final int NO_MORE_DATA = -1;
+
+    // Result codes that indicate real errors are negative and not -1
+    public static final int TRANSPORT_ERROR = -1000;
+    public static final int TRANSPORT_NOT_INITIALIZED = -1001;
+    public static final int TRANSPORT_PACKAGE_REJECTED = -1002;
+    public static final int AGENT_ERROR = -1003;
+    public static final int AGENT_UNKNOWN = -1004;
 
     IBackupTransport mBinderImpl = new TransportImpl();
     /** @hide */
@@ -370,11 +380,14 @@ public class BackupTransport {
      * @param socket The file descriptor that the transport will use for delivering the
      *    streamed archive.  The transport must close this socket in all cases when returning
      *    from this method.
-     * @return 0 when no more data for the current package is available.  A positive value
-     *    indicates the presence of that many bytes to be delivered to the app.  Any negative
-     *    return value is treated as equivalent to {@link BackupTransport#TRANSPORT_ERROR},
-     *    indicating a fatal error condition that precludes further restore operations
-     *    on the current dataset.
+     * @return {@link #NO_MORE_DATA} when no more data for the current package is available.
+     *    A positive value indicates the presence of that many bytes to be delivered to the app.
+     *    A value of zero indicates that no data was deliverable at this time, but the restore
+     *    is still running and the caller should retry.  {@link #TRANSPORT_PACKAGE_REJECTED}
+     *    means that the current package's restore operation should be aborted, but that
+     *    the transport itself is still in a good state and so a multiple-package restore
+     *    sequence can still be continued.  Any other negative return value is treated as a
+     *    fatal error condition that aborts all further restore operations on the current dataset.
      */
     public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
         return 0;
