@@ -19,7 +19,6 @@ package android.hardware.camera2.legacy;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.os.ConditionVariable;
@@ -84,6 +83,7 @@ public class RequestThreadManager {
     private Size mIntermediateBufferSize;
 
     private final RequestQueue mRequestQueue = new RequestQueue();
+    private CaptureRequest mLastRequest = null;
     private SurfaceTexture mDummyTexture;
     private Surface mDummySurface;
 
@@ -430,7 +430,6 @@ public class RequestThreadManager {
 
     private final Handler.Callback mRequestHandlerCb = new Handler.Callback() {
         private boolean mCleanup = false;
-        private final List<RequestHolder> mRepeating = null;
 
         @SuppressWarnings("unchecked")
         @Override
@@ -474,6 +473,13 @@ public class RequestThreadManager {
                     List<RequestHolder> requests =
                             nextBurst.first.produceRequestHolders(nextBurst.second);
                     for (RequestHolder holder : requests) {
+                        CaptureRequest request = holder.getRequest();
+                        if (mLastRequest == null || mLastRequest != request) {
+                            mLastRequest = request;
+                            LegacyMetadataMapper.convertRequestMetadata(mLastRequest,
+                                /*out*/mParams);
+                            mCamera.setParameters(mParams);
+                        }
                         mDeviceState.setCaptureStart(holder);
                         long timestamp = 0;
                         try {
@@ -501,8 +507,8 @@ public class RequestThreadManager {
                             // TODO: err handling
                             throw new IOError(e);
                         }
-                        CameraMetadataNative result = convertResultMetadata(mParams,
-                                holder.getRequest(), timestamp);
+                        CameraMetadataNative result = LegacyMetadataMapper.convertResultMetadata(mParams,
+                                request, timestamp);
                         mDeviceState.setCaptureResult(holder, result);
                     }
                     if (DEBUG) {
@@ -525,17 +531,6 @@ public class RequestThreadManager {
             return true;
         }
     };
-
-    private CameraMetadataNative convertResultMetadata(Camera.Parameters params,
-                                                       CaptureRequest request,
-                                                       long timestamp) {
-        CameraMetadataNative result = new CameraMetadataNative();
-        result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
-        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
-
-        // TODO: Remaining result metadata tags conversions.
-        return result;
-    }
 
     /**
      * Create a new RequestThreadManager.

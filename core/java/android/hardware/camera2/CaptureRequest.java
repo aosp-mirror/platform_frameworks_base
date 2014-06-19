@@ -18,6 +18,7 @@ package android.hardware.camera2;
 
 import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.TypeReference;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -280,7 +281,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public int hashCode() {
-        return mSettings.hashCode();
+        return HashCodeHelpers.hashCode(mSettings, mSurfaceSet, mUserTag);
     }
 
     public static final Parcelable.Creator<CaptureRequest> CREATOR =
