@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 /**
@@ -94,6 +95,9 @@ public class PreferenceGroupAdapter extends BaseAdapter
 
     private int mHighlightedPosition = -1;
     private Drawable mHighlightedDrawable;
+
+    private static ViewGroup.LayoutParams sWrapperLayoutParams = new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
     private static class PreferenceLayout implements Comparable<PreferenceLayout> {
         private int resId;
@@ -235,14 +239,18 @@ public class PreferenceGroupAdapter extends BaseAdapter
 
         // If it's not one of the cached ones, set the convertView to null so that 
         // the layout gets re-created by the Preference.
-        if (Collections.binarySearch(mPreferenceLayouts, mTempPreferenceLayout) < 0) {
+        if (Collections.binarySearch(mPreferenceLayouts, mTempPreferenceLayout) < 0 ||
+                (getItemViewType(position) == getHighlightItemViewType())) {
             convertView = null;
         }
         View result = preference.getView(convertView, parent);
         if (position == mHighlightedPosition && mHighlightedDrawable != null) {
-            result.setBackgroundDrawable(mHighlightedDrawable);
+            ViewGroup wrapper = new FrameLayout(parent.getContext());
+            wrapper.setLayoutParams(sWrapperLayoutParams);
+            wrapper.setBackgroundDrawable(mHighlightedDrawable);
+            wrapper.addView(result);
+            result = wrapper;
         }
-        result.setTag(preference.getKey());
         return result;
     }
 
@@ -273,8 +281,16 @@ public class PreferenceGroupAdapter extends BaseAdapter
         return true;
     }
 
+    private int getHighlightItemViewType() {
+        return getViewTypeCount() - 1;
+    }
+
     @Override
     public int getItemViewType(int position) {
+        if (position == mHighlightedPosition) {
+            return getHighlightItemViewType();
+        }
+
         if (!mHasReturnedViewTypeCount) {
             mHasReturnedViewTypeCount = true;
         }
@@ -302,7 +318,7 @@ public class PreferenceGroupAdapter extends BaseAdapter
             mHasReturnedViewTypeCount = true;
         }
         
-        return Math.max(1, mPreferenceLayouts.size());
+        return Math.max(1, mPreferenceLayouts.size()) + 1;
     }
 
 }
