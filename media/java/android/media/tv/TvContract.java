@@ -899,37 +899,37 @@ public final class TvContract {
         /** Canonical genres for TV programs. */
         public static final class Genres {
             /** The genre for Family/Kids. */
-            public static final String FAMILY_KIDS = "Family/Kids";
+            public static final String FAMILY_KIDS = "FAMILY_KIDS";
 
             /** The genre for Sports. */
-            public static final String SPORTS = "Sports";
+            public static final String SPORTS = "SPORTS";
 
             /** The genre for Shopping. */
-            public static final String SHOPPING = "Shopping";
+            public static final String SHOPPING = "SHOPPING";
 
             /** The genre for Movies. */
-            public static final String MOVIES = "Movies";
+            public static final String MOVIES = "MOVIES";
 
             /** The genre for Comedy. */
-            public static final String COMEDY = "Comedy";
+            public static final String COMEDY = "COMEDY";
 
             /** The genre for Travel. */
-            public static final String TRAVEL = "Travel";
+            public static final String TRAVEL = "TRAVEL";
 
             /** The genre for Drama. */
-            public static final String DRAMA = "Drama";
+            public static final String DRAMA = "DRAMA";
 
             /** The genre for Education. */
-            public static final String EDUCATION = "Education";
+            public static final String EDUCATION = "EDUCATION";
 
             /** The genre for Animal/Wildlife. */
-            public static final String ANIMAL_WILDLIFE = "Animal/Wildlife";
+            public static final String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
 
             /** The genre for News. */
-            public static final String NEWS = "News";
+            public static final String NEWS = "NEWS";
 
             /** The genre for Gaming. */
-            public static final String GAMING = "Gaming";
+            public static final String GAMING = "GAMING";
 
             private Genres() {}
 
