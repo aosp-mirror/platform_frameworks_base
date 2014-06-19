@@ -48,6 +48,9 @@ public class LegacyMetadataMapper {
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
 
+    // for metadata
+    private static final float LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS = 0.0f;
+
     private static final long APPROXIMATE_CAPTURE_DELAY_MS = 200; // ms
     private static final long APPROXIMATE_SENSOR_AREA = (1 << 20); // 8mp
     private static final long APPROXIMATE_JPEG_ENCODE_TIME = 600; // ms
@@ -94,10 +97,12 @@ public class LegacyMetadataMapper {
     }
 
     private static void mapCameraParameters(CameraMetadataNative m, Camera.Parameters p) {
+        m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
         mapStreamConfigs(m, p);
         mapAeConfig(m, p);
         mapCapabilities(m, p);
-
+        mapLens(m, p);
+        mapFlash(m, p);
         // TODO: map other fields
     }
 
@@ -198,6 +203,30 @@ public class LegacyMetadataMapper {
     private static void mapCapabilities(CameraMetadataNative m, Camera.Parameters p) {
         int[] capabilities = { REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE };
         m.set(REQUEST_AVAILABLE_CAPABILITIES, capabilities);
+    }
+
+    private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
+        /*
+         *  We can tell if the lens is fixed focus;
+         *  but if it's not, we can't tell the minimum focus distance, so leave it null then.
+         */
+        if (p.getFocusMode() == Camera.Parameters.FOCUS_MODE_FIXED) {
+            m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
+        }
+    }
+
+    private static void mapFlash(CameraMetadataNative m, Camera.Parameters p) {
+        boolean flashAvailable = false;
+        List<String> supportedFlashModes = p.getSupportedFlashModes();
+        if (supportedFlashModes != null) {
+            // If only 'OFF' is available, we don't really have flash support
+            if (!(supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_OFF) &&
+                    supportedFlashModes.size() == 1)) {
+                flashAvailable = true;
+            }
+        }
+
+        m.set(FLASH_INFO_AVAILABLE, flashAvailable);
     }
 
     private static void appendStreamConfig(

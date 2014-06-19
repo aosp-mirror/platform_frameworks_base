@@ -579,6 +579,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * of the lens that can be focused correctly.</p>
      * <p>If the lens is fixed-focus, this should be
      * 0.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      */
     public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
             new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
