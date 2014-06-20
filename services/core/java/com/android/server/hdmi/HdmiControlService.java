@@ -158,6 +158,7 @@ public final class HdmiControlService extends SystemService {
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
         final SparseIntArray finished = new SparseIntArray();
+        mCecController.clearLogicalAddress();
         for (int type : deviceTypes) {
             final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
             localDevice.init();
@@ -189,7 +190,7 @@ public final class HdmiControlService extends SystemService {
         for (int i = 0; i < devices.size(); ++i) {
             int address = devices.keyAt(i);
             HdmiCecLocalDevice device = devices.valueAt(i);
-            device.onAddressAllocated(address);
+            device.handleAddressAllocated(address);
         }
     }
 
