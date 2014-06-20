@@ -16,9 +16,7 @@
 
 package android.telecomm;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.os.RemoteException;
 
 import com.android.internal.telecomm.ITelecommService;
 
@@ -46,15 +44,5 @@ public class TelecommManager {
     /** {@hide} */
     public static TelecommManager from(Context context) {
         return (TelecommManager) context.getSystemService(Context.TELECOMM_SERVICE);
-    }
-
-    /** {@hide} */
-    public ComponentName getSystemPhoneApplication() {
-        try {
-            return mService.getSystemPhoneApplication();
-        } catch (RemoteException e) {
-            Log.e(TAG, e, "Error calling ITelecommService#getSystemPhoneApplication");
-            return null;
-        }
     }
 }
