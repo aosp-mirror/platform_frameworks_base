@@ -113,11 +113,8 @@ public:
 
     void computeOrdering();
 
-    void deferNodeTree(DeferStateStruct& deferStruct);
-    void deferNodeInParent(DeferStateStruct& deferStruct, const int level);
-
-    void replayNodeTree(ReplayStateStruct& replayStruct);
-    void replayNodeInParent(ReplayStateStruct& replayStruct, const int level);
+    void defer(DeferStateStruct& deferStruct, const int level);
+    void replay(ReplayStateStruct& replayStruct, const int level);
 
     ANDROID_API void output(uint32_t level = 1);
     ANDROID_API int getDebugSize();
@@ -227,6 +224,14 @@ private:
     template<class T>
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
 
+    template <class T>
+    inline int issueOperationsOfNegZChildren(
+            const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+            OpenGLRenderer& renderer, T& handler);
+    template <class T>
+    inline void issueOperationsOfPosZChildren(int shadowRestoreTo,
+            const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+            OpenGLRenderer& renderer, T& handler);
     template <class T>
     inline void issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
             ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler);
