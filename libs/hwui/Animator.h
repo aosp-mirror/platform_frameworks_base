@@ -61,6 +61,8 @@ public:
     bool isFinished() { return mPlayState == FINISHED; }
     float finalValue() { return mFinalValue; }
 
+    ANDROID_API virtual uint32_t dirtyMask() { return 0; }
+
 protected:
     BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
@@ -111,6 +113,8 @@ public:
     ANDROID_API RenderPropertyAnimator(RenderProperty property, float finalValue);
 
     ANDROID_API virtual void onAttached(RenderNode* target);
+
+    ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const;

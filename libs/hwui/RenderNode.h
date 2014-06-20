@@ -189,6 +189,8 @@ public:
     // UI thread only!
     ANDROID_API void removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
         mStagingAnimators.erase(animator);
+        // Force a sync of the staging property value
+        mDirtyPropertyFields |= animator->dirtyMask();
         mNeedsAnimatorsSync = true;
     }
 
