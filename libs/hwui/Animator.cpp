@@ -160,6 +160,10 @@ void RenderPropertyAnimator::onAttached(RenderNode* target) {
     (target->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
 }
 
+uint32_t RenderPropertyAnimator::dirtyMask() {
+    return mPropertyAccess->dirtyMask;
+}
+
 float RenderPropertyAnimator::getValue(RenderNode* target) const {
     return (target->properties().*mPropertyAccess->getter)();
 }

@@ -50,6 +50,15 @@ class ViewPropertyAnimatorRT {
         return true;
     }
 
+    public void cancelAll() {
+        for (int i = 0; i < mAnimators.length; i++) {
+            if (mAnimators[i] != null) {
+                mAnimators[i].cancel();
+                mAnimators[i] = null;
+            }
+        }
+    }
+
     private void doStartAnimation(ViewPropertyAnimator parent) {
         int size = parent.mPendingAnimations.size();
 
@@ -99,8 +108,25 @@ class ViewPropertyAnimatorRT {
         if (parent.hasActions()) {
             return false;
         }
+        if (hasAlphaAnimation(parent)) {
+            // TODO: Alpha does too much weird stuff currently to safely RT-accelerate
+            // see View:getFinalAlpha() and friends, which need to be fixed to
+            // work with RT animators
+            return false;
+        }
         // Here goes nothing...
         return true;
+    }
+
+    private boolean hasAlphaAnimation(ViewPropertyAnimator parent) {
+        int size = parent.mPendingAnimations.size();
+        for (int i = 0; i < size; i++) {
+            NameValuesHolder holder = parent.mPendingAnimations.get(i);
+            if (holder.mNameConstant == ViewPropertyAnimator.ALPHA) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void cancelAnimators(ArrayList<NameValuesHolder> mPendingAnimations) {

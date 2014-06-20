@@ -253,10 +253,9 @@ public class ViewPropertyAnimator {
     ViewPropertyAnimator(View view) {
         mView = view;
         view.ensureTransformationInfo();
-        // TODO: Disabled because of b/15287046
-        //if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
-        //    mRTBackend = new ViewPropertyAnimatorRT(view);
-        //}
+        if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+            mRTBackend = new ViewPropertyAnimatorRT(view);
+        }
     }
 
     /**
@@ -434,6 +433,9 @@ public class ViewPropertyAnimator {
         }
         mPendingAnimations.clear();
         mView.removeCallbacks(mAnimationStarter);
+        if (mRTBackend != null) {
+            mRTBackend.cancelAll();
+        }
     }
 
     /**
