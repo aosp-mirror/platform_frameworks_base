@@ -70,7 +70,7 @@
   <li class="nav-section">
     <div class="nav-section-header empty">
 
-      <a href="<?cs var:toroot ?>preview/l-developer-preview-reference.zip">Reference</a>
+      <a href="<?cs var:toroot ?>preview/reference.html">Reference</a>
 
     </div>
   </li>
@@ -81,7 +81,7 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty">
-      <a href="<?cs var:toroot ?>preview/tos.html">Terms of Service</a>
+      <a href="<?cs var:toroot ?>preview/license.html">License Agreement</a>
       </div>
   </li>
 </ul>
