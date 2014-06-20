@@ -439,7 +439,7 @@ public class SurfaceTextureRenderer {
         for (Surface s : surfaces) {
             // If pixel conversions aren't handled by egl, use a pbuffer
             if (LegacyCameraDevice.needsConversion(s)) {
-                LegacyCameraDevice.nativeSetSurfaceFormat(s, ImageFormat.NV21);
+                LegacyCameraDevice.nativeSetSurfaceFormat(s, ImageFormat.YV12);
                 EGLSurfaceHolder holder = new EGLSurfaceHolder();
                 holder.surface = s;
                 mConversionSurfaces.add(holder);

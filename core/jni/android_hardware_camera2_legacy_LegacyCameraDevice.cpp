@@ -35,6 +35,8 @@ using namespace android;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(*(a)))
 
+#define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
+
 /**
  * Convert from RGB 888 to Y'CbCr using the conversion specified in ITU-R BT.601 for
  * digital RGB with K_b = 0.114, and K_r = 0.299.
@@ -152,6 +154,11 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     ANativeWindowBuffer* anb;
     ALOGV("%s: Dequeue buffer from %p",__FUNCTION__, anw.get());
 
+    if (width < 0 || height < 0 || bufSize < 0) {
+        ALOGE("%s: Illegal argument, negative dimension passed to produceFrame", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
     // TODO: Switch to using Surface::lock and Surface::unlockAndPost
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
     if (err != NO_ERROR) return err;
@@ -179,6 +186,41 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
 
             rgbToYuv420(pixelBuffer, width, height, yPlane,
                     uPlane, vPlane, chromaStep, yStride, chromaStride);
+            break;
+        }
+        case HAL_PIXEL_FORMAT_YV12: {
+            if (bufSize < width * height * 4) {
+                ALOGE("%s: PixelBuffer size %lld to small for given dimensions", __FUNCTION__,
+                        bufSize);
+                return BAD_VALUE;
+            }
+
+            if ((width & 1) || (height & 1)) {
+                ALOGE("%s: Dimens %dx%d are not divisible by 2.", __FUNCTION__, width, height);
+                return BAD_VALUE;
+            }
+
+            uint8_t* img = NULL;
+            ALOGV("%s: Lock buffer from %p for write", __FUNCTION__, anw.get());
+            err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
+            if (err != NO_ERROR) {
+                ALOGE("%s: Error %s (%d) while locking gralloc buffer for write.", __FUNCTION__,
+                        strerror(-err), err);
+                return err;
+            }
+
+            uint32_t stride = buf->getStride();
+            LOG_ALWAYS_FATAL_IF(stride % 16, "Stride is not 16 pixel aligned %d", stride);
+
+            uint32_t cStride = ALIGN(stride / 2, 16);
+            size_t chromaStep = 1;
+
+            uint8_t* yPlane = img;
+            uint8_t* crPlane = img + static_cast<uint32_t>(height) * stride;
+            uint8_t* cbPlane = crPlane + cStride * static_cast<uint32_t>(height) / 2;
+
+            rgbToYuv420(pixelBuffer, width, height, yPlane,
+                    crPlane, cbPlane, chromaStep, stride, cStride);
             break;
         }
         case HAL_PIXEL_FORMAT_YCbCr_420_888: {

@@ -49,7 +49,7 @@ public class LegacyMetadataMapper {
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
 
     private static final long APPROXIMATE_CAPTURE_DELAY_MS = 200; // ms
-    private static final long APPROXIMATE_SENSOR_AREA = (1 << 20); // 8mp
+    private static final long APPROXIMATE_SENSOR_AREA = (1 << 23); // 8mp
     private static final long APPROXIMATE_JPEG_ENCODE_TIME = 600; // ms
     private static final long NS_PER_MS = 1000000;
 

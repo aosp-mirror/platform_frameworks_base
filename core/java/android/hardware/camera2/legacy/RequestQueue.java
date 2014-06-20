@@ -122,7 +122,7 @@ public class RequestQueue {
         for (BurstHolder b : mRequestQueue) {
             total += b.getNumberOfRequests();
             if (b.getRequestId() == requestId) {
-                return total;
+                return total - 1;
             }
         }
         throw new IllegalStateException(

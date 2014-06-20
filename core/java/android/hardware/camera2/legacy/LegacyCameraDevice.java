@@ -174,13 +174,17 @@ public class LegacyCameraDevice implements AutoCloseable {
     private final RequestThreadManager mRequestThreadManager;
 
     /**
-     * Check if a given surface uses {@link ImageFormat#YUV_420_888} format.
+     * Check if a given surface uses {@link ImageFormat#YUV_420_888} or format that can be readily
+     * converted to this; YV12 and NV21 are the two currently supported formats.
      *
      * @param s the surface to check.
-     * @return {@code true} if the surfaces uses {@link ImageFormat#YUV_420_888}.
+     * @return {@code true} if the surfaces uses {@link ImageFormat#YUV_420_888} or a compatible
+     *          format.
      */
     static boolean needsConversion(Surface s) {
-        return LegacyCameraDevice.nativeDetectSurfaceType(s) == ImageFormat.YUV_420_888;
+        int nativeType = LegacyCameraDevice.nativeDetectSurfaceType(s);
+        return nativeType == ImageFormat.YUV_420_888 || nativeType == ImageFormat.YV12 ||
+                nativeType == ImageFormat.NV21;
     }
 
     /**
