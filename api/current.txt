@@ -15358,6 +15358,19 @@ package android.media {
     ctor public UnsupportedSchemeException(java.lang.String);
   }
 
+  public abstract class VolumeProvider {
+    ctor public VolumeProvider(int, int);
+    method public final int getMaxVolume();
+    method public final int getVolumeControl();
+    method public final void notifyVolumeChanged();
+    method public void onAdjustVolumeBy(int);
+    method public abstract int onGetCurrentVolume();
+    method public void onSetVolumeTo(int);
+    field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
+    field public static final int VOLUME_CONTROL_FIXED = 0; // 0x0
+    field public static final int VOLUME_CONTROL_RELATIVE = 1; // 0x1
+  }
+
 }
 
 package android.media.audiofx {
@@ -15724,6 +15737,7 @@ package android.media.session {
     method public android.media.session.PlaybackState getPlaybackState();
     method public int getRatingType();
     method public android.media.session.MediaController.TransportControls getTransportControls();
+    method public android.media.session.MediaController.VolumeInfo getVolumeInfo();
     method public void removeCallback(android.media.session.MediaController.Callback);
     method public void sendControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
   }
@@ -15747,6 +15761,14 @@ package android.media.session {
     method public void stop();
   }
 
+  public static final class MediaController.VolumeInfo {
+    method public int getAudioStream();
+    method public int getCurrentVolume();
+    method public int getMaxVolume();
+    method public int getVolumeControl();
+    method public int getVolumeType();
+  }
+
   public final class MediaSession {
     method public void addCallback(android.media.session.MediaSession.Callback);
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
@@ -15764,9 +15786,11 @@ package android.media.session {
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(int);
-    method public void setPlaybackToRemote(android.media.session.RemoteVolumeProvider);
+    method public void setPlaybackToRemote(android.media.VolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
+    field public static final int VOLUME_TYPE_LOCAL = 1; // 0x1
+    field public static final int VOLUME_TYPE_REMOTE = 2; // 0x2
   }
 
   public static abstract class MediaSession.Callback {
@@ -15835,19 +15859,6 @@ package android.media.session {
     field public static final int STATE_SKIPPING_TO_NEXT = 10; // 0xa
     field public static final int STATE_SKIPPING_TO_PREVIOUS = 9; // 0x9
     field public static final int STATE_STOPPED = 1; // 0x1
-  }
-
-  public abstract class RemoteVolumeProvider {
-    ctor public RemoteVolumeProvider(int, int);
-    method public final int getMaxVolume();
-    method public final int getVolumeControl();
-    method public final void notifyVolumeChanged();
-    method public void onAdjustVolumeBy(int);
-    method public abstract int onGetCurrentVolume();
-    method public void onSetVolumeTo(int);
-    field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
-    field public static final int VOLUME_CONTROL_FIXED = 0; // 0x0
-    field public static final int VOLUME_CONTROL_RELATIVE = 1; // 0x1
   }
 
 }

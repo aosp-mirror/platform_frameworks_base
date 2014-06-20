@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.VolumeProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -180,6 +181,23 @@ public final class MediaController {
             Log.wtf(TAG, "Error calling getFlags.", e);
         }
         return 0;
+    }
+
+    /**
+     * Get the current volume info for this session.
+     *
+     * @return The current volume info or null.
+     */
+    public VolumeInfo getVolumeInfo() {
+        try {
+            ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
+            return new VolumeInfo(result.volumeType, result.audioStream, result.controlType,
+                    result.maxVolume, result.currentVolume);
+
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getVolumeInfo.", e);
+        }
+        return null;
     }
 
     /**
@@ -506,6 +524,85 @@ public final class MediaController {
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling rate.", e);
             }
+        }
+    }
+
+    /**
+     * Holds information about the way volume is handled for this session.
+     */
+    public static final class VolumeInfo {
+        private final int mVolumeType;
+        private final int mAudioStream;
+        private final int mVolumeControl;
+        private final int mMaxVolume;
+        private final int mCurrentVolume;
+
+        /**
+         * @hide
+         */
+        public VolumeInfo(int type, int stream, int control, int max, int current) {
+            mVolumeType = type;
+            mAudioStream = stream;
+            mVolumeControl = control;
+            mMaxVolume = max;
+            mCurrentVolume = current;
+        }
+
+        /**
+         * Get the type of volume handling, either local or remote. One of:
+         * <ul>
+         * <li>{@link MediaSession#VOLUME_TYPE_LOCAL}</li>
+         * <li>{@link MediaSession#VOLUME_TYPE_REMOTE}</li>
+         * </ul>
+         *
+         * @return The type of volume handling this session is using.
+         */
+        public int getVolumeType() {
+            return mVolumeType;
+        }
+
+        /**
+         * Get the stream this is currently controlling volume on. When the volume
+         * type is {@link MediaSession#VOLUME_TYPE_REMOTE} this value does not
+         * have meaning and should be ignored.
+         *
+         * @return The stream this session is playing on.
+         */
+        public int getAudioStream() {
+            return mAudioStream;
+        }
+
+        /**
+         * Get the type of volume control that can be used. One of:
+         * <ul>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}</li>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_RELATIVE}</li>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
+         * </ul>
+         *
+         * @return The type of volume control that may be used with this
+         *         session.
+         */
+        public int getVolumeControl() {
+            return mVolumeControl;
+        }
+
+        /**
+         * Get the maximum volume that may be set for this session.
+         *
+         * @return The maximum allowed volume where this session is playing.
+         */
+        public int getMaxVolume() {
+            return mMaxVolume;
+        }
+
+        /**
+         * Get the current volume for this session.
+         *
+         * @return The current volume where this session is playing.
+         */
+        public int getCurrentVolume() {
+            return mCurrentVolume;
         }
     }
 
