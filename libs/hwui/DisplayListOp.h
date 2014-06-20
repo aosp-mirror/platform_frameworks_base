@@ -1475,19 +1475,19 @@ public:
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->deferNodeInParent(deferStruct, level + 1);
+            mDisplayList->defer(deferStruct, level + 1);
         }
     }
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) {
         if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->replayNodeInParent(replayStruct, level + 1);
+            mDisplayList->replay(replayStruct, level + 1);
         }
     }
 
-    // NOT USED since replay() is overridden
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        return DrawGlInfo::kStatusDone;
+        LOG_ALWAYS_FATAL("should not be called, because replay() is overridden");
+        return 0;
     }
 
     virtual void output(int level, uint32_t logFlags) const {

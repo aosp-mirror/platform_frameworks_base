@@ -15,7 +15,7 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_VIEW
-#define LOG_TAG "RenderNode"
+#define LOG_TAG "OpenGLRenderer"
 
 #include "RenderNode.h"
 
@@ -523,15 +523,7 @@ private:
     const int mLevel;
 };
 
-void RenderNode::deferNodeTree(DeferStateStruct& deferStruct) {
-    DeferOperationHandler handler(deferStruct, 0);
-    if (MathUtils::isPositive(properties().getZ())) {
-        issueDrawShadowOperation(Matrix4::identity(), handler);
-    }
-    issueOperations<DeferOperationHandler>(deferStruct.mRenderer, handler);
-}
-
-void RenderNode::deferNodeInParent(DeferStateStruct& deferStruct, const int level) {
+void RenderNode::defer(DeferStateStruct& deferStruct, const int level) {
     DeferOperationHandler handler(deferStruct, level);
     issueOperations<DeferOperationHandler>(deferStruct.mRenderer, handler);
 }
@@ -561,15 +553,7 @@ private:
     const int mLevel;
 };
 
-void RenderNode::replayNodeTree(ReplayStateStruct& replayStruct) {
-    ReplayOperationHandler handler(replayStruct, 0);
-    if (MathUtils::isPositive(properties().getZ())) {
-        issueDrawShadowOperation(Matrix4::identity(), handler);
-    }
-    issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
-}
-
-void RenderNode::replayNodeInParent(ReplayStateStruct& replayStruct, const int level) {
+void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
     ReplayOperationHandler handler(replayStruct, level);
     issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
@@ -626,6 +610,36 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
             properties().getAlpha(), casterUnclipped,
             outlinePath, revealClipPath);
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+}
+
+template <class T>
+int RenderNode::issueOperationsOfNegZChildren(
+        const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+        OpenGLRenderer& renderer, T& handler) {
+    if (zTranslatedNodes.isEmpty()) return -1;
+
+    // create a save around the body of the ViewGroup's draw method, so that
+    // matrix/clip methods don't affect composited children
+    int shadowSaveCount = renderer.getSaveCount();
+    handler(new (handler.allocator()) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+            PROPERTY_SAVECOUNT, properties().getClipToBounds());
+
+    issueOperationsOf3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
+    return shadowSaveCount;
+}
+
+template <class T>
+void RenderNode::issueOperationsOfPosZChildren(int shadowRestoreTo,
+        const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+        OpenGLRenderer& renderer, T& handler) {
+    if (zTranslatedNodes.isEmpty()) return;
+
+    LOG_ALWAYS_FATAL_IF(shadowRestoreTo < 0, "invalid save to restore to");
+    handler(new (handler.allocator()) RestoreToCountOp(shadowRestoreTo),
+            PROPERTY_SAVECOUNT, properties().getClipToBounds());
+    renderer.setOverrideLayerAlpha(1.0f);
+
+    issueOperationsOf3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
 }
 
 #define SHADOW_DELTA 0.1f
@@ -701,8 +715,6 @@ template <class T>
 void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler) {
     DISPLAY_LIST_LOGD("%*s%d projected children:", (handler.level() + 1) * 2, "", mProjectedNodes.size());
     const SkPath* projectionReceiverOutline = properties().getOutline().getPath();
-    bool maskProjecteesWithPath = projectionReceiverOutline != NULL
-            && !projectionReceiverOutline->isRect(NULL);
     int restoreTo = renderer.getSaveCount();
 
     // If the projection reciever has an outline, we mask each of the projected rendernodes to it
@@ -723,7 +735,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
             SaveLayerOp* op = new (alloc) SaveLayerOp(
                     outlineBounds.left(), outlineBounds.top(),
                     outlineBounds.right(), outlineBounds.bottom(),
-                    255, SkCanvas::kARGB_ClipLayer_SaveFlag);
+                    255, SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag | SkCanvas::kARGB_ClipLayer_SaveFlag);
             op->setMask(projectionReceiverOutline);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
@@ -812,7 +824,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             buildZSortedChildList(zTranslatedNodes);
 
             // for 3d root, draw children with negative z values
-            issueOperationsOf3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
+            int shadowRestoreTo = issueOperationsOfNegZChildren(zTranslatedNodes, renderer, handler);
 
             DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
             const int saveCountOffset = renderer.getSaveCount() - 1;
@@ -820,9 +832,9 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
                 DisplayListOp *op = mDisplayListData->displayListOps[i];
 
-    #if DEBUG_DISPLAY_LIST
+#if DEBUG_DISPLAY_LIST
                 op->output(level + 1);
-    #endif
+#endif
                 logBuffer.writeCommand(level, op->name());
                 handler(op, saveCountOffset, properties().getClipToBounds());
 
@@ -832,7 +844,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             }
 
             // for 3d root, draw children with positive z values
-            issueOperationsOf3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
+            issueOperationsOfPosZChildren(shadowRestoreTo, zTranslatedNodes, renderer, handler);
         }
     }
 

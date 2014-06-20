@@ -219,7 +219,7 @@ void Layer::defer() {
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     displayList->computeOrdering();
-    displayList->deferNodeTree(deferredState);
+    displayList->defer(deferredState, 0);
 
     deferredUpdateScheduled = false;
 }
