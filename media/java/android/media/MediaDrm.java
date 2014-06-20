@@ -181,6 +181,27 @@ public final class MediaDrm {
     }
 
     /**
+     * Thrown when an unrecoverable failure occurs during a MediaDrm operation.
+     * Extends java.lang.IllegalStateException with the addition of an error
+     * code that may be useful in diagnosing the failure.
+     */
+    public static final class MediaDrmStateException extends java.lang.IllegalStateException {
+        private final int mErrorCode;
+
+        public MediaDrmStateException(int errorCode, String detailMessage) {
+            super(detailMessage);
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * Retrieve the associated error code
+         */
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+    }
+
+    /**
      * Register a callback to be invoked when an event occurs
      *
      * @param listener the callback that will be run

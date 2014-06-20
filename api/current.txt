@@ -14490,6 +14490,11 @@ package android.media {
     method public java.lang.String getDefaultUrl();
   }
 
+  public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
+    ctor public MediaDrm.MediaDrmStateException(int, java.lang.String);
+    method public int getErrorCode();
+  }
+
   public static abstract interface MediaDrm.OnEventListener {
     method public abstract void onEvent(android.media.MediaDrm, byte[], int, int, byte[]);
   }
