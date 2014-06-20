@@ -39,8 +39,7 @@ import com.android.internal.telephony.PhoneConstants;
 /**
  * Displays a PIN pad for entering a PUK (Pin Unlock Kode) provided by a carrier.
  */
-public class KeyguardSimPukView extends KeyguardAbsKeyInputView
-        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private static final String LOG_TAG = "KeyguardSimPukView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     public static final String TAG = "KeyguardSimPukView";
@@ -85,7 +84,7 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
                     msg = R.string.kg_invalid_confirm_pin_hint;
                 }
             }
-            mPasswordEntry.setText(null);
+            resetPasswordText(true);
             if (msg != 0) {
                 mSecurityMessageDisplay.setMessage(msg, true);
             }
@@ -126,8 +125,8 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     }
 
     public void resetState() {
+        super.resetState();
         mStateMachine.reset();
-        mPasswordEntry.setEnabled(true);
     }
 
     @Override
@@ -144,46 +143,6 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        final View ok = findViewById(R.id.key_enter);
-        if (ok != null) {
-            ok.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    doHapticKeyClick();
-                    verifyPasswordAndUnlock();
-                }
-            });
-        }
-
-        // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
-        // not a separate view
-        View pinDelete = findViewById(R.id.delete_button);
-        if (pinDelete != null) {
-            pinDelete.setVisibility(View.VISIBLE);
-            pinDelete.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    CharSequence str = mPasswordEntry.getText();
-                    if (str.length() > 0) {
-                        mPasswordEntry.setText(str.subSequence(0, str.length()-1));
-                    }
-                    doHapticKeyClick();
-                }
-            });
-            pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
-                    mPasswordEntry.setText("");
-                    doHapticKeyClick();
-                    return true;
-                }
-            });
-        }
-
-        mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-        mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
-                | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-
-        mPasswordEntry.requestFocus();
 
         mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
         if (mEcaView instanceof EmergencyCarrierArea) {
@@ -276,7 +235,7 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     private boolean checkPuk() {
         // make sure the puk is at least 8 digits long.
         if (mPasswordEntry.getText().length() == 8) {
-            mPukText = mPasswordEntry.getText().toString();
+            mPukText = mPasswordEntry.getText();
             return true;
         }
         return false;
@@ -286,14 +245,14 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
         // make sure the PIN is between 4 and 8 digits
         int length = mPasswordEntry.getText().length();
         if (length >= 4 && length <= 8) {
-            mPinText = mPasswordEntry.getText().toString();
+            mPinText = mPasswordEntry.getText();
             return true;
         }
         return false;
     }
 
     public boolean confirmPin() {
-        return mPinText.equals(mPasswordEntry.getText().toString());
+        return mPinText.equals(mPasswordEntry.getText());
     }
 
     private void updateSim() {

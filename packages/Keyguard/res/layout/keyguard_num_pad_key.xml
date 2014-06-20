@@ -14,15 +14,18 @@
   ~ limitations under the License
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent" >
-
-    <include
-        style="@style/BouncerSecurityContainer"
-        layout="@layout/keyguard_simple_host_view"
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/digit_text"
+        style="@style/Widget.TextView.NumPadKey"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:id="@+id/klondike_text"
+        style="@style/Widget.TextView.NumPadKey.Klondike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+</merge>
 

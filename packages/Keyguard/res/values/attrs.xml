@@ -134,6 +134,10 @@
         <attr name="textView" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="PasswordTextView">
+        <attr name="scaledTextSize" format="integer" />
+    </declare-styleable>
+
     <declare-styleable name="CarrierText">
         <attr name="allCaps" format="boolean" />
     </declare-styleable>

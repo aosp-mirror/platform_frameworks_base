@@ -17,15 +17,19 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import java.util.List;
@@ -40,6 +44,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     private final boolean mShowImeAtScreenOn;
 
     InputMethodManager mImm;
+    private TextView mPasswordEntry;
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -82,6 +87,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        mPasswordEntry.requestFocus();
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
@@ -90,9 +101,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         mImm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
 
+        mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mPasswordEntry.setOnEditorActionListener(this);
+        mPasswordEntry.addTextChangedListener(this);
 
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
@@ -100,6 +114,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 mCallback.userActivity(0); // TODO: customize timeout for text?
             }
         });
+
+        // Set selected property on so the view can send accessibility events.
+        mPasswordEntry.setSelected(true);
 
         mPasswordEntry.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -140,6 +157,27 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 mPasswordEntry.setLayoutParams(params);
             }
         }
+    }
+
+    @Override
+    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
+        // send focus to the password field
+        return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
+    }
+
+    @Override
+    protected void resetPasswordText(boolean animate) {
+        mPasswordEntry.setText("");
+    }
+
+    @Override
+    protected String getPasswordText() {
+        return mPasswordEntry.getText().toString();
+    }
+
+    @Override
+    protected void setPasswordEntryEnabled(boolean enabled) {
+        mPasswordEntry.setEnabled(enabled);
     }
 
     /**
@@ -204,5 +242,31 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         // TODO: Fancy animation.
         setAlpha(0);
         animate().alpha(1).withLayer().setDuration(200);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (mCallback != null) {
+            mCallback.userActivity(KeyguardConstants.DIGIT_PRESS_WAKE_MILLIS);
+        }
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        // Check if this was the result of hitting the enter key
+        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
+                || actionId == EditorInfo.IME_ACTION_NEXT) {
+            verifyPasswordAndUnlock();
+            return true;
+        }
+        return false;
     }
 }

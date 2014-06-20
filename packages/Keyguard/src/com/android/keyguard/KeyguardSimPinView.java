@@ -38,8 +38,7 @@ import android.widget.TextView.OnEditorActionListener;
 /**
  * Displays a PIN pad for unlocking.
  */
-public class KeyguardSimPinView extends KeyguardAbsKeyInputView
-        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     private static final String LOG_TAG = "KeyguardSimPinView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     public static final String TAG = "KeyguardSimPinView";
@@ -58,8 +57,8 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
     }
 
     public void resetState() {
+        super.resetState();
         mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
-        mPasswordEntry.setEnabled(true);
     }
 
     private String getPinPasswordErrorMessage(int attemptsRemaining) {
@@ -93,46 +92,6 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        final View ok = findViewById(R.id.key_enter);
-        if (ok != null) {
-            ok.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    doHapticKeyClick();
-                    verifyPasswordAndUnlock();
-                }
-            });
-        }
-
-        // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
-        // not a separate view
-        View pinDelete = findViewById(R.id.delete_button);
-        if (pinDelete != null) {
-            pinDelete.setVisibility(View.VISIBLE);
-            pinDelete.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    CharSequence str = mPasswordEntry.getText();
-                    if (str.length() > 0) {
-                        mPasswordEntry.setText(str.subSequence(0, str.length()-1));
-                    }
-                    doHapticKeyClick();
-                }
-            });
-            pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
-                    mPasswordEntry.setText("");
-                    doHapticKeyClick();
-                    return true;
-                }
-            });
-        }
-
-        mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-        mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
-                | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-
-        mPasswordEntry.requestFocus();
 
         mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
         if (mEcaView instanceof EmergencyCarrierArea) {
@@ -220,12 +179,12 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
 
     @Override
     protected void verifyPasswordAndUnlock() {
-        String entry = mPasswordEntry.getText().toString();
+        String entry = mPasswordEntry.getText();
 
         if (entry.length() < 4) {
             // otherwise, display a message to the user, and don't submit.
             mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);
-            mPasswordEntry.setText("");
+            resetPasswordText(true);
             mCallback.userActivity(0);
             return;
         }
@@ -233,7 +192,7 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
         getSimUnlockProgressDialog().show();
 
         if (mCheckSimPinThread == null) {
-            mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText().toString()) {
+            mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText()) {
                 void onSimCheckResponse(final int result, final int attemptsRemaining) {
                     post(new Runnable() {
                         public void run() {
@@ -262,7 +221,7 @@ public class KeyguardSimPinView extends KeyguardAbsKeyInputView
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " CheckSimPin.onSimCheckResponse: " + result
                                         + " attemptsRemaining=" + attemptsRemaining);
-                                mPasswordEntry.setText("");
+                                resetPasswordText(true /* animate */);
                             }
                             mCallback.userActivity(0);
                             mCheckSimPinThread = null;

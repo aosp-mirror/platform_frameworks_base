@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2014, The Android Open Source Project
+** Copyright 2012, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License")
 ** you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@
     <com.android.keyguard.KeyguardSecurityContainer
         android:id="@+id/keyguard_security_container"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/keyguard_security_height"
+        android:layout_height="wrap_content"
+        androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:padding="0dp"

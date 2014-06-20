@@ -79,7 +79,7 @@
 
     <!-- list of 3- or 4-letter mnemonics for a 10-key numeric keypad -->
     <string-array translatable="false" name="lockscreen_num_pad_klondike">
-        <item></item><!-- 0 -->
+        <item>+</item><!-- 0 -->
         <item></item><!-- 1 -->
         <item>ABC</item><!-- 2 -->
         <item>DEF</item><!-- 3 -->

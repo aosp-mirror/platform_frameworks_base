@@ -28,8 +28,7 @@ import android.widget.TextView.OnEditorActionListener;
 /**
  * Displays a PIN pad for unlocking.
  */
-public class KeyguardPINView extends KeyguardAbsKeyInputView
-        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     private final AppearAnimationUtils mAppearAnimationUtils;
     private ViewGroup mKeyguardBouncerFrame;
@@ -49,12 +48,12 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     }
 
     protected void resetState() {
+        super.resetState();
         if (KeyguardUpdateMonitor.getInstance(mContext).getMaxBiometricUnlockAttemptsReached()) {
             mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
         } else {
             mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);
         }
-        mPasswordEntry.setEnabled(true);
     }
 
     @Override
@@ -72,54 +71,6 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
         mRow2 = (ViewGroup) findViewById(R.id.row2);
         mRow3 = (ViewGroup) findViewById(R.id.row3);
         mDivider = findViewById(R.id.divider);
-        final View ok = findViewById(R.id.key_enter);
-        if (ok != null) {
-            ok.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    doHapticKeyClick();
-                    if (mPasswordEntry.isEnabled()) {
-                        verifyPasswordAndUnlock();
-                    }
-                }
-            });
-            ok.setOnHoverListener(new LiftToActivateListener(getContext()));
-        }
-
-        // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
-        // not a separate view
-        View pinDelete = findViewById(R.id.delete_button);
-        if (pinDelete != null) {
-            pinDelete.setVisibility(View.VISIBLE);
-            pinDelete.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    // check for time-based lockouts
-                    if (mPasswordEntry.isEnabled()) {
-                        CharSequence str = mPasswordEntry.getText();
-                        if (str.length() > 0) {
-                            mPasswordEntry.setText(str.subSequence(0, str.length()-1));
-                        }
-                    }
-                    doHapticKeyClick();
-                }
-            });
-            pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
-                    // check for time-based lockouts
-                    if (mPasswordEntry.isEnabled()) {
-                        mPasswordEntry.setText("");
-                    }
-                    doHapticKeyClick();
-                    return true;
-                }
-            });
-        }
-
-        mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-        mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
-                | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-
-        mPasswordEntry.requestFocus();
     }
 
     @Override

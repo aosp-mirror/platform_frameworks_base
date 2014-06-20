@@ -7001,11 +7001,6 @@
         <attr name="layout_maxHeight" />
     </declare-styleable>
 
-    <declare-styleable name="NumPadKey">
-        <attr name="digit" format="integer" />
-        <attr name="textView" format="reference" />
-    </declare-styleable>
-
     <declare-styleable name="Toolbar">
         <attr name="titleTextAppearance" format="reference" />
         <attr name="subtitleTextAppearance" format="reference" />

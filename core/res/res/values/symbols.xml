@@ -1431,9 +1431,6 @@
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
-  <java-symbol type="style" name="Widget.Button.NumPadKey" />
-  <java-symbol type="style" name="TextAppearance.NumPadKey" />
-  <java-symbol type="style" name="TextAppearance.NumPadKey.Klondike" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />
