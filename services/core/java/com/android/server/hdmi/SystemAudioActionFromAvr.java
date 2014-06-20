@@ -59,7 +59,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
         // TODO: Stop the action for System Audio Mode initialization if it is running.
         if (mTargetAudioStatus) {
             setSystemAudioMode(true);
-            sendGiveAudioStatus();
+            startAudioStatusAction();
         } else {
             setSystemAudioMode(false);
             finish();
