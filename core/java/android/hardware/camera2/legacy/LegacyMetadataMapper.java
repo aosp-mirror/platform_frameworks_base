@@ -21,12 +21,16 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.util.Log;
+import android.util.Range;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
@@ -91,6 +95,8 @@ public class LegacyMetadataMapper {
 
     private static void mapCameraParameters(CameraMetadataNative m, Camera.Parameters p) {
         mapStreamConfigs(m, p);
+        mapAeConfig(m, p);
+        mapCapabilities(m, p);
 
         // TODO: map other fields
     }
@@ -137,12 +143,61 @@ public class LegacyMetadataMapper {
         StreamConfigurationDuration[] jpegStalls =
                 new StreamConfigurationDuration[jpegSizes.size()];
         int i = 0;
+        long longestStallDuration = -1;
         for (Camera.Size s : jpegSizes) {
+            long stallDuration =  calculateJpegStallDuration(s);
             jpegStalls[i++] = new StreamConfigurationDuration(HAL_PIXEL_FORMAT_BLOB, s.width,
-                    s.height, calculateJpegStallDuration(s));
+                    s.height, stallDuration);
+            if (longestStallDuration < stallDuration) {
+                longestStallDuration = stallDuration;
+            }
         }
         // Set stall durations for jpeg, other formats use default stall duration
         m.set(SCALER_AVAILABLE_STALL_DURATIONS, jpegStalls);
+
+        m.set(SENSOR_INFO_MAX_FRAME_DURATION, longestStallDuration);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private static void mapAeConfig(CameraMetadataNative m, Camera.Parameters p) {
+
+        List<int[]> fpsRanges = p.getSupportedPreviewFpsRange();
+        if (fpsRanges == null) {
+            throw new AssertionError("Supported FPS ranges cannot be null.");
+        }
+        int rangesSize = fpsRanges.size();
+        if (rangesSize <= 0) {
+            throw new AssertionError("At least one FPS range must be supported.");
+        }
+        Range<Integer>[] ranges = new Range[rangesSize];
+        int i = 0;
+        for (int[] r : fpsRanges) {
+            ranges[i++] = Range.create(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                    r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+        }
+        m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
+
+        List<String> antiBandingModes = p.getSupportedAntibanding();
+        int antiBandingModesSize = antiBandingModes.size();
+        if (antiBandingModesSize > 0) {
+            int[] modes = new int[antiBandingModesSize];
+            int j = 0;
+            for (String mode : antiBandingModes) {
+                int convertedMode = convertAntiBandingMode(mode);
+                if (convertedMode == -1) {
+                    Log.w(TAG, "Antibanding mode " + ((mode == null) ? "NULL" : mode) +
+                            " not supported, skipping...");
+                } else {
+                    modes[j++] = convertedMode;
+                }
+            }
+            m.set(CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, Arrays.copyOf(modes, j));
+        }
+    }
+
+    private static void mapCapabilities(CameraMetadataNative m, Camera.Parameters p) {
+        int[] capabilities = { REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE };
+        m.set(REQUEST_AVAILABLE_CAPABILITIES, capabilities);
     }
 
     private static void appendStreamConfig(
@@ -152,6 +207,63 @@ public class LegacyMetadataMapper {
                     new StreamConfiguration(format, size.width, size.height, /*input*/false);
             configs.add(config);
         }
+    }
+
+    /**
+     * Returns -1 if the anti-banding mode string is null, or not supported.
+     */
+    private static int convertAntiBandingMode(final String mode) {
+        if (mode == null) {
+            return -1;
+        }
+        switch(mode) {
+            case Camera.Parameters.ANTIBANDING_OFF: {
+                return CONTROL_AE_ANTIBANDING_MODE_OFF;
+            }
+            case Camera.Parameters.ANTIBANDING_50HZ: {
+                return CONTROL_AE_ANTIBANDING_MODE_50HZ;
+            }
+            case Camera.Parameters.ANTIBANDING_60HZ: {
+                return CONTROL_AE_ANTIBANDING_MODE_60HZ;
+            }
+            case Camera.Parameters.ANTIBANDING_AUTO: {
+                return CONTROL_AE_ANTIBANDING_MODE_AUTO;
+            }
+            default: {
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * Returns null if the anti-banding mode enum is not supported.
+     */
+    private static String convertAntiBandingModeToLegacy(int mode) {
+        switch(mode) {
+            case CONTROL_AE_ANTIBANDING_MODE_OFF: {
+                return Camera.Parameters.ANTIBANDING_OFF;
+            }
+            case CONTROL_AE_ANTIBANDING_MODE_50HZ: {
+                return Camera.Parameters.ANTIBANDING_50HZ;
+            }
+            case CONTROL_AE_ANTIBANDING_MODE_60HZ: {
+                return Camera.Parameters.ANTIBANDING_60HZ;
+            }
+            case CONTROL_AE_ANTIBANDING_MODE_AUTO: {
+                return Camera.Parameters.ANTIBANDING_AUTO;
+            }
+            default: {
+                return null;
+            }
+        }
+    }
+
+
+    private static int[] convertAeFpsRangeToLegacy(Range<Integer> fpsRange) {
+        int[] legacyFps = new int[2];
+        legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] = fpsRange.getLower();
+        legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] = fpsRange.getUpper();
+        return legacyFps;
     }
 
     /**
@@ -165,5 +277,46 @@ public class LegacyMetadataMapper {
         long stallPerArea = APPROXIMATE_JPEG_ENCODE_TIME * NS_PER_MS /
                 APPROXIMATE_SENSOR_AREA; // 600ms stall for 8mp
         return baseDuration + area * stallPerArea;
+    }
+
+    /**
+     * Generate capture result metadata from legacy camera parameters.
+     *
+     * @param params a {@link Camera.Parameters} object to generate metadata from.
+     * @param request the {@link CaptureRequest} used for this result.
+     * @param timestamp the timestamp to use for this result in nanoseconds.
+     * @return a {@link CameraMetadataNative} object containing result metadata.
+     */
+    public static CameraMetadataNative convertResultMetadata(Camera.Parameters params,
+                                                      CaptureRequest request,
+                                                      long timestamp) {
+        CameraMetadataNative result = new CameraMetadataNative();
+        result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
+        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
+
+        // TODO: Remaining result metadata tags conversions.
+        return result;
+    }
+
+    /**
+     * Set the legacy parameters using the request metadata.
+     *
+     * @param request a {@link CaptureRequest} object to generate parameters from.
+     * @param params the a {@link Camera.Parameters} to set parameters in.
+     */
+    public static void convertRequestMetadata(CaptureRequest request,
+            /*out*/Camera.Parameters params) {
+        Integer antiBandingMode = request.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE);
+        if (antiBandingMode != null) {
+            String legacyMode = convertAntiBandingModeToLegacy(antiBandingMode);
+            if (legacyMode != null) params.setAntibanding(legacyMode);
+        }
+
+        Range<Integer> aeFpsRange = request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
+        if (aeFpsRange != null) {
+            int[] legacyFps = convertAeFpsRangeToLegacy(aeFpsRange);
+            params.setPreviewFpsRange(legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                    legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+        }
     }
 }
