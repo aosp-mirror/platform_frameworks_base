@@ -108,6 +108,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardBottomAreaView mKeyguardBottomArea;
     private boolean mBlockTouches;
     private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
+    private int mNotificationScrimWaitDistance;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -169,6 +170,8 @@ public class NotificationPanelView extends PanelView implements
                 getResources().getDimensionPixelSize(R.dimen.header_notifications_collide_distance);
         mUnlockMoveDistance = getResources().getDimensionPixelOffset(R.dimen.unlock_move_distance);
         mClockPositionAlgorithm.loadDimens(getResources());
+        mNotificationScrimWaitDistance =
+                getResources().getDimensionPixelSize(R.dimen.notification_scrim_wait_distance);
     }
 
     @Override
@@ -577,7 +580,15 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setExpansion(height - mQsPeekHeight);
         setQsTranslation(height);
         requestScrollerTopPaddingUpdate(false /* animate */);
+        updateNotificationScrim(height);
         mStatusBar.userActivity();
+    }
+
+    private void updateNotificationScrim(float height) {
+        int startDistance = mQsMinExpansionHeight + mNotificationScrimWaitDistance;
+        float progress = (height - startDistance) / (mQsMaxExpansionHeight - startDistance);
+        progress = Math.max(0.0f, Math.min(progress, 1.0f));
+        mNotificationStackScroller.setScrimAlpha(progress);
     }
 
     private void setQsTranslation(float height) {

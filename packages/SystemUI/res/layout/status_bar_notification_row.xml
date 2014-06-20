@@ -48,4 +48,9 @@
         android:padding="2dp"
         />
 
+    <com.android.systemui.statusbar.NotificationScrimView
+        android:id="@+id/scrim_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </com.android.systemui.statusbar.ExpandableNotificationRow>

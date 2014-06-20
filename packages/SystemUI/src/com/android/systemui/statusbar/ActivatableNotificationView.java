@@ -119,6 +119,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private NotificationBackgroundView mBackgroundNormal;
     private NotificationBackgroundView mBackgroundDimmed;
+    private NotificationScrimView mScrimView;
     private ObjectAnimator mBackgroundAnimator;
     private RectF mAppearAnimationRect = new RectF();
     private PorterDuffColorFilter mAppearAnimationFilter;
@@ -153,6 +154,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
         updateBackground();
         updateBackgroundResources();
+        mScrimView = (NotificationScrimView) findViewById(R.id.scrim_view);
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -379,6 +381,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setPivotY(actualHeight / 2);
         mBackgroundNormal.setActualHeight(actualHeight);
         mBackgroundDimmed.setActualHeight(actualHeight);
+        mScrimView.setActualHeight(actualHeight);
     }
 
     @Override
@@ -386,6 +389,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.setClipTopAmount(clipTopAmount);
         mBackgroundNormal.setClipTopAmount(clipTopAmount);
         mBackgroundDimmed.setClipTopAmount(clipTopAmount);
+        mScrimView.setClipTopAmount(clipTopAmount);
     }
 
     @Override
@@ -403,6 +407,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mDrawingAppearAnimation) {
             startAppearAnimation(true /* isAppearing */, -1.0f, delay, null);
         }
+    }
+
+    @Override
+    public void setScrimAmount(float scrimAmount) {
+        mScrimView.setAlpha(scrimAmount);
     }
 
     private void startAppearAnimation(boolean isAppearing,

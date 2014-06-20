@@ -148,6 +148,9 @@ public class StackScrollState {
                 // apply dimming
                 child.setDimmed(state.dimmed, false /* animate */);
 
+                // apply scrimming
+                child.setScrimAmount(state.scrimAmount);
+
                 float oldClipTopAmount = child.getClipTopAmount();
                 if (oldClipTopAmount != state.clipTopAmount) {
                     child.setClipTopAmount(state.clipTopAmount);
@@ -221,6 +224,12 @@ public class StackScrollState {
         boolean gone;
         float scale;
         boolean dimmed;
+
+        /**
+         * A value between 0 and 1 indicating how much the view should be scrimmed.
+         * 1 means that the notifications will be darkened as much as possible.
+         */
+        float scrimAmount;
 
         /**
          * The amount which the view should be clipped from the top. This is calculated to

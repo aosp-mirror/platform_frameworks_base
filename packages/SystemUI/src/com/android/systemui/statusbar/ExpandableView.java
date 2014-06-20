@@ -223,6 +223,8 @@ public abstract class ExpandableView extends FrameLayout {
 
     public abstract void performAddAnimation(long delay);
 
+    public abstract void setScrimAmount(float scrimAmount);
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */
