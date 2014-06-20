@@ -2650,21 +2650,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return false;
         }
 
-        private void updateColorViews(WindowInsets insets) {
-            if (mIsFloating || !ActivityManager.isHighEndGfx()) {
-                // No colors on floating windows or low end devices :(
-                return;
+        private WindowInsets updateColorViews(WindowInsets insets) {
+            if (!mIsFloating && ActivityManager.isHighEndGfx()) {
+                if (insets != null) {
+                    mLastTopInset = insets.getStableInsetTop();
+                    mLastBottomInset = insets.getStableInsetBottom();
+                }
+                mStatusColorView = updateColorViewInt(mStatusColorView,
+                        SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
+                        mStatusBarColor, mLastTopInset, Gravity.TOP);
+                mNavigationColorView = updateColorViewInt(mNavigationColorView,
+                        SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
+                        mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM);
             }
             if (insets != null) {
-                mLastTopInset = insets.getSystemWindowInsetTop();
-                mLastBottomInset = insets.getSystemWindowInsetBottom();
+                insets = insets.consumeStableInsets();
             }
-            mStatusColorView = updateColorViewInt(mStatusColorView,
-                    SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
-                    mStatusBarColor, mLastTopInset, Gravity.TOP);
-            mNavigationColorView = updateColorViewInt(mNavigationColorView,
-                    SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
-                    mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM);
+            return insets;
         }
 
         private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,

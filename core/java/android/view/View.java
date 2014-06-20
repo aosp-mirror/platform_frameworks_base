@@ -19805,6 +19805,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect mVisibleInsets = new Rect();
 
         /**
+         * For windows that are full-screen but using insets to layout inside
+         * of the screen decorations, these are the current insets for the
+         * stable system windows.
+         */
+        final Rect mStableInsets = new Rect();
+
+        /**
          * The internal insets given by this window.  This value is
          * supplied by the client (through
          * {@link ViewTreeObserver.OnComputeInternalInsetsListener}) and will

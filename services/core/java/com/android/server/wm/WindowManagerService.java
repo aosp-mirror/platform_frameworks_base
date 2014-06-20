@@ -2835,7 +2835,8 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
+            Rect outVisibleInsets, Rect outStableInsets, Configuration outConfig,
+            Surface outSurface) {
         boolean toBeDisplayed = false;
         boolean inTouchMode;
         boolean configChanged;
@@ -3112,6 +3113,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outOverscanInsets.set(win.mOverscanInsets);
             outContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
+            outStableInsets.set(win.mStableInsets);
             if (localLOGV) Slog.v(
                 TAG, "Relayout given client " + client.asBinder()
                 + ", requestedWidth=" + requestedWidth
@@ -8878,6 +8880,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " " + w.mContentInsets.toShortString()
                             + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
                             + " " + w.mVisibleInsets.toShortString()
+                            + " stableInsetsChanged=" + w.mStableInsetsChanged
+                            + " " + w.mStableInsets.toShortString()
                             + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged);
                 }
@@ -8885,6 +8889,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLastOverscanInsets.set(w.mOverscanInsets);
                 w.mLastContentInsets.set(w.mContentInsets);
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
+                w.mLastStableInsets.set(w.mStableInsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
                 // If the orientation is changing, then we need to
                 // hold off on unfreezing the display until this

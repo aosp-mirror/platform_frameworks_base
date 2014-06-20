@@ -35,7 +35,7 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
-            Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
+            Rect visibleInsets, Rect stableInsets, boolean reportDraw, Configuration newConfig) {
         if (reportDraw) {
             try {
                 mSession.finishDrawing(this);

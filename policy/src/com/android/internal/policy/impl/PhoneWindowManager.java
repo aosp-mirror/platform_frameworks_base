@@ -409,6 +409,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
     static final Rect mTmpDecorFrame = new Rect();
+    static final Rect mTmpStableFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
@@ -2973,7 +2974,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarLayer = mNavigationBar.getSurfaceLayer();
                 // And compute the final frame.
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                        mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf);
+                        mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
+                        mTmpNavigationFrame);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
                 if (mNavigationBarController.checkHiddenLw()) {
                     updateSysUiVisibility = true;
@@ -2998,7 +3000,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarLayer = mStatusBar.getSurfaceLayer();
 
                 // Let the status bar determine its size.
-                mStatusBar.computeFrameLw(pf, df, vf, vf, vf, dcf);
+                mStatusBar.computeFrameLw(pf, df, vf, vf, vf, dcf, vf);
 
                 // For layout, the status bar is always at the top with our fixed height.
                 mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
@@ -3158,12 +3160,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect cf = mTmpContentFrame;
         final Rect vf = mTmpVisibleFrame;
         final Rect dcf = mTmpDecorFrame;
+        final Rect sf = mTmpStableFrame;
         dcf.setEmpty();
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
                 && mNavigationBar != null && mNavigationBar.isVisibleLw());
 
         final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
+
+        if (isDefaultDisplay) {
+            sf.set(mStableLeft, mStableTop, mStableRight, mStableBottom);
+        } else {
+            sf.set(mOverscanLeft, mOverscanTop, mOverscanRight, mOverscanBottom);
+        }
 
         if (!isDefaultDisplay) {
             if (attached != null) {
@@ -3527,9 +3536,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " of=" + of.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
-                + " dcf=" + dcf.toShortString());
+                + " dcf=" + dcf.toShortString()
+                + " sf=" + sf.toShortString());
 
-        win.computeFrameLw(pf, df, of, cf, vf, dcf);
+        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.

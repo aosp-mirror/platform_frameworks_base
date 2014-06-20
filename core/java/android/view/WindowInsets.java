@@ -30,13 +30,16 @@ import android.graphics.Rect;
  * @see View#onApplyWindowInsets(WindowInsets)
  */
 public final class WindowInsets {
+
     private Rect mSystemWindowInsets;
     private Rect mWindowDecorInsets;
+    private Rect mStableInsets;
     private Rect mTempRect;
     private boolean mIsRound;
 
     private boolean mSystemWindowInsetsConsumed = false;
     private boolean mWindowDecorInsetsConsumed = false;
+    private boolean mStableInsetsConsumed = false;
 
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
@@ -49,28 +52,20 @@ public final class WindowInsets {
     public static final WindowInsets CONSUMED;
 
     static {
-        CONSUMED = new WindowInsets(EMPTY_RECT, EMPTY_RECT);
-        CONSUMED.mSystemWindowInsetsConsumed = true;
-        CONSUMED.mWindowDecorInsetsConsumed = true;
+        CONSUMED = new WindowInsets(null, null, null, false);
     }
 
     /** @hide */
-    public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets) {
-        this(systemWindowInsets, windowDecorInsets, false);
-    }
-
-    /** @hide */
-    public WindowInsets(Rect systemWindowInsets, boolean isRound) {
-        this(systemWindowInsets, null, isRound);
-    }
-
-    /** @hide */
-    public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, boolean isRound) {
+    public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, Rect stableInsets,
+            boolean isRound) {
         mSystemWindowInsetsConsumed = systemWindowInsets == null;
         mSystemWindowInsets = mSystemWindowInsetsConsumed ? EMPTY_RECT : systemWindowInsets;
 
         mWindowDecorInsetsConsumed = windowDecorInsets == null;
         mWindowDecorInsets = mWindowDecorInsetsConsumed ? EMPTY_RECT : windowDecorInsets;
+
+        mStableInsetsConsumed = stableInsets == null;
+        mStableInsets = mStableInsetsConsumed ? EMPTY_RECT : stableInsets;
 
         mIsRound = isRound;
     }
@@ -83,14 +78,16 @@ public final class WindowInsets {
     public WindowInsets(WindowInsets src) {
         mSystemWindowInsets = src.mSystemWindowInsets;
         mWindowDecorInsets = src.mWindowDecorInsets;
+        mStableInsets = src.mStableInsets;
         mSystemWindowInsetsConsumed = src.mSystemWindowInsetsConsumed;
         mWindowDecorInsetsConsumed = src.mWindowDecorInsetsConsumed;
+        mStableInsetsConsumed = src.mStableInsetsConsumed;
         mIsRound = src.mIsRound;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, null);
+        this(systemWindowInsets, null, null, false);
     }
 
     /**
@@ -272,7 +269,7 @@ public final class WindowInsets {
      * @hide Pending API
      */
     public boolean isConsumed() {
-        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed;
+        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed;
     }
 
     /**
@@ -381,9 +378,57 @@ public final class WindowInsets {
         return result;
     }
 
+    /**
+     * @hide
+     */
+    public int getStableInsetTop() {
+        return mStableInsets.top;
+    }
+
+    /**
+     * @hide
+     */
+    public int getStableInsetLeft() {
+        return mStableInsets.left;
+    }
+
+    /**
+     * @hide
+     */
+    public int getStableInsetRight() {
+        return mStableInsets.right;
+    }
+
+    /**
+     * @hide
+     */
+    public int getStableInsetBottom() {
+        return mStableInsets.bottom;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasStableInsets() {
+        return mStableInsets.top != 0 || mStableInsets.left != 0 || mStableInsets.right != 0
+                || mStableInsets.bottom != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public WindowInsets consumeStableInsets() {
+        final WindowInsets result = new WindowInsets(this);
+        result.mStableInsets = EMPTY_RECT;
+        result.mStableInsetsConsumed = true;
+        return result;
+    }
+
     @Override
     public String toString() {
-        return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets + " windowDecorInsets=" +
-                mWindowDecorInsets + (isRound() ? "round}" : "}");
+        return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets
+                + " windowDecorInsets=" + mWindowDecorInsets
+                + " stableInsets=" + mStableInsets +
+                (isRound() ? " round}" : "}");
     }
 }

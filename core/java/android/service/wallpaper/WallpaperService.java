@@ -154,6 +154,7 @@ public abstract class WallpaperService extends Service {
         final Rect mWinFrame = new Rect();
         final Rect mOverscanInsets = new Rect();
         final Rect mContentInsets = new Rect();
+        final Rect mStableInsets = new Rect();
         final Configuration mConfiguration = new Configuration();
         
         final WindowManager.LayoutParams mLayout
@@ -253,7 +254,8 @@ public abstract class WallpaperService extends Service {
         final BaseIWindow mWindow = new BaseIWindow() {
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
-                    Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
+                    Rect visibleInsets, Rect stableInsets, boolean reportDraw,
+                    Configuration newConfig) {
                 Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0);
                 mCaller.sendMessage(msg);
@@ -628,7 +630,7 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
-                            mVisibleInsets, mConfiguration, mSurfaceHolder.mSurface);
+                            mVisibleInsets, mStableInsets, mConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);

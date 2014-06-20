@@ -167,6 +167,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mOverscanInsetsChanged;
 
     /**
+     * Insets that determine the area covered by the stable system windows.  These are in the
+     * application's coordinate space (without compatibility scale applied).
+     */
+    final Rect mStableInsets = new Rect();
+    final Rect mLastStableInsets = new Rect();
+    boolean mStableInsetsChanged;
+
+    /**
      * Set to true if we are waiting for this window to receive its
      * given internal insets before laying out other windows based on it.
      */
@@ -225,6 +233,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Rect mParentFrame = new Rect();
     final Rect mVisibleFrame = new Rect();
     final Rect mDecorFrame = new Rect();
+    final Rect mStableFrame = new Rect();
 
     boolean mContentChanged;
 
@@ -470,7 +479,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf) {
+    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf) {
         mHaveFrame = true;
 
         TaskStack stack = mAppToken != null ? getStack() : null;
@@ -537,6 +546,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mContentFrame.set(cf);
         mVisibleFrame.set(vf);
         mDecorFrame.set(dcf);
+        mStableFrame.set(sf);
 
         final int fw = mFrame.width();
         final int fh = mFrame.height();
@@ -574,6 +584,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 Math.min(mVisibleFrame.right, mFrame.right),
                 Math.min(mVisibleFrame.bottom, mFrame.bottom));
 
+        mStableFrame.set(Math.max(mStableFrame.left, mFrame.left),
+                Math.max(mStableFrame.top, mFrame.top),
+                Math.min(mStableFrame.right, mFrame.right),
+                Math.min(mStableFrame.bottom, mFrame.bottom));
+
         mOverscanInsets.set(Math.max(mOverscanFrame.left - mFrame.left, 0),
                 Math.max(mOverscanFrame.top - mFrame.top, 0),
                 Math.max(mFrame.right - mOverscanFrame.right, 0),
@@ -589,6 +604,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mFrame.right - mVisibleFrame.right,
                 mFrame.bottom - mVisibleFrame.bottom);
 
+        mStableInsets.set(Math.max(mStableFrame.left - mFrame.left, 0),
+                Math.max(mStableFrame.top - mFrame.top, 0),
+                Math.max(mFrame.right - mStableFrame.right, 0),
+                Math.max(mFrame.bottom - mStableFrame.bottom, 0));
+
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
@@ -597,6 +617,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mOverscanInsets.scale(mInvGlobalScale);
             mContentInsets.scale(mInvGlobalScale);
             mVisibleInsets.scale(mInvGlobalScale);
+            mStableInsets.scale(mInvGlobalScale);
 
             // Also the scaled frame that we report to the app needs to be
             // adjusted to be in its coordinate space.
@@ -618,7 +639,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                 + "): frame=" + mFrame.toShortString()
                 + " ci=" + mContentInsets.toShortString()
-                + " vi=" + mVisibleInsets.toShortString());
+                + " vi=" + mVisibleInsets.toShortString()
+                + " vi=" + mStableInsets.toShortString());
     }
 
     @Override
@@ -724,6 +746,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
+        mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged;
     }
 
@@ -1344,6 +1367,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final Rect overscanInsets = mLastOverscanInsets;
             final Rect contentInsets = mLastContentInsets;
             final Rect visibleInsets = mLastVisibleInsets;
+            final Rect stableInsets = mLastStableInsets;
             final boolean reportDraw = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
             final Configuration newConfig = configChanged ? mConfiguration : null;
             if (mClient instanceof IWindow.Stub) {
@@ -1353,15 +1377,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     public void run() {
                         try {
                             mClient.resized(frame, overscanInsets, contentInsets,
-                                    visibleInsets, reportDraw, newConfig);
+                                    visibleInsets, stableInsets,  reportDraw, newConfig);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
                     }
                 });
             } else {
-                mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, reportDraw,
-                        newConfig);
+                mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
+                        reportDraw, newConfig);
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
@@ -1373,6 +1397,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mOverscanInsetsChanged = false;
             mContentInsetsChanged = false;
             mVisibleInsetsChanged = false;
+            mStableInsetsChanged = false;
             mWinAnimator.mSurfaceResized = false;
         } catch (RemoteException e) {
             mOrientationChanging = false;
@@ -1522,11 +1547,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     mOverscanInsets.printShortString(pw);
                     pw.print(" content="); mContentInsets.printShortString(pw);
                     pw.print(" visible="); mVisibleInsets.printShortString(pw);
+                    pw.print(" stable="); mStableInsets.printShortString(pw);
                     pw.println();
             pw.print(prefix); pw.print("Lst insets: overscan=");
                     mLastOverscanInsets.printShortString(pw);
                     pw.print(" content="); mLastContentInsets.printShortString(pw);
                     pw.print(" visible="); mLastVisibleInsets.printShortString(pw);
+                    pw.print(" stable="); mLastStableInsets.printShortString(pw);
                     pw.println();
         }
         pw.print(prefix); pw.print(mWinAnimator); pw.println(":");

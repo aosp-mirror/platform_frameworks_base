@@ -89,7 +89,7 @@ interface IWindowSession {
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
-            out Rect outContentInsets, out Rect outVisibleInsets,
+            out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Configuration outConfig, out Surface outSurface);
 
     /**
