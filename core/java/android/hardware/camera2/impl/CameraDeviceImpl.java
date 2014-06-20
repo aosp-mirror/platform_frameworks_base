@@ -460,7 +460,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
      * starting and stopping repeating request and flushing.
      *
      * <p>If lastFrameNumber is NO_FRAMES_CAPTURED, it means that the request was never
-     * sent to HAL. Then onCaptureSequenceCompleted is immediately triggered.
+     * sent to HAL. Then onCaptureSequenceAborted is immediately triggered.
      * If lastFrameNumber is non-negative, then the requestId and lastFrameNumber pair
      * is added to the list mFrameNumberRequestPairs.</p>
      *
@@ -471,7 +471,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private void checkEarlyTriggerSequenceComplete(
             final int requestId, final long lastFrameNumber) {
         // lastFrameNumber being equal to NO_FRAMES_CAPTURED means that the request
-        // was never sent to HAL. Should trigger onCaptureSequenceCompleted immediately.
+        // was never sent to HAL. Should trigger onCaptureSequenceAborted immediately.
         if (lastFrameNumber == CaptureListener.NO_FRAMES_CAPTURED) {
             final CaptureListenerHolder holder;
             int index = mCaptureListenerMap.indexOfKey(requestId);
@@ -488,7 +488,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
             if (holder != null) {
                 if (DEBUG) {
-                    Log.v(TAG, "immediately trigger onCaptureSequenceCompleted because"
+                    Log.v(TAG, "immediately trigger onCaptureSequenceAborted because"
                             + " request did not reach HAL");
                 }
 
@@ -505,10 +505,9 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                                     || lastFrameNumber > Integer.MAX_VALUE) {
                                 throw new AssertionError(lastFrameNumber + " cannot be cast to int");
                             }
-                            holder.getListener().onCaptureSequenceCompleted(
+                            holder.getListener().onCaptureSequenceAborted(
                                     CameraDeviceImpl.this,
-                                    requestId,
-                                    lastFrameNumber);
+                                    requestId);
                         }
                     }
                 };
