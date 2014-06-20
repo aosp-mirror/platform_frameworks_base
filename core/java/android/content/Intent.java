@@ -55,6 +55,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -6821,72 +6822,12 @@ public class Intent implements Parcelable, Cloneable {
         if (other == null) {
             return false;
         }
-        if (mAction != other.mAction) {
-            if (mAction != null) {
-                if (!mAction.equals(other.mAction)) {
-                    return false;
-                }
-            } else {
-                if (!other.mAction.equals(mAction)) {
-                    return false;
-                }
-            }
-        }
-        if (mData != other.mData) {
-            if (mData != null) {
-                if (!mData.equals(other.mData)) {
-                    return false;
-                }
-            } else {
-                if (!other.mData.equals(mData)) {
-                    return false;
-                }
-            }
-        }
-        if (mType != other.mType) {
-            if (mType != null) {
-                if (!mType.equals(other.mType)) {
-                    return false;
-                }
-            } else {
-                if (!other.mType.equals(mType)) {
-                    return false;
-                }
-            }
-        }
-        if (mPackage != other.mPackage) {
-            if (mPackage != null) {
-                if (!mPackage.equals(other.mPackage)) {
-                    return false;
-                }
-            } else {
-                if (!other.mPackage.equals(mPackage)) {
-                    return false;
-                }
-            }
-        }
-        if (mComponent != other.mComponent) {
-            if (mComponent != null) {
-                if (!mComponent.equals(other.mComponent)) {
-                    return false;
-                }
-            } else {
-                if (!other.mComponent.equals(mComponent)) {
-                    return false;
-                }
-            }
-        }
-        if (mCategories != other.mCategories) {
-            if (mCategories != null) {
-                if (!mCategories.equals(other.mCategories)) {
-                    return false;
-                }
-            } else {
-                if (!other.mCategories.equals(mCategories)) {
-                    return false;
-                }
-            }
-        }
+        if (!Objects.equals(this.mAction, other.mAction)) return false;
+        if (!Objects.equals(this.mData, other.mData)) return false;
+        if (!Objects.equals(this.mType, other.mType)) return false;
+        if (!Objects.equals(this.mPackage, other.mPackage)) return false;
+        if (!Objects.equals(this.mComponent, other.mComponent)) return false;
+        if (!Objects.equals(this.mCategories, other.mCategories)) return false;
 
         return true;
     }
