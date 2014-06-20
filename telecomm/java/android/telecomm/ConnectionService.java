@@ -155,6 +155,12 @@ public abstract class ConnectionService extends CallService {
             String parentId = parent == null ? null : mIdByConnection.get(parent);
             getAdapter().setIsConferenced(id, parentId);
         }
+
+        @Override
+        public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {
+            String id = mIdByConnection.get(c);
+            getAdapter().setCallVideoProvider(id, callVideoProvider);
+        }
     };
 
     @Override

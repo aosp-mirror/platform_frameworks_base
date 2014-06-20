@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.telecomm.CallVideoProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +41,7 @@ public abstract class Connection {
         void onDestroyed(Connection c);
         void onConferenceCapableChanged(Connection c, boolean isConferenceCapable);
         void onParentConnectionChanged(Connection c, Connection parent);
+        void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
     }
 
     public static class ListenerBase implements Listener {
@@ -78,6 +80,10 @@ public abstract class Connection {
         /** ${inheritDoc} */
         @Override
         public void onParentConnectionChanged(Connection c, Connection parent) {}
+
+        /** {@inheritDoc} */
+        @Override
+        public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {}
     }
 
     public final class State {
@@ -412,6 +418,16 @@ public abstract class Connection {
      */
     public final void setOnHold() {
         setState(State.HOLDING);
+    }
+
+    /**
+     * Sets the call video provider.
+     * @param callVideoProvider The call video provider.
+     */
+    public final void setCallVideoProvider(CallVideoProvider callVideoProvider) {
+        for (Listener l : mListeners) {
+            l.onSetCallVideoProvider(this, callVideoProvider);
+        }
     }
 
     /**
