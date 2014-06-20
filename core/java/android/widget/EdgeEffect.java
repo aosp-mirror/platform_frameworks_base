@@ -286,6 +286,22 @@ public class EdgeEffect {
         mTargetDisplacement = 0.5f;
     }
 
+    /**
+     * Set the color of this edge effect in argb.
+     *
+     * @param color Color in argb
+     */
+    public void setColor(int color) {
+        mPaint.setColor(color);
+    }
+
+    /**
+     * Return the color of this edge effect in argb.
+     * @return The color of this edge effect in argb
+     */
+    public int getColor() {
+        return mPaint.getColor();
+    }
 
     /**
      * Draw into the provided canvas. Assumes that the canvas has been rotated
