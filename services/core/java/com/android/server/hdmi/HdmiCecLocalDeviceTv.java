@@ -78,7 +78,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      */
     void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        HdmiCecDeviceInfo targetDevice = mService.getDeviceInfo(targetAddress);
+        HdmiCecDeviceInfo targetDevice = getDeviceInfo(targetAddress);
         if (targetDevice == null) {
             invokeCallback(callback, HdmiCec.RESULT_TARGET_NOT_AVAILABLE);
             return;
@@ -458,8 +458,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     final void addCecDevice(HdmiCecDeviceInfo info) {
         assertRunOnServiceThread();
         addDeviceInfo(info);
+        if (info.getLogicalAddress() == mAddress) {
+            // The addition of TV device itself should not be notified.
+            return;
+        }
         mService.invokeDeviceEventListeners(info, true);
-        // TODO: announce new device detection.
     }
 
     /**
