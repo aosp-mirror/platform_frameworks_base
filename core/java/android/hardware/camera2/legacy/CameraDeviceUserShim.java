@@ -76,13 +76,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
         // TODO: Move open/init into LegacyCameraDevice thread when API is switched to async.
         Camera legacyCamera = Camera.openUninitialized();
-        int initErrors = legacyCamera.cameraInit(cameraId);
+        int initErrors = legacyCamera.cameraInitUnspecified(cameraId);
+
         // Check errors old HAL initialization
-        if (Camera.checkInitErrors(initErrors)) {
-            // TODO: Map over old camera error codes.  This likely involves improving the error
-            // reporting in the HAL1 connect path.
-            throw new CameraRuntimeException(CameraAccessException.CAMERA_DISCONNECTED);
-        }
+        CameraBinderDecorator.throwOnError(initErrors);
+
         LegacyCameraDevice device = new LegacyCameraDevice(cameraId, legacyCamera, callbacks);
         return new CameraDeviceUserShim(cameraId, device);
     }

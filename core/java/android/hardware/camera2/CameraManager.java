@@ -278,14 +278,19 @@ public final class CameraManager {
                 ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
                 int id = Integer.parseInt(cameraId);
                 try {
-                    mCameraService.connectDevice(callbacks, id, mContext.getPackageName(),
-                            USE_CALLING_UID, holder);
-                    cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
-                } catch (CameraRuntimeException e) {
-                    if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
+                    if (supportsCamera2Api(cameraId)) {
+                        // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
+                        mCameraService.connectDevice(callbacks, id, mContext.getPackageName(),
+                                USE_CALLING_UID, holder);
+                        cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
+                    } else {
                         // Use legacy camera implementation for HAL1 devices
                         Log.i(TAG, "Using legacy camera HAL.");
                         cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id);
+                    }
+                } catch (CameraRuntimeException e) {
+                    if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
+                        throw new AssertionError("Should've gone down the shim path");
                     } else if (e.getReason() == CameraAccessException.CAMERA_IN_USE ||
                             e.getReason() == CameraAccessException.MAX_CAMERAS_IN_USE ||
                             e.getReason() == CameraAccessException.CAMERA_DISABLED ||
