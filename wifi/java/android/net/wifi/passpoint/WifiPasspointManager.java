@@ -221,12 +221,22 @@ public class WifiPasspointManager {
             return key;
         }
 
-        private Object getListener(int key, boolean force) {
-            Log.d(TAG, "getListener() key=" + key + " force=" + force);
+        private Object peekListener(int key) {
+            Log.d(TAG, "peekListener() key=" + key);
             if (key == INVALID_LISTENER_KEY)
                 return null;
             synchronized (mListenerMapLock) {
-                if (!force) {
+                return mListenerMap.get(key);
+            }
+        }
+
+
+        private Object getListener(int key, boolean forceRemove) {
+            Log.d(TAG, "getListener() key=" + key + " force=" + forceRemove);
+            if (key == INVALID_LISTENER_KEY)
+                return null;
+            synchronized (mListenerMapLock) {
+                if (!forceRemove) {
                     int count = mListenerMapCount.get(key);
                     Log.d(TAG, "count=" + count);
                     mListenerMapCount.put(key, --count);
@@ -322,7 +332,7 @@ public class WifiPasspointManager {
                         break;
 
                     case START_OSU_BROWSER:
-                        listener = getListener(message.arg2, true);
+                        listener = peekListener(message.arg2);
                         if (listener != null) {
                             ParcelableString str = (ParcelableString) message.obj;
                             if (str == null || str.string == null)
