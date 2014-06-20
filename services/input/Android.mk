@@ -37,10 +37,12 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libgui \
     libui \
-    libinput
+    libinput \
+    libcrypto \
 
 LOCAL_C_INCLUDES := \
-    external/skia/include/core
+    external/openssl/include \
+    external/skia/include/core \
 
 LOCAL_MODULE:= libinputservice
 
