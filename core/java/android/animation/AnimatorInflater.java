@@ -23,10 +23,12 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.PathParser;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.InflateException;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
@@ -47,7 +49,7 @@ import java.util.ArrayList;
  * <em>something</em> file.)
  */
 public class AnimatorInflater {
-
+    private static final String TAG = "AnimatorInflater";
     /**
      * These flags are used when parsing AnimatorSet objects
      */
@@ -59,8 +61,11 @@ public class AnimatorInflater {
      */
     private static final int VALUE_TYPE_FLOAT       = 0;
     private static final int VALUE_TYPE_INT         = 1;
+    private static final int VALUE_TYPE_PATH        = 2;
     private static final int VALUE_TYPE_COLOR       = 4;
     private static final int VALUE_TYPE_CUSTOM      = 5;
+
+    private static final boolean DBG_ANIMATOR_INFLATER = false;
 
     /**
      * Loads an {@link Animator} object from a resource
@@ -189,6 +194,56 @@ public class AnimatorInflater {
     }
 
     /**
+     * PathDataEvaluator is used to interpolate between two paths which are
+     * represented in the same format but different control points' values.
+     * The path is represented as an array of PathDataNode here, which is
+     * fundamentally an array of floating point numbers.
+     */
+    private static class PathDataEvaluator implements TypeEvaluator<PathParser.PathDataNode[]> {
+        private PathParser.PathDataNode[] mNodeArray;
+
+        /**
+         * Create a PathParser.PathDataNode[] that does not reuse the animated value.
+         * Care must be taken when using this option because on every evaluation
+         * a new <code>PathParser.PathDataNode[]</code> will be allocated.
+         */
+        private PathDataEvaluator() {}
+
+        /**
+         * Create a PathDataEvaluator that reuses <code>nodeArray</code> for every evaluate() call.
+         * Caution must be taken to ensure that the value returned from
+         * {@link android.animation.ValueAnimator#getAnimatedValue()} is not cached, modified, or
+         * used across threads. The value will be modified on each <code>evaluate()</code> call.
+         *
+         * @param nodeArray The array to modify and return from <code>evaluate</code>.
+         */
+        public PathDataEvaluator(PathParser.PathDataNode[] nodeArray) {
+            mNodeArray = nodeArray;
+        }
+
+        @Override
+        public PathParser.PathDataNode[] evaluate(float fraction,
+                PathParser.PathDataNode[] startPathData,
+                PathParser.PathDataNode[] endPathData) {
+            if (!PathParser.canMorph(startPathData, endPathData)) {
+                throw new IllegalArgumentException("Can't interpolate between"
+                        + " two incompatible pathData");
+            }
+
+            if (mNodeArray == null || !PathParser.canMorph(mNodeArray, startPathData)) {
+                mNodeArray = PathParser.deepCopyNodes(startPathData);
+            }
+
+            for (int i = 0; i < startPathData.length; i++) {
+                mNodeArray[i].interpolatePathDataNode(startPathData[i],
+                        endPathData[i], fraction);
+            }
+
+            return mNodeArray;
+        }
+    }
+
+    /**
      * @param anim Null if this is a ValueAnimator, otherwise this is an
      *            ObjectAnimator
      * @param arrayAnimator Incoming typed array for Animator's attributes.
@@ -209,27 +264,157 @@ public class AnimatorInflater {
         }
 
         TypeEvaluator evaluator = null;
-        int valueFromIndex = R.styleable.Animator_valueFrom;
-        int valueToIndex = R.styleable.Animator_valueTo;
 
         boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
 
-        TypedValue tvFrom = arrayAnimator.peekValue(valueFromIndex);
+        TypedValue tvFrom = arrayAnimator.peekValue(R.styleable.Animator_valueFrom);
         boolean hasFrom = (tvFrom != null);
         int fromType = hasFrom ? tvFrom.type : 0;
-        TypedValue tvTo = arrayAnimator.peekValue(valueToIndex);
+        TypedValue tvTo = arrayAnimator.peekValue(R.styleable.Animator_valueTo);
         boolean hasTo = (tvTo != null);
         int toType = hasTo ? tvTo.type : 0;
 
-        if ((hasFrom && (fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) ||
-                (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                        (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
-            // special case for colors: ignore valueType and get ints
-            getFloats = false;
-            evaluator = ArgbEvaluator.getInstance();
+        // TODO: Further clean up this part of code into 4 types : path, color,
+        // integer and float.
+        if (valueType == VALUE_TYPE_PATH) {
+            evaluator = setupAnimatorForPath(anim, arrayAnimator);
+        } else {
+            // Integer and float value types are handled here.
+            if ((hasFrom && (fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
+                    (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) ||
+                    (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
+                            (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
+                // special case for colors: ignore valueType and get ints
+                getFloats = false;
+                evaluator = ArgbEvaluator.getInstance();
+            }
+            setupValues(anim, arrayAnimator, getFloats, hasFrom, fromType, hasTo, toType);
         }
 
+        anim.setDuration(duration);
+        anim.setStartDelay(startDelay);
+
+        if (arrayAnimator.hasValue(R.styleable.Animator_repeatCount)) {
+            anim.setRepeatCount(
+                    arrayAnimator.getInt(R.styleable.Animator_repeatCount, 0));
+        }
+        if (arrayAnimator.hasValue(R.styleable.Animator_repeatMode)) {
+            anim.setRepeatMode(
+                    arrayAnimator.getInt(R.styleable.Animator_repeatMode,
+                            ValueAnimator.RESTART));
+        }
+        if (evaluator != null) {
+            anim.setEvaluator(evaluator);
+        }
+
+        if (arrayObjectAnimator != null) {
+            setupObjectAnimator(anim, arrayObjectAnimator, getFloats);
+        }
+    }
+
+    /**
+     * Setup the Animator to achieve path morphing.
+     *
+     * @param anim The target Animator which will be updated.
+     * @param arrayAnimator TypedArray for the ValueAnimator.
+     * @return the PathDataEvaluator.
+     */
+    private static TypeEvaluator setupAnimatorForPath(ValueAnimator anim,
+             TypedArray arrayAnimator) {
+        TypeEvaluator evaluator = null;
+        String fromString = arrayAnimator.getString(R.styleable.Animator_valueFrom);
+        String toString = arrayAnimator.getString(R.styleable.Animator_valueTo);
+        PathParser.PathDataNode[] nodesFrom = PathParser.createNodesFromPathData(fromString);
+        PathParser.PathDataNode[] nodesTo = PathParser.createNodesFromPathData(toString);
+
+        if (nodesFrom != null) {
+            if (nodesTo != null) {
+                anim.setObjectValues(nodesFrom, nodesTo);
+                if (!PathParser.canMorph(nodesFrom, nodesTo)) {
+                    throw new InflateException(arrayAnimator.getPositionDescription()
+                            + " Can't morph from " + fromString + " to " + toString);
+                }
+            } else {
+                anim.setObjectValues((Object)nodesFrom);
+            }
+            evaluator = new PathDataEvaluator(PathParser.deepCopyNodes(nodesFrom));
+        } else if (nodesTo != null) {
+            anim.setObjectValues((Object)nodesTo);
+            evaluator = new PathDataEvaluator(PathParser.deepCopyNodes(nodesTo));
+        }
+
+        if (DBG_ANIMATOR_INFLATER && evaluator != null) {
+            Log.v(TAG, "create a new PathDataEvaluator here");
+        }
+
+        return evaluator;
+    }
+
+    /**
+     * Setup ObjectAnimator's property or values from pathData.
+     *
+     * @param anim The target Animator which will be updated.
+     * @param arrayObjectAnimator TypedArray for the ObjectAnimator.
+     * @param getFloats True if the value type is float.
+     */
+    private static void setupObjectAnimator(ValueAnimator anim, TypedArray arrayObjectAnimator,
+            boolean getFloats) {
+        ObjectAnimator oa = (ObjectAnimator) anim;
+        String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
+
+        // Note that if there is a pathData defined in the Object Animator,
+        // valueFrom / valueTo will be ignored.
+        if (pathData != null) {
+            String propertyXName =
+                    arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyXName);
+            String propertyYName =
+                    arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyYName);
+
+            if (propertyXName == null && propertyYName == null) {
+                throw new InflateException(arrayObjectAnimator.getPositionDescription()
+                        + " propertyXName or propertyYName is needed for PathData");
+            } else {
+                Path path = PathParser.createPathFromPathData(pathData);
+                Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, !getFloats);
+                PropertyValuesHolder x = null;
+                PropertyValuesHolder y = null;
+                if (propertyXName != null) {
+                    x = PropertyValuesHolder.ofKeyframe(propertyXName, keyframes[0]);
+                }
+                if (propertyYName != null) {
+                    y = PropertyValuesHolder.ofKeyframe(propertyYName, keyframes[1]);
+                }
+                if (x == null) {
+                    oa.setValues(y);
+                } else if (y == null) {
+                    oa.setValues(x);
+                } else {
+                    oa.setValues(x, y);
+                }
+            }
+        } else {
+            String propertyName =
+                    arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyName);
+            oa.setPropertyName(propertyName);
+        }
+    }
+
+    /**
+     * Setup ValueAnimator's values.
+     * This will handle all of the integer, float and color types.
+     *
+     * @param anim The target Animator which will be updated.
+     * @param arrayAnimator TypedArray for the ValueAnimator.
+     * @param getFloats True if the value type is float.
+     * @param hasFrom True if "valueFrom" exists.
+     * @param fromType The type of "valueFrom".
+     * @param hasTo True if "valueTo" exists.
+     * @param toType The type of "valueTo".
+     */
+    private static void setupValues(ValueAnimator anim, TypedArray arrayAnimator,
+            boolean getFloats, boolean hasFrom, int fromType, boolean hasTo, int toType) {
+        int valueFromIndex = R.styleable.Animator_valueFrom;
+        int valueToIndex = R.styleable.Animator_valueTo;
         if (getFloats) {
             float valueFrom;
             float valueTo;
@@ -294,63 +479,6 @@ public class AnimatorInflater {
                     }
                     anim.setIntValues(valueTo);
                 }
-            }
-        }
-
-        anim.setDuration(duration);
-        anim.setStartDelay(startDelay);
-
-        if (arrayAnimator.hasValue(R.styleable.Animator_repeatCount)) {
-            anim.setRepeatCount(
-                    arrayAnimator.getInt(R.styleable.Animator_repeatCount, 0));
-        }
-        if (arrayAnimator.hasValue(R.styleable.Animator_repeatMode)) {
-            anim.setRepeatMode(
-                    arrayAnimator.getInt(R.styleable.Animator_repeatMode,
-                            ValueAnimator.RESTART));
-        }
-        if (evaluator != null) {
-            anim.setEvaluator(evaluator);
-        }
-
-        if (arrayObjectAnimator != null) {
-            ObjectAnimator oa = (ObjectAnimator) anim;
-            String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
-
-            // Note that if there is a pathData defined in the Object Animator,
-            // valueFrom / valueTo will be overwritten by the pathData.
-            if (pathData != null) {
-                String propertyXName =
-                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyXName);
-                String propertyYName =
-                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyYName);
-
-                if (propertyXName == null && propertyYName == null) {
-                    throw new IllegalArgumentException("propertyXName or propertyYName"
-                            + " is needed for PathData in Object Animator");
-                } else {
-                    Path path = PathParser.createPathFromPathData(pathData);
-                    Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, !getFloats);
-                    PropertyValuesHolder x = null;
-                    PropertyValuesHolder y = null;
-                    if (propertyXName != null) {
-                        x = PropertyValuesHolder.ofKeyframe(propertyXName, keyframes[0]);
-                    }
-                    if (propertyYName != null) {
-                        y = PropertyValuesHolder.ofKeyframe(propertyYName, keyframes[1]);
-                    }
-                    if (x == null) {
-                        oa.setValues(y);
-                    } else if (y == null) {
-                        oa.setValues(x);
-                    } else {
-                        oa.setValues(x, y);
-                    }
-                }
-            } else {
-                String propertyName =
-                        arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyName);
-                oa.setPropertyName(propertyName);
             }
         }
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+ Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +15,21 @@
      limitations under the License.
 -->
 
-<resources>
-    <string name="twoLinePathData" >"M 0,0 v 100 M 0,0 h 100"</string>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:ordering="sequentially" >
 
-    <string name="triangle" > "M300,70 l 0,-70 70,70 0,0   -70,70z"</string>
-    <string name="rectangle" >"M300,70 l 0,-70 70,0  0,140 -70,0 z"</string>
+    <objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="@string/triangle"
+        android:valueTo="@string/rectangle"
+        android:valueType="pathType"/>
 
-    <string name="rectangle2" >"M300,70 l 0,-70 70,0  0,70z M300,70  l 70,0 0,70 -70,0z"</string>
-    <string name="equal2" >    "M300,35 l 0,-35 70,0  0,35z M300,105 l 70,0 0,35 -70,0z"</string>
+    <objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="@string/rectangle2"
+        android:valueTo="@string/equal2"
+        android:valueType="pathType"/>
 
-</resources>
+</set>

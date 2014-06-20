@@ -32,27 +32,21 @@
             android:name="pie1"
             android:fill="#00000000"
             android:pathData="M300,70 a230,230 0 1,0 1,0 z"
-            android:stroke="#FF00FF00"
+            android:stroke="#FF777777"
             android:strokeWidth="70"
             android:trimPathEnd=".75"
             android:trimPathOffset="0"
             android:trimPathStart="0" />
         <path
             android:name="v"
-            android:fill="#FF00FF00"
-            android:pathData="M300,70 l 0,-70 70,70 -70,70z" />
+            android:fill="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
 
         <group
             android:name="translateToCenterGroup"
             android:rotation="0.0"
             android:translateX="200.0"
             android:translateY="200.0" >
-            <path
-                android:name="twoLines"
-                android:pathData="@string/twoLinePathData"
-                android:stroke="#FFFF0000"
-                android:strokeWidth="20" />
-
             <group
                 android:name="rotationGroup2"
                 android:pivotX="0.0"
@@ -61,7 +55,7 @@
                 <path
                     android:name="twoLines1"
                     android:pathData="@string/twoLinePathData"
-                    android:stroke="#FF00FF00"
+                    android:stroke="#FFFF0000"
                     android:strokeWidth="20" />
 
                 <group
