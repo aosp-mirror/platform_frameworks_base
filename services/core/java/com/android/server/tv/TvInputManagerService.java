@@ -132,7 +132,7 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
         };
-        monitor.register(mContext, null, UserHandle.ALL, true);
+        monitor.register(mContext, Looper.getMainLooper(), UserHandle.ALL, true);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
