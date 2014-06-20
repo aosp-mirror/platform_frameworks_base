@@ -203,7 +203,8 @@ public class JobStatus {
     @Override
     public String toString() {
         return String.valueOf(hashCode()).substring(0, 3) + ".."
-                + ":[" + job.getService().getPackageName() + ",jId=" + job.getId()
+                + ":[" + job.getService()
+                + ",jId=" + job.getId()
                 + ",R=(" + earliestRunTimeElapsedMillis + "," + latestRunTimeElapsedMillis + ")"
                 + ",N=" + job.getNetworkCapabilities() + ",C=" + job.isRequireCharging()
                 + ",I=" + job.isRequireDeviceIdle() + ",F=" + numFailures

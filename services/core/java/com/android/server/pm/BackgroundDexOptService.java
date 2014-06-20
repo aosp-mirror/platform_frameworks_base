@@ -34,9 +34,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BackgroundDexOptService extends JobService {
     static final String TAG = "BackgroundDexOptService";
 
-    static final int BACKGROUND_DEXOPT_JOB = 808;
+    static final int BACKGROUND_DEXOPT_JOB = 800;
     private static ComponentName sDexoptServiceName = new ComponentName(
-            BackgroundDexOptService.class.getPackage().getName(),
+            "android",
             BackgroundDexOptService.class.getName());
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
