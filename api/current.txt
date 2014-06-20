@@ -2525,7 +2525,14 @@ package android {
 
   public static final class R.transition {
     ctor public R.transition();
+    field public static final int explode = 17760259; // 0x10f0003
+    field public static final int fade = 17760258; // 0x10f0002
+    field public static final int move = 17760257; // 0x10f0001
     field public static final int no_transition = 17760256; // 0x10f0000
+    field public static final int slide_bottom = 17760260; // 0x10f0004
+    field public static final int slide_left = 17760263; // 0x10f0007
+    field public static final int slide_right = 17760262; // 0x10f0006
+    field public static final int slide_top = 17760261; // 0x10f0005
   }
 
   public static final class R.xml {

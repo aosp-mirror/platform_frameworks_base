@@ -2461,5 +2461,26 @@
   <!-- An interpolator which accelerates fast and keeps accelerating until the end. -->
   <public type="interpolator" name="fast_out_linear_in" />
 
+  <!-- Used for Activity Transitions, this transition indicates that no Transition
+       should be used. -->
   <public type="transition" name="no_transition" id="0x010f0000"/>
+  <!-- A transition that moves and resizes a view -->
+  <public type="transition" name="move"/>
+  <!-- A transition that fades views in and out. -->
+  <public type="transition" name="fade"/>
+  <!-- A transition that moves views in or out of the scene to or from the edges when
+       a view visibility changes. -->
+  <public type="transition" name="explode"/>
+  <!-- A transition that moves views in or out of the scene to or from the bottom edge when
+       a view visibility changes. -->
+  <public type="transition" name="slide_bottom"/>
+  <!-- A transition that moves views in or out of the scene to or from the top edge when
+       a view visibility changes. -->
+  <public type="transition" name="slide_top"/>
+  <!-- A transition that moves views in or out of the scene to or from the right edge when
+       a view visibility changes. -->
+  <public type="transition" name="slide_right"/>
+  <!-- A transition that moves views in or out of the scene to or from the left edge when
+       a view visibility changes. -->
+  <public type="transition" name="slide_left"/>
 </resources>
