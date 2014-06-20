@@ -102,17 +102,25 @@ public final class TvInputManagerService extends SystemService {
         mLogHandler = new LogHandler(IoThread.get().getLooper());
 
         mTvInputHardwareManager = new TvInputHardwareManager(context);
-        registerBroadcastReceivers();
 
         synchronized (mLock) {
             mUserStates.put(mCurrentUserId, new UserState());
-            buildTvInputListLocked(mCurrentUserId);
         }
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.TV_INPUT_SERVICE, new BinderService());
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            registerBroadcastReceivers();
+            synchronized (mLock) {
+                buildTvInputListLocked(mCurrentUserId);
+            }
+        }
     }
 
     private void registerBroadcastReceivers() {
