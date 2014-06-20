@@ -1,0 +1,514 @@
+page.title=ExoPlayer
+page.tags="audio","video","adaptive","streaming","DASH","smoothstreaming"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#trackrenderer">TrackRenderer</a></li>
+      <li><a href="#samplesource">SampleSource</a>
+        <ol>
+          <li><a href="#mediaextractor">Providing media using MediaExtractor</a></li>
+          <li><a href="#adaptive-playback">Providing media for adaptive playback</a>
+            <ol>
+              <li><a href="#format-selection">Format selection for adaptive playback</a></li>
+            </ol>
+          </li>
+        </ol>
+      <li><a href="#events">Player Events</a>
+        <ol>
+          <li><a href="#high-events">High level events</a></li>
+          <li><a href="#low-events">Low level events</a></li>
+        </ol>
+      </li>
+      <li><a href="#sending-messages">Sending messages to components</a></li>
+      <li><a href="#customizing">Customizing ExoPlayer</a>
+        <ol>
+          <li><a href="#custom-guidelines">Custom component guidelines</a></li>
+        </ol>
+      </li>
+      <li><a href="#drm">Digital Rights Management</a></li>
+    </ol>
+    <h2>Key Classes</h2>
+    <ol>
+      <li>{@link android.media.MediaCodec}</li>
+      <li>{@link android.media.MediaExtractor}</li>
+      <li>{@link android.media.AudioTrack}</li>
+    </ol>
+    <h2>Related Samples</h2>
+    <ol>
+      <li><a class="external-link" href="https://github.com/google/ExoPlayer">
+        ExoPlayer Project</a></li>
+      <li><a class="external-link" href="http://google.github.io/ExoPlayer/doc/reference/packages.html">
+        Class Reference</a></li>
+    </ol>
+  </div>
+</div>
+
+
+<p>Playing videos and music is a popular activity on Android devices. The Android framework
+  provides {@link android.media.MediaPlayer} as a quick solution for playing media with minimal
+  code, and the {@link android.media.MediaCodec} and {@link android.media.MediaExtractor} classes
+  are provided for building custom media players. The open source project, ExoPlayer, is a
+  solution between these two options, providing a pre-built player that you can extend.</p>
+
+<p>ExoPlayer supports features not currently provided by
+  {@link android.media.MediaPlayer}, including Dynamic adaptive streaming
+  over HTTP (DASH), SmoothStreaming, and persistent caching. ExoPlayer can be extended
+  to handle additional media formats, and because you include it as part of your app code,
+  you can update it along with your app.</p>
+
+<p>This guide describes how to use ExoPlayer for playing Android supported media formats, as well as
+  DASH and SmoothStreaming playback. This guide also discusses ExoPlayer events, messages, DRM
+  support and guidelines for customizing the player.</p>
+
+<p class="note">
+  <strong>Note:</strong> ExoPlayer is an open source project that is not part of the Android
+  framework and is distributed separately from the Android SDK. The project contains a library and
+  a demo app that shows both simple and more advanced use of ExoPlayer:</p>
+
+<ul>
+    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/library">
+      ExoPlayer Library</a> &mdash; This part of the project contains the core library classes.</li>
+    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/demo/src/main/java/com/google/android/exoplayer/demo/simple">
+      Simple Demo</a> &mdash; This part of the app demonstrates a basic use of ExoPlayer.</li>
+    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/demo/src/main/java/com/google/android/exoplayer/demo/full">
+      Full Demo</a> &mdash; This part of the app demonstrates more advanced features,
+      including the ability to select between multiple audio tracks, a background audio mode,
+      event logging and DRM protected playback. </li>
+</ul>
+
+
+<h2 id="overview">Overview</h2>
+
+<p>ExoPlayer is a media player built on top of the {@link android.media.MediaExtractor} and
+  {@link android.media.MediaCodec} APIs released in Android 4.1 (API level 16). At the core of this
+  library is the {@code ExoPlayer} class. This class maintains the player’s global state, but makes few
+  assumptions about the nature of the media being played, such as how the media data is obtained,
+  how it is buffered or its format. You inject this functionality through ExoPlayer’s {@code
+  prepare()} method in the form of {@code TrackRenderer} objects.</p>
+
+<p>ExoPlayer provides default {@code TrackRenderer} implementations for audio and
+  video, which make use of the {@link android.media.MediaCodec} and {@link android.media.AudioTrack}
+  classes in the Android framework. Both renderers require a {@code SampleSource} object, from which
+  they obtain individual media samples for playback. Figure 1 shows the high level object model for
+  an ExoPlayer implementation configured to play audio and video using these components.</p>
+
+<img src="{@docRoot}images/exoplayer/object-model.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> High level object model for an ExoPlayer configured to play audio
+  and video using {@code TrackRenderer} objects
+</p>
+
+
+<h2 id="trackrenderer">TrackRenderer</h2>
+
+<p>A {@code TrackRenderer} processes a component of media for playback, such as
+  video, audio or text. The ExoPlayer class invokes methods on its {@code TrackRenderer} instances from a
+  single playback thread, and by doing so causes each media component to be rendered as the global
+  playback position is advanced. The ExoPlayer library provides {@code MediaCodecVideoTrackRenderer} as
+  the default implementations rendering video and {@code MediaCodecAudioTrackRenderer} for audio.
+  Both implementations make use of {@link android.media.MediaCodec} to decode individual media
+  samples. They can handle all audio and video formats supported by a given Android device
+  (see <a href="http://developer.android.com/guide/appendix/media-formats.html">Supported Media
+  Formats</a> for details). The ExoPlayer library also provides an implementation for rendering
+  text called {@code TextTrackRenderer}.
+</p>
+
+<p>The code example below outlines the main steps required to instantiate an ExoPlayer to play video
+  and audio using the standard {@code TrackRenderer} implementations.</p>
+
+<pre>
+// 1. Instantiate the player.
+player = ExoPlayer.Factory.newInstance(RENDERER_COUNT);
+// 2. Construct renderers.
+MediaCodecVideoTrackRenderer videoRenderer = …
+MediaCodecAudioTrackRenderer audioRenderer = ...
+// 3. Inject the renderers through prepare.
+player.prepare(videoRenderer, audioRenderer);
+// 4. Pass the surface to the video renderer.
+player.sendMessage(videoRenderer, MediaCodecVideoTrackRenderer.MSG_SET_SURFACE,
+        surface);
+// 5. Start playback.
+player.setPlayWhenReady(true);
+...
+player.release(); // Don’t forget to release when done!
+</pre>
+
+<p>For a complete example, see the {@code SimplePlayerActivity} in the ExoPlayer demo app, which
+  correctly manages an ExoPlayer instance with respect to both the {@link android.app.Activity} and
+  {@link android.view.Surface} lifecycles.</p>
+
+
+<h2 id="samplesource">SampleSource</h2>
+
+<p>A standard {@code TrackRenderer} implementation requires a {@code SampleSource} to
+  be provided in its constructor. A {@code SampleSource} object provides format information and
+  media samples to be rendered. The ExoPlayer library provides {@code FrameworkSampleSource} and
+  {@code ChunkSampleSource}. The {@code FrameworkSampleSource} class uses {@link
+  android.media.MediaExtractor} to request, buffer and extract the media samples. The {@code
+  ChunkSampleSource} class provides adaptive playback using DASH or SmoothStreaming, and
+  implements networking, buffering and media extraction within the ExoPlayer library.</p>
+
+
+<h3 id="mediaextractor">Providing media using MediaExtractor</h3>
+
+<p>
+  In order to render media formats supported by the Android framework, the {@code
+  FrameworkSampleSource} class uses {@link android.media.MediaExtractor} for networking,
+  buffering and sample extraction functionality. By doing so, it supports any media container format
+  supported by the version of Android where it is running. For more information about media formats
+  supported by Android, see <a href="{@docRoot}guide/appendix/media-formats.html">Supported
+  Media Formats</a>.
+</p>
+
+<p>The diagram in Figure 2 shows the object model for an ExoPlayer implementation using
+  {@code FrameworkSampleSource}.</p>
+
+<img src="{@docRoot}images/exoplayer/frameworksamplesource.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Object model for an implementation of ExoPlayer that renders
+  media formats supported by Android using {@code FrameworkSampleSource}
+</p>
+
+<p>The following code example outlines how the video and audio renderers are constructed to
+  load the video from a specified URI.</p>
+
+<pre>
+FrameworkSampleSource sampleSource = new FrameworkSampleSource(
+        activity, uri, null, 2);
+MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(
+        sampleSource, null, true, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT, 0,
+        mainHandler, playerActivity, 50);
+MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(
+        sampleSource, null, true);
+</pre>
+
+<p>The ExoPlayer demo app provides a complete implementation of this code in
+  {@code DefaultRendererBuilder}. The {@code SimplePlaybackActivity} class uses it to play one
+  of the videos available in the demo app. Note that in the example, video and audio
+  are muxed, meaning they are streamed together from a single URI. The {@code FrameworkSampleSource}
+  instance provides video samples to the {@code videoRenderer} object and audio samples to the
+  {@code audioRenderer} object as they are extracted from the media container format. It is also
+  possible to play demuxed media, where video and audio are streamed separately from different URIs.
+  This functionality can be achieved by having two {@code FrameworkSampleSource} instances instead
+  of one.</p>
+
+
+<h3 id="adaptive-playback">Providing media for adaptive playback</h3>
+
+<p>ExoPlayer supports adaptive streaming, which allows the quality of the
+  media data to be adjusted during playback based on the network conditions. DASH
+  and SmoothStreaming are examples of adaptive streaming technologies. Both these approaches
+  load media in small chunks (typically 2 to 10 seconds in duration). Whenever a chunk of media
+  is requested, the client selects from a number of possible formats. For example, a client may
+  select a high quality format if network conditions are good, or a low quality format if network
+  conditions are bad. In both techniques, video and audio are streamed separately.</p>
+
+<p>ExoPlayer supports adaptive playback through use of the {@code ChunkSampleSource} class,
+  which loads chunks of media data from which individual samples can be extracted. Each {@code
+  ChunkSampleSource} requires a {@code ChunkSource} object to be injected through its constructor,
+  which is responsible for providing media chunks from which to load and read samples. The {@code
+  DashMp4ChunkSource} and {@code SmoothStreamingChunkSource} classes provide DASH and SmoothStreaming
+  playback using the FMP4 container format. The {@code DashWebMChunkSource} class uses the WebM
+  container format to provide DASH playback.</p>
+
+<p>All of the standard {@code ChunkSource} implementations require a {@code FormatEvaluator} and
+  a {@code DataSource} to be injected through their constructors. The {@code FormatEvaluator}
+  objects select from the available formats before each chunk is loaded. The {@code DataSource}
+  objects are responsible for actually loading the data. Finally, the {@code ChunkSampleSources}
+  require a {@code LoadControl} object that controls the chunk buffering policy.</p>
+
+<p>The object model of an ExoPlayer configured for a DASH adaptive playback is shown in the
+  diagram below. This example uses an {@code HttpDataSource} object to stream the media over the
+  network. The video quality is varied at runtime using the adaptive implementation of {@code
+  FormatEvaluator}, while audio is played at a fixed quality level.</p>
+
+<img src="{@docRoot}images/exoplayer/adaptive-streaming.png" alt="" id="figure3" />
+<p class="img-caption">
+  <strong>Figure 3.</strong> Object model for a DASH adaptive playback using ExoPlayer
+</p>
+
+<p>The following code example outlines how the video and audio renderers are constructed.</p>
+
+<pre>
+Handler mainHandler = playerActivity.getMainHandler();
+LoadControl loadControl = new DefaultLoadControl(
+        new BufferPool(BUFFER_SEGMENT_SIZE));
+BandwidthMeter bandwidthMeter = new BandwidthMeter();
+
+// Build the video renderer.
+DataSource videoDataSource = new HttpDataSource(userAgent,
+        HttpDataSource.REJECT_PAYWALL_TYPES, bandwidthMeter);
+ChunkSource videoChunkSource = new DashMp4ChunkSource(videoDataSource,
+        new AdaptiveEvaluator(bandwidthMeter), videoRepresentations);
+ChunkSampleSource videoSampleSource = new ChunkSampleSource(videoChunkSource,
+        loadControl, VIDEO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, true);
+MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(
+        videoSampleSource, null, true, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
+        0, mainHandler, playerActivity, 50);
+
+// Build the audio renderer.
+DataSource audioDataSource = new HttpDataSource(userAgent,
+        HttpDataSource.REJECT_PAYWALL_TYPES, bandwidthMeter);
+ChunkSource audioChunkSource = new DashMp4ChunkSource(audioDataSource,
+        new FormatEvaluator.FixedEvaluator(), audioRepresentation);
+SampleSource audioSampleSource = new ChunkSampleSource(audioChunkSource,
+        loadControl, AUDIO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, true);
+MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(
+        audioSampleSource, null, true);
+</pre>
+
+<p>In this code, {@code videoRepresentations} and {@code audioRepresentation} are {@code
+  Representation} objects, each of which describes one of the available media streams. In the DASH
+  model, these streams are parsed from a media presentation description (MPD) file. The ExoPlayer
+  library provides a {@code MediaPresentationDescriptionParser} class to obtain {@code
+  Representation} objects from MPD files.</p>
+
+<p class="note">
+  <strong>Note:</strong> Building Representation objects from MPD files is not required. You can
+  build Representation objects from other data sources if necessary.
+</p>
+
+<p>The ExoPlayer demo app provides complete implementation of this code in
+  {@code DashVodRendererBuilder}. The {@code SimplePlaybackActivity} class uses this builder to
+  construct renderers for playing DASH sample videos in the demo app. It asynchronously fetches a
+  specified MPD file in order to construct the required {@code Representation} objects. For an
+  equivalent SmoothStreaming example, see the {@code SmoothStreamingRendererBuilder} class in the
+  demo app.</p>
+
+
+<h4 id="format-selection">Format selection for adaptive playback</h4>
+
+<p>For DASH and SmoothStreaming playback, consider both static format selection at the
+  start of playback and dynamic format selection during playback. Static format selection should be
+  used to filter out formats that should not be used throughout the playback, for example formats
+  with resolutions higher than the maximum supported by the playback device. Dynamic selection varies
+  the selected format during playback, typically to adapt video quality in response to changes in
+  network conditions.</p>
+
+<h5 id="static-selection">Static format selection</h5>
+
+<p>When preparing a player, you should consider filtering out some of the available formats if
+  they are not useable for playback. Static format selection allows you to filter out
+  formats that cannot be used on a particular device or are not compatible with your player.
+  For audio playback, this often means picking a single format to play and discarding the others.</p>
+
+<p>For video playback, filtering formats can be more complicated. Apps should first
+  eliminate any streams that whose resolution is too high to be played by the device. For H.264,
+  which is normally used for DASH and SmoothStreaming playback, ExoPlayer’s {@code MediaCodecUtil}
+  class provides a {@code maxH264DecodableFrameSize()} method that can be used to determine what
+  resolution streams the device is able to handle, as shown in the following code example:</p>
+
+<pre>
+int maxDecodableFrameSize = MediaCodecUtil.maxH264DecodableFrameSize();
+Format format = representation.format;
+if (format.width * format.height &lt;= maxDecodableFrameSize) {
+  // The device can play this stream.
+  videoRepresentations.add(representation);
+} else {
+  // The device isn't capable of playing this stream.
+}
+</pre>
+
+<p>This approach is used to filter {@code Representations} in the {@code DashVodRendererBuilder}
+  class of the ExoPlayer demo app, and similarly to filter track indices in {@code
+  SmoothStreamingRendererBuilder}.</p>
+
+<p>In addition to eliminating unsupported formats, it should be noted that the ability to
+  seamlessly switch between H.264 streams of different resolution is an optional decoder feature
+  available in Android 4.3 (API level 16) and higher, and so is not supported by all devices. The
+  availability of an adaptive H.264 decoder can be queried using {@code MediaCodecUtil}, as shown in
+  the following code example:</p>
+
+<pre>
+boolean isAdaptive = MediaCodecUtil.getDecoderInfo(MimeTypes.VIDEO_H264).adaptive;
+</pre>
+
+<p>The {@code MediaCodecVideoTrackRenderer} class is still able to handle resolution changes on
+  devices that do not have adaptive decoders, however the switch is not seamless. Typically, the
+  switch creates a small discontinuity in visual output lasting around 50-100ms. For devices that
+  do not provide an adaptive decoder, app developers may choose to adapt between formats at
+  a single fixed resolution so as to avoid discontinuities. The ExoPlayer demo app
+  implementation does not pick a fixed resolution.</p>
+
+
+<h5 id="dynamic-selection">Dynamic format selection</h5>
+
+<p>During playback, you can use a {@code FormatEvaluator} to dynamically select from the
+  available video formats. The ExoPlayer library provides a {@code FormatEvaluator.Adaptive}
+  implementation for dynamically selecting between video formats based on the current network
+  conditions.</p>
+
+<p>This class provides a simple, general purpose reference implementation, however you are
+  encouraged to write your own {@code FormatEvaluator} implementation to best suit your particular
+  needs.</p>
+
+
+<h2 id="events">Player Events</h2>
+
+<p>During playback, your app can listen for events generated by the ExoPlayer that indicate the
+  overall state of the player. These events are useful as triggers for updating the app user
+  interface such as playback controls. Many ExoPlayer components also report their own component
+  specific low level events, which can be useful for performance monitoring.</p>
+
+
+<h3 id="high-events">High level events</h3>
+
+<p>ExoPlayer allows instances of {@code ExoPlayer.Listener} to be added and removed using its
+  {@code addListener()} and {@code removeListener()} methods. Registered listeners are notified of
+  changes in playback state, as well as when errors occur that cause playback to fail. For more
+  information about the valid playback states and the possible transitions between them, see the
+  ExoPlayer source code.</p>
+
+<p>Developers who implement custom playback controls should register a listener and use it to
+  update their controls as the player’s state changes. An app should also show an
+  appropriate error to the user if playback fails.</p>
+
+<h3 id="low-events">Low level events</h3>
+
+<p>In addition to high level listeners, many of the individual components provided by the
+  ExoPlayer library allow their own event listeners. For example, {@code
+  MediaCodecVideoTrackRenderer} has constructors that take a {@code
+  MediaCodecVideoTrackRenderer.EventListener}. In the ExoPlayer demo app, {@code SimplePlayerActivity}
+  acts as a listener so that it can adjust the dimensions of the target surface to have the correct
+  height and width ratio for the video being played:</p>
+
+<pre>
+&#64;Override
+public void onVideoSizeChanged(int width, int height) {
+  surfaceView.setVideoWidthHeightRatio(height == 0 ? 1 : (float) width / height);
+}
+</pre>
+
+<p>The {@code RendererBuilder} classes in the ExoPlayer demo app inject the activity as the
+  listener, for example in the {@code DashVodRendererBuilder} class:</p>
+
+<pre>
+MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(
+        videoSampleSource, null, true, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
+        0, <strong>mainHandler, playerActivity</strong>, 50);
+</pre>
+
+<p>Note that you must pass a {@link android.os.Handler} object to the renderer, which determines
+  the thread on which the listener’s methods are invoked. In most cases, you should use a
+  {@link android.os.Handler} associated with the app’s main thread, as is the case in this example.
+  </p>
+
+<p>Listening to individual components can be useful for adjusting UI based on player events, as
+  in the example above. Listening to component events can also be helpful for logging performance
+  metrics. For example, {@code MediaCodecVideoTrackRenderer} notifies its listener of dropped video
+  frames. A developer may wish to log such metrics to track playback performance in their
+  app.</p>
+
+<p>Many components also notify their listeners when errors occur. Such errors may or may not
+  cause playback to fail. If an error does not cause playback to fail, it may still result in
+  degraded performance, and so you may wish to log all errors in order to track playback
+  performance. Note that an ExoPlayer instance always notifies its high level listeners of errors that
+  cause playback to fail, in addition to the listener of the individual component from which the error
+  originated. Hence, you should display error messages to users only from high level listeners.
+  Within individual component listeners, you should use error notifications only for informational
+  purposes.</p>
+
+
+<h2 id="sending-messages">Sending messages to components</h2>
+
+<p>Some ExoPlayer components allow changes in configuration during playback. By convention, you make
+  these changes by passing asynchronous messages through the ExoPlayer to the component.
+  This approach ensures both thread safety and that the configuration change is
+  executed in order with any other operations being performed on the player.</p>
+
+<p>The most common use of messaging is passing a target surface to
+  {@code MediaCodecVideoTrackRenderer}:</p>
+
+<pre>
+player.sendMessage(videoRenderer, MediaCodecVideoTrackRenderer.MSG_SET_SURFACE,
+        surface);
+</pre>
+
+<p>Note that if the surface needs to be cleared because
+  {@link android.view.SurfaceHolder.Callback#surfaceDestroyed
+  SurfaceHolder.Callback.surfaceDestroyed()} has been invoked, then you must send this
+  message using the blocking variant of {@code sendMessage()}:</p>
+<p>
+
+<pre>
+player.blockingSendMessage(videoRenderer,
+        MediaCodecVideoTrackRenderer.MSG_SET_SURFACE, null);
+</pre>
+
+<p>You must use a blocking message because the contract of {@link
+  android.view.SurfaceHolder.Callback#surfaceDestroyed surfaceDestroyed()} requires that the
+  app does not attempt to access the surface after the method returns. The {@code
+  SimplePlayerActivity} class in the demo app demonstrates how the surface should be set and
+  cleared.</p>
+
+
+<h2 id="customizing">Customizing ExoPlayer</h2>
+
+<p>One of the main benefits of ExoPlayer over {@link android.media.MediaPlayer} is the ability to
+  customize and extend the player to better suit the developer’s use case. The ExoPlayer library
+  is designed specifically with this in mind, defining a number of abstract base classes and
+  interfaces that make it possible for app developers to easily replace the default implementations
+  provided by the library. Here are some use cases for building custom components:</p>
+
+<ul>
+  <li><strong>{@code TrackRenderer}</strong> - You may want to implement a custom
+    {@code TrackRenderer} to handle media types other than audio and video. The {@code
+    TextTrackRenderer} class within the ExoPlayer library is an example of how to implement a
+    custom renderer. You could use the approach it demonstrates to render custom
+    overlays or annotations. Implementing this kind of functionality as a {@code TrackRenderer}
+    makes it easy to keep the overlays or annotations in sync with the other media being played.</li>
+  <li><strong>{@code SampleSource}</strong> - If you need to support a container format not
+    already handled by {@link android.media.MediaExtractor} or ExoPlayer, consider implementing a
+    custom {@code SampleSource} class.</li>
+  <li><strong>{@code FormatEvaluator}</strong> - The ExoPlayer library provides {@code
+    FormatEvaluator.Adaptive} as a simple reference implementation that switches between different
+    quality video formats based on the available bandwidth. App developers are encouraged to
+    develop their own adaptive {@code FormatEvaluator} implementations, which can be designed to
+    suit their use specific needs.</li>
+  <li><strong>{@code DataSource}</strong> - ExoPlayer’s upstream package already contains a
+    number of {@code DataSource} implementations for different use cases, such as writing and
+    reading to and from a persistent media cache. You may want to implement you own
+    {@code DataSource} class to load data in another way, such as a custom
+    protocol or HTTP stack for data input.</li>
+</ul>
+
+
+<h3 id="custom-guidelines">Custom component guidelines</h3>
+
+<p>If a custom component needs to report events back to the app, we recommend that you
+  do so using the same model as existing ExoPlayer components, where an event listener is passed
+  together with a {@link android.os.Handler} to the constructor of the component.</p>
+
+<p>We recommended that custom components use the same model as existing ExoPlayer components to
+  allow reconfiguration by the app during playback, as described in
+  <a href="#sending-messages">Sending messages to components</a>.
+  To do this, you should implement a {@code ExoPlayerComponent} and receive
+  configuration changes in its {@code handleMessage()} method. Your app should pass
+  configuration changes by calling ExoPlayer’s {@code sendMessage()} and {@code
+  blockingSendMessage()} methods.</p>
+
+
+<h2 id="drm">Digital Rights Management</h2>
+
+<p>On Android 4.3 (API level 18) and higher, ExoPlayer supports Digital Rights Managment (DRM)
+  protected playback. In order to play DRM protected content with ExoPlayer, your app must
+  inject a {@code DrmSessionManager} into the {@code MediaCodecVideoTrackRenderer} and {@code
+  MediaCodecAudioTrackRenderer} constructors. A {@code DrmSessionManager} object is responsible for
+  providing the {@code MediaCrypto} object required for decryption, as well as ensuring that the
+  required decryption keys are available to the underlying DRM module being used.</p>
+
+<p>The ExoPlayer library provides a default implementation of {@code DrmSessionManager}, called
+  {@code StreamingDrmSessionManager}, which uses {@link android.media.MediaDrm}. The session
+  manager supports any DRM scheme for which a modular DRM component exists on the device. All
+  Android devices are required to support Widevine modular DRM (with L3 security, although many
+  devices also support L1). Some devices may support additional schemes such as PlayReady.</p>
+
+<p>The {@code StreamingDrmSessionManager} class requires a {@code MediaDrmCallback} to be
+  injected into its constructor, which is responsible for actually making provisioning and key
+  requests. You should implement this interface to make network requests to your license
+  server and obtain the required keys. The {@code WidevineTestMediaDrmCallback} class in the
+  ExoPlayer demo app sends requests to a Widevine test server.</p>
