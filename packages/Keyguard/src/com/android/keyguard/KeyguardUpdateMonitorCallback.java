@@ -144,18 +144,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onBootCompleted() { }
 
     /**
-     * Called when audio client attaches or detaches from AudioManager.
-     */
-    public void onMusicClientIdChanged(int clientGeneration, boolean clearing, PendingIntent intent) { }
-
-    /**
-     * Called when the audio playback state changes.
-     * @param playbackState
-     * @param eventTime
-     */
-    public void onMusicPlaybackStateChanged(int playbackState, long eventTime) { }
-
-    /**
      * Called when the emergency call button is pressed.
      */
     void onEmergencyCallAction() { }
