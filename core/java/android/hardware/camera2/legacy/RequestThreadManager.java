@@ -16,7 +16,6 @@
 
 package android.hardware.camera2.legacy;
 
-import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CaptureRequest;
@@ -76,8 +75,8 @@ public class RequestThreadManager {
     private volatile RequestHolder mInFlightPreview;
     private volatile RequestHolder mInFlightJpeg;
 
-    private List<Surface> mPreviewOutputs = new ArrayList<Surface>();
-    private List<Surface> mCallbackOutputs = new ArrayList<Surface>();
+    private final List<Surface> mPreviewOutputs = new ArrayList<Surface>();
+    private final List<Surface> mCallbackOutputs = new ArrayList<Surface>();
     private GLThreadManager mGLThreadManager;
     private SurfaceTexture mPreviewTexture;
     private Camera.Parameters mParams;
@@ -315,16 +314,17 @@ public class RequestThreadManager {
         mInFlightPreview = null;
         mInFlightJpeg = null;
 
-
-        for (Surface s : outputs) {
-            int format = LegacyCameraDevice.nativeDetectSurfaceType(s);
-            switch (format) {
-                case CameraMetadataNative.NATIVE_JPEG_FORMAT:
-                    mCallbackOutputs.add(s);
-                    break;
-                default:
-                    mPreviewOutputs.add(s);
-                    break;
+        if (outputs != null) {
+            for (Surface s : outputs) {
+                int format = LegacyCameraDevice.nativeDetectSurfaceType(s);
+                switch (format) {
+                    case CameraMetadataNative.NATIVE_JPEG_FORMAT:
+                        mCallbackOutputs.add(s);
+                        break;
+                    default:
+                        mPreviewOutputs.add(s);
+                        break;
+                }
             }
         }
         mParams = mCamera.getParameters();
@@ -369,8 +369,6 @@ public class RequestThreadManager {
                 Log.d(TAG, "No Intermediate buffer selected, no preview outputs were configured");
             }
         }
-
-
 
         // TODO: Detect and optimize single-output paths here to skip stream teeing.
         if (mGLThreadManager == null) {
@@ -432,7 +430,7 @@ public class RequestThreadManager {
 
     private final Handler.Callback mRequestHandlerCb = new Handler.Callback() {
         private boolean mCleanup = false;
-        private List<RequestHolder> mRepeating = null;
+        private final List<RequestHolder> mRepeating = null;
 
         @SuppressWarnings("unchecked")
         @Override
@@ -447,7 +445,8 @@ public class RequestThreadManager {
             switch (msg.what) {
                 case MSG_CONFIGURE_OUTPUTS:
                     ConfigureHolder config = (ConfigureHolder) msg.obj;
-                    Log.i(TAG, "Configure outputs: " + config.surfaces.size() +
+                    int sizes = config.surfaces != null ? config.surfaces.size() : 0;
+                    Log.i(TAG, "Configure outputs: " + sizes +
                             " surfaces configured.");
                     try {
                         configureOutputs(config.surfaces);
@@ -620,11 +619,13 @@ public class RequestThreadManager {
 
 
     /**
-     * Configure with the current output Surfaces.
+     * Configure with the current list of output Surfaces.
      *
      * <p>
      * This operation blocks until the configuration is complete.
      * </p>
+     *
+     * <p>Using a {@code null} or empty {@code outputs} list is the equivalent of unconfiguring.</p>
      *
      * @param outputs a {@link java.util.Collection} of outputs to configure.
      */

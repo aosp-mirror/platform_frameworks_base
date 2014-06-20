@@ -23,7 +23,6 @@ import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.ConditionVariable;
 import android.os.Handler;
@@ -34,7 +33,8 @@ import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import static android.hardware.camera2.utils.CameraBinderDecorator.*;
 
 /**
  * This class emulates the functionality of a Camera2 device using a the old Camera class.
@@ -54,6 +54,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     private final int mCameraId;
     private final ICameraDeviceCallbacks mDeviceCallbacks;
     private final CameraDeviceState mDeviceState = new CameraDeviceState();
+    private List<Surface> mConfiguredSurfaces;
 
     private final ConditionVariable mIdle = new ConditionVariable(/*open*/true);
 
@@ -213,16 +214,35 @@ public class LegacyCameraDevice implements AutoCloseable {
     /**
      * Configure the device with a set of output surfaces.
      *
+     * <p>Using empty or {@code null} {@code outputs} is the same as unconfiguring.</p>
+     *
+     * <p>Every surface in {@code outputs} must be non-{@code null}.</p>
+     *
      * @param outputs a list of surfaces to set.
-     * @return an error code for this binder operation, or {@link CameraBinderDecorator.NO_ERROR}
+     * @return an error code for this binder operation, or {@link NO_ERROR}
      *          on success.
      */
     public int configureOutputs(List<Surface> outputs) {
+        if (outputs != null) {
+            for (Surface output : outputs) {
+                if (output == null) {
+                    Log.e(TAG, "configureOutputs - null outputs are not allowed");
+                    return BAD_VALUE;
+                }
+            }
+        }
+
         int error = mDeviceState.setConfiguring();
-        if (error == CameraBinderDecorator.NO_ERROR) {
+        if (error == NO_ERROR) {
             mRequestThreadManager.configure(outputs);
             error = mDeviceState.setIdle();
         }
+
+        // TODO: May also want to check the surfaces more deeply (e.g. state, formats, sizes..)
+        if (error == NO_ERROR) {
+            mConfiguredSurfaces = outputs != null ? new ArrayList<>(outputs) : null;
+        }
+
         return error;
     }
 
@@ -239,7 +259,35 @@ public class LegacyCameraDevice implements AutoCloseable {
      */
     public int submitRequestList(List<CaptureRequest> requestList, boolean repeating,
             /*out*/LongParcelable frameNumber) {
-        // TODO: validate request here
+        if (requestList == null || requestList.isEmpty()) {
+            Log.e(TAG, "submitRequestList - Empty/null requests are not allowed");
+            return BAD_VALUE;
+        }
+
+        // Make sure that there all requests have at least 1 surface; all surfaces are non-null
+        for (CaptureRequest request : requestList) {
+            if (request.getTargets().isEmpty()) {
+                Log.e(TAG, "submitRequestList - "
+                        + "Each request must have at least one Surface target");
+                return BAD_VALUE;
+            }
+
+            for (Surface surface : request.getTargets()) {
+                if (surface == null) {
+                    Log.e(TAG, "submitRequestList - Null Surface targets are not allowed");
+                    return BAD_VALUE;
+                } else if (mConfiguredSurfaces == null) {
+                    Log.e(TAG, "submitRequestList - must configure " +
+                            " device with valid surfaces before submitting requests");
+                    return INVALID_OPERATION;
+                } else if (!mConfiguredSurfaces.contains(surface)) {
+                    Log.e(TAG, "submitRequestList - cannot use a surface that wasn't configured");
+                    return BAD_VALUE;
+                }
+            }
+        }
+
+        // TODO: further validation of request here
         mIdle.close();
         return mRequestThreadManager.submitCaptureRequests(requestList, repeating,
                 frameNumber);
