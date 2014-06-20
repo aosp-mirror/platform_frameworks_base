@@ -11244,6 +11244,17 @@ package android.graphics.drawable {
     method public void addTransition(int, int, android.graphics.drawable.AnimationDrawable, boolean);
   }
 
+  public class AnimatedVectorDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable {
+    ctor public AnimatedVectorDrawable();
+    method public void draw(android.graphics.Canvas);
+    method public int getOpacity();
+    method public boolean isRunning();
+    method public void setAlpha(int);
+    method public void setColorFilter(android.graphics.ColorFilter);
+    method public void start();
+    method public void stop();
+  }
+
   public class AnimationDrawable extends android.graphics.drawable.DrawableContainer implements android.graphics.drawable.Animatable java.lang.Runnable {
     ctor public AnimationDrawable();
     method public void addFrame(android.graphics.drawable.Drawable, int);
@@ -11643,8 +11654,6 @@ package android.graphics.drawable {
     method public int getOpacity();
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setPadding(android.graphics.Rect);
-    method public void setPadding(int, int, int, int);
   }
 
 }
