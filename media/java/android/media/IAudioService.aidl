@@ -217,6 +217,7 @@ interface IAudioService {
     oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);
 
     void startBluetoothSco(IBinder cb, int targetSdkVersion);
+    void startBluetoothScoVirtualCall(IBinder cb);
     void stopBluetoothSco(IBinder cb);
 
     void forceVolumeControlStream(int streamType, IBinder cb);

@@ -2056,7 +2056,19 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#startBluetoothSco() */
-    public void startBluetoothSco(IBinder cb, int targetSdkVersion){
+    public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
+        int scoAudioMode =
+                (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
+                        SCO_MODE_VIRTUAL_CALL : SCO_MODE_RAW;
+        startBluetoothScoInt(cb, scoAudioMode);
+    }
+
+    /** @see AudioManager#startBluetoothScoVirtualCall() */
+    public void startBluetoothScoVirtualCall(IBinder cb) {
+        startBluetoothScoInt(cb, SCO_MODE_VIRTUAL_CALL);
+    }
+
+    void startBluetoothScoInt(IBinder cb, int scoAudioMode){
         if (!checkAudioSettingsPermission("startBluetoothSco()") ||
                 !mSystemReady) {
             return;
@@ -2068,7 +2080,7 @@ public class AudioService extends IAudioService.Stub {
         // The caller identity must be cleared after getScoClient() because it is needed if a new
         // client is created.
         final long ident = Binder.clearCallingIdentity();
-        client.incCount(targetSdkVersion);
+        client.incCount(scoAudioMode);
         Binder.restoreCallingIdentity(ident);
     }
 
@@ -2114,9 +2126,9 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
-        public void incCount(int targetSdkVersion) {
+        public void incCount(int scoAudioMode) {
             synchronized(mScoClients) {
-                requestScoState(BluetoothHeadset.STATE_AUDIO_CONNECTED, targetSdkVersion);
+                requestScoState(BluetoothHeadset.STATE_AUDIO_CONNECTED, scoAudioMode);
                 if (mStartcount == 0) {
                     try {
                         mCb.linkToDeath(this, 0);
@@ -2186,7 +2198,7 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
-        private void requestScoState(int state, int targetSdkVersion) {
+        private void requestScoState(int state, int scoAudioMode) {
             checkScoAudioState();
             if (totalCount() == 0) {
                 if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
@@ -2201,9 +2213,7 @@ public class AudioService extends IAudioService.Stub {
                                 (mScoAudioState == SCO_STATE_INACTIVE ||
                                  mScoAudioState == SCO_STATE_DEACTIVATE_REQ)) {
                             if (mScoAudioState == SCO_STATE_INACTIVE) {
-                                mScoAudioMode =
-                                        (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
-                                                SCO_MODE_VIRTUAL_CALL : SCO_MODE_RAW;
+                                mScoAudioMode = scoAudioMode;
                                 if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
                                     boolean status;
                                     if (mScoAudioMode == SCO_MODE_RAW) {

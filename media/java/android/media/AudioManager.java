@@ -1254,11 +1254,6 @@ public class AudioManager {
      * call {@link #stopBluetoothSco()} to clear the request and turn down the bluetooth connection.
      * <p>Even if a SCO connection is established, the following restrictions apply on audio
      * output streams so that they can be routed to SCO headset:
-     * <p>NOTE: up to and including API version
-     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method initiates a virtual
-     * voice call to the bluetooth headset.
-     * After API version {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2} only a raw SCO audio
-     * connection is established.
      * <ul>
      *   <li> the stream type must be {@link #STREAM_VOICE_CALL} </li>
      *   <li> the format must be mono </li>
@@ -1274,6 +1269,11 @@ public class AudioManager {
      * it will be ignored. Similarly, if a call is received or sent while an application
      * is using the SCO connection, the connection will be lost for the application and NOT
      * returned automatically when the call ends.
+     * <p>NOTE: up to and including API version
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method initiates a virtual
+     * voice call to the bluetooth headset.
+     * After API version {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2} only a raw SCO audio
+     * connection is established.
      * @see #stopBluetoothSco()
      * @see #ACTION_SCO_AUDIO_STATE_UPDATED
      */
@@ -1287,13 +1287,38 @@ public class AudioManager {
     }
 
     /**
+     * Start bluetooth SCO audio connection in virtual call mode.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     * <p>Similar to {@link #startBluetoothSco()} with explicit selection of virtual call mode.
+     * Telephony and communication applications (VoIP, Video Chat) should preferably select
+     * virtual call mode.
+     * Applications using voice input for search or commands should first try raw audio connection
+     * with {@link #startBluetoothSco()} and fall back to startBluetoothScoVirtualCall() in case of
+     * failure.
+     * @see #startBluetoothSco()
+     * @see #stopBluetoothSco()
+     * @see #ACTION_SCO_AUDIO_STATE_UPDATED
+     */
+    public void startBluetoothScoVirtualCall() {
+        IAudioService service = getService();
+        try {
+            service.startBluetoothScoVirtualCall(mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in startBluetoothScoVirtualCall", e);
+        }
+    }
+
+    /**
      * Stop bluetooth SCO audio connection.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
      * <p>This method must be called by applications having requested the use of
-     * bluetooth SCO audio with {@link #startBluetoothSco()}
-     * when finished with the SCO connection or if connection fails.
+     * bluetooth SCO audio with {@link #startBluetoothSco()} or
+     * {@link #startBluetoothScoVirtualCall()} when finished with the SCO connection or
+     * if connection fails.
      * @see #startBluetoothSco()
+     * @see #startBluetoothScoVirtualCall()
      */
     public void stopBluetoothSco(){
         IAudioService service = getService();
