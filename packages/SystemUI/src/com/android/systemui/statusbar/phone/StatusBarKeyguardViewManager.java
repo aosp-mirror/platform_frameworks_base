@@ -190,19 +190,23 @@ public class StatusBarKeyguardViewManager {
      */
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
-        mPhoneStatusBar.hideKeyguard();
-        mStatusBarWindowManager.setKeyguardFadingAway(true);
-        mStatusBarWindowManager.setKeyguardShowing(false);
+
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = startTime - uptimeMillis;
         if (delay < 0) {
             delay = 0;
         }
+
+        mPhoneStatusBar.setKeyguardFadingAway(delay, fadeoutDuration);
+        mPhoneStatusBar.hideKeyguard();
+        mStatusBarWindowManager.setKeyguardFadingAway(true);
+        mStatusBarWindowManager.setKeyguardShowing(false);
         mBouncer.animateHide(delay, fadeoutDuration);
         mScrimController.animateKeyguardFadingOut(delay, fadeoutDuration, new Runnable() {
             @Override
             public void run() {
                 mStatusBarWindowManager.setKeyguardFadingAway(false);
+                mPhoneStatusBar.finishKeyguardFadingAway();
             }
         });
         mViewMediatorCallback.keyguardGone();
