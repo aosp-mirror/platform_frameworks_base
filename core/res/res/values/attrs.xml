@@ -4978,16 +4978,6 @@
     <!-- ========================== -->
     <eat-comment />
 
-    <!-- Drawable used to draw vector paths. -->
-    <declare-styleable name="VectorDrawable">
-        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
-             no tint is applied. May be a color state list. -->
-        <attr name="tint" />
-        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
-             default value is src_in, which treats the drawable as an alpha mask. -->
-        <attr name="tintMode" />
-    </declare-styleable>
-
     <!-- Define the virtual size of the drawing surface paths will draw to. -->
     <declare-styleable name="VectorDrawableViewport">
         <!-- The width of the canvas the drawing is on. -->

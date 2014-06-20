@@ -885,9 +885,9 @@ public class TypedArray {
 
     /**
      * Extracts theme attributes from a typed array for later resolution using
-     * {@link android.content.res.Resources.Theme#resolveAttributes(int[], int[])}.
-     * Removes the entries from the typed array so that subsequent calls to typed
-     * getters will return the default value without crashing.
+     * {@link Theme#resolveAttributes(int[], int[])}. Removes the entries from
+     * the typed array so that subsequent calls to typed getters will return the
+     * default value without crashing.
      *
      * @return an array of length {@link #getIndexCount()} populated with theme
      *         attributes, or null if there are no theme attributes in the typed

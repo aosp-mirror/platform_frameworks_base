@@ -378,8 +378,6 @@ public class VectorDrawable extends Drawable {
                         mVGTargetsMap.put(newChildGroup.getGroupName(), newChildGroup);
                     }
                     noGroupTag = false;
-                } else if (SHAPE_VECTOR.equals(tagName)) {
-                    parseVector(res, attrs);
                 }
             } else if (eventType == XmlPullParser.END_TAG) {
                 final String tagName = parser.getName();
@@ -419,29 +417,7 @@ public class VectorDrawable extends Drawable {
             throw new XmlPullParserException("no " + tag + " defined");
         }
 
-        mTintFilter = updateTintFilter(mTintFilter, mVectorState.mTint, mVectorState.mTintMode);
-        mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
-
         return pathRenderer;
-    }
-
-    private void parseVector(Resources r, AttributeSet attrs) throws XmlPullParserException {
-        final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawable);
-        final VectorDrawableState state = mVectorState;
-
-        state.mThemeAttrs = a.extractThemeAttrs();
-
-        final int tintMode = a.getInt(R.styleable.BitmapDrawable_tintMode, -1);
-        if (tintMode != -1) {
-            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
-        }
-
-        final ColorStateList tint = a.getColorStateList(R.styleable.BitmapDrawable_tint);
-        if (tint != null) {
-            state.mTint = tint;
-        }
-
-        a.recycle();
     }
 
     private void printGroupTree(VGroup currentGroup, int level) {
@@ -464,7 +440,6 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VectorDrawableState extends ConstantState {
-        int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
         Rect mPadding;
@@ -473,7 +448,6 @@ public class VectorDrawable extends Drawable {
 
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
-                mThemeAttrs = copy.mThemeAttrs;
                 mChangingConfigurations = copy.mChangingConfigurations;
                 // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
