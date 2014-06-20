@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -793,12 +794,12 @@ public final class RemoteController
         final ComponentName listenerComponent = new ComponentName(mContext,
                 mOnClientUpdateListener.getClass());
         mSessionManager.addActiveSessionsListener(mSessionListener, listenerComponent,
-                ActivityManager.getCurrentUser());
+                UserHandle.myUserId());
         mSessionListener.onActiveSessionsChanged(mSessionManager
                 .getActiveSessions(listenerComponent));
         if (DEBUG) {
             Log.d(TAG, "Registered session listener with component " + listenerComponent
-                    + " for user " + ActivityManager.getCurrentUser());
+                    + " for user " + UserHandle.myUserId());
         }
     }
 
@@ -809,7 +810,7 @@ public final class RemoteController
         mSessionManager.removeActiveSessionsListener(mSessionListener);
         if (DEBUG) {
             Log.d(TAG, "Unregistered session listener for user "
-                    + ActivityManager.getCurrentUser());
+                    + UserHandle.myUserId());
         }
     }
 

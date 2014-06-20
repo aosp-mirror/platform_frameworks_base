@@ -109,7 +109,6 @@ public final class MediaSessionManager {
      * @param notificationListener The enabled notification listener component.
      *            May be null.
      * @return A list of controllers for ongoing sessions
-     * @hide
      */
     public List<MediaController> getActiveSessions(ComponentName notificationListener) {
         return getActiveSessionsForUser(notificationListener, UserHandle.myUserId());
@@ -143,6 +142,24 @@ public final class MediaSessionManager {
             Log.e(TAG, "Failed to get active sessions: ", e);
         }
         return controllers;
+    }
+
+    /**
+     * Add a listener to be notified when the list of active sessions
+     * changes.This requires the
+     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
+     * the calling app. You may also retrieve this list if your app is an
+     * enabled notification listener using the
+     * {@link NotificationListenerService} APIs, in which case you must pass the
+     * {@link ComponentName} of your enabled listener.
+     *
+     * @param sessionListener The listener to add.
+     * @param notificationListener The enabled notification listener component.
+     *            May be null.
+     */
+    public void addActiveSessionsListener(SessionListener sessionListener,
+            ComponentName notificationListener) {
+        addActiveSessionsListener(sessionListener, notificationListener, UserHandle.myUserId());
     }
 
     /**
@@ -236,8 +253,6 @@ public final class MediaSessionManager {
     /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addActiveSessionsListener}.
-     *
-     * @hide
      */
     public static abstract class SessionListener {
         /**

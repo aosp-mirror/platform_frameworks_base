@@ -15829,7 +15829,14 @@ package android.media.session {
   }
 
   public final class MediaSessionManager {
+    method public void addActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener, android.content.ComponentName);
     method public android.media.session.MediaSession createSession(java.lang.String);
+    method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
+  }
+
+  public static abstract class MediaSessionManager.SessionListener {
+    ctor public MediaSessionManager.SessionListener();
+    method public abstract void onActiveSessionsChanged(java.util.List<android.media.session.MediaController>);
   }
 
   public final class MediaSessionToken implements android.os.Parcelable {

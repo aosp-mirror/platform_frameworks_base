@@ -383,6 +383,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             // You may not access another user's content as an enabled listener.
             return false;
         }
+        if (DEBUG) {
+            Log.d(TAG, "Checking if enabled notification listener " + compName);
+        }
         if (compName != null) {
             final String enabledNotifListeners = Settings.Secure.getStringForUser(mContentResolver,
                     Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
