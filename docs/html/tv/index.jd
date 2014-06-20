@@ -204,13 +204,13 @@ page.type=about
             <div class="landing-breakout cols">
 
               <div class="col-8">
-                <a href="{@docRoot}preview/setup-sdk.html" class="landing-button landing-secondary">
+                <a href="{@docRoot}preview/setup-sdk.html" class="landing-button landing-primary">
                   Download the Preview SDK
                 </a>
               </div>
 
               <div class="col-8">
-                <a href="{@docRoot}preview/tv/adt-1/request.html" class="landing-button landing-secondary">
+                <a href="{@docRoot}preview/tv/adt-1/request.html" class="landing-button landing-primary">
                   Request ADT-1 Developer Kit
                 </a>
               </div>

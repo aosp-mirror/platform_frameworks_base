@@ -196,7 +196,7 @@ page.type=about
             </div>
           </div>
           <div class="landing-body">
-            <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-secondary" style="margin-top: 20px;">
+            <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-primary" style="margin-top: 20px;">
               Get Started
             </a>
           </div>
