@@ -17,7 +17,6 @@
 package com.android.internal.telecomm;
 
 import android.telecomm.Subscription;
-import android.content.ComponentName;
 
 /**
  * Interface used to interact with Telecomm. Mostly this is used by TelephonyManager for passing
@@ -41,11 +40,6 @@ interface ITelecommService {
      * @param showDialpad if true, make the dialpad visible initially.
      */
     void showCallScreen(boolean showDialpad);
-
-    /**
-     * Returns the component name of the phone application installed on the system partition.
-     */
-    ComponentName getSystemPhoneApplication();
 
     /**
      * Gets a list of Subscriptions.
