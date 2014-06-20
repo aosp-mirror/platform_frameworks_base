@@ -72,12 +72,22 @@ class ViewPropertyAnimatorRT {
             NameValuesHolder holder = parent.mPendingAnimations.get(i);
             int property = RenderNodeAnimator.mapViewPropertyToRenderProperty(holder.mNameConstant);
 
-            RenderNodeAnimator animator = new RenderNodeAnimator(property, holder.mFromValue + holder.mDeltaValue);
+            final float finalValue = holder.mFromValue + holder.mDeltaValue;
+            RenderNodeAnimator animator = new RenderNodeAnimator(property, finalValue);
             animator.setStartDelay(startDelay);
             animator.setDuration(duration);
             animator.setInterpolator(interpolator);
             animator.setTarget(mView);
             animator.start();
+
+            // Alpha is a special snowflake that has the canonical value stored
+            // in mTransformationInfo instead of in RenderNode, so we need to update
+            // it with the final value here.
+            if (property == RenderNodeAnimator.ALPHA) {
+                // Don't need null check because ViewPropertyAnimator's
+                // ctor calls ensureTransformationInfo()
+                parent.mView.mTransformationInfo.mAlpha = finalValue;
+            }
         }
 
         parent.mPendingAnimations.clear();
@@ -108,25 +118,8 @@ class ViewPropertyAnimatorRT {
         if (parent.hasActions()) {
             return false;
         }
-        if (hasAlphaAnimation(parent)) {
-            // TODO: Alpha does too much weird stuff currently to safely RT-accelerate
-            // see View:getFinalAlpha() and friends, which need to be fixed to
-            // work with RT animators
-            return false;
-        }
         // Here goes nothing...
         return true;
-    }
-
-    private boolean hasAlphaAnimation(ViewPropertyAnimator parent) {
-        int size = parent.mPendingAnimations.size();
-        for (int i = 0; i < size; i++) {
-            NameValuesHolder holder = parent.mPendingAnimations.get(i);
-            if (holder.mNameConstant == ViewPropertyAnimator.ALPHA) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void cancelAnimators(ArrayList<NameValuesHolder> mPendingAnimations) {
