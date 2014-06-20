@@ -380,6 +380,16 @@ public final class NfcAdapter {
         public Uri[] createBeamUris(NfcEvent event);
     }
 
+
+    /**
+     * A callback to be invoked when an application has registered for receiving
+     * tags at the lockscreen.
+     */
+    public interface NfcLockscreenDispatch {
+        public boolean onTagDetected(Tag tag);
+    }
+
+
     /**
      * Helper to check if this device has FEATURE_NFC, but without using
      * a context.
@@ -1415,6 +1425,23 @@ public final class NfcAdapter {
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
+    }
+
+    public boolean registerLockscreenDispatch(final NfcLockscreenDispatch lockscreenDispatch,
+                                           int[] techList) {
+        try {
+            sService.registerLockscreenDispatch(new INfcLockscreenDispatch.Stub() {
+                @Override
+                public boolean onTagDetected(Tag tag) throws RemoteException {
+                    return lockscreenDispatch.onTagDetected(tag);
+                }
+            }, techList);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+
+        return true;
     }
 
     /**
