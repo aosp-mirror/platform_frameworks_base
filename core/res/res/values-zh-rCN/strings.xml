@@ -424,8 +424,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允许应用从系统的各个日志文件中读取信息。这样，应用就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒体解码器进行播放"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允许该应用使用任何已安装的媒体解码器进行解码，以便播放媒体。"</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理受信任的凭据"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载 CA 证书（作为受信任的凭据）。"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理信任的凭据"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载CA证书（作为信任的凭据）。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用组件"</string>
@@ -734,7 +734,7 @@
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"住宅"</item>
-    <item msgid="1359644565647383708">"单位"</item>
+    <item msgid="1359644565647383708">"工作"</item>
     <item msgid="7868549401053615677">"其他"</item>
     <item msgid="3145118944639869809">"自定义"</item>
   </string-array>
@@ -789,7 +789,7 @@
     <string name="postalTypeOther" msgid="2726111966623584341">"其他"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"自定义"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"住宅"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"单位"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"工作"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"其他"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"自定义"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
