@@ -311,7 +311,7 @@ public abstract class LayoutInflater {
         if (mFactory == null) {
             mFactory = mFactory2 = factory;
         } else {
-            mFactory = new FactoryMerger(factory, factory, mFactory, mFactory2);
+            mFactory = mFactory2 = new FactoryMerger(factory, factory, mFactory, mFactory2);
         }
     }
 
@@ -319,7 +319,11 @@ public abstract class LayoutInflater {
      * @hide for use by framework
      */
     public void setPrivateFactory(Factory2 factory) {
-        mPrivateFactory = factory;
+        if (mPrivateFactory == null) {
+            mPrivateFactory = factory;
+        } else {
+            mPrivateFactory = new FactoryMerger(factory, factory, mPrivateFactory, mPrivateFactory);
+        }
     }
 
     /**
