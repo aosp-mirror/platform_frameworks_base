@@ -113,7 +113,9 @@ public class ThreadedRenderer extends HardwareRenderer {
     boolean initialize(Surface surface) throws OutOfResourcesException {
         mInitialized = true;
         updateEnabledState(surface);
-        return nInitialize(mNativeProxy, surface);
+        boolean status = nInitialize(mNativeProxy, surface);
+        surface.allocateBuffers();
+        return status;
     }
 
     @Override

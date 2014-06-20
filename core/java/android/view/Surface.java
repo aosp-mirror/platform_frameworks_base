@@ -51,6 +51,8 @@ public class Surface implements Parcelable {
     private static native long nativeReadFromParcel(long nativeObject, Parcel source);
     private static native void nativeWriteToParcel(long nativeObject, Parcel dest);
 
+    private static native void nativeAllocateBuffers(long nativeObject);
+
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         @Override
@@ -416,6 +418,17 @@ public class Surface implements Parcelable {
     private void checkNotReleasedLocked() {
         if (mNativeObject == 0) {
             throw new IllegalStateException("Surface has already been released.");
+        }
+    }
+
+    /**
+     * Allocate buffers ahead of time to avoid allocation delays during rendering
+     * @hide
+     */
+    public void allocateBuffers() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            nativeAllocateBuffers(mNativeObject);
         }
     }
 
