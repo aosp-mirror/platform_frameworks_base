@@ -6747,6 +6747,8 @@
         <attr name="switchPadding" format="dimension" />
         <!-- Whether to split the track and leave a gap for the thumb drawable. -->
         <attr name="splitTrack" />
+        <!-- Whether to draw on/off text. -->
+        <attr name="showText" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="Pointer">

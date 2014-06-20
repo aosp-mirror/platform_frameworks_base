@@ -90,6 +90,7 @@ public class Switch extends CompoundButton {
     private boolean mSplitTrack;
     private CharSequence mTextOn;
     private CharSequence mTextOff;
+    private boolean mShowText;
 
     private int mTouchMode;
     private int mTouchSlop;
@@ -188,6 +189,7 @@ public class Switch extends CompoundButton {
         mTrackDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_track);
         mTextOn = a.getText(com.android.internal.R.styleable.Switch_textOn);
         mTextOff = a.getText(com.android.internal.R.styleable.Switch_textOff);
+        mShowText = a.getBoolean(com.android.internal.R.styleable.Switch_showText, true);
         mThumbTextPadding = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.Switch_thumbTextPadding, 0);
         mSwitchMinWidth = a.getDimensionPixelSize(
@@ -533,14 +535,37 @@ public class Switch extends CompoundButton {
         requestLayout();
     }
 
+    /**
+     * Sets whether the on/off text should be displayed.
+     *
+     * @param showText {@code true} to display on/off text
+     * @hide
+     */
+    public void setShowText(boolean showText) {
+        if (mShowText != showText) {
+            mShowText = showText;
+            requestLayout();
+        }
+    }
+
+    /**
+     * @return whether the on/off text should be displayed
+     * @hide
+     */
+    public boolean getShowText() {
+        return mShowText;
+    }
+
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mOnLayout == null) {
-            mOnLayout = makeLayout(mTextOn);
-        }
+        if (mShowText) {
+            if (mOnLayout == null) {
+                mOnLayout = makeLayout(mTextOn);
+            }
 
-        if (mOffLayout == null) {
-            mOffLayout = makeLayout(mTextOff);
+            if (mOffLayout == null) {
+                mOffLayout = makeLayout(mTextOff);
+            }
         }
 
         mTrackDrawable.getPadding(mTempRect);
@@ -568,9 +593,10 @@ public class Switch extends CompoundButton {
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         super.onPopulateAccessibilityEvent(event);
-        Layout layout =  isChecked() ? mOnLayout : mOffLayout;
-        if (layout != null && !TextUtils.isEmpty(layout.getText())) {
-            event.getText().add(layout.getText());
+
+        final CharSequence text = isChecked() ? mTextOn : mTextOff;
+        if (text != null) {
+            event.getText().add(text);
         }
     }
 
