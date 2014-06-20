@@ -167,7 +167,7 @@ public class Camera {
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
-    private Object mAutoFocusCallbackLock = new Object();
+    private final Object mAutoFocusCallbackLock = new Object();
 
     private static final int NO_ERROR = 0;
     private static final int EACCESS = -13;
@@ -202,14 +202,14 @@ public class Camera {
 
     /**
      * A constant meaning the normal camera connect/open will be used.
-     * @hide
      */
-    public static final int CAMERA_HAL_API_VERSION_NORMAL_OPEN = -2;
+    private static final int CAMERA_HAL_API_VERSION_NORMAL_CONNECT = -2;
 
     /**
      * Used to indicate HAL version un-specified.
      */
     private static final int CAMERA_HAL_API_VERSION_UNSPECIFIED = -1;
+
     /**
      * Hardware face detection. It does not use much CPU.
      */
@@ -376,18 +376,25 @@ public class Camera {
      *
      * @param cameraId The hardware camera to access, between 0 and
      * {@link #getNumberOfCameras()}-1.
-     * @param halVersion The HAL API version this camera device to be opened as. When
-     * it is {@value #CAMERA_HAL_API_VERSION_NORMAL_OPEN}, the methods will be equivalent
-     * to {@link #open}, but more detailed error information will be returned to managed code.
+     * @param halVersion The HAL API version this camera device to be opened as.
      * @return a new Camera object, connected, locked and ready for use.
+     *
+     * @throws IllegalArgumentException if the {@code halVersion} is invalid
+     *
      * @throws RuntimeException if opening the camera fails (for example, if the
      * camera is in use by another process or device policy manager has disabled
      * the camera).
+     *
      * @see android.app.admin.DevicePolicyManager#getCameraDisabled(android.content.ComponentName)
+     * @see #CAMERA_HAL_API_VERSION_1_0
      *
      * @hide
      */
     public static Camera openLegacy(int cameraId, int halVersion) {
+        if (halVersion < CAMERA_HAL_API_VERSION_1_0) {
+            throw new IllegalArgumentException("Invalid HAL version " + halVersion);
+        }
+
         return new Camera(cameraId, halVersion);
     }
 
@@ -399,7 +406,7 @@ public class Camera {
      * @param halVersion The HAL API version this camera device to be opened as.
      */
     private Camera(int cameraId, int halVersion) {
-        int err = cameraInit(cameraId, halVersion);
+        int err = cameraInitVersion(cameraId, halVersion);
         if (checkInitErrors(err)) {
             switch(err) {
                 case EACCESS:
@@ -428,13 +435,7 @@ public class Camera {
         }
     }
 
-    private int cameraInit(int cameraId, int halVersion) {
-        // This function should be only called by Camera(int cameraId, int halVersion).
-        if (halVersion < CAMERA_HAL_API_VERSION_1_0 &&
-                halVersion != CAMERA_HAL_API_VERSION_NORMAL_OPEN) {
-            throw new IllegalArgumentException("Invalid HAL version " + halVersion);
-        }
-
+    private int cameraInitVersion(int cameraId, int halVersion) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -457,8 +458,31 @@ public class Camera {
         return native_setup(new WeakReference<Camera>(this), cameraId, halVersion, packageName);
     }
 
+    private int cameraInitNormal(int cameraId) {
+        return cameraInitVersion(cameraId, CAMERA_HAL_API_VERSION_NORMAL_CONNECT);
+    }
+
+    /**
+     * Connect to the camera service using #connectLegacy
+     *
+     * <p>
+     * This acts the same as normal except that it will return
+     * the detailed error code if open fails instead of
+     * converting everything into {@code NO_INIT}.</p>
+     *
+     * <p>Intended to use by the camera2 shim only, do <i>not</i> use this for other code.</p>
+     *
+     * @return a detailed errno error code, or {@code NO_ERROR} on success
+     *
+     * @hide
+     */
+    public int cameraInitUnspecified(int cameraId) {
+        return cameraInitVersion(cameraId, CAMERA_HAL_API_VERSION_UNSPECIFIED);
+    }
+
+    /** used by Camera#open, Camera#open(int) */
     Camera(int cameraId) {
-        int err = cameraInit(cameraId);
+        int err = cameraInitNormal(cameraId);
         if (checkInitErrors(err)) {
             switch(err) {
                 case EACCESS:
@@ -472,32 +496,6 @@ public class Camera {
         }
     }
 
-    /**
-     * @hide
-     */
-    public int cameraInit(int cameraId) {
-        mShutterCallback = null;
-        mRawImageCallback = null;
-        mJpegCallback = null;
-        mPreviewCallback = null;
-        mPostviewCallback = null;
-        mUsingPreviewAllocation = false;
-        mZoomListener = null;
-
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-        }
-
-        String packageName = ActivityThread.currentPackageName();
-
-        return native_setup(new WeakReference<Camera>(this), cameraId,
-                CAMERA_HAL_API_VERSION_UNSPECIFIED, packageName);
-    }
 
     /**
      * @hide
@@ -519,6 +517,7 @@ public class Camera {
     Camera() {
     }
 
+    @Override
     protected void finalize() {
         release();
     }
@@ -1056,7 +1055,7 @@ public class Camera {
 
     private class EventHandler extends Handler
     {
-        private Camera mCamera;
+        private final Camera mCamera;
 
         public EventHandler(Camera c, Looper looper) {
             super(looper);
@@ -2337,6 +2336,7 @@ public class Camera {
          * @hide
          * @deprecated
          */
+        @Deprecated
         public void dump() {
             Log.e(TAG, "dump: size=" + mMap.size());
             for (String k : mMap.keySet()) {

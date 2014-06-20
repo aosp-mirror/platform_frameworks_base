@@ -36,6 +36,11 @@
 
 using namespace android;
 
+enum {
+    // Keep up to date with Camera.java
+    CAMERA_HAL_API_VERSION_NORMAL_CONNECT = -2,
+};
+
 struct fields_t {
     jfieldID    context;
     jfieldID    facing;
@@ -475,8 +480,8 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     env->ReleaseStringChars(clientPackageName, rawClientName);
 
     sp<Camera> camera;
-    if (halVersion == ICameraService::CAMERA_HAL_API_VERSION_UNSPECIFIED) {
-        // Default path: hal version is unspecified, do normal camera open.
+    if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
+        // Default path: hal version is don't care, do normal camera connect.
         camera = Camera::connect(cameraId, clientName,
                 Camera::USE_CALLING_UID);
     } else {
