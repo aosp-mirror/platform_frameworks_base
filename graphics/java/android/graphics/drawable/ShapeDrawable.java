@@ -396,6 +396,9 @@ public class ShapeDrawable extends Drawable {
                         " for ShapeDrawable " + this);
             }
         }
+
+        // Update local properties.
+        initializeWithState(mShapeState, r);
     }
 
     @Override
@@ -410,6 +413,9 @@ public class ShapeDrawable extends Drawable {
         final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ShapeDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
+
+        // Update local properties.
+        initializeWithState(state, t.getResources());
     }
 
     private void updateStateFromTypedArray(TypedArray a) {
@@ -431,6 +437,16 @@ public class ShapeDrawable extends Drawable {
                 R.styleable.ShapeDrawable_width, state.mIntrinsicWidth));
         setIntrinsicHeight((int) a.getDimension(
                 R.styleable.ShapeDrawable_height, state.mIntrinsicHeight));
+
+        final int tintMode = a.getInt(R.styleable.ShapeDrawable_tintMode, -1);
+        if (tintMode != -1) {
+            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
+        }
+
+        final ColorStateList tint = a.getColorStateList(R.styleable.ShapeDrawable_tint);
+        if (tint != null) {
+            state.mTint = tint;
+        }
     }
 
     private void updateShape() {
@@ -545,6 +561,10 @@ public class ShapeDrawable extends Drawable {
         }
     }
 
+    /**
+     * The one constructor to rule them all. This is called by all public
+     * constructors to set the state and initialize local properties.
+     */
     private ShapeDrawable(ShapeState state, Resources res, Theme theme) {
         if (theme != null && state.canApplyTheme()) {
             mShapeState = new ShapeState(state);
@@ -553,7 +573,16 @@ public class ShapeDrawable extends Drawable {
             mShapeState = state;
         }
 
-        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, mShapeState.mTintMode);
+        initializeWithState(state, res);
+    }
+
+    /**
+     * Initializes local dynamic properties from state. This should be called
+     * after significant state changes, e.g. from the One True Constructor and
+     * after inflating or applying a theme.
+     */
+    private void initializeWithState(ShapeState state, Resources res) {
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
     /**

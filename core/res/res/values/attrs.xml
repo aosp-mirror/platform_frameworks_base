@@ -4813,6 +4813,32 @@
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
+        <!-- Defines the horizontal tile mode. When the tile mode is enabled, the bitmap is repeated.
+             Gravity is ignored when the tile mode is enabled. Default value is "disabled". -->
+        <attr name="tileModeX">
+            <!-- Do not tile the bitmap. This is the default value. -->
+            <enum name="disabled" value="-1" />
+            <!-- Replicates the edge color. -->
+            <enum name="clamp" value="0" />
+            <!-- Repeats the bitmap in both direction. -->
+            <enum name="repeat" value="1" />
+            <!-- Repeats the shader's image horizontally and vertically, alternating
+                 mirror images so that adjacent images always seam. -->
+            <enum name="mirror" value="2" />
+        </attr>
+        <!-- Defines the vertical tile mode. When the tile mode is enabled, the bitmap is repeated.
+             Gravity is ignored when the tile mode is enabled. Default value is "disabled". -->
+        <attr name="tileModeY">
+            <!-- Do not tile the bitmap. This is the default value. -->
+            <enum name="disabled" value="-1" />
+            <!-- Replicates the edge color. -->
+            <enum name="clamp" value="0" />
+            <!-- Repeats the bitmap in both direction. -->
+            <enum name="repeat" value="1" />
+            <!-- Repeats the shader's image horizontally and vertically, alternating
+                 mirror images so that adjacent images always seam. -->
+            <enum name="mirror" value="2" />
+        </attr>
         <!-- Enables or disables the mipmap hint. See
             {@link android.graphics.Bitmap#setHasMipMap(boolean)} for more information.
             Default value is false. -->
@@ -4971,6 +4997,12 @@
         <attr name="height" />
         <!-- Enables or disables dithering. -->
         <attr name="dither" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
     </declare-styleable>
 
     <!-- ========================== -->

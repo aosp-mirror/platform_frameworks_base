@@ -757,7 +757,18 @@ public class BitmapDrawable extends Drawable {
 
         final int tileMode = a.getInt(R.styleable.BitmapDrawable_tileMode, TILE_MODE_UNDEFINED);
         if (tileMode != TILE_MODE_UNDEFINED) {
-            setTileModeInternal(tileMode);
+            final Shader.TileMode mode = parseTileMode(tileMode);
+            setTileModeXY(mode, mode);
+        }
+
+        final int tileModeX = a.getInt(R.styleable.BitmapDrawable_tileModeX, TILE_MODE_UNDEFINED);
+        if (tileModeX != TILE_MODE_UNDEFINED) {
+            setTileModeX(parseTileMode(tileModeX));
+        }
+
+        final int tileModeY = a.getInt(R.styleable.BitmapDrawable_tileModeY, TILE_MODE_UNDEFINED);
+        if (tileModeY != TILE_MODE_UNDEFINED) {
+            setTileModeY(parseTileMode(tileModeY));
         }
 
         // Update local properties.
@@ -783,20 +794,16 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    private void setTileModeInternal(final int tileMode) {
+    private static Shader.TileMode parseTileMode(int tileMode) {
         switch (tileMode) {
-            case TILE_MODE_DISABLED:
-                setTileModeXY(null, null);
-                break;
             case TILE_MODE_CLAMP:
-                setTileModeXY(Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-                break;
+                return Shader.TileMode.CLAMP;
             case TILE_MODE_REPEAT:
-                setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-                break;
+                return Shader.TileMode.REPEAT;
             case TILE_MODE_MIRROR:
-                setTileModeXY(Shader.TileMode.MIRROR, Shader.TileMode.MIRROR);
-                break;
+                return Shader.TileMode.MIRROR;
+            default:
+                return null;
         }
     }
 
@@ -919,7 +926,9 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
-     * Initializes local dynamic properties from state.
+     * Initializes local dynamic properties from state. This should be called
+     * after significant state changes, e.g. from the One True Constructor and
+     * after inflating or applying a theme.
      */
     private void initializeWithState(BitmapState state, Resources res) {
         if (res != null) {

@@ -1239,6 +1239,8 @@ package android {
     field public static final int thumbTintMode = 16843892; // 0x1010474
     field public static final int thumbnail = 16843429; // 0x10102a5
     field public static final int tileMode = 16843265; // 0x1010201
+    field public static final int tileModeX = 16843897; // 0x1010479
+    field public static final int tileModeY = 16843898; // 0x101047a
     field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
     field public static final int tintMode = 16843797; // 0x1010415

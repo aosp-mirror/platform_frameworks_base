@@ -2210,6 +2210,8 @@
   <public type="attr" name="propertyXName" />
   <public type="attr" name="propertyYName" />
   <public type="attr" name="relinquishTaskIdentity" />
+  <public type="attr" name="tileModeX" />
+  <public type="attr" name="tileModeY" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
