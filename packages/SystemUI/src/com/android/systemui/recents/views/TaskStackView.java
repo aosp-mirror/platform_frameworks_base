@@ -100,6 +100,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Rect mTmpRect2 = new Rect();
     LayoutInflater mInflater;
 
+    Runnable mReturnAllViewsToPoolRunnable = new Runnable() {
+        @Override
+        public void run() {
+            int childCount = getChildCount();
+            for (int i = childCount - 1; i >= 0; i--) {
+                mViewPool.returnViewToPool((TaskView) getChildAt(i));
+            }
+        }
+    };
+
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
         mConfig = RecentsConfiguration.getInstance();
@@ -904,6 +914,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView tv = (TaskView) getChildAt(i);
             tv.startExitToHomeAnimation(ctx);
         }
+
+        // Add a runnable to the post animation ref counter to clear all the views
+        ctx.postAnimationTrigger.addLastDecrementRunnable(mReturnAllViewsToPoolRunnable);
     }
 
     @Override
@@ -936,14 +949,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onStackTaskRemoved(TaskStack stack, Task t) {
         // Remove the view associated with this task, we can't rely on updateTransforms
         // to work here because the task is no longer in the list
-        int childCount = getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            TaskView tv = (TaskView) getChildAt(i);
-            if (tv.getTask() == t) {
-                mViewPool.returnViewToPool(tv);
-                break;
-            }
+        TaskView tv = getChildViewForTask(t);
+        if (tv != null) {
+            mViewPool.returnViewToPool(tv);
         }
+
+        // Notify the callback that we've removed the task and it can clean up after it
+        mCb.onTaskRemoved(t);
 
         // Update the min/max scroll and animate other task views into their new positions
         updateMinMaxScroll(true);
@@ -1193,7 +1205,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Request that this tasks's data be filled
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.loadTaskData(task);
-
         // Find the index where this task should be placed in the children
         int insertIndex = -1;
         int childCount = getChildCount();
@@ -1275,8 +1286,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Task task = tv.getTask();
         // Remove the task from the view
         mStack.removeTask(task);
-        // Notify the callback that we've removed the task and it can clean up after it
-        mCb.onTaskRemoved(task);
     }
 
     /**** View.OnClickListener Implementation ****/

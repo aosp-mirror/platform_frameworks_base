@@ -577,23 +577,33 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onEnterAnimationTriggered() {
         // Fade in the scrims
         if (mConfig.hasStatusBarScrim() && mConfig.shouldAnimateStatusBarScrim()) {
-            mStatusBarScrimView.setVisibility(View.VISIBLE);
             mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
             mStatusBarScrimView.animate()
                     .translationY(0)
                     .setStartDelay(mConfig.taskBarEnterAnimDelay)
                     .setDuration(mConfig.navBarScrimEnterDuration)
                     .setInterpolator(mConfig.quintOutInterpolator)
+                    .withStartAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mStatusBarScrimView.setVisibility(View.VISIBLE);
+                        }
+                    })
                     .start();
         }
         if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
-            mNavBarScrimView.setVisibility(View.VISIBLE);
             mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
             mNavBarScrimView.animate()
                     .translationY(0)
                     .setStartDelay(mConfig.taskBarEnterAnimDelay)
                     .setDuration(mConfig.navBarScrimEnterDuration)
                     .setInterpolator(mConfig.quintOutInterpolator)
+                    .withStartAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNavBarScrimView.setVisibility(View.VISIBLE);
+                        }
+                    })
                     .start();
         }
     }
