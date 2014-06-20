@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
@@ -214,7 +215,7 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    public void addMediaButtonListener(PendingIntent pi,
+    public void addMediaButtonListener(PendingIntent pi, ComponentName mbrComponent,
             Context context) {
         if (pi == null) {
             Log.w(TAG, "Pending intent was null, can't addMediaButtonListener.");
@@ -238,6 +239,7 @@ public class MediaSessionLegacyHelper {
 
         holder.mMediaButtonReceiver = new MediaButtonReceiver(pi, context);
         holder.mSession.addCallback(holder.mMediaButtonReceiver, mHandler);
+        holder.mSession.setMediaButtonReceiver(mbrComponent);
         if (DEBUG) {
             Log.d(TAG, "addMediaButtonListener added " + pi);
         }

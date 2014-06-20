@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
@@ -107,6 +108,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     // TODO define a RouteState class with relevant info
     private int mRouteState;
     private long mFlags;
+    private ComponentName mMediaButtonReceiver;
 
     // TransportPerformer fields
 
@@ -185,6 +187,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public MediaSessionInfo getSessionInfo() {
         return mSessionInfo;
+    }
+
+    public ComponentName getMediaButtonReceiver() {
+        return mMediaButtonReceiver;
     }
 
     /**
@@ -680,6 +686,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
             mFlags = flags;
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
+        }
+
+        @Override
+        public void setMediaButtonReceiver(ComponentName mbr) {
+            mMediaButtonReceiver = mbr;
         }
 
         @Override

@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
@@ -229,6 +230,21 @@ public final class MediaSession {
      */
     public void setLaunchPendingIntent(PendingIntent pi) {
         // TODO
+    }
+
+    /**
+     * Set a media button event receiver component to use to restart playback
+     * after an app has been stopped.
+     *
+     * @param mbr The receiver component to send the media button event to.
+     * @hide
+     */
+    public void setMediaButtonReceiver(ComponentName mbr) {
+        try {
+            mBinder.setMediaButtonReceiver(mbr);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
+        }
     }
 
     /**

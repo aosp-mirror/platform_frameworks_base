@@ -4412,66 +4412,10 @@ public class AudioService extends IAudioService.Stub {
         mMediaFocusControl.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
     }
 
-    public void registerMediaButtonEventReceiverForCalls(ComponentName c) {
-        mMediaFocusControl.registerMediaButtonEventReceiverForCalls(c);
-    }
-
-    public void unregisterMediaButtonEventReceiverForCalls() {
-        mMediaFocusControl.unregisterMediaButtonEventReceiverForCalls();
-    }
-
-    public void registerMediaButtonIntent(PendingIntent pi, ComponentName c, IBinder token) {
-        mMediaFocusControl.registerMediaButtonIntent(pi, c, token);
-    }
-
-    public void unregisterMediaButtonIntent(PendingIntent pi) {
-        mMediaFocusControl.unregisterMediaButtonIntent(pi);
-    }
-
-    public int registerRemoteControlClient(PendingIntent mediaIntent,
-            IRemoteControlClient rcClient, String callingPckg) {
-        return mMediaFocusControl.registerRemoteControlClient(mediaIntent, rcClient, callingPckg);
-    }
-
-    public void unregisterRemoteControlClient(PendingIntent mediaIntent,
-            IRemoteControlClient rcClient) {
-        mMediaFocusControl.unregisterRemoteControlClient(mediaIntent, rcClient);
-    }
-
-    public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
-        mMediaFocusControl.setRemoteControlClientPlaybackPosition(generationId, timeMs);
-    }
-
-    public void updateRemoteControlClientMetadata(int generationId, int key, Rating value) {
-        mMediaFocusControl.updateRemoteControlClientMetadata(generationId, key, value);
-    }
-
-    public void registerRemoteVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
-        mMediaFocusControl.registerRemoteVolumeObserverForRcc(rccId, rvo);
-    }
-
-    @Override
-    public int getRemoteStreamVolume() {
-        return mMediaFocusControl.getRemoteStreamVolume();
-    }
-
-    @Override
-    public int getRemoteStreamMaxVolume() {
-        return mMediaFocusControl.getRemoteStreamMaxVolume();
-    }
-
     @Override
     public void setRemoteStreamVolume(int index) {
         enforceSelfOrSystemUI("set the remote stream volume");
         mMediaFocusControl.setRemoteStreamVolume(index);
-    }
-
-    public void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed) {
-        mMediaFocusControl.setPlaybackStateForRcc(rccId, state, timeMs, speed);
-    }
-
-    public void setPlaybackInfoForRcc(int rccId, int what, int value) {
-        mMediaFocusControl.setPlaybackInfoForRcc(rccId, what, value);
     }
 
     //==========================================================================================

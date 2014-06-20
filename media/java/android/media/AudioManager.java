@@ -2194,48 +2194,8 @@ public class AudioManager {
             Log.e(TAG, "Cannot call registerMediaButtonIntent() with a null parameter");
             return;
         }
-        IAudioService service = getService();
-        try {
-            // pi != null, this is currently still needed to support across
-            // reboot launching of the last app.
-            service.registerMediaButtonIntent(pi, eventReceiver,
-                    eventReceiver == null ? mToken : null);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerMediaButtonIntent"+e);
-        }
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
-        helper.addMediaButtonListener(pi, mContext);
-    }
-
-    /**
-     * @hide
-     * Used internally by telephony package to register an intent receiver for ACTION_MEDIA_BUTTON.
-     * @param eventReceiver the component that will receive the media button key events,
-     *          no-op if eventReceiver is null
-     */
-    public void registerMediaButtonEventReceiverForCalls(ComponentName eventReceiver) {
-        if (eventReceiver == null) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            // eventReceiver != null
-            service.registerMediaButtonEventReceiverForCalls(eventReceiver);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerMediaButtonEventReceiverForCalls", e);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void unregisterMediaButtonEventReceiverForCalls() {
-        IAudioService service = getService();
-        try {
-            service.unregisterMediaButtonEventReceiverForCalls();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiverForCalls", e);
-        }
+        helper.addMediaButtonListener(pi, eventReceiver, mContext);
     }
 
     /**
@@ -2272,12 +2232,6 @@ public class AudioManager {
      * @hide
      */
     public void unregisterMediaButtonIntent(PendingIntent pi) {
-        IAudioService service = getService();
-        try {
-            service.unregisterMediaButtonIntent(pi);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterMediaButtonIntent"+e);
-        }
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(mContext);
         helper.removeMediaButtonListener(pi);
     }
@@ -2439,46 +2393,6 @@ public class AudioManager {
             service.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in remoteControlDisplayWantsPlaybackPositionSync " + e);
-        }
-    }
-
-    /**
-     * @hide
-     * Request the user of a RemoteControlClient to seek to the given playback position.
-     * @param generationId the RemoteControlClient generation counter for which this request is
-     *         issued. Requests for an older generation than current one will be ignored.
-     * @param timeMs the time in ms to seek to, must be positive.
-     */
-    public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
-        if (timeMs < 0) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            service.setRemoteControlClientPlaybackPosition(generationId, timeMs);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRccPlaybackPosition("+ generationId + ", "
-                    + timeMs + ")", e);
-        }
-    }
-
-    /**
-     * @hide
-     * Notify the user of a RemoteControlClient that it should update its metadata with the
-     * new value for the given key.
-     * @param generationId the RemoteControlClient generation counter for which this request is
-     *         issued. Requests for an older generation than current one will be ignored.
-     * @param key the metadata key for which a new value exists
-     * @param value the new metadata value
-     */
-    public void updateRemoteControlClientMetadata(int generationId, int key,
-            Rating value) {
-        IAudioService service = getService();
-        try {
-            service.updateRemoteControlClientMetadata(generationId, key, value);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in updateRemoteControlClientMetadata("+ generationId + ", "
-                    + key +", " + value + ")", e);
         }
     }
 
@@ -2898,12 +2812,9 @@ public class AudioManager {
      * @hide
      */
     public int getRemoteStreamVolume() {
-        try {
-            return getService().getRemoteStreamVolume();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error getting remote stream volume", e);
-            return 0;
-        }
+        // TODO STOPSHIP switch callers to use media sessions instead
+        Log.e(TAG, "Need to implement new Remote Volume!");
+        return 0;
     }
 
     /**
@@ -2911,12 +2822,9 @@ public class AudioManager {
      * @hide
      */
     public int getRemoteStreamMaxVolume() {
-        try {
-            return getService().getRemoteStreamMaxVolume();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error getting remote stream max volume", e);
-            return 0;
-        }
+        // TODO STOPSHIP switch callers to use media sessions instead
+        Log.e(TAG, "Need to implement new Remote Volume!");
+        return 0;
     }
 
     /**
