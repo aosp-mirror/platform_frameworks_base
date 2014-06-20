@@ -76,6 +76,8 @@ interface IBatteryStats {
     void noteWifiRunningChanged(in WorkSource oldWs, in WorkSource newWs);
     void noteWifiStopped(in WorkSource ws);
     void noteWifiState(int wifiState, String accessPoint);
+    void noteWifiSupplicantStateChanged(int supplState, boolean failedAuth);
+    void noteWifiRssiChanged(int newRssi);
     void noteBluetoothOn();
     void noteBluetoothOff();
     void noteBluetoothState(int bluetoothState);

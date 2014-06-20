@@ -24,6 +24,7 @@ import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
+import android.net.wifi.WifiManager;
 import android.os.BadParcelableException;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -88,7 +89,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 106 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 107 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -283,6 +284,13 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mWifiState = -1;
     final StopwatchTimer[] mWifiStateTimer = new StopwatchTimer[NUM_WIFI_STATES];
+
+    int mWifiSupplState = -1;
+    final StopwatchTimer[] mWifiSupplStateTimer = new StopwatchTimer[NUM_WIFI_SUPPL_STATES];
+
+    int mWifiSignalStrengthBin = -1;
+    final StopwatchTimer[] mWifiSignalStrengthsTimer =
+            new StopwatchTimer[NUM_WIFI_SIGNAL_STRENGTH_BINS];
 
     boolean mBluetoothOn;
     StopwatchTimer mBluetoothOnTimer;
@@ -2086,7 +2094,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mHistoryLastWritten.batteryLevel == cur.batteryLevel &&
                     (dataSize >= MAX_MAX_HISTORY_BUFFER
                             || ((mHistoryLastWritten.states^cur.states)
-                                    & HistoryItem.MOST_INTERESTING_STATES) == 0)) {
+                                    & HistoryItem.MOST_INTERESTING_STATES) == 0
+                            || ((mHistoryLastWritten.states2^cur.states2)
+                                    & HistoryItem.MOST_INTERESTING_STATES2) == 0)) {
                 return;
             }
 
@@ -2863,7 +2873,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void stopAllSignalStrengthTimersLocked(int except) {
+    void stopAllPhoneSignalStrengthTimersLocked(int except) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             if (i == except) {
@@ -2959,13 +2969,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (!mPhoneSignalStrengthsTimer[strengthBin].isRunningLocked()) {
                     mPhoneSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
                 }
-                mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_SIGNAL_STRENGTH_MASK)
-                        | (strengthBin << HistoryItem.STATE_SIGNAL_STRENGTH_SHIFT);
+                mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_MASK)
+                        | (strengthBin << HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_SHIFT);
                 if (DEBUG_HISTORY) Slog.v(TAG, "Signal strength " + strengthBin + " to: "
                         + Integer.toHexString(mHistoryCur.states));
                 newHistory = true;
             } else {
-                stopAllSignalStrengthTimersLocked(-1);
+                stopAllPhoneSignalStrengthTimersLocked(-1);
             }
             mPhoneSignalStrengthBin = strengthBin;
         }
@@ -3065,7 +3075,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (!mWifiOn) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states |= HistoryItem.STATE_WIFI_ON_FLAG;
+            mHistoryCur.states2 |= HistoryItem.STATE2_WIFI_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
@@ -3078,7 +3088,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
         if (mWifiOn) {
-            mHistoryCur.states &= ~HistoryItem.STATE_WIFI_ON_FLAG;
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_WIFI_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
@@ -3171,7 +3181,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (!mGlobalWifiRunning) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states |= HistoryItem.STATE_WIFI_RUNNING_FLAG;
+            mHistoryCur.states2 |= HistoryItem.STATE2_WIFI_RUNNING_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI running to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
@@ -3209,7 +3219,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mGlobalWifiRunning) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states &= ~HistoryItem.STATE_WIFI_RUNNING_FLAG;
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_WIFI_RUNNING_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI stopped to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
@@ -3234,6 +3244,64 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mWifiState = wifiState;
             mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtime);
+        }
+    }
+
+    public void noteWifiSupplicantStateChangedLocked(int supplState, boolean failedAuth) {
+        if (DEBUG) Log.i(TAG, "WiFi suppl state -> " + supplState);
+        if (mWifiSupplState != supplState) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            if (mWifiSupplState >= 0) {
+                mWifiSupplStateTimer[mWifiSupplState].stopRunningLocked(elapsedRealtime);
+            }
+            mWifiSupplState = supplState;
+            mWifiSupplStateTimer[supplState].startRunningLocked(elapsedRealtime);
+            mHistoryCur.states2 =
+                    (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SUPPL_STATE_MASK)
+                    | (supplState << HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT);
+            if (DEBUG_HISTORY) Slog.v(TAG, "Wifi suppl state " + supplState + " to: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+    }
+
+    void stopAllWifiSignalStrengthTimersLocked(int except) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        for (int i = 0; i < NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            if (i == except) {
+                continue;
+            }
+            while (mWifiSignalStrengthsTimer[i].isRunningLocked()) {
+                mWifiSignalStrengthsTimer[i].stopRunningLocked(elapsedRealtime);
+            }
+        }
+    }
+
+    public void noteWifiRssiChangedLocked(int newRssi) {
+        int strengthBin = WifiManager.calculateSignalLevel(newRssi, NUM_WIFI_SIGNAL_STRENGTH_BINS);
+        if (DEBUG) Log.i(TAG, "WiFi rssi -> " + newRssi + " bin=" + strengthBin);
+        if (mWifiSignalStrengthBin != strengthBin) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            if (mWifiSignalStrengthBin >= 0) {
+                mWifiSignalStrengthsTimer[mWifiSignalStrengthBin].stopRunningLocked(
+                        elapsedRealtime);
+            }
+            if (strengthBin >= 0) {
+                if (!mWifiSignalStrengthsTimer[strengthBin].isRunningLocked()) {
+                    mWifiSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
+                }
+                mHistoryCur.states2 =
+                        (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
+                        | (strengthBin << HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT);
+                if (DEBUG_HISTORY) Slog.v(TAG, "Wifi signal strength " + strengthBin + " to: "
+                        + Integer.toHexString(mHistoryCur.states2));
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+            } else {
+                stopAllWifiSignalStrengthTimersLocked(-1);
+            }
+            mWifiSignalStrengthBin = strengthBin;
         }
     }
 
@@ -3578,6 +3646,26 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getWifiStateCount(int wifiState, int which) {
         return mWifiStateTimer[wifiState].getCountLocked(which);
+    }
+
+    @Override public long getWifiSupplStateTime(int state,
+            long elapsedRealtimeUs, int which) {
+        return mWifiSupplStateTimer[state].getTotalTimeLocked(
+                elapsedRealtimeUs, which);
+    }
+
+    @Override public int getWifiSupplStateCount(int state, int which) {
+        return mWifiSupplStateTimer[state].getCountLocked(which);
+    }
+
+    @Override public long getWifiSignalStrengthTime(int strengthBin,
+            long elapsedRealtimeUs, int which) {
+        return mWifiSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
+                elapsedRealtimeUs, which);
+    }
+
+    @Override public int getWifiSignalStrengthCount(int strengthBin, int which) {
+        return mWifiSignalStrengthsTimer[strengthBin].getCountLocked(which);
     }
 
     @Override public long getBluetoothOnTime(long elapsedRealtimeUs, int which) {
@@ -5580,6 +5668,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i] = new StopwatchTimer(null, -600-i, null, mOnBatteryTimeBase);
         }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i] = new StopwatchTimer(null, -700-i, null, mOnBatteryTimeBase);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i] = new StopwatchTimer(null, -800-i, null,
+                    mOnBatteryTimeBase);
+        }
         mBluetoothOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i, null, mOnBatteryTimeBase);
@@ -5855,6 +5950,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mGlobalWifiRunningTimer.reset(false);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i].reset(false);
+        }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i].reset(false);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i].reset(false);
         }
         mBluetoothOnTimer.reset(false);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
@@ -7012,6 +7113,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i].readSummaryFromParcelLocked(in);
         }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i].readSummaryFromParcelLocked(in);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
+        }
         mBluetoothOn = false;
         mBluetoothOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
@@ -7263,6 +7370,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
@@ -7536,6 +7649,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiStateTimer[i] = new StopwatchTimer(null, -600-i,
                     null, mOnBatteryTimeBase, in);
         }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i] = new StopwatchTimer(null, -700-i,
+                    null, mOnBatteryTimeBase, in);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i] = new StopwatchTimer(null, -800-i,
+                    null, mOnBatteryTimeBase, in);
+        }
         mBluetoothOn = false;
         mBluetoothOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase, in);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
@@ -7667,6 +7788,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             mWifiStateTimer[i].writeToParcel(out, uSecRealtime);
         }
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            mWifiSupplStateTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            mWifiSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
+        }
         mBluetoothOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
@@ -7768,7 +7895,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
             for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-                pr.println("*** Signal strength #" + i + ":");
+                pr.println("*** Phone signal strength #" + i + ":");
                 mPhoneSignalStrengthsTimer[i].logState(pr, "  ");
             }
             pr.println("*** Signal scanning :");
@@ -7789,6 +7916,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i<NUM_WIFI_STATES; i++) {
                 pr.println("*** Wifi state #" + i + ":");
                 mWifiStateTimer[i].logState(pr, "  ");
+            }
+            for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+                pr.println("*** Wifi suppl state #" + i + ":");
+                mWifiSupplStateTimer[i].logState(pr, "  ");
+            }
+            for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+                pr.println("*** Wifi signal strength #" + i + ":");
+                mWifiSignalStrengthsTimer[i].logState(pr, "  ");
             }
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");

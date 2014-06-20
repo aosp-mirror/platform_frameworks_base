@@ -171,6 +171,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String DATA_CONNECTION_COUNT_DATA = "dcc";
     private static final String WIFI_STATE_TIME_DATA = "wst";
     private static final String WIFI_STATE_COUNT_DATA = "wsc";
+    private static final String WIFI_SUPPL_STATE_TIME_DATA = "wsst";
+    private static final String WIFI_SUPPL_STATE_COUNT_DATA = "wssc";
+    private static final String WIFI_SIGNAL_STRENGTH_TIME_DATA = "wsgt";
+    private static final String WIFI_SIGNAL_STRENGTH_COUNT_DATA = "wsgc";
     private static final String BLUETOOTH_STATE_TIME_DATA = "bst";
     private static final String BLUETOOTH_STATE_COUNT_DATA = "bsc";
     private static final String POWER_USE_SUMMARY_DATA = "pws";
@@ -563,8 +567,8 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_BRIGHTNESS_SHIFT = 0;
         public static final int STATE_BRIGHTNESS_MASK = 0x7;
         // Constants from SIGNAL_STRENGTH_*
-        public static final int STATE_SIGNAL_STRENGTH_SHIFT = 3;
-        public static final int STATE_SIGNAL_STRENGTH_MASK = 0x7 << STATE_SIGNAL_STRENGTH_SHIFT;
+        public static final int STATE_PHONE_SIGNAL_STRENGTH_SHIFT = 3;
+        public static final int STATE_PHONE_SIGNAL_STRENGTH_MASK = 0x7 << STATE_PHONE_SIGNAL_STRENGTH_SHIFT;
         // Constants from ServiceState.STATE_*
         public static final int STATE_PHONE_STATE_SHIFT = 6;
         public static final int STATE_PHONE_STATE_MASK = 0x7 << STATE_PHONE_STATE_SHIFT;
@@ -582,7 +586,6 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_WIFI_SCAN_FLAG = 1<<27;
         public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<26;
         public static final int STATE_MOBILE_RADIO_ACTIVE_FLAG = 1<<25;
-        public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
         // These are on the lower bits used for the command; if they change
         // we need to write another int of data.
         public static final int STATE_SENSOR_ON_FLAG = 1<<23;
@@ -591,17 +594,30 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_SCREEN_ON_FLAG = 1<<20;
         public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<19;
         public static final int STATE_PHONE_IN_CALL_FLAG = 1<<18;
-        public static final int STATE_WIFI_ON_FLAG = 1<<17;
         public static final int STATE_BLUETOOTH_ON_FLAG = 1<<16;
 
         public static final int MOST_INTERESTING_STATES =
             STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG
-            | STATE_GPS_ON_FLAG | STATE_PHONE_IN_CALL_FLAG;
+            | STATE_PHONE_IN_CALL_FLAG | STATE_BLUETOOTH_ON_FLAG;
 
         public int states;
 
-        public static final int STATE2_VIDEO_ON_FLAG = 1<<0;
-        public static final int STATE2_LOW_POWER_FLAG = 1<<1;
+        // Constants from WIFI_SUPPL_STATE_*
+        public static final int STATE2_WIFI_SUPPL_STATE_SHIFT = 0;
+        public static final int STATE2_WIFI_SUPPL_STATE_MASK = 0xf;
+        // Values for NUM_WIFI_SIGNAL_STRENGTH_BINS
+        public static final int STATE2_WIFI_SIGNAL_STRENGTH_SHIFT = 4;
+        public static final int STATE2_WIFI_SIGNAL_STRENGTH_MASK =
+                0x7 << STATE2_WIFI_SIGNAL_STRENGTH_SHIFT;
+
+        public static final int STATE2_LOW_POWER_FLAG = 1<<31;
+        public static final int STATE2_VIDEO_ON_FLAG = 1<<30;
+        public static final int STATE2_WIFI_RUNNING_FLAG = 1<<29;
+        public static final int STATE2_WIFI_ON_FLAG = 1<<28;
+
+        public static final int MOST_INTERESTING_STATES2 =
+            STATE2_LOW_POWER_FLAG | STATE2_WIFI_ON_FLAG;
+
         public int states2;
 
         // The wake lock that was acquired at this point.
@@ -1005,7 +1021,7 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     public static final int NUM_SCREEN_BRIGHTNESS_BINS = 5;
-    
+
     /**
      * Returns the time in microseconds that the screen has been on with
      * the given brightness
@@ -1153,6 +1169,34 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract int getPhoneDataConnectionCount(int dataType, int which);
 
+    public static final int WIFI_SUPPL_STATE_INVALID = 0;
+    public static final int WIFI_SUPPL_STATE_DISCONNECTED = 1;
+    public static final int WIFI_SUPPL_STATE_INTERFACE_DISABLED = 2;
+    public static final int WIFI_SUPPL_STATE_INACTIVE = 3;
+    public static final int WIFI_SUPPL_STATE_SCANNING = 4;
+    public static final int WIFI_SUPPL_STATE_AUTHENTICATING = 5;
+    public static final int WIFI_SUPPL_STATE_ASSOCIATING = 6;
+    public static final int WIFI_SUPPL_STATE_ASSOCIATED = 7;
+    public static final int WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE = 8;
+    public static final int WIFI_SUPPL_STATE_GROUP_HANDSHAKE = 9;
+    public static final int WIFI_SUPPL_STATE_COMPLETED = 10;
+    public static final int WIFI_SUPPL_STATE_DORMANT = 11;
+    public static final int WIFI_SUPPL_STATE_UNINITIALIZED = 12;
+
+    public static final int NUM_WIFI_SUPPL_STATES = WIFI_SUPPL_STATE_UNINITIALIZED+1;
+
+    static final String[] WIFI_SUPPL_STATE_NAMES = {
+        "invalid", "disconn", "disabled", "inactive", "scanning",
+        "authenticating", "associating", "associated", "4-way-handshake",
+        "group-handshake", "completed", "dormant", "uninit"
+    };
+
+    static final String[] WIFI_SUPPL_STATE_SHORT_NAMES = {
+        "inv", "dsc", "dis", "inact", "scan",
+        "auth", "ascing", "asced", "4-way",
+        "group", "compl", "dorm", "uninit"
+    };
+
     public static final BitDescription[] HISTORY_STATE_DESCRIPTIONS
             = new BitDescription[] {
         new BitDescription(HistoryItem.STATE_CPU_RUNNING_FLAG, "running", "r"),
@@ -1163,13 +1207,11 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_WIFI_SCAN_FLAG, "wifi_scan", "Ws"),
         new BitDescription(HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG, "wifi_multicast", "Wm"),
         new BitDescription(HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG, "mobile_radio", "Pr"),
-        new BitDescription(HistoryItem.STATE_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
         new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning", "Psc"),
         new BitDescription(HistoryItem.STATE_AUDIO_ON_FLAG, "audio", "a"),
         new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen", "S"),
         new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged", "BP"),
         new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
-        new BitDescription(HistoryItem.STATE_WIFI_ON_FLAG, "wifi", "W"),
         new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
         new BitDescription(HistoryItem.STATE_DATA_CONNECTION_MASK,
                 HistoryItem.STATE_DATA_CONNECTION_SHIFT, "data_conn", "Pcn",
@@ -1178,11 +1220,10 @@ public abstract class BatteryStats implements Parcelable {
                 HistoryItem.STATE_PHONE_STATE_SHIFT, "phone_state", "Pst",
                 new String[] {"in", "out", "emergency", "off"},
                 new String[] {"in", "out", "em", "off"}),
-        new BitDescription(HistoryItem.STATE_SIGNAL_STRENGTH_MASK,
-                HistoryItem.STATE_SIGNAL_STRENGTH_SHIFT, "signal_strength", "Pss",
-                SignalStrength.SIGNAL_STRENGTH_NAMES, new String[] {
-                    "0", "1", "2", "3", "4"
-        }),
+        new BitDescription(HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_MASK,
+                HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_SHIFT, "phone_signal_strength", "Pss",
+                SignalStrength.SIGNAL_STRENGTH_NAMES,
+                new String[] { "0", "1", "2", "3", "4" }),
         new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
                 HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness", "Sb",
                 SCREEN_BRIGHTNESS_NAMES, SCREEN_BRIGHTNESS_SHORT_NAMES),
@@ -1190,8 +1231,17 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final BitDescription[] HISTORY_STATE2_DESCRIPTIONS
             = new BitDescription[] {
-        new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
         new BitDescription(HistoryItem.STATE2_LOW_POWER_FLAG, "low_power", "lp"),
+        new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
+        new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
+        new BitDescription(HistoryItem.STATE2_WIFI_ON_FLAG, "wifi", "W"),
+        new BitDescription(HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK,
+                HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT, "wifi_signal_strength", "Wss",
+                new String[] { "0", "1", "2", "3", "4" },
+                new String[] { "0", "1", "2", "3", "4" }),
+        new BitDescription(HistoryItem.STATE2_WIFI_SUPPL_STATE_MASK,
+                HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT, "wifi_suppl", "Wsp",
+                WIFI_SUPPL_STATE_NAMES, WIFI_SUPPL_STATE_SHORT_NAMES),
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
@@ -1248,6 +1298,40 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract int getWifiStateCount(int wifiState, int which);
+
+    /**
+     * Returns the time in microseconds that the wifi supplicant has been
+     * in a given state.
+     *
+     * {@hide}
+     */
+    public abstract long getWifiSupplStateTime(int state, long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the number of times that the wifi supplicant has transitioned
+     * to a given state.
+     *
+     * {@hide}
+     */
+    public abstract int getWifiSupplStateCount(int state, int which);
+
+    public static final int NUM_WIFI_SIGNAL_STRENGTH_BINS = 5;
+
+    /**
+     * Returns the time in microseconds that WIFI has been running with
+     * the given signal strength.
+     *
+     * {@hide}
+     */
+    public abstract long getWifiSignalStrengthTime(int strengthBin,
+            long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the number of times WIFI has entered the given signal strength.
+     *
+     * {@hide}
+     */
+    public abstract int getWifiSignalStrengthCount(int strengthBin, int which);
 
     /**
      * Returns the time in microseconds that bluetooth has been on while the device was
@@ -1780,6 +1864,28 @@ public abstract class BatteryStats implements Parcelable {
         }
         dumpLine(pw, 0 /* uid */, category, WIFI_STATE_COUNT_DATA, args);
 
+        // Dump wifi suppl state stats
+        args = new Object[NUM_WIFI_SUPPL_STATES];
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            args[i] = getWifiSupplStateTime(i, rawRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_SUPPL_STATE_TIME_DATA, args);
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            args[i] = getWifiSupplStateCount(i, which);
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_SUPPL_STATE_COUNT_DATA, args);
+
+        // Dump wifi signal strength stats
+        args = new Object[NUM_WIFI_SIGNAL_STRENGTH_BINS];
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            args[i] = getWifiSignalStrengthTime(i, rawRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_SIGNAL_STRENGTH_TIME_DATA, args);
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            args[i] = getWifiSignalStrengthCount(i, which);
+        }
+        dumpLine(pw, 0 /* uid */, category, WIFI_SIGNAL_STRENGTH_COUNT_DATA, args);
+
         // Dump bluetooth state stats
         args = new Object[NUM_BLUETOOTH_STATES];
         for (int i=0; i<NUM_BLUETOOTH_STATES; i++) {
@@ -2254,7 +2360,7 @@ public abstract class BatteryStats implements Parcelable {
                 pw.print(", sent "); pw.print(mobileTxTotalPackets); pw.println(")");
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Signal levels:");
+        sb.append("  Phone signal levels:");
         didOne = false;
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             final long time = getPhoneSignalStrengthTime(i, rawRealtime, which);
@@ -2372,7 +2478,55 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("(");
             sb.append(formatRatioLocked(time, whichBatteryRealtime));
             sb.append(") ");
-            sb.append(getPhoneDataConnectionCount(i, which));
+            sb.append(getWifiStateCount(i, which));
+            sb.append("x");
+        }
+        if (!didOne) sb.append(" (no activity)");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Wifi supplicant states:");
+        didOne = false;
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            final long time = getWifiSupplStateTime(i, rawRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            sb.append("\n    ");
+            didOne = true;
+            sb.append(WIFI_SUPPL_STATE_NAMES[i]);
+            sb.append(" ");
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+            sb.append(getWifiSupplStateCount(i, which));
+            sb.append("x");
+        }
+        if (!didOne) sb.append(" (no activity)");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Wifi signal levels:");
+        didOne = false;
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            final long time = getWifiSignalStrengthTime(i, rawRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            sb.append("\n    ");
+            sb.append(prefix);
+            didOne = true;
+            sb.append("level(");
+            sb.append(i);
+            sb.append(") ");
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+            sb.append(getWifiSignalStrengthCount(i, which));
             sb.append("x");
         }
         if (!didOne) sb.append(" (no activity)");
@@ -3039,6 +3193,16 @@ public abstract class BatteryStats implements Parcelable {
         long lastTime = -1;
         long firstTime = -1;
 
+        void reset() {
+            oldState = oldState2 = 0;
+            oldLevel = -1;
+            oldStatus = -1;
+            oldHealth = -1;
+            oldPlug = -1;
+            oldTemp = -1;
+            oldVolt = -1;
+        }
+
         public void printNextItem(PrintWriter pw, HistoryItem rec, long baseTime, boolean checkin,
                 boolean verbose) {
             if (!checkin) {
@@ -3062,6 +3226,7 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(":");
                 }
                 pw.println("START");
+                reset();
             } else if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
                     || rec.cmd == HistoryItem.CMD_RESET) {
                 if (checkin) {
@@ -3069,6 +3234,7 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 if (rec.cmd == HistoryItem.CMD_RESET) {
                     pw.print("RESET:");
+                    reset();
                 }
                 pw.print("TIME:");
                 if (checkin) {
