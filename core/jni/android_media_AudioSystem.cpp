@@ -129,6 +129,8 @@ android_media_AudioSystem_error_callback(status_t err)
     env->CallStaticVoidMethod(clazz, env->GetStaticMethodID(clazz,
                               "errorCallbackFromNative","(I)V"),
                               check_AudioSystem_Command(err));
+
+    env->DeleteLocalRef(clazz);
 }
 
 static jint
