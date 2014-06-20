@@ -11,13 +11,31 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   <div class="fullscreen-carousel-content">
     <div class="vcenter">
       <div class="wrap clearfix">
-        <div class="resource-widget resource-flow-layout wrap col-16"
+
+        <div class="static resource-flow-layout wrap col-16">
+          <div class="resource resource-card resource-card-18x6">
+            <div class="card-bg" style="background-image: url('/preview/images/l-dev-prev.png');"></div>
+            <div class="card-info">
+              <div class="section"></div>
+              <div class="title">Android L Developer Preview</div>
+              <div class="description ellipsis" style="height: 285px;">
+                <div class="text" style="height: auto;">
+                  <p style="font-size:16px;">Get an early look at the next Android release and
+                    start using new APIs so your apps are ready when the platform officially launches.</p>
+                  <p>
+                  <a href="{@docRoot}preview/index.html" class="landing-button landing-secondary">Learn more</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="resource-widget resource-flow-layout wrap col-16 no-section"
           data-query="collection:index/primary"
           data-resourceStyle="card"
           data-sortOrder="-timestamp"
-          data-numStacks="3"
-          data-maxResults="4"
-          data-cardSizes="18x6,6x2,6x2,6x2">
+          data-maxResults="3"
+          data-cardSizes="6x2,6x2,6x2">
         </div> <!-- end .resource-widget -->
       </div> <!-- end .wrap -->
     </div> <!-- end .vcenter -->
@@ -38,7 +56,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 
 <div class="landing-rest-of-page">
-  <div class="landing-section" style="background-color:#f5f5f5">
+  <div class="landing-section">
     <div class="wrap">
       <div class="landing-section-header">
         <div class="landing-h1">Android, Everywhere You Need It</div>
@@ -55,7 +73,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           <div class="col-3-wide">
             <img src="" alt="">
 
-            <p>Wear</p>
+            <p>Wearable</p>
             <p class="landing-small">
               Provide information on-the-go for your users, whenever they need it.
             </p>
