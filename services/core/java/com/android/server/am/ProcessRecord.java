@@ -573,9 +573,9 @@ final class ProcessRecord {
      */
     public boolean addPackage(String pkg, int versionCode, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
+            ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
+                    versionCode);
             if (baseProcessTracker != null) {
-                ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
-                        versionCode);
                 holder.state = tracker.getProcessStateLocked(
                         pkg, info.uid, versionCode, processName);
                 pkgList.put(pkg, holder);
@@ -583,7 +583,7 @@ final class ProcessRecord {
                     holder.state.makeActive();
                 }
             } else {
-                pkgList.put(pkg, null);
+                pkgList.put(pkg, holder);
             }
             return true;
         }

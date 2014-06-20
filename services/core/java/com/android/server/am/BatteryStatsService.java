@@ -393,6 +393,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteWifiSupplicantStateChanged(int supplState, boolean failedAuth) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiSupplicantStateChangedLocked(supplState, failedAuth);
+        }
+    }
+
+    public void noteWifiRssiChanged(int newRssi) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiRssiChangedLocked(newRssi);
+        }
+    }
+
     public void noteBluetoothOn() {
         enforceCallingPermission();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
