@@ -118,13 +118,13 @@ public class NetworkUtils {
      * is by design so an application doesn't accidentally use sockets it thinks are still bound to
      * a particular {@code Network}.
      */
-    public native static void bindProcessToNetwork(int netId);
+    public native static boolean bindProcessToNetwork(int netId);
 
     /**
      * Clear any process specific {@code Network} binding.  This reverts a call to
      * {@link #bindProcessToNetwork}.
      */
-    public native static void unbindProcessToNetwork();
+    public native static boolean unbindProcessToNetwork();
 
     /**
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
@@ -138,7 +138,7 @@ public class NetworkUtils {
      *
      * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
      */
-    public native static void bindProcessToNetworkForHostResolution(int netId);
+    public native static boolean bindProcessToNetworkForHostResolution(int netId);
 
     /**
      * Clears any process specific {@link Network} binding for host resolution.  This does
@@ -146,13 +146,13 @@ public class NetworkUtils {
      *
      * @deprecated This is strictly for legacy usage to support startUsingNetworkFeature().
      */
-    public native static void unbindProcessToNetworkForHostResolution();
+    public native static boolean unbindProcessToNetworkForHostResolution();
 
     /**
      * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This
      * overrides any binding via {@link #bindProcessToNetwork}.
      */
-    public native static void bindSocketToNetwork(int socketfd, int netId);
+    public native static boolean bindSocketToNetwork(int socketfd, int netId);
 
     /**
      * Convert a IPv4 address from an integer to an InetAddress.

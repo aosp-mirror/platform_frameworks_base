@@ -2372,12 +2372,10 @@ public class ConnectivityManager {
      */
     public static boolean setProcessDefaultNetwork(Network network) {
         if (network == null) {
-            NetworkUtils.unbindProcessToNetwork();
+            return NetworkUtils.unbindProcessToNetwork();
         } else {
-            NetworkUtils.bindProcessToNetwork(network.netId);
+            return NetworkUtils.bindProcessToNetwork(network.netId);
         }
-        // TODO fix return value
-        return true;
     }
 
     /**
@@ -2404,11 +2402,9 @@ public class ConnectivityManager {
      */
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         if (network == null) {
-            NetworkUtils.unbindProcessToNetworkForHostResolution();
+            return NetworkUtils.unbindProcessToNetworkForHostResolution();
         } else {
-            NetworkUtils.bindProcessToNetworkForHostResolution(network.netId);
+            return NetworkUtils.bindProcessToNetworkForHostResolution(network.netId);
         }
-        // TODO hook up the return value.
-        return true;
     }
 }
