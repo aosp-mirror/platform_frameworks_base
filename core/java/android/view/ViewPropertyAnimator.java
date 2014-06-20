@@ -52,7 +52,7 @@ public class ViewPropertyAnimator {
      * The View whose properties are being animated by this class. This is set at
      * construction time.
      */
-    private final View mView;
+    final View mView;
 
     /**
      * The duration of the underlying Animator object. By default, we don't set the duration
