@@ -75,7 +75,6 @@ public:
     static JTvInputHal* createInstance(JNIEnv* env, jobject thiz);
 
     int setSurface(int deviceId, int streamId, const sp<Surface>& surface);
-    void getStreamConfigs(int deviceId, jobjectArray* array);
     const tv_stream_config_t* getStreamConfigs(int deviceId, int* numConfigs);
 
 private:
