@@ -112,6 +112,10 @@ float LUTInterpolator::interpolate(float input) {
     int i1 = (int) ipart;
     int i2 = MathUtils::min(i1 + 1, mSize - 1);
 
+    LOG_ALWAYS_FATAL_IF(i1 < 0 || i2 < 0, "negatives in interpolation!"
+            " i1=%d, i2=%d, input=%f, lutpos=%f, size=%zu, values=%p, ipart=%f, weight=%f",
+            i1, i2, input, lutpos, mSize, mValues, ipart, weight);
+
     float v1 = mValues[i1];
     float v2 = mValues[i2];
 
