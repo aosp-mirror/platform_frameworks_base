@@ -286,13 +286,6 @@ public class VectorDrawable extends Drawable {
     }
 
     @Override
-    public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme)
-            throws XmlPullParserException, IOException {
-        final VPathRenderer p = inflateInternal(res, parser, attrs, theme);
-        setPathRenderer(p);
-    }
-
-    @Override
     public boolean canApplyTheme() {
         return super.canApplyTheme() || mVectorState != null && mVectorState.canApplyTheme();
     }
@@ -335,13 +328,44 @@ public class VectorDrawable extends Drawable {
         return color;
     }
 
-    private VPathRenderer inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
-            Theme theme) throws XmlPullParserException, IOException {
+
+    @Override
+    public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme)
+            throws XmlPullParserException, IOException {
+        final TypedArray a = obtainAttributes(res, theme,  attrs,R.styleable.VectorDrawable);
+        updateStateFromTypedArray(a);
+        a.recycle();
+
+        final VectorDrawableState state = mVectorState;
+        state.mVPathRenderer = inflateInternal(res, parser, attrs, theme);
+
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        state.mVPathRenderer.setColorFilter(mTintFilter);
+    }
+
+    private void updateStateFromTypedArray(TypedArray a) {
+        final VectorDrawableState state = mVectorState;
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        final int tintMode = a.getInt(R.styleable.VectorDrawable_tintMode, -1);
+        if (tintMode != -1) {
+            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
+        }
+
+        final ColorStateList tint = a.getColorStateList(R.styleable.VectorDrawable_tint);
+        if (tint != null) {
+            state.mTint = tint;
+        }
+    }
+
+    private VPathRenderer inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme)
+            throws XmlPullParserException, IOException {
         final VPathRenderer pathRenderer = new VPathRenderer();
 
         boolean noSizeTag = true;
         boolean noViewportTag = true;
-        boolean noGroupTag = true;
         boolean noPathTag = true;
 
         // Use a stack to help to build the group tree.
@@ -377,7 +401,6 @@ public class VectorDrawable extends Drawable {
                     if (newChildGroup.getGroupName() != null) {
                         mVGTargetsMap.put(newChildGroup.getGroupName(), newChildGroup);
                     }
-                    noGroupTag = false;
                 }
             } else if (eventType == XmlPullParser.END_TAG) {
                 final String tagName = parser.getName();
@@ -435,11 +458,8 @@ public class VectorDrawable extends Drawable {
         }
     }
 
-    private void setPathRenderer(VPathRenderer pathRenderer) {
-        mVectorState.mVPathRenderer = pathRenderer;
-    }
-
     private static class VectorDrawableState extends ConstantState {
+        int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
         Rect mPadding;
@@ -448,6 +468,7 @@ public class VectorDrawable extends Drawable {
 
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
+                mThemeAttrs = copy.mThemeAttrs;
                 mChangingConfigurations = copy.mChangingConfigurations;
                 // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
