@@ -68,6 +68,7 @@ import java.util.HashMap;
  */
 public class ConnectivityManager {
     private static final String TAG = "ConnectivityManager";
+    private static final boolean LEGACY_DBG = true; // STOPSHIP
 
     /**
      * A change in network connectivity has occurred. A default connection has either
@@ -823,6 +824,14 @@ public class ConnectivityManager {
 
         NetworkRequest request = null;
         synchronized (sLegacyRequests) {
+            if (LEGACY_DBG) {
+                Log.d(TAG, "Looking for legacyRequest for netCap with hash: " + netCap + " (" +
+                        netCap.hashCode() + ")");
+                Log.d(TAG, "sLegacyRequests has:");
+                for (NetworkCapabilities nc : sLegacyRequests.keySet()) {
+                    Log.d(TAG, "  " + nc + " (" + nc.hashCode() + ")");
+                }
+            }
             LegacyRequest l = sLegacyRequests.get(netCap);
             if (l != null) {
                 Log.d(TAG, "renewing startUsingNetworkFeature request " + l.networkRequest);
@@ -837,7 +846,7 @@ public class ConnectivityManager {
             request = requestNetworkForFeatureLocked(netCap);
         }
         if (request != null) {
-            Log.d(TAG, "starting startUsingNeworkFeature for request " + request);
+            Log.d(TAG, "starting startUsingNetworkFeature for request " + request);
             return PhoneConstants.APN_REQUEST_STARTED;
         } else {
             Log.d(TAG, " request Failed");
