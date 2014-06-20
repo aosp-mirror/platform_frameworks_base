@@ -140,12 +140,12 @@ public class GradientDrawable extends Drawable {
     private final RectF mRect = new RectF();
 
     private Paint mLayerPaint;    // internal, used if we use saveLayer()
-    private boolean mRectIsDirty;   // internal state
+    private boolean mGradientIsDirty;   // internal state
     private boolean mMutated;
     private Path mRingPath;
     private boolean mPathIsDirty = true;
 
-    /** Current gradient radius, valid when {@link #mRectIsDirty} is false. */
+    /** Current gradient radius, valid when {@link #mGradientIsDirty} is false. */
     private float mGradientRadius;
 
     /**
@@ -383,7 +383,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setGradientType(int gradient) {
         mGradientState.setGradientType(gradient);
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -402,7 +402,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setGradientCenter(float x, float y) {
         mGradientState.setGradientCenter(x, y);
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -420,7 +420,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setGradientRadius(float gradientRadius) {
         mGradientState.setGradientRadius(gradientRadius, TypedValue.COMPLEX_UNIT_PX);
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -454,7 +454,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setUseLevel(boolean useLevel) {
         mGradientState.mUseLevel = useLevel;
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -482,7 +482,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setOrientation(Orientation orientation) {
         mGradientState.mOrientation = orientation;
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -500,7 +500,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setColors(int[] colors) {
         mGradientState.setColors(colors);
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
@@ -637,10 +637,11 @@ public class GradientDrawable extends Drawable {
 
     private void buildPathIfDirty() {
         final GradientState st = mGradientState;
-        if (mPathIsDirty || mRectIsDirty) {
+        if (mPathIsDirty) {
+            ensureValidRect();
             mPath.reset();
             mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
-            mPathIsDirty = mRectIsDirty = false;
+            mPathIsDirty = false;
         }
     }
 
@@ -828,27 +829,27 @@ public class GradientDrawable extends Drawable {
         super.onBoundsChange(r);
         mRingPath = null;
         mPathIsDirty = true;
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
     }
 
     @Override
     protected boolean onLevelChange(int level) {
         super.onLevelChange(level);
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         mPathIsDirty = true;
         invalidateSelf();
         return true;
     }
 
     /**
-     * This checks mRectIsDirty, and if it is true, recomputes both our drawing
+     * This checks mGradientIsDirty, and if it is true, recomputes both our drawing
      * rectangle (mRect) and the gradient itself, since it depends on our
      * rectangle too.
      * @return true if the resulting rectangle is not empty, false otherwise
      */
     private boolean ensureValidRect() {
-        if (mRectIsDirty) {
-            mRectIsDirty = false;
+        if (mGradientIsDirty) {
+            mGradientIsDirty = false;
 
             Rect bounds = getBounds();
             float inset = 0;
@@ -1674,7 +1675,7 @@ public class GradientDrawable extends Drawable {
 
         initializeWithState(state);
 
-        mRectIsDirty = true;
+        mGradientIsDirty = true;
         mMutated = false;
     }
 
