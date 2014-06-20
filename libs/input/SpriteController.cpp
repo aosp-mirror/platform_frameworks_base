@@ -206,9 +206,8 @@ void SpriteController::doUpdateSprites() {
             } else {
                 SkBitmap surfaceBitmap;
                 ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-                surfaceBitmap.setConfig(SkBitmap::kARGB_8888_Config,
-                        outBuffer.width, outBuffer.height, bpr);
-                surfaceBitmap.setPixels(outBuffer.bits);
+                surfaceBitmap.installPixels(SkImageInfo::MakeN32Premul(outBuffer.width, outBuffer.height),
+                                            outBuffer.bits, bpr);
 
                 SkCanvas surfaceCanvas(surfaceBitmap);
 

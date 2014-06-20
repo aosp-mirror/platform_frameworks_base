@@ -169,15 +169,10 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     return true;
 }
 
-void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkBitmap::Config pref,
+void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkColorType pref,
         int width, int height) {
-    bm->setConfig(getColorSpaceConfig(pref), width, height, 0, kOpaque_SkAlphaType);
-}
-
-SkBitmap::Config OmxJpegImageDecoder::getColorSpaceConfig(
-        SkBitmap::Config pref) {
-
-    // Set the color space to ARGB_8888 for now
+    // Set the color space to ARGB_8888 for now (ignoring pref)
     // because of limitation in hardware support.
-    return SkBitmap::kARGB_8888_Config;
+    bm->setInfo(SkImageInfo::MakeN32(width, height, kOpaque_SkAlphaType);
 }
+

@@ -333,8 +333,7 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
 void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
         uint32_t width, uint32_t height) {
     SkBitmap rgbaBitmap;
-    rgbaBitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height, 0, bitmap->alphaType());
-    rgbaBitmap.allocPixels();
+    rgbaBitmap.allocPixels(SkImageInfo::MakeN32(width, height, bitmap->alphaType()));
     rgbaBitmap.eraseColor(0);
 
     SkCanvas canvas(rgbaBitmap);

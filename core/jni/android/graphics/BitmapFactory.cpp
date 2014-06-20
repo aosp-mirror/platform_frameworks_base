@@ -386,7 +386,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
-        outputBitmap->setConfig(SkImageInfo::Make(scaledWidth, scaledHeight,
+        outputBitmap->setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
                 colorType, decodingBitmap.alphaType()));
         if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");

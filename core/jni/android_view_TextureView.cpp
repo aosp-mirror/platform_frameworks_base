@@ -73,17 +73,28 @@ static struct {
 // Native layer
 // ----------------------------------------------------------------------------
 
-static inline SkBitmap::Config convertPixelFormat(int32_t format) {
-    switch (format) {
+// FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
+static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
+    SkImageInfo info;
+    info.fWidth = buffer.width;
+    info.fHeight = buffer.height;
+    switch (buffer.format) {
         case WINDOW_FORMAT_RGBA_8888:
-            return SkBitmap::kARGB_8888_Config;
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kPremul_SkAlphaType;
+            break;
         case WINDOW_FORMAT_RGBX_8888:
-            return SkBitmap::kARGB_8888_Config;
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
         case WINDOW_FORMAT_RGB_565:
-            return SkBitmap::kRGB_565_Config;
+            info.fColorType = kRGB_565_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
         default:
-            return SkBitmap::kNo_Config;
+            info.fColorType = kUnknown_SkColorType;
+            info.fAlphaType = kIgnore_SkAlphaType;
+            break;
     }
+    return info;
 }
 
 /**
@@ -148,11 +159,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
     ssize_t bytesCount = buffer.stride * bytesPerPixel(buffer.format);
 
     SkBitmap bitmap;
-    bitmap.setConfig(convertPixelFormat(buffer.format), buffer.width, buffer.height, bytesCount);
-
-    if (buffer.format == WINDOW_FORMAT_RGBX_8888) {
-        bitmap.setAlphaType(kOpaque_SkAlphaType);
-    }
+    bitmap.setInfo(convertPixelFormat(buffer), bytesCount);
 
     if (buffer.width > 0 && buffer.height > 0) {
         bitmap.setPixels(buffer.bits);

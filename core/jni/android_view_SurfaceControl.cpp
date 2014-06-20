@@ -175,7 +175,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
     SkBitmap* bitmap = new SkBitmap();
-    bitmap->setConfig(screenshotInfo, (size_t)rowBytes);
+    bitmap->setInfo(screenshotInfo, (size_t)rowBytes);
     if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
         // takes ownership of ScreenshotClient
         SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
