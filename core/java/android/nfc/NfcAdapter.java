@@ -1428,16 +1428,19 @@ public final class NfcAdapter {
     }
 
     public boolean registerLockscreenDispatch(final NfcLockscreenDispatch lockscreenDispatch,
-                                           int[] techList) {
+                                           String[] techList) {
         try {
             sService.registerLockscreenDispatch(new INfcLockscreenDispatch.Stub() {
                 @Override
                 public boolean onTagDetected(Tag tag) throws RemoteException {
                     return lockscreenDispatch.onTagDetected(tag);
                 }
-            }, techList);
+            }, Tag.techListFromStrings(techList));
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            return false;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register LockscreenDispatch", e);
             return false;
         }
 
