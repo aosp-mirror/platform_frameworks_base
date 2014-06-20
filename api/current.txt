@@ -23460,6 +23460,7 @@ package android.provider {
   protected static abstract interface ContactsContract.ContactOptionsColumns {
     field public static final java.lang.String CUSTOM_RINGTONE = "custom_ringtone";
     field public static final java.lang.String LAST_TIME_CONTACTED = "last_time_contacted";
+    field public static final java.lang.String PINNED = "pinned";
     field public static final java.lang.String SEND_TO_VOICEMAIL = "send_to_voicemail";
     field public static final java.lang.String STARRED = "starred";
     field public static final java.lang.String TIMES_CONTACTED = "times_contacted";
@@ -23735,6 +23736,13 @@ package android.provider {
     field public static final int KOREAN = 5; // 0x5
     field public static final int PINYIN = 3; // 0x3
     field public static final int UNDEFINED = 0; // 0x0
+  }
+
+  public static final class ContactsContract.PinnedPositions {
+    ctor public ContactsContract.PinnedPositions();
+    field public static final int DEMOTED = -1; // 0xffffffff
+    field public static final java.lang.String UNDEMOTE_METHOD = "undemote";
+    field public static final int UNPINNED = 2147483647; // 0x7fffffff
   }
 
   public static final class ContactsContract.Preferences {
