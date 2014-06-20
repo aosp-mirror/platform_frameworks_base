@@ -2145,9 +2145,23 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_LOCK_TASK_BY_CURRENT: {
+            data.enforceInterface(IActivityManager.descriptor);
+            startLockTaskModeOnCurrent();
+            reply.writeNoException();
+            return true;
+        }
+
         case STOP_LOCK_TASK_MODE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             stopLockTaskMode();
+            reply.writeNoException();
+            return true;
+        }
+
+        case STOP_LOCK_TASK_BY_CURRENT: {
+            data.enforceInterface(IActivityManager.descriptor);
+            stopLockTaskModeOnCurrent();
             reply.writeNoException();
             return true;
         }
@@ -4947,11 +4961,33 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
+    public void startLockTaskModeOnCurrent() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(START_LOCK_TASK_BY_CURRENT, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
     public void stopLockTaskMode() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(STOP_LOCK_TASK_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void stopLockTaskModeOnCurrent() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(STOP_LOCK_TASK_BY_CURRENT, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

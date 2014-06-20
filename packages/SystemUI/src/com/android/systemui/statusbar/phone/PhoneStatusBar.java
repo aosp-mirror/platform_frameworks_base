@@ -35,6 +35,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -64,6 +65,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.provider.Settings.SettingNotFoundException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -902,6 +904,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
+    private View.OnLongClickListener mLockToAppClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            toggleLockedApp();
+            return true;
+        }
+    };
+
     private int mShowSearchHoldoff = 0;
     private Runnable mShowSearchPanel = new Runnable() {
         public void run() {
@@ -945,6 +955,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
+        mNavigationBarView.getRecentsButton().setLongClickable(true);
+        mNavigationBarView.getRecentsButton().setOnLongClickListener(mLockToAppClickListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
         updateSearchPanel();
     }
@@ -3186,6 +3198,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurnedOn() {
         mStackScroller.setAnimationsEnabled(true);
+    }
+
+    public void toggleLockedApp() {
+        Log.d(TAG, "Trying to toggle lock-to-app");
+        try {
+            IActivityManager activityManager = ActivityManagerNative.getDefault();
+            if (activityManager.isInLockTaskMode()) {
+                activityManager.stopLockTaskModeOnCurrent();
+            } else {
+                try {
+                    boolean lockToAppEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.LOCK_TO_APP_ENABLED) != 0;
+                    if (lockToAppEnabled) {
+                        activityManager.startLockTaskModeOnCurrent();
+                    }
+                } catch (SettingNotFoundException e) {
+                    // No setting, not enabled.
+                }
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Unable to toggle Lock-to-app", e);
+        }
     }
 
     private final Runnable mUserActivity = new Runnable() {

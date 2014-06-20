@@ -79,6 +79,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
@@ -141,6 +143,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 12;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
+
+    private static final String LOCK_TASK_TAG = "Lock-to-App";
 
     /** Status Bar Service **/
     private IBinder mToken = new Binder();
@@ -255,6 +259,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** If non-null then the task specified remains in front and no other tasks may be started
      * until the task exits or #stopLockTaskMode() is called. */
     TaskRecord mLockTaskModeTask;
+    /**
+     * Notifies the user when entering/exiting lock-task.
+     */
+    private LockTaskNotify mLockTaskNotify;
 
     public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
@@ -3005,7 +3013,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return list;
     }
 
-    void setLockTaskModeLocked(TaskRecord task) {
+    void setLockTaskModeLocked(TaskRecord task, boolean showHomeRecents) {
         if (task == null) {
             // Take out of lock task mode if necessary
             if (mLockTaskModeTask != null) {
@@ -3029,6 +3037,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         lockTaskMsg.obj = mLockTaskModeTask.intent.getComponent().getPackageName();
         lockTaskMsg.arg1 = mLockTaskModeTask.userId;
         lockTaskMsg.what = LOCK_TASK_START_MSG;
+        lockTaskMsg.arg2 = showHomeRecents ? 1 : 0;
         mHandler.sendMessage(lockTaskMsg);
     }
 
@@ -3131,15 +3140,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 case LOCK_TASK_START_MSG: {
                     // When lock task starts, we disable the status bars.
                     try {
-                        if (getStatusBarService() != null) {
-                            getStatusBarService().disable
-                                (StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK,
-                                mToken, mService.mContext.getPackageName());
+                        if (mLockTaskNotify == null) {
+                            mLockTaskNotify = new LockTaskNotify(mService.mContext);
                         }
+                        mLockTaskNotify.show(true);
+                        if (getStatusBarService() != null) {
+                            int flags =
+                                    StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK;
+                            if (msg.arg2 != 0) {
+                                flags ^= StatusBarManager.DISABLE_HOME
+                                        | StatusBarManager.DISABLE_RECENT;
+                            }
+                            getStatusBarService().disable(flags, mToken,
+                                    mService.mContext.getPackageName());
+                        }
+                        mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
                         if (getDevicePolicyManager() != null) {
                             getDevicePolicyManager().notifyLockTaskModeChanged(true,
-                                    (String)msg.obj,
-                                    msg.arg1);
+                                    (String)msg.obj, msg.arg1);
                         }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
@@ -3148,14 +3166,28 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 case LOCK_TASK_END_MSG: {
                     // When lock task ends, we enable the status bars.
                     try {
-                       if (getStatusBarService() != null) {
-                           getStatusBarService().disable
-                               (StatusBarManager.DISABLE_NONE,
-                               mToken, mService.mContext.getPackageName());
-                       }
+                        if (getStatusBarService() != null) {
+                            getStatusBarService().disable(StatusBarManager.DISABLE_NONE, mToken,
+                                    mService.mContext.getPackageName());
+                        }
+                        mWindowManager.reenableKeyguard(mToken);
                         if (getDevicePolicyManager() != null) {
                             getDevicePolicyManager().notifyLockTaskModeChanged(false, null,
                                     msg.arg1);
+                        }
+                        if (mLockTaskNotify == null) {
+                            mLockTaskNotify = new LockTaskNotify(mService.mContext);
+                        }
+                        mLockTaskNotify.show(false);
+                        try {
+                            boolean shouldLockKeyguard = Settings.System.getInt(
+                                    mService.mContext.getContentResolver(),
+                                    Settings.System.LOCK_TO_APP_EXIT_LOCKED) != 0;
+                            if (shouldLockKeyguard) {
+                                mWindowManager.lockNow(null);
+                            }
+                        } catch (SettingNotFoundException e) {
+                            // No setting, don't lock.
                         }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);

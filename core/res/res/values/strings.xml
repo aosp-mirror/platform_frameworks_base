@@ -4746,4 +4746,17 @@
     <!-- DO NOT TRANSLATE -->
     <string name="day_of_week_label_typeface">sans-serif</string>
 
+    <!-- Lock-to-app dialog title. -->
+    <string name="lock_to_app_title">Use lock-to-app?</string>
+    <!-- Lock-to-app dialog description. The $ is not actually shown or translated, it is a marker of where the recents icon shows up. -->
+    <string name="lock_to_app_description">Lock-to-app locks the display in a single app.\n\nTo exit press and hold the recent apps button  $</string>
+    <!-- Lock-to-app negative response. -->
+    <string name="lock_to_app_negative">NO</string>
+    <!-- Lock-to-app positive response. -->
+    <string name="lock_to_app_positive">START</string>
+    <!-- Starting lock-to-app indication. -->
+    <string name="lock_to_app_start">Start Lock-to-app</string>
+    <!-- Exting lock-to-app indication. -->
+    <string name="lock_to_app_exit">Exit Lock-to-app</string>
+
 </resources>
