@@ -7942,21 +7942,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             ProviderInfo cpi, ProcessRecord r, int userId, boolean checkUser) {
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
         final int callingUid = (r != null) ? r.uid : Binder.getCallingUid();
-        final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
-        // Looking for cross-user grants before to enforce the typical cross-users permissions
-        if (userId != UserHandle.getUserId(callingUid)) {
-            if (perms != null) {
-                for (GrantUri grantUri : perms.keySet()) {
-                    if (grantUri.sourceUserId == userId) {
-                        String authority = grantUri.uri.getAuthority();
-                        if (authority.equals(cpi.authority)) {
-                            return null;
-                        }
-                    }
-                }
-            }
-        }
+        boolean checkedGrants = false;
         if (checkUser) {
+            // Looking for cross-user grants before enforcing the typical cross-users permissions
+            if (UserHandle.getUserId(callingUid) != userId) {
+                if (checkAuthorityGrants(callingUid, cpi, userId, checkUser)) {
+                    return null;
+                }
+                checkedGrants = true;
+            }
             userId = handleIncomingUser(callingPid, callingUid, userId,
                     false, true, "checkContentProviderPermissionLocked " + cpi.authority, null);
         }
@@ -7977,25 +7971,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (i > 0) {
                 i--;
                 PathPermission pp = pps[i];
-                if (checkComponentPermission(pp.getReadPermission(), callingPid, callingUid,
+                String pprperm = pp.getReadPermission();
+                if (pprperm != null && checkComponentPermission(pprperm, callingPid, callingUid,
                         cpi.applicationInfo.uid, cpi.exported)
                         == PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
-                if (checkComponentPermission(pp.getWritePermission(), callingPid, callingUid,
+                String ppwperm = pp.getWritePermission();
+                if (ppwperm != null && checkComponentPermission(ppwperm, callingPid, callingUid,
                         cpi.applicationInfo.uid, cpi.exported)
                         == PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
             }
         }
-
-        if (perms != null) {
-            for (GrantUri grantUri : perms.keySet()) {
-                if (grantUri.uri.getAuthority().equals(cpi.authority)) {
-                    return null;
-                }
-            }
+        if (!checkedGrants && checkAuthorityGrants(callingUid, cpi, userId, checkUser)) {
+            return null;
         }
 
         String msg;
@@ -8012,6 +8003,40 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         Slog.w(TAG, msg);
         return msg;
+    }
+
+    /**
+     * Returns if the ContentProvider has granted a uri to callingUid
+     */
+    boolean checkAuthorityGrants(int callingUid, ProviderInfo cpi, int userId, boolean checkUser) {
+        final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
+        if (perms != null) {
+            for (GrantUri grantUri : perms.keySet()) {
+                if (grantUri.sourceUserId == userId || !checkUser) {
+                    if (matchesProvider(grantUri.uri, cpi)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the uri authority is one of the authorities specified in the provider.
+     */
+    boolean matchesProvider(Uri uri, ProviderInfo cpi) {
+        String uriAuth = uri.getAuthority();
+        String cpiAuth = cpi.authority;
+        if (cpiAuth.indexOf(';') == -1) {
+            return cpiAuth.equals(uriAuth);
+        }
+        String[] cpiAuths = cpiAuth.split(";");
+        int length = cpiAuths.length;
+        for (int i = 0; i < length; i++) {
+            if (cpiAuths[i].equals(uriAuth)) return true;
+        }
+        return false;
     }
 
     ContentProviderConnection incProviderCountLocked(ProcessRecord r,
