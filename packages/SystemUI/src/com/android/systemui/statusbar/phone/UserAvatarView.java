@@ -90,8 +90,12 @@ public class UserAvatarView extends View {
     public void setBitmap(Bitmap bitmap) {
         setDrawable(null);
         mBitmap = bitmap;
-        mBitmapPaint.setShader(new BitmapShader(
-                bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        if (mBitmap != null) {
+            mBitmapPaint.setShader(new BitmapShader(
+                    bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        } else {
+            mBitmapPaint.setShader(null);
+        }
         configureBounds();
         invalidate();
     }
