@@ -323,8 +323,8 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
             info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
         }
         for (size_t i = 0; i < subtree->children().size(); i++) {
-            DrawDisplayListOp* op = subtree->children()[i];
-            RenderNode* childNode = op->mDisplayList;
+            DrawRenderNodeOp* op = subtree->children()[i];
+            RenderNode* childNode = op->mRenderNode;
             info.damageAccumulator->pushTransform(&op->mTransformFromParent);
             childNode->prepareTreeImpl(info);
             info.damageAccumulator->popTransform();
@@ -455,16 +455,16 @@ void RenderNode::computeOrdering() {
     // transform properties are applied correctly to top level children
     if (mDisplayListData == NULL) return;
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
-        DrawDisplayListOp* childOp = mDisplayListData->children()[i];
-        childOp->mDisplayList->computeOrderingImpl(childOp,
+        DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
+        childOp->mRenderNode->computeOrderingImpl(childOp,
                 properties().getOutline().getPath(), &mProjectedNodes, &mat4::identity());
     }
 }
 
 void RenderNode::computeOrderingImpl(
-        DrawDisplayListOp* opState,
+        DrawRenderNodeOp* opState,
         const SkPath* outlineOfProjectionSurface,
-        Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
+        Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
     if (mDisplayListData == NULL || mDisplayListData->isEmpty()) return;
@@ -488,11 +488,11 @@ void RenderNode::computeOrderingImpl(
         const bool isProjectionReceiver = mDisplayListData->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
         for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
-            DrawDisplayListOp* childOp = mDisplayListData->children()[i];
-            RenderNode* child = childOp->mDisplayList;
+            DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
+            RenderNode* child = childOp->mRenderNode;
 
             const SkPath* projectionOutline = NULL;
-            Vector<DrawDisplayListOp*>* projectionChildren = NULL;
+            Vector<DrawRenderNodeOp*>* projectionChildren = NULL;
             const mat4* projectionTransform = NULL;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
                 // if receiving projections, collect projecting descendent
@@ -571,16 +571,16 @@ void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
     issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
 
-void RenderNode::buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes) {
+void RenderNode::buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
     if (mDisplayListData == NULL || mDisplayListData->children().size() == 0) return;
 
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
-        DrawDisplayListOp* childOp = mDisplayListData->children()[i];
-        RenderNode* child = childOp->mDisplayList;
+        DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
+        RenderNode* child = childOp->mRenderNode;
         float childZ = child->properties().getZ();
 
         if (!MathUtils::isZero(childZ)) {
-            zTranslatedNodes.add(ZDrawDisplayListOpPair(childZ, childOp));
+            zTranslatedNodes.add(ZDrawRenderNodeOpPair(childZ, childOp));
             childOp->mSkipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
             // regular, in order drawing DisplayList
@@ -627,7 +627,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
 template <class T>
 int RenderNode::issueOperationsOfNegZChildren(
-        const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+        const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
         OpenGLRenderer& renderer, T& handler) {
     if (zTranslatedNodes.isEmpty()) return -1;
 
@@ -643,7 +643,7 @@ int RenderNode::issueOperationsOfNegZChildren(
 
 template <class T>
 void RenderNode::issueOperationsOfPosZChildren(int shadowRestoreTo,
-        const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+        const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
         OpenGLRenderer& renderer, T& handler) {
     if (zTranslatedNodes.isEmpty()) return;
 
@@ -658,7 +658,7 @@ void RenderNode::issueOperationsOfPosZChildren(int shadowRestoreTo,
 #define SHADOW_DELTA 0.1f
 
 template <class T>
-void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
         ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
@@ -693,8 +693,8 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair
     float lastCasterZ = 0.0f;
     while (shadowIndex < endIndex || drawIndex < endIndex) {
         if (shadowIndex < endIndex) {
-            DrawDisplayListOp* casterOp = zTranslatedNodes[shadowIndex].value;
-            RenderNode* caster = casterOp->mDisplayList;
+            DrawRenderNodeOp* casterOp = zTranslatedNodes[shadowIndex].value;
+            RenderNode* caster = casterOp->mRenderNode;
             const float casterZ = zTranslatedNodes[shadowIndex].key;
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
@@ -711,8 +711,8 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair
         // since it modifies the renderer's matrix
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
 
-        DrawDisplayListOp* childOp = zTranslatedNodes[drawIndex].value;
-        RenderNode* child = childOp->mDisplayList;
+        DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
+        RenderNode* child = childOp->mRenderNode;
 
         renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
@@ -761,7 +761,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
 
     // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
-        DrawDisplayListOp* childOp = mProjectedNodes[i];
+        DrawRenderNodeOp* childOp = mProjectedNodes[i];
 
         // matrix save, concat, and restore can be done safely without allocating operations
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
@@ -833,7 +833,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
         } else {
-            Vector<ZDrawDisplayListOpPair> zTranslatedNodes;
+            Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
             buildZSortedChildList(zTranslatedNodes);
 
             // for 3d root, draw children with negative z values

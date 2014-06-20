@@ -469,7 +469,7 @@ void CanvasContext::notifyFramePending() {
 
 void CanvasContext::draw() {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
-            "drawDisplayList called on a context with no canvas or surface!");
+            "drawRenderNode called on a context with no canvas or surface!");
 
     profiler().markPlaybackStart();
 
@@ -496,7 +496,7 @@ void CanvasContext::draw() {
     }
 
     Rect outBounds;
-    status |= mCanvas->drawDisplayList(mRootRenderNode.get(), outBounds);
+    status |= mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);
 
     profiler().draw(mCanvas);
 

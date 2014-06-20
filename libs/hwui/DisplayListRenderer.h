@@ -148,8 +148,7 @@ public:
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
     virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawDisplayList(RenderNode* displayList, Rect& dirty,
-            int32_t replayFlags);
+    virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
 
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);

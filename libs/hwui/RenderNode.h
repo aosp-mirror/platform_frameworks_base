@@ -67,7 +67,7 @@ class ClipRectOp;
 class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
-class DrawDisplayListOp;
+class DrawRenderNodeOp;
 
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
@@ -195,9 +195,9 @@ protected:
     virtual void damageSelf(TreeInfo& info);
 
 private:
-    typedef key_value_pair_t<float, DrawDisplayListOp*> ZDrawDisplayListOpPair;
+    typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
-    static size_t findNonNegativeIndex(const Vector<ZDrawDisplayListOpPair>& nodes) {
+    static size_t findNonNegativeIndex(const Vector<ZDrawRenderNodeOpPair>& nodes) {
         for (size_t i = 0; i < nodes.size(); i++) {
             if (nodes[i].key >= 0.0f) return i;
         }
@@ -211,29 +211,29 @@ private:
 
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false);
 
-    void computeOrderingImpl(DrawDisplayListOp* opState,
+    void computeOrderingImpl(DrawRenderNodeOp* opState,
             const SkPath* outlineOfProjectionSurface,
-            Vector<DrawDisplayListOp*>* compositedChildrenOfProjectionSurface,
+            Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
-    void buildZSortedChildList(Vector<ZDrawDisplayListOpPair>& zTranslatedNodes);
+    void buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
 
     template<class T>
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
 
     template <class T>
     inline int issueOperationsOfNegZChildren(
-            const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+            const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             OpenGLRenderer& renderer, T& handler);
     template <class T>
     inline void issueOperationsOfPosZChildren(int shadowRestoreTo,
-            const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+            const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             OpenGLRenderer& renderer, T& handler);
     template <class T>
-    inline void issueOperationsOf3dChildren(const Vector<ZDrawDisplayListOpPair>& zTranslatedNodes,
+    inline void issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler);
 
     template <class T>
@@ -241,7 +241,7 @@ private:
 
     /**
      * Issue the RenderNode's operations into a handler, recursing for subtrees through
-     * DrawDisplayListOp's defer() or replay() methods
+     * DrawRenderNodeOp's defer() or replay() methods
      */
     template <class T>
     inline void issueOperations(OpenGLRenderer& renderer, T& handler);
@@ -292,7 +292,7 @@ private:
      */
 
     // for projection surfaces, contains a list of all children items
-    Vector<DrawDisplayListOp*> mProjectedNodes;
+    Vector<DrawRenderNodeOp*> mProjectedNodes;
 }; // class RenderNode
 
 } /* namespace uirenderer */

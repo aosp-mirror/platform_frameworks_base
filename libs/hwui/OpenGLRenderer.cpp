@@ -474,8 +474,8 @@ void OpenGLRenderer::countOverdraw() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
-    if (layer->deferredUpdateScheduled && layer->renderer &&
-            layer->displayList.get() && layer->displayList->isRenderable()) {
+    if (layer->deferredUpdateScheduled && layer->renderer
+            && layer->renderNode.get() && layer->renderNode->isRenderable()) {
         ATRACE_CALL();
 
         Rect& dirty = layer->dirtyRect;
@@ -1931,25 +1931,24 @@ void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-status_t OpenGLRenderer::drawDisplayList(RenderNode* displayList, Rect& dirty,
-        int32_t replayFlags) {
+status_t OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags) {
     status_t status;
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
-    if (displayList && displayList->isRenderable()) {
+    if (renderNode && renderNode->isRenderable()) {
         // compute 3d ordering
-        displayList->computeOrdering();
+        renderNode->computeOrdering();
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             status = startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
-            displayList->replay(replayStruct, 0);
+            renderNode->replay(replayStruct, 0);
             return status | replayStruct.mDrawGlStatus;
         }
 
         bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
         DeferredDisplayList deferredList(*currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
-        displayList->defer(deferStruct, 0);
+        renderNode->defer(deferStruct, 0);
 
         flushLayers();
         status = startFrame();

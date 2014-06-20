@@ -61,7 +61,7 @@ class ClipRectOp;
 class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
-class DrawDisplayListOp;
+class DrawRenderNodeOp;
 
 /**
  * Holds data used in the playback a tree of DisplayLists.
@@ -133,8 +133,8 @@ public:
         return !displayListOps.size();
     }
 
-    void addChild(DrawDisplayListOp* childOp);
-    const Vector<DrawDisplayListOp*>& children() { return mChildren; }
+    void addChild(DrawRenderNodeOp* childOp);
+    const Vector<DrawRenderNodeOp*>& children() { return mChildren; }
 
     void refProperty(CanvasPropertyPrimitive* prop) {
         mReferenceHolders.push(prop);
@@ -148,7 +148,7 @@ private:
     Vector< sp<VirtualLightRefBase> > mReferenceHolders;
 
     // list of children display lists for quick, non-drawing traversal
-    Vector<DrawDisplayListOp*> mChildren;
+    Vector<DrawRenderNodeOp*> mChildren;
 
     void cleanupResources();
 };

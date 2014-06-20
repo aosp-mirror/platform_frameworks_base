@@ -234,12 +234,11 @@ class GLES20Canvas extends HardwareCanvas {
     protected static native long nFinishRecording(long renderer);
 
     @Override
-    public int drawDisplayList(RenderNode displayList, Rect dirty, int flags) {
-        return nDrawDisplayList(mRenderer, displayList.getNativeDisplayList(),
-                dirty, flags);
+    public int drawRenderNode(RenderNode renderNode, Rect dirty, int flags) {
+        return nDrawRenderNode(mRenderer, renderNode.getNativeDisplayList(), dirty, flags);
     }
 
-    private static native int nDrawDisplayList(long renderer, long displayList,
+    private static native int nDrawRenderNode(long renderer, long renderNode,
             Rect dirty, int flags);
 
     ///////////////////////////////////////////////////////////////////////////

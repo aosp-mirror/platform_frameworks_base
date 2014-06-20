@@ -85,8 +85,7 @@ public:
         regionRect.translate(layer.left, layer.top);
     }
 
-    void updateDeferred(RenderNode* displayList,
-            int left, int top, int right, int bottom);
+    void updateDeferred(RenderNode* renderNode, int left, int top, int right, int bottom);
 
     inline uint32_t getWidth() const {
         return texture.width;
@@ -297,7 +296,7 @@ public:
      */
     bool deferredUpdateScheduled;
     OpenGLRenderer* renderer;
-    sp<RenderNode> displayList;
+    sp<RenderNode> renderNode;
     Rect dirtyRect;
     bool debugDrawUpdate;
     bool hasDrawnSinceUpdate;

@@ -41,7 +41,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
     colorFilter = NULL;
     deferredUpdateScheduled = false;
     renderer = NULL;
-    displayList = NULL;
+    renderNode = NULL;
     fbo = 0;
     stencil = NULL;
     debugDrawUpdate = false;
@@ -141,10 +141,9 @@ void Layer::removeFbo(bool flush) {
     }
 }
 
-void Layer::updateDeferred(RenderNode* displayList,
-        int left, int top, int right, int bottom) {
+void Layer::updateDeferred(RenderNode* renderNode, int left, int top, int right, int bottom) {
     requireRenderer();
-    this->displayList = displayList;
+    this->renderNode = renderNode;
     const Rect r(left, top, right, bottom);
     dirtyRect.unionWith(r);
     deferredUpdateScheduled = true;
@@ -219,14 +218,14 @@ void Layer::defer() {
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
-    displayList->computeOrdering();
-    displayList->defer(deferredState, 0);
+    renderNode->computeOrdering();
+    renderNode->defer(deferredState, 0);
 
     deferredUpdateScheduled = false;
 }
 
 void Layer::cancelDefer() {
-    displayList = NULL;
+    renderNode = NULL;
     deferredUpdateScheduled = false;
     if (deferredList) {
         delete deferredList;
@@ -246,7 +245,7 @@ void Layer::flush() {
         renderer->finish();
 
         dirtyRect.setEmpty();
-        displayList = NULL;
+        renderNode = NULL;
     }
 }
 
@@ -255,14 +254,14 @@ void Layer::render() {
     renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
             !isBlend());
 
-    renderer->drawDisplayList(displayList.get(), dirtyRect, RenderNode::kReplayFlag_ClipChildren);
+    renderer->drawRenderNode(renderNode.get(), dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 
     renderer->finish();
 
     dirtyRect.setEmpty();
 
     deferredUpdateScheduled = false;
-    displayList = NULL;
+    renderNode = NULL;
 }
 
 }; // namespace uirenderer

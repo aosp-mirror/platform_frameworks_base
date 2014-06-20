@@ -1465,23 +1465,23 @@ private:
     Functor* mFunctor;
 };
 
-class DrawDisplayListOp : public DrawBoundedOp {
-    friend class RenderNode; // grant DisplayList access to info of child
+class DrawRenderNodeOp : public DrawBoundedOp {
+    friend class RenderNode; // grant RenderNode access to info of child
 public:
-    DrawDisplayListOp(RenderNode* displayList, int flags, const mat4& transformFromParent)
-            : DrawBoundedOp(0, 0, displayList->getWidth(), displayList->getHeight(), 0),
-            mDisplayList(displayList), mFlags(flags), mTransformFromParent(transformFromParent) {}
+    DrawRenderNodeOp(RenderNode* renderNode, int flags, const mat4& transformFromParent)
+            : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), 0),
+            mRenderNode(renderNode), mFlags(flags), mTransformFromParent(transformFromParent) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->defer(deferStruct, level + 1);
+        if (mRenderNode && mRenderNode->isRenderable() && !mSkipInOrderDraw) {
+            mRenderNode->defer(deferStruct, level + 1);
         }
     }
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mDisplayList && mDisplayList->isRenderable() && !mSkipInOrderDraw) {
-            mDisplayList->replay(replayStruct, level + 1);
+        if (mRenderNode && mRenderNode->isRenderable() && !mSkipInOrderDraw) {
+            mRenderNode->replay(replayStruct, level + 1);
         }
     }
 
@@ -1491,22 +1491,22 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Display List %p, flags %#x", mDisplayList, mFlags);
-        if (mDisplayList && (logFlags & kOpLogFlag_Recurse)) {
-            mDisplayList->output(level + 1);
+        OP_LOG("Draw Display List %p, flags %#x", mRenderNode, mFlags);
+        if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
+            mRenderNode->output(level + 1);
         }
     }
 
-    virtual const char* name() { return "DrawDisplayList"; }
+    virtual const char* name() { return "DrawRenderNode"; }
 
-    RenderNode* renderNode() { return mDisplayList; }
+    RenderNode* renderNode() { return mRenderNode; }
 
 private:
-    RenderNode* mDisplayList;
+    RenderNode* mRenderNode;
     const int mFlags;
 
     ///////////////////////////
-    // Properties below are used by DisplayList::computeOrderingImpl() and iterate()
+    // Properties below are used by RenderNode::computeOrderingImpl() and issueOperations()
     ///////////////////////////
     /**
      * Records transform vs parent, used for computing total transform without rerunning DL contents
@@ -1514,12 +1514,12 @@ private:
     const mat4 mTransformFromParent;
 
     /**
-     * Holds the transformation between the projection surface ViewGroup and this DisplayList
+     * Holds the transformation between the projection surface ViewGroup and this RenderNode
      * drawing instance. Represents any translations / transformations done within the drawing of
      * the compositing ancestor ViewGroup's draw, before the draw of the View represented by this
      * DisplayList draw instance.
      *
-     * Note: doesn't include any transformation recorded within the DisplayList and its properties.
+     * Note: doesn't include transformation within the RenderNode, or its properties.
      */
     mat4 mTransformFromCompositingAncestor;
     bool mSkipInOrderDraw;

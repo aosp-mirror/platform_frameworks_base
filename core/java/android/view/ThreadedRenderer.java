@@ -222,7 +222,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         try {
             canvas.save();
             callbacks.onHardwarePreDraw(canvas);
-            canvas.drawDisplayList(view.getDisplayList());
+            canvas.drawRenderNode(view.getDisplayList());
             callbacks.onHardwarePostDraw(canvas);
             canvas.restore();
         } finally {
