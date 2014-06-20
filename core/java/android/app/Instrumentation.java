@@ -188,6 +188,9 @@ public class Instrumentation {
             endPerformanceSnapshot();
         }
         if (mPerfMetrics != null) {
+            if (results == null) {
+                results = new Bundle();
+            }
             results.putAll(mPerfMetrics);
         }
         if (mUiAutomation != null) {
