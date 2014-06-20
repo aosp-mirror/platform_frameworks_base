@@ -335,11 +335,14 @@ final class TaskRecord extends ThumbnailHolder {
             // Was previously in list.
             numFullscreen--;
         }
-        updateEffectiveIntent();
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
         }
-        return mActivities.size() == 0;
+        if (mActivities.isEmpty()) {
+            return true;
+        }
+        updateEffectiveIntent();
+        return false;
     }
 
     boolean autoRemoveFromRecents() {
