@@ -67,43 +67,37 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
       <div class="landing-body">
         <div class="landing-breakout cols">
 
-         <!-- <div class="resource-widget resource-flow-layout col-16" data-query="collection:index/devices"
-          data-sortorder="" data-cardsizes="6x6, 6x6, 6x6" data-maxresults="3"></div>-->
-
           <div class="col-3-wide">
             <img src="/images/home/wear.png">
 
-            <p>Wearable</p>
             <p class="landing-small">
               Provide information on-the-go for your users, whenever they need it.
             </p>
             <p class="landing-small">
-              <a href="{@docRoot}wear">Learn about Android Wear</a>
+              <a href="{@docRoot}wear/index.html">Learn about Android Wear</a>
             </p>
           </div>
 
           <div class="col-3-wide">
             <img src="/images/home/tv.png">
 
-            <p>TV</p>
             <p class="landing-small">
               Build your apps for the big screen and bring your content to life.
             </p>
             <p class="landing-small">
-              <a href="{@docRoot}tv">Learn about Android TV</a>
+              <a href="{@docRoot}tv/index.html">Learn about Android TV</a>
             </p>
           </div>
 
           <div class="col-3-wide">
             <img src="/images/home/auto.png">
 
-            <p>Auto</p>
             <p class="landing-small">
               Extend your music apps to automobile
               entertainment systems.
             </p>
             <p class="landing-small">
-              <a href="{@docRoot}auto">Learn about Android Auto</a>
+              <a href="{@docRoot}auto/index.html">Learn about Android Auto</a>
             </p>
           </div>
 
