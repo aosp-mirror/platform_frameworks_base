@@ -11,10 +11,8 @@ header.hide=1
 <div class="col-6">
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Play Services</h1>
-  <p itemprop="description">
-  </p>
-
-  <p>Give your apps more features to attract users on a wider range of devices.
+  <p itemprop="description">Give your apps more features to attract users
+  on a wider range of devices.
   With Google Play services, your app can take advantage
   of the latest, Google-powered features such as Maps, Google+, and more,
   with automatic platform updates distributed as an APK through
