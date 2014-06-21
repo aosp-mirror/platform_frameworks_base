@@ -215,6 +215,17 @@ class ActivityTransitionState {
         restoreExitedViews();
     }
 
+    public void clear() {
+        mEnteringNames = null;
+        mExitingFrom = null;
+        mExitingTo = null;
+        mExitingToView = null;
+        mCalledExitCoordinator = null;
+        mEnterTransitionCoordinator = null;
+        mEnterActivityOptions = null;
+        mExitTransitionCoordinators = null;
+    }
+
     private void restoreExitedViews() {
         if (mCalledExitCoordinator != null) {
             mCalledExitCoordinator.resetViews();
