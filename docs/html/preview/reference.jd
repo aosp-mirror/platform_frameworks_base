@@ -1,0 +1,13 @@
+page.title=Reference
+
+@jd:body
+
+<p>The reference documentation and API difference report are available as downloadable packages.
+</p>
+
+<ul>
+  <li><a href="{@docRoot}preview/l-developer-preview-reference.zip">L
+  Developer Preview reference</a></li>
+  <li><a href="{@docRoot}preview/l-developer-preview-api-diff.zip">L
+  Developer Preview difference report</a></li>
+</ul>
