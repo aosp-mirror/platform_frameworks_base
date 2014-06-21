@@ -11,12 +11,6 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/gpfe-guidelines.html">
-          <span class="en">Education Guidelines</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/optimizing-your-app.html">
           <span class="en">Optimize Your App</span>
         </a>
