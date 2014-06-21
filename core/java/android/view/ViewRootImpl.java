@@ -41,6 +41,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -118,6 +119,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final String PROPERTY_PROFILE_RENDERING = "viewroot.profile_rendering";
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
+
+    // property used by emulator to determine display shape
+    private static final String PROPERTY_DISPLAY_CIRCULAR = "ro.emulator.circular";
 
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
@@ -1170,8 +1174,10 @@ public final class ViewRootImpl implements ViewParent,
         if ((mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0
                 && mDisplay.getDisplayId() == 0) {
             // we're fullscreen and not hosted in an ActivityView
-            isRound = mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_windowIsRound);
+            isRound = (Build.HARDWARE.contains("goldfish")
+                    && SystemProperties.getBoolean(PROPERTY_DISPLAY_CIRCULAR, false))
+                    || mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_windowIsRound);
         }
         host.dispatchApplyWindowInsets(new WindowInsets(
                 mFitSystemWindowsInsets, isRound));
