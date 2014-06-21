@@ -18,6 +18,8 @@ package com.android.systemui.recents;
 
 import android.content.Context;
 
+import java.util.ArrayList;
+
 /**
  * A ref counted trigger that does some logic when the count is first incremented, or last
  * decremented.  Not thread safe as it's not currently needed.
@@ -26,8 +28,8 @@ public class ReferenceCountedTrigger {
 
     Context mContext;
     int mCount;
-    Runnable mFirstIncRunnable;
-    Runnable mLastDecRunnable;
+    ArrayList<Runnable> mFirstIncRunnables = new ArrayList<Runnable>();
+    ArrayList<Runnable> mLastDecRunnables = new ArrayList<Runnable>();
     Runnable mErrorRunnable;
 
     // Convenience runnables
@@ -47,15 +49,18 @@ public class ReferenceCountedTrigger {
     public ReferenceCountedTrigger(Context context, Runnable firstIncRunnable,
                                    Runnable lastDecRunnable, Runnable errorRunanable) {
         mContext = context;
-        mFirstIncRunnable = firstIncRunnable;
-        mLastDecRunnable = lastDecRunnable;
+        if (firstIncRunnable != null) mFirstIncRunnables.add(firstIncRunnable);
+        if (lastDecRunnable != null) mLastDecRunnables.add(lastDecRunnable);
         mErrorRunnable = errorRunanable;
     }
 
     /** Increments the ref count */
     public void increment() {
-        if (mCount == 0 && mFirstIncRunnable != null) {
-            mFirstIncRunnable.run();
+        if (mCount == 0 && !mFirstIncRunnables.isEmpty()) {
+            int numRunnables = mFirstIncRunnables.size();
+            for (int i = 0; i < numRunnables; i++) {
+                mFirstIncRunnables.get(i).run();
+            }
         }
         mCount++;
     }
@@ -65,11 +70,19 @@ public class ReferenceCountedTrigger {
         return mIncrementRunnable;
     }
 
+    /** Adds a runnable to the last-decrement runnables list. */
+    public void addLastDecrementRunnable(Runnable r) {
+        mLastDecRunnables.add(r);
+    }
+
     /** Decrements the ref count */
     public void decrement() {
         mCount--;
-        if (mCount == 0 && mLastDecRunnable != null) {
-            mLastDecRunnable.run();
+        if (mCount == 0 && !mLastDecRunnables.isEmpty()) {
+            int numRunnables = mLastDecRunnables.size();
+            for (int i = 0; i < numRunnables; i++) {
+                mLastDecRunnables.get(i).run();
+            }
         } else if (mCount < 0) {
             if (mErrorRunnable != null) {
                 mErrorRunnable.run();
