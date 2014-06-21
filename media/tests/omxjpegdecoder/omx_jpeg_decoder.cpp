@@ -105,7 +105,7 @@ bool OmxJpegImageDecoder::onDecode(SkStream* stream,
     meta->findInt32(kKeyWidth, &width);
     meta->findInt32(kKeyHeight, &height);
     configBitmapSize(
-            bm, SkColorTypeToBitmapConfig(getPrefColorType(k32Bit_SrcDepth, false)),
+            bm, getPrefColorType(k32Bit_SrcDepth, false),
             width, height);
 
     // mode == DecodeBounds
@@ -173,6 +173,5 @@ void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkColorType pref,
         int width, int height) {
     // Set the color space to ARGB_8888 for now (ignoring pref)
     // because of limitation in hardware support.
-    bm->setInfo(SkImageInfo::MakeN32(width, height, kOpaque_SkAlphaType);
+    bm->setInfo(SkImageInfo::MakeN32(width, height, kOpaque_SkAlphaType));
 }
-
