@@ -64,6 +64,10 @@ final class TaskRecord extends ThumbnailHolder {
      * Display.DEFAULT_DISPLAY. */
     boolean mOnTopOfHome = false;
 
+    // Used in the unique case where we are clearing the task in order to reuse it. In that case we
+    // do not want to delete the stack when the task goes empty.
+    boolean mReuseTask = false;
+
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
         affinity = info.taskAffinity;
@@ -219,7 +223,7 @@ final class TaskRecord extends ThumbnailHolder {
             // Was previously in list.
             numFullscreen--;
         }
-        return mActivities.size() == 0;
+        return mActivities.size() == 0 && !mReuseTask;
     }
 
     /**
@@ -244,7 +248,9 @@ final class TaskRecord extends ThumbnailHolder {
      * Completely remove all activities associated with an existing task.
      */
     final void performClearTaskLocked() {
+        mReuseTask = true;
         performClearTaskAtIndexLocked(0);
+        mReuseTask = false;
     }
 
     /**
