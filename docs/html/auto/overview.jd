@@ -13,6 +13,49 @@ page.metaDescription=Android Auto
 #copyright {
     margin-top:-35px;
 }
+.auto-img-container {
+  position:relative;
+}
+.auto-img-frame {
+  z-index:2;
+  position:relative;
+}
+.auto-img-shot {
+  position:absolute;
+  top:9px;
+  left:8px;
+  z-index:1;
+}
+.auto-img-container-cols {
+  position:relative;
+  margin-top:10px;
+}
+.auto-img-frame-cols {
+  z-index:2;
+  position:relative;
+}
+.auto-img-shot-cols {
+  position:absolute;
+  top:0px;
+  left:0px;
+  z-index:1;
+  border:1px solid #;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  border-radius: 7px;
+}
+.auto-col-2 {
+  width:380px;
+  display: inline;
+  float: left;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.auto-img-container-single {
+  width:380px;
+  margin:0 auto;
+  margin-top:20px;
+}
 </style>
 
 <div style="width:780px; margin:0 auto;">
@@ -79,13 +122,13 @@ you already know.</dd>
 Android Auto experience on a regular Android device.</p>
 
 
-<h2 id="design" style="margin-top:30px">Design</h2>
+<h2 id="design">Design</h2>
 
 <p>Digital experiences for cars should complement and augment driving, not demand the driver's
 attention. Designing these experiences for cars is fundamentally different than in the case of
 phones and tablets. It requires rethinking how these experiences unfold.</p>
 
-<h3 id="designprinciples" style="margin-top:25px">Design Principles</h3>
+<h3 id="designprinciples">Design Principles</h3>
 
 <p><strong>Glanceable</strong>. We designed Android Auto to reduce UI complexity, optimize user
 interactions, and lower cognitive load. Effective apps show just enough information
@@ -105,52 +148,15 @@ that bring personal content and context from other devices are part of Android A
 system, creating a truly integrated experience in every car. By using the vehicle's screen and
 controls, apps feel tailored to each car.</p>
 
-<h3 id="uioverview" style="margin-top:25px">UI Overview</h3>
-
-<p>Android Auto is a new environment that leverages existing UI models where appropiate and adds
-new models based on constrains and context. There are three primary concepts for Android Auto:
-<strong>Suggest</strong>, a unified place for predictive content; <strong>Demand</strong>, a
-pervasive way to interact with voice; and the <strong>Facets</strong>, organized spaces for
-primary activities, apps and content.</p>
-
-<dl>
-<dt style="margin-bottom:10px"><strong>Suggest: The Google Facet</strong></dt>
-<dd style="margin-bottom:20px">
-Core of continuity and extensibility is contextual stream of Now-like cards, powered by your
-apps and notifications. Relevant, timely, and dynamic, the stream organizes likely people, media,
-places, and information so drivers can quickly continue their activities or start something new.
-Google Now and notifications enable drivers to use the apps and services they know when they are
-most relevant.
-</dd>
-<dt style="margin-bottom:10px"><strong>Demand: The Voice Layer</strong></dt>
-<dd style="margin-bottom:20px">
-Voice-enabled tasks lets drivers accomplish their goals without taking their eyes off the road.
-Android Auto defines actions and intents that your app can register for.
-These are accessible through both persistent UI elements and dedicated hardware controls.
-</dd>
-<dt style="margin-bottom:10px"><strong>Facets and Templates: App-powered activities</strong></dt>
-<dd style="margin-bottom:20px">
-In the car, pages of app icons and different UIs create a distracting and dangerous situation.
-Instead, Android Auto apps power templates which help provide simple but customizable UIs
-for common interactions such as media or communications. Templates incorporate common behaviors,
-such as play/pause or reply to a message, while still letting your app promote its value
-and its brand. Apps are organized into facets (or activities) to enable quick access.
-</dd>
-</dl>
-
-<p>Android Auto uses the input and output mechanisms in each vehicle to tailor the interactions.
-Some vehicles have dedicated hardware controls, while others have primarily touch-based systems.
-Android Auto maps common actions and intents across these diverse sets of controls and outputs to
-enable you to concentrate on your unique app experience.</p>
 
 
-<h2 id="architecture" style="margin-top:30px">Architecture</h2>
+<h2 id="architecture">Architecture</h2>
 
 <p>The Android Auto app projects your app's customized UI on the vehicle's screen. To communicate
 with the Android Auto app, your media app implements a set of media interfaces.</p>
 
 <div style="width:750px;margin:0 auto">
-<img src="/auto/images/figure01.png" alt="" id="figure1" />
+<img src="{@docRoot}auto/images/figure01.png" alt="" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1</strong> - Architecture of Android Auto.
 </p>
@@ -180,7 +186,7 @@ playback state through callbacks.</li>
 </ul>
 
 
-<h2 id="uitemplates" style="margin-top:30px">UI Templates</h2>
+<h2 id="uitemplates">UI Templates</h2>
 
 <p>The Android Auto app uses a templated UI to display content and user interaction
 opportunities. Android Auto provides you with a set of standard UI templates that follow
@@ -192,89 +198,98 @@ multiple legislations across the globe and different standards for each vehicle 
 media apps. Although you cannot change the standard template format or layout, you can customize
 the template colors, action icons, background images, and more.</p>
 
-<h3 id="launchapp" style="margin-top:25px">Launch App Template</h3>
+<h3 id="launchapp">Launch App Template</h3>
 
 <p>The Launcher template shows all the compatible media apps installed on the user’s
 Android device and lets users select one of them from an scrollable list:</p>
 
-<div style="width:500px;margin:0 auto">
-<img src="/auto/images/figure02.png" alt="" id="figure2" />
-<p class="img-caption">
-  <strong>Figure 2.</strong> The Launcher template.
-</p>
+<div class="auto-img-container-single">
+  <div class="auto-img-container">
+    <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="/auto/images/assets/do_01_switcher.png" />
+  </div>
+  <p class="img-caption" style="margin-top:0px">
+    <strong>Figure 2.</strong> The Launcher template.
+  </p>
 </div>
 
-<h3 style="margin-top:25px">Primary App Template</h3>
+<h3>Primary App Template</h3>
 
 <p>After the user selects a media app, the display shows the primary app template. Figure
 3 shows the elements of this template that you can customize:</p>
 
-<div style="width:428px;margin:0 auto">
-<img src="/auto/images/figure03.png" alt="" id="figure3" />
-<p class="img-caption">
-  <strong>Figure 3.</strong> The main application template.
-</p>
-</div>
-
 <p>You can customize the primary app template to show your own icons, app name, and
 background images. Figure 4 shows an example of a customized template:</p>
 
-<div style="width:787px;margin:0 auto">
-<img src="/auto/images/figure04.png" alt="" id="figure4" />
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_05_template.png" />
+  </div>
+</div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music.png" />
+  </div>
+</div>
+</div>
 <p class="img-caption">
   <strong>Figure 4.</strong> A customized template.
 </p>
-</div>
 
-<h3 id="useractions" style="margin-top:25px">User Actions</h3>
+
+
+<h3 id="useractions">User Actions</h3>
 
 <p>The primary app template supports four main actions on the action bar, four auxiliary actions
 on the overflow bar, and the <em>Return</em> action. You can use standard controls and customize
 the actions and icons, as shown in Figure 5.</p>
 
-<div style="width:500px;margin:0 auto">
-<img src="/auto/images/figure05.png" alt="" id="figure5" />
-<p class="img-caption">
-  <strong>Figure 5.</strong> Custom icons for auxiliary actions.
-</p>
+<div class="auto-img-container-single">
+  <div class="auto-img-container">
+    <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="/auto/images/assets/do_03_more.png" />
+  </div>
+  <p class="img-caption" style="margin-top:0px">
+    <strong>Figure 5.</strong> Custom extra actions.
+  </p>
 </div>
 
-<h3 id="drawertransitions" style="margin-top:25px">Drawer Transitions</h3>
+<h3 id="drawertransitions">Drawer Transitions</h3>
 
 <p>For browse actions, the display shows the drawer transition and template:</p>
-
-<div style="width:750px;margin:0 auto">
-<img src="/auto/images/figure06.png" alt="" id="figure6" />
-<p class="img-caption">
-  <strong>Figure 6.</strong> The drawer transition.
-</p>
-</div>
 
 <p>After the transition from the primary app template to the drawer template, the drawer
 appears on the center. The customized drawer template shows the media containers and
 media files provided by the media service in your app. You can also customize drawers
 with icons for list items.</p>
 
-<div style="width:500px;margin:0 auto">
-<img src="/auto/images/figure07.png" alt="" id="figure7" />
-<p class="img-caption">
-  <strong>Figure 7.</strong> A customized drawer template.
-</p>
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_06_gdrawer.png" />
+  </div>
 </div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_04_mdrawer.png" />
+  </div>
+</div>
+</div>
+<p class="img-caption">
+  <strong>Figure 4.</strong> Generic and customized drawer templates.
+</p>
 
-<h3 id="daynighttransitions" style="margin-top:25px">Day and Night Transitions</h3>
+<h3 id="daynighttransitions">Day and Night Transitions</h3>
 
 <p>All the templates support different color schemes for day and night, as shown in
 Figure 8. The platform provides the state (day or night) and makes adjustments automatically.</p>
 
-<div style="width:780px;margin:0 auto">
-<img src="/auto/images/figure08.png" alt="" id="figure8" />
-<p class="img-caption">
-  <strong>Figure 8.</strong> Day and night transitions.
-</p>
-</div>
-
-<h3 id="customizetemplates" style="margin-top:25px">Customizing Templates</h3>
+<h3 id="customizetemplates">Customizing Templates</h3>
 
 <p>To customize the templates, provide the following app-specific resources and actions
 to the Android Auto media client.</p>
@@ -288,7 +303,7 @@ to the Android Auto media client.</p>
 <p>If provided, the media client automatically uses them in the templated UI.</p>
 
 
-<h2 id="devprocess" style="margin-top:30px">Development Process</h2>
+<h2 id="devprocess">Development Process</h2>
 
 <p class="note"><strong>Note:</strong> When released, the Android Auto SDK will provide
 media service interfaces, an APK for handheld devices that simulates the Android Auto
@@ -327,7 +342,7 @@ differences such as screen resolutions, software interfaces, knobs and touch
 controls.</p>
 
 
-<h2 id="emulator" style="margin-top:30px">Testing Your App on an Android Device</h2>
+<h2 id="emulator">Testing Your App on an Android Device</h2>
 
 <p>The Android Auto SDK includes an APK with a media client implementation, which is
 similar to those available in compatible vehicles. To test your app with this
@@ -348,7 +363,7 @@ library and play media. If your app provides app-specific actions, these actions
 in the UI controls.</p>
 
 
-<h2 id="running" style="margin-top:30px">Running Your App on Android Auto</h2>
+<h2 id="running">Running Your App on Android Auto</h2>
 
 <p>Media apps are available on the Google Play Store for compatible Android devices.
 When users connect their Android device to a compatible vehicle, the
