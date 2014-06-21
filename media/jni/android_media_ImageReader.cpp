@@ -767,11 +767,12 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     int imgReaderFmt = ctx->getBufferFormat();
     int bufFmt = buffer->format;
     if (imgReaderFmt != bufFmt) {
-        // Special casing for when producer switches format
-        if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 && bufFmt ==
-                HAL_PIXEL_FORMAT_YCrCb_420_SP) {
-            ctx->setBufferFormat(HAL_PIXEL_FORMAT_YCrCb_420_SP);
-            ALOGV("%s: Overriding NV21 to YUV_420_888.", __FUNCTION__);
+        // Special casing for when producer switches to a format compatible with flexible YUV
+        // (HAL_PIXEL_FORMAT_YCbCr_420_888).
+        if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 && (bufFmt ==
+                HAL_PIXEL_FORMAT_YCrCb_420_SP || bufFmt == HAL_PIXEL_FORMAT_YV12)) {
+            ctx->setBufferFormat(bufFmt);
+            ALOGV("%s: Overriding buffer format YUV_420_888 to %x.", __FUNCTION__, bufFmt);
         } else {
             // Return the buffer to the queue.
             consumer->unlockBuffer(*buffer);

@@ -239,6 +239,9 @@ public class RequestThreadManager {
                         mGLThreadManager.queueNewFrame(holder.getHolderTargets());
                     }
 
+                    /**
+                     * TODO: Get timestamp from GL thread after buffer update.
+                     */
                     mLastPreviewTimestamp = surfaceTexture.getTimestamp();
                     mReceivedPreview.open();
                 }
@@ -495,7 +498,6 @@ public class RequestThreadManager {
                             if (holder.hasJpegTargets()) {
                                 mReceivedJpeg.close();
                                 doJpegCapture(holder);
-                                mReceivedJpeg.block();
                                 if (!mReceivedJpeg.block(JPEG_FRAME_TIMEOUT)) {
                                     // TODO: report error to CameraDevice
                                     Log.e(TAG, "Hit timeout for jpeg callback!");
@@ -506,6 +508,9 @@ public class RequestThreadManager {
                         } catch (IOException e) {
                             // TODO: err handling
                             throw new IOError(e);
+                        }
+                        if (timestamp == 0) {
+                            timestamp = SystemClock.elapsedRealtimeNanos();
                         }
                         CameraMetadataNative result = LegacyMetadataMapper.convertResultMetadata(mParams,
                                 request, timestamp);
