@@ -71,7 +71,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           data-sortorder="" data-cardsizes="6x6, 6x6, 6x6" data-maxresults="3"></div>-->
 
           <div class="col-3-wide">
-            <img src="" alt="">
+            <img src="/images/home/wear.png">
 
             <p>Wearable</p>
             <p class="landing-small">
@@ -83,7 +83,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           </div>
 
           <div class="col-3-wide">
-            <img src="" alt="">
+            <img src="/images/home/tv.png">
 
             <p>TV</p>
             <p class="landing-small">
@@ -95,7 +95,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           </div>
 
           <div class="col-3-wide">
-            <img src="" alt="">
+            <img src="/images/home/auto.png">
 
             <p>Auto</p>
             <p class="landing-small">
