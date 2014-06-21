@@ -3,8 +3,8 @@ page.title=Installing the Android SDK
 @jd:body
 
 <style>
-.paging-links {
-  margin:0 0 80px;
+p.paging-links {
+  margin:0 0 40px;
 }
 .paging-links .next-page-link {
   right:initial;
@@ -13,6 +13,10 @@ page.title=Installing the Android SDK
   padding:20px 20px 5px;
   margin-bottom:1em;
   background:#eee;
+}
+.landing-button {
+  min-width: 155px;
+  text-align: center;
 }
 </style>
 
@@ -316,39 +320,32 @@ Continue: Adding SDK Packages</a></p>
 
 
 <!-- ################    DEFAULT    ##################### -->
-<style>
-h3.large-link {
-  display:inline-block;
-  width:100%;
-  text-align:center;
-  border:1px solid #258aaf;
-  padding:10px 0;
-  color:inherit;
-}
-</style>
+
 
 <div id="default" style="display:none">
 
-<p>If you haven't already done so, <b><a href="{@docRoot}sdk/index.html">click here to download
+<p>If you haven't already, <b><a href="{@docRoot}sdk/index.html">download
 the Android SDK</a></b>. </p>
 
-<p>Otherwise, select which SDK package you want to install:</p>
+<p>Then, select which SDK package you want to install:</p>
 
-<div class="cols" style="margin-bottom:60px">
-<div class="col-4">
-<a href="{@docRoot}sdk/installing/index.html?pkg=adt">
-<h3 class="large-link">Eclipse ADT</h3>
+<div class="cols" style="margin:30px 0 60px">
+<div class="col-4" style="margin-left:0">
+<a href="{@docRoot}sdk/installing/index.html?pkg=adt" class="landing-button landing-secondary">
+Eclipse ADT
 </a>
 </div>
 
 <div class="col-4">
-<a href="{@docRoot}sdk/installing/index.html?pkg=studio">
-<h3 class="large-link">Android Studio</h3></a>
+<a href="{@docRoot}sdk/installing/index.html?pkg=studio" class="landing-button landing-secondary">
+Android Studio
+</a>
 </div>
 
 <div class="col-4">
-<a href="{@docRoot}sdk/installing/index.html?pkg=tools">
-<h3 class="large-link">Stand-alone SDK Tools</h3></a>
+<a href="{@docRoot}sdk/installing/index.html?pkg=tools" class="landing-button landing-secondary">
+Stand-alone SDK Tools
+</a>
 </div>
 </div>
 
