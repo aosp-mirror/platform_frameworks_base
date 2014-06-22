@@ -121,7 +121,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
 
     // property used by emulator to determine display shape
-    private static final String PROPERTY_DISPLAY_CIRCULAR = "ro.emulator.circular";
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
@@ -328,6 +328,8 @@ public final class ViewRootImpl implements ViewParent,
 
     /** Set to true once doDie() has been called. */
     private boolean mRemoved;
+
+    private boolean mIsEmulator;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -1174,8 +1176,7 @@ public final class ViewRootImpl implements ViewParent,
         if ((mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0
                 && mDisplay.getDisplayId() == 0) {
             // we're fullscreen and not hosted in an ActivityView
-            isRound = (Build.HARDWARE.contains("goldfish")
-                    && SystemProperties.getBoolean(PROPERTY_DISPLAY_CIRCULAR, false))
+            isRound = (mIsEmulator && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))
                     || mContext.getResources().getBoolean(
                             com.android.internal.R.bool.config_windowIsRound);
         }
@@ -5432,6 +5433,9 @@ public final class ViewRootImpl implements ViewParent,
                         mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200);
                     }
                 }
+
+                // detect emulator
+                mIsEmulator = Build.HARDWARE.contains("goldfish");
             }
         });
     }
