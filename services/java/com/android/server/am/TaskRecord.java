@@ -173,6 +173,11 @@ final class TaskRecord extends ThumbnailHolder {
                 foundFront = true;
             }
         }
+        if (!foundFront && numActivities > 0) {
+            // All activities of this task are finishing. As we ought to have a frontOfTask
+            // activity, make the bottom activity front.
+            mActivities.get(0).frontOfTask = true;
+        }
     }
 
     /**
