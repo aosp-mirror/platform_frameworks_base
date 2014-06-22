@@ -122,7 +122,7 @@ page.type=about
                 </div>
 
               <div class="landing-body">
-                <a href="/auto/overview.html" class="landing-button landing-primary"
+                <a href="{@docRoot}auto/overview.html" class="landing-button landing-primary"
                    style="margin-top:40px;">
                   Developer Overview
                 </a>
@@ -134,7 +134,7 @@ page.type=about
 
       <div class="landing-scroll-down-affordance">
         <a class="landing-down-arrow" href="#android-in-car">
-          <img src="/wear/images/carrot.png" alt="Scroll down to read more">
+          <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
         </a>
       </div>
     </div> <!-- end .landing-section .landing-hero -->
@@ -145,35 +145,71 @@ page.type=about
       <div class="landing-section landing-gray-background" id="android-in-car">
         <div class="wrap">
           <div class="landing-section-h1">
-            <div class="landing-h1">Build Experiences for the Road</div>
+            <div class="landing-h1">Extending Android to Cars</div>
           </div>
           <div class="landing-body">
-            <div class="landing-subhead">Android Auto brings apps to the car, integrating with
-            the vehicle's input controls and display.</div>
+            <div class="landing-subhead">Android Auto brings the Android experience to
+            cars with apps like Google Now and Maps.</div>
             <div class="cols">
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/01_a_maps.png" />
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/01_b_now.png" />
                 </div>
               </div>
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/01_b_now.png" />
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/01_a_maps.png" />
                 </div>
               </div>
             </div>
+
             <p>When users connect their Android phones to compatible vehicles, Android Auto
              shows a standard interface that lets them start enabled apps and services.
              Android Auto locks the handheld device when connected, so drivers
-            interact with your app using the vehicle's input controls and touch display.</p>
+            interact with Auto by using the vehicle's input controls, touch display, and voice.</p>
             </p>
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
-      <div class="landing-section" >
+
+      <div class="landing-section">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1">Build for One Platform</div>
+            <div class="landing-subhead">Create apps with the Android APIs you're familiar with
+            and extend them to cars with the Auto SDK.
+            </div>
+          </div>
+
+          <div class="landing-body">
+
+            <div class="cols">
+              <div class="col-8">
+                <div class="auto-img-container-cols">
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/02_b_switcher.gif" />
+                </div>
+              </div>
+              <div class="col-8">
+                <div class="auto-img-container-cols">
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/02_a_notif.gif" />
+                </div>
+              </div>
+            </div>
+            <p>Write your apps without having
+            to worry about vehicle-specific hardware differences like screen resolution, software
+            interfaces, knobs, and touch controls. Your users get the same experience on any compatible
+            vehicle such as a consistent app launcher and system events such as notifications.</p>
+          </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
+
+
+      <div class="landing-section landing-gray-background">
         <div class="wrap">
           <div class="landing-section-header">
             <div class="landing-h1">Minimize Distraction</div>
@@ -185,14 +221,14 @@ page.type=about
             <div class="cols">
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/03_b_voice.gif" />
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/03_b_voice.gif" />
                 </div>
               </div>
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/03_a_musict.png" />
+                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/03_a_musict.png" />
                 </div>
               </div>
             </div>
@@ -205,41 +241,6 @@ page.type=about
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
-
-      <div class="landing-section landing-gray-background">
-        <div class="wrap">
-          <div class="landing-section-header">
-            <div class="landing-h1">Run on One Platform</div>
-            <div class="landing-subhead">Extend your existing apps with the Auto SDK and get the
-            same experience on any compatible vehicle.
-            </div>
-          </div>
-
-          <div class="landing-body">
-
-            <div class="cols">
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/02_a_notif.gif" />
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="/auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="/auto/images/assets/02_b_switcher.gif" />
-                </div>
-              </div>
-            </div>
-            <p>Write your app once, without having
-            to worry about vehicle-specific hardware differences like screen resolution, software
-            interfaces, knobs, and touch controls. Your app runs the same on any compatible
-            vehicle.</p>
-          </div>
-        </div> <!-- end .wrap -->
-      </div> <!-- end .landing-section -->
-
-
 
       <div class="landing-section" style="background-color:#f5f5f5">
         <div class="wrap">
@@ -287,43 +288,43 @@ page.type=about
           <div class="cols">
 
             <div class="col-4">
-              <img src="/auto/images/logos/apps/joyride.png"
+              <img src="{@docRoot}auto/images/logos/apps/joyride.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/mlb.png"
+              <img src="{@docRoot}auto/images/logos/apps/mlb.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/pandora.png"
+              <img src="{@docRoot}auto/images/logos/apps/pandora.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/pocketcasts.png"
+              <img src="{@docRoot}auto/images/logos/apps/pocketcasts.png"
                    width="160" height="160" class="img-logo" />
             </div>
           </div>
           <div class="cols">
             <div class="col-4">
-              <img src="/auto/images/logos/apps/songza.png"
+              <img src="{@docRoot}auto/images/logos/apps/songza.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/stitcher.png"
+              <img src="{@docRoot}auto/images/logos/apps/stitcher.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/tunein.png"
+              <img src="{@docRoot}auto/images/logos/apps/tunein.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/umano.png"
+              <img src="{@docRoot}auto/images/logos/apps/umano.png"
                    width="160" height="160" class="img-logo" />
             </div>
           </div>
           <div class="cols" style="margin-top:40px">
              <div class="col-4">
-                <img src="/auto/images/logos/apps/iheartradio.png"
+                <img src="{@docRoot}auto/images/logos/apps/iheartradio.png"
                      width="160" height="160" class="img-logo" />
               </div>
               <div class="col-12">
@@ -337,7 +338,7 @@ page.type=about
           <div class="cols" style="margin-top:60px">
 
               <div class="col-4">
-                <img src="/auto/images/logos/apps/spotify.png"
+                <img src="{@docRoot}auto/images/logos/apps/spotify.png"
                      width="160" height="160" class="img-logo" />
               </div>
               <div class="col-12"><p style="margin-top:20px"><em>
@@ -363,107 +364,107 @@ page.type=about
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/auto/acura.png"
+              <img src="{@docRoot}auto/images/logos/auto/acura.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/audi.png"
+              <img src="{@docRoot}auto/images/logos/auto/audi.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/bentley.png"
+              <img src="{@docRoot}auto/images/logos/auto/bentley.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/chevrolet.png"
+              <img src="{@docRoot}auto/images/logos/auto/chevrolet.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/chrysler.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/datsun.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/fiat.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/honda.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/hyundai.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/infinity.png"
+              <img src="{@docRoot}auto/images/logos/auto/chrysler.png"
                    width="120" height="120" class="img-logo" />
             </div>
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/auto/kia.png"
+              <img src="{@docRoot}auto/images/logos/auto/datsun.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/maserati.png"
+              <img src="{@docRoot}auto/images/logos/auto/fiat.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/mazda.png"
+              <img src="{@docRoot}auto/images/logos/auto/honda.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/mercedesbenz.png"
+              <img src="{@docRoot}auto/images/logos/auto/hyundai.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/mitsubishi.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/nissan.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/opel.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/renault.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/seat.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/auto/skoda.png"
+              <img src="{@docRoot}auto/images/logos/auto/infinity.png"
                    width="120" height="120" class="img-logo" />
             </div>
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/auto/subaru.png"
+              <img src="{@docRoot}auto/images/logos/auto/kia.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/suzuki.png"
+              <img src="{@docRoot}auto/images/logos/auto/maserati.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/volkswagen.png"
+              <img src="{@docRoot}auto/images/logos/auto/mazda.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/auto/volvo.png"
+              <img src="{@docRoot}auto/images/logos/auto/mercedesbenz.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+          </div>
+          <div class="cols">
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/nissan.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/opel.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/renault.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/seat.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/skoda.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+          </div>
+          <div class="cols">
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/subaru.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/volkswagen.png"
+                   width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/auto/volvo.png"
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
@@ -479,73 +480,73 @@ page.type=about
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/hard/alpine.png"
+              <img src="{@docRoot}auto/images/logos/hard/alpine.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/clarion.png"
+              <img src="{@docRoot}auto/images/logos/hard/clarion.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/cloudcar.png"
+              <img src="{@docRoot}auto/images/logos/hard/cloudcar.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/delphi.png"
+              <img src="{@docRoot}auto/images/logos/hard/delphi.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/freescale.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="/auto/images/logos/hard/fujitsuten.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/hard/harman.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/hard/jvc.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/hard/kenwood.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="/auto/images/logos/hard/lg.png"
+              <img src="{@docRoot}auto/images/logos/hard/freescale.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/hard/panasonic.png"
+              <img src="{@docRoot}auto/images/logos/hard/fujitsuten.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/parrot.png"
+              <img src="{@docRoot}auto/images/logos/hard/harman.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/pioneer.png"
+              <img src="{@docRoot}auto/images/logos/hard/jvc.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/renesas.png"
+              <img src="{@docRoot}auto/images/logos/hard/kenwood.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
-              <img src="/auto/images/logos/hard/symphonyteleca.png"
+              <img src="{@docRoot}auto/images/logos/hard/lg.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
           </div>
           <div class="cols">
             <div class="col-5">
-              <img src="/auto/images/logos/hard/texasinstruments.png"
+              <img src="{@docRoot}auto/images/logos/hard/panasonic.png"
+                   width="120" height="120" class="img-logo-thin" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/hard/parrot.png"
+                   width="120" height="120" class="img-logo-thin" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/hard/pioneer.png"
+                   width="120" height="120" class="img-logo-thin" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/hard/renesas.png"
+                   width="120" height="120" class="img-logo-thin" />
+            </div>
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/hard/symphonyteleca.png"
+                   width="120" height="120" class="img-logo-thin" />
+            </div>
+          </div>
+          <div class="cols">
+            <div class="col-5">
+              <img src="{@docRoot}auto/images/logos/hard/texasinstruments.png"
                    width="120" height="120" class="img-logo-thin" />
             </div>
             <div class="col-5">
@@ -581,7 +582,7 @@ page.type=about
         Except as noted, this content is
         licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
         Creative Commons Attribution 2.5</a>. For details and
-        restrictions, see the <a href="/license.html">Content
+        restrictions, see the <a href="{@docRoot}license.html">Content
         License</a>.
       </div>
     </div>
