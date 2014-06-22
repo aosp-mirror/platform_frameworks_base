@@ -43,11 +43,6 @@ public class ColorMatrixColorFilter_Delegate extends ColorFilter_Delegate {
     // ---- Public Helper methods ----
 
     @Override
-    public boolean isSupported() {
-        return false;
-    }
-
-    @Override
     public String getSupportMessage() {
         return "ColorMatrix Color Filters are not supported.";
     }
