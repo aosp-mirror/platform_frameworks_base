@@ -25,13 +25,7 @@
   </li>
   <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/edu/start.html">
-          <span class="en">Get Started with Education</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/edu/faq.html">
-          <span class="en">Education FAQ</span>
+          <span class="en">Publish Android Apps for Education</span>
         </a>
     </div>
   </li>

@@ -45,14 +45,14 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/googleplay/edu/about.html",
       "distribute/googleplay/edu/start.html",
-      "distribute/googleplay/edu/faq.html"
+      "https://developers.google.com/edu/faq"
     ]
   },
   "distribute/essentials": {
     "resources": [
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html",
-      "distribute/essentials/gpfe-guidelines.html",
+      "https://developers.google.com/edu/guidelines",
       "distribute/essentials/optimizing-your-app.html",
       "distribute/essentials/best-practices/apps.html",
       "distribute/essentials/best-practices/games.html"
@@ -165,16 +165,18 @@ var RESOURCE_COLLECTIONS = {
     "title": "About Google Play for Education / Developers",
     "resources": [
       "distribute/googleplay/edu/start.html",
-      "distribute/essentials/gpfe-guidelines.html",
-      "distribute/googleplay/edu/faq.html",
-      "distribute/essentials/quality/tablets.html"
+      "https://developers.google.com/edu/guidelines",
+      "https://developers.google.com/edu/faq",
+      "distribute/essentials/quality/tablets.html",
+      "https://developers.google.com/edu/",
+      "https://www.google.com/edu/tablets/#tablets-family"
     ]
   },
   "distribute/googleplay/gpfe/dev": {
     "title": "About Google Play for Education / Developers",
     "resources": [
       "distribute/googleplay/edu/about.html",
-      "distribute/essentials/gpfe-guidelines.html",
+      "https://developers.google.com/edu/guidelines",
       "distribute/essentials/quality/tablets.html",
       "distribute/googleplay/developer-console.html",
       "http://play.google.com/about/developer-distribution-agreement-addendum.html",
@@ -206,7 +208,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/googleplay/developer-console.html",
       "distribute/googleplay/edu/start.html",
-      "distribute/googleplay/edu/faq.html"
+      "https://developers.google.com/edu/faq"
     ]
   },
   "distribute/essentials/eduessentials/educators": {
@@ -586,7 +588,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html",
-      "distribute/essentials/gpfe-guidelines.html"
+      "https://developers.google.com/edu/guidelines"
     ]
   },
   "distribute/toolsreference/launchchecklist/rating": {
