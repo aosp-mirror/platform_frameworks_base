@@ -114,6 +114,10 @@ final class TaskRecord extends ThumbnailHolder {
     /** If original intent did not allow relinquishing task identity, save that information */
     boolean mNeverRelinquishIdentity = true;
 
+    // Used in the unique case where we are clearing the task in order to reuse it. In that case we
+    // do not want to delete the stack when the task goes empty.
+    boolean mReuseTask = false;
+
     final ActivityManagerService mService;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -339,7 +343,7 @@ final class TaskRecord extends ThumbnailHolder {
             mService.notifyTaskPersisterLocked(this, false);
         }
         if (mActivities.isEmpty()) {
-            return true;
+            return !mReuseTask;
         }
         updateEffectiveIntent();
         return false;
@@ -383,7 +387,9 @@ final class TaskRecord extends ThumbnailHolder {
      * Completely remove all activities associated with an existing task.
      */
     final void performClearTaskLocked() {
+        mReuseTask = true;
         performClearTaskAtIndexLocked(0);
+        mReuseTask = false;
     }
 
     /**
