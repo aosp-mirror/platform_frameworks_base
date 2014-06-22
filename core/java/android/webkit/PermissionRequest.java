@@ -39,6 +39,12 @@ public interface PermissionRequest {
      * Resource belongs to audio capture device, like microphone.
      */
     public final static long RESOURCE_AUDIO_CAPTURE = 1 << 2;
+    /**
+     * Resource belongs to protected media identifier.
+     * After the user grants this resource, the origin can use EME APIs to generate the license
+     * requests.
+     */
+    public final static long RESOURCE_PROTECTED_MEDIA_ID = 1 << 3;
 
     /**
      * @return the origin of web content which attempt to access the restricted
