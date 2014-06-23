@@ -500,7 +500,7 @@ void DeferredDisplayList::addRestoreToCount(OpenGLRenderer& renderer, StateOp* o
 void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     /* 1: op calculates local bounds */
     DeferredDisplayState* const state = createState();
-    if (op->getLocalBounds(renderer.getDrawModifiers(), state->mBounds)) {
+    if (op->getLocalBounds(state->mBounds)) {
         if (state->mBounds.isEmpty()) {
             // valid empty bounds, don't bother deferring
             tryRecycleState(state);

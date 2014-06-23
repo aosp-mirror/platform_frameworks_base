@@ -27,6 +27,8 @@
 namespace android {
 namespace uirenderer {
 
+class RenderState;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +46,7 @@ namespace uirenderer {
 
 class LayerRenderer: public OpenGLRenderer {
 public:
-    ANDROID_API LayerRenderer(Layer* layer);
+    LayerRenderer(RenderState& renderState, Layer* layer);
     virtual ~LayerRenderer();
 
     virtual void onViewportInitialized(int width, int height) { /* do nothing */ }
@@ -52,16 +54,16 @@ public:
     virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
-    ANDROID_API static Layer* createTextureLayer();
-    ANDROID_API static Layer* createRenderLayer(uint32_t width, uint32_t height);
-    ANDROID_API static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
-    ANDROID_API static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
+    static Layer* createTextureLayer(RenderState& renderState);
+    static Layer* createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height);
+    static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
+    static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
             bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform);
-    ANDROID_API static void destroyLayer(Layer* layer);
+    static void destroyLayer(Layer* layer);
     ANDROID_API static void destroyLayerDeferred(Layer* layer);
-    ANDROID_API static bool copyLayer(Layer* layer, SkBitmap* bitmap);
+    static bool copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap);
 
-    static void flushLayer(Layer* layer);
+    static void flushLayer(RenderState& renderState, Layer* layer);
 
 protected:
     virtual void ensureStencilBuffer();

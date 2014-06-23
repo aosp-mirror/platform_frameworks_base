@@ -171,7 +171,7 @@ public:
      *
      * returns true if bounds exist
      */
-    virtual bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
+    virtual bool getLocalBounds(Rect& localBounds) {
         return false;
     }
 
@@ -253,7 +253,7 @@ public:
     // default empty constructor for bounds, to be overridden in child constructor body
     DrawBoundedOp(const SkPaint* paint): DrawOp(paint) { }
 
-    bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
+    bool getLocalBounds(Rect& localBounds) {
         localBounds.set(mLocalBounds);
         OpenGLRenderer::TextShadow textShadow;
         if (OpenGLRenderer::getTextShadow(mPaint, &textShadow)) {
@@ -1029,7 +1029,7 @@ public:
     DrawStrokableOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint) {};
 
-    bool getLocalBounds(const DrawModifiers& drawModifiers, Rect& localBounds) {
+    bool getLocalBounds(Rect& localBounds) {
         localBounds.set(mLocalBounds);
         if (mPaint && mPaint->getStyle() != SkPaint::kFill_Style) {
             localBounds.outset(strokeWidthOutset());
@@ -1399,7 +1399,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         Rect bounds;
-        getLocalBounds(renderer.getDrawModifiers(), bounds);
+        getLocalBounds(bounds);
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
                 mPositions, getPaint(renderer), mTotalAdvance, bounds);
     }

@@ -31,12 +31,18 @@
 #include "TimeLord.h"
 
 namespace android {
+
 class DisplayEventReceiver;
 
 namespace uirenderer {
+
+class RenderState;
+
 namespace renderthread {
 
 class DispatchFrameCallbacks;
+class EglManager;
+class RenderProxy;
 
 class TaskQueue {
 public:
@@ -62,7 +68,7 @@ protected:
     ~IFrameCallback() {}
 };
 
-class ANDROID_API RenderThread : public Thread, public Singleton<RenderThread> {
+class ANDROID_API RenderThread : public Thread, protected Singleton<RenderThread> {
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
@@ -79,6 +85,8 @@ public:
     void pushBackFrameCallback(IFrameCallback* callback);
 
     TimeLord& timeLord() { return mTimeLord; }
+    RenderState& renderState() { return *mRenderState; }
+    EglManager& eglManager() { return *mEglManager; }
 
 protected:
     virtual bool threadLoop();
@@ -86,10 +94,12 @@ protected:
 private:
     friend class Singleton<RenderThread>;
     friend class DispatchFrameCallbacks;
+    friend class RenderProxy;
 
     RenderThread();
     virtual ~RenderThread();
 
+    void initThreadLocals();
     void initializeDisplayEventReceiver();
     static int displayEventReceiverCallback(int fd, int events, void* data);
     void drainDisplayEventQueue(bool skipCallbacks = false);
@@ -119,6 +129,8 @@ private:
     DispatchFrameCallbacks* mFrameCallbackTask;
 
     TimeLord mTimeLord;
+    RenderState* mRenderState;
+    EglManager* mEglManager;
 };
 
 } /* namespace renderthread */

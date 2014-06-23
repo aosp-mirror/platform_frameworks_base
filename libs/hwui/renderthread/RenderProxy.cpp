@@ -52,8 +52,8 @@ namespace renderthread {
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
 
-CREATE_BRIDGE2(createContext, bool translucent, RenderNode* rootRenderNode) {
-    return new CanvasContext(args->translucent, args->rootRenderNode);
+CREATE_BRIDGE3(createContext, RenderThread* thread, bool translucent, RenderNode* rootRenderNode) {
+    return new CanvasContext(*args->thread, args->translucent, args->rootRenderNode);
 }
 
 RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode)
@@ -62,6 +62,7 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode)
     SETUP_TASK(createContext);
     args->translucent = translucent;
     args->rootRenderNode = rootRenderNode;
+    args->thread = &mRenderThread;
     mContext = (CanvasContext*) postAndWait(task);
     mDrawFrameTask.setContext(&mRenderThread, mContext);
 }
@@ -199,20 +200,29 @@ void RenderProxy::destroyCanvasAndSurface() {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(invokeFunctor, CanvasContext* context, Functor* functor) {
-    args->context->invokeFunctor(args->functor);
+CREATE_BRIDGE2(invokeFunctor, RenderThread* thread, Functor* functor) {
+    CanvasContext::invokeFunctor(*args->thread, args->functor);
     return NULL;
 }
 
 void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
     ATRACE_CALL();
+    RenderThread& thread = RenderThread::getInstance();
     SETUP_TASK(invokeFunctor);
-    args->context = mContext;
+    args->thread = &thread;
     args->functor = functor;
     if (waitForCompletion) {
-        postAndWait(task);
+        // waitForCompletion = true is expected to be fairly rare and only
+        // happen in destruction. Thus it should be fine to temporarily
+        // create a Mutex
+        Mutex mutex;
+        Condition condition;
+        SignalingRenderTask syncTask(task, &mutex, &condition);
+        AutoMutex _lock(mutex);
+        thread.queue(&syncTask);
+        condition.wait(mutex);
     } else {
-        post(task);
+        thread.queue(task);
     }
 }
 
@@ -233,7 +243,7 @@ CREATE_BRIDGE1(destroyLayer, Layer* layer) {
     return NULL;
 }
 
-static void enqueueDestroyLayer(Layer* layer) {
+void RenderProxy::enqueueDestroyLayer(Layer* layer) {
     SETUP_TASK(destroyLayer);
     args->layer = layer;
     RenderThread::getInstance().queue(task);
@@ -242,7 +252,7 @@ static void enqueueDestroyLayer(Layer* layer) {
 CREATE_BRIDGE3(createDisplayListLayer, CanvasContext* context, int width, int height) {
     Layer* layer = args->context->createRenderLayer(args->width, args->height);
     if (!layer) return 0;
-    return new DeferredLayerUpdater(layer, enqueueDestroyLayer);
+    return new DeferredLayerUpdater(layer, RenderProxy::enqueueDestroyLayer);
 }
 
 DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height) {
@@ -258,7 +268,7 @@ DeferredLayerUpdater* RenderProxy::createDisplayListLayer(int width, int height)
 CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
     Layer* layer = args->context->createTextureLayer();
     if (!layer) return 0;
-    return new DeferredLayerUpdater(layer, enqueueDestroyLayer);
+    return new DeferredLayerUpdater(layer, RenderProxy::enqueueDestroyLayer);
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
@@ -334,6 +344,22 @@ void RenderProxy::dumpProfileInfo(int fd) {
     args->context = mContext;
     args->fd = fd;
     postAndWait(task);
+}
+
+CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map, size_t size) {
+    CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
+    args->buffer->decStrong(0);
+    return NULL;
+}
+
+void RenderProxy::setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size) {
+    SETUP_TASK(setTextureAtlas);
+    args->thread = &mRenderThread;
+    args->buffer = buffer.get();
+    args->buffer->incStrong(0);
+    args->map = map;
+    args->size = size;
+    post(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

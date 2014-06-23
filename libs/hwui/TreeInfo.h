@@ -29,6 +29,7 @@ namespace uirenderer {
 class BaseRenderNodeAnimator;
 class AnimationListener;
 class OpenGLRenderer;
+class RenderState;
 
 class AnimationHook {
 public:
@@ -67,14 +68,15 @@ public:
         // TODO: TRIM_MEMORY?
     };
 
-    explicit TreeInfo(TraversalMode mode)
+    explicit TreeInfo(TraversalMode mode, RenderState& renderState)
         : mode(mode)
         , frameTimeMs(0)
         , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
         , damageAccumulator(NullDamageAccumulator::instance())
-        , renderer(0)
-        , errorHandler(0)
+        , renderState(renderState)
+        , renderer(NULL)
+        , errorHandler(NULL)
     {}
 
     const TraversalMode mode;
@@ -85,6 +87,7 @@ public:
     bool prepareTextures;
     // Must not be null
     IDamageAccumulator* damageAccumulator;
+    RenderState& renderState;
     // The renderer that will be drawing the next frame. Use this to push any
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer;

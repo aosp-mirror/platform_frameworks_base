@@ -20,6 +20,7 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
+#include "RenderState.h"
 #include "LayerCache.h"
 #include "LayerRenderer.h"
 #include "Matrix.h"
@@ -33,7 +34,9 @@ namespace uirenderer {
 // Rendering
 ///////////////////////////////////////////////////////////////////////////////
 
-LayerRenderer::LayerRenderer(Layer* layer): mLayer(layer) {
+LayerRenderer::LayerRenderer(RenderState& renderState, Layer* layer)
+        : OpenGLRenderer(renderState)
+        , mLayer(layer) {
 }
 
 LayerRenderer::~LayerRenderer() {
@@ -43,7 +46,7 @@ status_t LayerRenderer::prepareDirty(float left, float top, float right, float b
         bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
-    glBindFramebuffer(GL_FRAMEBUFFER, mLayer->getFbo());
+    renderState().bindFramebuffer(mLayer->getFbo());
 
     const float width = mLayer->layer.getWidth();
     const float height = mLayer->layer.getHeight();
@@ -180,7 +183,7 @@ void LayerRenderer::generateMesh() {
 // Layers management
 ///////////////////////////////////////////////////////////////////////////////
 
-Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
+Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height) {
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
@@ -191,7 +194,7 @@ Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
     }
 
     caches.activeTexture(0);
-    Layer* layer = caches.layerCache.get(width, height);
+    Layer* layer = caches.layerCache.get(renderState, width, height);
     if (!layer) {
         ALOGW("Could not obtain a layer");
         return NULL;
@@ -221,10 +224,9 @@ Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
     layer->setDirty(true);
     layer->region.clear();
 
-    GLuint previousFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
+    GLuint previousFbo = renderState.getFramebuffer();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
+    renderState.bindFramebuffer(layer->getFbo());
     layer->bindTexture();
 
     // Initialize the texture if needed
@@ -235,7 +237,7 @@ Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
         // This should only happen if we run out of memory
         if (glGetError() != GL_NO_ERROR) {
             ALOGE("Could not allocate texture for layer (fbo=%d %dx%d)", fbo, width, height);
-            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+            renderState.bindFramebuffer(previousFbo);
             caches.resourceCache.decrementRefcount(layer);
             return NULL;
         }
@@ -244,7 +246,7 @@ Layer* LayerRenderer::createRenderLayer(uint32_t width, uint32_t height) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+    renderState.bindFramebuffer(previousFbo);
 
     return layer;
 }
@@ -265,10 +267,10 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
     return true;
 }
 
-Layer* LayerRenderer::createTextureLayer() {
+Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
-    Layer* layer = new Layer(0, 0);
+    Layer* layer = new Layer(renderState, 0, 0);
     layer->setCacheable(false);
     layer->setTextureLayer(true);
     layer->setEmpty(true);
@@ -332,7 +334,7 @@ void LayerRenderer::destroyLayerDeferred(Layer* layer) {
     }
 }
 
-void LayerRenderer::flushLayer(Layer* layer) {
+void LayerRenderer::flushLayer(RenderState& renderState, Layer* layer) {
 #ifdef GL_EXT_discard_framebuffer
     if (!layer) return;
 
@@ -341,20 +343,23 @@ void LayerRenderer::flushLayer(Layer* layer) {
         // If possible, discard any enqueud operations on deferred
         // rendering architectures
         if (Extensions::getInstance().hasDiscardFramebuffer()) {
-            GLuint previousFbo;
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
-            if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            GLuint previousFbo = renderState.getFramebuffer();
+            if (fbo != previousFbo) {
+                renderState.bindFramebuffer(fbo);
+            }
 
             const GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
             glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
 
-            if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+            if (fbo != previousFbo) {
+                renderState.bindFramebuffer(previousFbo);
+            }
         }
     }
 #endif
 }
 
-bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
+bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap) {
     Caches& caches = Caches::getInstance();
     if (layer && bitmap->width() <= caches.maxTextureSize &&
             bitmap->height() <= caches.maxTextureSize) {
@@ -369,7 +374,8 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 
         GLuint texture;
         GLuint previousFbo;
-        GLuint previousViewport[4];
+        GLsizei previousViewportWidth;
+        GLsizei previousViewportHeight;
 
         GLenum format;
         GLenum type;
@@ -404,9 +410,9 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         layer->setAlpha(255, SkXfermode::kSrc_Mode);
         layer->setFbo(fbo);
 
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
-        glGetIntegerv(GL_VIEWPORT, (GLint*) &previousViewport);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        previousFbo = renderState.getFramebuffer();
+        renderState.getViewport(&previousViewportWidth, &previousViewportHeight);
+        renderState.bindFramebuffer(fbo);
 
         glGenTextures(1, &texture);
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
@@ -431,7 +437,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         {
-            LayerRenderer renderer(layer);
+            LayerRenderer renderer(renderState, layer);
             renderer.setViewport(bitmap->width(), bitmap->height());
             renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
                     bitmap->width(), bitmap->height(), !layer->isBlend());
@@ -471,13 +477,12 @@ error:
         }
 #endif
 
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+        renderState.bindFramebuffer(previousFbo);
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
         caches.deleteTexture(texture);
         caches.fboCache.put(fbo);
-        glViewport(previousViewport[0], previousViewport[1],
-                previousViewport[2], previousViewport[3]);
+        renderState.setViewport(previousViewportWidth, previousViewportHeight);
 
         return status;
     }

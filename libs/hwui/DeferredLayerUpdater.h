@@ -23,7 +23,6 @@
 #include <utils/StrongPointer.h>
 
 #include "Layer.h"
-#include "OpenGLRenderer.h"
 #include "Rect.h"
 #include "RenderNode.h"
 

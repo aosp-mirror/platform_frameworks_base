@@ -24,6 +24,8 @@
 namespace android {
 namespace uirenderer {
 
+class RenderState;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,7 +57,7 @@ public:
      * @param width The desired width of the layer
      * @param height The desired height of the layer
      */
-    Layer* get(const uint32_t width, const uint32_t height);
+    Layer* get(RenderState& renderState, const uint32_t width, const uint32_t height);
 
     /**
      * Adds the layer to the cache. The layer will not be added if there is

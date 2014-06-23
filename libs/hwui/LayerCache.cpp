@@ -91,7 +91,7 @@ void LayerCache::clear() {
     mCache.clear();
 }
 
-Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
+Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uint32_t height) {
     Layer* layer = NULL;
 
     LayerEntry entry(width, height);
@@ -108,7 +108,7 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
     } else {
         LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
-        layer = new Layer(entry.mWidth, entry.mHeight);
+        layer = new Layer(renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
         layer->setEmpty(true);
         layer->setFbo(0);

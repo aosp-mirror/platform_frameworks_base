@@ -80,12 +80,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     private boolean mProfilingEnabled;
 
     ThreadedRenderer(Context context, boolean translucent) {
-        AtlasInitializer.sInstance.init(context);
-
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
+
+        AtlasInitializer.sInstance.init(context, mNativeProxy);
 
         // Setup timing
         mChoreographer = Choreographer.getInstance();
@@ -259,9 +259,8 @@ public class ThreadedRenderer extends HardwareRenderer {
         }
     }
 
-    @Override
-    void invokeFunctor(long functor, boolean waitForCompletion) {
-        nInvokeFunctor(mNativeProxy, functor, waitForCompletion);
+    static void invokeFunctor(long functor, boolean waitForCompletion) {
+        nInvokeFunctor(functor, waitForCompletion);
     }
 
     @Override
@@ -342,7 +341,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         private AtlasInitializer() {}
 
-        synchronized void init(Context context) {
+        synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
             IBinder binder = ServiceManager.getService("assetatlas");
             if (binder == null) return;
@@ -356,7 +355,7 @@ public class ThreadedRenderer extends HardwareRenderer {
                         if (map != null) {
                             // TODO Remove after fixing b/15425820
                             validateMap(context, map);
-                            nSetAtlas(buffer, map);
+                            nSetAtlas(renderProxy, buffer, map);
                             mInitialized = true;
                         }
                         // If IAssetAtlas is not the same class as the IBinder
@@ -399,7 +398,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     static native void setupShadersDiskCache(String cacheFile);
 
-    private static native void nSetAtlas(GraphicBuffer buffer, long[] map);
+    private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
@@ -419,7 +418,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);
 
-    private static native void nInvokeFunctor(long nativeProxy, long functor, boolean waitForCompletion);
+    private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
 
     private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
     private static native long nCreateTextureLayer(long nativeProxy);

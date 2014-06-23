@@ -41,13 +41,13 @@ class Layer;
 
 namespace renderthread {
 
-class GlobalContext;
+class EglManager;
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 class CanvasContext : public IFrameCallback {
 public:
-    CanvasContext(bool translucent, RenderNode* rootRenderNode);
+    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode);
     virtual ~CanvasContext();
 
     bool initialize(ANativeWindow* window);
@@ -68,15 +68,15 @@ public:
 
     void flushCaches(Caches::FlushMode flushMode);
 
-    void invokeFunctor(Functor* functor);
+    static void invokeFunctor(RenderThread& thread, Functor* functor);
 
     void runWithGlContext(RenderTask* task);
 
     Layer* createRenderLayer(int width, int height);
     Layer* createTextureLayer();
 
-    ANDROID_API static void setTextureAtlas(const sp<GraphicBuffer>& buffer,
-            int64_t* map, size_t mapSize);
+    ANDROID_API static void setTextureAtlas(RenderThread& thread,
+            const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
     void notifyFramePending();
 
@@ -91,8 +91,8 @@ private:
 
     void requireGlContext();
 
-    GlobalContext* mGlobalContext;
     RenderThread& mRenderThread;
+    EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
     EGLSurface mEglSurface;
     bool mDirtyRegionsEnabled;

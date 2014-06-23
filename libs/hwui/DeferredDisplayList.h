@@ -38,7 +38,6 @@ class SaveLayerOp;
 class StateOp;
 
 class DeferredDisplayState;
-class OpenGLRenderer;
 
 class Batch;
 class DrawBatch;

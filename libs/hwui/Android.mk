@@ -45,6 +45,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		RenderBufferCache.cpp \
 		RenderNode.cpp \
 		RenderProperties.cpp \
+		RenderState.cpp \
 		ResourceCache.cpp \
 		ShadowTessellator.cpp \
 		SkiaShader.cpp \
@@ -61,6 +62,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES += \
 		renderthread/CanvasContext.cpp \
 		renderthread/DrawFrameTask.cpp \
+		renderthread/EglManager.cpp \
 		renderthread/RenderProxy.cpp \
 		renderthread/RenderTask.cpp \
 		renderthread/RenderThread.cpp \
