@@ -34,7 +34,7 @@ elevation</a>.</li>
 <li>On very tall or wide views, view shadows may appear with additional rough
 visual artifacts around the view edges. To minimize this, avoid using view
 shadows with very narrow views.</li>
-<li>The {@code android.graphics.drawable.RippableDrawable} class does not
+<li>The {@code android.graphics.drawable.RippleDrawable} class does not
 respond to pointer location changes, except when the drawable is set as a
 {@link android.view.View} background.</li>
 </ul>
@@ -54,11 +54,12 @@ CaptureRequest.Builder stillCaptureRequest =
 stillCaptureRequest.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE,
         CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE_ON);
 </pre></li>
-<li>Portions of the internal audio pipeline do not support floating-point format.</li>
 <li>The {@code android.media.AudioTrack.write(float[], int, int, int)} method
 currently does not work. Use the
 {@link android.media.AudioTrack#write(short[], int, int)
 AudioTrack.write(short[], int, int)} method instead.</li>
+<li>Lockscreen security is currently not enforced when users start a Android
+mirroring session from the Quick Settings shade.</li>
 </ul>
 
 <h3 id="UserInput">User input</h3>
@@ -72,15 +73,17 @@ devices.</li></ul>
 <h3 id="Enterprise">Enterprise</h3>
 <ul>
 <li>The device may crash unexpectedly in these situations when using
-Android for Work functionality:
+Android work functionality:
 <ul>
-<li>The user attempts to share a webpage (via <strong>Menu &gt; Share</strong>)
-from a non-managed Chrome app to a managed Gmail app.</li>
-<li>The user attempts to share a webpage via Bluetooth from a managed Chrome app.</li>
-<li>The user attempts to share a webpage via Android Beam from a managed Chrome app.</li>
+<li>The user attempts to share a web page (via <strong>Menu &gt; Share</strong>)
+from a non-Android work Chrome app to a Android work profile Gmail app.</li>
+<li>The user attempts to share a web page via Bluetooth from a
+Android work profile
+Chrome app.</li>
+<li>The user attempts to share a web page via Android Beam from a
+Android work profile Chrome app.</li>
 </ul>
 </li>
-<li>Deleting the managed work profile (profile owner) may take several minutes
-to complete. You cannot create a new managed profile until the deletion
-operation is over.</li>
+<li>Deleting a Android work profile may take several minutes to complete. You
+cannot create a new Android work profile until the deletion operation is over.</li>
 </ul>
