@@ -29,6 +29,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -3618,4 +3619,8 @@ public abstract class PackageManager {
      */
     public abstract void addCrossProfileIntentsForPackage(String packageName,
             int sourceUserId, int targetUserId);
+    /**
+     * @hide
+     */
+    public abstract Bitmap getUserIcon(int userId);
 }

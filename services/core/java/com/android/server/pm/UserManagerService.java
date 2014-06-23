@@ -412,12 +412,16 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public Bitmap getUserIcon(int userId) {
-        checkManageUsersPermission("read users");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null || info.partial) {
                 Slog.w(LOG_TAG, "getUserIcon: unknown user #" + userId);
                 return null;
+            }
+            int callingGroupId = mUsers.get(UserHandle.getCallingUserId()).profileGroupId;
+            if (callingGroupId == UserInfo.NO_PROFILE_GROUP_ID
+                    || callingGroupId != info.profileGroupId) {
+                checkManageUsersPermission("get the icon of a user who is not related");
             }
             if (info.iconPath == null) {
                 return null;

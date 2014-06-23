@@ -48,11 +48,13 @@ import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
@@ -1488,6 +1490,15 @@ final class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             // Should never happen!
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public Bitmap getUserIcon(int userId) {
+        UserManager um = UserManager.get(mContext);
+        return um.getUserIcon(userId);
     }
 
     private final ContextImpl mContext;
