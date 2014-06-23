@@ -43,6 +43,7 @@ import android.text.style.SuggestionRangeSpan;
 import android.text.style.SuggestionSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.TtsSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
@@ -607,7 +608,9 @@ public class TextUtils {
     /** @hide */
     public static final int LOCALE_SPAN = 23;
     /** @hide */
-    public static final int LAST_SPAN = LOCALE_SPAN;
+    public static final int TTS_SPAN = 24;
+    /** @hide */
+    public static final int LAST_SPAN = TTS_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -784,6 +787,10 @@ public class TextUtils {
 
                 case LOCALE_SPAN:
                     readSpan(p, sp, new LocaleSpan(p));
+                    break;
+
+                case TTS_SPAN:
+                    readSpan(p, sp, new TtsSpan(p));
                     break;
 
                 default:

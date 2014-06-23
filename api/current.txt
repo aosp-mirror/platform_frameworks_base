@@ -16287,20 +16287,20 @@ package android.net {
     method public void unregisterDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
+    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1; // 0x1
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
+    field public static final java.lang.String EXTRA_NETWORK = "network";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
-    field public static final java.lang.String EXTRA_NETWORK = "network";
-    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1;
-    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2;
     field public static final int TYPE_BLUETOOTH = 7; // 0x7
     field public static final int TYPE_DUMMY = 8; // 0x8
     field public static final int TYPE_ETHERNET = 9; // 0x9
@@ -30384,6 +30384,40 @@ package android.text.style {
     method public void updateDrawState(android.text.TextPaint);
     method public void updateMeasureState(android.text.TextPaint);
     method public void writeToParcel(android.os.Parcel, int);
+  }
+
+  public class TtsSpan implements android.text.ParcelableSpan {
+    ctor public TtsSpan(java.lang.String, android.os.PersistableBundle);
+    ctor public TtsSpan(android.os.Parcel);
+    method public int describeContents();
+    method public android.os.PersistableBundle getArgs();
+    method public int getSpanTypeId();
+    method public java.lang.String getType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String ANIMACY_ANIMATE = "android.animate";
+    field public static final java.lang.String ANIMACY_INANIMATE = "android.inanimate";
+    field public static final java.lang.String ARG_ANIMACY = "android.arg.animacy";
+    field public static final java.lang.String ARG_CASE = "android.arg.case";
+    field public static final java.lang.String ARG_GENDER = "android.arg.gender";
+    field public static final java.lang.String ARG_MULTIPLICITY = "android.arg.multiplicity";
+    field public static final java.lang.String ARG_NUMBER = "android.arg.number";
+    field public static final java.lang.String ARG_TEXT = "android.arg.text";
+    field public static final java.lang.String CASE_ABLATIVE = "android.ablative";
+    field public static final java.lang.String CASE_ACCUSATIVE = "android.accusative";
+    field public static final java.lang.String CASE_DATIVE = "android.dative";
+    field public static final java.lang.String CASE_GENITIVE = "android.genitive";
+    field public static final java.lang.String CASE_INSTRUMENTAL = "android.instrumental";
+    field public static final java.lang.String CASE_LOCATIVE = "android.locative";
+    field public static final java.lang.String CASE_NOMINATIVE = "android.nomative";
+    field public static final java.lang.String CASE_VOCATIVE = "android.vocative";
+    field public static final java.lang.String GENDER_FEMALE = "android.female";
+    field public static final java.lang.String GENDER_MALE = "android.male";
+    field public static final java.lang.String GENDER_NEUTRAL = "android.neutral";
+    field public static final java.lang.String MULTIPLICITY_DUAL = "android.dual";
+    field public static final java.lang.String MULTIPLICITY_PLURAL = "android.plural";
+    field public static final java.lang.String MULTIPLICITY_SINGLE = "android.single";
+    field public static final java.lang.String TYPE_CARDINAL = "android.type.cardinal";
+    field public static final java.lang.String TYPE_TEXT = "android.type.text";
   }
 
   public class TypefaceSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
