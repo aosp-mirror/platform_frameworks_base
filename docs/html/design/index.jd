@@ -13,7 +13,7 @@ footer.hide=1
 
 #text-overlay {
   position: absolute;
-  left: 36px;
+  left: 0;
   top: 42px;
   width: 266px;
 
@@ -34,5 +34,15 @@ footer.hide=1
   <a id="hero-image" href="/design/get-started/creative-vision.html">
     <img src="/design/media/index_landing_page.png">
   </a>
+
+<div style="background: hsl(8, 70%, 54%); margin: 0; padding: 20px 20px 10px 20px;color: #fff; position: absolute;top: 255px;width: 179px;">
+<h2 style="color: #fff;margin:0 0 10px; font-size:18px" class="norule">L Developer Preview</h2>
+<p> The next version of Android uses a design
+metaphor inspired by paper and ink that provides a reassuring sense of tactility. Before it arrives for users, you can get an early
+look at the new Material design.
+</p>
+<p><a class="white" href="{@docRoot}preview/material/index.html">Learn more about Material</a></p>
+</div>
+
 </div>
 
