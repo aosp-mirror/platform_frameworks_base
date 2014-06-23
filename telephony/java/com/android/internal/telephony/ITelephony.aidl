@@ -633,5 +633,17 @@ interface ITelephony {
      */
     void setImsRegistrationState(boolean registered);
 
+    /**
+     * Has the calling application been granted special privileges by the carrier.
+     *
+     * If any of the packages in the calling UID has carrier privileges, the
+     * call will return true. This access is granted by the owner of the UICC
+     * card and does not depend on the registered carrier.
+     *
+     * TODO: Add a link to documentation.
+     *
+     * @return carrier privelege status defined in TelephonyManager.
+     */
+    int hasCarrierPrivileges();
 }
 

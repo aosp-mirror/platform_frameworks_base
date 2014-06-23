@@ -16288,20 +16288,20 @@ package android.net {
     method public void unregisterDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
+    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1; // 0x1
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
+    field public static final java.lang.String EXTRA_NETWORK = "network";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
-    field public static final java.lang.String EXTRA_NETWORK = "network";
-    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1;
-    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2;
     field public static final int TYPE_BLUETOOTH = 7; // 0x7
     field public static final int TYPE_DUMMY = 8; // 0x8
     field public static final int TYPE_ETHERNET = 9; // 0x9
@@ -28327,6 +28327,7 @@ package android.telephony {
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
+    method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
@@ -28335,6 +28336,10 @@ package android.telephony {
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
+    field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
+    field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
+    field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
+    field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int DATA_ACTIVITY_DORMANT = 4; // 0x4
     field public static final int DATA_ACTIVITY_IN = 1; // 0x1
     field public static final int DATA_ACTIVITY_INOUT = 3; // 0x3

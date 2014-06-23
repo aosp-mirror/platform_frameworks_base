@@ -2812,6 +2812,40 @@ public class TelephonyManager {
     }
 
     /**
+     * Values used to return status for hasCarrierPrivileges call.
+     */
+    public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1;
+    public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0;
+    public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1;
+    public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2;
+
+    /**
+     * Has the calling application been granted carrier privileges by the carrier.
+     *
+     * If any of the packages in the calling UID has carrier privileges, the
+     * call will return true. This access is granted by the owner of the UICC
+     * card and does not depend on the registered carrier.
+     *
+     * TODO: Add a link to documentation.
+     *
+     * @return CARRIER_PRIVILEGE_STATUS_HAS_ACCESS if the app has carrier privileges.
+     *         CARRIER_PRIVILEGE_STATUS_NO_ACCESS if the app does not have carrier privileges.
+     *         CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED if the carrier rules are not loaded.
+     *         CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES if there was an error loading carrier
+     *             rules (or if there are no rules).
+     */
+    public int hasCarrierPrivileges() {
+        try {
+            return getITelephony().hasCarrierPrivileges();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "hasCarrierPrivileges RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "hasCarrierPrivileges NPE", ex);
+        }
+        return CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /**
      * Expose the rest of ITelephony to @SystemApi
      */
 
