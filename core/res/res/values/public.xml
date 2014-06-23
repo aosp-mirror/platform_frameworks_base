@@ -2115,7 +2115,7 @@
   <public type="attr" name="controlY1" />
   <public type="attr" name="controlX2" />
   <public type="attr" name="controlY2" />
-  <public type="attr" name="transitionName" />
+  <public type="attr" name="viewName" />
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="viewportWidth" />
   <public type="attr" name="viewportHeight" />
@@ -2168,8 +2168,8 @@
   <public type="attr" name="fromId" />
   <public type="attr" name="reversible" />
   <public type="attr" name="splitTrack" />
-  <public type="attr" name="targetName" />
-  <public type="attr" name="excludeName" />
+  <public type="attr" name="targetViewName" />
+  <public type="attr" name="excludeViewName" />
   <public type="attr" name="matchOrder" />
   <public type="attr" name="windowDrawsSystemBarBackgrounds" />
   <public type="attr" name="statusBarColor"/>

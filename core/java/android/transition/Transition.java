@@ -89,8 +89,8 @@ import java.util.List;
  * out-in behavior. Finally, note the use of the <code>targets</code> sub-tag, which
  * takes a set of {@link android.R.styleable#TransitionTarget target} tags, each
  * of which lists a specific <code>targetId</code>, <code>targetClass</code>,
- * <code>targetName</code>, <code>excludeId</code>, <code>excludeClass</code>, or
- * <code>excludeName</code>, which this transition acts upon.
+ * <code>targetViewName</code>, <code>excludeId</code>, <code>excludeClass</code>, or
+ * <code>excludeViewName</code>, which this transition acts upon.
  * Use of targets is optional, but can be used to either limit the time spent checking
  * attributes on unchanging views, or limiting the types of animations run on specific views.
  * In this case, we know that only the <code>grayscaleContainer</code> will be
@@ -115,9 +115,9 @@ public abstract class Transition implements Cloneable {
 
     /**
      * With {@link #setMatchOrder(int...)}, chooses to match by
-     * {@link android.view.View#getTransitionName()}. Null names will not be matched.
+     * {@link android.view.View#getViewName()}. Null names will not be matched.
      */
-    public static final int MATCH_NAME = 0x2;
+    public static final int MATCH_VIEW_NAME = 0x2;
 
     /**
      * With {@link #setMatchOrder(int...)}, chooses to match by
@@ -135,7 +135,7 @@ public abstract class Transition implements Cloneable {
     private static final int MATCH_LAST = MATCH_ITEM_ID;
 
     private static final int[] DEFAULT_MATCH_ORDER = {
-        MATCH_NAME,
+        MATCH_VIEW_NAME,
         MATCH_INSTANCE,
         MATCH_ID,
         MATCH_ITEM_ID,
@@ -207,7 +207,7 @@ public abstract class Transition implements Cloneable {
     EpicenterCallback mEpicenterCallback;
 
     // For Fragment shared element transitions, linking views explicitly by mismatching
-    // transitionNames.
+    // viewNames.
     ArrayMap<String, String> mNameOverrides;
 
     /**
@@ -378,17 +378,17 @@ public abstract class Transition implements Cloneable {
     /**
      * Sets the order in which Transition matches View start and end values.
      * <p>
-     * The default behavior is to match first by {@link android.view.View#getTransitionName()},
+     * The default behavior is to match first by {@link android.view.View#getViewName()},
      * then by View instance, then by {@link android.view.View#getId()} and finally
      * by its item ID if it is in a direct child of ListView. The caller can
      * choose to have only some or all of the values of {@link #MATCH_INSTANCE},
-     * {@link #MATCH_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}. Only
+     * {@link #MATCH_VIEW_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}. Only
      * the match algorithms supplied will be used to determine whether Views are the
      * the same in both the start and end Scene. Views that do not match will be considered
      * as entering or leaving the Scene.
      * </p>
      * @param matches A list of zero or more of {@link #MATCH_INSTANCE},
-     *                {@link #MATCH_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}.
+     *                {@link #MATCH_VIEW_NAME}, {@link #MATCH_ITEM_ID}, and {@link #MATCH_ID}.
      *                If none are provided, then the default match order will be set.
      */
     public void setMatchOrder(int... matches) {
@@ -500,9 +500,9 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Match start/end values by Adapter transitionName. Adds matched values to startValuesList
+     * Match start/end values by Adapter viewName. Adds matched values to startValuesList
      * and endValuesList and removes them from unmatchedStart and unmatchedEnd, using
-     * startNames and endNames as a guide for which Views have unique transitionNames.
+     * startNames and endNames as a guide for which Views have unique viewNames.
      */
     private void matchNames(ArrayList<TransitionValues> startValuesList,
             ArrayList<TransitionValues> endValuesList,
@@ -563,7 +563,7 @@ public abstract class Transition implements Cloneable {
                 case MATCH_INSTANCE:
                     matchInstances(startValuesList, endValuesList, unmatchedStart, unmatchedEnd);
                     break;
-                case MATCH_NAME:
+                case MATCH_VIEW_NAME:
                     matchNames(startValuesList, endValuesList, unmatchedStart, unmatchedEnd,
                             startValues.nameValues, endValues.nameValues);
                     break;
@@ -718,8 +718,8 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        if (mTargetNameExcludes != null && target != null && target.getTransitionName() != null) {
-            if (mTargetNameExcludes.contains(target.getTransitionName())) {
+        if (mTargetNameExcludes != null && target != null && target.getViewName() != null) {
+            if (mTargetNameExcludes.contains(target.getViewName())) {
                 return false;
             }
         }
@@ -731,7 +731,7 @@ public abstract class Transition implements Cloneable {
         if (mTargetIds.contains(targetId) || mTargets.contains(target)) {
             return true;
         }
-        if (mTargetNames != null && mTargetNames.contains(target.getTransitionName())) {
+        if (mTargetNames != null && mTargetNames.contains(target.getViewName())) {
             return true;
         }
         if (mTargetTypes != null) {
@@ -882,18 +882,18 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Adds the transitionName of a target view that this Transition is interested in
+     * Adds the viewName of a target view that this Transition is interested in
      * animating. By default, there are no targetNames, and a Transition will
      * listen for changes on every view in the hierarchy below the sceneRoot
      * of the Scene being transitioned into. Setting targetNames constrains
-     * the Transition to only listen for, and act on, views with these transitionNames.
-     * Views with different transitionNames, or no transitionName whatsoever, will be ignored.
+     * the Transition to only listen for, and act on, views with these viewNames.
+     * Views with different viewNames, or no viewName whatsoever, will be ignored.
      *
-     * <p>Note that transitionNames should be unique within the view hierarchy.</p>
+     * <p>Note that viewNames should be unique within the view hierarchy.</p>
      *
-     * @see android.view.View#getTransitionName()
-     * @param targetName The transitionName of a target view, must be non-null.
-     * @return The Transition to which the target transitionName is added.
+     * @see android.view.View#getViewName()
+     * @param targetName The viewName of a target view, must be non-null.
+     * @return The Transition to which the target viewName is added.
      * Returning the same object makes it easier to chain calls during
      * construction, such as
      * <code>transitionSet.addTransitions(new Fade()).addTarget(someName);</code>
@@ -958,10 +958,10 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Removes the given targetName from the list of transitionNames that this Transition
+     * Removes the given targetName from the list of viewNames that this Transition
      * is interested in animating.
      *
-     * @param targetName The transitionName of a target view, must not be null.
+     * @param targetName The viewName of a target view, must not be null.
      * @return The Transition from which the targetName is removed.
      * Returning the same object makes it easier to chain calls during
      * construction, such as
@@ -1003,28 +1003,28 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Whether to add the given transitionName to the list of target transitionNames to exclude
-     * from this transition. The <code>exclude</code> parameter specifies whether the target
+     * Whether to add the given viewName to the list of target viewNames to exclude from this
+     * transition. The <code>exclude</code> parameter specifies whether the target
      * should be added to or removed from the excluded list.
      *
      * <p>Excluding targets is a general mechanism for allowing transitions to run on
      * a view hierarchy while skipping target views that should not be part of
      * the transition. For example, you may want to avoid animating children
      * of a specific ListView or Spinner. Views can be excluded by their
-     * id, their instance reference, their transitionName, or by the Class of that view
+     * id, their instance reference, their viewName, or by the Class of that view
      * (eg, {@link Spinner}).</p>
      *
      * @see #excludeTarget(View, boolean)
      * @see #excludeTarget(int, boolean)
      * @see #excludeTarget(Class, boolean)
      *
-     * @param targetName The name of a target to ignore when running this transition.
+     * @param targetViewName The name of a target to ignore when running this transition.
      * @param exclude Whether to add the target to or remove the target from the
      * current list of excluded targets.
      * @return This transition object.
      */
-    public Transition excludeTarget(String targetName, boolean exclude) {
-        mTargetNameExcludes = excludeObject(mTargetNameExcludes, targetName, exclude);
+    public Transition excludeTarget(String targetViewName, boolean exclude) {
+        mTargetNameExcludes = excludeObject(mTargetNameExcludes, targetViewName, exclude);
         return this;
     }
 
@@ -1248,7 +1248,7 @@ public abstract class Transition implements Cloneable {
     /**
      * Returns the list of target IDs that this transition limits itself to
      * tracking and animating. If the list is null or empty for
-     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetViewNames()}, and
      * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
@@ -1262,7 +1262,7 @@ public abstract class Transition implements Cloneable {
     /**
      * Returns the list of target views that this transition limits itself to
      * tracking and animating. If the list is null or empty for
-     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetViewNames()}, and
      * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
@@ -1274,31 +1274,23 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Returns the list of target transitionNames that this transition limits itself to
+     * Returns the list of target viewNames that this transition limits itself to
      * tracking and animating. If the list is null or empty for
-     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetViewNames()}, and
      * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
      *
-     * @return the list of target transitionNames
-     */
-    public List<String> getTargetNames() {
-        return mTargetNames;
-    }
-
-    /**
-     * To be removed before L release.
-     * @hide
+     * @return the list of target viewNames
      */
     public List<String> getTargetViewNames() {
         return mTargetNames;
     }
 
     /**
-     * Returns the list of target transitionNames that this transition limits itself to
+     * Returns the list of target viewNames that this transition limits itself to
      * tracking and animating. If the list is null or empty for
-     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetNames()}, and
+     * {@link #getTargetIds()}, {@link #getTargets()}, {@link #getTargetViewNames()}, and
      * {@link #getTargetTypes()} then this transition is
      * not limited to specific views, and will handle changes to any views
      * in the hierarchy of a scene change.
@@ -1388,10 +1380,10 @@ public abstract class Transition implements Cloneable {
                 transitionValuesMaps.idValues.put(id, view);
             }
         }
-        String name = view.getTransitionName();
+        String name = view.getViewName();
         if (name != null) {
             if (transitionValuesMaps.nameValues.containsKey(name)) {
-                // Duplicate transitionNames: cannot match by transitionName.
+                // Duplicate viewNames: cannot match by viewName.
                 transitionValuesMaps.nameValues.put(name, null);
             } else {
                 transitionValuesMaps.nameValues.put(name, view);

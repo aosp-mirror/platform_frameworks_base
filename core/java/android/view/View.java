@@ -672,7 +672,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawHorizontalTrack
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
  * @attr ref android.R.styleable#View_stateListAnimator
- * @attr ref android.R.styleable#View_transitionName
+ * @attr ref android.R.styleable#View_viewName
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
  * @attr ref android.R.styleable#View_textAlignment
@@ -3204,7 +3204,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
 
-    private String mTransitionName;
+    private String mViewName;
 
     static class ListenerInfo {
         /**
@@ -4016,8 +4016,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_accessibilityLiveRegion:
                     setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
                     break;
-                case R.styleable.View_transitionName:
-                    setTransitionName(a.getString(attr));
+                case R.styleable.View_viewName:
+                    setViewName(a.getString(attr));
                     break;
                 case R.styleable.View_nestedScrollingEnabled:
                     setNestedScrollingEnabled(a.getBoolean(attr, false));
@@ -18915,15 +18915,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Adds all Views that have {@link #getTransitionName()} non-null to namedElements.
-     * @param namedElements Will contain all Views in the hierarchy having a transitionName.
+     * Adds all Views that have {@link #getViewName()} non-null to namedElements.
+     * @param namedElements Will contain all Views in the hierarchy having a view name.
      * @hide
      */
     public void findNamedViews(Map<String, View> namedElements) {
         if (getVisibility() == VISIBLE) {
-            String transitionName = getTransitionName();
-            if (transitionName != null) {
-                namedElements.put(transitionName, this);
+            String viewName = getViewName();
+            if (viewName != null) {
+                namedElements.put(viewName, this);
             }
         }
     }
@@ -19325,18 +19325,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the name of the View to be used to identify Views in Transitions.
      * Names should be unique in the View hierarchy.
      *
-     * @param transitionName The name of the View to uniquely identify it for Transitions.
+     * @param viewName The name of the View to uniquely identify it for Transitions.
      */
-    public final void setTransitionName(String transitionName) {
-        mTransitionName = transitionName;
-    }
-
-    /**
-     * To be removed before L release.
-     * @hide
-     */
-    public final void setViewName(String transitionName) {
-        setTransitionName(transitionName);
+    public final void setViewName(String viewName) {
+        mViewName = viewName;
     }
 
     /**
@@ -19348,15 +19340,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The name used of the View to be used to identify Views in Transitions or null
      * if no name has been given.
      */
-    public String getTransitionName() {
-        return mTransitionName;
+    public String getViewName() {
+        return mViewName;
     }
-
-    /**
-     * To be removed before L release.
-     * @hide
-     */
-    public String getViewName() { return getTransitionName(); }
 
     /**
      * Interface definition for a callback to be invoked when a hardware key event is

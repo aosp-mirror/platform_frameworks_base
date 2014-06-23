@@ -581,13 +581,13 @@ final class BackStackRecord extends FragmentTransaction implements
 
     @Override
     public FragmentTransaction setSharedElement(View sharedElement, String name) {
-        String transitionName = sharedElement.getTransitionName();
-        if (transitionName == null) {
-            throw new IllegalArgumentException("Unique transitionNames are required for all" +
+        String viewName = sharedElement.getViewName();
+        if (viewName == null) {
+            throw new IllegalArgumentException("Unique viewNames are required for all" +
                     " sharedElements");
         }
         mSharedElementSourceNames = new ArrayList<String>(1);
-        mSharedElementSourceNames.add(transitionName);
+        mSharedElementSourceNames.add(viewName);
 
         mSharedElementTargetNames = new ArrayList<String>(1);
         mSharedElementTargetNames.add(name);
@@ -603,12 +603,12 @@ final class BackStackRecord extends FragmentTransaction implements
             ArrayList<String> sourceNames = new ArrayList<String>(sharedElements.length);
             ArrayList<String> targetNames = new ArrayList<String>(sharedElements.length);
             for (int i = 0; i < sharedElements.length; i++) {
-                String transitionName = sharedElements[i].first.getTransitionName();
-                if (transitionName == null) {
-                    throw new IllegalArgumentException("Unique transitionNames are required for all"
-                            + " sharedElements");
+                String viewName = sharedElements[i].first.getViewName();
+                if (viewName == null) {
+                    throw new IllegalArgumentException("Unique viewNames are required for all" +
+                            " sharedElements");
                 }
-                sourceNames.add(transitionName);
+                sourceNames.add(viewName);
                 targetNames.add(sharedElements[i].second);
             }
             mSharedElementSourceNames = sourceNames;
