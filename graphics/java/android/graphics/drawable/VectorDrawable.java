@@ -237,34 +237,6 @@ public class VectorDrawable extends Drawable {
         return PixelFormat.TRANSLUCENT;
     }
 
-    /**
-     * Sets padding for this shape, defined by a Rect object. Define the padding
-     * in the Rect object as: left, top, right, bottom.
-     */
-    public void setPadding(Rect padding) {
-        setPadding(padding.left, padding.top, padding.right, padding.bottom);
-    }
-
-    /**
-     * Sets padding for the shape.
-     *
-     * @param left padding for the left side (in pixels)
-     * @param top padding for the top (in pixels)
-     * @param right padding for the right side (in pixels)
-     * @param bottom padding for the bottom (in pixels)
-     */
-    public void setPadding(int left, int top, int right, int bottom) {
-        if ((left | top | right | bottom) == 0) {
-            mVectorState.mPadding = null;
-        } else {
-            if (mVectorState.mPadding == null) {
-                mVectorState.mPadding = new Rect();
-            }
-            mVectorState.mPadding.set(left, top, right, bottom);
-        }
-        invalidateSelf();
-    }
-
     @Override
     public int getIntrinsicWidth() {
         return (int) mVectorState.mVPathRenderer.mBaseWidth;
@@ -273,16 +245,6 @@ public class VectorDrawable extends Drawable {
     @Override
     public int getIntrinsicHeight() {
         return (int) mVectorState.mVPathRenderer.mBaseHeight;
-    }
-
-    @Override
-    public boolean getPadding(Rect padding) {
-        if (mVectorState.mPadding != null) {
-            padding.set(mVectorState.mPadding);
-            return true;
-        } else {
-            return super.getPadding(padding);
-        }
     }
 
     @Override
@@ -462,7 +424,6 @@ public class VectorDrawable extends Drawable {
         int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
-        Rect mPadding;
         ColorStateList mTint;
         Mode mTintMode;
 
@@ -472,7 +433,6 @@ public class VectorDrawable extends Drawable {
                 mChangingConfigurations = copy.mChangingConfigurations;
                 // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
-                mPadding = new Rect(copy.mPadding);
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
             }
