@@ -22,4 +22,9 @@
     <style name="AlertDialog.Leanback.Light">
     </style>
 
+    <style name="Widget.Leanback.TimePicker" parent="Widget.Material.TimePicker">
+        <item name="legacyLayout">@layout/time_picker_legacy_leanback</item>
+    </style>
+
+
 </resources>

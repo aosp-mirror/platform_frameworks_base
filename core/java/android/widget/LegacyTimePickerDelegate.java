@@ -75,6 +75,11 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
     // accommodates these two cases to be backwards compatible.
     private final Button mAmPmButton;
 
+    // May be null if layout has no done button
+    private final View mDoneButton;
+    private boolean mShowDoneButton;
+    private TimePicker.TimePickerDismissCallback mDismissCallback;
+
     private final String[] mAmPmStrings;
 
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
@@ -218,6 +223,19 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
             }
         }
 
+        mDoneButton = delegator.findViewById(R.id.done_button);
+        if (mDoneButton != null) {
+            mDoneButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mDismissCallback != null) {
+                        mDismissCallback.dismiss(mDelegator, false, getCurrentHour(),
+                                                 getCurrentMinute());
+                    }
+                }
+            });
+        }
+
         getHourFormatData();
 
         // update controls to initial state
@@ -242,6 +260,9 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (mDelegator.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             mDelegator.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+
+        mShowDoneButton = false;
+        updateDoneButton();
     }
 
     private void getHourFormatData() {
@@ -408,12 +429,23 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public void setShowDoneButton(boolean showDoneButton) {
-        // Nothing to do
+        mShowDoneButton = showDoneButton;
+        updateDoneButton();
+    }
+
+    private boolean isShowDoneButton() {
+        return mShowDoneButton;
+    }
+
+    private void updateDoneButton() {
+        if (mDoneButton != null) {
+            mDoneButton.setVisibility(mShowDoneButton ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
     public void setDismissCallback(TimePicker.TimePickerDismissCallback callback) {
-        // Nothing to do
+        mDismissCallback = callback;
     }
 
     @Override
@@ -428,7 +460,8 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
-        return new SavedState(superState, getCurrentHour(), getCurrentMinute());
+        return new SavedState(superState, getCurrentHour(), getCurrentMinute(),
+                isShowDoneButton());
     }
 
     @Override
@@ -436,6 +469,7 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
         SavedState ss = (SavedState) state;
         setCurrentHour(ss.getHour());
         setCurrentMinute(ss.getMinute());
+        setShowDoneButton(ss.isShowDoneButton());
     }
 
     @Override
@@ -596,16 +630,20 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
         private final int mMinute;
 
-        private SavedState(Parcelable superState, int hour, int minute) {
+        private final boolean mShowDoneButton;
+
+        private SavedState(Parcelable superState, int hour, int minute, boolean showDoneButton) {
             super(superState);
             mHour = hour;
             mMinute = minute;
+            mShowDoneButton = showDoneButton;
         }
 
         private SavedState(Parcel in) {
             super(in);
             mHour = in.readInt();
             mMinute = in.readInt();
+            mShowDoneButton = (in.readInt() == 1);
         }
 
         public int getHour() {
@@ -616,11 +654,16 @@ class LegacyTimePickerDelegate extends TimePicker.AbstractTimePickerDelegate {
             return mMinute;
         }
 
+        public boolean isShowDoneButton() {
+            return mShowDoneButton;
+        }
+
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeInt(mHour);
             dest.writeInt(mMinute);
+            dest.writeInt(mShowDoneButton ? 1 : 0);
         }
 
         @SuppressWarnings({"unused", "hiding"})

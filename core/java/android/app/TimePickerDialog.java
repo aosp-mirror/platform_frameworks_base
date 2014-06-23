@@ -16,9 +16,11 @@
 
 package android.app;
 
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -110,11 +112,14 @@ public class TimePickerDialog extends AlertDialog
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
         setView(view);
-        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
 
         // Initialize state
-        mTimePicker.setLegacyMode(false /* will show new UI */);
+        UiModeManager uiModeManager =
+                (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() != Configuration.UI_MODE_TYPE_TELEVISION) {
+            mTimePicker.setLegacyMode(false /* will show new UI */);
+        }
         mTimePicker.setShowDoneButton(true);
         mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
             @Override
