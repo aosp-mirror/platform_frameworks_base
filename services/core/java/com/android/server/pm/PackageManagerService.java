@@ -3479,8 +3479,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ResolveInfo resolveInfo = checkTargetCanHandle(filter, intent, resolvedType,
                             flags, sourceUserId);
                     if (resolveInfo != null) {
-                        return createForwardingResolveInfo(
-                                filter, sourceUserId, filter.getTargetUserId());
+                        return resolveInfo;
                     }
                 }
             }
