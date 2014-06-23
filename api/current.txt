@@ -5320,9 +5320,22 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
     field public static final java.lang.String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME = "android.app.extra.defaultManagedProfileName";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM = "android.app.extra.deviceAdminPackageChecksum";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.deviceAdminPackageDownloadLocation";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.deviceAdminPackageName";
     field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.ManagedProfileEmailAddress";
+    field public static final java.lang.String EXTRA_PROVISIONING_LOCALE = "android.app.extra.locale";
+    field public static final java.lang.String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.localTime";
+    field public static final java.lang.String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.timeZone";
     field public static final java.lang.String EXTRA_PROVISIONING_TOKEN = "android.app.extra.token";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_HIDDEN = "android.app.extra.wifiHidden";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PAC_URL = "android.app.extra.wifiPacUrl";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PASSWORD = "android.app.extra.wifiPassword";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PROXY_BYPASS = "android.app.extra.wifiProxyBypassHosts";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PROXY_HOST = "android.app.extra.wifiProxyHost";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PROXY_PORT = "android.app.extra.wifiProxyPort";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.wifiSecurityType";
+    field public static final java.lang.String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.wifiSsid";
     field public static int FLAG_MANAGED_CAN_ACCESS_PARENT;
     field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
@@ -5339,6 +5352,7 @@ package android.app.admin {
     field public static final int PASSWORD_QUALITY_NUMERIC = 131072; // 0x20000
     field public static final int PASSWORD_QUALITY_SOMETHING = 65536; // 0x10000
     field public static final int PASSWORD_QUALITY_UNSPECIFIED = 0; // 0x0
+    field public static final java.lang.String PROVISIONING_NFC_MIME_TYPE = "application/com.android.managedprovisioning";
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
   }
