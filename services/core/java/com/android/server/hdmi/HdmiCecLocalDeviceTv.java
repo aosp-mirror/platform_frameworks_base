@@ -284,11 +284,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         addAndStartAction(
                 new SystemAudioActionFromTv(this, avr.getLogicalAddress(), enabled, callback));
-   }
-
-    boolean canChangeSystemAudioMode() {
-        // TODO: once have immutable device info, test whether avr info exists or not.
-        return false;
     }
 
     void setSystemAudioMode(boolean on) {
@@ -504,6 +499,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return false;
     }
 
+    @ServiceThreadOnly
+    HdmiCecDeviceInfo getAvrDeviceInfo() {
+        assertRunOnServiceThread();
+        return getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+    }
+
     /**
      * Return a {@link HdmiCecDeviceInfo} corresponding to the given {@code logicalAddress}.
      *
@@ -520,10 +521,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mDeviceInfos.get(logicalAddress);
     }
 
-    @ServiceThreadOnly
-    HdmiCecDeviceInfo getAvrDeviceInfo() {
-        assertRunOnServiceThread();
-        return getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+    boolean hasSystemAudioDevice() {
+        return getSafeAvrDeviceInfo() != null;
+    }
+
+    HdmiCecDeviceInfo getSafeAvrDeviceInfo() {
+        return getSafeDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
     }
 
     /**
@@ -537,10 +540,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         synchronized (mLock) {
             return mSafeAllDeviceInfos.get(logicalAddress);
         }
-    }
-
-    HdmiCecDeviceInfo getSafeAvrDeviceInfo() {
-        return getSafeDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
     }
 
     /**
