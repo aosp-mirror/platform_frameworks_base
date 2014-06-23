@@ -186,16 +186,12 @@ public class TrustManagerService extends SystemService {
                 if (resolveInfo.serviceInfo == null) continue;
 
                 String packageName = resolveInfo.serviceInfo.packageName;
-                // STOPSHIP Reenable this check once the GMS Core prebuild library has the
-                // permission.
-                /*
                 if (pm.checkPermission(PERMISSION_PROVIDE_AGENT, packageName)
                         != PackageManager.PERMISSION_GRANTED) {
                     Log.w(TAG, "Skipping agent because package " + packageName
                             + " does not have permission " + PERMISSION_PROVIDE_AGENT + ".");
                     continue;
                 }
-                */
 
                 ComponentName name = getComponentName(resolveInfo);
                 if (!enabledAgents.contains(name)) continue;
