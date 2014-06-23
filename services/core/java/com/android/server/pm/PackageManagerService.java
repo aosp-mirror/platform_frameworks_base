@@ -605,10 +605,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final AtomicLong mLastWritten = new AtomicLong(0);
         private final AtomicBoolean mBackgroundWriteRunning = new AtomicBoolean(false);
 
-        private boolean mIsFirstBoot = false;
+        private boolean mIsHistoricalPackageUsageAvailable = true;
 
-        boolean isFirstBoot() {
-            return mIsFirstBoot;
+        boolean isHistoricalPackageUsageAvailable() {
+            return mIsHistoricalPackageUsageAvailable;
         }
 
         void write(boolean force) {
@@ -699,7 +699,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pkg.mLastPackageUsageTimeInMills = timeInMillis;
                     }
                 } catch (FileNotFoundException expected) {
-                    mIsFirstBoot = true;
+                    mIsHistoricalPackageUsageAvailable = false;
                 } catch (IOException e) {
                     Log.w(TAG, "Failed to read package usage times", e);
                 } finally {
@@ -1683,7 +1683,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean isFirstBoot() {
-        return !mRestoredSettings || mPackageUsage.isFirstBoot();
+        return !mRestoredSettings;
     }
 
     @Override
@@ -4156,7 +4156,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // The exception is first boot of a non-eng device, which
             // should do a full dexopt.
             boolean eng = "eng".equals(SystemProperties.get("ro.build.type"));
-            if (eng || !isFirstBoot()) {
+            if (eng || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
                 // TODO: add a property to control this?
                 long dexOptLRUThresholdInMinutes;
                 if (eng) {
