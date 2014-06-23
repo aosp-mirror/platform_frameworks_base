@@ -57,21 +57,11 @@ static struct {
     fingerprint_device_t *device;
 } gContext;
 
-// TODO: remove after driver update to use new HAL
-fingerprint_msg_type_t hackTilFpDriverUpdate(fingerprint_msg_type_t t) {
-    switch(static_cast<int>(t)) {
-        case 1: return FINGERPRINT_PROCESSED;
-        case 2: return FINGERPRINT_TEMPLATE_ENROLLING;
-        default: return t;
-    }
-}
-
 // Called by the HAL to notify us of fingerprint events
 static void hal_notify_callback(fingerprint_msg_t msg) {
     uint32_t arg1 = 0;
     uint32_t arg2 = 0;
     uint32_t arg3 = 0; // TODO
-    msg.type = hackTilFpDriverUpdate(msg.type);
     switch (msg.type) {
         case FINGERPRINT_ERROR:
             arg1 = msg.data.error;
