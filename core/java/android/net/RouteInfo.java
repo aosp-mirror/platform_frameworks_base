@@ -63,7 +63,6 @@ public final class RouteInfo implements Parcelable {
      */
     private final String mInterface;
 
-    private final boolean mIsDefault;
     private final boolean mIsHost;
     private final boolean mHasGateway;
 
@@ -128,7 +127,6 @@ public final class RouteInfo implements Parcelable {
         }
         mGateway = gateway;
         mInterface = iface;
-        mIsDefault = isDefault();
         mIsHost = isHost();
     }
 
@@ -215,18 +213,6 @@ public final class RouteInfo implements Parcelable {
                 mDestination.getPrefixLength() == 128);
     }
 
-    private boolean isDefault() {
-        boolean val = false;
-        if (mGateway != null) {
-            if (mGateway instanceof Inet4Address) {
-                val = (mDestination == null || mDestination.getPrefixLength() == 0);
-            } else {
-                val = (mDestination == null || mDestination.getPrefixLength() == 0);
-            }
-        }
-        return val;
-    }
-
     /**
      * Retrieves the destination address and prefix length in the form of an {@link IpPrefix}.
      *
@@ -269,7 +255,23 @@ public final class RouteInfo implements Parcelable {
      * @return {@code true} if the destination has a prefix length of 0.
      */
     public boolean isDefaultRoute() {
-        return mIsDefault;
+        return mDestination.getPrefixLength() == 0;
+    }
+
+    /**
+     * Indicates if this route is an IPv4 default route.
+     * @hide
+     */
+    public boolean isIPv4Default() {
+        return isDefaultRoute() && mDestination.getAddress() instanceof Inet4Address;
+    }
+
+    /**
+     * Indicates if this route is an IPv6 default route.
+     * @hide
+     */
+    public boolean isIPv6Default() {
+        return isDefaultRoute() && mDestination.getAddress() instanceof Inet6Address;
     }
 
     /**
@@ -370,10 +372,9 @@ public final class RouteInfo implements Parcelable {
      *  Returns a hashcode for this <code>RouteInfo</code> object.
      */
     public int hashCode() {
-        return (mDestination == null ? 0 : mDestination.hashCode() * 41)
+        return (mDestination.hashCode() * 41)
                 + (mGateway == null ? 0 :mGateway.hashCode() * 47)
-                + (mInterface == null ? 0 :mInterface.hashCode() * 67)
-                + (mIsDefault ? 3 : 7);
+                + (mInterface == null ? 0 :mInterface.hashCode() * 67);
     }
 
     /**
@@ -387,13 +388,8 @@ public final class RouteInfo implements Parcelable {
      * Implement the Parcelable interface
      */
     public void writeToParcel(Parcel dest, int flags) {
-        if (mDestination == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeByteArray(mDestination.getAddress().getAddress());
-            dest.writeInt(mDestination.getPrefixLength());
-        }
+        dest.writeByteArray(mDestination.getAddress().getAddress());
+        dest.writeInt(mDestination.getPrefixLength());
 
         if (mGateway == null) {
             dest.writeByte((byte) 0);
@@ -415,17 +411,15 @@ public final class RouteInfo implements Parcelable {
             int prefix = 0;
             InetAddress gateway = null;
 
-            if (in.readByte() == 1) {
-                byte[] addr = in.createByteArray();
-                prefix = in.readInt();
+            byte[] addr = in.createByteArray();
+            prefix = in.readInt();
 
-                try {
-                    destAddr = InetAddress.getByAddress(addr);
-                } catch (UnknownHostException e) {}
-            }
+            try {
+                destAddr = InetAddress.getByAddress(addr);
+            } catch (UnknownHostException e) {}
 
             if (in.readByte() == 1) {
-                byte[] addr = in.createByteArray();
+                addr = in.createByteArray();
 
                 try {
                     gateway = InetAddress.getByAddress(addr);
