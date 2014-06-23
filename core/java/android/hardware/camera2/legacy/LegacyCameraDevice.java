@@ -29,12 +29,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.hardware.camera2.utils.CameraBinderDecorator.*;
+import static com.android.internal.util.Preconditions.*;
 
 /**
  * This class emulates the functionality of a Camera2 device using a the old Camera class.
@@ -367,9 +369,27 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
     }
 
+    /**
+     * Query the surface for its currently configured default buffer size.
+     * @param surface a non-{@code null} {@code Surface}
+     * @return the width and height of the surface
+     *
+     * @throws NullPointerException if the {@code surface} was {@code null}
+     * @throws IllegalStateException if the {@code surface} was invalid
+     */
+    static Size getSurfaceSize(Surface surface) {
+        checkNotNull(surface);
+
+        int[] dimens = new int[2];
+        nativeDetectSurfaceDimens(surface, /*out*/dimens);
+
+        return new Size(dimens[0], dimens[1]);
+    }
+
     protected static native int nativeDetectSurfaceType(Surface surface);
 
-    protected static native void nativeDetectSurfaceDimens(Surface surface, int[] dimens);
+    protected static native void nativeDetectSurfaceDimens(Surface surface,
+            /*out*/int[/*2*/] dimens);
 
     protected static native void nativeConfigureSurface(Surface surface, int width, int height,
                                                         int pixelFormat);

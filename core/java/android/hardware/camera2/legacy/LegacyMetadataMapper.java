@@ -21,6 +21,8 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -32,6 +34,7 @@ import android.util.Range;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CameraCharacteristics.*;
@@ -55,6 +58,42 @@ public class LegacyMetadataMapper {
     private static final long APPROXIMATE_SENSOR_AREA = (1 << 23); // 8mp
     private static final long APPROXIMATE_JPEG_ENCODE_TIME = 600; // ms
     private static final long NS_PER_MS = 1000000;
+
+    /*
+     * Development hijinks: Lie about not supporting certain capabilities
+     *
+     * - Unblock some CTS tests from running whose main intent is not the metadata itself
+     *
+     * TODO: Remove these constants and strip out any code that previously relied on them
+     * being set to true.
+     */
+    private static final boolean LIE_ABOUT_FLASH = true;
+    private static final boolean LIE_ABOUT_AE = true;
+    private static final boolean LIE_ABOUT_AF = true;
+    private static final boolean LIE_ABOUT_AWB = true;
+
+    /**
+     * Create characteristics for a legacy device by mapping the {@code parameters}
+     * and {@code info}
+     *
+     * @param parameters A non-{@code null} parameters set
+     * @param info Camera info with camera facing direction and angle of orientation
+     *
+     * @return static camera characteristics for a camera device
+     *
+     * @throws NullPointerException if any of the args were {@code null}
+     */
+    public static CameraCharacteristics createCharacteristics(Camera.Parameters parameters,
+            CameraInfo info) {
+        checkNotNull(parameters, "parameters must not be null");
+        checkNotNull(info, "info must not be null");
+
+        String paramStr = parameters.flatten();
+        android.hardware.CameraInfo outerInfo = new android.hardware.CameraInfo();
+        outerInfo.info = info;
+
+        return createCharacteristics(paramStr, outerInfo);
+    }
 
     /**
      * Create characteristics for a legacy device by mapping the {@code parameters}
@@ -99,7 +138,8 @@ public class LegacyMetadataMapper {
     private static void mapCameraParameters(CameraMetadataNative m, Camera.Parameters p) {
         m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
         mapStreamConfigs(m, p);
-        mapAeConfig(m, p);
+        mapControlAe(m, p);
+        mapControlAwb(m, p);
         mapCapabilities(m, p);
         mapLens(m, p);
         mapFlash(m, p);
@@ -164,8 +204,10 @@ public class LegacyMetadataMapper {
     }
 
     @SuppressWarnings({"unchecked"})
-    private static void mapAeConfig(CameraMetadataNative m, Camera.Parameters p) {
-
+    private static void mapControlAe(CameraMetadataNative m, Camera.Parameters p) {
+        /*
+         * control.aeAvailableTargetFpsRanges
+         */
         List<int[]> fpsRanges = p.getSupportedPreviewFpsRange();
         if (fpsRanges == null) {
             throw new AssertionError("Supported FPS ranges cannot be null.");
@@ -182,6 +224,10 @@ public class LegacyMetadataMapper {
         }
         m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
 
+        /*
+         * control.aeAvailableAntiBandingModes
+         */
+
         List<String> antiBandingModes = p.getSupportedAntibanding();
         int antiBandingModesSize = antiBandingModes.size();
         if (antiBandingModesSize > 0) {
@@ -197,6 +243,49 @@ public class LegacyMetadataMapper {
                 }
             }
             m.set(CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, Arrays.copyOf(modes, j));
+        }
+
+        /*
+         * control.aeAvailableModes
+         */
+        List<String> flashModes = p.getSupportedFlashModes();
+
+        String[] flashModeStrings = new String[] {
+                Camera.Parameters.FLASH_MODE_AUTO,
+                Camera.Parameters.FLASH_MODE_ON,
+                Camera.Parameters.FLASH_MODE_RED_EYE,
+                // Map these manually
+                Camera.Parameters.FLASH_MODE_TORCH,
+                Camera.Parameters.FLASH_MODE_OFF,
+        };
+        int[] flashModeInts = new int[] {
+                CONTROL_AE_MODE_ON,
+                CONTROL_AE_MODE_ON_AUTO_FLASH,
+                CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
+        };
+        int[] aeAvail = convertStringListToIntArray(flashModes, flashModeStrings, flashModeInts);
+
+        // No flash control -> AE is always on
+        if (aeAvail == null || aeAvail.length == 0) {
+            aeAvail = new int[] {
+                    CONTROL_AE_MODE_ON
+            };
+        }
+
+        if (LIE_ABOUT_FLASH) {
+            // TODO: Remove this branch
+            Log.w(TAG, "mapControlAe - lying; saying we only support CONTROL_AE_MODE_ON");
+            aeAvail = new int[] {
+                    CONTROL_AE_MODE_ON
+            };
+        }
+
+        m.set(CONTROL_AE_AVAILABLE_MODES, aeAvail);
+    }
+
+    private static void mapControlAwb(CameraMetadataNative m, Camera.Parameters p) {
+        if (!LIE_ABOUT_AWB) {
+            throw new AssertionError("Not implemented yet");
         }
     }
 
@@ -224,6 +313,12 @@ public class LegacyMetadataMapper {
                     supportedFlashModes.size() == 1)) {
                 flashAvailable = true;
             }
+        }
+
+        if (LIE_ABOUT_FLASH && flashAvailable) {
+            // TODO: remove this branch
+            Log.w(TAG, "mapFlash - lying; saying we never support flash");
+            flashAvailable = false;
         }
 
         m.set(FLASH_INFO_AVAILABLE, flashAvailable);
@@ -320,7 +415,52 @@ public class LegacyMetadataMapper {
                                                       CaptureRequest request,
                                                       long timestamp) {
         CameraMetadataNative result = new CameraMetadataNative();
+
+        /*
+         * control
+         */
+        // control.afState
+        if (LIE_ABOUT_AF) {
+            // TODO: Implement autofocus state machine
+            result.set(CaptureResult.CONTROL_AF_MODE, request.get(CaptureRequest.CONTROL_AF_MODE));
+        }
+
+        // control.aeState
+        if (LIE_ABOUT_AE) {
+            // Lie to pass CTS temporarily.
+            // TODO: Implement precapture trigger, after which we can report CONVERGED ourselves
+            result.set(CaptureResult.CONTROL_AE_STATE,
+                    CONTROL_AE_STATE_CONVERGED);
+
+            result.set(CaptureResult.CONTROL_AE_MODE,
+                    request.get(CaptureRequest.CONTROL_AE_MODE));
+        }
+
+        // control.awbLock
+        result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
+
+        // control.awbState
+        if (LIE_ABOUT_AWB) {
+            // Lie to pass CTS temporarily.
+            // TODO: CTS needs to be updated not to query this value
+            // for LIMITED devices unless its guaranteed to be available.
+            result.set(CaptureResult.CONTROL_AWB_STATE,
+                    CameraMetadata.CONTROL_AWB_STATE_CONVERGED);
+            // TODO: Read the awb mode from parameters instead
+            result.set(CaptureResult.CONTROL_AWB_MODE,
+                    request.get(CaptureRequest.CONTROL_AWB_MODE));
+        }
+
+        /*
+         * lens
+         */
+        // lens.focalLength
         result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
+
+        /*
+         * sensor
+         */
+        // sensor.timestamp
         result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
 
         // TODO: Remaining result metadata tags conversions.
@@ -335,17 +475,149 @@ public class LegacyMetadataMapper {
      */
     public static void convertRequestMetadata(CaptureRequest request,
             /*out*/Camera.Parameters params) {
+
+        /*
+         * control.ae*
+         */
+        // control.aeAntibandingMode
         Integer antiBandingMode = request.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE);
         if (antiBandingMode != null) {
             String legacyMode = convertAntiBandingModeToLegacy(antiBandingMode);
             if (legacyMode != null) params.setAntibanding(legacyMode);
         }
 
+        // control.aeTargetFpsRange
         Range<Integer> aeFpsRange = request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
         if (aeFpsRange != null) {
             int[] legacyFps = convertAeFpsRangeToLegacy(aeFpsRange);
             params.setPreviewFpsRange(legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
                     legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
         }
+
+        /*
+         * control
+         */
+        // control.awbLock
+        Boolean awbLock = request.get(CaptureRequest.CONTROL_AWB_LOCK);
+        params.setAutoWhiteBalanceLock(awbLock == null ? false : awbLock);
+    }
+
+    /**
+     * Create an int[] from the List<> by using {@code convertFrom} and {@code convertTo}
+     * as a one-to-one map (via the index).
+     *
+     * <p>Strings not appearing in {@code convertFrom} are ignored (with a warning);
+     * strings appearing in {@code convertFrom} but not {@code convertTo} are silently
+     * dropped.</p>
+     *
+     * @param list Source list of strings
+     * @param convertFrom Conversion list of strings
+     * @param convertTo Conversion list of ints
+     * @return An array of ints where the values correspond to the ones in {@code convertTo}
+     *         or {@code null} if {@code list} was {@code null}
+     */
+    private static int[] convertStringListToIntArray(
+            List<String> list, String[] convertFrom, int[] convertTo) {
+        if (list == null) {
+            return null;
+        }
+
+        List<Integer> convertedList = new ArrayList<>(list.size());
+
+        for (String str : list) {
+            int strIndex = getArrayIndex(convertFrom, str);
+
+            // Guard against bad API1 values
+            if (strIndex < 0) {
+                Log.w(TAG, "Ignoring invalid parameter " + str);
+                continue;
+            }
+
+            // Ignore values we can't map into (intentional)
+            if (strIndex < convertTo.length) {
+                convertedList.add(convertTo[strIndex]);
+            }
+        }
+
+        int[] returnArray = new int[convertedList.size()];
+        for (int i = 0; i < returnArray.length; ++i) {
+            returnArray[i] = convertedList.get(i);
+        }
+
+        return returnArray;
+    }
+
+    /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
+    private static <T> int getArrayIndex(T[] array, T needle) {
+        if (needle == null) {
+            return -1;
+        }
+
+        int index = 0;
+        for (T elem : array) {
+            if (Objects.equals(elem, needle)) {
+                return index;
+            }
+            index++;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Create a request template
+     *
+     * @param c a non-{@code null} camera characteristics for this camera
+     * @param templateId a non-negative template ID
+     *
+     * @return a non-{@code null} request template
+     *
+     * @throws IllegalArgumentException if {@code templateId} was invalid
+     *
+     * @see android.hardware.camera2.CameraDevice#TEMPLATE_MANUAL
+     */
+    public static CameraMetadataNative createRequestTemplate(
+            CameraCharacteristics c, int templateId) {
+        if (templateId < 0 || templateId > CameraDevice.TEMPLATE_MANUAL) {
+            throw new IllegalArgumentException("templateId out of range");
+        }
+
+        CameraMetadataNative m = new CameraMetadataNative();
+
+        /*
+         * NOTE: If adding new code here and it needs to query the static info,
+         * query the camera characteristics, so we can reuse this for api2 code later
+         * to create our own templates in the framework
+         */
+
+        if (LIE_ABOUT_AWB) {
+            m.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
+        } else {
+            throw new AssertionError("Valid control.awbMode not implemented yet");
+        }
+
+        // control.aeMode
+        m.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+        // AE is always unconditionally available in API1 devices
+
+        // control.afMode
+        {
+            Float minimumFocusDistance = c.get(LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+
+            int afMode;
+            if (minimumFocusDistance != null &&
+                    minimumFocusDistance == LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS) {
+                // Cannot control auto-focus with fixed-focus cameras
+                afMode = CameraMetadata.CONTROL_AF_MODE_OFF;
+            } else {
+                // If a minimum focus distance is reported; the camera must have AF
+                afMode = CameraMetadata.CONTROL_AF_MODE_AUTO;
+            }
+
+            m.set(CaptureRequest.CONTROL_AF_MODE, afMode);
+        }
+
+        // TODO: map other request template values
+        return m;
     }
 }

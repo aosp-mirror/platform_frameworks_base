@@ -17,7 +17,9 @@
 package android.hardware.camera2.legacy;
 
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
@@ -25,7 +27,9 @@ import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
+import android.os.ConditionVariable;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -33,7 +37,6 @@ import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Compatibility implementation of the Camera2 API binder interface.
@@ -53,6 +56,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     private static final String TAG = "CameraDeviceUserShim";
 
     private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final int OPEN_CAMERA_TIMEOUT_MS = 5000; // 5 sec (same as api1 cts timeout)
 
     private final LegacyCameraDevice mLegacyDevice;
 
@@ -60,13 +64,113 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     private int mSurfaceIdCounter;
     private boolean mConfiguring;
     private final SparseArray<Surface> mSurfaces;
+    private final CameraCharacteristics mCameraCharacteristics;
+    private final CameraLooper mCameraInit;
 
-    protected CameraDeviceUserShim(int cameraId, LegacyCameraDevice legacyCamera) {
+    protected CameraDeviceUserShim(int cameraId, LegacyCameraDevice legacyCamera,
+            CameraCharacteristics characteristics, CameraLooper cameraInit) {
         mLegacyDevice = legacyCamera;
         mConfiguring = false;
         mSurfaces = new SparseArray<Surface>();
+        mCameraCharacteristics = characteristics;
+        mCameraInit = cameraInit;
 
         mSurfaceIdCounter = 0;
+    }
+
+    /**
+     * Create a separate looper/thread for the camera to run on; open the camera.
+     *
+     * <p>Since the camera automatically latches on to the current thread's looper,
+     * it's important that we have our own thread with our own looper to guarantee
+     * that the camera callbacks get correctly posted to our own thread.</p>
+     */
+    private static class CameraLooper implements Runnable, AutoCloseable {
+        private final int mCameraId;
+        private Looper mLooper;
+        private volatile int mInitErrors;
+        private final Camera mCamera = Camera.openUninitialized();
+        private final ConditionVariable mStartDone = new ConditionVariable();
+        private final Thread mThread;
+
+        /**
+         * Spin up a new thread, immediately open the camera in the background.
+         *
+         * <p>Use {@link #waitForOpen} to block until the camera is finished opening.</p>
+         *
+         * @param cameraId numeric camera Id
+         *
+         * @see #waitForOpen
+         */
+        public CameraLooper(int cameraId) {
+            mCameraId = cameraId;
+
+            mThread = new Thread(this);
+            mThread.start();
+        }
+
+        public Camera getCamera() {
+            return mCamera;
+        }
+
+        @Override
+        public void run() {
+            // Set up a looper to be used by camera.
+            Looper.prepare();
+
+            // Save the looper so that we can terminate this thread
+            // after we are done with it.
+            mLooper = Looper.myLooper();
+            mInitErrors = mCamera.cameraInitUnspecified(mCameraId);
+
+            mStartDone.open();
+            Looper.loop();  // Blocks forever until #close is called.
+        }
+
+        /**
+         * Quit the looper safely; then join until the thread shuts down.
+         */
+        @Override
+        public void close() {
+            if (mLooper == null) {
+                return;
+            }
+
+            mLooper.quitSafely();
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+                throw new AssertionError(e);
+            }
+
+            mLooper = null;
+        }
+
+        /**
+         * Block until the camera opens; then return its initialization error code (if any).
+         *
+         * @param timeoutMs timeout in milliseconds
+         *
+         * @return int error code
+         *
+         * @throws CameraRuntimeException if the camera open times out with ({@code CAMERA_ERROR})
+         */
+        public int waitForOpen(int timeoutMs) {
+            // Block until the camera is open asynchronously
+            if (!mStartDone.block(timeoutMs)) {
+                Log.e(TAG, "waitForOpen - Camera failed to open after timeout of "
+                        + OPEN_CAMERA_TIMEOUT_MS + " ms");
+                try {
+                    mCamera.release();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "connectBinderShim - Failed to release camera after timeout ", e);
+                }
+
+                throw new CameraRuntimeException(CameraAccessException.CAMERA_ERROR);
+            }
+
+            return mInitErrors;
+        }
     }
 
     public static CameraDeviceUserShim connectBinderShim(ICameraDeviceCallbacks callbacks,
@@ -74,15 +178,29 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "Opening shim Camera device");
         }
-        // TODO: Move open/init into LegacyCameraDevice thread when API is switched to async.
-        Camera legacyCamera = Camera.openUninitialized();
-        int initErrors = legacyCamera.cameraInitUnspecified(cameraId);
+
+        /*
+         * Put the camera open on a separate thread with its own looper; otherwise
+         * if the main thread is used then the callbacks might never get delivered
+         * (e.g. in CTS which run its own default looper only after tests)
+         */
+
+        CameraLooper init = new CameraLooper(cameraId);
+
+        // TODO: Make this async instead of blocking
+        int initErrors = init.waitForOpen(OPEN_CAMERA_TIMEOUT_MS);
+        Camera legacyCamera = init.getCamera();
 
         // Check errors old HAL initialization
         CameraBinderDecorator.throwOnError(initErrors);
 
+        CameraInfo info = new CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+
+        CameraCharacteristics characteristics =
+                LegacyMetadataMapper.createCharacteristics(legacyCamera.getParameters(), info);
         LegacyCameraDevice device = new LegacyCameraDevice(cameraId, legacyCamera, callbacks);
-        return new CameraDeviceUserShim(cameraId, device);
+        return new CameraDeviceUserShim(cameraId, device, characteristics, init);
     }
 
     @Override
@@ -90,7 +208,12 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "disconnect called.");
         }
-        mLegacyDevice.close();
+
+        try {
+            mLegacyDevice.close();
+        } finally {
+            mCameraInit.close();
+        }
     }
 
     @Override
@@ -218,8 +341,17 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (DEBUG) {
             Log.d(TAG, "createDefaultRequest called.");
         }
-        // TODO: implement createDefaultRequest.
-        Log.e(TAG, "createDefaultRequest unimplemented.");
+
+        CameraMetadataNative template;
+        try {
+            template =
+                    LegacyMetadataMapper.createRequestTemplate(mCameraCharacteristics, templateId);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "createDefaultRequest - invalid templateId specified");
+            return CameraBinderDecorator.BAD_VALUE;
+        }
+
+        request.swap(template);
         return CameraBinderDecorator.NO_ERROR;
     }
 

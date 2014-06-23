@@ -105,11 +105,11 @@ public class RequestThreadManager {
 
 
     /**
-     * Comparator for {@link Size} objects.
+     * Comparator for {@link Size} objects by the area.
      *
-     * <p>This comparator compares by rectangle area.  Tiebreaks on width.</p>
+     * <p>This comparator totally orders by rectangle area. Tiebreaks on width.</p>
      */
-    private static class SizeComparator implements Comparator<Size> {
+    private static class SizeAreaComparator implements Comparator<Size> {
         @Override
         public int compare(Size size, Size size2) {
             if (size == null || size2 == null) {
@@ -262,7 +262,11 @@ public class RequestThreadManager {
     }
 
     private void doJpegCapture(RequestHolder request) throws IOException {
+        if (DEBUG) Log.d(TAG, "doJpegCapture");
+
         if (!mPreviewRunning) {
+            if (DEBUG) Log.d(TAG, "doJpegCapture - create fake surface");
+
             createDummySurface();
             mCamera.setPreviewTexture(mDummyTexture);
             startPreview();
@@ -373,6 +377,18 @@ public class RequestThreadManager {
             }
         }
 
+        Size smallestSupportedJpegSize = calculatePictureSize(mCallbackOutputs, mParams);
+        if (smallestSupportedJpegSize != null) {
+            /*
+             * Set takePicture size to the smallest supported JPEG size large enough
+             * to scale/crop out of for the bounding rectangle of the configured JPEG sizes.
+             */
+
+            Log.i(TAG, "configureOutputs - set take picture size to " + smallestSupportedJpegSize);
+            mParams.setPictureSize(
+                    smallestSupportedJpegSize.getWidth(), smallestSupportedJpegSize.getHeight());
+        }
+
         // TODO: Detect and optimize single-output paths here to skip stream teeing.
         if (mGLThreadManager == null) {
             mGLThreadManager = new GLThreadManager(mCameraId);
@@ -387,8 +403,100 @@ public class RequestThreadManager {
         }
     }
 
+    /**
+     * Find a JPEG size (that is supported by the legacy camera device) which is equal to or larger
+     * than all of the configured {@code JPEG} outputs (by both width and height).
+     *
+     * <p>If multiple supported JPEG sizes are larger, select the smallest of them which
+     * still satisfies the above constraint.</p>
+     *
+     * <p>As a result, the returned size is guaranteed to be usable without needing
+     * to upscale any of the outputs. If only one {@code JPEG} surface is used,
+     * then no scaling/cropping is necessary between the taken picture and
+     * the {@code JPEG} output surface.</p>
+     *
+     * @param callbackOutputs a non-{@code null} list of {@code Surface}s with any image formats
+     * @param params api1 parameters (used for reading only)
+     *
+     * @return a size large enough to fit all of the configured {@code JPEG} outputs, or
+     *          {@code null} if the {@code callbackOutputs} did not have any {@code JPEG}
+     *          surfaces.
+     */
+    private Size calculatePictureSize(
+            Collection<Surface> callbackOutputs, Camera.Parameters params) {
+        /*
+         * Find the largest JPEG size (if any), from the configured outputs:
+         * - the api1 picture size should be set to the smallest legal size that's at least as large
+         *   as the largest configured JPEG size
+         */
+        List<Size> configuredJpegSizes = new ArrayList<Size>();
+        for (Surface callbackSurface : callbackOutputs) {
+            int format = LegacyCameraDevice.nativeDetectSurfaceType(callbackSurface);
+
+            if (format != CameraMetadataNative.NATIVE_JPEG_FORMAT) {
+                continue; // Ignore non-JPEG callback formats
+            }
+
+            Size jpegSize = LegacyCameraDevice.getSurfaceSize(callbackSurface);
+            configuredJpegSizes.add(jpegSize);
+        }
+        if (!configuredJpegSizes.isEmpty()) {
+            /*
+             * Find the largest configured JPEG width, and height, independently
+             * of the rest.
+             *
+             * The rest of the JPEG streams can be cropped out of this smallest bounding
+             * rectangle.
+             */
+            int maxConfiguredJpegWidth = -1;
+            int maxConfiguredJpegHeight = -1;
+            for (Size jpegSize : configuredJpegSizes) {
+                maxConfiguredJpegWidth = jpegSize.getWidth() > maxConfiguredJpegWidth ?
+                        jpegSize.getWidth() : maxConfiguredJpegWidth;
+                maxConfiguredJpegHeight = jpegSize.getHeight() > maxConfiguredJpegHeight ?
+                        jpegSize.getHeight() : maxConfiguredJpegHeight;
+            }
+            Size smallestBoundJpegSize = new Size(maxConfiguredJpegWidth, maxConfiguredJpegHeight);
+
+            List<Size> supportedJpegSizes = convertSizeList(params.getSupportedPictureSizes());
+
+            /*
+             * Find the smallest supported JPEG size that can fit the smallest bounding
+             * rectangle for the configured JPEG sizes.
+             */
+            List<Size> candidateSupportedJpegSizes = new ArrayList<>();
+            for (Size supportedJpegSize : supportedJpegSizes) {
+                if (supportedJpegSize.getWidth() >= maxConfiguredJpegWidth &&
+                    supportedJpegSize.getHeight() >= maxConfiguredJpegHeight) {
+                    candidateSupportedJpegSizes.add(supportedJpegSize);
+                }
+            }
+
+            if (candidateSupportedJpegSizes.isEmpty()) {
+                throw new AssertionError(
+                        "Could not find any supported JPEG sizes large enough to fit " +
+                        smallestBoundJpegSize);
+            }
+
+            Size smallestSupportedJpegSize = Collections.min(candidateSupportedJpegSizes,
+                    new SizeAreaComparator());
+
+            if (!smallestSupportedJpegSize.equals(smallestBoundJpegSize)) {
+                Log.w(TAG,
+                        String.format(
+                                "configureOutputs - Will need to crop picture %s into "
+                                + "smallest bound size %s",
+                                smallestSupportedJpegSize, smallestBoundJpegSize));
+            }
+
+            return smallestSupportedJpegSize;
+        }
+
+        return null;
+    }
+
     private static Size findLargestByArea(List<Size> sizes) {
-        return Collections.max(sizes, new SizeComparator());
+        return Collections.max(sizes, new SizeAreaComparator());
     }
 
     private static boolean checkAspectRatiosMatch(Size a, Size b) {
