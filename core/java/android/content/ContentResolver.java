@@ -1751,6 +1751,15 @@ public abstract class ContentResolver {
      * @param extras any extras to pass to the SyncAdapter.
      */
     public static void requestSync(Account account, String authority, Bundle extras) {
+        requestSyncAsUser(account, authority, UserHandle.getCallingUserId(), extras);
+    }
+
+    /**
+     * @see #requestSync(Account, String, Bundle)
+     * @hide
+     */
+    public static void requestSyncAsUser(Account account, String authority, int userId,
+            Bundle extras) {
         if (extras == null) {
             throw new IllegalArgumentException("Must specify extras.");
         }
@@ -1760,7 +1769,11 @@ public abstract class ContentResolver {
                 .setExtras(extras)
                 .syncOnce()     // Immediate sync.
                 .build();
-        requestSync(request);
+        try {
+            getContentService().syncAsUser(request, userId);
+        } catch(RemoteException e) {
+            // Shouldn't happen.
+        }
     }
 
     /**
@@ -1839,12 +1852,35 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #cancelSync(Account, String)
+     * @hide
+     */
+    public static void cancelSyncAsUser(Account account, String authority, int userId) {
+        try {
+            getContentService().cancelSyncAsUser(account, authority, null, userId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Get information about the SyncAdapters that are known to the system.
      * @return an array of SyncAdapters that have registered with the system
      */
     public static SyncAdapterType[] getSyncAdapterTypes() {
         try {
             return getContentService().getSyncAdapterTypes();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getSyncAdapterTypes()
+     * @hide
+     */
+    public static SyncAdapterType[] getSyncAdapterTypesAsUser(int userId) {
+        try {
+            return getContentService().getSyncAdapterTypesAsUser(userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -1862,6 +1898,19 @@ public abstract class ContentResolver {
     public static boolean getSyncAutomatically(Account account, String authority) {
         try {
             return getContentService().getSyncAutomatically(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getSyncAutomatically(Account, String)
+     * @hide
+     */
+    public static boolean getSyncAutomaticallyAsUser(Account account, String authority,
+            int userId) {
+        try {
+            return getContentService().getSyncAutomaticallyAsUser(account, authority, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2032,6 +2081,18 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #getIsSyncable(Account, String)
+     * @hide
+     */
+    public static int getIsSyncableAsUser(Account account, String authority, int userId) {
+        try {
+            return getContentService().getIsSyncableAsUser(account, authority, userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
      * Set whether this account/provider is syncable.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
@@ -2057,6 +2118,18 @@ public abstract class ContentResolver {
     public static boolean getMasterSyncAutomatically() {
         try {
             return getContentService().getMasterSyncAutomatically();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getMasterSyncAutomatically()
+     * @hide
+     */
+    public static boolean getMasterSyncAutomaticallyAsUser(int userId) {
+        try {
+            return getContentService().getMasterSyncAutomaticallyAsUser(userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2147,6 +2220,18 @@ public abstract class ContentResolver {
     }
 
     /**
+     * @see #getCurrentSyncs()
+     * @hide
+     */
+    public static List<SyncInfo> getCurrentSyncsAsUser(int userId) {
+        try {
+            return getContentService().getCurrentSyncsAsUser(userId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
      * Returns the status that matches the authority.
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being queried
@@ -2156,6 +2241,19 @@ public abstract class ContentResolver {
     public static SyncStatusInfo getSyncStatus(Account account, String authority) {
         try {
             return getContentService().getSyncStatus(account, authority, null);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * @see #getSyncStatus(Account, String)
+     * @hide
+     */
+    public static SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
+            int userId) {
+        try {
+            return getContentService().getSyncStatusAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }

@@ -305,6 +305,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public List<ProviderInfo> queryContentProviders(String processName, int uid, int flags) {
         throw new UnsupportedOperationException();

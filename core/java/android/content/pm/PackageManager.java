@@ -2478,6 +2478,19 @@ public abstract class PackageManager {
             int flags);
 
     /**
+     * Find a single content provider by its base path name.
+     *
+     * @param name The name of the provider to find.
+     * @param flags Additional option flags.  Currently should always be 0.
+     * @param userId The user id.
+     *
+     * @return ContentProviderInfo Information about the provider, if found,
+     *         else null.
+     * @hide
+     */
+    public abstract ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId);
+
+    /**
      * Retrieve content provider information.
      *
      * <p><em>Note: unlike most other methods, an empty result set is indicated

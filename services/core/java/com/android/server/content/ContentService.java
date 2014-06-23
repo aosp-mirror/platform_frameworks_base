@@ -172,11 +172,8 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
 
-        final int callingUser = UserHandle.getCallingUserId();
-        if (callingUser != userHandle) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "no permission to observe other users' provider view");
-        }
+        enforceCrossUserPermission(userHandle,
+                "no permission to observe other users' provider view");
 
         if (userHandle < 0) {
             if (userHandle == UserHandle.USER_CURRENT) {
@@ -346,7 +343,15 @@ public final class ContentService extends IContentService.Stub {
      * @param request The request object. Validation of this object is done by its builder.
      */
     public void sync(SyncRequest request) {
-        int userId = UserHandle.getCallingUserId();
+        syncAsUser(request, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    public void syncAsUser(SyncRequest request, int userId) {
+        enforceCrossUserPermission(userId, "no permission to request sync as user: " + userId);
         int callerUid = Binder.getCallingUid();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
@@ -399,11 +404,30 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public void cancelSync(Account account, String authority, ComponentName cname) {
+        cancelSyncAsUser(account, authority, cname, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Clear all scheduled sync operations that match the uri and cancel the active sync
+     * if they match the authority and account, if they are present.
+     *
+     * <p> If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param account filter the pending and active syncs to cancel using this account, or null.
+     * @param authority filter the pending and active syncs to cancel using this authority, or
+     * null.
+     * @param userId the user id for which to cancel sync operations.
+     * @param cname cancel syncs running on this service, or null for provider/account.
+     */
+    @Override
+    public void cancelSyncAsUser(Account account, String authority, ComponentName cname,
+            int userId) {
         if (authority != null && authority.length() == 0) {
             throw new IllegalArgumentException("Authority must be non-empty");
         }
-
-        int userId = UserHandle.getCallingUserId();
+        enforceCrossUserPermission(userId,
+                "no permission to modify the sync settings for user " + userId);
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -456,9 +480,23 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public SyncAdapterType[] getSyncAdapterTypes() {
+        return getSyncAdapterTypesAsUser(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Get information about the SyncAdapters that are known to the system for a particular user.
+     *
+     * <p> If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @return an array of SyncAdapters that have registered with the system
+     */
+    @Override
+    public SyncAdapterType[] getSyncAdapterTypesAsUser(int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read sync settings for user " + userId);
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
-        final int userId = UserHandle.getCallingUserId();
         final long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -470,10 +508,20 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public boolean getSyncAutomatically(Account account, String providerName) {
+        return getSyncAutomaticallyAsUser(account, providerName, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Override
+    public boolean getSyncAutomaticallyAsUser(Account account, String providerName, int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -588,9 +636,18 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public int getIsSyncable(Account account, String providerName) {
+        return getIsSyncableAsUser(account, providerName, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    public int getIsSyncableAsUser(Account account, String providerName, int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -627,10 +684,20 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public boolean getMasterSyncAutomatically() {
+        return getMasterSyncAutomaticallyAsUser(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    @Override
+    public boolean getMasterSyncAutomaticallyAsUser(int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -679,10 +746,19 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public List<SyncInfo> getCurrentSyncs() {
+        return getCurrentSyncsAsUser(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    public List<SyncInfo> getCurrentSyncsAsUser(int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             return getSyncManager().getSyncStorageEngine().getCurrentSyncsCopy(userId);
@@ -692,13 +768,24 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public SyncStatusInfo getSyncStatus(Account account, String authority, ComponentName cname) {
+        return getSyncStatusAsUser(account, authority, cname, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    public SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
+            ComponentName cname, int userId) {
         if (TextUtils.isEmpty(authority)) {
             throw new IllegalArgumentException("Authority must not be empty");
         }
+
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync stats for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
 
-        int userId = UserHandle.getCallingUserId();
         int callerUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
@@ -769,6 +856,21 @@ public final class ContentService extends IContentService.Stub {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
+    }
+
+    /**
+     * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS_FULL
+     * permission, if the userHandle is not for the caller.
+     *
+     * @param userHandle the user handle of the user we want to act on behalf of.
+     * @param message the message to log on security exception.
+     */
+    private void enforceCrossUserPermission(int userHandle, String message) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (callingUser != userHandle) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
+        }
     }
 
     /**
