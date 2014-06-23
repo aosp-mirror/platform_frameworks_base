@@ -77,7 +77,8 @@ public class RequestQueue {
         long ret = INVALID_FRAME;
         if (mRepeatingRequest != null && mRepeatingRequest.getRequestId() == requestId) {
             mRepeatingRequest = null;
-            ret = mCurrentRepeatingFrameNumber;
+            ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
+                    mCurrentRepeatingFrameNumber - 1;
             mCurrentRepeatingFrameNumber = INVALID_FRAME;
         } else {
             Log.e(TAG, "cancel failed: no repeating request exists for request id: " + requestId);
@@ -105,7 +106,8 @@ public class RequestQueue {
         long ret = INVALID_FRAME;
         if (burst.isRepeating()) {
             if (mRepeatingRequest != null) {
-                ret = mCurrentRepeatingFrameNumber;
+                ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
+                        mCurrentRepeatingFrameNumber - 1;
             }
             mCurrentRepeatingFrameNumber = INVALID_FRAME;
             mRepeatingRequest = burst;
