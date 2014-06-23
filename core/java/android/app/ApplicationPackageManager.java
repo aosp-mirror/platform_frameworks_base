@@ -36,6 +36,7 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
@@ -49,6 +50,7 @@ import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Process;
@@ -68,6 +70,15 @@ final class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
+
+    UserManager mUserManager;
+
+    UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = UserManager.get(mContext);
+        }
+        return mUserManager;
+    }
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
@@ -1500,10 +1511,16 @@ final class ApplicationPackageManager extends PackageManager {
     /**
      * @hide
      */
-    @Override
-    public Bitmap getUserIcon(int userId) {
-        UserManager um = UserManager.get(mContext);
-        return um.getUserIcon(userId);
+    public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
+        if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
+            return new BitmapDrawable(getUserManager().getUserIcon(itemInfo.showUserIcon));
+        }
+        Drawable dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+        if (dr != null) {
+            dr = getUserManager().getBadgedDrawableForUser(dr,
+                    new UserHandle(mContext.getUserId()));
+        }
+        return dr;
     }
 
     private final ContextImpl mContext;

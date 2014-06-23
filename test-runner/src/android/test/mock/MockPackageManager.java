@@ -34,6 +34,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -744,7 +745,7 @@ public class MockPackageManager extends PackageManager {
     /**
      * @hide
      */
-    public Bitmap getUserIcon(int userId) {
+    public Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         throw new UnsupportedOperationException();
     }
 }

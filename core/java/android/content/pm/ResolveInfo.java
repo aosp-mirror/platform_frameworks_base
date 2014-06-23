@@ -19,8 +19,6 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -136,10 +134,9 @@ public class ResolveInfo implements Parcelable {
     public int targetUserId;
 
     /**
-     * If true, then loadIcon will return the icon of the target user.
      * @hide
      */
-    public boolean showTargetUserIcon;
+    public boolean noResourceId;
 
     /**
      * @hide Target comes from system process?
@@ -217,10 +214,6 @@ public class ResolveInfo implements Parcelable {
                 return dr;
             }
         }
-        if (showTargetUserIcon) {
-            Bitmap bm = pm.getUserIcon(targetUserId);
-            return new BitmapDrawable(bm);
-        }
         return ci.loadIcon(pm);
     }
     
@@ -232,9 +225,10 @@ public class ResolveInfo implements Parcelable {
      * @return The icon associated with this match.
      */
     public final int getIconResource() {
+        if (noResourceId) return 0;
         if (icon != 0) return icon;
         final ComponentInfo ci = getComponentInfo();
-        if (ci != null && !showTargetUserIcon) {
+        if (ci != null) {
             return ci.getIconResource();
         }
         return 0;
@@ -312,9 +306,6 @@ public class ResolveInfo implements Parcelable {
             sb.append(" targetUserId=");
             sb.append(targetUserId);
         }
-        if (showTargetUserIcon) {
-            sb.append(" [showTargetUserIcon]");
-        }
         sb.append('}');
         return sb.toString();
     }
@@ -351,8 +342,8 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(icon);
         dest.writeString(resolvePackageName);
         dest.writeInt(targetUserId);
-        dest.writeInt(showTargetUserIcon ? 1 : 0);
         dest.writeInt(system ? 1 : 0);
+        dest.writeInt(noResourceId ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -396,8 +387,8 @@ public class ResolveInfo implements Parcelable {
         icon = source.readInt();
         resolvePackageName = source.readString();
         targetUserId = source.readInt();
-        showTargetUserIcon = source.readInt() != 0;
         system = source.readInt() != 0;
+        noResourceId = source.readInt() != 0;
     }
     
     public static class DisplayNameComparator

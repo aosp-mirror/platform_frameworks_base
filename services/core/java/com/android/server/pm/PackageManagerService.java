@@ -105,6 +105,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
@@ -459,6 +460,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final PackageInstallerService mInstallerService;
 
     HashSet<PackageParser.Package> mDeferredDexOpt = null;
+
+    // Cache of users who need badging.
+    SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
 
     /** Token for keys in mPendingVerification. */
     private int mPendingVerificationToken = 0;
@@ -3411,7 +3415,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         String className;
         if (targetUserId == UserHandle.USER_OWNER) {
             className = FORWARD_INTENT_TO_USER_OWNER;
-            forwardingResolveInfo.showTargetUserIcon = true;
         } else {
             className = FORWARD_INTENT_TO_MANAGED_PROFILE;
         }
@@ -3419,6 +3422,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mAndroidApplication.packageName, className);
         ActivityInfo forwardingActivityInfo = getActivityInfo(forwardingActivityComponentName, 0,
                 sourceUserId);
+        if (targetUserId == UserHandle.USER_OWNER) {
+            forwardingActivityInfo.showUserIcon = UserHandle.USER_OWNER;
+            forwardingResolveInfo.noResourceId = true;
+        }
         forwardingResolveInfo.activityInfo = forwardingActivityInfo;
         forwardingResolveInfo.priority = 0;
         forwardingResolveInfo.preferredOrder = 0;
@@ -6847,7 +6854,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.isDefault = info.hasDefault;
             res.labelRes = info.labelRes;
             res.nonLocalizedLabel = info.nonLocalizedLabel;
-            res.icon = info.icon;
+            if (userNeedsBadging(userId)) {
+                res.noResourceId = true;
+            } else {
+                res.icon = info.icon;
+            }
             res.system = isSystemApp(res.activityInfo.applicationInfo);
             return res;
         }
@@ -12975,6 +12986,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // other disk I/O going on, that we'll let it slide for now.
             mInstaller.removeUserDataDirs(userHandle);
         }
+        mUserNeedsBadging.delete(userHandle);
     }
 
     /** Called by UserManagerService */
@@ -13048,5 +13060,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public IPackageInstaller getPackageInstaller() {
         return mInstallerService;
+    }
+
+    private boolean userNeedsBadging(int userId) {
+        int index = mUserNeedsBadging.indexOfKey(userId);
+        if (index < 0) {
+            final UserInfo userInfo;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                userInfo = sUserManager.getUserInfo(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            final boolean b;
+            if (userInfo != null && userInfo.isManagedProfile()) {
+                b = true;
+            } else {
+                b = false;
+            }
+            mUserNeedsBadging.put(userId, b);
+            return b;
+        }
+        return mUserNeedsBadging.valueAt(index);
     }
 }
