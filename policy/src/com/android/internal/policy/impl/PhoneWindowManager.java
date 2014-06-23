@@ -2646,19 +2646,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             });
-        } else if (mRecentsVisible) {
-            // Recents is started on top of Home, so when we launch home while recents is open, let
-            // it do its own animation and then finish itself
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-            hideRecentApps(false);
         } else {
             // no keyguard stuff to worry about, just launch home!
             try {
                 ActivityManagerNative.getDefault().stopAppSwitches();
             } catch (RemoteException e) {
             }
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-            startDockOrHome();
+            if (mRecentsVisible) {
+                // Hide Recents and notify it to launch Home
+                awakenDreams();
+                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+                hideRecentApps(false);
+            } else {
+                // Otherwise, just launch Home
+                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+                startDockOrHome();
+            }
         }
     }
 
