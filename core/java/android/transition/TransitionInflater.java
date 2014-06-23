@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 /**
@@ -42,8 +43,6 @@ import java.util.StringTokenizer;
  */
 public class TransitionInflater {
     private static final String MATCH_INSTANCE = "instance";
-    private static final String MATCH_NAME = "name";
-    /** To be removed before L release */
     private static final String MATCH_VIEW_NAME = "viewName";
     private static final String MATCH_ID = "id";
     private static final String MATCH_ITEM_ID = "itemId";
@@ -90,6 +89,8 @@ public class TransitionInflater {
 
     /**
      * Loads a {@link TransitionManager} object from a resource
+     *
+     *
      *
      * @param resource The resource id of the transition manager to load
      * @return The loaded TransitionManager object
@@ -234,20 +235,20 @@ public class TransitionInflater {
                         com.android.internal.R.styleable.TransitionTarget);
                 int id = a.getResourceId(
                         com.android.internal.R.styleable.TransitionTarget_targetId, -1);
-                String transitionName;
+                String viewName;
                 if (id >= 0) {
                     transition.addTarget(id);
                 } else if ((id = a.getResourceId(
                         com.android.internal.R.styleable.TransitionTarget_excludeId, -1)) >= 0) {
                     transition.excludeTarget(id, true);
-                } else if ((transitionName = a.getString(
-                            com.android.internal.R.styleable.TransitionTarget_targetName))
+                } else if ((viewName = a.getString(
+                            com.android.internal.R.styleable.TransitionTarget_targetViewName))
                         != null) {
-                    transition.addTarget(transitionName);
-                } else if ((transitionName = a.getString(
-                        com.android.internal.R.styleable.TransitionTarget_excludeName))
+                    transition.addTarget(viewName);
+                } else if ((viewName = a.getString(
+                        com.android.internal.R.styleable.TransitionTarget_excludeViewName))
                         != null) {
-                    transition.excludeTarget(transitionName, true);
+                    transition.excludeTarget(viewName, true);
                 } else {
                     String className = a.getString(
                             com.android.internal.R.styleable.TransitionTarget_excludeClass);
@@ -281,10 +282,8 @@ public class TransitionInflater {
                 matches[index] = Transition.MATCH_ID;
             } else if (MATCH_INSTANCE.equalsIgnoreCase(token)) {
                 matches[index] = Transition.MATCH_INSTANCE;
-            } else if (MATCH_NAME.equalsIgnoreCase(token)) {
-                matches[index] = Transition.MATCH_NAME;
             } else if (MATCH_VIEW_NAME.equalsIgnoreCase(token)) {
-                matches[index] = Transition.MATCH_NAME;
+                matches[index] = Transition.MATCH_VIEW_NAME;
             } else if (MATCH_ITEM_ID.equalsIgnoreCase(token)) {
                 matches[index] = Transition.MATCH_ITEM_ID;
             } else if (token.isEmpty()) {

@@ -108,7 +108,7 @@ public abstract class SharedElementListener {
      * @param names The names of all shared elements transferred from the calling Activity
      *              to the started Activity.
      * @param sharedElements The mapping of shared element names to Views. The best guess
-     *                       will be filled into sharedElements based on the transitionNames.
+     *                       will be filled into sharedElements based on the View names.
      */
     public void remapSharedElements(List<String> names, Map<String, View> sharedElements) {}
 }

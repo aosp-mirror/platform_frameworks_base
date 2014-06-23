@@ -244,11 +244,11 @@ public class TransitionSet extends Transition {
     }
 
     @Override
-    public Transition excludeTarget(String targetName, boolean exclude) {
+    public Transition excludeTarget(String targetViewName, boolean exclude) {
         for (int i = 0; i < mTransitions.size(); i++) {
-            mTransitions.get(i).excludeTarget(targetName, exclude);
+            mTransitions.get(i).excludeTarget(targetViewName, exclude);
         }
-        return super.excludeTarget(targetName, exclude);
+        return super.excludeTarget(targetViewName, exclude);
     }
 
     @Override

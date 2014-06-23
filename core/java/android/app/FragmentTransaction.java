@@ -184,10 +184,10 @@ public abstract class FragmentTransaction {
     /**
      * Used with {@link #setCustomTransition(int, int)} to map a View from a removed or hidden
      * Fragment to a View from a shown or added Fragment.
-     * <var>sharedElement</var> must have a unique transitionName in the View hierarchy.
+     * <var>sharedElement</var> must have a unique viewName in the View hierarchy.
      * @param sharedElement A View in a disappearing Fragment to match with a View in an
      *                      appearing Fragment.
-     * @param name The transitionName for a View in an appearing Fragment to match to the shared
+     * @param name The viewName for a View in an appearing Fragment to match to the shared
      *             element.
      */
     public abstract FragmentTransaction setSharedElement(View sharedElement, String name);
@@ -195,8 +195,8 @@ public abstract class FragmentTransaction {
     /**
      * Used with {@link #setCustomTransition(int, int)} to map multiple Views from removed or hidden
      * Fragments to a Views from a shown or added Fragments. Views in
-     * <var>sharedElements</var> must have unique transitionNames in the View hierarchy.
-     * @param sharedElements Pairs of Views in disappearing Fragments to transitionNames in
+     * <var>sharedElements</var> must have unique viewNames in the View hierarchy.
+     * @param sharedElements Pairs of Views in disappearing Fragments to viewNames in
      *                       appearing Fragments.
      */
     public abstract FragmentTransaction setSharedElements(Pair<View, String>... sharedElements);
