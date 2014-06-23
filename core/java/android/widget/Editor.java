@@ -1420,7 +1420,7 @@ public class Editor {
                     blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
                 }
 
-                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, null,
+                ((HardwareCanvas) canvas).drawRenderNode(blockDisplayList, null,
                         0 /* no child clipping, our TextView parent enforces it */);
 
                 endOfPreviousBlock = blockEndLine;

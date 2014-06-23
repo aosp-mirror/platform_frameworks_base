@@ -90,8 +90,8 @@ void DisplayListData::cleanupResources() {
     layers.clear();
 }
 
-void DisplayListData::addChild(DrawDisplayListOp* op) {
-    LOG_ALWAYS_FATAL_IF(!op->renderNode(), "DrawDisplayListOp with no render node!");
+void DisplayListData::addChild(DrawRenderNodeOp* op) {
+    LOG_ALWAYS_FATAL_IF(!op->renderNode(), "DrawRenderNodeOp with no render node!");
 
     mChildren.push(op);
     mReferenceHolders.push(op->renderNode());

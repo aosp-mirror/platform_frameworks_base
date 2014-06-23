@@ -854,13 +854,13 @@ static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env, jo
     return reinterpret_cast<jlong>(new DisplayListRenderer);
 }
 
-static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong displayListPtr,
+static jint android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
+        jobject clazz, jlong rendererPtr, jlong renderNodePtr,
         jobject dirty, jint flags) {
     OpenGLRenderer* renderer = reinterpret_cast<OpenGLRenderer*>(rendererPtr);
-    RenderNode* displayList = reinterpret_cast<RenderNode*>(displayListPtr);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     android::uirenderer::Rect bounds;
-    status_t status = renderer->drawDisplayList(displayList, bounds, flags);
+    status_t status = renderer->drawRenderNode(renderNode, bounds, flags);
     if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
         env->CallVoidMethod(dirty, gRectClassInfo.set,
                 int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
@@ -996,12 +996,10 @@ static JNINativeMethod gMethods[] = {
     { "nDrawTextRun",       "(JLjava/lang/String;IIIIFFZJJ)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
 
-    { "nGetClipBounds",     "(JLandroid/graphics/Rect;)Z",
-            (void*) android_view_GLES20Canvas_getClipBounds },
+    { "nGetClipBounds",     "(JLandroid/graphics/Rect;)Z", (void*) android_view_GLES20Canvas_getClipBounds },
 
-    { "nFinishRecording",        "(J)J",      (void*) android_view_GLES20Canvas_finishRecording },
-    { "nDrawDisplayList",        "(JJLandroid/graphics/Rect;I)I",
-            (void*) android_view_GLES20Canvas_drawDisplayList },
+    { "nFinishRecording",   "(J)J",      (void*) android_view_GLES20Canvas_finishRecording },
+    { "nDrawRenderNode",    "(JJLandroid/graphics/Rect;I)I", (void*) android_view_GLES20Canvas_drawRenderNode },
 
     { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
 

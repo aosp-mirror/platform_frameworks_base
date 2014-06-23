@@ -61,16 +61,16 @@ public abstract class HardwareCanvas extends Canvas {
      * Draws the specified display list onto this canvas. The display list can only
      * be drawn if {@link android.view.RenderNode#isValid()} returns true.
      *
-     * @param displayList The display list to replay.
+     * @param renderNode The RenderNode to replay.
      */
-    public void drawDisplayList(RenderNode displayList) {
-        drawDisplayList(displayList, null, RenderNode.FLAG_CLIP_CHILDREN);
+    public void drawRenderNode(RenderNode renderNode) {
+        drawRenderNode(renderNode, null, RenderNode.FLAG_CLIP_CHILDREN);
     }
 
     /**
      * Draws the specified display list onto this canvas.
      *
-     * @param displayList The display list to replay.
+     * @param renderNode The RenderNode to replay.
      * @param dirty Ignored, can be null.
      * @param flags Optional flags about drawing, see {@link RenderNode} for
      *              the possible flags.
@@ -80,7 +80,7 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @hide
      */
-    public abstract int drawDisplayList(RenderNode displayList, Rect dirty, int flags);
+    public abstract int drawRenderNode(RenderNode renderNode, Rect dirty, int flags);
 
     /**
      * Draws the specified layer onto this canvas.

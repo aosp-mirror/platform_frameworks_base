@@ -169,18 +169,16 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return StatefulBaseRenderer::clipRegion(region, op);
 }
 
-status_t DisplayListRenderer::drawDisplayList(RenderNode* displayList,
-        Rect& dirty, int32_t flags) {
+status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
 
-    if (displayList->stagingProperties().isProjectionReceiver()) {
+    if (renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
         mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size();
     }
 
-    DrawDisplayListOp* op = new (alloc()) DrawDisplayListOp(displayList,
-            flags, *currentTransform());
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
     addDrawOp(op);
     mDisplayListData->addChild(op);
     return DrawGlInfo::kStatusDone;

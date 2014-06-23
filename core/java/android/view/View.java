@@ -3193,13 +3193,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean mHasBackgroundTint = false;
 
     /**
-     * Display list used for backgrounds.
+     * RenderNode used for backgrounds.
      * <p>
      * When non-null and valid, this is expected to contain an up-to-date copy
-     * of the background drawable. It is cleared on temporary detach and reset
+     * of the background drawable. It is cleared on temporary detach, and reset
      * on cleanup.
      */
-    private RenderNode mBackgroundDisplayList;
+    private RenderNode mBackgroundRenderNode;
 
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
@@ -13755,8 +13755,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mRenderNode.destroyDisplayListData();
         }
 
-        if (mBackgroundDisplayList != null && mBackgroundDisplayList.isValid()) {
-            mBackgroundDisplayList.destroyDisplayListData();
+        if (mBackgroundRenderNode != null && mBackgroundRenderNode.isValid()) {
+            mBackgroundRenderNode.destroyDisplayListData();
         }
     }
 
@@ -14471,7 +14471,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_INVALIDATED;
         }
 
-        RenderNode displayList = null;
+        RenderNode renderNode = null;
         Bitmap cache = null;
         boolean hasDisplayList = false;
         if (caching) {
@@ -14506,12 +14506,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         useDisplayListProperties &= hasDisplayList;
         if (useDisplayListProperties) {
-            displayList = getDisplayList();
-            if (!displayList.isValid()) {
+            renderNode = getDisplayList();
+            if (!renderNode.isValid()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
                 // to getDisplayList(), the display list will be marked invalid and we should not
                 // try to use it again.
-                displayList = null;
+                renderNode = null;
                 hasDisplayList = false;
                 useDisplayListProperties = false;
             }
@@ -14565,7 +14565,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (transformToApply != null) {
                     if (concatMatrix) {
                         if (useDisplayListProperties) {
-                            displayList.setAnimationMatrix(transformToApply.getMatrix());
+                            renderNode.setAnimationMatrix(transformToApply.getMatrix());
                         } else {
                             // Undo the scroll translation, apply the transformation matrix,
                             // then redo the scroll translate to get the correct result.
@@ -14608,7 +14608,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
                         if (useDisplayListProperties) {
-                            displayList.setAlpha(alpha * getAlpha() * getTransitionAlpha());
+                            renderNode.setAlpha(alpha * getAlpha() * getTransitionAlpha());
                         } else  if (layerType == LAYER_TYPE_NONE) {
                             final int scrollX = hasDisplayList ? 0 : sx;
                             final int scrollY = hasDisplayList ? 0 : sy;
@@ -14640,12 +14640,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (!useDisplayListProperties && hasDisplayList) {
-            displayList = getDisplayList();
-            if (!displayList.isValid()) {
+            renderNode = getDisplayList();
+            if (!renderNode.isValid()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
                 // to getDisplayList(), the display list will be marked invalid and we should not
                 // try to use it again.
-                displayList = null;
+                renderNode = null;
                 hasDisplayList = false;
             }
         }
@@ -14678,7 +14678,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 } else {
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawDisplayList(displayList, null, flags);
+                    ((HardwareCanvas) canvas).drawRenderNode(renderNode, null, flags);
                 }
             }
         } else if (cache != null) {
@@ -14949,12 +14949,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Attempt to use a display list if requested.
         if (canvas.isHardwareAccelerated() && mAttachInfo != null
                 && mAttachInfo.mHardwareRenderer != null) {
-            mBackgroundDisplayList = getDrawableDisplayList(background, mBackgroundDisplayList);
+            mBackgroundRenderNode = getDrawableRenderNode(background, mBackgroundRenderNode);
 
-            final RenderNode displayList = mBackgroundDisplayList;
+            final RenderNode displayList = mBackgroundRenderNode;
             if (displayList != null && displayList.isValid()) {
                 setBackgroundDisplayListProperties(displayList);
-                ((HardwareCanvas) canvas).drawDisplayList(displayList);
+                ((HardwareCanvas) canvas).drawRenderNode(displayList);
                 return;
             }
         }
@@ -14985,30 +14985,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * specified Drawable.
      *
      * @param drawable Drawable for which to create a display list
-     * @param displayList Existing display list, or {@code null}
+     * @param renderNode Existing RenderNode, or {@code null}
      * @return A valid display list for the specified drawable
      */
-    private RenderNode getDrawableDisplayList(Drawable drawable, RenderNode displayList) {
-        if (displayList == null) {
-            displayList = RenderNode.create(drawable.getClass().getName());
+    private RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
+        if (renderNode == null) {
+            renderNode = RenderNode.create(drawable.getClass().getName());
         }
 
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
-        final HardwareCanvas canvas = displayList.start(width, height);
+        final HardwareCanvas canvas = renderNode.start(width, height);
         try {
             drawable.draw(canvas);
         } finally {
-            displayList.end(canvas);
+            renderNode.end(canvas);
         }
 
         // Set up drawable properties that are view-independent.
-        displayList.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
-        displayList.setProjectBackwards(drawable.isProjected());
-        displayList.setProjectionReceiver(true);
-        displayList.setClipToBounds(false);
-        return displayList;
+        renderNode.setLeftTopRightBottom(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        renderNode.setProjectBackwards(drawable.isProjected());
+        renderNode.setProjectionReceiver(true);
+        renderNode.setClipToBounds(false);
+        return renderNode;
     }
 
     /**
