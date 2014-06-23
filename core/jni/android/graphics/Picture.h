@@ -22,13 +22,12 @@
 #include "SkRefCnt.h"
 #include "SkTemplates.h"
 
-class SkCanvas;
-class SkPicture;
-class SkPictureRecorder;
 class SkStream;
 class SkWStream;
 
 namespace android {
+
+class Canvas;
 
 // Skia's SkPicture class has been split into an SkPictureRecorder
 // and an SkPicture. AndroidPicture recreates the functionality
@@ -38,7 +37,7 @@ class Picture {
 public:
     explicit Picture(const Picture* src = NULL);
 
-    SkCanvas* beginRecording(int width, int height);
+    Canvas* beginRecording(int width, int height);
 
     void endRecording();
 
@@ -50,7 +49,7 @@ public:
 
     void serialize(SkWStream* stream) const;
 
-    void draw(SkCanvas* canvas);
+    void draw(Canvas* canvas);
 
 private:
     int mWidth;
