@@ -245,11 +245,15 @@ public class LinkPropertiesTest extends TestCase {
         // Add a route with no interface to a LinkProperties with no interface. No errors.
         LinkProperties lp = new LinkProperties();
         RouteInfo r = new RouteInfo(prefix, address, null);
-        lp.addRoute(r);
+        assertTrue(lp.addRoute(r));
         assertEquals(1, lp.getRoutes().size());
         assertAllRoutesHaveInterface(null, lp);
 
-        // Add a route with an interface. Except an exception.
+        // Adding the same route twice has no effect.
+        assertFalse(lp.addRoute(r));
+        assertEquals(1, lp.getRoutes().size());
+
+        // Add a route with an interface. Expect an exception.
         r = new RouteInfo(prefix, address, "wlan0");
         try {
           lp.addRoute(r);
@@ -267,6 +271,7 @@ public class LinkPropertiesTest extends TestCase {
         } catch (IllegalArgumentException expected) {}
 
         // If the interface name matches, the route is added.
+        r = new RouteInfo(prefix, null, "wlan0");
         lp.setInterfaceName("wlan0");
         lp.addRoute(r);
         assertEquals(2, lp.getRoutes().size());
