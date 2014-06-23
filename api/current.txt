@@ -15912,6 +15912,7 @@ package android.media.tv {
   public static final class TvContract.Channels implements android.media.tv.TvContract.BaseTvColumns {
     method public static final java.lang.String getVideoResolution(java.lang.String);
     field public static final java.lang.String COLUMN_BROWSABLE = "browsable";
+    field public static final java.lang.String COLUMN_CONDITIONAL_ACCESS = "conditional_access";
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
     field public static final java.lang.String COLUMN_DISPLAY_NUMBER = "display_number";
