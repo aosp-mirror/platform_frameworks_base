@@ -226,13 +226,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void startExitTransition() {
-        Transition sharedElementTransition = mSharedElements.isEmpty()
-                ? null : getSharedElementTransition();
-        if (sharedElementTransition == null) {
-            sharedElementTransitionComplete();
-        }
-        Transition transition = mergeTransitions(sharedElementTransition,
-                getExitTransition());
+        Transition transition = getExitTransition();
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
             setViewVisibility(mTransitioningViews, View.INVISIBLE);
