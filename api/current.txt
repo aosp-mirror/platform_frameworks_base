@@ -5304,6 +5304,7 @@ package android.app.admin {
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
     method public void setProfileEnabled(android.content.ComponentName);
+    method public void setProfileName(android.content.ComponentName, java.lang.String);
     method public void setRecommendedGlobalProxy(android.content.ComponentName, android.net.ProxyInfo);
     method public void setRestrictionsProvider(android.content.ComponentName, android.content.ComponentName);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);

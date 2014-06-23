@@ -114,6 +114,7 @@ interface IDevicePolicyManager {
     String getProfileOwner(int userHandle);
     String getProfileOwnerName(int userHandle);
     void setProfileEnabled(in ComponentName who);
+    void setProfileName(in ComponentName who, String profileName);
 
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
     void uninstallCaCert(in ComponentName admin, in String alias);
