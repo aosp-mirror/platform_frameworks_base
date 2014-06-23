@@ -158,7 +158,7 @@ public class Canvas {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
-        mNativeCanvasWrapper = initCanvas(nativeCanvas);
+        mNativeCanvasWrapper = nativeCanvas;
         mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
     }
@@ -921,7 +921,7 @@ public class Canvas {
      * @param b blue component (0..255) of the color to draw onto the canvas
      */
     public void drawRGB(int r, int g, int b) {
-        native_drawRGB(mNativeCanvasWrapper, r, g, b);
+        drawColor(Color.rgb(r, g, b));
     }
 
     /**
@@ -934,7 +934,7 @@ public class Canvas {
      * @param b blue component (0..255) of the color to draw onto the canvas
      */
     public void drawARGB(int a, int r, int g, int b) {
-        native_drawARGB(mNativeCanvasWrapper, a, r, g, b);
+        drawColor(Color.argb(a, r, g, b));
     }
 
     /**
@@ -944,7 +944,7 @@ public class Canvas {
      * @param color the color to draw onto the canvas
      */
     public void drawColor(int color) {
-        native_drawColor(mNativeCanvasWrapper, color);
+        native_drawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
     /**
@@ -1298,13 +1298,28 @@ public class Canvas {
      */
     public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull RectF dst,
             @Nullable Paint paint) {
-        if (dst == null) {
-            throw new NullPointerException();
-        }
-        throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), src, dst,
-                          paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
-    }
+      if (dst == null) {
+          throw new NullPointerException();
+      }
+      throwIfCannotDraw(bitmap);
+      final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+
+      float left, top, right, bottom;
+      if (src == null) {
+          left = top = 0;
+          right = bitmap.getWidth();
+          bottom = bitmap.getHeight();
+      } else {
+          left = src.left;
+          right = src.right;
+          top = src.top;
+          bottom = src.bottom;
+      }
+
+      native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+              dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
+              bitmap.mDensity);
+  }
 
     /**
      * Draw the specified bitmap, scaling/translating automatically to fill
@@ -1334,8 +1349,23 @@ public class Canvas {
             throw new NullPointerException();
         }
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), src, dst,
-                paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
+        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+
+        int left, top, right, bottom;
+        if (src == null) {
+            left = top = 0;
+            right = bitmap.getWidth();
+            bottom = bitmap.getHeight();
+        } else {
+            left = src.left;
+            right = src.right;
+            top = src.top;
+            bottom = src.bottom;
+        }
+
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+            dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
+            bitmap.mDensity);
     }
 
     /**
@@ -1863,7 +1893,6 @@ public class Canvas {
     public static native void freeTextLayoutCaches();
 
     private static native long initRaster(long nativeBitmapOrZero);
-    private static native long initCanvas(long canvasHandle);
     private static native void native_setBitmap(long canvasHandle,
                                                 long bitmapHandle,
                                                 boolean copyState);
@@ -1916,11 +1945,6 @@ public class Canvas {
     private static native boolean native_quickReject(long nativeCanvas,
                                                      float left, float top,
                                                      float right, float bottom);
-    private static native void native_drawRGB(long nativeCanvas, int r, int g,
-                                              int b);
-    private static native void native_drawARGB(long nativeCanvas, int a, int r,
-                                               int g, int b);
-    private static native void native_drawColor(long nativeCanvas, int color);
     private static native void native_drawColor(long nativeCanvas, int color,
                                                 int mode);
     private static native void native_drawPaint(long nativeCanvas,
@@ -1962,16 +1986,9 @@ public class Canvas {
                                                  int screenDensity,
                                                  int bitmapDensity);
     private native void native_drawBitmap(long nativeCanvas, long nativeBitmap,
-                                                 Rect src, RectF dst,
-                                                 long nativePaintOrZero,
-                                                 int screenDensity,
-                                                 int bitmapDensity);
-    private static native void native_drawBitmap(long nativeCanvas,
-                                                 long nativeBitmap,
-                                                 Rect src, Rect dst,
-                                                 long nativePaintOrZero,
-                                                 int screenDensity,
-                                                 int bitmapDensity);
+            float srcLeft, float srcTop, float srcRight, float srcBottom,
+            float dstLeft, float dstTop, float dstRight, float dstBottom,
+            long nativePaintOrZero, int screenDensity, int bitmapDensity);
     private static native void native_drawBitmap(long nativeCanvas, int[] colors,
                                                 int offset, int stride, float x,
                                                  float y, int width, int height,

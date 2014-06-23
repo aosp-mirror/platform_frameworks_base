@@ -3,6 +3,7 @@
 
 #include "SkCamera.h"
 
+#include "Canvas.h"
 #include "GraphicsJNI.h"
 
 static jfieldID gNativeInstanceFieldID;
@@ -95,10 +96,10 @@ static void Camera_getMatrix(JNIEnv* env, jobject obj, jlong matrixHandle) {
 }
 
 static void Camera_applyToCanvas(JNIEnv* env, jobject obj, jlong canvasHandle) {
-    SkCanvas* native_canvas = GraphicsJNI::getNativeCanvas(canvasHandle);
+    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
-    v->applyToCanvas((SkCanvas*)native_canvas);
+    v->applyToCanvas(canvas);
 }
 
 static jfloat Camera_dotWithNormal(JNIEnv* env, jobject obj,

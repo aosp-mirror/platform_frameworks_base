@@ -51,7 +51,7 @@ static void android_graphics_Picture_killPicture(JNIEnv* env, jobject, jlong pic
 
 static void android_graphics_Picture_draw(JNIEnv* env, jobject, jlong canvasHandle,
                                           jlong pictureHandle) {
-    SkCanvas* canvas = GraphicsJNI::getNativeCanvas(canvasHandle);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasHandle);
     Picture* picture = reinterpret_cast<Picture*>(pictureHandle);
     SkASSERT(canvas);
     SkASSERT(picture);
@@ -84,12 +84,7 @@ static jint android_graphics_Picture_getHeight(JNIEnv* env, jobject, jlong pictu
 static jlong android_graphics_Picture_beginRecording(JNIEnv* env, jobject, jlong pictHandle,
                                                      jint w, jint h) {
     Picture* pict = reinterpret_cast<Picture*>(pictHandle);
-    // beginRecording does not ref its return value, it just returns it.
-    SkCanvas* canvas = pict->beginRecording(w, h);
-    // the java side will wrap this guy in a Canvas.java, which will call
-    // unref in its finalizer, so we have to ref it here, so that both that
-    // Canvas.java and our picture can both be owners
-    canvas->ref();
+    Canvas* canvas = pict->beginRecording(w, h);
     return reinterpret_cast<jlong>(canvas);
 }
 
