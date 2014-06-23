@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Khetha unyaka"</string>
     <string name="item_is_selected" msgid="949687401682476608">"I-<xliff:g id="ITEM">%1$s</xliff:g> ekhethiwe"</string>
     <string name="deleted_key" msgid="7659477886625566590">"I-<xliff:g id="KEY">%1$s</xliff:g> isusiwe"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Umsebenzi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Sebenzisa isikhiya sohlelo lokusebenza?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Isikhiya kuhlelo lokusebenza sikhiyela isibonisi kuhlelo lokusebenza olulodwa.\n\nUkuze uphume cindezela uphinde ubambe inkinobho yezinhlelo zokusebenza zakamuva engu-$"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"CHA"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"QALA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Qala Isikhiya sohlelo lokusebenza"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Phuma kusikhiya sohlelo lokusebenza"</string>
 </resources>

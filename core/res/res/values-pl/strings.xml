@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Wybierz rok"</string>
     <string name="item_is_selected" msgid="949687401682476608">"Wybrałeś <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Chcesz użyć funkcji lock-to-app?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Po włączeniu funkcji lock-to-app na ekranie będzie wyświetlona pojedyncza aplikacja.\n\nAby wyłączyć tę funkcję, naciśnij i przytrzymaj przycisk ostatnio używanych aplikacji $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NIE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Włącz funkcję lock-to-app"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Wyłącz funkcję lock-to-app"</string>
 </resources>

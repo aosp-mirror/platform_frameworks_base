@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"تحديد العام"</string>
     <string name="item_is_selected" msgid="949687401682476608">"تم تحديد <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"هل تريد استخدام قفل تشغيل الجهاز على تطبيق؟"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"تتيح ميزة \"قفل تشغيل الجهاز على تطبيق\" تأمين الشاشة وقصر استخدامها على تطبيق واحد.\n\nللخروج اضغط مع الاستمرار على زر التطبيقات الحديثة $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"لا"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"بدء"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"بدء قفل تشغيل الجهاز على تطبيق"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"خروج من قفل تشغيل الجهاز على تطبيق"</string>
 </resources>

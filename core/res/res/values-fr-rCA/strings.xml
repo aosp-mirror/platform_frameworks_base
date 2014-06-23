@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permet à l\'application de régler la sonnerie d\'une fonction de réveil installée sur votre appareil. Cette fonctionnalité n\'est pas compatible avec toutes les applications de réveils."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ajouter des messages vocaux"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permet à l\'application d\'ajouter des messages à votre messagerie vocale."</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"accéder à tous les messages vocaux"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Permet à l\'application d\'accéder à tous vos messages vocaux."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modifier les autorisations de géolocalisation du navigateur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permet à l\'application de modifier les autorisations de géolocalisation du navigateur. Des applications malveillantes peuvent exploiter cette fonctionnalité pour permettre l\'envoi de données de localisation à des sites Web arbitraires."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"vérifier les paquets"</string>
@@ -1727,4 +1725,17 @@
     <string name="select_year" msgid="7952052866994196170">"Sélectionnez une année"</string>
     <string name="item_is_selected" msgid="949687401682476608">"« <xliff:g id="ITEM">%1$s</xliff:g> » a été sélectionné"</string>
     <string name="deleted_key" msgid="7659477886625566590">"« <xliff:g id="KEY">%1$s</xliff:g> » a été supprimé"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
+    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
+    <skip />
+    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
+    <skip />
+    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
+    <skip />
 </resources>

@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Programu omogoča nastavitev alarma v nameščenem programu budilke. Nekateri programi budilke morda nimajo te funkcije."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodajanje odzivnika"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Programu omogoča dodajanje sporočil prejetim sporočilom odzivnika."</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"branje vseh sporočil v odzivniku"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Aplikaciji omogoča branje vseh sporočil v odzivniku."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Spreminjanje dovoljenj za geolokacijo brskalnika"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Programu omogoča spreminjanje geolokacijskih dovoljenj v brskalniku. Zlonamerni programi lahko to izkoristijo za pošiljanje podatkov o lokaciji poljubnim spletnim mestom."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"preveri pakete"</string>
@@ -1727,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Izberite leto"</string>
     <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Želite uporabiti zaklepanje v aplikaciji?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Zaklepanje v aplikaciji zaklene zaslon v eni aplikaciji.\n\nČe želite zapustiti ta način, pritisnite in pridržite gumb za nedavne aplikacije $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Zagon zaklepanja v aplikaciji"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Izhod iz zaklepanja v aplikaciji"</string>
 </resources>

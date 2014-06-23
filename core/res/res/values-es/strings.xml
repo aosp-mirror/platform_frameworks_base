@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Seleccionar año"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"¿Usar bloqueo de aplicación?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"El bloqueo de aplicación bloquea la pantalla en una sola aplicación.\n\nPara salir, mantén pulsado el botón de aplicaciones recientes $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NO"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Iniciar bloqueo de aplicación"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Salir de bloqueo de aplicación"</string>
 </resources>

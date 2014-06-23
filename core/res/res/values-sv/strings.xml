@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Välj år"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> har markerats"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vill du använda Lås till app?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Med funktionen Lås till app låses skärmen i en enskild app.\n\nAvsluta genom att trycka länge på knappen för de senaste apparna $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEJ"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"STARTA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Starta Lås till app"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Avsluta Lås till app"</string>
 </resources>

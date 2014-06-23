@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legge til talepost"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar appen legge til meldinger i talepostkassen din."</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lese alle meldingene i talepostkassen"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Lar appen lese alle meldingene i talepostkassen din."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"endre nettleserens tillatelser for geoposisjonering"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Lar appen endre nettleserens tillatelser for geoposisjonering. Ondsinnede apper kan bruke dette for å tillate sending av posisjonsinformasjon til vilkårlige nettsteder."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekrefte pakker"</string>
@@ -1727,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Velg året"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vil du bruke lås-til-app?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Lås-til-app låser skjermen i en enkelt app.\n\nFor å avslutte trykker du på og holder nede nylige apper-knappen $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEI"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Start lås-til-app"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Avslutt lås-til-app"</string>
 </resources>

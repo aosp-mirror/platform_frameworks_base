@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Jaar selecteren"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> geselecteerd"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> verwijderd"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Lock-to-app gebruiken?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Met Lock-to-app wordt het scherm vergrendeld in één app.\n\nAls u dit wilt afsluiten, houdt u de knop \'Recente apps\' $ ingedrukt"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Lock-to-app starten"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lock-to-app afsluiten"</string>
 </resources>

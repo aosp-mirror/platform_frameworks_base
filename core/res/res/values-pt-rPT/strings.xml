@@ -1725,4 +1725,17 @@
     <string name="select_year" msgid="7952052866994196170">"Selecionar ano"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selecionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
+    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
+    <skip />
+    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
+    <skip />
+    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
+    <skip />
 </resources>

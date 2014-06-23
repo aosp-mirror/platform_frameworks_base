@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ऐप्स को इंस्‍टॉल किए गए अलार्म घड़ी ऐप्स में अलार्म सेट करने देता है. हो सकता है कुछ अलार्म घड़ी ऐप्स में यह सुविधा न हो."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ध्‍वनिमेल जोड़ें"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ऐप्स  को आपके ध्‍वनिमेल इनबॉक्‍स में संदेश जोड़ने देता है."</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"सभी ध्वनिमेल पढ़ें"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"ऐप्स को आपके सभी ध्वनिमेल पढ़ने देती है."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को बदलें"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ऐप्स को ब्राउज़र के भौगोलिक-स्‍थान की अनुमतियां संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स इसका उपयोग एकपक्षीय वेबसाइट को स्‍थान जानकारी भेजने में कर सकते हैं."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पैकेज सत्‍यापि‍त करें"</string>
@@ -1727,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चुनें"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयनित"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"ऐप्स-पर-लॉक करें का उपयोग करें?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"ऐप्स-पर-लॉक करें, डिस्प्ले को किसी एकल ऐप्स में लॉक कर देता है.\n\nबाहर निकलने के लिए हाल ही के ऐप्स बटन $ को दबाए रखें"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"नहीं"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ करें"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"ऐप्स-पर-लॉक करें प्रारंभ करें"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"ऐप्स-पर-लॉक करें से बाहर निकलें"</string>
 </resources>
