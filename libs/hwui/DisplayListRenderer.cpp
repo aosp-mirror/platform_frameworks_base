@@ -425,7 +425,7 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
 
 void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
-    if (op->getLocalBounds(mDrawModifiers, localBounds)) {
+    if (op->getLocalBounds(localBounds)) {
         bool rejected = quickRejectConservative(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);

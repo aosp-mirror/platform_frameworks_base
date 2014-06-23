@@ -20,6 +20,7 @@
 
 #include "Caches.h"
 #include "DeferredDisplayList.h"
+#include "RenderState.h"
 #include "Layer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
@@ -28,8 +29,10 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
-        caches(Caches::getInstance()), texture(caches) {
+Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight)
+        : caches(Caches::getInstance())
+        , renderState(renderState)
+        , texture(caches) {
     mesh = NULL;
     meshElementCount = 0;
     cacheable = true;
@@ -72,7 +75,7 @@ uint32_t Layer::computeIdealHeight(uint32_t layerHeight) {
 
 void Layer::requireRenderer() {
     if (!renderer) {
-        renderer = new LayerRenderer(this);
+        renderer = new LayerRenderer(renderState, this);
         renderer->initProperties();
     }
 }
@@ -123,18 +126,17 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
 
 void Layer::removeFbo(bool flush) {
     if (stencil) {
-        GLuint previousFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
-        if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        GLuint previousFbo = renderState.getFramebuffer();
+        renderState.bindFramebuffer(fbo);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+        renderState.bindFramebuffer(previousFbo);
 
         caches.renderBufferCache.put(stencil);
         stencil = NULL;
     }
 
     if (fbo) {
-        if (flush) LayerRenderer::flushLayer(this);
+        if (flush) LayerRenderer::flushLayer(renderState, this);
         // If put fails the cache will delete the FBO
         caches.fboCache.put(fbo);
         fbo = 0;

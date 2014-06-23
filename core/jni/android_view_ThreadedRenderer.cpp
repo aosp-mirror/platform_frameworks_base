@@ -76,26 +76,6 @@ private:
     jobject mRunnable;
 };
 
-class SetAtlasTask : public RenderTask {
-public:
-    SetAtlasTask(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size)
-            : mBuffer(buffer)
-            , mMap(map)
-            , mMapSize(size) {
-    }
-
-    virtual void run() {
-        CanvasContext::setTextureAtlas(mBuffer, mMap, mMapSize);
-        mMap = 0;
-        delete this;
-    }
-
-private:
-    sp<GraphicBuffer> mBuffer;
-    int64_t* mMap;
-    size_t mMapSize;
-};
-
 class OnFinishedEvent {
 public:
     OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
@@ -193,7 +173,7 @@ private:
 };
 
 static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
-        jobject graphicBuffer, jlongArray atlasMapArray) {
+        jlong proxyPtr, jobject graphicBuffer, jlongArray atlasMapArray) {
     sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
     jsize len = env->GetArrayLength(atlasMapArray);
     if (len <= 0) {
@@ -203,8 +183,8 @@ static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
     int64_t* map = new int64_t[len];
     env->GetLongArrayRegion(atlasMapArray, 0, len, map);
 
-    SetAtlasTask* task = new SetAtlasTask(buffer, map, len);
-    RenderThread::getInstance().queue(task);
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setTextureAtlas(buffer, map, len);
 }
 
 static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
@@ -291,10 +271,9 @@ static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, j
 }
 
 static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong functorPtr, jboolean waitForCompletion) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+        jlong functorPtr, jboolean waitForCompletion) {
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    proxy->invokeFunctor(functor, waitForCompletion);
+    RenderProxy::invokeFunctor(functor, waitForCompletion);
 }
 
 static void android_view_ThreadedRenderer_runWithGlContext(JNIEnv* env, jobject clazz,
@@ -387,7 +366,7 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nSetAtlas", "(Landroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
+    { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
@@ -400,7 +379,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
-    { "nInvokeFunctor", "(JJZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
+    { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },

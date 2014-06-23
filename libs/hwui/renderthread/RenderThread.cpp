@@ -21,7 +21,9 @@
 #include <gui/DisplayEventReceiver.h>
 #include <utils/Log.h>
 
+#include "../RenderState.h"
 #include "CanvasContext.h"
+#include "EglManager.h"
 #include "RenderProxy.h"
 
 namespace android {
@@ -138,13 +140,16 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
         , mDisplayEventReceiver(0)
         , mVsyncRequested(false)
         , mFrameCallbackTaskPending(false)
-        , mFrameCallbackTask(0) {
+        , mFrameCallbackTask(0)
+        , mRenderState(NULL)
+        , mEglManager(NULL) {
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");
 }
 
 RenderThread::~RenderThread() {
+    LOG_ALWAYS_FATAL("Can't destroy the render thread");
 }
 
 void RenderThread::initializeDisplayEventReceiver() {
@@ -157,6 +162,12 @@ void RenderThread::initializeDisplayEventReceiver() {
     // Register the FD
     mLooper->addFd(mDisplayEventReceiver->getFd(), 0,
             Looper::EVENT_INPUT, RenderThread::displayEventReceiverCallback, this);
+}
+
+void RenderThread::initThreadLocals() {
+    initializeDisplayEventReceiver();
+    mEglManager = new EglManager(*this);
+    mRenderState = new RenderState();
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
@@ -233,7 +244,7 @@ void RenderThread::requestVsync() {
 }
 
 bool RenderThread::threadLoop() {
-    initializeDisplayEventReceiver();
+    initThreadLocals();
 
     int timeoutMillis = -1;
     for (;;) {

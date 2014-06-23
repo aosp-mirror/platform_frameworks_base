@@ -73,10 +73,11 @@ public:
             float density);
     ANDROID_API void destroyCanvasAndSurface();
 
-    ANDROID_API void invokeFunctor(Functor* functor, bool waitForCompletion);
+    ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
 
     ANDROID_API void runWithGlContext(RenderTask* task);
 
+    static void enqueueDestroyLayer(Layer* layer);
     ANDROID_API DeferredLayerUpdater* createDisplayListLayer(int width, int height);
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
@@ -89,6 +90,8 @@ public:
     ANDROID_API void notifyFramePending();
 
     ANDROID_API void dumpProfileInfo(int fd);
+
+    ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
 
 private:
     RenderThread& mRenderThread;

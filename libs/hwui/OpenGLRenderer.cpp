@@ -35,6 +35,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
 #include "Fence.h"
+#include "RenderState.h"
 #include "PathTessellator.h"
 #include "Properties.h"
 #include "ShadowTessellator.h"
@@ -129,8 +130,10 @@ static inline T min(T a, T b) {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer():
-        mCaches(Caches::getInstance()), mExtensions(Extensions::getInstance()) {
+OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
+        : mCaches(Caches::getInstance())
+        , mExtensions(Extensions::getInstance())
+        , mRenderState(renderState) {
     // *set* draw modifiers to be 0
     memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
@@ -187,7 +190,7 @@ status_t OpenGLRenderer::startFrame() {
 
     discardFramebuffer(mTilingClip.left, mTilingClip.top, mTilingClip.right, mTilingClip.bottom);
 
-    glViewport(0, 0, getWidth(), getHeight());
+    mRenderState.setViewport(getWidth(), getHeight());
 
     // Functors break the tiling extension in pretty spectacular ways
     // This ensures we don't use tiling when a functor is going to be
@@ -311,46 +314,9 @@ void OpenGLRenderer::finish() {
     mFrameStarted = false;
 }
 
-void OpenGLRenderer::interrupt() {
-    if (mCaches.currentProgram) {
-        if (mCaches.currentProgram->isInUse()) {
-            mCaches.currentProgram->remove();
-            mCaches.currentProgram = NULL;
-        }
-    }
-    mCaches.resetActiveTexture();
-    mCaches.unbindMeshBuffer();
-    mCaches.unbindIndicesBuffer();
-    mCaches.resetVertexPointers();
-    mCaches.disableTexCoordsVertexArray();
-    debugOverdraw(false, false);
-}
-
-void OpenGLRenderer::resume() {
-    const Snapshot* snapshot = currentSnapshot();
-    glViewport(0, 0, getViewportWidth(), getViewportHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
-    debugOverdraw(true, false);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    mCaches.scissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
-    mCaches.enableScissor();
-    mCaches.resetScissor();
-    dirtyClip();
-
-    mCaches.activeTexture(0);
-    mCaches.resetBoundTextures();
-
-    mCaches.blend = true;
-    glEnable(GL_BLEND);
-    glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
-    glBlendEquation(GL_FUNC_ADD);
-}
-
 void OpenGLRenderer::resumeAfterLayer() {
-    glViewport(0, 0, getViewportWidth(), getViewportHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, currentSnapshot()->fbo);
+    mRenderState.setViewport(getViewportWidth(), getViewportHeight());
+    mRenderState.bindFramebuffer(currentSnapshot()->fbo);
     debugOverdraw(true, false);
 
     mCaches.resetScissor();
@@ -379,20 +345,19 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.height = getViewportHeight();
     currentTransform()->copyTo(&info.transform[0]);
 
-    bool dirtyClip = mDirtyClip;
+    bool prevDirtyClip = mDirtyClip;
     // setup GL state for functor
     if (mDirtyClip) {
         setStencilFromClip(); // can issue draws, so must precede enableScissor()/interrupt()
     }
-    if (mCaches.enableScissor() || dirtyClip) {
+    if (mCaches.enableScissor() || prevDirtyClip) {
         setScissorFromClip();
     }
-    interrupt();
 
-    // call functor immediately after GL state setup
-    (*functor)(DrawGlInfo::kModeDraw, &info);
+    mRenderState.invokeFunctor(functor, DrawGlInfo::kModeDraw, &info);
+    // Scissor may have been modified, reset dirty clip
+    dirtyClip();
 
-    resume();
     return DrawGlInfo::kStatusDrew;
 }
 
@@ -413,17 +378,7 @@ void OpenGLRenderer::endMark() const {
 }
 
 void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
-    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
-        if (clear) {
-            mCaches.disableScissor();
-            mCaches.stencil.clear();
-        }
-        if (enable) {
-            mCaches.stencil.enableDebugWrite();
-        } else {
-            mCaches.stencil.disable();
-        }
-    }
+    mRenderState.debugOverdraw(enable, clear);
 }
 
 void OpenGLRenderer::renderOverdraw() {
@@ -528,7 +483,7 @@ void OpenGLRenderer::updateLayers() {
 
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
             mLayerUpdates.clear();
-            glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
+            mRenderState.bindFramebuffer(getTargetFbo());
         }
         endMark();
     }
@@ -556,7 +511,7 @@ void OpenGLRenderer::flushLayers() {
         }
 
         mLayerUpdates.clear();
-        glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
+        mRenderState.bindFramebuffer(getTargetFbo());
 
         endMark();
     }
@@ -620,7 +575,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
     bool restoreLayer = removed.flags & Snapshot::kFlagIsLayer;
 
     if (restoreViewport) {
-        glViewport(0, 0, getViewportWidth(), getViewportHeight());
+        mRenderState.setViewport(getViewportWidth(), getViewportHeight());
     }
 
     if (restoreClip) {
@@ -791,7 +746,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     }
 
     mCaches.activeTexture(0);
-    Layer* layer = mCaches.layerCache.get(bounds.getWidth(), bounds.getHeight());
+    Layer* layer = mCaches.layerCache.get(mRenderState, bounds.getWidth(), bounds.getHeight());
     if (!layer) {
         return false;
     }
@@ -853,7 +808,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     endTiling();
     debugOverdraw(false, false);
     // Bind texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
+    mRenderState.bindFramebuffer(layer->getFbo());
     layer->bindTexture();
 
     // Initialize the texture if needed
@@ -876,7 +831,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     dirtyClip();
 
     // Change the ortho projection
-    glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
+    mRenderState.setViewport(bounds.getWidth(), bounds.getHeight());
     return true;
 }
 
@@ -907,7 +862,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         layer->removeFbo(false);
 
         // Unbind current FBO and restore previous one
-        glBindFramebuffer(GL_FRAMEBUFFER, restored.fbo);
+        mRenderState.bindFramebuffer(restored.fbo);
         debugOverdraw(true, false);
 
         startTilingCurrentClip();

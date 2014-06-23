@@ -23,7 +23,6 @@
 #include <cutils/compiler.h>
 
 #include "DisplayListLogBuffer.h"
-#include "OpenGLRenderer.h"
 #include "RenderNode.h"
 
 namespace android {
@@ -53,12 +52,12 @@ class StateOp;
 /**
  * Records drawing commands in a display list for later playback into an OpenGLRenderer.
  */
-class DisplayListRenderer: public OpenGLRenderer {
+class ANDROID_API DisplayListRenderer: public StatefulBaseRenderer {
 public:
-    ANDROID_API DisplayListRenderer();
+    DisplayListRenderer();
     virtual ~DisplayListRenderer();
 
-    ANDROID_API DisplayListData* finishRecording();
+    DisplayListData* finishRecording();
 
     virtual bool isRecording() const { return true; }
 
@@ -81,7 +80,7 @@ public:
             const SkPaint* paint, int flags);
 
     // Matrix
-    virtual void translate(float dx, float dy, float dz);
+    virtual void translate(float dx, float dy, float dz = 0.0f);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
@@ -97,6 +96,10 @@ public:
     // Misc - should be implemented with SkPaint inspection
     virtual void resetPaintFilter();
     virtual void setupPaintFilter(int clearBits, int setBits);
+
+    bool isCurrentTransformSimple() {
+        return currentTransform()->isSimple();
+    }
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations
@@ -152,11 +155,6 @@ public:
 
     // TODO: rename for consistency
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
-protected:
-    // NOTE: must override these to avoid calling into super class, which calls GL. These may be
-    // removed once DisplayListRenderer no longer inherits from OpenGLRenderer
-    virtual void onViewportInitialized() {};
-    virtual void onSnapshotRestored() {};
 
 private:
     void insertRestoreToCount();

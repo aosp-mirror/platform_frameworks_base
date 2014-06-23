@@ -129,21 +129,6 @@ public:
      */
     virtual void finish() = 0;
 
-    /**
-     * This method must be invoked before handing control over to a draw functor.
-     * See callDrawGLFunction() for instance.
-     *
-     * This command must not be recorded inside display lists.
-     */
-    virtual void interrupt() = 0;
-
-    /**
-     * This method must be invoked after getting control back from a draw functor.
-     *
-     * This command must not be recorded inside display lists.
-     */
-    virtual void resume() = 0;
-
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------

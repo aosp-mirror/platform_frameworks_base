@@ -55,7 +55,6 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
-class DeferredDisplayList;
 class DisplayListOp;
 class DisplayListRenderer;
 class OpenGLRenderer;

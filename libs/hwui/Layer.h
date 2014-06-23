@@ -43,6 +43,7 @@ namespace uirenderer {
 
 // Forward declarations
 class Caches;
+class RenderState;
 class OpenGLRenderer;
 class RenderNode;
 class DeferredDisplayList;
@@ -53,7 +54,7 @@ class DeferStateStruct;
  */
 class Layer {
 public:
-    Layer(const uint32_t layerWidth, const uint32_t layerHeight);
+    Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
     static uint32_t computeIdealWidth(uint32_t layerWidth);
@@ -305,6 +306,8 @@ private:
     void requireRenderer();
 
     Caches& caches;
+
+    RenderState& renderState;
 
     /**
      * Name of the FBO used to render the layer. If the name is 0

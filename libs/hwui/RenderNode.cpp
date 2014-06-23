@@ -155,7 +155,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     }
 
     if (!mLayer) {
-        mLayer = LayerRenderer::createRenderLayer(getWidth(), getHeight());
+        mLayer = LayerRenderer::createRenderLayer(info.renderState, getWidth(), getHeight());
         applyLayerPropertiesToLayer(info);
         damageSelf(info);
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
@@ -267,7 +267,7 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING);
+        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING, info.renderState);
         oldTreeInfo.damageAccumulator = info.damageAccumulator;
         prepareSubTree(oldTreeInfo, mDisplayListData);
         delete mDisplayListData;

@@ -661,11 +661,19 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Schedules the functor for execution in either kModeProcess or
+     * kModeProcessNoContext, depending on whether or not there is an EGLContext.
+     *
+     * @param functor The native functor to invoke
+     * @param waitForCompletion If true, this will not return until the functor
+     *                          has invoked. If false, the functor may be invoked
+     *                          asynchronously.
+     */
     public boolean invokeFunctor(long functor, boolean waitForCompletion) {
-        if (mAttachInfo.mHardwareRenderer == null) {
-            return false;
-        }
-        mAttachInfo.mHardwareRenderer.invokeFunctor(functor, waitForCompletion);
+        ThreadedRenderer.invokeFunctor(functor, waitForCompletion);
+        // TODO: Remove the return value. This is here for compatibility
+        // with current webview, which expects a boolean
         return true;
     }
 

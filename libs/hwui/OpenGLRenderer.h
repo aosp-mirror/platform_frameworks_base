@@ -57,6 +57,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredDisplayState;
+class RenderState;
 class RenderNode;
 class TextSetupFunctor;
 class VertexBuffer;
@@ -119,33 +120,31 @@ enum ModelViewMode {
  */
 class OpenGLRenderer : public StatefulBaseRenderer {
 public:
-    ANDROID_API OpenGLRenderer();
+    OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
 
-    ANDROID_API void initProperties();
+    void initProperties();
 
     virtual void onViewportInitialized();
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
-    virtual void interrupt();
-    virtual void resume();
 
-    ANDROID_API void setCountOverdrawEnabled(bool enabled) {
+    void setCountOverdrawEnabled(bool enabled) {
         mCountOverdraw = enabled;
     }
 
-    ANDROID_API float getOverdraw() {
+    float getOverdraw() {
         return mCountOverdraw ? mOverdraw : 0.0f;
     }
 
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
-    ANDROID_API void pushLayerUpdate(Layer* layer);
-    ANDROID_API void cancelLayerUpdate(Layer* layer);
-    ANDROID_API void clearLayerUpdates();
-    ANDROID_API void flushLayerUpdates();
+    void pushLayerUpdate(Layer* layer);
+    void cancelLayerUpdate(Layer* layer);
+    void clearLayerUpdates();
+    void flushLayerUpdates();
 
-    ANDROID_API virtual int saveLayer(float left, float top, float right, float bottom,
+    virtual int saveLayer(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags) {
         return saveLayer(left, top, right, bottom, paint, flags, NULL);
     }
@@ -231,7 +230,7 @@ public:
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
-    ANDROID_API bool isCurrentTransformSimple() {
+    bool isCurrentTransformSimple() {
         return currentTransform()->isSimple();
     }
 
@@ -473,6 +472,8 @@ protected:
     virtual bool suppressErrorChecks() const {
         return false;
     }
+
+    inline RenderState& renderState() { return mRenderState; }
 
 private:
     /**
@@ -977,6 +978,7 @@ private:
     // Various caches
     Caches& mCaches;
     Extensions& mExtensions;
+    RenderState& mRenderState;
 
     // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;
@@ -1012,7 +1014,6 @@ private:
 
     bool mSkipOutlineClip;
 
-    friend class DisplayListRenderer;
     friend class Layer;
     friend class TextSetupFunctor;
     friend class DrawBitmapOp;
