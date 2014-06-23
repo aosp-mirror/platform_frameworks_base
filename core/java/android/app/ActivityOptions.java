@@ -29,8 +29,6 @@ import android.view.View;
 import android.view.Window;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Helper class for building an options Bundle that can be used with
@@ -398,14 +396,14 @@ public class ActivityOptions {
                 if (sharedElementName == null) {
                     throw new IllegalArgumentException("Shared element name must not be null");
                 }
-                String viewName = sharedElement.first.getViewName();
-                if (viewName == null) {
+                String name = sharedElement.first.getTransitionName();
+                if (name == null) {
                     throw new IllegalArgumentException("Shared elements must have non-null " +
-                            "viewNames");
+                            "transitionNames");
                 }
 
                 names.add(sharedElementName);
-                mappedNames.add(viewName);
+                mappedNames.add(name);
             }
         }
 

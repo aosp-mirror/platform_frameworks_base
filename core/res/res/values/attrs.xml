@@ -2424,7 +2424,7 @@
 
         <!-- Names a View such that it can be identified for Transitions. Names should be
              unique in the View hierarchy. -->
-        <attr name="viewName" format="string" />
+        <attr name="transitionName" format="string" />
 
         <!-- Specifies that this view should permit nested scrolling within a compatible
              ancestor view. -->
@@ -5273,10 +5273,10 @@
         <attr name="interpolator" />
         <!-- The match order to use for the transition. This is a comma-separated
              list of values, containing one or more of the following:
-             id, itemId, viewName, instance. These correspond to
+             id, itemId, name, instance. These correspond to
              {@link android.transition.Transition#MATCH_ID},
              {@link android.transition.Transition#MATCH_ITEM_ID},
-             {@link android.transition.Transition#MATCH_VIEW_NAME}, and
+             {@link android.transition.Transition#MATCH_NAME}, and
              {@link android.transition.Transition#MATCH_INSTANCE}, respectively.
              This corresponds to {@link android.transition.Transition#setMatchOrder(int...)}. -->
         <attr name="matchOrder" format="string" />
@@ -5331,10 +5331,10 @@
         <attr name="targetClass" />
         <!-- The fully-qualified name of the Class to exclude from this transition. -->
         <attr name="excludeClass" format="string" />
-        <!-- The viewName of the target on which this transition will animation changes. -->
-        <attr name="targetViewName" format="string" />
-        <!-- The viewName of the target to exclude from this transition. -->
-        <attr name="excludeViewName" format="string" />
+        <!-- The transitionName of the target on which this transition will animation changes. -->
+        <attr name="targetName" format="string" />
+        <!-- The transitionName of the target to exclude from this transition. -->
+        <attr name="excludeName" format="string" />
     </declare-styleable>
 
     <!-- Use <code>set</code> as the root tag of the XML resource that
