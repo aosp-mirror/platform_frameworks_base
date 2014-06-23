@@ -77,7 +77,7 @@ final class DeviceSelectAction extends FeatureAction {
      * @param target target logical device that will be a new active source
      * @param callback callback object
      */
-    public DeviceSelectAction(HdmiCecLocalDevice source,
+    public DeviceSelectAction(HdmiCecLocalDeviceTv source,
             HdmiCecDeviceInfo target, IHdmiControlCallback callback) {
         super(source);
         mCallback = callback;
@@ -116,7 +116,7 @@ final class DeviceSelectAction extends FeatureAction {
                 if (opcode == HdmiCec.MESSAGE_ACTIVE_SOURCE && params.length == 2) {
                     int activePath = HdmiUtils.twoBytesToInt(params);
                     ActiveSourceHandler
-                            .create(localDevice(), mCallback)
+                            .create((HdmiCecLocalDeviceTv) localDevice(), mCallback)
                             .process(cmd.getSource(), activePath);
                     finish();
                     return true;

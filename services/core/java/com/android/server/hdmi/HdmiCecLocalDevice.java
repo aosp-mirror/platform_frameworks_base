@@ -125,6 +125,12 @@ abstract class HdmiCecLocalDevice {
             return true;
         }
         switch (message.getOpcode()) {
+            case HdmiCec.MESSAGE_ACTIVE_SOURCE:
+                return handleActiveSource(message);
+            case HdmiCec.MESSAGE_INACTIVE_SOURCE:
+                return handleInactiveSource(message);
+            case HdmiCec.MESSAGE_REQUEST_ACTIVE_SOURCE:
+                return handleRequestActiveSource(message);
             case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
                 return handleGetMenuLanguage(message);
             case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
@@ -190,6 +196,21 @@ abstract class HdmiCecLocalDevice {
                 message.getSource(), version);
         mService.sendCecCommand(cecMessage);
         return true;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        return false;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleInactiveSource(HdmiCecMessage message) {
+        return false;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
+        return false;
     }
 
     @ServiceThreadOnly
@@ -383,12 +404,21 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
-    /**
-     * Returns the active routing path.
-     */
+    void setActiveSource(int source) {
+        synchronized (mLock) {
+            mActiveSource = source;
+        }
+    }
+
     int getActivePath() {
         synchronized (mLock) {
             return mActiveRoutingPath;
+        }
+    }
+
+    void setActivePath(int path) {
+        synchronized (mLock) {
+            mActiveRoutingPath = path;
         }
     }
 
@@ -429,6 +459,13 @@ abstract class HdmiCecLocalDevice {
     }
 
     boolean isInPresetInstallationMode() {
+        // TODO: Change this to check the right flag.
+        synchronized (mLock) {
+            return !mInputChangeEnabled;
+        }
+    }
+
+    boolean isHdmiControlEnabled() {
         synchronized (mLock) {
             return !mInputChangeEnabled;
         }

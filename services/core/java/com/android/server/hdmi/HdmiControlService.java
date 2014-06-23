@@ -582,7 +582,7 @@ public final class HdmiControlService extends SystemService {
                         invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
-                    tv.portSelect(portId, callback);
+                    tv.doManualPortSwitching(portId, callback);
                 }
             });
         }
