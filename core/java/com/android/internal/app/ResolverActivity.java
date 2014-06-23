@@ -259,11 +259,11 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         super.onRestoreInstanceState(savedInstanceState);
         if (mAlwaysUseOption) {
             final int checkedPos = mListView.getCheckedItemPosition();
-            final boolean enabled = checkedPos != ListView.INVALID_POSITION;
+            final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             mLastSelected = checkedPos;
-            mAlwaysButton.setEnabled(enabled);
-            mOnceButton.setEnabled(enabled);
-            if (enabled) {
+            setAlwaysButtonEnabled(hasValidSelection, checkedPos);
+            mOnceButton.setEnabled(hasValidSelection);
+            if (hasValidSelection) {
                 mListView.setSelection(checkedPos);
             }
         }
@@ -274,7 +274,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         final int checkedPos = mListView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
-            mAlwaysButton.setEnabled(hasValidSelection);
+            setAlwaysButtonEnabled(hasValidSelection, checkedPos);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
                 mListView.smoothScrollToPosition(checkedPos);
@@ -283,6 +283,17 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         } else {
             startSelected(position, false);
         }
+    }
+
+    private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos) {
+        boolean enabled = false;
+        if (hasValidSelection) {
+            ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos);
+            if (ri.targetUserId == UserHandle.USER_CURRENT) {
+                enabled = true;
+            }
+        }
+        mAlwaysButton.setEnabled(enabled);
     }
 
     public void onButtonClick(View v) {
