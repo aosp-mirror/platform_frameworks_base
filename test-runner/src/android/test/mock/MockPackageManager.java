@@ -724,4 +724,13 @@ public class MockPackageManager extends PackageManager {
     public PackageInstaller getPackageInstaller() {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addCrossProfileIntentsForPackage(String packageName, int sourceUserId,
+            int targetUserId) {
+        throw new UnsupportedOperationException();
+    }
 }
