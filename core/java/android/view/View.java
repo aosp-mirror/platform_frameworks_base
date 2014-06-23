@@ -3894,7 +3894,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (fadingEdge != FADING_EDGE_NONE) {
                         viewFlagValues |= fadingEdge;
                         viewFlagMasks |= FADING_EDGE_MASK;
-                        initializeFadingEdge(a);
+                        initializeFadingEdgeInternal(a);
                     }
                     break;
                 case R.styleable.View_scrollbarStyle:
@@ -4108,7 +4108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (initializeScrollbars) {
-            initializeScrollbars(a);
+            initializeScrollbarsInternal(a);
         }
 
         a.recycle();
@@ -4236,6 +4236,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param a the styled attributes set to initialize the fading edges from
      */
     protected void initializeFadingEdge(TypedArray a) {
+        // This method probably shouldn't have been included in the SDK to begin with.
+        // It relies on 'a' having been initialized using an attribute filter array that is
+        // not publicly available to the SDK. The old method has been renamed
+        // to initializeFadingEdgeInternal and hidden for framework use only;
+        // this one initializes using defaults to make it safe to call for apps.
+
+        TypedArray arr = mContext.obtainStyledAttributes(com.android.internal.R.styleable.View);
+
+        initializeFadingEdgeInternal(arr);
+
+        arr.recycle();
+    }
+
+    /**
+     * <p>
+     * Initializes the fading edges from a given set of styled attributes. This
+     * method should be called by subclasses that need fading edges and when an
+     * instance of these subclasses is created programmatically rather than
+     * being inflated from XML. This method is automatically called when the XML
+     * is inflated.
+     * </p>
+     *
+     * @param a the styled attributes set to initialize the fading edges from
+     * @hide This is the real method; the public one is shimmed to be safe to call from apps.
+     */
+    protected void initializeFadingEdgeInternal(TypedArray a) {
         initScrollCache();
 
         mScrollCache.fadingEdgeLength = a.getDimensionPixelSize(
@@ -4350,6 +4376,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param a the styled attributes set to initialize the scrollbars from
      */
     protected void initializeScrollbars(TypedArray a) {
+        // It's not safe to use this method from apps. The parameter 'a' must have been obtained
+        // using the View filter array which is not available to the SDK. As such, internal
+        // framework usage now uses initializeScrollbarsInternal and we grab a default
+        // TypedArray with the right filter instead here.
+        TypedArray arr = mContext.obtainStyledAttributes(com.android.internal.R.styleable.View);
+
+        initializeScrollbarsInternal(arr);
+
+        // We ignored the method parameter. Recycle the one we actually did use.
+        arr.recycle();
+    }
+
+    /**
+     * <p>
+     * Initializes the scrollbars from a given set of styled attributes. This
+     * method should be called by subclasses that need scrollbars and when an
+     * instance of these subclasses is created programmatically rather than
+     * being inflated from XML. This method is automatically called when the XML
+     * is inflated.
+     * </p>
+     *
+     * @param a the styled attributes set to initialize the scrollbars from
+     * @hide
+     */
+    protected void initializeScrollbarsInternal(TypedArray a) {
         initScrollCache();
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;

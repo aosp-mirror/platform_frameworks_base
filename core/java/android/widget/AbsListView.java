@@ -785,7 +785,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         setVerticalScrollBarEnabled(true);
         TypedArray a = context.obtainStyledAttributes(R.styleable.View);
-        initializeScrollbars(a);
+        initializeScrollbarsInternal(a);
         a.recycle();
     }
 
