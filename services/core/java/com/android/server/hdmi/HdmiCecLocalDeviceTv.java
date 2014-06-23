@@ -351,7 +351,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return false;
         }
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
-                message.getSource(), HdmiUtils.parseCommandParamSystemAudioStatus(message));
+                message.getSource(), HdmiUtils.parseCommandParamSystemAudioStatus(message), null);
         addAndStartAction(action);
         return true;
     }

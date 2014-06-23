@@ -106,7 +106,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
     private void handleSystemAudioModeStatusTimeout() {
         if (tv().getSystemAudioMode()) {
             if (canChangeSystemAudio()) {
-                addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true));
+                addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true, null));
             }
         } else {
             tv().setSystemAudioMode(false);
