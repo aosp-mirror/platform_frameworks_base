@@ -203,6 +203,19 @@ public class MediaSessionStack {
         return null;
     }
 
+    public MediaSessionRecord getDefaultRemoteSession(int userId) {
+        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userId);
+
+        int size = records.size();
+        for (int i = 0; i < size; i++) {
+            MediaSessionRecord record = records.get(i);
+            if (record.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE) {
+                return record;
+            }
+        }
+        return null;
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
                 UserHandle.USER_ALL);

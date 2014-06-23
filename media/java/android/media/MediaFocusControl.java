@@ -2061,29 +2061,6 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    protected void adjustRemoteVolume(int streamType, int direction, int flags) {
-        int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
-        boolean volFixed = false;
-        synchronized (mMainRemote) {
-            if (!mMainRemoteIsActive) {
-                if (DEBUG_VOL) Log.w(TAG, "adjustRemoteVolume didn't find an active client");
-                return;
-            }
-            rccId = mMainRemote.mRccId;
-            volFixed = (mMainRemote.mVolumeHandling ==
-                    RemoteControlClient.PLAYBACK_VOLUME_FIXED);
-        }
-        // unlike "local" stream volumes, we can't compute the new volume based on the direction,
-        // we can only notify the remote that volume needs to be updated, and we'll get an async'
-        // update through setPlaybackInfoForRcc()
-        if (!volFixed) {
-            sendVolumeUpdateToRemote(rccId, direction);
-        }
-
-        // fire up the UI
-        mVolumeController.postRemoteVolumeChanged(streamType, flags);
-    }
-
     private void sendVolumeUpdateToRemote(int rccId, int direction) {
         if (DEBUG_VOL) { Log.d(TAG, "sendVolumeUpdateToRemote(rccId="+rccId+" , dir="+direction); }
         if (direction == 0) {
@@ -2183,27 +2160,9 @@ public class MediaFocusControl implements OnFinished {
     }
 
     private void onReevaluateRemote() {
-        if (DEBUG_VOL) { Log.w(TAG, "onReevaluateRemote()"); }
-        // is there a registered RemoteControlClient that is handling remote playback
-        boolean hasRemotePlayback = false;
-        synchronized (mPRStack) {
-            // iteration stops when PLAYBACK_TYPE_REMOTE is found, so remote control stack
-            //   traversal order doesn't matter
-            Iterator<PlayerRecord> stackIterator = mPRStack.iterator();
-            while(stackIterator.hasNext()) {
-                PlayerRecord prse = stackIterator.next();
-                if (prse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
-                    hasRemotePlayback = true;
-                    break;
-                }
-            }
-        }
-        synchronized (mMainRemote) {
-            if (mHasRemotePlayback != hasRemotePlayback) {
-                mHasRemotePlayback = hasRemotePlayback;
-                mVolumeController.postRemoteSliderVisibility(hasRemotePlayback);
-            }
-        }
+        // TODO This was used to notify VolumePanel if there was remote playback
+        // in the stack. This is now in MediaSessionService. More code should be
+        // removed.
     }
 
 }

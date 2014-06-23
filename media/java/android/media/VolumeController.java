@@ -23,7 +23,9 @@ import android.util.Log;
 import java.util.Objects;
 
 /**
- * Wraps the remote volume controller interface as a convenience to audio service.
+ * Wraps the volume controller binder interface as a convenience to audio
+ * service.
+ *
  * @hide
  */
 public class VolumeController {
@@ -50,33 +52,6 @@ public class VolumeController {
     @Override
     public String toString() {
         return "VolumeController(" + asBinder() + ")";
-    }
-
-    public void postHasNewRemotePlaybackInfo() {
-        if (mController == null) return;
-        try {
-            mController.hasNewRemotePlaybackInfo();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error calling hasNewRemotePlaybackInfo", e);
-        }
-    }
-
-    public void postRemoteVolumeChanged(int streamType, int flags) {
-        if (mController == null) return;
-        try {
-            mController.remoteVolumeChanged(streamType, flags);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error calling remoteVolumeChanged", e);
-        }
-    }
-
-    public void postRemoteSliderVisibility(boolean visible) {
-        if (mController == null) return;
-        try {
-            mController.remoteSliderVisibility(visible);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error calling remoteSliderVisibility", e);
-        }
     }
 
     public void postDisplaySafeVolumeWarning(int flags) {

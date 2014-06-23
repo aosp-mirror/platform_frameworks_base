@@ -2811,38 +2811,6 @@ public class AudioManager {
      * Only useful for volume controllers.
      * @hide
      */
-    public int getRemoteStreamVolume() {
-        // TODO STOPSHIP switch callers to use media sessions instead
-        Log.e(TAG, "Need to implement new Remote Volume!");
-        return 0;
-    }
-
-    /**
-     * Only useful for volume controllers.
-     * @hide
-     */
-    public int getRemoteStreamMaxVolume() {
-        // TODO STOPSHIP switch callers to use media sessions instead
-        Log.e(TAG, "Need to implement new Remote Volume!");
-        return 0;
-    }
-
-    /**
-     * Only useful for volume controllers.
-     * @hide
-     */
-    public void setRemoteStreamVolume(int index) {
-        try {
-            getService().setRemoteStreamVolume(index);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error setting remote stream volume", e);
-        }
-    }
-
-    /**
-     * Only useful for volume controllers.
-     * @hide
-     */
     public boolean isStreamAffectedByRingerMode(int streamType) {
         try {
             return getService().isStreamAffectedByRingerMode(streamType);

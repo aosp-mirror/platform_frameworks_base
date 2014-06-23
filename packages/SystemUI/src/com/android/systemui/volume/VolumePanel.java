@@ -34,6 +34,9 @@ import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.RingtoneManager;
 import android.media.ToneGenerator;
+import android.media.VolumeProvider;
+import android.media.session.MediaController;
+import android.media.session.MediaController.VolumeInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -224,6 +227,7 @@ public class VolumePanel extends Handler {
     /** Object that contains data for each slider */
     private class StreamControl {
         int streamType;
+        MediaController controller;
         ViewGroup group;
         ImageView icon;
         SeekBar seekbarView;
@@ -405,7 +409,8 @@ public class VolumePanel extends Handler {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.isMasterMute();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return (mAudioManager.getRemoteStreamVolume() <= 0);
+            // TODO do we need to support a distinct mute property for remote?
+            return false;
         } else {
             return mAudioManager.isStreamMute(streamType);
         }
@@ -415,7 +420,14 @@ public class VolumePanel extends Handler {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.getMasterMaxVolume();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return mAudioManager.getRemoteStreamMaxVolume();
+            if (mStreamControls != null) {
+                StreamControl sc = mStreamControls.get(streamType);
+                if (sc != null && sc.controller != null) {
+                    VolumeInfo vi = sc.controller.getVolumeInfo();
+                    return vi.getMaxVolume();
+                }
+            }
+            return -1;
         } else {
             return mAudioManager.getStreamMaxVolume(streamType);
         }
@@ -425,19 +437,32 @@ public class VolumePanel extends Handler {
         if (streamType == STREAM_MASTER) {
             return mAudioManager.getMasterVolume();
         } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return mAudioManager.getRemoteStreamVolume();
+            if (mStreamControls != null) {
+                StreamControl sc = mStreamControls.get(streamType);
+                if (sc != null && sc.controller != null) {
+                    VolumeInfo vi = sc.controller.getVolumeInfo();
+                    return vi.getCurrentVolume();
+                }
+            }
+            return -1;
         } else {
             return mAudioManager.getStreamVolume(streamType);
         }
     }
 
-    private void setStreamVolume(int streamType, int index, int flags) {
-        if (streamType == STREAM_MASTER) {
-            mAudioManager.setMasterVolume(index, flags);
-        } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            mAudioManager.setRemoteStreamVolume(index);
-        } else {
-            mAudioManager.setStreamVolume(streamType, index, flags);
+    private void setStreamVolume(StreamControl sc, int index, int flags) {
+        if (sc.streamType == AudioService.STREAM_REMOTE_MUSIC) {
+            if (sc.controller != null) {
+                sc.controller.setVolumeTo(index, flags);
+            } else {
+                Log.wtf(mTag, "Adjusting remote volume without a controller!");
+            }
+        } else if (getStreamVolume(sc.streamType) != index) {
+            if (sc.streamType == STREAM_MASTER) {
+                mAudioManager.setMasterVolume(index, flags);
+            } else {
+                mAudioManager.setStreamVolume(sc.streamType, index, flags);
+            }
         }
     }
 
@@ -549,7 +574,7 @@ public class VolumePanel extends Handler {
         if (sc.streamType == AudioService.STREAM_REMOTE_MUSIC) {
             // never disable touch interactions for remote playback, the muting is not tied to
             // the state of the phone.
-            sc.seekbarView.setEnabled(true);
+            sc.seekbarView.setEnabled(!fixedVolume);
         } else if (fixedVolume ||
                         (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
                         (sConfirmSafeVolumeDialog != null)) {
@@ -677,7 +702,7 @@ public class VolumePanel extends Handler {
         obtainMessage(MSG_VOLUME_CHANGED, streamType, flags).sendToTarget();
     }
 
-    public void postRemoteVolumeChanged(int streamType, int flags) {
+    public void postRemoteVolumeChanged(MediaController controller, int flags) {
         if (hasMessages(MSG_REMOTE_VOLUME_CHANGED)) return;
         synchronized (this) {
             if (mStreamControls == null) {
@@ -685,7 +710,7 @@ public class VolumePanel extends Handler {
             }
         }
         removeMessages(MSG_FREE_RESOURCES);
-        obtainMessage(MSG_REMOTE_VOLUME_CHANGED, streamType, flags).sendToTarget();
+        obtainMessage(MSG_REMOTE_VOLUME_CHANGED, flags, 0, controller).sendToTarget();
     }
 
     public void postRemoteSliderVisibility(boolean visible) {
@@ -758,7 +783,7 @@ public class VolumePanel extends Handler {
                 if (mActiveStreamType != streamType) {
                     reorderSliders(streamType);
                 }
-                onShowVolumeChanged(streamType, flags);
+                onShowVolumeChanged(streamType, flags, null);
             }
         }
 
@@ -790,7 +815,7 @@ public class VolumePanel extends Handler {
         onVolumeChanged(streamType, flags);
     }
 
-    protected void onShowVolumeChanged(int streamType, int flags) {
+    protected void onShowVolumeChanged(int streamType, int flags, MediaController controller) {
         int index = getStreamVolume(streamType);
 
         mRingIsSilent = false;
@@ -803,6 +828,7 @@ public class VolumePanel extends Handler {
         // get max volume for progress bar
 
         int max = getStreamMaxVolume(streamType);
+        StreamControl sc = mStreamControls.get(streamType);
 
         switch (streamType) {
 
@@ -865,13 +891,37 @@ public class VolumePanel extends Handler {
             }
 
             case AudioService.STREAM_REMOTE_MUSIC: {
+                if (controller == null && sc != null) {
+                    // If we weren't passed one try using the last one set.
+                    controller = sc.controller;
+                }
+                if (controller == null) {
+                    // We still don't have one, ignore the command.
+                    Log.w(mTag, "sent remote volume change without a controller!");
+                } else {
+                    VolumeInfo vi = controller.getVolumeInfo();
+                    index = vi.getCurrentVolume();
+                    max = vi.getMaxVolume();
+                    if ((vi.getVolumeControl() & VolumeProvider.VOLUME_CONTROL_FIXED) != 0) {
+                        // if the remote volume is fixed add the flag for the UI
+                        flags |= AudioManager.FLAG_FIXED_VOLUME;
+                    }
+                }
                 if (LOGD) { Log.d(mTag, "showing remote volume "+index+" over "+ max); }
                 break;
             }
         }
 
-        StreamControl sc = mStreamControls.get(streamType);
         if (sc != null) {
+            if (streamType == AudioService.STREAM_REMOTE_MUSIC && controller != sc.controller) {
+                if (sc.controller != null) {
+                    sc.controller.removeCallback(mMediaControllerCb);
+                }
+                sc.controller = controller;
+                if (controller != null) {
+                    sc.controller.addCallback(mMediaControllerCb);
+                }
+            }
             if (sc.seekbarView.getMax() != max) {
                 sc.seekbarView.setMax(max);
             }
@@ -949,32 +999,19 @@ public class VolumePanel extends Handler {
         mVibrator.vibrate(VIBRATE_DURATION, AudioManager.STREAM_SYSTEM);
     }
 
-    protected void onRemoteVolumeChanged(int streamType, int flags) {
-        // streamType is the real stream type being affected, but for the UI sliders, we
-        // refer to AudioService.STREAM_REMOTE_MUSIC. We still play the beeps on the real
-        // stream type.
-        if (LOGD) Log.d(mTag, "onRemoteVolumeChanged(stream:"+streamType+", flags: " + flags + ")");
+    protected void onRemoteVolumeChanged(MediaController controller, int flags) {
+        if (LOGD) Log.d(mTag, "onRemoteVolumeChanged(controller:" + controller + ", flags: " + flags
+                    + ")");
 
         if (((flags & AudioManager.FLAG_SHOW_UI) != 0) || isShowing()) {
             synchronized (this) {
                 if (mActiveStreamType != AudioService.STREAM_REMOTE_MUSIC) {
                     reorderSliders(AudioService.STREAM_REMOTE_MUSIC);
                 }
-                onShowVolumeChanged(AudioService.STREAM_REMOTE_MUSIC, flags);
+                onShowVolumeChanged(AudioService.STREAM_REMOTE_MUSIC, flags, controller);
             }
         } else {
             if (LOGD) Log.d(mTag, "not calling onShowVolumeChanged(), no FLAG_SHOW_UI or no UI");
-        }
-
-        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && ! mRingIsSilent) {
-            removeMessages(MSG_PLAY_SOUND);
-            sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
-        }
-
-        if ((flags & AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE) != 0) {
-            removeMessages(MSG_PLAY_SOUND);
-            removeMessages(MSG_VIBRATE);
-            onStopSounds();
         }
 
         removeMessages(MSG_FREE_RESOURCES);
@@ -987,10 +1024,24 @@ public class VolumePanel extends Handler {
         if (isShowing()
                 && (mActiveStreamType == AudioService.STREAM_REMOTE_MUSIC)
                 && (mStreamControls != null)) {
-            onShowVolumeChanged(AudioService.STREAM_REMOTE_MUSIC, 0);
+            onShowVolumeChanged(AudioService.STREAM_REMOTE_MUSIC, 0, null);
         }
     }
 
+    /**
+     * Clear the current remote stream controller.
+     */
+    private void clearRemoteStreamController() {
+        if (mStreamControls != null) {
+            StreamControl sc = mStreamControls.get(AudioService.STREAM_REMOTE_MUSIC);
+            if (sc != null) {
+                if (sc.controller != null) {
+                    sc.controller.removeCallback(mMediaControllerCb);
+                    sc.controller = null;
+                }
+            }
+        }
+    }
 
     /**
      * Handler for MSG_SLIDER_VISIBILITY_CHANGED
@@ -1137,6 +1188,7 @@ public class VolumePanel extends Handler {
                 if (isShowing()) {
                     if (mDialog != null) {
                         mDialog.dismiss();
+                        clearRemoteStreamController();
                         mActiveStreamType = -1;
                     }
                 }
@@ -1155,7 +1207,7 @@ public class VolumePanel extends Handler {
             }
 
             case MSG_REMOTE_VOLUME_CHANGED: {
-                onRemoteVolumeChanged(msg.arg1, msg.arg2);
+                onRemoteVolumeChanged((MediaController) msg.obj, msg.arg1);
                 break;
             }
 
@@ -1202,9 +1254,7 @@ public class VolumePanel extends Handler {
             final Object tag = seekBar.getTag();
             if (fromUser && tag instanceof StreamControl) {
                 StreamControl sc = (StreamControl) tag;
-                if (getStreamVolume(sc.streamType) != progress) {
-                    setStreamVolume(sc.streamType, progress, 0);
-                }
+                setStreamVolume(sc, progress, 0);
             }
             resetTimeout();
         }
@@ -1215,19 +1265,6 @@ public class VolumePanel extends Handler {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            final Object tag = seekBar.getTag();
-            if (tag instanceof StreamControl) {
-                StreamControl sc = (StreamControl) tag;
-                // Because remote volume updates are asynchronous, AudioService
-                // might have received a new remote volume value since the
-                // finger adjusted the slider. So when the progress of the
-                // slider isn't being tracked anymore, adjust the slider to the
-                // last "published" remote volume value, so the UI reflects the
-                // actual volume.
-                if (sc.streamType == AudioService.STREAM_REMOTE_MUSIC) {
-                    seekBar.setProgress(getStreamVolume(AudioService.STREAM_REMOTE_MUSIC));
-                }
-            }
         }
     };
 
@@ -1255,6 +1292,12 @@ public class VolumePanel extends Handler {
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         public void onZenChanged(boolean zen) {
             postZenModeChanged(zen);
+        }
+    };
+
+    private final MediaController.Callback mMediaControllerCb = new MediaController.Callback() {
+        public void onVolumeInfoChanged(VolumeInfo info) {
+            onRemoteVolumeUpdateIfShown();
         }
     };
 }

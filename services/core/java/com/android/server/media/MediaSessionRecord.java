@@ -16,11 +16,9 @@
 
 package com.android.server.media;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
@@ -49,7 +47,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -87,6 +84,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     private static final int ACTIVE_BUFFER = 30000;
 
+    /**
+     * The amount of time we'll send an assumed volume after the last volume
+     * command before reverting to the last reported volume.
+     */
+    private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
+
     private final MessageHandler mHandler;
 
     private final int mOwnerPid;
@@ -122,11 +125,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     // Volume handling fields
     private AudioManager mAudioManager;
-    private int mVolumeType = MediaSession.VOLUME_TYPE_LOCAL;
+    private int mVolumeType = MediaSession.PLAYBACK_TYPE_LOCAL;
     private int mAudioStream = AudioManager.STREAM_MUSIC;
     private int mVolumeControlType = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
     private int mMaxVolume = 0;
     private int mCurrentVolume = 0;
+    private int mOptimisticVolume = -1;
     // End volume handling fields
 
     private boolean mIsActive = false;
@@ -276,7 +280,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param delta The amount to adjust the volume by.
      */
     public void adjustVolumeBy(int delta, int flags) {
-        if (mVolumeType == MediaSession.VOLUME_TYPE_LOCAL) {
+        if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
             if (delta == 0) {
                 mAudioManager.adjustStreamVolume(mAudioStream, delta, flags);
             } else {
@@ -298,18 +302,46 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             mSessionCb.adjustVolumeBy(delta);
+
+            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+            mOptimisticVolume = volumeBefore + delta;
+            mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
+            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+            if (volumeBefore != mOptimisticVolume) {
+                pushVolumeUpdate();
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
+                        + mMaxVolume);
+            }
         }
     }
 
     public void setVolumeTo(int value, int flags) {
-        if (mVolumeType == MediaSession.VOLUME_TYPE_LOCAL) {
+        if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
             mAudioManager.setStreamVolume(mAudioStream, value, flags);
         } else {
             if (mVolumeControlType != VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
                 // Nothing to do. The volume can't be set directly.
                 return;
             }
+            value = Math.max(0, Math.min(value, mMaxVolume));
             mSessionCb.setVolumeTo(value);
+
+            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+            mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
+            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+            if (volumeBefore != mOptimisticVolume) {
+                pushVolumeUpdate();
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
+                        + mMaxVolume);
+            }
         }
     }
 
@@ -424,6 +456,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public int getCurrentVolume() {
         return mCurrentVolume;
+    }
+
+    /**
+     * Get the volume we'd like it to be set to. This is only valid for a short
+     * while after a call to adjust or set volume.
+     *
+     * @return The current optimistic volume or -1.
+     */
+    public int getOptimisticVolume() {
+        return mOptimisticVolume;
     }
 
     /**
@@ -542,8 +584,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     cb.onPlaybackStateChanged(mPlaybackState);
                 } catch (DeadObjectException e) {
                     mControllerCallbacks.remove(i);
-                    Log.w(TAG, "Removed dead callback in pushPlaybackStateUpdate. size="
-                            + mControllerCallbacks.size() + " cb=" + cb, e);
+                    Log.w(TAG, "Removed dead callback in pushPlaybackStateUpdate.", e);
                 } catch (RemoteException e) {
                     Log.w(TAG, "unexpected exception in pushPlaybackStateUpdate.", e);
                 }
@@ -561,10 +602,29 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 try {
                     cb.onMetadataChanged(mMetadata);
                 } catch (DeadObjectException e) {
-                    Log.w(TAG, "Removing dead callback in pushMetadataUpdate. " + cb, e);
+                    Log.w(TAG, "Removing dead callback in pushMetadataUpdate. ", e);
                     mControllerCallbacks.remove(i);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "unexpected exception in pushMetadataUpdate. " + cb, e);
+                    Log.w(TAG, "unexpected exception in pushMetadataUpdate. ", e);
+                }
+            }
+        }
+    }
+
+    private void pushVolumeUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            ParcelableVolumeInfo info = mController.getVolumeAttributes();
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onVolumeInfoChanged(info);
+                } catch (DeadObjectException e) {
+                    Log.w(TAG, "Removing dead callback in pushVolumeUpdate. ", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Unexpected exception in pushVolumeUpdate. ", e);
                 }
             }
         }
@@ -680,6 +740,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     };
 
+    private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            boolean needUpdate = (mOptimisticVolume != mCurrentVolume);
+            mOptimisticVolume = -1;
+            if (needUpdate) {
+                pushVolumeUpdate();
+            }
+        }
+    };
+
     private final class SessionStub extends ISession.Stub {
         @Override
         public void destroy() {
@@ -785,12 +856,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void setCurrentVolume(int volume) {
             mCurrentVolume = volume;
+            mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
         }
 
         @Override
         public void configureVolumeHandling(int type, int arg1, int arg2) throws RemoteException {
+            boolean typeChanged = type != mVolumeType;
             switch(type) {
-                case MediaSession.VOLUME_TYPE_LOCAL:
+                case MediaSession.PLAYBACK_TYPE_LOCAL:
                     mVolumeType = type;
                     int audioStream = arg1;
                     if (isValidStream(audioStream)) {
@@ -800,7 +873,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                         mAudioStream = AudioManager.STREAM_MUSIC;
                     }
                     break;
-                case MediaSession.VOLUME_TYPE_REMOTE:
+                case MediaSession.PLAYBACK_TYPE_REMOTE:
                     mVolumeType = type;
                     mVolumeControlType = arg1;
                     mMaxVolume = arg2;
@@ -808,6 +881,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 default:
                     throw new IllegalArgumentException("Volume handling type " + type
                             + " not recognized.");
+            }
+            if (typeChanged) {
+                mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
             }
         }
 
@@ -1027,10 +1103,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 int type;
                 int max;
                 int current;
-                if (mVolumeType == MediaSession.VOLUME_TYPE_REMOTE) {
+                if (mVolumeType == MediaSession.PLAYBACK_TYPE_REMOTE) {
                     type = mVolumeControlType;
                     max = mMaxVolume;
-                    current = mCurrentVolume;
+                    current = mOptimisticVolume != -1 ? mOptimisticVolume
+                            : mCurrentVolume;
                 } else {
                     type = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
                     max = mAudioManager.getStreamMaxVolume(mAudioStream);
@@ -1130,6 +1207,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         private static final int MSG_UPDATE_ROUTE_FILTERS = 5;
         private static final int MSG_SEND_COMMAND = 6;
         private static final int MSG_UPDATE_SESSION_STATE = 7;
+        private static final int MSG_UPDATE_VOLUME = 8;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -1156,6 +1234,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     break;
                 case MSG_UPDATE_SESSION_STATE:
                     // TODO add session state
+                    break;
+                case MSG_UPDATE_VOLUME:
+                    pushVolumeUpdate();
                     break;
             }
         }

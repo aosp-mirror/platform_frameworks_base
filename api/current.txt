@@ -15751,6 +15751,7 @@ package android.media.session {
   public final class MediaController {
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
+    method public void adjustVolumeBy(int, int);
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
     method public android.media.MediaMetadata getMetadata();
@@ -15760,6 +15761,7 @@ package android.media.session {
     method public android.media.session.MediaController.VolumeInfo getVolumeInfo();
     method public void removeCallback(android.media.session.MediaController.Callback);
     method public void sendControlCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
+    method public void setVolumeTo(int, int);
   }
 
   public static abstract class MediaController.Callback {
@@ -15767,6 +15769,7 @@ package android.media.session {
     method public void onMetadataChanged(android.media.MediaMetadata);
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
+    method public void onVolumeInfoChanged(android.media.session.MediaController.VolumeInfo);
   }
 
   public final class MediaController.TransportControls {
@@ -15809,8 +15812,8 @@ package android.media.session {
     method public void setPlaybackToRemote(android.media.VolumeProvider);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
-    field public static final int VOLUME_TYPE_LOCAL = 1; // 0x1
-    field public static final int VOLUME_TYPE_REMOTE = 2; // 0x2
+    field public static final int PLAYBACK_TYPE_LOCAL = 1; // 0x1
+    field public static final int PLAYBACK_TYPE_REMOTE = 2; // 0x2
   }
 
   public static abstract class MediaSession.Callback {

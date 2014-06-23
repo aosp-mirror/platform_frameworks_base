@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.ComponentName;
+import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -34,4 +35,7 @@ interface ISessionManager {
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
             int userId);
     void removeSessionsListener(in IActiveSessionsListener listener);
+
+    // This is for the system volume UI only
+    void setRemoteVolumeController(in IRemoteVolumeController rvc);
 }

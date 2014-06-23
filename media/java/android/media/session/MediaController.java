@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -52,6 +53,7 @@ public final class MediaController {
     private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
     private static final int MSG_UPDATE_METADATA = 3;
     private static final int MSG_ROUTE = 4;
+    private static final int MSG_UPDATE_VOLUME = 5;
 
     private final ISessionController mSessionBinder;
 
@@ -200,6 +202,43 @@ public final class MediaController {
             Log.wtf(TAG, "Error calling getVolumeInfo.", e);
         }
         return null;
+    }
+
+    /**
+     * Set the volume of the stream or output this session is playing on. The
+     * command will be ignored if it does not support
+     * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
+     * {@link AudioManager} may be used to affect the handling.
+     *
+     * @see #getVolumeInfo()
+     * @param value The value to set it to, between 0 and the reported max.
+     * @param flags Any flags to pass with the command.
+     */
+    public void setVolumeTo(int value, int flags) {
+        try {
+            mSessionBinder.setVolumeTo(value, flags);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling setVolumeTo.", e);
+        }
+    }
+
+    /**
+     * Adjust the volume of the stream or output this session is playing on.
+     * Negative values will lower the volume. The command will be ignored if it
+     * does not support {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
+     * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
+     * {@link AudioManager} may be used to affect the handling.
+     *
+     * @see #getVolumeInfo()
+     * @param delta The number of steps to adjust the volume by.
+     * @param flags Any flags to pass with the command.
+     */
+    public void adjustVolumeBy(int delta, int flags) {
+        try {
+            mSessionBinder.adjustVolumeBy(delta, flags);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
+        }
     }
 
     /**
@@ -406,6 +445,14 @@ public final class MediaController {
          */
         public void onMetadataChanged(@Nullable MediaMetadata metadata) {
         }
+
+        /**
+         * Override to handle changes to the volume info.
+         *
+         * @param info The current volume info for this session.
+         */
+        public void onVolumeInfoChanged(VolumeInfo info) {
+        }
     }
 
     /**
@@ -552,8 +599,8 @@ public final class MediaController {
         /**
          * Get the type of volume handling, either local or remote. One of:
          * <ul>
-         * <li>{@link MediaSession#VOLUME_TYPE_LOCAL}</li>
-         * <li>{@link MediaSession#VOLUME_TYPE_REMOTE}</li>
+         * <li>{@link MediaSession#PLAYBACK_TYPE_LOCAL}</li>
+         * <li>{@link MediaSession#PLAYBACK_TYPE_REMOTE}</li>
          * </ul>
          *
          * @return The type of volume handling this session is using.
@@ -564,7 +611,7 @@ public final class MediaController {
 
         /**
          * Get the stream this is currently controlling volume on. When the volume
-         * type is {@link MediaSession#VOLUME_TYPE_REMOTE} this value does not
+         * type is {@link MediaSession#PLAYBACK_TYPE_REMOTE} this value does not
          * have meaning and should be ignored.
          *
          * @return The stream this session is playing on.
@@ -646,6 +693,16 @@ public final class MediaController {
             }
         }
 
+        @Override
+        public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                VolumeInfo info = new VolumeInfo(pvi.volumeType, pvi.audioStream, pvi.controlType,
+                        pvi.maxVolume, pvi.currentVolume);
+                controller.postMessage(MSG_UPDATE_VOLUME, info, null);
+            }
+        }
+
     }
 
     private final static class MessageHandler extends Handler {
@@ -670,6 +727,9 @@ public final class MediaController {
                     break;
                 case MSG_UPDATE_METADATA:
                     mCallback.onMetadataChanged((MediaMetadata) msg.obj);
+                    break;
+                case MSG_UPDATE_VOLUME:
+                    mCallback.onVolumeInfoChanged((VolumeInfo) msg.obj);
                     break;
             }
         }
