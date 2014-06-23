@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -46,7 +47,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Whether SystemAudioMode is "On" or not.
     @GuardedBy("mLock")
     private boolean mSystemAudioMode;
-
 
     // Copy of mDeviceInfos to guarantee thread-safety.
     @GuardedBy("mLock")
@@ -312,13 +312,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             boolean oldStatus = mArcStatusEnabled;
             // 1. Enable/disable ARC circuit.
             mService.setAudioReturnChannel(enabled);
-
-            // TODO: notify arc mode change to AudioManager.
-
-            // 2. Update arc status;
+            // 2. Notify arc status to audio service.
+            notifyArcStatusToAudioService(enabled);
+            // 3. Update arc status;
             mArcStatusEnabled = enabled;
             return oldStatus;
         }
+    }
+
+    private void notifyArcStatusToAudioService(boolean enabled) {
+        // Note that we don't set any name to ARC.
+        mService.getAudioManager().setWiredDeviceConnectionState(
+                AudioSystem.DEVICE_OUT_HDMI_ARC,
+                enabled ? 1 : 0, "");
     }
 
     /**
@@ -613,7 +619,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portNo, boolean connected) {
         assertRunOnServiceThread();
-        // TODO: delegate onHotplug event to each local device.
 
         // Tv device will have permanent HotplugDetectionAction.
         List<HotplugDetectionAction> hotplugActions = getActions(HotplugDetectionAction.class);
@@ -622,11 +627,5 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // "pollAllDevicesNow" cleans up timer and start poll action immediately.
             hotplugActions.get(0).pollAllDevicesNow();
         }
-    }
-
-    boolean canChangeSystemAudio() {
-        // TODO: implement this.
-        // return true if no system audio control sequence is running.
-        return false;
     }
 }

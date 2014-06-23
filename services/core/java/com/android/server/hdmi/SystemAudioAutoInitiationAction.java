@@ -115,6 +115,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
     }
 
     private boolean canChangeSystemAudio() {
-        return tv().canChangeSystemAudio();
+        return !(tv().hasAction(SystemAudioActionFromTv.class)
+               || tv().hasAction(SystemAudioActionFromAvr.class));
     }
 }
