@@ -71,8 +71,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 
 	LOCAL_C_INCLUDES += \
-		$(JNI_H_INCLUDE) \
-		$(LOCAL_PATH)/../../include/utils \
 		external/skia/src/core
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
