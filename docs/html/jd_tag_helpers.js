@@ -64,6 +64,7 @@ function buildResourceLookupMap(resourceDict) {
 // Type lookups
 
 var ALL_RESOURCES_BY_TYPE = {
+  'about': ABOUT_RESOURCES,
   'design': DESIGN_RESOURCES,
   'distribute': DISTRIBUTE_RESOURCES,
   'google': GOOGLE_RESOURCES,
@@ -79,6 +80,7 @@ var IS_RESOURCE_OF_TYPE = buildResourceLookupMap(ALL_RESOURCES_BY_TYPE);
 // Tag lookups
 
 var ALL_RESOURCES_BY_TAG = mergeMaps(
+  {map:ABOUT_BY_TAG,arr:ABOUT_RESOURCES},
   {map:DESIGN_BY_TAG,arr:DESIGN_RESOURCES},
   {map:DISTRIBUTE_BY_TAG,arr:DISTRIBUTE_RESOURCES},
   {map:GOOGLE_BY_TAG,arr:GOOGLE_RESOURCES},
