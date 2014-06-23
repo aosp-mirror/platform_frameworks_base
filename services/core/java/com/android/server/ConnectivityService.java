@@ -3613,6 +3613,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return mTethering.getErroredIfaces();
     }
 
+    public String[] getTetheredDhcpRanges() {
+        enforceConnectivityInternalPermission();
+        return mTethering.getTetheredDhcpRanges();
+    }
+
     // if ro.tether.denied = true we default to no tethering
     // gservices could set the secure setting to 1 though to enable it on a build where it
     // had previously been turned off.

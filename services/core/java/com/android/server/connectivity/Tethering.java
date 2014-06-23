@@ -109,13 +109,14 @@ public class Tethering extends BaseNetworkObserver {
     // Wifi is 192.168.43.1 and 255.255.255.0
     // BT is limited to max default of 5 connections. 192.168.44.1 to 192.168.48.1
     // with 255.255.255.0
+    // P2P is 192.168.49.1 and 255.255.255.0
 
     private String[] mDhcpRange;
     private static final String[] DHCP_DEFAULT_RANGE = {
         "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
         "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
         "192.168.46.2", "192.168.46.254", "192.168.47.2", "192.168.47.254",
-        "192.168.48.2", "192.168.48.254",
+        "192.168.48.2", "192.168.48.254", "192.168.49.2", "192.168.49.254",
     };
 
     private String[] mDefaultDnsServers;
@@ -699,6 +700,10 @@ public class Tethering extends BaseNetworkObserver {
             retVal[i] = list.get(i);
         }
         return retVal;
+    }
+
+    public String[] getTetheredDhcpRanges() {
+        return mDhcpRange;
     }
 
     public String[] getErroredIfaces() {
