@@ -26,5 +26,8 @@
         <item name="legacyLayout">@layout/time_picker_legacy_leanback</item>
     </style>
 
+    <style name="Widget.Leanback.NumberPicker" parent="Widget.Material.NumberPicker">
+        <item name="hideWheelUntilFocused">true</item>
+    </style>
 
 </resources>

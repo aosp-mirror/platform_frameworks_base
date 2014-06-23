@@ -4411,6 +4411,8 @@
         <attr name="internalLayout" />
         <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
         <attr name="virtualButtonPressedDrawable" format="reference"/>
+        <!-- @hide If true then the selector wheel is hidden until the picker has focus. -->
+        <attr name="hideWheelUntilFocused" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="TimePicker">

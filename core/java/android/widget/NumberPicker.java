@@ -478,6 +478,11 @@ public class NumberPicker extends LinearLayout {
     private int mLastHandledDownDpadKeyCode = -1;
 
     /**
+     * If true then the selector wheel is hidden until the picker has focus.
+     */
+    private boolean mHideWheelUntilFocused;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -597,6 +602,9 @@ public class NumberPicker extends LinearLayout {
                 R.styleable.NumberPicker_internalLayout, DEFAULT_LAYOUT_RESOURCE_ID);
 
         mHasSelectorWheel = (layoutResId != DEFAULT_LAYOUT_RESOURCE_ID);
+
+        mHideWheelUntilFocused = attributesArray.getBoolean(
+            R.styleable.NumberPicker_hideWheelUntilFocused, false);
 
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
 
@@ -974,8 +982,8 @@ public class NumberPicker extends LinearLayout {
                 }
                 switch (event.getAction()) {
                     case KeyEvent.ACTION_DOWN:
-                        if (mWrapSelectorWheel || (keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
-                                ? getValue() < getMaxValue() : getValue() > getMinValue()) {
+                        if (mWrapSelectorWheel || ((keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
+                                ? getValue() < getMaxValue() : getValue() > getMinValue())) {
                             requestFocus();
                             mLastHandledDownDpadKeyCode = keyCode;
                             removeAllCallbacks();
@@ -1497,11 +1505,12 @@ public class NumberPicker extends LinearLayout {
             super.onDraw(canvas);
             return;
         }
+        final boolean showSelectorWheel = mHideWheelUntilFocused ? hasFocus() : true;
         float x = (mRight - mLeft) / 2;
         float y = mCurrentScrollOffset;
 
         // draw the virtual buttons pressed state if needed
-        if (mVirtualButtonPressedDrawable != null
+        if (showSelectorWheel && mVirtualButtonPressedDrawable != null
                 && mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
             if (mDecrementVirtualButtonPressed) {
                 mVirtualButtonPressedDrawable.setState(PRESSED_STATE_SET);
@@ -1526,14 +1535,15 @@ public class NumberPicker extends LinearLayout {
             // item. Otherwise, if the user starts editing the text via the
             // IME he may see a dimmed version of the old value intermixed
             // with the new one.
-            if (i != SELECTOR_MIDDLE_ITEM_INDEX || mInputText.getVisibility() != VISIBLE) {
+            if ((showSelectorWheel && i != SELECTOR_MIDDLE_ITEM_INDEX) ||
+                (i == SELECTOR_MIDDLE_ITEM_INDEX && mInputText.getVisibility() != VISIBLE)) {
                 canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
             }
             y += mSelectorElementHeight;
         }
 
         // draw the selection dividers
-        if (mSelectionDivider != null) {
+        if (showSelectorWheel && mSelectionDivider != null) {
             // draw the top divider
             int topOfTopDivider = mTopSelectionDividerTop;
             int bottomOfTopDivider = topOfTopDivider + mSelectionDividerHeight;
