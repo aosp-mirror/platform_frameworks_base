@@ -31,18 +31,16 @@ page.metaDescription=Android Auto
   margin-top:10px;
 }
 .auto-img-frame-cols {
+  width:380px;
   z-index:2;
   position:relative;
 }
 .auto-img-shot-cols {
+  width:369px;
   position:absolute;
-  top:0px;
-  left:0px;
+  top:7px;
+  left:6px;
   z-index:1;
-  border:1px solid #;
-  -webkit-border-radius: 7px;
-  -moz-border-radius: 7px;
-  border-radius: 7px;
 }
 .auto-col-2 {
   width:380px;
