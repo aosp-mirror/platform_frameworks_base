@@ -21,6 +21,7 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 
 import java.util.List;
 
@@ -42,4 +43,9 @@ interface IHdmiControlService {
     void portSelect(int portId, IHdmiControlCallback callback);
     void sendKeyEvent(int keyCode, boolean isPressed);
     List<HdmiPortInfo> getPortInfo();
+    boolean canChangeSystemAudioMode();
+    boolean getSystemAudioMode();
+    void setSystemAudioMode(boolean enabled, IHdmiControlCallback callback);
+    void addSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
+    void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
 }

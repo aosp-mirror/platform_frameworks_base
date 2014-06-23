@@ -253,20 +253,35 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mDeviceInfos.clear();
     }
 
+    void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
+        assertRunOnServiceThread();
+        HdmiCecDeviceInfo avr = getAvrDeviceInfo();
+        if (avr == null) {
+            invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+            return;
+        }
+
+        addAndStartAction(
+                new SystemAudioActionFromTv(this, avr.getLogicalAddress(), enabled, callback));
+   }
+
+    boolean canChangeSystemAudioMode() {
+        // TODO: once have immutable device info, test whether avr info exists or not.
+        return false;
+    }
+
     void setSystemAudioMode(boolean on) {
         synchronized (mLock) {
             if (on != mSystemAudioMode) {
                 mSystemAudioMode = on;
                 // TODO: Need to set the preference for SystemAudioMode.
-                // TODO: Need to handle the notification of changing the mode and
-                // to identify the notification should be handled in the service or TvSettings.
+                mService.announceSystemAudioModeChange(on);
             }
         }
     }
 
     boolean getSystemAudioMode() {
         synchronized (mLock) {
-            assertRunOnServiceThread();
             return mSystemAudioMode;
         }
     }

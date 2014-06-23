@@ -27,6 +27,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -112,6 +113,14 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
             new ArrayList<>();
+
+    // List of listeners registered by callers that want to get notified of
+    // system audio mode changes.
+    private final ArrayList<IHdmiSystemAudioModeChangeListener>
+            mSystemAudioModeChangeListeners = new ArrayList<>();
+    // List of records for system audio mode change to handle the the caller killed in action.
+    private final ArrayList<SystemAudioModeChangeListenerRecord>
+            mSystemAudioModeChangeListenerRecords = new ArrayList<>();
 
     // Handler used to run a task in service thread.
     private final Handler mHandler = new Handler();
@@ -447,6 +456,12 @@ public final class HdmiControlService extends SystemService {
         // TODO: Hook up with AudioManager.
     }
 
+    void announceSystemAudioModeChange(boolean enabled) {
+        for (IHdmiSystemAudioModeChangeListener listener : mSystemAudioModeChangeListeners) {
+            invokeSystemAudioModeChange(listener, enabled);
+        }
+    }
+
     private HdmiCecDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
         // TODO: find better name instead of model name.
         String displayName = Build.MODEL;
@@ -480,10 +495,26 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-            public void binderDied() {
+        public void binderDied() {
             synchronized (mLock) {
                 mDeviceEventListenerRecords.remove(this);
                 mDeviceEventListeners.remove(mListener);
+            }
+        }
+    }
+
+    private final class SystemAudioModeChangeListenerRecord implements IBinder.DeathRecipient {
+        private IHdmiSystemAudioModeChangeListener mListener;
+
+        public SystemAudioModeChangeListenerRecord(IHdmiSystemAudioModeChangeListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mSystemAudioModeChangeListenerRecords.remove(this);
+                mSystemAudioModeChangeListeners.remove(mListener);
             }
         }
     }
@@ -605,7 +636,7 @@ public final class HdmiControlService extends SystemService {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
-                    public void run() {
+                public void run() {
                     HdmiControlService.this.addDeviceEventListener(listener);
                 }
             });
@@ -615,6 +646,57 @@ public final class HdmiControlService extends SystemService {
         public List<HdmiPortInfo> getPortInfo() {
             enforceAccessPermission();
             return mPortInfo;
+        }
+
+        @Override
+        public boolean canChangeSystemAudioMode() {
+            enforceAccessPermission();
+            HdmiCecLocalDeviceTv tv = tv();
+            if (tv == null) {
+                return false;
+            }
+            return tv.canChangeSystemAudioMode();
+        }
+
+        @Override
+        public boolean getSystemAudioMode() {
+            enforceAccessPermission();
+            HdmiCecLocalDeviceTv tv = tv();
+            if (tv == null) {
+                return false;
+            }
+            return tv.getSystemAudioMode();
+        }
+
+        @Override
+        public void setSystemAudioMode(final boolean enabled, final IHdmiControlCallback callback) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available");
+                        invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+                        return;
+                    }
+                    tv.changeSystemAudioMode(enabled, callback);
+                }
+            });
+        }
+
+        @Override
+        public void addSystemAudioModeChangeListener(
+                final IHdmiSystemAudioModeChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.addSystemAudioModeChangeListner(listener);
+        }
+
+        @Override
+        public void removeSystemAudioModeChangeListener(
+                final IHdmiSystemAudioModeChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.removeSystemAudioModeChangeListener(listener);
         }
     }
 
@@ -693,9 +775,47 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    private void addSystemAudioModeChangeListner(IHdmiSystemAudioModeChangeListener listener) {
+        SystemAudioModeChangeListenerRecord record = new SystemAudioModeChangeListenerRecord(
+                listener);
+        try {
+            listener.asBinder().linkToDeath(record, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Listener already died");
+            return;
+        }
+        synchronized (mLock) {
+            mSystemAudioModeChangeListeners.add(listener);
+            mSystemAudioModeChangeListenerRecords.add(record);
+        }
+    }
+
+    private void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener) {
+        synchronized (mLock) {
+            for (SystemAudioModeChangeListenerRecord record :
+                    mSystemAudioModeChangeListenerRecords) {
+                if (record.mListener.asBinder() == listener) {
+                    listener.asBinder().unlinkToDeath(record, 0);
+                    mSystemAudioModeChangeListenerRecords.remove(record);
+                    break;
+                }
+            }
+            mSystemAudioModeChangeListeners.remove(listener);
+        }
+    }
+
     private void invokeCallback(IHdmiControlCallback callback, int result) {
         try {
             callback.onComplete(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Invoking callback failed:" + e);
+        }
+    }
+
+    private void invokeSystemAudioModeChange(IHdmiSystemAudioModeChangeListener listener,
+            boolean enabled) {
+        try {
+            listener.onStatusChanged(enabled);
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }

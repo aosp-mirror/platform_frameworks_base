@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.IHdmiControlCallback;
 
 /**
  * Feature action that handles System Audio initiated by AVR devices.
@@ -28,11 +29,12 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
      * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
+     * @param callback callback interface to be notified when it's done
      * @throw IllegalArugmentException if device type of tvAddress and avrAddress is invalid
      */
     SystemAudioActionFromAvr(HdmiCecLocalDevice source, int avrAddress,
-            boolean targetStatus) {
-        super(source, avrAddress, targetStatus);
+            boolean targetStatus, IHdmiControlCallback callback) {
+        super(source, avrAddress, targetStatus, callback);
         HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
     }
 
@@ -45,7 +47,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
 
     private void handleSystemAudioActionFromAvr() {
         if (mTargetAudioStatus == tv().getSystemAudioMode()) {
-            finish();
+            finishWithCallback(HdmiCec.RESULT_SUCCESS);
             return;
         }
         if (tv().isInPresetInstallationMode()) {
@@ -62,7 +64,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
             startAudioStatusAction();
         } else {
             setSystemAudioMode(false);
-            finish();
+            finishWithCallback(HdmiCec.RESULT_SUCCESS);
         }
     }
 }
