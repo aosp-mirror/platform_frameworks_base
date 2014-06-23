@@ -10316,6 +10316,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.lockNow(options);
     }
 
+    public void showRecentApps() {
+        mPolicy.showRecentApps();
+    }
+
     @Override
     public boolean isSafeModeEnabled() {
         return mSafeMode;

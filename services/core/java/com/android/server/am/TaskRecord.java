@@ -17,6 +17,9 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerService.TAG;
+import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 
 import android.app.Activity;
@@ -53,7 +56,6 @@ final class TaskRecord extends ThumbnailHolder {
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_TASKTYPE = "task_type";
-    private static final String ATTR_ONTOPOFHOME = "on_top_of_home";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
@@ -107,9 +109,10 @@ final class TaskRecord extends ThumbnailHolder {
     /** True if persistable, has changed, and has not yet been persisted */
     boolean needsPersisting = false;
 
-    /** Launch the home activity when leaving this task. Will be false for tasks that are not on
-     * Display.DEFAULT_DISPLAY. */
-    boolean mOnTopOfHome = false;
+    /** Indication of what to run next when task exits. Use ActivityRecord types.
+     * ActivityRecord.APPLICATION_ACTIVITY_TYPE indicates to resume the task below this one in the
+     * task stack. */
+    private int mTaskToReturnTo = APPLICATION_ACTIVITY_TYPE;
 
     /** If original intent did not allow relinquishing task identity, save that information */
     boolean mNeverRelinquishIdentity = true;
@@ -132,9 +135,9 @@ final class TaskRecord extends ThumbnailHolder {
 
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
-            boolean _rootWasReset, boolean _askedCompatMode, int _taskType, boolean _onTopOfHome,
-            int _userId, String _lastDescription, ArrayList<ActivityRecord> activities,
-            long lastTimeMoved, boolean neverRelinquishIdentity) {
+            boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
+            String _lastDescription, ArrayList<ActivityRecord> activities, long lastTimeMoved,
+            boolean neverRelinquishIdentity) {
         mService = service;
         taskId = _taskId;
         intent = _intent;
@@ -147,7 +150,7 @@ final class TaskRecord extends ThumbnailHolder {
         rootWasReset = _rootWasReset;
         askedCompatMode = _askedCompatMode;
         taskType = _taskType;
-        mOnTopOfHome = _onTopOfHome;
+        mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = _userId;
         lastDescription = _lastDescription;
         mActivities = activities;
@@ -222,6 +225,14 @@ final class TaskRecord extends ThumbnailHolder {
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             intent.addFlags(Intent.FLAG_ACTIVITY_AUTO_REMOVE_FROM_RECENTS);
         }
+    }
+
+    void setTaskToReturnTo(int taskToReturnTo) {
+        mTaskToReturnTo = taskToReturnTo;
+    }
+
+    int getTaskToReturnTo() {
+        return mTaskToReturnTo;
     }
 
     void disposeThumbnail() {
@@ -514,11 +525,15 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     boolean isHomeTask() {
-        return taskType == ActivityRecord.HOME_ACTIVITY_TYPE;
+        return taskType == HOME_ACTIVITY_TYPE;
     }
 
     boolean isApplicationTask() {
-        return taskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+        return taskType == APPLICATION_ACTIVITY_TYPE;
+    }
+
+    boolean isOverHomeStack() {
+        return mTaskToReturnTo == HOME_ACTIVITY_TYPE || mTaskToReturnTo == RECENTS_ACTIVITY_TYPE;
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked() {
@@ -688,7 +703,6 @@ final class TaskRecord extends ThumbnailHolder {
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
-        out.attribute(null, ATTR_ONTOPOFHOME, String.valueOf(mOnTopOfHome));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
         out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
         if (lastDescription != null) {
@@ -737,7 +751,6 @@ final class TaskRecord extends ThumbnailHolder {
         boolean rootHasReset = false;
         boolean askedCompatMode = false;
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-        boolean onTopOfHome = true;
         int userId = 0;
         String lastDescription = null;
         long lastTimeOnTop = 0;
@@ -766,8 +779,6 @@ final class TaskRecord extends ThumbnailHolder {
                 userId = Integer.valueOf(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.valueOf(attrValue);
-            } else if (ATTR_ONTOPOFHOME.equals(attrName)) {
-                onTopOfHome = Boolean.valueOf(attrValue);
             } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
                 lastDescription = attrValue;
             } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
@@ -807,8 +818,8 @@ final class TaskRecord extends ThumbnailHolder {
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
-                askedCompatMode, taskType, onTopOfHome, userId, lastDescription, activities,
-                lastTimeOnTop, neverRelinquishIdentity);
+                askedCompatMode, taskType, userId, lastDescription, activities, lastTimeOnTop,
+                neverRelinquishIdentity);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);
@@ -827,7 +838,7 @@ final class TaskRecord extends ThumbnailHolder {
                     pw.print(" userId="); pw.print(userId);
                     pw.print(" taskType="); pw.print(taskType);
                     pw.print(" numFullscreen="); pw.print(numFullscreen);
-                    pw.print(" mOnTopOfHome="); pw.println(mOnTopOfHome);
+                    pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
         }
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
