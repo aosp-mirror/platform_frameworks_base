@@ -21,6 +21,8 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
+
 /**
  * Represent a logical device of type Playback residing in Android system.
  */
@@ -32,11 +34,14 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress) {
+        assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
     }
 
+    @ServiceThreadOnly
     void oneTouchPlay(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (hasAction(OneTouchPlayAction.class)) {
@@ -56,6 +61,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         addAndStartAction(action);
     }
 
+    @ServiceThreadOnly
     void queryDisplayStatus(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (hasAction(DevicePowerStatusAction.class)) {
@@ -73,7 +79,9 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         addAndStartAction(action);
     }
 
+    @ServiceThreadOnly
     private void invokeCallback(IHdmiControlCallback callback, int result) {
+        assertRunOnServiceThread();
         try {
             callback.onComplete(result);
         } catch (RemoteException e) {
@@ -82,7 +90,9 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
+        assertRunOnServiceThread();
         // TODO: clear devices connected to the given port id.
         mCecMessageCache.flushAll();
     }

@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -87,7 +88,9 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     void init() {
+        assertRunOnServiceThread();
         mPreferredAddress = HdmiCec.ADDR_UNREGISTERED;
         // TODO: load preferred address from permanent storage.
     }
@@ -103,9 +106,9 @@ abstract class HdmiCecLocalDevice {
      * @param message incoming message
      * @return true if consumed a message; otherwise, return false.
      */
+    @ServiceThreadOnly
     final boolean dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         int dest = message.getDestination();
         if (dest != mAddress && dest != HdmiCec.ADDR_BROADCAST) {
             return false;
@@ -115,9 +118,9 @@ abstract class HdmiCecLocalDevice {
         return onMessage(message);
     }
 
+    @ServiceThreadOnly
     protected final boolean onMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         if (dispatchMessageToAction(message)) {
             return true;
         }
@@ -147,7 +150,9 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     private boolean dispatchMessageToAction(HdmiCecMessage message) {
+        assertRunOnServiceThread();
         for (FeatureAction action : mActions) {
             if (action.processCommand(message)) {
                 return true;
@@ -156,6 +161,7 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    @ServiceThreadOnly
     protected boolean handleGivePhysicalAddress() {
         assertRunOnServiceThread();
 
@@ -166,9 +172,9 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
     protected boolean handleGiveDeviceVendorId() {
         assertRunOnServiceThread();
-
         int vendorId = mService.getVendorId();
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, vendorId);
@@ -176,9 +182,9 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
     protected boolean handleGetCecVersion(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         int version = mService.getCecVersion();
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildCecVersion(message.getDestination(),
                 message.getSource(), version);
@@ -186,9 +192,9 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
@@ -197,9 +203,9 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
     protected boolean handleGiveOsdName(HdmiCecMessage message) {
         assertRunOnServiceThread();
-
         // Note that since this method is called after logical address allocation is done,
         // mDeviceInfo should not be null.
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildSetOsdNameCommand(
@@ -236,45 +242,52 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    @ServiceThreadOnly
     final void handleAddressAllocated(int logicalAddress) {
         assertRunOnServiceThread();
-
         mAddress = mPreferredAddress = logicalAddress;
         onAddressAllocated(logicalAddress);
     }
 
+    @ServiceThreadOnly
     HdmiCecDeviceInfo getDeviceInfo() {
         assertRunOnServiceThread();
         return mDeviceInfo;
     }
 
+    @ServiceThreadOnly
     void setDeviceInfo(HdmiCecDeviceInfo info) {
         assertRunOnServiceThread();
         mDeviceInfo = info;
     }
 
     // Returns true if the logical address is same as the argument.
+    @ServiceThreadOnly
     boolean isAddressOf(int addr) {
         assertRunOnServiceThread();
         return addr == mAddress;
     }
 
     // Resets the logical address to unregistered(15), meaning the logical device is invalid.
+    @ServiceThreadOnly
     void clearAddress() {
         assertRunOnServiceThread();
         mAddress = HdmiCec.ADDR_UNREGISTERED;
     }
 
+    @ServiceThreadOnly
     void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
         mPreferredAddress = addr;
     }
 
+    @ServiceThreadOnly
     int getPreferredAddress() {
         assertRunOnServiceThread();
         return mPreferredAddress;
     }
 
+    @ServiceThreadOnly
     void addAndStartAction(final FeatureAction action) {
         assertRunOnServiceThread();
         mActions.add(action);
@@ -282,6 +295,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     // See if we have an action of a given type in progress.
+    @ServiceThreadOnly
     <T extends FeatureAction> boolean hasAction(final Class<T> clazz) {
         assertRunOnServiceThread();
         for (FeatureAction action : mActions) {
@@ -293,6 +307,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     // Returns all actions matched with given class type.
+    @ServiceThreadOnly
     <T extends FeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
         ArrayList<T> actions = new ArrayList<>();
@@ -309,17 +324,21 @@ abstract class HdmiCecLocalDevice {
      *
      * @param action {@link FeatureAction} to remove
      */
+    @ServiceThreadOnly
     void removeAction(final FeatureAction action) {
         assertRunOnServiceThread();
         mActions.remove(action);
     }
 
     // Remove all actions matched with the given Class type.
+    @ServiceThreadOnly
     <T extends FeatureAction> void removeAction(final Class<T> clazz) {
+        assertRunOnServiceThread();
         removeActionExcept(clazz, null);
     }
 
     // Remove all actions matched with the given Class type besides |exception|.
+    @ServiceThreadOnly
     <T extends FeatureAction> void removeActionExcept(final Class<T> clazz,
             final FeatureAction exception) {
         assertRunOnServiceThread();
@@ -352,7 +371,9 @@ abstract class HdmiCecLocalDevice {
         return mService;
     }
 
+    @ServiceThreadOnly
     final boolean isConnectedToArcPort(int path) {
+        assertRunOnServiceThread();
         return mService.isConnectedToArcPort(path);
     }
 
@@ -442,11 +463,13 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     HdmiCecMessageCache getCecMessageCache() {
         assertRunOnServiceThread();
         return mCecMessageCache;
     }
 
+    @ServiceThreadOnly
     int pathToPortId(int newPath) {
         assertRunOnServiceThread();
         return mService.pathToPortId(newPath);

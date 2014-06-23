@@ -26,6 +26,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +67,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress) {
         assertRunOnServiceThread();
         // TODO: vendor-specific initialization here.
@@ -76,7 +78,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mAddress, mService.getVendorId()));
 
         launchDeviceDiscovery();
-        // TODO: Start routing control action, device discovery action.
+        // TODO: Start routing control action
     }
 
     /**
@@ -85,6 +87,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param targetAddress logical address of the device to select
      * @param callback callback object to report the result with
      */
+    @ServiceThreadOnly
     void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo targetDevice = getDeviceInfo(targetAddress);
@@ -102,6 +105,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param portId new HDMI port to route to
      * @param callback callback object to report the result with
      */
+    @ServiceThreadOnly
     void portSelect(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (isInPresetInstallationMode()) {
@@ -136,6 +140,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
      * @param isPressed true if this is keypress event
      */
+    @ServiceThreadOnly
     void sendKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
         List<SendKeyAction> action = getActions(SendKeyAction.class);
@@ -162,6 +167,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
@@ -176,6 +182,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Ignore if [Device Discovery Action] is going on.
@@ -198,6 +205,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
         List<VendorSpecificAction> actions = Collections.emptyList();
@@ -223,6 +231,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
         clearDeviceInfoList();
@@ -257,12 +266,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     // Clear all device info.
+    @ServiceThreadOnly
     private void clearDeviceInfoList() {
         assertRunOnServiceThread();
         mDeviceInfos.clear();
         updateSafeDeviceInfoList();
     }
 
+    @ServiceThreadOnly
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo avr = getAvrDeviceInfo();
@@ -324,11 +335,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     void setAudioStatus(boolean mute, int volume) {
         mService.setAudioStatus(mute, volume);
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // In case where <Initiate Arc> is started by <Request ARC Initiation>
@@ -341,6 +354,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleTerminateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // In case where <Terminate Arc> is started by <Request ARC Termination>
@@ -355,6 +369,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
@@ -367,6 +382,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
@@ -396,6 +412,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @return {@code null} if it is new device. Otherwise, returns old {@HdmiCecDeviceInfo}
      *         that has the same logical address as new one has.
      */
+    @ServiceThreadOnly
     HdmiCecDeviceInfo addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo oldDeviceInfo = getDeviceInfo(deviceInfo.getLogicalAddress());
@@ -416,6 +433,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param logicalAddress logical address of device to be removed
      * @return removed {@link HdmiCecDeviceInfo} it exists. Otherwise, returns {@code null}
      */
+    @ServiceThreadOnly
     HdmiCecDeviceInfo removeDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo deviceInfo = mDeviceInfos.get(logicalAddress);
@@ -432,6 +450,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      * This is not thread-safe. For thread safety, call {@link #getSafeDeviceInfoList(boolean)}.
      */
+    @ServiceThreadOnly
     List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includelLocalDevice) {
         assertRunOnServiceThread();
         if (includelLocalDevice) {
@@ -463,6 +482,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     private void updateSafeDeviceInfoList() {
         assertRunOnServiceThread();
         List<HdmiCecDeviceInfo> copiedDevices = HdmiUtils.sparseArrayToList(mDeviceInfos);
@@ -473,6 +493,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
     private boolean isLocalDeviceAddress(int address) {
         assertRunOnServiceThread();
         for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
@@ -493,11 +514,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @return {@link HdmiCecDeviceInfo} matched with the given {@code logicalAddress}.
      *         Returns null if no logical address matched
      */
+    @ServiceThreadOnly
     HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         return mDeviceInfos.get(logicalAddress);
     }
 
+    @ServiceThreadOnly
     HdmiCecDeviceInfo getAvrDeviceInfo() {
         assertRunOnServiceThread();
         return getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
@@ -525,6 +548,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      *
      * @param info device info of a new device.
      */
+    @ServiceThreadOnly
     final void addCecDevice(HdmiCecDeviceInfo info) {
         assertRunOnServiceThread();
         addDeviceInfo(info);
@@ -540,6 +564,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      *
      * @param address a logical address of a device to be removed
      */
+    @ServiceThreadOnly
     final void removeCecDevice(int address) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo info = removeDeviceInfo(address);
@@ -555,6 +580,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param path routing path or physical address
      * @return {@link HdmiCecDeviceInfo} if the matched info is found; otherwise null
      */
+    @ServiceThreadOnly
     final HdmiCecDeviceInfo getDeviceInfoByPath(int path) {
         assertRunOnServiceThread();
         for (HdmiCecDeviceInfo info : getDeviceInfoList(false)) {
@@ -574,6 +600,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @param logicalAddress logical address of a device to be searched
      * @return true if exist; otherwise false
      */
+    @ServiceThreadOnly
     boolean isInDeviceList(int physicalAddress, int logicalAddress) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo device = getDeviceInfo(logicalAddress);
@@ -584,6 +611,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    @ServiceThreadOnly
     void onHotplug(int portNo, boolean connected) {
         assertRunOnServiceThread();
         // TODO: delegate onHotplug event to each local device.

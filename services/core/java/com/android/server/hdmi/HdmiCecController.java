@@ -26,6 +26,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.Predicate;
+import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 
 import libcore.util.EmptyArray;
@@ -144,7 +146,9 @@ final class HdmiCecController {
         mNativePtr = nativePtr;
     }
 
+    @ServiceThreadOnly
     void addLocalDevice(int deviceType, HdmiCecLocalDevice device) {
+        assertRunOnServiceThread();
         mLocalDevices.put(deviceType, device);
     }
 
@@ -161,6 +165,7 @@ final class HdmiCecController {
      *                         Otherwise, scan address will start from {@code preferredAddress}
      * @param callback callback interface to report allocated logical address to caller
      */
+    @ServiceThreadOnly
     void allocateLogicalAddress(final int deviceType, final int preferredAddress,
             final AllocateAddressCallback callback) {
         assertRunOnServiceThread();
@@ -173,6 +178,7 @@ final class HdmiCecController {
         });
     }
 
+    @IoThreadOnly
     private void handleAllocateLogicalAddress(final int deviceType, int preferredAddress,
             final AllocateAddressCallback callback) {
         assertRunOnIoThread();
@@ -245,6 +251,7 @@ final class HdmiCecController {
      * @param newLogicalAddress a logical address to be added
      * @return 0 on success. Otherwise, returns negative value
      */
+    @ServiceThreadOnly
     int addLogicalAddress(int newLogicalAddress) {
         assertRunOnServiceThread();
         if (HdmiCec.isValidAddress(newLogicalAddress)) {
@@ -259,6 +266,7 @@ final class HdmiCecController {
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
+    @ServiceThreadOnly
     void clearLogicalAddress() {
         assertRunOnServiceThread();
         // TODO: consider to backup logical address so that new logical address
@@ -277,6 +285,7 @@ final class HdmiCecController {
      * @return CEC physical address of the device. The range of success address
      *         is between 0x0000 and 0xFFFF. If failed it returns -1
      */
+    @ServiceThreadOnly
     int getPhysicalAddress() {
         assertRunOnServiceThread();
         return nativeGetPhysicalAddress(mNativePtr);
@@ -287,6 +296,7 @@ final class HdmiCecController {
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
+    @ServiceThreadOnly
     int getVersion() {
         assertRunOnServiceThread();
         return nativeGetVersion(mNativePtr);
@@ -297,6 +307,7 @@ final class HdmiCecController {
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
+    @ServiceThreadOnly
     int getVendorId() {
         assertRunOnServiceThread();
         return nativeGetVendorId(mNativePtr);
@@ -311,6 +322,7 @@ final class HdmiCecController {
      * @param value a value of option. Actual value varies flag. For more
      *        details, look at description of flags
      */
+    @ServiceThreadOnly
     void setOption(int flag, int value) {
         assertRunOnServiceThread();
         nativeSetOption(mNativePtr, flag, value);
@@ -321,6 +333,7 @@ final class HdmiCecController {
      *
      * @param enabled whether to enable/disable ARC
      */
+    @ServiceThreadOnly
     void setAudioReturnChannel(boolean enabled) {
         assertRunOnServiceThread();
         nativeSetAudioReturnChannel(mNativePtr, enabled);
@@ -332,6 +345,7 @@ final class HdmiCecController {
      * @param port port number to check connection status
      * @return true if connected; otherwise, return false
      */
+    @ServiceThreadOnly
     boolean isConnected(int port) {
         assertRunOnServiceThread();
         return nativeIsConnected(mNativePtr, port);
@@ -347,6 +361,7 @@ final class HdmiCecController {
      * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
      */
+    @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
         assertRunOnServiceThread();
 
@@ -360,6 +375,7 @@ final class HdmiCecController {
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      */
+    @ServiceThreadOnly
     List<HdmiCecLocalDevice> getLocalDeviceList() {
         assertRunOnServiceThread();
         return HdmiUtils.sparseArrayToList(mLocalDevices);
@@ -400,7 +416,9 @@ final class HdmiCecController {
         return pollingCandidates;
     }
 
+    @ServiceThreadOnly
     private boolean isAllocatedLocalDeviceAddress(int address) {
+        assertRunOnServiceThread();
         for (int i = 0; i < mLocalDevices.size(); ++i) {
             if (mLocalDevices.valueAt(i).isAddressOf(address)) {
                 return true;
@@ -409,6 +427,7 @@ final class HdmiCecController {
         return false;
     }
 
+    @ServiceThreadOnly
     private void runDevicePolling(final List<Integer> candidates, final int retryCount,
             final DevicePollingCallback callback) {
         assertRunOnServiceThread();
@@ -433,6 +452,7 @@ final class HdmiCecController {
         });
     }
 
+    @IoThreadOnly
     private boolean sendPollMessage(int address, int retryCount) {
         assertRunOnIoThread();
         for (int i = 0; i < retryCount; ++i) {
@@ -480,6 +500,7 @@ final class HdmiCecController {
         return isAllocatedLocalDeviceAddress(address);
     }
 
+    @ServiceThreadOnly
     private void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (isAcceptableAddress(message.getDestination())
@@ -493,16 +514,20 @@ final class HdmiCecController {
             HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
                     sourceAddress, message.getSource(), message.getOpcode(),
                     HdmiConstants.ABORT_REFUSED);
-            sendCommand(cecMessage, null);
+            sendCommand(cecMessage);
         }
     }
 
+    @ServiceThreadOnly
     void sendCommand(HdmiCecMessage cecMessage) {
+        assertRunOnServiceThread();
         sendCommand(cecMessage, null);
     }
 
+    @ServiceThreadOnly
     void sendCommand(final HdmiCecMessage cecMessage,
             final HdmiControlService.SendMessageCallback callback) {
+        assertRunOnServiceThread();
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
@@ -527,6 +552,7 @@ final class HdmiCecController {
     /**
      * Called by native when incoming CEC message arrived.
      */
+    @ServiceThreadOnly
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         assertRunOnServiceThread();
         onReceiveCommand(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));

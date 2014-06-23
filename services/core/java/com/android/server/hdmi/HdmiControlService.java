@@ -40,6 +40,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 
 import java.util.ArrayList;
@@ -163,7 +164,9 @@ public final class HdmiControlService extends SystemService {
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
     }
 
+    @ServiceThreadOnly
     private void initializeLocalDevices(final List<Integer> deviceTypes) {
+        assertRunOnServiceThread();
         // A container for [Logical Address, Local device info].
         final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
         final SparseIntArray finished = new SparseIntArray();
@@ -195,7 +198,9 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    @ServiceThreadOnly
     private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices) {
+        assertRunOnServiceThread();
         for (int i = 0; i < devices.size(); ++i) {
             int address = devices.keyAt(i);
             HdmiCecLocalDevice device = devices.valueAt(i);
@@ -205,7 +210,9 @@ public final class HdmiControlService extends SystemService {
 
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
     // keep them in one place.
+    @ServiceThreadOnly
     private List<HdmiPortInfo> initPortInfo() {
+        assertRunOnServiceThread();
         HdmiPortInfo[] cecPortInfo = null;
 
         // CEC HAL provides majority of the info while MHL does only MHL support flag for
@@ -325,6 +332,7 @@ public final class HdmiControlService extends SystemService {
         return mCecController.getVendorId();
     }
 
+    @ServiceThreadOnly
     HdmiCecDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         HdmiCecLocalDeviceTv tv = tv();
@@ -374,15 +382,21 @@ public final class HdmiControlService extends SystemService {
      * @param command CEC command to send out
      * @param callback interface used to the result of send command
      */
+    @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+        assertRunOnServiceThread();
         mCecController.sendCommand(command, callback);
     }
 
+    @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command) {
+        assertRunOnServiceThread();
         mCecController.sendCommand(command, null);
     }
 
+    @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
+        assertRunOnServiceThread();
         return dispatchMessageToLocalDevice(message);
     }
 
@@ -390,7 +404,9 @@ public final class HdmiControlService extends SystemService {
         mCecController.setAudioReturnChannel(enabled);
     }
 
+    @ServiceThreadOnly
     private boolean dispatchMessageToLocalDevice(HdmiCecMessage message) {
+        assertRunOnServiceThread();
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             if (device.dispatchMessage(message)
                     && message.getDestination() != HdmiCec.ADDR_BROADCAST) {
@@ -408,13 +424,12 @@ public final class HdmiControlService extends SystemService {
      * @param portNo hdmi port number where hot plug event issued.
      * @param connected whether to be plugged in or not
      */
+    @ServiceThreadOnly
     void onHotplug(int portNo, boolean connected) {
         assertRunOnServiceThread();
-
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             device.onHotplug(portNo, connected);
         }
-
         announceHotplugEvent(portNo, connected);
     }
 
@@ -427,7 +442,9 @@ public final class HdmiControlService extends SystemService {
      * @param retryCount the number of retry used to send polling message to remote devices
      * @throw IllegalArgumentException if {@code pickStrategy} is invalid value
      */
+    @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
+        assertRunOnServiceThread();
         mCecController.pollDevices(callback, checkPollStrategy(pickStrategy), retryCount);
     }
 
@@ -700,6 +717,7 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    @ServiceThreadOnly
     private void oneTouchPlay(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiCecLocalDevicePlayback source = playback();
@@ -711,6 +729,7 @@ public final class HdmiControlService extends SystemService {
         source.oneTouchPlay(callback);
     }
 
+    @ServiceThreadOnly
     private void queryDisplayStatus(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiCecLocalDevicePlayback source = playback();
