@@ -264,13 +264,32 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
-     * Adds the given {@link InetAddress} to the list of DNS servers.
+     * Adds the given {@link InetAddress} to the list of DNS servers, if not present.
      *
      * @param dnsServer The {@link InetAddress} to add to the list of DNS servers.
+     * @return true if the DNS server was added, false if it was already present.
      * @hide
      */
-    public void addDnsServer(InetAddress dnsServer) {
-        if (dnsServer != null) mDnses.add(dnsServer);
+    public boolean addDnsServer(InetAddress dnsServer) {
+        if (dnsServer != null && !mDnses.contains(dnsServer)) {
+            mDnses.add(dnsServer);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Replaces the DNS servers in this {@code LinkProperties} with
+     * the given {@link Collection} of {@link InetAddress} objects.
+     *
+     * @param addresses The {@link Collection} of DNS servers to set in this object.
+     * @hide
+     */
+    public void setDnsServers(Collection<InetAddress> dnsServers) {
+        mDnses.clear();
+        for (InetAddress dnsServer: dnsServers) {
+            addDnsServer(dnsServer);
+        }
     }
 
     /**
