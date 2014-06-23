@@ -48,7 +48,9 @@ interface IConnectivityManager
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);
+    NetworkInfo getNetworkInfoForNetwork(in Network network);
     NetworkInfo[] getAllNetworkInfo();
+    Network[] getAllNetworks();
 
     NetworkInfo getProvisioningOrActiveNetworkInfo();
 

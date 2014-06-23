@@ -16279,10 +16279,12 @@ package android.net {
   public class ConnectivityManager {
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
+    method public android.net.Network[] getAllNetworks();
     method public deprecated boolean getBackgroundDataSetting();
     method public android.net.LinkProperties getLinkProperties(android.net.Network);
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
     method public android.net.NetworkInfo getNetworkInfo(int);
+    method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
     method public static android.net.Network getProcessDefaultNetwork();
     method public boolean isActiveNetworkMetered();
