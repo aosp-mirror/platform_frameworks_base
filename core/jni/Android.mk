@@ -90,12 +90,12 @@ LOCAL_SRC_FILES:= \
 	android_util_Process.cpp \
 	android_util_StringBlock.cpp \
 	android_util_XmlBlock.cpp \
+	android_graphics_Canvas.cpp \
 	android_graphics_Picture.cpp \
 	android/graphics/AutoDecodeCancel.cpp \
 	android/graphics/Bitmap.cpp \
 	android/graphics/BitmapFactory.cpp \
 	android/graphics/Camera.cpp \
-	android/graphics/Canvas.cpp \
 	android/graphics/CanvasProperty.cpp \
 	android/graphics/ColorFilter.cpp \
 	android/graphics/DrawFilter.cpp \
@@ -122,6 +122,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Rasterizer.cpp \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
+	android/graphics/SkiaCanvas.cpp \
 	android/graphics/SurfaceTexture.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/TypefaceImpl.cpp \
