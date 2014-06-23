@@ -167,5 +167,5 @@ public abstract class WindowManagerInternal {
      * Invalidate all visible windows. Then report back on the callback once all windows have
      * redrawn.
      */
-    public abstract void waitForAllWindowsDrawn(IRemoteCallback callback, long timeout);
+    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout);
 }

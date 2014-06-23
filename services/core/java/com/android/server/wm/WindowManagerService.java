@@ -411,7 +411,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * And the callback to make when they've all been drawn.
      */
-    IRemoteCallback mWaitingForDrawnCallback;
+    Runnable mWaitingForDrawnCallback;
 
     /**
      * Windows that have called relayout() while we were running animations,
@@ -7561,7 +7561,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case WAITING_FOR_DRAWN_TIMEOUT: {
-                    IRemoteCallback callback = null;
+                    Runnable callback = null;
                     synchronized (mWindowMap) {
                         Slog.w(TAG, "Timeout waiting for drawn: undrawn=" + mWaitingForDrawn);
                         mWaitingForDrawn.clear();
@@ -7569,10 +7569,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mWaitingForDrawnCallback = null;
                     }
                     if (callback != null) {
-                        try {
-                            callback.sendResult(null);
-                        } catch (RemoteException e) {
-                        }
+                        callback.run();
                     }
                     break;
                 }
@@ -7626,16 +7623,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 case ALL_WINDOWS_DRAWN: {
-                    IRemoteCallback callback;
+                    Runnable callback;
                     synchronized (mWindowMap) {
                         callback = mWaitingForDrawnCallback;
                         mWaitingForDrawnCallback = null;
                     }
                     if (callback != null) {
-                        try {
-                            callback.sendResult(null);
-                        } catch (RemoteException e) {
-                        }
+                        callback.run();
                     }
                 }
                 case NEW_ANIMATOR_SCALE: {
@@ -9555,8 +9549,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mInnerFields.mOrientationChangeComplete && !defaultDisplay.layoutNeeded
-                && !mInnerFields.mUpdateRotation) {
+        if (mWaitingForDrawnCallback != null ||
+                (mInnerFields.mOrientationChangeComplete && !defaultDisplay.layoutNeeded &&
+                        !mInnerFields.mUpdateRotation)) {
             checkDrawnWindowsLocked();
         }
 
@@ -11141,24 +11136,31 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        public void waitForAllWindowsDrawn(IRemoteCallback callback, long timeout) {
+        public void waitForAllWindowsDrawn(Runnable callback, long timeout) {
             synchronized (mWindowMap) {
                 mWaitingForDrawnCallback = callback;
                 final WindowList windows = getDefaultWindowListLocked();
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
-                    if (win.mHasSurface) {
-                        win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                    if (win.mHasSurface && win.isWinVisibleLw()) {
+                        if (!win.mIsWallpaper) {
+                            // Don't force wallpaper to redraw.
+                            win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                        }
                         // Force add to mResizingWindows.
                         win.mLastContentInsets.set(-1, -1, -1, -1);
                         mWaitingForDrawn.add(win);
                     }
                 }
                 requestTraversalLocked();
-                mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, timeout);
             }
-            checkDrawnWindowsLocked();
+            mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
+            if (mWaitingForDrawn.isEmpty()) {
+                callback.run();
+            } else {
+                mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, timeout);
+                checkDrawnWindowsLocked();
+            }
         }
     }
 }

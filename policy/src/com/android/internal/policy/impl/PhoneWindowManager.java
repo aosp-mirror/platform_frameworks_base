@@ -42,7 +42,6 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
-import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -51,7 +50,6 @@ import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -105,7 +103,6 @@ import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
 import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowListener;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 
@@ -270,10 +267,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The following are only accessed on the mHandler thread.
     boolean mKeyguardDrawComplete;
     boolean mWindowManagerDrawComplete;
-    ArrayList<ScreenOnListener> mScreenOnListeners = new ArrayList<ScreenOnListener>();
-    final IRemoteCallback mWindowManagerDrawCallback = new IRemoteCallback.Stub() {
+    ScreenOnListener mScreenOnListener;
+    final Runnable mWindowManagerDrawCallback = new Runnable() {
         @Override
-        public void sendResult(Bundle data) {
+        public void run() {
             if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for display!");
             mHandler.sendEmptyMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE);
         }
@@ -4543,7 +4540,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the mHandler thread.
     private void handleWakingUp(final ScreenOnListener screenOnListener) {
         if (screenOnListener != null) {
-            mScreenOnListeners.add(screenOnListener);
+            mScreenOnListener = screenOnListener;
         }
 
         synchronized (mLock) {
@@ -4575,8 +4572,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
+        ScreenOnListener screenOnListener;
         synchronized (mLock) {
             mScreenOnFully = true;
+            screenOnListener = mScreenOnListener;
+            mScreenOnListener = null;
         }
 
         try {
@@ -4584,8 +4584,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException unhandled) {
         }
 
-        for (int i = mScreenOnListeners.size() - 1; i >=0; --i) {
-            mScreenOnListeners.remove(i).onScreenOn();
+        if (screenOnListener != null) {
+            screenOnListener.onScreenOn();
         }
 
         setKeyguardDrawn();
