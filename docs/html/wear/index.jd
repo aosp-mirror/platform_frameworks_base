@@ -188,7 +188,7 @@ page.type=about
             <div class="landing-h2">Building an Ecosystem</div>
             <div class="landing-body landing-align-center">
               <p class="landing-small">
-                We’re working with several partners to bring you watches powered by Android Wear later this year!
+                We’re working with partners around the world to build watches powered by Android Wear!
               </p>
             </div>
           </div>
@@ -226,6 +226,9 @@ page.type=about
             </div>
             <div class="col-4">
               <img src="/wear/images/partners/samsung.png" alt="Samsung">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/arm.png" alt="ARM">
             </div>
           </div>
         </div> <!-- end .wrap -->
@@ -285,7 +288,7 @@ page.type=about
                   </p>
                   <br>
                     <p class="landing-small">
-                    <a target="_blank" href="http://android-developers.blogspot.com/2014/03/android-wear-developer-preview.html">Android Developers Blog</a>
+                    <a target="_blank" href="http://android-developers.blogspot.com">Android Developers Blog</a>
                     </p>
                   <p></p>
                 </div>
