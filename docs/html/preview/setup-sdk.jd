@@ -20,7 +20,96 @@ App</a> training lesson first.</a></p>
     <b>Install</b>.</li>
 </ol>
 
-<h2>Set up your environment</h2>
+<h2>Set Up Hardware and AVDs</h2>
+
+<p>The Android L developer preview provides you with 32-bit system images
+to flash the following devices:
+</p>
+
+<ul>
+  <li>Nexus 5</li>
+  <li>Nexus 7 Wi-Fi (version 2, released in 2013)</li>
+</ul>
+
+<p>In addition, you also get the emulator system images, which includes
+experimental 64-bit system images along with standard 32-bit system images.
+</p>
+
+<h3>Instal the L Preview System Image</h3>
+
+<!-- Will we get an official warning text from the lawyercats? Is this it? -->
+<p class="warning"><b>Warning</b>: This is a preview version of the Android
+system image, and is subject to change. Your use of this system image is
+governed by the Android SDK Preview License Agreement. The Android preview
+system image is not a stable release, and may contain errors and defects that
+can result in damage to your computer systems, devices, and data. The preview
+Android system image is not subject to the same testing as the factory OS and
+can cause your phone and installed services and applications to stop working.
+</p>
+
+
+<ol>
+  <li>Download and extract the Android Developer Preview package to a directory
+  (which we'll call <code>&lt;l_download_dir&gt;</code> in these
+  instructions).</li>
+  <li>Connect your powered-off Android device to your development machine. Put
+  the device in fastboot mode by pressing and holding the following buttons:
+    <ul>
+    <li><strong>Nexus 5:</strong> <i>volume down</i> + <i>volume up</i> +
+        <i>power</i></li>
+    <li><strong>Nexus 7:</strong> <i>volume down</i> + <i>power</i> </li>
+    </ul>
+    <p class="note">Alternatively, you can enter fastboot mode by booting up
+    the device and running <code>adb reboot bootloader</code> with USB debugging
+    turned on.</p>
+  </li>
+  <li>Follow the instructions at
+  <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+  to set up your system for flashing devices.</li>
+  <li>Run the <code>&lt;l_download_dir&gt;/flash-all</code> script
+  corresponding to your platform. This script flashes all of the system data
+  onto the phone.</li> <!-- Confirm names of flash scripts -->
+  <li>(Optional) After flashing is complete, lock your device's bootloader by
+  putting it in   fastboot mode and running <code>fastboot oem lock</code>.
+  (This does not wipe   your device.) Once you do this,  you will not be able to
+  flash your device until you run   run <code>fastboot oem   unlock</code>,
+  which unlocks the bootloader and wipes your device. We recommend you leave the
+  bootloader unlocked until you are done with flashing the device.</li>
+</ol>
+
+<h3>Revert a Device to Factory Specifications</h3>
+
+  <p>If you want to uninstall the L Preview and revert the device to factory
+specifications, go to <a href="http://developers.google.com/android
+/nexus/images">developers.google.com/android</a> and download the image you want
+to flash to for your device. Follow the instructions on that page to flash the
+image to your device.</p>
+
+
+<h3>Set up an AVD</h3>
+
+<p>You can set up <a href="{@docRoot}tools/devices/">Android Virtual Devices
+(AVD)</a> and use the emulator to build and test apps with the L Preview.</p>
+
+<p>To create an AVD with the AVD Manager:</p>
+
+<ol>
+  <li>Install the L Preview SDK in your development environment, as described
+      in <a href="{@docRoot}preview/setup-sdk.html">Setting Up the Preview
+      SDK.</a></li>
+  <li>Follow the steps in
+      <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
+      Manager</a>. Use the following settings:
+    <ul>
+      <li><b>Device:</b> Either Nexus 5 or Nexus 7</li>
+      <li><b>Target:</b> <!-- Confirm exact text when we have final distro -->
+       Android L (Preview) - API Level L</li>
+    </ul>
+    <!-- Confirm this works when you can download image through SDK manager! -->
+  </li>
+</ol>
+
+<h2>Create a Project</h2>
 
 <ol>
   <li>Create a new Android project with the following properties:
