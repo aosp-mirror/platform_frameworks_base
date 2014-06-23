@@ -4713,7 +4713,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         LinkProperties lp = mCs.getLinkPropertiesForTypeInternal(
                                 ConnectivityManager.TYPE_MOBILE_HIPRI);
                         boolean linkHasIpv4 = lp.hasIPv4Address();
-                        boolean linkHasIpv6 = lp.hasIPv6Address();
+                        boolean linkHasIpv6 = lp.hasGlobalIPv6Address();
                         log("isMobileOk: linkHasIpv4=" + linkHasIpv4
                                 + " linkHasIpv6=" + linkHasIpv6);
 
