@@ -260,7 +260,7 @@ public final class MediaMetadata implements Parcelable {
             rating = mBundle.getParcelable(key);
         } catch (Exception e) {
             // ignore, value was not a bitmap
-            Log.d(TAG, "Failed to retrieve a key as Rating.", e);
+            Log.w(TAG, "Failed to retrieve a key as Rating.", e);
         }
         return rating;
     }
@@ -278,7 +278,7 @@ public final class MediaMetadata implements Parcelable {
             bmp = mBundle.getParcelable(key);
         } catch (Exception e) {
             // ignore, value was not a bitmap
-            Log.d(TAG, "Failed to retrieve a key as Bitmap.", e);
+            Log.w(TAG, "Failed to retrieve a key as Bitmap.", e);
         }
         return bmp;
     }
@@ -323,8 +323,8 @@ public final class MediaMetadata implements Parcelable {
         return EDITOR_KEY_MAPPING.get(editorKey, null);
     }
 
-    public static final Parcelable.Creator<MediaMetadata> CREATOR
-            = new Parcelable.Creator<MediaMetadata>() {
+    public static final Parcelable.Creator<MediaMetadata> CREATOR =
+            new Parcelable.Creator<MediaMetadata>() {
                 @Override
                 public MediaMetadata createFromParcel(Parcel in) {
                     return new MediaMetadata(in);

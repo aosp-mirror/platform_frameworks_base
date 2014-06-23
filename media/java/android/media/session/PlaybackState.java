@@ -561,8 +561,8 @@ public final class PlaybackState implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<PlaybackState> CREATOR
-            = new Parcelable.Creator<PlaybackState>() {
+    public static final Parcelable.Creator<PlaybackState> CREATOR =
+            new Parcelable.Creator<PlaybackState>() {
         @Override
         public PlaybackState createFromParcel(Parcel in) {
             return new PlaybackState(in);

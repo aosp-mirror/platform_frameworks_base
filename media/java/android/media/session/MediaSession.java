@@ -51,10 +51,9 @@ import java.util.List;
  * for all playback, though multiple sessions can be created to provide finer
  * grain controls of media.
  * <p>
- * A MediaSession is created by calling
- * {@link MediaSessionManager#createSession(String)}. Once a session is created
- * the owner of the session may use {@link #getSessionToken()} to allow apps to
- * create a {@link MediaController} to interact with this session.
+ * Once a session is created the owner of the session may pass its
+ * {@link #getSessionToken() session token} to other processes to allow them to
+ * create a {@link MediaController} to interact with the session.
  * <p>
  * To receive commands, media keys, and other events a {@link Callback} must be
  * set with {@link #addCallback(Callback)}. To receive transport control
@@ -64,10 +63,10 @@ import java.util.List;
  * When an app is finished performing playback it must call {@link #release()}
  * to clean up the session and notify any controllers.
  * <p>
- * MediaSession objects are thread safe
+ * MediaSession objects are thread safe.
  */
 public final class MediaSession {
-    private static final String TAG = "Session";
+    private static final String TAG = "MediaSession";
 
     /**
      * Set this flag on the session to indicate that it can handle media button
@@ -77,9 +76,8 @@ public final class MediaSession {
 
     /**
      * Set this flag on the session to indicate that it handles transport
-     * control commands through a {@link TransportControlsCallback}. The
-     * callback can be retrieved by calling
-     * {@link #addTransportControlsCallback}.
+     * control commands through a {@link TransportControlsCallback}.
+     * The callback can be retrieved by calling {@link #addTransportControlsCallback}.
      */
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
@@ -153,7 +151,7 @@ public final class MediaSession {
     private Route mRoute;
     private VolumeProvider mVolumeProvider;
 
-    private boolean mActive = false;;
+    private boolean mActive = false;
 
     /**
      * @hide
@@ -177,7 +175,7 @@ public final class MediaSession {
      *
      * @param callback The callback object
      */
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
         addCallback(callback, null);
     }
 
@@ -188,7 +186,7 @@ public final class MediaSession {
      * @param callback The callback to receive updates on.
      * @param handler The handler that events should be posted on.
      */
-    public void addCallback(Callback callback, Handler handler) {
+    public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -211,7 +209,7 @@ public final class MediaSession {
      *
      * @param callback The callback to remove.
      */
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
         synchronized (mLock) {
             removeCallbackLocked(callback);
         }
@@ -223,7 +221,7 @@ public final class MediaSession {
      *
      * @param pi The intent to launch to show UI for this Session.
      */
-    public void setLaunchPendingIntent(PendingIntent pi) {
+    public void setLaunchPendingIntent(@Nullable PendingIntent pi) {
         // TODO
     }
 
@@ -234,7 +232,7 @@ public final class MediaSession {
      * @param mbr The receiver component to send the media button event to.
      * @hide
      */
-    public void setMediaButtonReceiver(ComponentName mbr) {
+    public void setMediaButtonReceiver(@Nullable ComponentName mbr) {
         try {
             mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {
@@ -283,12 +281,17 @@ public final class MediaSession {
      * @param volumeProvider The provider that will handle volume changes. May
      *            not be null.
      */
-    public void setPlaybackToRemote(VolumeProvider volumeProvider) {
+    public void setPlaybackToRemote(@NonNull VolumeProvider volumeProvider) {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
         mVolumeProvider = volumeProvider;
-        volumeProvider.setSession(this);
+        volumeProvider.setCallback(new VolumeProvider.Callback() {
+            @Override
+            public void onVolumeChanged(VolumeProvider volumeProvider) {
+                notifyRemoteVolumeChanged(volumeProvider);
+            }
+        });
 
         try {
             mBinder.configureVolumeHandling(VOLUME_TYPE_REMOTE, volumeProvider.getVolumeControl(),
@@ -335,7 +338,7 @@ public final class MediaSession {
      * @param event The name of the event to send
      * @param extras Any extras included with the event
      */
-    public void sendSessionEvent(String event, Bundle extras) {
+    public void sendSessionEvent(@NonNull String event, @Nullable Bundle extras) {
         if (TextUtils.isEmpty(event)) {
             throw new IllegalArgumentException("event cannot be null or empty");
         }
@@ -367,7 +370,7 @@ public final class MediaSession {
      * @return A token that can be used to create a MediaController for this
      *         session
      */
-    public MediaSessionToken getSessionToken() {
+    public @NonNull MediaSessionToken getSessionToken() {
         return mSessionToken;
     }
 
@@ -512,7 +515,7 @@ public final class MediaSession {
      *
      * @param state The current state of playback
      */
-    public void setPlaybackState(PlaybackState state) {
+    public void setPlaybackState(@Nullable PlaybackState state) {
         try {
             mBinder.setPlaybackState(state);
         } catch (RemoteException e) {
@@ -526,7 +529,7 @@ public final class MediaSession {
      *
      * @param metadata The new metadata
      */
-    public void setMetadata(MediaMetadata metadata) {
+    public void setMetadata(@Nullable MediaMetadata metadata) {
         try {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
@@ -714,7 +717,7 @@ public final class MediaSession {
          * @param mediaButtonIntent an intent containing the KeyEvent as an
          *            extra
          */
-        public void onMediaButtonEvent(Intent mediaButtonIntent) {
+        public void onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
         }
 
         /**
@@ -722,10 +725,12 @@ public final class MediaSession {
          * The owner of the session may handle custom commands but is not
          * required to.
          *
-         * @param command
-         * @param extras optional
+         * @param command The command name.
+         * @param extras Optional parameters for the command, may be null.
+         * @param cb A result receiver to which a result may be sent by the command, may be null.
          */
-        public void onControlCommand(String command, Bundle extras, ResultReceiver cb) {
+        public void onControlCommand(@NonNull String command, @Nullable Bundle extras,
+                @Nullable ResultReceiver cb) {
         }
 
         /**
@@ -831,7 +836,7 @@ public final class MediaSession {
          *
          * @param rating
          */
-        public void onSetRating(Rating rating) {
+        public void onSetRating(@NonNull Rating rating) {
         }
 
         /**

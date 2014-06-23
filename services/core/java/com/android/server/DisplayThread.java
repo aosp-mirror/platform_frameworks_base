@@ -41,14 +41,14 @@ public final class DisplayThread extends ServiceThread {
     }
 
     public static DisplayThread get() {
-        synchronized (UiThread.class) {
+        synchronized (DisplayThread.class) {
             ensureThreadLocked();
             return sInstance;
         }
     }
 
     public static Handler getHandler() {
-        synchronized (UiThread.class) {
+        synchronized (DisplayThread.class) {
             ensureThreadLocked();
             return sHandler;
         }

@@ -16,6 +16,8 @@
 
 package android.media.session;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.session.ISessionManager;
@@ -24,6 +26,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -63,10 +66,10 @@ public final class MediaSessionManager {
     /**
      * Creates a new session.
      *
-     * @param tag A short name for debugging purposes
-     * @return a {@link MediaSession} for the new session
+     * @param tag A short name for debugging purposes.
+     * @return A {@link MediaSession} for the new session.
      */
-    public MediaSession createSession(String tag) {
+    public @NonNull MediaSession createSession(@NonNull String tag) {
         return createSessionAsUser(tag, UserHandle.myUserId());
     }
 
@@ -76,12 +79,16 @@ public final class MediaSessionManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
      * permission.
      *
-     * @param tag A short name for debugging purposes
+     * @param tag A short name for debugging purposes.
      * @param userId The user id to create the session as.
-     * @return a {@link MediaSession} for the new session
+     * @return A {@link MediaSession} for the new session.
      * @hide
      */
-    public MediaSession createSessionAsUser(String tag, int userId) {
+    public @NonNull MediaSession createSessionAsUser(@NonNull String tag, int userId) {
+        if (TextUtils.isEmpty(tag)) {
+            throw new IllegalArgumentException("tag must not be null or empty");
+        }
+
         try {
             MediaSession.CallbackStub cbStub = new MediaSession.CallbackStub();
             MediaSession session = new MediaSession(mService
@@ -108,9 +115,10 @@ public final class MediaSessionManager {
      *
      * @param notificationListener The enabled notification listener component.
      *            May be null.
-     * @return A list of controllers for ongoing sessions
+     * @return A list of controllers for ongoing sessions.
      */
-    public List<MediaController> getActiveSessions(ComponentName notificationListener) {
+    public @NonNull List<MediaController> getActiveSessions(
+            @Nullable ComponentName notificationListener) {
         return getActiveSessionsForUser(notificationListener, UserHandle.myUserId());
     }
 
@@ -127,8 +135,8 @@ public final class MediaSessionManager {
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
-    public List<MediaController> getActiveSessionsForUser(ComponentName notificationListener,
-            int userId) {
+    public @NonNull List<MediaController> getActiveSessionsForUser(
+            @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
             List<IBinder> binders = mService.getSessions(notificationListener, userId);
@@ -177,8 +185,8 @@ public final class MediaSessionManager {
      * @param userId The userId to listen for changes on.
      * @hide
      */
-    public void addActiveSessionsListener(SessionListener sessionListener,
-            ComponentName notificationListener, int userId) {
+    public void addActiveSessionsListener(@NonNull SessionListener sessionListener,
+            @Nullable ComponentName notificationListener, int userId) {
         if (sessionListener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
@@ -195,7 +203,7 @@ public final class MediaSessionManager {
      * @param listener The listener to remove.
      * @hide
      */
-    public void removeActiveSessionsListener(SessionListener listener) {
+    public void removeActiveSessionsListener(@NonNull SessionListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
@@ -212,19 +220,18 @@ public final class MediaSessionManager {
      * @param keyEvent The KeyEvent to send.
      * @hide
      */
-    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+    public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent) {
         dispatchMediaKeyEvent(keyEvent, false);
     }
 
     /**
      * Send a media key event. The receiver will be selected automatically.
      *
-     * @param keyEvent The KeyEvent to send
-     * @param needWakeLock true if a wake lock should be held while sending the
-     *            key
+     * @param keyEvent The KeyEvent to send.
+     * @param needWakeLock True if a wake lock should be held while sending the key.
      * @hide
      */
-    public void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+    public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean needWakeLock) {
         try {
             mService.dispatchMediaKeyEvent(keyEvent, needWakeLock);
         } catch (RemoteException e) {
@@ -264,7 +271,8 @@ public final class MediaSessionManager {
          * @param controllers The updated list of controllers for the user that
          *            changed.
          */
-        public abstract void onActiveSessionsChanged(List<MediaController> controllers);
+        public abstract void onActiveSessionsChanged(
+                @Nullable List<MediaController> controllers);
 
         private final IActiveSessionsListener.Stub mStub = new IActiveSessionsListener.Stub() {
             @Override

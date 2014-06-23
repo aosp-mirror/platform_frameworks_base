@@ -16,6 +16,8 @@
 
 package android.media.session;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -44,7 +46,7 @@ import java.util.ArrayList;
  * MediaController objects are thread-safe.
  */
 public final class MediaController {
-    private static final String TAG = "SessionController";
+    private static final String TAG = "MediaController";
 
     private static final int MSG_EVENT = 1;
     private static final int MSG_UPDATE_PLAYBACK_STATE = 2;
@@ -75,14 +77,14 @@ public final class MediaController {
     }
 
     /**
-     * Get a new MediaController for a MediaSessionToken. If successful the
-     * controller returned will be connected to the session that generated the
-     * token.
+     * Get a new media controller from a session token which may have
+     * been obtained from another process.  If successful the controller returned
+     * will be connected to the session that generated the token.
      *
-     * @param token The session token to use
-     * @return A controller for the session or null
+     * @param token The session token to control.
+     * @return A controller for the session or null if inaccessible.
      */
-    public static MediaController fromToken(MediaSessionToken token) {
+    public static MediaController fromToken(@NonNull MediaSessionToken token) {
         return fromBinder(token.getBinder());
     }
 
@@ -91,7 +93,7 @@ public final class MediaController {
      *
      * @return A controls instance
      */
-    public TransportControls getTransportControls() {
+    public @NonNull TransportControls getTransportControls() {
         return mTransportController;
     }
 
@@ -102,7 +104,7 @@ public final class MediaController {
      * @param keyEvent The media button event to dispatch.
      * @return true if the event was sent to the session, false otherwise.
      */
-    public boolean dispatchMediaButtonEvent(KeyEvent keyEvent) {
+    public boolean dispatchMediaButtonEvent(@NonNull KeyEvent keyEvent) {
         if (keyEvent == null) {
             throw new IllegalArgumentException("KeyEvent may not be null");
         }
@@ -122,7 +124,7 @@ public final class MediaController {
      *
      * @return The current PlaybackState or null
      */
-    public PlaybackState getPlaybackState() {
+    public @Nullable PlaybackState getPlaybackState() {
         try {
             return mSessionBinder.getPlaybackState();
         } catch (RemoteException e) {
@@ -136,7 +138,7 @@ public final class MediaController {
      *
      * @return The current MediaMetadata or null.
      */
-    public MediaMetadata getMetadata() {
+    public @Nullable MediaMetadata getMetadata() {
         try {
             return mSessionBinder.getMetadata();
         } catch (RemoteException e) {
@@ -188,7 +190,7 @@ public final class MediaController {
      *
      * @return The current volume info or null.
      */
-    public VolumeInfo getVolumeInfo() {
+    public @Nullable VolumeInfo getVolumeInfo() {
         try {
             ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
             return new VolumeInfo(result.volumeType, result.audioStream, result.controlType,
@@ -204,26 +206,29 @@ public final class MediaController {
      * Adds a callback to receive updates from the Session. Updates will be
      * posted on the caller's thread.
      *
-     * @param cb The callback object, must not be null
+     * @param callback The callback object, must not be null.
      */
-    public void addCallback(Callback cb) {
-        addCallback(cb, null);
+    public void addCallback(@NonNull Callback callback) {
+        addCallback(callback, null);
     }
 
     /**
      * Adds a callback to receive updates from the session. Updates will be
      * posted on the specified handler's thread.
      *
-     * @param cb Cannot be null.
+     * @param callback The callback object, must not be null.
      * @param handler The handler to post updates on. If null the callers thread
-     *            will be used
+     *            will be used.
      */
-    public void addCallback(Callback cb, Handler handler) {
+    public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
         if (handler == null) {
             handler = new Handler();
         }
         synchronized (mLock) {
-            addCallbackLocked(cb, handler);
+            addCallbackLocked(callback, handler);
         }
     }
 
@@ -231,11 +236,14 @@ public final class MediaController {
      * Stop receiving updates on the specified callback. If an update has
      * already been posted you may still receive it after calling this method.
      *
-     * @param cb The callback to remove
+     * @param callback The callback to remove.
      */
-    public void removeCallback(Callback cb) {
+    public void removeCallback(@NonNull Callback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
         synchronized (mLock) {
-            removeCallbackLocked(cb);
+            removeCallbackLocked(callback);
         }
     }
 
@@ -248,7 +256,8 @@ public final class MediaController {
      * @param params Any parameters to include with the command
      * @param cb The callback to receive the result on
      */
-    public void sendControlCommand(String command, Bundle params, ResultReceiver cb) {
+    public void sendControlCommand(@NonNull String command, @Nullable Bundle params,
+            @Nullable ResultReceiver cb) {
         if (TextUtils.isEmpty(command)) {
             throw new IllegalArgumentException("command cannot be null or empty");
         }
@@ -298,12 +307,6 @@ public final class MediaController {
     }
 
     private void addCallbackLocked(Callback cb, Handler handler) {
-        if (cb == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        if (handler == null) {
-            throw new IllegalArgumentException("Handler cannot be null");
-        }
         if (getHandlerForCallbackLocked(cb) != null) {
             Log.w(TAG, "Callback is already added, ignoring");
             return;
@@ -322,9 +325,6 @@ public final class MediaController {
     }
 
     private boolean removeCallbackLocked(Callback cb) {
-        if (cb == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
         boolean success = false;
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             MessageHandler handler = mCallbacks.get(i);
@@ -375,9 +375,10 @@ public final class MediaController {
          * specified interface. Controllers should only handle these for
          * sessions they own.
          *
-         * @param event
+         * @param event The event from the session.
+         * @param extras Optional parameters for the event, may be null.
          */
-        public void onSessionEvent(String event, Bundle extras) {
+        public void onSessionEvent(@NonNull String event, @Nullable Bundle extras) {
         }
 
         /**
@@ -394,16 +395,16 @@ public final class MediaController {
          *
          * @param state The new playback state of the session
          */
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
         }
 
         /**
          * Override to handle changes to the current metadata.
          *
+         * @param metadata The current metadata for the session or null if none.
          * @see MediaMetadata
-         * @param metadata The current metadata for the session or null
          */
-        public void onMetadataChanged(MediaMetadata metadata) {
+        public void onMetadataChanged(@Nullable MediaMetadata metadata) {
         }
     }
 
