@@ -2,11 +2,7 @@
 
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html">Set up the Preview SDK
-      </a></div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-devices.html">Set Up Hardware and AVDs
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html">Set up the SDK
       </a></div>
   </li>
   <li class="nav-section">
