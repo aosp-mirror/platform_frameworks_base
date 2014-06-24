@@ -1378,6 +1378,7 @@ java.util.zip.ZipFile
 java.util.zip.ZipFile$1
 java.util.zip.ZipFile$RAFStream
 java.util.zip.ZipFile$ZipInflaterInputStream
+javax.crypto.spec.GCMParameterSpec
 javax.microedition.khronos.egl.EGL
 javax.microedition.khronos.egl.EGL10
 javax.microedition.khronos.egl.EGLConfig
