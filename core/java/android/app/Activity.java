@@ -5139,78 +5139,7 @@ public class Activity extends ContextThemeWrapper
             return onCreateView(name, context, attrs);
         }
         
-        String fname = attrs.getAttributeValue(null, "class");
-        TypedArray a = 
-            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
-        if (fname == null) {
-            fname = a.getString(com.android.internal.R.styleable.Fragment_name);
-        }
-        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, View.NO_ID);
-        String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
-        a.recycle();
-        
-        int containerId = parent != null ? parent.getId() : 0;
-        if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
-            throw new IllegalArgumentException(attrs.getPositionDescription()
-                    + ": Must specify unique android:id, android:tag, or have a parent with an id for " + fname);
-        }
-
-        // If we restored from a previous state, we may already have
-        // instantiated this fragment from the state and should use
-        // that instance instead of making a new one.
-        Fragment fragment = id != View.NO_ID ? mFragments.findFragmentById(id) : null;
-        if (fragment == null && tag != null) {
-            fragment = mFragments.findFragmentByTag(tag);
-        }
-        if (fragment == null && containerId != View.NO_ID) {
-            fragment = mFragments.findFragmentById(containerId);
-        }
-
-        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "onCreateView: id=0x"
-                + Integer.toHexString(id) + " fname=" + fname
-                + " existing=" + fragment);
-        if (fragment == null) {
-            fragment = Fragment.instantiate(this, fname);
-            fragment.mFromLayout = true;
-            fragment.mFragmentId = id != 0 ? id : containerId;
-            fragment.mContainerId = containerId;
-            fragment.mTag = tag;
-            fragment.mInLayout = true;
-            fragment.mFragmentManager = mFragments;
-            fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
-            mFragments.addFragment(fragment, true);
-
-        } else if (fragment.mInLayout) {
-            // A fragment already exists and it is not one we restored from
-            // previous state.
-            throw new IllegalArgumentException(attrs.getPositionDescription()
-                    + ": Duplicate id 0x" + Integer.toHexString(id)
-                    + ", tag " + tag + ", or parent id 0x" + Integer.toHexString(containerId)
-                    + " with another fragment for " + fname);
-        } else {
-            // This fragment was retained from a previous instance; get it
-            // going now.
-            fragment.mInLayout = true;
-            // If this fragment is newly instantiated (either right now, or
-            // from last saved state), then give it the attributes to
-            // initialize itself.
-            if (!fragment.mRetaining) {
-                fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
-            }
-            mFragments.moveToState(fragment);
-        }
-
-        if (fragment.mView == null) {
-            throw new IllegalStateException("Fragment " + fname
-                    + " did not create a view.");
-        }
-        if (id != 0) {
-            fragment.mView.setId(id);
-        }
-        if (fragment.mView.getTag() == null) {
-            fragment.mView.setTag(tag);
-        }
-        return fragment.mView;
+        return mFragments.onCreateView(parent, name, context, attrs);
     }
 
     /**

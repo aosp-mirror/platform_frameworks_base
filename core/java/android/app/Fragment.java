@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1104,7 +1105,15 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * inflation.  Maybe this should become a public API. Note sure.
      */
     public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        return mActivity.getLayoutInflater();
+        // Newer platform versions use the child fragment manager's LayoutInflaterFactory.
+        if (mActivity.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
+            LayoutInflater result = mActivity.getLayoutInflater().cloneInContext(mActivity);
+            getChildFragmentManager(); // Init if needed; use raw implementation below.
+            result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());
+            return result;
+        } else {
+            return mActivity.getLayoutInflater();
+        }
     }
     
     /**
