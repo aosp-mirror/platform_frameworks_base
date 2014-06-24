@@ -306,6 +306,24 @@ with icons for list items.</p>
 <p>All the templates support different color schemes for day and night.
 The platform provides the state (day or night) and makes adjustments automatically.</p>
 
+<div class="cols">
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music.png" />
+  </div>
+</div>
+<div class="auto-col-2">
+  <div class="auto-img-container-cols">
+    <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
+    <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/do_02_music_night.png" />
+  </div>
+</div>
+</div>
+<p class="img-caption">
+  <strong>Figure 6.</strong> Day and night modes.
+</p>
+
 <h3 id="customizetemplates">Customizing Templates</h3>
 
 <p>To customize the templates, provide the following app-specific resources and actions
