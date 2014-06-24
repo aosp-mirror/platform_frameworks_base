@@ -18,13 +18,10 @@ package com.android.layoutlib.bridge.bars;
 
 import com.android.layoutlib.bridge.impl.Config;
 import com.android.resources.Density;
-import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LevelListDrawable;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,7 +31,8 @@ public class StatusBar extends CustomBar {
     public StatusBar(Context context, Density density, int direction, boolean RtlEnabled,
             int simulatedPlatformVersion) throws XmlPullParserException {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
-        super(context, density, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml");
+        super(context, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml",
+                simulatedPlatformVersion);
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
