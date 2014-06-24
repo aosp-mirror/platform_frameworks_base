@@ -128,9 +128,10 @@ abstract class CustomBar extends LinearLayout {
         if (mSimulatedPlatformVersion == 0) {
             String path = pathOut[0];
             String dirName = path.substring(0, path.lastIndexOf('/'));
-            pathOut[0] = dirName + "-v21" + "/" + iconName;
-            InputStream stream = getClass().getResourceAsStream(pathOut[0]);
+            path = dirName + "-v21" + "/" + iconName;
+            InputStream stream = getClass().getResourceAsStream(path);
             if (stream != null) {
+                pathOut[0] = path;
                 return stream;
             }
         }
