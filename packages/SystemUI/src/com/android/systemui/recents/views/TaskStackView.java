@@ -58,6 +58,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onTaskLaunched(TaskStackView stackView, TaskView tv, TaskStack stack, Task t);
         public void onTaskAppInfoLaunched(Task t);
         public void onTaskRemoved(Task t);
+        public void onTaskStackFilterTriggered();
+        public void onTaskStackUnfilterTriggered();
     }
 
     RecentsConfiguration mConfig;
@@ -1131,6 +1133,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Animate
         doFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
+
+        // Notify any callbacks
+        mCb.onTaskStackFilterTriggered();
     }
 
     @Override
@@ -1154,6 +1159,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Clear the saved vars
         mStashedScroll = 0;
+
+        // Notify any callbacks
+        mCb.onTaskStackUnfilterTriggered();
     }
 
     /**** ViewPoolConsumer Implementation ****/

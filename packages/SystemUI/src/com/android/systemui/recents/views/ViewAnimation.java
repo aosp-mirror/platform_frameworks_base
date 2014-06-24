@@ -25,7 +25,7 @@ public class ViewAnimation {
     /* The animation context for a task view animation into Recents */
     public static class TaskViewEnterContext {
         // The full screenshot view that we are animating down
-        FullScreenTransitionView fullScreenshot;
+        FullscreenTransitionOverlayView fullScreenshot;
         // The transform of the current task view
         TaskViewTransform transform;
         // The stack rect that the transform is relative to
@@ -39,7 +39,7 @@ public class ViewAnimation {
         // Whether this is the front most task view
         boolean isFrontMost;
 
-        public TaskViewEnterContext(FullScreenTransitionView fss) {
+        public TaskViewEnterContext(FullscreenTransitionOverlayView fss) {
             fullScreenshot = fss;
         }
     }

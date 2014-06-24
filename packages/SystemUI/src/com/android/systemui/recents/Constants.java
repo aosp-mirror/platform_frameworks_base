@@ -33,6 +33,8 @@ public class Constants {
             public static final boolean EnableTaskFiltering = true;
             // Enables clipping of tasks against each other
             public static final boolean EnableTaskStackClipping = true;
+            // Enables tapping on the TaskBar to launch the task
+            public static final boolean EnableTaskBarTouchEvents = true;
             // Enables the use of theme colors as the task bar background
             public static final boolean EnableTaskBarThemeColors = true;
             // Enables app-info pane on long-pressing the icon

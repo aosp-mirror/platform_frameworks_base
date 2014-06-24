@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
@@ -43,7 +44,6 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.Set;
-
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -72,6 +72,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public RecentsView(Context context) {
         super(context);
+    }
+
+    public RecentsView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public RecentsView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
     }
@@ -507,6 +519,34 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
         RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(t.key.id,
                 isDocument);
+    }
+
+    @Override
+    public void onTaskStackFilterTriggered() {
+        // Hide the search bar
+        if (mSearchBar != null) {
+            mSearchBar.animate()
+                    .alpha(0f)
+                    .setStartDelay(0)
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setDuration(mConfig.filteringCurrentViewsAnimDuration)
+                    .withLayer()
+                    .start();
+        }
+    }
+
+    @Override
+    public void onTaskStackUnfilterTriggered() {
+        // Show the search bar
+        if (mSearchBar != null) {
+            mSearchBar.animate()
+                    .alpha(1f)
+                    .setStartDelay(0)
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .setDuration(mConfig.filteringNewViewsAnimDuration)
+                    .withLayer()
+                    .start();
+        }
     }
 
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/

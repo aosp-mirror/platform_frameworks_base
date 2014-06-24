@@ -25,6 +25,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
@@ -85,6 +86,15 @@ class TaskBarView extends FrameLayout {
             sHighlightPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
             sHighlightPaint.setAntiAlias(true);
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (Constants.DebugFlags.App.EnableTaskBarTouchEvents) {
+            return super.onTouchEvent(event);
+        }
+        // We ignore taps on the task bar except on the filter and dismiss buttons
+        return true;
     }
 
     @Override

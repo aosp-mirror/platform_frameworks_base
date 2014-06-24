@@ -14,10 +14,14 @@
      limitations under the License.
 -->
 
-<ImageView
+<com.android.systemui.recents.views.FullscreenTransitionOverlayView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal|top"
-    android:scaleType="fitXY"
-    android:src="@drawable/recents_status_gradient" />
+    android:layout_height="match_parent"
+    android:visibility="gone">
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY" />
+</com.android.systemui.recents.views.FullscreenTransitionOverlayView>
