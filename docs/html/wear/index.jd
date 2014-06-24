@@ -227,9 +227,6 @@ page.type=about
             <div class="col-4">
               <img src="/wear/images/partners/samsung.png" alt="Samsung">
             </div>
-            <div class="col-4">
-              <img src="/wear/images/partners/arm.png" alt="ARM">
-            </div>
           </div>
         </div> <!-- end .wrap -->
       </div>
