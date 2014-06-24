@@ -59,14 +59,6 @@ in your app by adding intent filters in your app manifest.</li>
 </li>
 </ol>
 
-<p class="note"><strong>Note: </strong>
-Currently, the Google Search app indexing capability is restricted to
-English-only Android apps from developers participating in the early adopter
-program. You can sign up to be a participant by submitting the <a
-href="https://docs.google.com/a/google.com/forms/d/1itcqPAQqggJ6e4m8aejWLM8Dc5O8P6qybgGbKCNxGV0/viewform"
-class="external-link" target="_blank">App Indexing Expression of Interest</a> form.
-</p>
-
 <p>This class shows how to enable deep linking and indexing of your application
 content so that users can open this content directly from mobile search
 results.</p>
