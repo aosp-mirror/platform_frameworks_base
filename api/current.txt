@@ -24561,6 +24561,7 @@ package android.provider {
     field public static final java.lang.String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
     field public static final java.lang.String SELECTED_INPUT_METHOD_SUBTYPE = "selected_input_method_subtype";
     field public static final java.lang.String SETTINGS_CLASSNAME = "settings_classname";
+    field public static final java.lang.String SKIP_FIRST_USE_HINTS = "skip_first_use_hints";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
     field public static final java.lang.String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";
     field public static final deprecated java.lang.String TTS_DEFAULT_COUNTRY = "tts_default_country";
