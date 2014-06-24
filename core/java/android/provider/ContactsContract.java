@@ -7806,13 +7806,13 @@ public final class ContactsContract {
     }
 
     /**
-     * Helper methods to display QuickContact dialogs that allow users to pivot on
+     * Helper methods to display QuickContact dialogs that display all the information belonging to
      * a specific {@link Contacts} entry.
      */
     public static final class QuickContact {
         /**
-         * Action used to trigger person pivot dialog.
-         * @hide
+         * Action used to launch the system contacts application and bring up a QuickContact dialog
+         * for the provided {@link Contacts} entry.
          */
         public static final String ACTION_QUICK_CONTACT =
                 "com.android.contacts.action.QUICK_CONTACT";
@@ -7832,9 +7832,8 @@ public final class ContactsContract {
         public static final String EXTRA_MODE = "mode";
 
         /**
-         * Extra used to indicate a list of specific MIME-types to exclude and
-         * not display. Stored as a {@link String} array.
-         * @hide
+         * Extra used to indicate a list of specific MIME-types to exclude and not display in the
+         * QuickContacts dialog. Stored as a {@link String} array.
          */
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
 
