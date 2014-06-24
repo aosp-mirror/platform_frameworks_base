@@ -1832,8 +1832,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         final int N = mProcessCpuTracker.countStats();
                         for (int j=0; j<N; j++) {
                             ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(j);
-                            if (st.vsize <= 0 || st.uid >= Process.FIRST_APPLICATION_UID
-                                    || st.uid == Process.SYSTEM_UID) {
+                            if (st.vsize <= 0 || st.uid >= Process.FIRST_APPLICATION_UID) {
                                 // This is definitely an application process; skip it.
                                 continue;
                             }
@@ -1851,8 +1850,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (DEBUG_PSS) Slog.d(TAG, "Collected native and kernel memory in "
                                 + (SystemClock.uptimeMillis()-start) + "ms");
                         mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
-                                memInfo.getFreeSizeKb(),
-                                memInfo.getSwapTotalSizeKb()-memInfo.getSwapFreeSizeKb(),
+                                memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
                                 memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()
                                         +memInfo.getSlabSizeKb(),
                                 nativeTotalPss);
@@ -12827,8 +12825,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (nativeProcTotalPss > 0) {
                 synchronized (this) {
                     mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
-                            memInfo.getFreeSizeKb(),
-                            memInfo.getSwapTotalSizeKb()-memInfo.getSwapFreeSizeKb(),
+                            memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
                             memInfo.getBuffersSizeKb()+memInfo.getShmemSizeKb()+memInfo.getSlabSizeKb(),
                             nativeProcTotalPss);
                 }

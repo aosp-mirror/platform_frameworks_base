@@ -45,6 +45,8 @@
 #define POLICY_DEBUG 0
 #define GUARD_THREAD_PRIORITY 0
 
+#define DEBUG_PROC(x) //x
+
 using namespace android;
 
 #if GUARD_THREAD_PRIORITY
@@ -725,6 +727,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
         if (i >= endIndex) {
+            DEBUG_PROC(ALOGW("Ran off end of data @%d", i));
             res = JNI_FALSE;
             break;
         }
@@ -822,19 +825,20 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         return JNI_FALSE;
     }
     int fd = open(file8, O_RDONLY);
-    env->ReleaseStringUTFChars(file, file8);
 
     if (fd < 0) {
-        //ALOGW("Unable to open process file: %s\n", file8);
+        DEBUG_PROC(ALOGW("Unable to open process file: %s\n", file8));
+        env->ReleaseStringUTFChars(file, file8);
         return JNI_FALSE;
     }
+    env->ReleaseStringUTFChars(file, file8);
 
     char buffer[256];
     const int len = read(fd, buffer, sizeof(buffer)-1);
     close(fd);
 
     if (len < 0) {
-        //ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        DEBUG_PROC(ALOGW("Unable to open process file: %s fd=%d\n", file8, fd));
         return JNI_FALSE;
     }
     buffer[len] = 0;
