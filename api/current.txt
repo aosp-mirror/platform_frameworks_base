@@ -30466,6 +30466,12 @@ package android.transition {
     method public void captureStartValues(android.transition.TransitionValues);
   }
 
+  public class ChangeImageTransform extends android.transition.Transition {
+    ctor public ChangeImageTransform();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+  }
+
   public class ChangeTransform extends android.transition.Transition {
     ctor public ChangeTransform();
     method public void captureEndValues(android.transition.TransitionValues);
@@ -30487,12 +30493,6 @@ package android.transition {
     ctor public Fade(int);
     field public static final int IN = 1; // 0x1
     field public static final int OUT = 2; // 0x2
-  }
-
-  public class MoveImage extends android.transition.Transition {
-    ctor public MoveImage();
-    method public void captureEndValues(android.transition.TransitionValues);
-    method public void captureStartValues(android.transition.TransitionValues);
   }
 
   public final class Scene {

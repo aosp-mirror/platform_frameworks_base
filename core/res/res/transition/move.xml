@@ -14,17 +14,8 @@
      limitations under the License.
 -->
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
-    <transitionSet>
-        <changeBounds/>
-        <changeTransform/>
-        <changeClipBounds/>
-        <targets>
-            <target android:excludeClass="android.widget.ImageView"/>
-        </targets>
-    </transitionSet>
-    <moveImage>
-        <targets>
-            <target android:targetClass="android.widget.ImageView"/>
-        </targets>
-    </moveImage>
+    <changeBounds/>
+    <changeTransform/>
+    <changeClipBounds/>
+    <changeImageTransform/>
 </transitionSet>

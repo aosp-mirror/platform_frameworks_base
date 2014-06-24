@@ -1435,7 +1435,7 @@ public abstract class Window {
     /**
      * Sets the Transition that will be used for shared elements transferred into the content
      * Scene. Typical Transitions will affect size and location, such as
-     * {@link android.transition.MoveImage} and {@link android.transition.ChangeBounds}. A null
+     * {@link android.transition.ChangeBounds}. A null
      * value will cause transferred shared elements to blink to the final position.
      * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
      * @param transition The Transition to use for shared elements transferred into the content
