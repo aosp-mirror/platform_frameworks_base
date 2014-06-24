@@ -2335,7 +2335,9 @@ public class MediaPlayer implements SubtitleController.Listener
                 case MEDIA_INFO_EXTERNAL_METADATA_UPDATE:
                     msg.arg1 = MEDIA_INFO_METADATA_UPDATE;
                     // update default track selection
-                    mSubtitleController.selectDefaultTrack();
+                    if (mSubtitleController != null) {
+                        mSubtitleController.selectDefaultTrack();
+                    }
                     break;
                 }
 
