@@ -577,14 +577,6 @@
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
-    <!-- Zen mode: Summary notification content title. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_notification_title">
-        <item quantity="one">Notification hidden</item>
-        <item quantity="other">%d notifications hidden</item>
-    </plurals>
-    <!-- Zen mode: Summary notification content text. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_notification_text">Touch to show</string>
-
     <!-- Zen mode: Short title. [CHAR LIMIT=40] -->
     <string name="zen_mode_title">Do not disturb</string>
 
