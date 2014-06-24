@@ -16,6 +16,15 @@
 
 package com.android.server.location;
 
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
+
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -28,6 +37,7 @@ import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
 import android.location.Criteria;
 import android.location.FusedBatchOptions;
+import android.location.GpsMeasurementsEvent;
 import android.location.IGpsGeofenceHardware;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -46,7 +56,6 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -64,27 +73,17 @@ import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsNetInitiatedHandler;
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
-import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneConstants;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.util.ArrayList;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -314,7 +313,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final ILocationManager mILocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
-    private ArrayList<Listener> mListeners = new ArrayList<Listener>();
+    private GpsStatusListenerHelper mListenerHelper = new GpsStatusListenerHelper() {
+        @Override
+        protected boolean isSupported() {
+            return native_is_measurement_supported();
+        }
+    };
 
     // Handler for processing events
     private Handler mHandler;
@@ -348,49 +352,29 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
         public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
-            if (listener == null) {
-                throw new NullPointerException("listener is null in addGpsStatusListener");
-            }
-
-            synchronized (mListeners) {
-                IBinder binder = listener.asBinder();
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener test = mListeners.get(i);
-                    if (binder.equals(test.mListener.asBinder())) {
-                        // listener already added
-                        return;
-                    }
-                }
-
-                Listener l = new Listener(listener);
-                binder.linkToDeath(l, 0);
-                mListeners.add(l);
-            }
+            mListenerHelper.addListener(listener);
         }
 
         @Override
         public void removeGpsStatusListener(IGpsStatusListener listener) {
-            if (listener == null) {
-                throw new NullPointerException("listener is null in addGpsStatusListener");
-            }
+            mListenerHelper.removeListener(listener);
+        }
+    };
 
-            synchronized (mListeners) {
-                IBinder binder = listener.asBinder();
-                Listener l = null;
-                int size = mListeners.size();
-                for (int i = 0; i < size && l == null; i++) {
-                    Listener test = mListeners.get(i);
-                    if (binder.equals(test.mListener.asBinder())) {
-                        l = test;
-                    }
-                }
+    private final GpsMeasurementsProvider mGpsMeasurementsProvider = new GpsMeasurementsProvider() {
+        @Override
+        public boolean isSupported() {
+            return native_is_measurement_supported();
+        }
 
-                if (l != null) {
-                    mListeners.remove(l);
-                    binder.unlinkToDeath(l, 0);
-                }
-            }
+        @Override
+        protected void onFirstListenerAdded() {
+            native_start_measurement_collection();
+        }
+
+        @Override
+        protected void onLastListenerRemoved() {
+            native_stop_measurement_collection();
         }
     };
 
@@ -400,6 +384,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public IGpsGeofenceHardware getGpsGeofenceProxy() {
         return mGpsGeofenceBinder;
+    }
+
+    public GpsMeasurementsProvider getGpsMeasurementsProvider() {
+        return mGpsMeasurementsProvider;
     }
 
     private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
@@ -892,26 +880,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
-    private final class Listener implements IBinder.DeathRecipient {
-        final IGpsStatusListener mListener;
-
-        Listener(IGpsStatusListener listener) {
-            mListener = listener;
-        }
-
-        @Override
-        public void binderDied() {
-            if (DEBUG) Log.d(TAG, "GPS status listener died");
-
-            synchronized (mListeners) {
-                mListeners.remove(this);
-            }
-            if (mListener != null) {
-                mListener.asBinder().unlinkToDeath(this, 0);
-            }
-        }
-    }
-
     private void updateClientUids(WorkSource source) {
         // Update work source.
         WorkSource[] changes = mClientSource.setReturningDiffs(source);
@@ -1185,20 +1153,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
 
             // notify status listeners
-            synchronized (mListeners) {
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        listener.mListener.onFirstFix(mTimeToFirstFix);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in stopNavigating");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
-                    }
-                }
-            }
+            mListenerHelper.onFirstFix(mTimeToFirstFix);
         }
 
         if (mSingleShot) {
@@ -1232,49 +1187,31 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void reportStatus(int status) {
         if (DEBUG) Log.v(TAG, "reportStatus status: " + status);
 
-        synchronized (mListeners) {
-            boolean wasNavigating = mNavigating;
+        boolean wasNavigating = mNavigating;
+        switch (status) {
+            case GPS_STATUS_SESSION_BEGIN:
+                mNavigating = true;
+                mEngineOn = true;
+                break;
+            case GPS_STATUS_SESSION_END:
+                mNavigating = false;
+                break;
+            case GPS_STATUS_ENGINE_ON:
+                mEngineOn = true;
+                break;
+            case GPS_STATUS_ENGINE_OFF:
+                mEngineOn = false;
+                mNavigating = false;
+                break;
+        }
 
-            switch (status) {
-                case GPS_STATUS_SESSION_BEGIN:
-                    mNavigating = true;
-                    mEngineOn = true;
-                    break;
-                case GPS_STATUS_SESSION_END:
-                    mNavigating = false;
-                    break;
-                case GPS_STATUS_ENGINE_ON:
-                    mEngineOn = true;
-                    break;
-                case GPS_STATUS_ENGINE_OFF:
-                    mEngineOn = false;
-                    mNavigating = false;
-                    break;
-            }
+        if (wasNavigating != mNavigating) {
+            mListenerHelper.onStatusChanged(mNavigating);
 
-            if (wasNavigating != mNavigating) {
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        if (mNavigating) {
-                            listener.mListener.onGpsStarted();
-                        } else {
-                            listener.mListener.onGpsStopped();
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in reportStatus");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
-                    }
-                }
-
-                // send an intent to notify that the GPS has been enabled or disabled.
-                Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
-                intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            }
+            // send an intent to notify that the GPS has been enabled or disabled
+            Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
+            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
 
@@ -1282,25 +1219,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * called from native code to update SV info
      */
     private void reportSvStatus() {
-
         int svCount = native_read_sv_status(mSvs, mSnrs, mSvElevations, mSvAzimuths, mSvMasks);
-
-        synchronized (mListeners) {
-            int size = mListeners.size();
-            for (int i = 0; i < size; i++) {
-                Listener listener = mListeners.get(i);
-                try {
-                    listener.mListener.onSvStatusChanged(svCount, mSvs, mSnrs,
-                            mSvElevations, mSvAzimuths, mSvMasks[EPHEMERIS_MASK],
-                            mSvMasks[ALMANAC_MASK], mSvMasks[USED_FOR_FIX_MASK]);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "RemoteException in reportSvInfo");
-                    mListeners.remove(listener);
-                    // adjust for size of list changing
-                    size--;
-                }
-            }
-        }
+        mListenerHelper.onSvStatusChanged(
+                svCount,
+                mSvs,
+                mSnrs,
+                mSvElevations,
+                mSvAzimuths,
+                mSvMasks[EPHEMERIS_MASK],
+                mSvMasks[ALMANAC_MASK],
+                mSvMasks[USED_FOR_FIX_MASK]);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount +
@@ -1398,26 +1326,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * called from native code to report NMEA data received
      */
     private void reportNmea(long timestamp) {
-        synchronized (mListeners) {
-            int size = mListeners.size();
-            if (size > 0) {
-                // don't bother creating the String if we have no listeners
-                int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
-                String nmea = new String(mNmeaBuffer, 0, length);
+        int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
+        String nmea = new String(mNmeaBuffer, 0 /* offset */, length);
+        mListenerHelper.onNmeaReceived(timestamp, nmea);
+    }
 
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        listener.mListener.onNmeaReceived(timestamp, nmea);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in reportNmea");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
-                    }
-                }
-            }
-        }
+    /**
+     * called from native code - Gps Data callback
+     */
+    private void reportMeasurementData(GpsMeasurementsEvent event) {
+        mGpsMeasurementsProvider.onMeasurementsAvailable(event);
     }
 
     /**
@@ -1845,7 +1763,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "No APN found to select.");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error encountered on selectiong the APN.", e);
+            Log.e(TAG, "Error encountered on selecting the APN.", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -2008,4 +1926,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static native boolean native_remove_geofence(int geofenceId);
     private static native boolean native_resume_geofence(int geofenceId, int transitions);
     private static native boolean native_pause_geofence(int geofenceId);
+
+    // Gps Hal measurements support.
+    private static native boolean native_is_measurement_supported();
+    private static native boolean native_start_measurement_collection();
+    private static native boolean native_stop_measurement_collection();
 }

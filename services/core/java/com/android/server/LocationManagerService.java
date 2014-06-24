@@ -16,6 +16,27 @@
 
 package com.android.server;
 
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+import com.android.internal.os.BackgroundThread;
+import com.android.server.location.FlpHardwareProvider;
+import com.android.server.location.FusedProxy;
+import com.android.server.location.GeocoderProxy;
+import com.android.server.location.GeofenceManager;
+import com.android.server.location.GeofenceProxy;
+import com.android.server.location.GpsLocationProvider;
+import com.android.server.location.GpsMeasurementsProvider;
+import com.android.server.location.LocationBlacklist;
+import com.android.server.location.LocationFudger;
+import com.android.server.location.LocationProviderInterface;
+import com.android.server.location.LocationProviderProxy;
+import com.android.server.location.LocationRequestStatistics;
+import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
+import com.android.server.location.LocationRequestStatistics.PackageStatistics;
+import com.android.server.location.MockProvider;
+import com.android.server.location.PassiveProvider;
+
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -36,6 +57,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IGpsMeasurementsListener;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
@@ -61,26 +83,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
-
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.location.ProviderProperties;
-import com.android.internal.location.ProviderRequest;
-import com.android.internal.os.BackgroundThread;
-import com.android.server.location.FlpHardwareProvider;
-import com.android.server.location.FusedProxy;
-import com.android.server.location.GeocoderProxy;
-import com.android.server.location.GeofenceProxy;
-import com.android.server.location.GeofenceManager;
-import com.android.server.location.GpsLocationProvider;
-import com.android.server.location.LocationBlacklist;
-import com.android.server.location.LocationFudger;
-import com.android.server.location.LocationProviderInterface;
-import com.android.server.location.LocationProviderProxy;
-import com.android.server.location.LocationRequestStatistics;
-import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
-import com.android.server.location.LocationRequestStatistics.PackageStatistics;
-import com.android.server.location.MockProvider;
-import com.android.server.location.PassiveProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -154,6 +156,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
+    private GpsMeasurementsProvider mGpsMeasurementsProvider;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
@@ -403,6 +406,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             addProviderLocked(gpsProvider);
             mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
         }
+        mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
 
         /*
         Load package name(s) containing location provider support.
@@ -1801,6 +1805,36 @@ public class LocationManagerService extends ILocationManager.Stub {
                 Slog.e(TAG, "mGpsStatusProvider.removeGpsStatusListener failed", e);
             }
         }
+    }
+
+    @Override
+    public boolean addGpsMeasurementsListener(
+            IGpsMeasurementsListener listener,
+            String packageName) {
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForProviderUse(
+                allowedResolutionLevel,
+                LocationManager.GPS_PROVIDER);
+
+        int uid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        boolean hasLocationAccess;
+        try {
+            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        if (!hasLocationAccess) {
+            return false;
+        }
+
+        return mGpsMeasurementsProvider.addListener(listener);
+    }
+
+    @Override
+    public boolean removeGpsMeasurementsListener(IGpsMeasurementsListener listener) {
+        return mGpsMeasurementsProvider.removeListener(listener);
     }
 
     @Override
