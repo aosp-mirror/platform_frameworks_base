@@ -42,12 +42,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mArcStatusEnabled = false;
 
-    @GuardedBy("mLock")
     // Whether SystemAudioMode is "On" or not.
+    @GuardedBy("mLock")
     private boolean mSystemAudioMode;
+
+
+    // Copy of mDeviceInfos to guarantee thread-safety.
+    @GuardedBy("mLock")
+    private List<HdmiCecDeviceInfo> mSafeAllDeviceInfos = Collections.emptyList();
+    // All external cec device which excludes local devices.
+    @GuardedBy("mLock")
+    private List<HdmiCecDeviceInfo> mSafeExternalDeviceInfos = Collections.emptyList();
 
     // Map-like container of all cec devices including local ones.
     // A logical address of device is used as key of container.
+    // This is not thread-safe. For external purpose use mSafeDeviceInfos.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos = new SparseArray<>();
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
@@ -124,7 +133,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     /**
      * Sends key to a target CEC device.
      *
-     * @param keyCode key code to send. Defined in {@link KeyEvent}.
+     * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
      * @param isPressed true if this is keypress event
      */
     void sendKeyEvent(int keyCode, boolean isPressed) {
@@ -251,6 +260,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void clearDeviceInfoList() {
         assertRunOnServiceThread();
         mDeviceInfos.clear();
+        updateSafeDeviceInfoList();
     }
 
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
@@ -393,6 +403,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             removeDeviceInfo(deviceInfo.getLogicalAddress());
         }
         mDeviceInfos.append(deviceInfo.getLogicalAddress(), deviceInfo);
+        updateSafeDeviceInfoList();
         return oldDeviceInfo;
     }
 
@@ -411,6 +422,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (deviceInfo != null) {
             mDeviceInfos.remove(logicalAddress);
         }
+        updateSafeDeviceInfoList();
         return deviceInfo;
     }
 
@@ -418,13 +430,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Return a list of all {@link HdmiCecDeviceInfo}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     * This is not thread-safe. For thread safety, call {@link #getSafeDeviceInfoList(boolean)}.
      */
     List<HdmiCecDeviceInfo> getDeviceInfoList(boolean includelLocalDevice) {
         assertRunOnServiceThread();
         if (includelLocalDevice) {
-                return HdmiUtils.sparseArrayToList(mDeviceInfos);
+            return HdmiUtils.sparseArrayToList(mDeviceInfos);
         } else {
-
             ArrayList<HdmiCecDeviceInfo> infoList = new ArrayList<>();
             for (int i = 0; i < mDeviceInfos.size(); ++i) {
                 HdmiCecDeviceInfo info = mDeviceInfos.valueAt(i);
@@ -433,6 +445,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 }
             }
             return infoList;
+        }
+    }
+
+    /**
+     * Return a list of  {@link HdmiCecDeviceInfo}.
+     *
+     * @param includeLocalDevice whether to include local device in result.
+     */
+    List<HdmiCecDeviceInfo> getSafeDeviceInfoList(boolean includeLocalDevice) {
+        synchronized (mLock) {
+            if (includeLocalDevice) {
+                return mSafeAllDeviceInfos;
+            } else {
+                return mSafeExternalDeviceInfos;
+            }
+        }
+    }
+
+    private void updateSafeDeviceInfoList() {
+        assertRunOnServiceThread();
+        List<HdmiCecDeviceInfo> copiedDevices = HdmiUtils.sparseArrayToList(mDeviceInfos);
+        List<HdmiCecDeviceInfo> externalDeviceInfos = getDeviceInfoList(false);
+        synchronized (mLock) {
+            mSafeAllDeviceInfos = copiedDevices;
+            mSafeExternalDeviceInfos = externalDeviceInfos;
         }
     }
 
@@ -450,6 +487,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Return a {@link HdmiCecDeviceInfo} corresponding to the given {@code logicalAddress}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     * This is not thread-safe. For thread safety, call {@link #getSafeDeviceInfo(int)}.
      *
      * @param logicalAddress logical address to be retrieved
      * @return {@link HdmiCecDeviceInfo} matched with the given {@code logicalAddress}.
@@ -463,6 +501,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     HdmiCecDeviceInfo getAvrDeviceInfo() {
         assertRunOnServiceThread();
         return getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+    }
+
+    /**
+     * Thread safe version of {@link #getDeviceInfo(int)}.
+     *
+     * @param logicalAddress logical address to be retrieved
+     * @return {@link HdmiCecDeviceInfo} matched with the given {@code logicalAddress}.
+     *         Returns null if no logical address matched
+     */
+    HdmiCecDeviceInfo getSafeDeviceInfo(int logicalAddress) {
+        synchronized (mLock) {
+            return mSafeAllDeviceInfos.get(logicalAddress);
+        }
+    }
+
+    HdmiCecDeviceInfo getSafeAvrDeviceInfo() {
+        return getSafeDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
     }
 
     /**
