@@ -1443,9 +1443,6 @@ final class ActivityStack {
                         mStackSupervisor.resumeHomeStackTask(returnTaskType, prev);
             }
         }
-        if (prev != null && prev.isRecentsActivity()) {
-            nextTask.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
-        }
 
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.

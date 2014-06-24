@@ -1981,6 +1981,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
                 intent, r.getUriPermissionsLocked(), r.userId);
 
+        if (sourceRecord != null && sourceRecord.isRecentsActivity()) {
+            r.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
+        }
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.userId, r.task.taskId);
         }
