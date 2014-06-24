@@ -5405,23 +5405,33 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 return (mError=err);
             }
 
-            //printf("Adding new package id %d at index %d\n", id, idx);
-            err = mPackageGroups.add(group);
+            err = group->packages.add(package);
             if (err < NO_ERROR) {
+                delete group;
+                delete package;
                 return (mError=err);
             }
             group->basePackage = package;
+
+            //printf("Adding new package id %d at index %d\n", id, idx);
+            err = mPackageGroups.add(group);
+            if (err < NO_ERROR) {
+                delete group;
+                return (mError=err);
+            }
 
             mPackageMap[id] = (uint8_t)idx;
         } else {
             group = mPackageGroups.itemAt(idx-1);
             if (group == NULL) {
+                delete package;
                 return (mError=UNKNOWN_ERROR);
             }
-        }
-        err = group->packages.add(package);
-        if (err < NO_ERROR) {
-            return (mError=err);
+            err = group->packages.add(package);
+            if (err < NO_ERROR) {
+                delete package;
+                return (mError=err);
+            }
         }
     } else {
         LOG_ALWAYS_FATAL("Package id out of range");
