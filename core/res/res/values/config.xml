@@ -116,8 +116,10 @@
          specified for -large and -xlarge configurations. -->
     <dimen name="config_prefDialogWidth">320dp</dimen>
 
-    <!-- Enables or disables fading edges when marquee is enabled in TextView. -->
-    <bool name="config_ui_enableFadingMarquee">true</bool>
+    <!-- Enables or disables fading edges when marquee is enabled in TextView.
+         Off by default, since the framebuffer readback used to implement the
+         fading edges is prohibitively expensive on most GPUs. -->
+    <bool name="config_ui_enableFadingMarquee">false</bool>
 
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
