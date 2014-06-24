@@ -98,6 +98,11 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     private PorterDuffColorFilter_Delegate(int srcColor, int mode) {
         mSrcColor = srcColor;
+        // Temporarily change multiply to SRC_IN to render menus.
+        // TODO: support Mode.MULTIPLY
+        if (mode == Mode.MULTIPLY.nativeInt) {
+            mode = Mode.SRC_IN.nativeInt;
+        }
         mMode = getPorterDuffMode(mode);
     }
 
