@@ -7522,6 +7522,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                     return;
                 }
+                final ActivityRecord prev = mStackSupervisor.topRunningActivityLocked();
+                if (prev != null && prev.isRecentsActivity()) {
+                    task.setTaskToReturnTo(ActivityRecord.RECENTS_ACTIVITY_TYPE);
+                }
                 mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options);
             } finally {
                 Binder.restoreCallingIdentity(origId);
