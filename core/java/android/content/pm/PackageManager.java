@@ -198,6 +198,12 @@ public abstract class PackageManager {
     public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
 
     /**
+     * Resolution and querying flag: do not resolve intents cross-profile.
+     * @hide
+     */
+    public static final int NO_CROSS_PROFILE = 0x00020000;
+
+    /**
      * Flag for {@link addCrossProfileIntentFilter}: if the cross-profile intent has been set by the
      * profile owner.
      * @hide
@@ -2310,6 +2316,7 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
+     * @see #NO_CROSS_PROFILE
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
