@@ -7,7 +7,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 @jd:body
 
 <!-- Top full-bleed carousel -->
-<div class="home-new-carousel-1">
+<div class="home-new-carousel-1" style="margin-top:40px">
   <div class="fullscreen-carousel-content">
     <div class="vcenter">
       <div class="wrap clearfix">
@@ -42,7 +42,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   </div> <!-- end .fullscreen-carousel-content -->
 </div> <!-- end .fullscreen-carousel -->
 
-<div class="actions-bar">
+<div class="actions-bar" style="margin-top:30px">
   <div class="wrap">
     <div class="actions">
       <div><a href="{@docRoot}sdk/index.html">Get the SDK</a></div>
@@ -68,13 +68,33 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
       <div class="landing-body" style="margin-top: 80px;">
         <div class="landing-breakout cols">
           <div class="col-3-wide">
-              <a href="{@docRoot}wear/index.html"><img src="{@docRoot}images/home/wear.png"></a>
+              <img src="{@docRoot}images/home/wear.png">
+              <p class="landing-small" style="margin-top:30px">
+                Provide information on-the-go for your users, whenever they need it.
+            </p>
+            <p class="landing-small">
+              <a href="{@docRoot}wear/index.html">Learn about Android Wear</a>
+            </p>
           </div>
           <div class="col-3-wide">            
-              <a href="{@docRoot}tv/index.html"><img src="{@docRoot}images/home/tv.png"></a>
+             <img src="{@docRoot}images/home/tv.png">
+              <p class="landing-small" style="margin-top:30px">
+                Build your apps for the big screen and bring your content to life.
+              </p>
+            <p class="landing-small">
+              <a href="{@docRoot}tv/index.html">Learn about Android TV</a>
+
+            </p>
           </div>
           <div class="col-3-wide">            
-              <a href="{@docRoot}auto/index.html"><img src="{@docRoot}images/home/auto.png"></a>
+              <img src="{@docRoot}images/home/auto.png">
+              <p class="landing-small" style="margin-top:30px">
+                Extend your music apps to automobile
+                entertainment systems.
+             </p>
+            <p class="landing-small">
+              <a href="{@docRoot}auto/index.html">Learn about Android Auto</a>
+            </p>
           </div>
         </div>
       </div>
