@@ -16,12 +16,14 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
@@ -561,6 +563,16 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             padding.right = Math.max(padding.right, mPaddingR[i]);
             padding.bottom = Math.max(padding.bottom, mPaddingB[i]);
         }
+    }
+
+    /**
+     * Builds an Outline from the first child Drawable, if present.
+     */
+    @Override
+    public boolean getOutline(@NonNull Outline outline) {
+        if (mLayerState.mNum < 1) return false;
+        final Drawable firstChild = mLayerState.mChildren[0].mDrawable;
+        return firstChild.getOutline(outline);
     }
 
     @Override
