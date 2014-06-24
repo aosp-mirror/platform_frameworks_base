@@ -11,15 +11,6 @@ page.type=about
 #jd-content>.content-footer.wrap {
   display:none;
 }
-</style>
-
-<style>
-#footer {
-  display: none;
-}
-.content-footer {
-  display: none;
-}
 #hero-height {
   height:calc(100% - 100px);
 }
@@ -452,7 +443,7 @@ page.type=about
 
           <div class="landing-body landing-align-center">
               <div class="landing-subhead" style="margin-top:80px">
-                Android Auto is also coming soon to aftermarket systems from these manufacturers:
+                Android Auto is also coming soon to aftermarket systems from these manufacturers
               </div>
           </div>
           <div class="cols">
@@ -546,9 +537,8 @@ page.type=about
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
     </div> <!-- end .landing-rest-of-page -->
-
-
-    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
+    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement"
+    style="border-top: none;">
       <div class="layout-content-col col-16" style="padding-top:4px">
         <style>#___plusone_0 {float:right !important;}</style>
         <div class="g-plusone" data-size="medium"></div>
@@ -563,9 +553,7 @@ page.type=about
         License</a>.
       </div>
     </div>
-
-
-  </div> <!-- end landing-body-content -->
+  </div> <!-- end .landing-hero-container -->
 
   <script>
   $("a.landing-down-arrow").on("click", function(e) {
@@ -575,3 +563,5 @@ page.type=about
     e.preventDefault();
   });
   </script>
+
+</div> <!-- end landing-body-content -->
