@@ -20,8 +20,26 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /* Common code */
 public class Utilities {
+
+    // Reflection methods for altering shadows
+    private static Method sPropertyMethod;
+    static {
+        try {
+            Class<?> c = Class.forName("android.view.GLES20Canvas");
+            sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
+            if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Calculates a consistent animation duration (ms) for all animations depending on the movement
      * of the object being animated.
@@ -65,5 +83,11 @@ public class Utilities {
                                                            Drawable darkRes) {
         int greyscale = colorToGreyscale(color);
         return (greyscale < 128) ? lightRes : darkRes;
+    }
+
+    /** Sets some private shadow properties. */
+    public static void setShadowProperty(String property, String value)
+            throws IllegalAccessException, InvocationTargetException {
+        sPropertyMethod.invoke(null, property, value);
     }
 }

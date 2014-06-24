@@ -28,7 +28,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +38,7 @@ import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.FullScreenTransitionView;
 import com.android.systemui.recents.views.RecentsView;
+import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
 
 import java.lang.reflect.InvocationTargetException;
@@ -49,6 +49,26 @@ import java.util.ArrayList;
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
         FullScreenTransitionView.FullScreenTransitionViewCallbacks {
+
+    FrameLayout mContainerView;
+    RecentsView mRecentsView;
+    SystemBarScrimViews mScrimViews;
+    View mEmptyView;
+    FullScreenTransitionView mFullScreenshotView;
+
+    RecentsConfiguration mConfig;
+
+    RecentsAppWidgetHost mAppWidgetHost;
+    AppWidgetProviderInfo mSearchAppWidgetInfo;
+    AppWidgetHostView mSearchAppWidgetHostView;
+
+    boolean mVisible;
+    boolean mTaskLaunched;
+
+    // Runnables to finish the Recents activity
+    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
+    FinishRecentsRunnable mFinishWithoutAnimationRunnable = new FinishRecentsRunnable(false);
+    FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     /**
      * A Runnable to finish Recents either with/without a transition, and either by calling finish()
@@ -87,40 +107,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                             R.anim.recents_to_launcher_exit);
                 }
             }
-        }
-    }
-
-    FrameLayout mContainerView;
-    RecentsView mRecentsView;
-    View mEmptyView;
-    View mStatusBarScrimView;
-    View mNavBarScrimView;
-    FullScreenTransitionView mFullScreenshotView;
-
-    RecentsConfiguration mConfig;
-
-    RecentsAppWidgetHost mAppWidgetHost;
-    AppWidgetProviderInfo mSearchAppWidgetInfo;
-    AppWidgetHostView mSearchAppWidgetHostView;
-
-    boolean mVisible;
-    boolean mTaskLaunched;
-
-    // Runnables to finish the Recents activity
-    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
-    FinishRecentsRunnable mFinishWithoutAnimationRunnable = new FinishRecentsRunnable(false);
-    FinishRecentsRunnable mFinishLaunchHomeRunnable;
-
-    private static Method sPropertyMethod;
-    static {
-        try {
-            Class<?> c = Class.forName("android.view.GLES20Canvas");
-            sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
-            if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
         }
     }
 
@@ -192,10 +178,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
 
         // Show the scrim if we animate into Recents without window transitions
-        mNavBarScrimView.setVisibility(mConfig.hasNavBarScrim() &&
-                !mConfig.shouldAnimateNavBarScrim() ? View.VISIBLE : View.INVISIBLE);
-        mStatusBarScrimView.setVisibility(mConfig.hasStatusBarScrim() &&
-                !mConfig.shouldAnimateStatusBarScrim() ? View.VISIBLE : View.INVISIBLE);
+        mScrimViews.prepareEnterRecentsAnimation();
 
         // Add the default no-recents layout
         if (mConfig.launchedWithNoRecentTasks) {
@@ -348,14 +331,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Create the empty view
         LayoutInflater inflater = LayoutInflater.from(this);
         mEmptyView = inflater.inflate(R.layout.recents_empty, mContainerView, false);
-        mStatusBarScrimView = inflater.inflate(R.layout.recents_status_bar_scrim, mContainerView, false);
-        mStatusBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
-        mNavBarScrimView = inflater.inflate(R.layout.recents_nav_bar_scrim, mContainerView, false);
-        mNavBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+        mScrimViews = new SystemBarScrimViews(mConfig);
+        mScrimViews.inflate(inflater, mContainerView);
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
             mFullScreenshotView = new FullScreenTransitionView(this, this);
             mFullScreenshotView.setLayoutParams(new FrameLayout.LayoutParams(
@@ -364,13 +341,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Add the views to the layout
         mContainerView = new FrameLayout(this);
-        mContainerView.addView(mStatusBarScrimView);
+        mContainerView.addView(mScrimViews.getStatusBarScrimView());
         mContainerView.addView(mRecentsView);
         mContainerView.addView(mEmptyView);
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
             mContainerView.addView(mFullScreenshotView);
         }
-        mContainerView.addView(mNavBarScrimView);
+        mContainerView.addView(mScrimViews.getNavBarScrimView());
         setContentView(mContainerView);
 
         // Update the recent tasks
@@ -391,10 +368,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             onConfigurationChange();
         }
 
-        // XXX: Update the shadows
+        // Private API calls to make the shadows look better
         try {
-            sPropertyMethod.invoke(null, "ambientShadowStrength", String.valueOf(35f));
-            sPropertyMethod.invoke(null, "ambientRatio", String.valueOf(0.5f));
+            Utilities.setShadowProperty("ambientShadowStrength", String.valueOf(35f));
+            Utilities.setShadowProperty("ambientRatio", String.valueOf(0.5f));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -589,37 +566,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     public void onEnterAnimationTriggered() {
-        // Fade in the scrims
-        if (mConfig.hasStatusBarScrim() && mConfig.shouldAnimateStatusBarScrim()) {
-            mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
-            mStatusBarScrimView.animate()
-                    .translationY(0)
-                    .setStartDelay(mConfig.taskBarEnterAnimDelay)
-                    .setDuration(mConfig.navBarScrimEnterDuration)
-                    .setInterpolator(mConfig.quintOutInterpolator)
-                    .withStartAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mStatusBarScrimView.setVisibility(View.VISIBLE);
-                        }
-                    })
-                    .start();
-        }
-        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
-            mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
-            mNavBarScrimView.animate()
-                    .translationY(0)
-                    .setStartDelay(mConfig.taskBarEnterAnimDelay)
-                    .setDuration(mConfig.navBarScrimEnterDuration)
-                    .setInterpolator(mConfig.quintOutInterpolator)
-                    .withStartAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mNavBarScrimView.setVisibility(View.VISIBLE);
-                        }
-                    })
-                    .start();
-        }
+        // Animate the scrims in
+        mScrimViews.startEnterRecentsAnimation();
     }
 
     /**** FullScreenTransitionView.FullScreenTransitionViewCallbacks Implementation ****/
@@ -642,16 +590,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
 
     @Override
-    public void onExitAnimationTriggered() {
-        // Fade out the scrim
-        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
-            mNavBarScrimView.animate()
-                    .translationY(mNavBarScrimView.getMeasuredHeight())
-                    .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .start();
-        }
+    public void onExitToHomeAnimationTriggered() {
+        // Animate the scrims out
+        mScrimViews.startExitRecentsAnimation();
     }
 
     @Override

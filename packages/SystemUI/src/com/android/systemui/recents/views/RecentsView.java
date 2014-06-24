@@ -55,7 +55,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskLaunching();
-        public void onExitAnimationTriggered();
+        public void onExitToHomeAnimationTriggered();
     }
 
     RecentsConfiguration mConfig;
@@ -194,7 +194,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         ctx.postAnimationTrigger.decrement();
 
         // Notify of the exit animation
-        mCb.onExitAnimationTriggered();
+        mCb.onExitToHomeAnimationTriggered();
     }
 
     /** Adds the search bar */
