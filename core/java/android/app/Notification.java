@@ -91,7 +91,10 @@ public class Notification implements Parcelable
      * Use the default notification sound. This will ignore any given
      * {@link #sound}.
      *
-
+     * <p>
+     * A notification that is noisy is more likely to be presented as a heads-up notification.
+     * </p>
+     *
      * @see #defaults
      */
 
@@ -101,6 +104,10 @@ public class Notification implements Parcelable
      * Use the default notification vibrate. This will ignore any given
      * {@link #vibrate}. Using phone vibration requires the
      * {@link android.Manifest.permission#VIBRATE VIBRATE} permission.
+     *
+     * <p>
+     * A notification that vibrates is more likely to be presented as a heads-up notification.
+     * </p>
      *
      * @see #defaults
      */
@@ -195,6 +202,11 @@ public class Notification implements Parcelable
     /**
      * An intent to launch instead of posting the notification to the status bar.
      *
+     * <p>
+     * The system UI may choose to display a heads-up notification, instead of
+     * launching this intent, while the user is using the device.
+     * </p>
+     *
      * @see Notification.Builder#setFullScreenIntent
      */
     public PendingIntent fullScreenIntent;
@@ -228,9 +240,10 @@ public class Notification implements Parcelable
 
     /**
      * @hide
-     * A medium-format version of {@link #contentView}, giving the Notification an
-     * opportunity to add action buttons to contentView. The system UI may
-     * choose to show this as a popup notification at its discretion.
+     * A medium-format version of {@link #contentView}, providing the Notification an
+     * opportunity to add action buttons to contentView. At its discretion, the system UI may
+     * choose to show this as a heads-up notification, which will pop up so the user can see
+     * it without leaving their current activity.
      */
     public RemoteViews headsUpContentView;
 
@@ -241,6 +254,10 @@ public class Notification implements Parcelable
 
     /**
      * The sound to play.
+     *
+     * <p>
+     * A notification that is noisy is more likely to be presented as a heads-up notification.
+     * </p>
      *
      * <p>
      * To play the default notification sound, see {@link #defaults}.
@@ -267,6 +284,10 @@ public class Notification implements Parcelable
      *
      * <p>
      * To vibrate the default pattern, see {@link #defaults}.
+     * </p>
+     *
+     * <p>
+     * A notification that vibrates is more likely to be presented as a heads-up notification.
      * </p>
      *
      * @see android.os.Vibrator#vibrate(long[],int)
@@ -443,6 +464,12 @@ public class Notification implements Parcelable
      * situations, while the user might be interrupted for a higher-priority notification. The
      * system will make a determination about how to interpret this priority when presenting
      * the notification.
+     *
+     * <p>
+     * A notification that is at least {@link #PRIORITY_HIGH} is more likely to be presented
+     * as a heads-up notification.
+     * </p>
+     *
      */
     @Priority
     public int priority;
@@ -724,7 +751,8 @@ public class Notification implements Parcelable
     public static final String EXTRA_SCORE_MODIFIED = "android.scoreModified";
 
     /**
-     * Not used.
+     * {@link #extras} key: used to provide hints about the appropriateness of
+     * displaying this notification as a heads-up notification.
      * @hide
      */
     public static final String EXTRA_AS_HEADS_UP = "headsup";
@@ -755,19 +783,27 @@ public class Notification implements Parcelable
     public static final String EXTRA_MEDIA_SESSION = "android.mediaSession";
 
     /**
-     * Value for {@link #EXTRA_AS_HEADS_UP}.
+     * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
+     * displayed in the heads up space.
+     *
+     * <p>
+     * If this notification has a {@link #fullScreenIntent}, then it will always launch the
+     * full-screen intent when posted.
+     * </p>
      * @hide
      */
     public static final int HEADS_UP_NEVER = 0;
 
     /**
-     * Default value for {@link #EXTRA_AS_HEADS_UP}.
+     * Default value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification may be
+     * displayed as a heads up.
      * @hide
      */
     public static final int HEADS_UP_ALLOWED = 1;
 
     /**
-     * Value for {@link #EXTRA_AS_HEADS_UP}.
+     * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification is a
+     * good candidate for display as a heads up.
      * @hide
      */
     public static final int HEADS_UP_REQUESTED = 2;
@@ -1903,6 +1939,11 @@ public class Notification implements Parcelable
          * to turn it off and use a normal notification, as this can be extremely
          * disruptive.
          *
+         * <p>
+         * The system UI may choose to display a heads-up notification, instead of
+         * launching this intent, while the user is using the device.
+         * </p>
+         *
          * @param intent The pending intent to launch.
          * @param highPriority Passing true will cause this notification to be sent
          *          even if other notifications are suppressed.
@@ -1958,6 +1999,10 @@ public class Notification implements Parcelable
          *
          * It will be played on the {@link #STREAM_DEFAULT default stream} for notifications.
          *
+         * <p>
+         * A notification that is noisy is more likely to be presented as a heads-up notification.
+         * </p>
+         *
          * @see Notification#sound
          */
         public Builder setSound(Uri sound) {
@@ -1971,6 +2016,10 @@ public class Notification implements Parcelable
          *
          * See {@link android.media.AudioManager} for the <code>STREAM_</code> constants.
          *
+         * <p>
+         * A notification that is noisy is more likely to be presented as a heads-up notification.
+         * </p>
+         *
          * @see Notification#sound
          */
         public Builder setSound(Uri sound, int streamType) {
@@ -1982,11 +2031,13 @@ public class Notification implements Parcelable
         /**
          * Set the vibration pattern to use.
          *
-
          * See {@link android.os.Vibrator#vibrate(long[], int)} for a discussion of the
          * <code>pattern</code> parameter.
          *
-
+         * <p>
+         * A notification that vibrates is more likely to be presented as a heads-up notification.
+         * </p>
+         *
          * @see Notification#vibrate
          */
         public Builder setVibrate(long[] pattern) {
