@@ -69,13 +69,13 @@ page.metaDescription=Android Auto
     </ol>
   </li>
   <li><a href="#architecture">Architecture</a></li>
-  <li><a href="#uitemplates">UI Templates</a>
+  <li><a href="#ui">User Interface</a>
     <ol>
       <li><a href="#launchapp">Launch App</a></li>
       <li><a href="#useractions">User Actions</a></li>
       <li><a href="#drawertransitions">Drawer Transitions</a></li>
       <li><a href="#daynighttransitions">Day and Night Transitions</a></li>
-      <li><a href="#customizetemplates">Customizing Templates</a></li>
+      <li><a href="#customizeui">Customizing the UI</a></li>
     </ol>
   </li>
   <li><a href="#devprocess">Development Process</a></li>
@@ -94,13 +94,13 @@ through voice actions and the vehicle's input controls.</p>
 
 <p>The Android Auto SDK lets you easily extend your existing apps to work in the car, without
 having to worry about vehicle-specific hardware differences. You can use many Android APIs and
-services you are already familiar with. Android Auto provides easy to use UI templates and
+services you are already familiar with. Android Auto provides an easy to use UI model and
 supports notifications and voice actions:</p>
 
 <dl>
-<dt style="margin-bottom:10px"><strong>UI Templates</strong></dt>
+<dt style="margin-bottom:10px"><strong>Media UI</strong></dt>
 <dd style="margin-bottom:20px">
-Android Auto defines interaction models and UI templates for apps. The
+Android Auto defines interaction models and car-specific UI patterns for apps. The
 first version of Android Auto supports media apps, such as music, podcast, live radio, and
 audio news apps.
 </dd>
@@ -184,7 +184,7 @@ with the Android Auto app, your media app implements a set of media interfaces.<
 <p><strong>Media App</strong> - Runs a media service that exposes content through browsing and
 playback APIs. The service provides content to the Android Auto app. This is your Android app.</p>
 
-<p><strong>Android Auto App</strong> - Creates a templated UI and handles user interactions.
+<p><strong>Android Auto App</strong> - Creates the UI and handles user interactions.
 This app uses a media client to request content from the media service running in the media
 app. The client requests data from the media service and monitors service states.</p>
 
@@ -203,21 +203,20 @@ playback state through callbacks.</li>
 </ul>
 
 
-<h2 id="uitemplates">UI Templates</h2>
+<h2 id="ui">User Interface</h2>
 
-<p>The Android Auto app uses a templated UI to display content and user interaction
-opportunities. Android Auto provides you with a set of standard UI templates that follow
-international guidelines for minimizing driving distraction. You do not have to test your
-app's UI for for driver distraction, which is a lengthy and expensive process involving
-multiple legislations across the globe and different standards for each vehicle OEM.</p>
+<p>The Android Auto app uses a car-specific UI model to display content and user interaction
+opportunities. Android Auto provides you with a standard UI designed to minimize driver
+distraction. You do not have to test a custom UI for for driver distraction, which is a
+lengthy and expensive process involving multiple legislations across the globe and different
+standards for each vehicle OEM.</p>
 
-<p>The UI templates define interfaces for browsing, searching, and listening to content from
-media apps. Although you cannot change the standard template format or layout, you can customize
-the template colors, action icons, background images, and more.</p>
+<p>The UI defines interfaces for browsing, searching, and listening to content from
+media apps. You can customize the UI colors, action icons, background images, and more.</p>
 
-<h3 id="launchapp">Launch App Template</h3>
+<h3 id="launchapp">Launcher</h3>
 
-<p>The Launcher template shows all the compatible media apps installed on the user’s
+<p>The launcher shows all the compatible media apps installed on the user’s
 Android device and lets users select one of them from an scrollable list:</p>
 
 <div class="auto-img-container-single">
@@ -226,15 +225,15 @@ Android device and lets users select one of them from an scrollable list:</p>
     <img class="auto-img-shot-cols" src="/auto/images/assets/do_01_switcher.png" />
   </div>
   <p class="img-caption" style="margin-top:0px">
-    <strong>Figure 2.</strong> The Launcher template.
+    <strong>Figure 2.</strong> The launcher.
   </p>
 </div>
 
-<h3>Primary App Template</h3>
+<h3>Primary App UI</h3>
 
-<p>After the user selects a media app, the display shows the primary app template.
-You can customize this template to show your own icons, app name, and
-background images. Figure 3 shows an example of a customized template:</p>
+<p>After the user selects a media app, the display shows the primary app UI.
+You can customize this UI to show your own icons, app name, and
+background images. Figure 3 shows an example of a customized UI:</p>
 
 <div class="cols">
 <div class="auto-col-2">
@@ -251,14 +250,14 @@ background images. Figure 3 shows an example of a customized template:</p>
 </div>
 </div>
 <p class="img-caption">
-  <strong>Figure 3.</strong> A customized template.
+  <strong>Figure 3.</strong> A customized UI.
 </p>
 
 
 
 <h3 id="useractions">User Actions</h3>
 
-<p>The primary app template supports four main actions on the action bar, four auxiliary actions
+<p>The primary app UI supports four main actions on the action bar, four auxiliary actions
 on the overflow bar, and the <em>Return</em> action. You can use standard controls and customize
 the actions and icons, as shown in Figure 4.</p>
 
@@ -274,8 +273,7 @@ the actions and icons, as shown in Figure 4.</p>
 
 <h3 id="drawertransitions">Drawer Transitions</h3>
 
-<p>For browse actions, the display shows the drawer transition and template, as shown in
-Figure 5.</p>
+<p>For browse actions, the display shows the drawer transition as shown in Figure 5.</p>
 
 <div class="cols">
 <div class="auto-col-2">
@@ -292,18 +290,18 @@ Figure 5.</p>
 </div>
 </div>
 <p class="img-caption">
-  <strong>Figure 5.</strong> Generic and customized drawer templates.
+  <strong>Figure 5.</strong> Generic and customized drawers.
 </p>
 
-<p>After the transition from the primary app template to the drawer template, the drawer
-appears on the center. The customized drawer template shows the media containers and
+<p>After the transition from the primary app UI to the drawer UI, the drawer
+appears on the center. The customized drawer UI shows the media containers and
 media files provided by the media service in your app. You can also customize drawers
 with icons for list items.</p>
 
 
 <h3 id="daynighttransitions">Day and Night Transitions</h3>
 
-<p>All the templates support different color schemes for day and night.
+<p>All the UIs support different color schemes for day and night.
 The platform provides the state (day or night) and makes adjustments automatically.</p>
 
 <div class="cols">
@@ -324,10 +322,10 @@ The platform provides the state (day or night) and makes adjustments automatical
   <strong>Figure 6.</strong> Day and night modes.
 </p>
 
-<h3 id="customizetemplates">Customizing Templates</h3>
+<h3 id="customizeui">Customizing UIs</h3>
 
-<p>To customize the templates, provide the following app-specific resources and actions
-to the Android Auto media client.</p>
+<p>To customize the UI, you provide the following app-specific resources and actions
+to the Android Auto media client:</p>
 
 <ul>
 <li><strong>Resources</strong> - App logo, app name, theme colors, and background images.</li>
@@ -335,7 +333,7 @@ to the Android Auto media client.</p>
 <em>Favorite</em>, and <em>Bookmark</em>. These actions are app-specific.</li>
 </ul>
 
-<p>If provided, the media client automatically uses them in the templated UI.</p>
+<p>If provided, the media client automatically uses them in the UI.</p>
 
 
 <h2 id="devprocess">Development Process</h2>
@@ -347,10 +345,10 @@ app, and other tools for Android Auto development.</p>
 <p>To create a media app for Android Auto, you include an Android service in your app
 that implements the media service interfaces provided by the Android Auto SDK. These
 interfaces define functionality for browsing and finding content, playing media,
-customizing the UI template, and performing app-specific actions.</p>
+customizing the UI, and performing app-specific actions.</p>
 
 <p>The media service interfaces present the content library as a navigable tree and enable
-clients to play media, get album art, obtain theme resources for the UI template, and
+clients to play media, get album art, obtain theme resources for the UI, and
 invoke app-specific actions.</p>
 
 <p>You don’t have to create a new app for Android Auto: you can extend your existing
