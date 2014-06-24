@@ -123,7 +123,7 @@ it to receive messages. Once the Android application has the registration ID, it
 it to the 3rd-party application server, which uses it to identify each device 
 that has registered to receive messages for a given Android application. In other words,
 a registration ID is tied to a particular Android application running on a particular
-device.
+device. Note that registration IDs must be kept secret.
 <br/>
 <br/>
 <strong>Note:</strong> If you use 
