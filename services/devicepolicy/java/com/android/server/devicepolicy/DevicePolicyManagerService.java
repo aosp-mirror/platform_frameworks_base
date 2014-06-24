@@ -3732,7 +3732,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Sets which packages may enter lock task mode.
      *
-     * This function can only be called by the device owner or the profile owner.
+     * This function can only be called by the device owner.
      * @param components The list of components allowed to enter lock task mode.
      */
     public void setLockTaskPackages(String[] packages) throws SecurityException {
@@ -3741,15 +3741,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
 
         synchronized (this) {
-            // Check whether any of the package name is the device owner or the profile owner.
+            // Check whether any of the package name is the device owner.
             for (int i=0; i<packageNames.length; i++) {
                 String packageName = packageNames[i];
                 int userHandle = UserHandle.getUserId(uid);
-                String profileOwnerPackage = getProfileOwner(userHandle);
-                if (isDeviceOwner(packageName) ||
-                    (profileOwnerPackage != null && profileOwnerPackage.equals(packageName))) {
+                if (isDeviceOwner(packageName)) {
 
-                    // If a package name is the device owner or the profile owner,
+                    // If a package name is the device owner,
                     // we update the component list.
                     DevicePolicyData policy = getUserData(userHandle);
                     policy.mLockTaskPackages.clear();

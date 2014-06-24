@@ -2349,7 +2349,7 @@ public class DevicePolicyManager {
      * <p>Any packages that shares uid with an allowed package will also be allowed
      * to activate lock task.
      *
-     * This function can only be called by the device owner or the profile owner.
+     * This function can only be called by the device owner.
      * @param packages The list of packages allowed to enter lock task mode
      *
      * @see Activity#startLockTask()
