@@ -64,7 +64,7 @@ public class RequestThreadManager {
     private static final int MSG_CLEANUP = 3;
 
     private static final int PREVIEW_FRAME_TIMEOUT = 300; // ms
-    private static final int JPEG_FRAME_TIMEOUT = 1000; // ms
+    private static final int JPEG_FRAME_TIMEOUT = 3000; // ms (same as CTS for API2)
 
     private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
     private boolean mPreviewRunning = false;
@@ -401,6 +401,9 @@ public class RequestThreadManager {
         if (mPreviewTexture != null) {
             mPreviewTexture.setOnFrameAvailableListener(mPreviewCallback);
         }
+
+        // TODO: configure the JPEG surface with some arbitrary size
+        // using LegacyCameraDevice.nativeConfigureSurface
     }
 
     /**

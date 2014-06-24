@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "Legacy-CameraDevice-JNI"
+// #define LOG_NDEBUG 0
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/Trace.h>
@@ -26,6 +27,7 @@
 
 #include <ui/GraphicBuffer.h>
 #include <system/window.h>
+#include <hardware/camera3.h>
 
 using namespace android;
 
@@ -118,8 +120,9 @@ static status_t configureSurface(const sp<ANativeWindow>& anw,
         return err;
     }
 
-    ALOGV("%s: Setting buffer count to %d", __FUNCTION__,
-          maxBufferSlack + 1 + minUndequeuedBuffers);
+    ALOGV("%s: Setting buffer count to %d, size to (%dx%d), fmt (0x%x)", __FUNCTION__,
+          maxBufferSlack + 1 + minUndequeuedBuffers,
+          width, height, pixelFmt);
     err = native_window_set_buffer_count(anw.get(), maxBufferSlack + 1 + minUndequeuedBuffers);
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to set native window buffer count, error %s (%d).", __FUNCTION__,
@@ -148,11 +151,29 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
                              int32_t width, // Width of the pixelBuffer
                              int32_t height, // Height of the pixelBuffer
                              int32_t pixelFmt, // Format of the pixelBuffer
-                             int64_t bufSize) {
+                             int32_t bufSize) {
     ATRACE_CALL();
     status_t err = NO_ERROR;
     ANativeWindowBuffer* anb;
-    ALOGV("%s: Dequeue buffer from %p",__FUNCTION__, anw.get());
+    ALOGV("%s: Dequeue buffer from %p %dx%d (fmt=%x, size=%x)",
+            __FUNCTION__, anw.get(), width, height, pixelFmt, bufSize);
+
+    if (anw == 0) {
+        ALOGE("%s: anw must not be NULL", __FUNCTION__);
+        return BAD_VALUE;
+    } else if (pixelBuffer == NULL) {
+        ALOGE("%s: pixelBuffer must not be NULL", __FUNCTION__);
+        return BAD_VALUE;
+    } else if (width < 0) {
+        ALOGE("%s: width must be non-negative", __FUNCTION__);
+        return BAD_VALUE;
+    } else if (height < 0) {
+        ALOGE("%s: height must be non-negative", __FUNCTION__);
+        return BAD_VALUE;
+    } else if (bufSize < 0) {
+        ALOGE("%s: bufSize must be non-negative", __FUNCTION__);
+        return BAD_VALUE;
+    }
 
     if (width < 0 || height < 0 || bufSize < 0) {
         ALOGE("%s: Illegal argument, negative dimension passed to produceFrame", __FUNCTION__);
@@ -162,6 +183,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     // TODO: Switch to using Surface::lock and Surface::unlockAndPost
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
     if (err != NO_ERROR) return err;
+
+    // TODO: check anb is large enough to store the results
 
     sp<GraphicBuffer> buf(new GraphicBuffer(anb, /*keepOwnership*/false));
 
@@ -257,7 +280,12 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
                         err);
                 return err;
             }
+            struct camera3_jpeg_blob footer = {
+                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
+                jpeg_size: (uint32_t)width
+            };
             memcpy(img, pixelBuffer, width);
+            memcpy(img + anb->width - sizeof(footer), &footer, sizeof(footer));
             break;
         }
         default: {

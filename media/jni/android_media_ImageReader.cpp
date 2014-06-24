@@ -33,6 +33,9 @@
 #include <jni.h>
 #include <JNIHelp.h>
 
+#include <stdint.h>
+#include <inttypes.h>
+
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
@@ -300,6 +303,14 @@ static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer)
 
     // failed to find size, default to whole buffer
     if (size == 0) {
+        /*
+         * This is a problem because not including the JPEG header
+         * means that in certain rare situations a regular JPEG blob
+         * will be misidentified as having a header, in which case
+         * we will get a garbage size value.
+         */
+        ALOGW("%s: No JPEG header detected, defaulting to size=width=%d",
+                __FUNCTION__, width);
         size = width;
     }
 
@@ -848,6 +859,14 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx)
 
     // Create byteBuffer from native buffer
     Image_getLockedBufferInfo(env, buffer, idx, &base, &size);
+
+    if (size > static_cast<uint32_t>(INT32_MAX)) {
+        // Byte buffer have 'int capacity', so check the range
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                "Size too large for bytebuffer capacity " PRIu32, size);
+        return NULL;
+    }
+
     byteBuffer = env->NewDirectByteBuffer(base, size);
     // TODO: throw dvm exOutOfMemoryError?
     if ((byteBuffer == NULL) && (env->ExceptionCheck() == false)) {
