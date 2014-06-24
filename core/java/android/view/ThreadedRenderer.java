@@ -64,9 +64,9 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     // Keep in sync with DrawFrameTask.h SYNC_* flags
     // Nothing interesting to report
-    private static final int SYNC_OK = 0x0;
+    private static final int SYNC_OK = 0;
     // Needs a ViewRoot invalidate
-    private static final int SYNC_INVALIDATE_REQUIRED = 0x1;
+    private static final int SYNC_INVALIDATE_REQUIRED = 1 << 0;
 
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,

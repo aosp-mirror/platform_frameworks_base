@@ -148,9 +148,7 @@ void CanvasContext::prepareTree(TreeInfo& info) {
     info.out.canDrawThisFrame = !runningBehind;
 
     if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
-        if (info.out.hasFunctors) {
-            info.out.requiresUiRedraw = true;
-        } else if (!info.out.requiresUiRedraw) {
+        if (!info.out.requiresUiRedraw) {
             // If animationsNeedsRedraw is set don't bother posting for an RT anim
             // as we will just end up fighting the UI thread.
             mRenderThread.postFrameCallback(this);
