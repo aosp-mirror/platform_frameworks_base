@@ -110,7 +110,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
-import com.android.systemui.statusbar.InterceptedNotifications;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -399,7 +398,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }};
 
     private Runnable mOnFlipRunnable;
-    private InterceptedNotifications mIntercepted;
     private VelocityTracker mSettingsTracker;
     private float mSettingsDownY;
     private boolean mSettingsStarted;
@@ -510,19 +508,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     @Override
-    public void setZenMode(int mode) {
-        super.setZenMode(mode);
-        if (!isDeviceProvisioned()) return;
-        final boolean zen = mode != Settings.Global.ZEN_MODE_OFF;
-        if (!zen) {
-            mIntercepted.releaseIntercepted();
-        }
-        if (mIconPolicy != null) {
-            mIconPolicy.setZenMode(zen);
-        }
-    }
-
-    @Override
     protected void setShowLockscreenNotifications(boolean show) {
         super.setShowLockscreenNotifications(show);
         updateStackScrollerState();
@@ -533,7 +518,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
-        mIntercepted = new InterceptedNotifications(mContext, this);
         super.start(); // calls createAndAddWindows()
 
         addNavigationBar();
@@ -1074,16 +1058,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void addNotification(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
-        if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification, ranking)) {
-            // Forward the ranking so we can sort the new notification.
-            mNotificationData.updateRanking(ranking);
-            return;
-        }
-        mIntercepted.remove(notification.getKey());
-        displayNotification(notification, ranking);
-    }
-
-    public void displayNotification(StatusBarNotification notification, RankingMap ranking) {
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
             Entry interruptionCandidate = new Entry(notification, null);
@@ -1167,7 +1141,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     protected void updateNotificationRanking(RankingMap ranking) {
         mNotificationData.updateRanking(ranking);
-        mIntercepted.retryIntercepts(ranking);
         updateNotifications();
     }
 
@@ -1195,7 +1168,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 animateCollapsePanels();
             }
         }
-        mIntercepted.remove(key);
         setAreThereNotifications();
     }
 
@@ -1349,9 +1321,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             == Notification.VISIBILITY_SECRET
                     && !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId())) {
                 // in "public" mode (atop a secure keyguard), secret notifs are totally hidden
-                continue;
-            }
-            if (mIntercepted.isSyntheticEntry(ent)) {
                 continue;
             }
             toShow.add(ent.icon);
