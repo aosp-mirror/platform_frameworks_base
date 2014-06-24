@@ -60,8 +60,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     private NotificationDelegate mNotificationDelegate;
     private volatile IStatusBar mBar;
     private StatusBarIconList mIcons = new StatusBarIconList();
-    private HashMap<String,StatusBarNotification> mNotifications
-            = new HashMap<String,StatusBarNotification>();
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
@@ -111,56 +109,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     private final StatusBarManagerInternal mInternalService = new StatusBarManagerInternal() {
         @Override
         public void setNotificationDelegate(NotificationDelegate delegate) {
-            synchronized (mNotifications) {
-                mNotificationDelegate = delegate;
-            }
-        }
-
-        @Override
-        public void addNotification(StatusBarNotification notification) {
-            synchronized (mNotifications) {
-                mNotifications.put(notification.getKey(), notification);
-                if (mBar != null) {
-                    try {
-                        mBar.addNotification(notification);
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void updateNotification(StatusBarNotification notification) {
-            synchronized (mNotifications) {
-                String key = notification.getKey();
-                if (!mNotifications.containsKey(key)) {
-                    throw new IllegalArgumentException("updateNotification key not found: " + key);
-                }
-                mNotifications.put(notification.getKey(), notification);
-                if (mBar != null) {
-                    try {
-                        mBar.updateNotification(notification);
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void removeNotification(String key) {
-            synchronized (mNotifications) {
-                final StatusBarNotification n = mNotifications.remove(key);
-                if (n == null) {
-                    Slog.e(TAG, "removeNotification key not found: " + key);
-                    return;
-                }
-                if (mBar != null) {
-                    try {
-                        mBar.removeNotification(key);
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
+            mNotificationDelegate = delegate;
         }
     };
 
@@ -511,18 +460,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     @Override
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
-            List<StatusBarNotification> notifications, int switches[], List<IBinder> binders) {
+            int switches[], List<IBinder> binders) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         synchronized (mIcons) {
             iconList.copyFrom(mIcons);
-        }
-        synchronized (mNotifications) {
-            for (StatusBarNotification sbn : mNotifications.values()) {
-                notifications.add(sbn);
-            }
         }
         synchronized (mLock) {
             switches[0] = gatherDisableActionsLocked(mCurrentUserId);
@@ -706,15 +650,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
         synchronized (mIcons) {
             mIcons.dump(pw);
-        }
-
-        synchronized (mNotifications) {
-            int i=0;
-            pw.println("Notification list:");
-            for (Map.Entry<String,StatusBarNotification> e: mNotifications.entrySet()) {
-                pw.printf("  %2d: %s\n", i, e.getValue().toString());
-                i++;
-            }
         }
 
         synchronized (mLock) {

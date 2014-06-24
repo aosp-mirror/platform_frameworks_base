@@ -107,7 +107,7 @@ public class InterceptedNotifications {
     private void updateSyntheticNotification() {
         if (mIntercepted.isEmpty()) {
             if (mSynKey != null) {
-                mBar.removeNotificationInternal(mSynKey, null);
+                mBar.removeNotification(mSynKey, null);
                 mSynKey = null;
             }
             return;
@@ -128,7 +128,7 @@ public class InterceptedNotifications {
             mSynKey = sbn.getKey();
             mBar.displayNotification(sbn, null);
         } else {
-           mBar.updateNotificationInternal(sbn, null);
+           mBar.updateNotification(sbn, null);
         }
         final NotificationData.Entry entry = mBar.mNotificationData.findByKey(mSynKey);
         entry.row.setOnClickListener(mSynClickListener);

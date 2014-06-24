@@ -41,23 +41,20 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int OP_REMOVE_ICON = 2;
 
     private static final int MSG_ICON                       = 1 << MSG_SHIFT;
-    private static final int MSG_ADD_NOTIFICATION           = 2 << MSG_SHIFT;
-    private static final int MSG_UPDATE_NOTIFICATION        = 3 << MSG_SHIFT;
-    private static final int MSG_REMOVE_NOTIFICATION        = 4 << MSG_SHIFT;
-    private static final int MSG_DISABLE                    = 5 << MSG_SHIFT;
-    private static final int MSG_EXPAND_NOTIFICATIONS       = 6 << MSG_SHIFT;
-    private static final int MSG_COLLAPSE_PANELS            = 7 << MSG_SHIFT;
-    private static final int MSG_EXPAND_SETTINGS            = 8 << MSG_SHIFT;
-    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 9 << MSG_SHIFT;
-    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 10 << MSG_SHIFT;
-    private static final int MSG_SHOW_IME_BUTTON            = 11 << MSG_SHIFT;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 12 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_RECENT_APPS         = 13 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
-    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
-    private static final int MSG_SET_WINDOW_STATE           = 16 << MSG_SHIFT;
-    private static final int MSG_SHOW_RECENT_APPS           = 17 << MSG_SHIFT;
-    private static final int MSG_HIDE_RECENT_APPS           = 18 << MSG_SHIFT;
+    private static final int MSG_DISABLE                    = 2 << MSG_SHIFT;
+    private static final int MSG_EXPAND_NOTIFICATIONS       = 3 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_PANELS            = 4 << MSG_SHIFT;
+    private static final int MSG_EXPAND_SETTINGS            = 5 << MSG_SHIFT;
+    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 6 << MSG_SHIFT;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 7 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON            = 8 << MSG_SHIFT;
+    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 9 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS         = 10 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS        = 11 << MSG_SHIFT;
+    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 12 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE           = 13 << MSG_SHIFT;
+    private static final int MSG_SHOW_RECENT_APPS           = 14 << MSG_SHIFT;
+    private static final int MSG_HIDE_RECENT_APPS           = 15 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -80,9 +77,6 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void addNotification(StatusBarNotification notification);
-        public void updateNotification(StatusBarNotification notification);
-        public void removeNotification(String key);
         public void disable(int state);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
@@ -120,26 +114,6 @@ public class CommandQueue extends IStatusBar.Stub {
             int what = MSG_ICON | index;
             mHandler.removeMessages(what);
             mHandler.obtainMessage(what, OP_REMOVE_ICON, 0, null).sendToTarget();
-        }
-    }
-
-    @Override
-    public void addNotification(StatusBarNotification notification) {
-        synchronized (mList) {
-            mHandler.obtainMessage(MSG_ADD_NOTIFICATION, 0, 0, notification).sendToTarget();
-        }
-    }
-
-    @Override
-    public void updateNotification(StatusBarNotification notification) {
-        synchronized (mList) {
-            mHandler.obtainMessage(MSG_UPDATE_NOTIFICATION, 0, 0, notification).sendToTarget();
-        }
-    }
-
-    public void removeNotification(String key) {
-        synchronized (mList) {
-            mHandler.obtainMessage(MSG_REMOVE_NOTIFICATION, 0, 0, key).sendToTarget();
         }
     }
 
@@ -277,18 +251,6 @@ public class CommandQueue extends IStatusBar.Stub {
                             }
                             break;
                     }
-                    break;
-                }
-                case MSG_ADD_NOTIFICATION: {
-                    mCallbacks.addNotification((StatusBarNotification) msg.obj);
-                    break;
-                }
-                case MSG_UPDATE_NOTIFICATION: {
-                    mCallbacks.updateNotification((StatusBarNotification) msg.obj);
-                    break;
-                }
-                case MSG_REMOVE_NOTIFICATION: {
-                    mCallbacks.removeNotification((String) msg.obj);
                     break;
                 }
                 case MSG_DISABLE:

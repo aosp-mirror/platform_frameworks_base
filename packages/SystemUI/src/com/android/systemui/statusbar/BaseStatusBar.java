@@ -94,7 +94,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
-    private static final boolean USE_NOTIFICATION_LISTENER = true;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -298,7 +297,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
-                        addNotificationInternal(sbn, currentRanking);
+                        addNotification(sbn, currentRanking);
                     }
                 }
             });
@@ -325,16 +324,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                         // wasn't a group child, remove the old instance.
                         // Otherwise just update the ranking.
                         if (isUpdate) {
-                            removeNotificationInternal(sbn.getKey(), rankingMap);
+                            removeNotification(sbn.getKey(), rankingMap);
                         } else {
-                            updateRankingInternal(rankingMap);
+                            updateNotificationRanking(rankingMap);
                         }
                         return;
                     }
                     if (isUpdate) {
-                        updateNotificationInternal(sbn, rankingMap);
+                        updateNotification(sbn, rankingMap);
                     } else {
-                        addNotificationInternal(sbn, rankingMap);
+                        addNotification(sbn, rankingMap);
                     }
                 }
             });
@@ -347,7 +346,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    removeNotificationInternal(sbn.getKey(), rankingMap);
+                    removeNotification(sbn.getKey(), rankingMap);
                 }
             });
         }
@@ -358,7 +357,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updateRankingInternal(rankingMap);
+                    updateNotificationRanking(rankingMap);
                 }
             });
         }
@@ -414,14 +413,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
-        ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
 
         int[] switches = new int[8];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconList, notifications,
-                    switches, binders);
+            mBarService.registerStatusBar(mCommandQueue, iconList, switches, binders);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
@@ -447,19 +444,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         // Set up the initial notification state.
-        if (USE_NOTIFICATION_LISTENER) {
-            try {
-                mNotificationListener.registerAsSystemService(
-                        new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),
-                        UserHandle.USER_ALL);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to register notification listener", e);
-            }
-        } else {
-            N = notifications.size();
-            for (int i=0; i<N; i++) {
-                addNotification(notifications.get(i));
-            }
+        try {
+            mNotificationListener.registerAsSystemService(
+                    new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),
+                    UserHandle.USER_ALL);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to register notification listener", e);
         }
 
 
@@ -1194,7 +1184,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      * WARNING: this will call back into us.  Don't hold any locks.
      */
     void handleNotificationError(StatusBarNotification n, String message) {
-        removeNotification(n.getKey());
+        removeNotification(n.getKey(), null);
         try {
             mBarService.onNotificationError(n.getPackageName(), n.getTag(), n.getId(), n.getUid(),
                     n.getInitialPid(), message, n.getUserId());
@@ -1330,34 +1320,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract boolean shouldDisableNavbarGestures();
 
-    @Override
-    public void addNotification(StatusBarNotification notification) {
-        if (!USE_NOTIFICATION_LISTENER) {
-            addNotificationInternal(notification, null);
-        }
-    }
-
-    public abstract void addNotificationInternal(StatusBarNotification notification,
+    public abstract void addNotification(StatusBarNotification notification,
             RankingMap ranking);
-
-    protected abstract void updateRankingInternal(RankingMap ranking);
-
-    @Override
-    public void removeNotification(String key) {
-        if (!USE_NOTIFICATION_LISTENER) {
-            removeNotificationInternal(key, null);
-        }
-    }
-
-    public abstract void removeNotificationInternal(String key, RankingMap ranking);
-
-    public void updateNotification(StatusBarNotification notification) {
-        if (!USE_NOTIFICATION_LISTENER) {
-            updateNotificationInternal(notification, null);
-        }
-    }
-
-    public void updateNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
+    protected abstract void updateNotificationRanking(RankingMap ranking);
+    public abstract void removeNotification(String key, RankingMap ranking);
+    public void updateNotification(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
@@ -1474,7 +1441,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 } else {
                     if (shouldInterrupt && alertAgain) {
                         removeNotificationViews(key, ranking);
-                        addNotificationInternal(notification, ranking);  //this will pop the headsup
+                        addNotification(notification, ranking);  //this will pop the headsup
                     } else {
                         updateNotificationViews(oldEntry, notification);
                     }
@@ -1514,7 +1481,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (shouldInterrupt && alertAgain) {
                     if (DEBUG) Log.d(TAG, "reposting to invoke heads up for key: " + key);
                     removeNotificationViews(key, ranking);
-                    addNotificationInternal(notification, ranking);  //this will pop the headsup
+                    addNotification(notification, ranking);  //this will pop the headsup
                 } else {
                     if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
                     removeNotificationViews(key, ranking);
@@ -1672,12 +1639,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             mWindowManager.removeViewImmediate(mSearchPanelView);
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
-        if (USE_NOTIFICATION_LISTENER) {
-            try {
-                mNotificationListener.unregisterAsSystemService();
-            } catch (RemoteException e) {
-                // Ignore.
-            }
+        try {
+            mNotificationListener.unregisterAsSystemService();
+        } catch (RemoteException e) {
+            // Ignore.
         }
     }
 }

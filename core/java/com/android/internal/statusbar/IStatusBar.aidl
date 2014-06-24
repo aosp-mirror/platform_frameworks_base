@@ -24,9 +24,6 @@ oneway interface IStatusBar
 {
     void setIcon(int index, in StatusBarIcon icon);
     void removeIcon(int index);
-    void addNotification(in StatusBarNotification notification);
-    void updateNotification(in StatusBarNotification notification);
-    void removeNotification(String key);
     void disable(int state);
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel();

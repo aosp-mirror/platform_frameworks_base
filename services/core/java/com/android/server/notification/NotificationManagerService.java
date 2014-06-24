@@ -1546,41 +1546,11 @@ public class NotificationManagerService extends SystemService {
 
                     Collections.sort(mNotificationList, mRankingComparator);
 
-                    final int currentUser;
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        currentUser = ActivityManager.getCurrentUser();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-
                     if (notification.icon != 0) {
-                        if (old != null && !old.isCanceled) {
-                            final long identity = Binder.clearCallingIdentity();
-                            try {
-                                mStatusBar.updateNotification(n);
-                            } finally {
-                                Binder.restoreCallingIdentity(identity);
-                            }
-                        } else {
-                            final long identity = Binder.clearCallingIdentity();
-                            try {
-                                mStatusBar.addNotification(n);
-                            } finally {
-                                Binder.restoreCallingIdentity(identity);
-                            }
-                        }
                         mListeners.notifyPostedLocked(n);
                     } else {
                         Slog.e(TAG, "Not posting notification with icon==0: " + notification);
                         if (old != null && !old.isCanceled) {
-                            final long identity = Binder.clearCallingIdentity();
-                            try {
-                                mStatusBar.removeNotification(r.getKey());
-                            } finally {
-                                Binder.restoreCallingIdentity(identity);
-                            }
-
                             mListeners.notifyRemovedLocked(n);
                         }
                         // ATTENTION: in a future release we will bail out here
@@ -1992,12 +1962,6 @@ public class NotificationManagerService extends SystemService {
 
         // status bar
         if (r.getNotification().icon != 0) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mStatusBar.removeNotification(r.getKey());
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
             r.isCanceled = true;
             mListeners.notifyRemovedLocked(r.sbn);
         }
