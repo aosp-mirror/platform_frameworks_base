@@ -36,10 +36,15 @@ public class FieldPacker {
     }
 
     public FieldPacker(byte[] data) {
-        mPos = 0;
+        // Advance mPos to the end of the buffer, since we are copying in the
+        // full data input.
+        mPos = data.length;
         mLen = data.length;
         mData = data;
         mAlignment = new BitSet();
+        // TODO: We should either have an actual FieldPacker copy constructor
+        // or drop support for computing alignment like this. As it stands,
+        // subAlign() can never work correctly for copied FieldPacker objects.
     }
 
     public void align(int v) {
