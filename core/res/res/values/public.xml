@@ -2212,6 +2212,9 @@
   <public type="attr" name="relinquishTaskIdentity" />
   <public type="attr" name="tileModeX" />
   <public type="attr" name="tileModeY" />
+  <public type="attr" name="actionModeShareDrawable" />
+  <public type="attr" name="actionModeFindDrawable" />
+  <public type="attr" name="actionModeWebSearchDrawable" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
