@@ -1,0 +1,40 @@
+page.title=User Interfaces for TV
+
+@jd:body
+
+
+<p>
+  Building an effective and engaging user interface for TV devices requires a firm understanding of what works well
+  in the context of a living room. Imagine a large screen that can be seen by many people at the
+  same time, controlled with a few buttons by users with limited attention, and you start to see the
+  challenges and opportunities of building an app for TV. Building apps for this environment
+  requires a different approach and different tools.</p>
+
+<p>This section discusses how to build a living room experience with your app, including
+  implementation instructions and creating user interface widgets built for TV. Also check out
+  <a href="{@docRoot}design/tv/index.html">Design for TV</a> for information and inspiration
+  on creating engaging user interfaces for TV devices.</p>
+
+<h2>Topics</h2>
+
+<dl>
+  <dt><b><a href="layouts.html">Layouts</a></b></dt>
+    <dd>Learn how to build app layouts for TV screens.</dd>
+
+  <dt><b><a href="navigation.html">Navigation</a></b></dt>
+    <dd>Learn how to build navigation for TV devices.</dd>
+
+  <dt><b><a href="browse.html">BrowseFragment</a></b></dt>
+    <dd>Learn how to use this fragment to build a browsing interface for media catalogs.</dd>
+
+  <dt><b><a href="details.html">DetailsFragment</a></b></dt>
+    <dd>Learn how to use this fragment to build a details page for media items.</dd>
+
+  <dt><b><a href="in-app-search.html">In-App Search</a></b></dt>
+    <dd>Learn how to use a built-for-TV user interface for searching within your app.</dd>
+
+  <dt><b><a href="recommendations.html">Recommendations</a></b></dt>
+    <dd>Learn how your app can contribute to the list of recommendations appearing on the home
+      screen and get your content noticed by users.</dd>
+</dl>
+
