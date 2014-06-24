@@ -456,15 +456,8 @@ static void android_view_RenderNode_addAnimator(JNIEnv* env, jobject clazz,
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
     renderNode->addAnimator(animator);
+    animator->start();
 }
-
-static void android_view_RenderNode_removeAnimator(JNIEnv* env, jobject clazz,
-        jlong renderNodePtr, jlong animatorPtr) {
-    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
-    renderNode->removeAnimator(animator);
-}
-
 
 #endif // USE_OPENGL_RENDERER
 
@@ -546,7 +539,6 @@ static JNINativeMethod gMethods[] = {
     { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
 
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
-    { "nRemoveAnimator",           "(JJ)V", (void*) android_view_RenderNode_removeAnimator },
 #endif
 };
 

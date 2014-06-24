@@ -18,6 +18,7 @@
 
 #include "Animator.h"
 
+#include <inttypes.h>
 #include <set>
 
 #include "RenderNode.h"
@@ -35,72 +36,105 @@ BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
         , mInterpolator(0)
-        , mPlayState(NEEDS_START)
+        , mStagingPlayState(NOT_STARTED)
+        , mPlayState(NOT_STARTED)
+        , mHasStartValue(false)
         , mStartTime(0)
-        , mDelayUntil(0)
         , mDuration(300)
         , mStartDelay(0) {
-
 }
 
 BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
-    setInterpolator(NULL);
+    delete mInterpolator;
+}
+
+void BaseRenderNodeAnimator::checkMutable() {
+    // Should be impossible to hit as the Java-side also has guards for this
+    LOG_ALWAYS_FATAL_IF(mStagingPlayState != NOT_STARTED,
+            "Animator has already been started!");
 }
 
 void BaseRenderNodeAnimator::setInterpolator(Interpolator* interpolator) {
+    checkMutable();
     delete mInterpolator;
     mInterpolator = interpolator;
 }
 
 void BaseRenderNodeAnimator::setStartValue(float value) {
-    LOG_ALWAYS_FATAL_IF(mPlayState != NEEDS_START,
-            "Cannot set the start value after the animator has started!");
-    mFromValue = value;
-    mDeltaValue = (mFinalValue - mFromValue);
-    mPlayState = PENDING;
+    checkMutable();
+    doSetStartValue(value);
 }
 
-void BaseRenderNodeAnimator::setupStartValueIfNecessary(RenderNode* target, TreeInfo& info) {
-    if (mPlayState == NEEDS_START) {
-        setStartValue(getValue(target));
-    }
+void BaseRenderNodeAnimator::doSetStartValue(float value) {
+    mFromValue = value;
+    mDeltaValue = (mFinalValue - mFromValue);
+    mHasStartValue = true;
 }
 
 void BaseRenderNodeAnimator::setDuration(nsecs_t duration) {
+    checkMutable();
     mDuration = duration;
 }
 
 void BaseRenderNodeAnimator::setStartDelay(nsecs_t startDelay) {
+    checkMutable();
     mStartDelay = startDelay;
 }
 
-bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
-    if (mPlayState == PENDING && mStartDelay > 0 && mDelayUntil == 0) {
-        mDelayUntil = info.frameTimeMs + mStartDelay;
-        return false;
+void BaseRenderNodeAnimator::pushStaging(RenderNode* target, TreeInfo& info) {
+    if (!mHasStartValue) {
+        doSetStartValue(getValue(target));
     }
-
-    if (mDelayUntil > info.frameTimeMs) {
-        return false;
-    }
-
-    if (mPlayState == PENDING) {
-        mPlayState = RUNNING;
-        mStartTime = info.frameTimeMs;
-        // No interpolator was set, use the default
-        if (!mInterpolator) {
-            setInterpolator(Interpolator::createDefaultInterpolator());
+    if (mStagingPlayState > mPlayState) {
+        mPlayState = mStagingPlayState;
+        // Oh boy, we're starting! Man the battle stations!
+        if (mPlayState == RUNNING) {
+            transitionToRunning(info);
         }
+    }
+}
+
+void BaseRenderNodeAnimator::transitionToRunning(TreeInfo& info) {
+    LOG_ALWAYS_FATAL_IF(info.frameTimeMs <= 0, "%" PRId64 " isn't a real frame time!", info.frameTimeMs);
+    if (mStartDelay < 0 || mStartDelay > 50000) {
+        ALOGW("Your start delay is strange and confusing: %" PRId64, mStartDelay);
+    }
+    mStartTime = info.frameTimeMs + mStartDelay;
+    if (mStartTime < 0) {
+        ALOGW("Ended up with a really weird start time of %" PRId64
+                " with frame time %" PRId64 " and start delay %" PRId64,
+                mStartTime, info.frameTimeMs, mStartDelay);
+        // Set to 0 so that the animate() basically instantly finishes
+        mStartTime = 0;
+    }
+    // No interpolator was set, use the default
+    if (!mInterpolator) {
+        setInterpolator(Interpolator::createDefaultInterpolator());
+    }
+    if (mDuration < 0 || mDuration > 50000) {
+        ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);
+    }
+}
+
+bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
+    if (mPlayState < RUNNING) {
+        return false;
+    }
+
+    if (mStartTime > info.frameTimeMs) {
+        info.out.hasAnimations |= true;
+        return false;
     }
 
     float fraction = 1.0f;
-    if (mPlayState == RUNNING) {
-        fraction = mDuration > 0 ? (float)(info.frameTimeMs - mStartTime) / mDuration : 1.0f;
-        if (fraction >= 1.0f) {
-            fraction = 1.0f;
-            mPlayState = FINISHED;
-        }
+    if (mPlayState == RUNNING && mDuration > 0) {
+        fraction = (float)(info.frameTimeMs - mStartTime) / mDuration;
     }
+    if (fraction >= 1.0f) {
+        fraction = 1.0f;
+        mPlayState = FINISHED;
+    }
+
     fraction = mInterpolator->interpolate(fraction);
     setValue(target, mFromValue + (mDeltaValue * fraction));
 
@@ -108,6 +142,8 @@ bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
         callOnFinishedListener(info);
         return true;
     }
+
+    info.out.hasAnimations |= true;
     return false;
 }
 
@@ -153,7 +189,7 @@ RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property, float fi
 }
 
 void RenderPropertyAnimator::onAttached(RenderNode* target) {
-    if (mPlayState == NEEDS_START
+    if (!mHasStartValue
             && target->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
         setStartValue((target->stagingProperties().*mPropertyAccess->getter)());
     }

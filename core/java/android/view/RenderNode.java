@@ -21,9 +21,6 @@ import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -179,12 +176,6 @@ public class RenderNode {
 
     private boolean mValid;
     private final long mNativeRenderNode;
-
-    // We need to keep a strong reference to all running animators to ensure that
-    // they can call removeAnimator when they have finished, as the native-side
-    // object can only hold a WeakReference<> to avoid leaking memory due to
-    // cyclic references.
-    private List<RenderNodeAnimator> mActiveAnimators;
 
     private RenderNode(String name) {
         mNativeRenderNode = nCreate(name);
@@ -866,16 +857,7 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
 
     public void addAnimator(RenderNodeAnimator animator) {
-        if (mActiveAnimators == null) {
-            mActiveAnimators = new ArrayList<RenderNodeAnimator>();
-        }
-        mActiveAnimators.add(animator);
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
-    }
-
-    public void removeAnimator(RenderNodeAnimator animator) {
-        nRemoveAnimator(mNativeRenderNode, animator.getNativeAnimator());
-        mActiveAnimators.remove(animator);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -960,7 +942,6 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
 
     private static native void nAddAnimator(long renderNode, long animatorPtr);
-    private static native void nRemoveAnimator(long renderNode, long animatorPtr);
 
     ///////////////////////////////////////////////////////////////////////////
     // Finalization

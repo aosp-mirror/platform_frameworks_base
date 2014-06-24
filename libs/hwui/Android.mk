@@ -13,6 +13,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		font/Font.cpp \
 		AmbientShadow.cpp \
 		Animator.cpp \
+		AnimatorManager.cpp \
 		AssetAtlas.cpp \
 		DamageAccumulator.cpp \
 		FontRenderer.cpp \

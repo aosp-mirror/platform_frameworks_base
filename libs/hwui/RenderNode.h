@@ -20,18 +20,11 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
-#include <set>
-#include <vector>
-
 #include <SkCamera.h>
 #include <SkMatrix.h>
 
-#include <private/hwui/DrawGlInfo.h>
-
-#include <utils/KeyedVector.h>
 #include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
-#include <utils/SortedVector.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
@@ -39,6 +32,7 @@
 
 #include <androidfw/ResourceTypes.h>
 
+#include "AnimatorManager.h"
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "Matrix.h"
@@ -176,19 +170,7 @@ public:
     ANDROID_API virtual void prepareTree(TreeInfo& info);
 
     // UI thread only!
-    ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-        animator->onAttached(this);
-        mStagingAnimators.insert(animator);
-        mNeedsAnimatorsSync = true;
-    }
-
-    // UI thread only!
-    ANDROID_API void removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-        mStagingAnimators.erase(animator);
-        // Force a sync of the staging property value
-        mDirtyPropertyFields |= animator->dirtyMask();
-        mNeedsAnimatorsSync = true;
-    }
+    ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
 protected:
     virtual void damageSelf(TreeInfo& info);
@@ -262,7 +244,6 @@ private:
     void prepareTreeImpl(TreeInfo& info);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void evaluateAnimations(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
     void applyLayerPropertiesToLayer(TreeInfo& info);
     void prepareLayer(TreeInfo& info);
@@ -278,9 +259,8 @@ private:
     DisplayListData* mDisplayListData;
     DisplayListData* mStagingDisplayListData;
 
-    bool mNeedsAnimatorsSync;
-    std::set< sp<BaseRenderNodeAnimator> > mStagingAnimators;
-    std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
+    friend class AnimatorManager;
+    AnimatorManager mAnimatorManager;
 
     // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
     // being in ~RenderNode() which may happen on any thread.

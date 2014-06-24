@@ -56,7 +56,7 @@ public:
     void setup(int width, int height, const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
     void makeCurrent();
-    void processLayerUpdate(DeferredLayerUpdater* layerUpdater, TreeInfo& info);
+    void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
     void prepareTree(TreeInfo& info);
     void draw();
     void destroyCanvasAndSurface();

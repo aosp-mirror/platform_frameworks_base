@@ -127,7 +127,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     Caches::getInstance().textureCache.resetMarkInUse();
 
     for (size_t i = 0; i < mLayers.size(); i++) {
-        mContext->processLayerUpdate(mLayers[i].get(), info);
+        mContext->processLayerUpdate(mLayers[i].get());
     }
     mLayers.clear();
     mContext->prepareTree(info);

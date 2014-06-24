@@ -58,7 +58,7 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
-bool DeferredLayerUpdater::apply(TreeInfo& info) {
+bool DeferredLayerUpdater::apply() {
     bool success = true;
     // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);

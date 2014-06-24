@@ -123,8 +123,8 @@ void CanvasContext::makeCurrent() {
     mHaveNewSurface |= mEglManager.makeCurrent(mEglSurface);
 }
 
-void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater, TreeInfo& info) {
-    bool success = layerUpdater->apply(info);
+void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
+    bool success = layerUpdater->apply();
     LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
     if (layerUpdater->backingLayer()->deferredUpdateScheduled) {
         mCanvas->pushLayerUpdate(layerUpdater->backingLayer());
@@ -237,8 +237,7 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     requireGlContext();
-    TreeInfo info(TreeInfo::MODE_FULL, mRenderThread.renderState());
-    layer->apply(info);
+    layer->apply();
     return LayerRenderer::copyLayer(mRenderThread.renderState(), layer->backingLayer(), bitmap);
 }
 

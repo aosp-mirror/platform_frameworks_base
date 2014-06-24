@@ -50,12 +50,11 @@ public:
     ANDROID_API void setListener(AnimationListener* listener) {
         mListener = listener;
     }
+    ANDROID_API void start() { mStagingPlayState = RUNNING; }
+    ANDROID_API void cancel() { mStagingPlayState = FINISHED; }
 
-    ANDROID_API virtual void onAttached(RenderNode* target) {}
-
-    // Guaranteed to happen before the staging push
-    void setupStartValueIfNecessary(RenderNode* target, TreeInfo& info);
-
+    virtual void onAttached(RenderNode* target) {}
+    virtual void pushStaging(RenderNode* target, TreeInfo& info);
     bool animate(RenderNode* target, TreeInfo& info);
 
     bool isFinished() { return mPlayState == FINISHED; }
@@ -73,8 +72,7 @@ protected:
     void callOnFinishedListener(TreeInfo& info);
 
     enum PlayState {
-        NEEDS_START,
-        PENDING,
+        NOT_STARTED,
         RUNNING,
         FINISHED,
     };
@@ -84,13 +82,19 @@ protected:
     float mFromValue;
 
     Interpolator* mInterpolator;
+    PlayState mStagingPlayState;
     PlayState mPlayState;
+    bool mHasStartValue;
     nsecs_t mStartTime;
-    nsecs_t mDelayUntil;
     nsecs_t mDuration;
     nsecs_t mStartDelay;
 
     sp<AnimationListener> mListener;
+
+private:
+    void doSetStartValue(float value);
+    inline void checkMutable();
+    void transitionToRunning(TreeInfo& info);
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
@@ -112,7 +116,7 @@ public:
 
     ANDROID_API RenderPropertyAnimator(RenderProperty property, float finalValue);
 
-    ANDROID_API virtual void onAttached(RenderNode* target);
+    virtual void onAttached(RenderNode* target);
 
     ANDROID_API virtual uint32_t dirtyMask();
 
