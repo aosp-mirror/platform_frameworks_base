@@ -357,7 +357,7 @@ public class RecentsTaskLoader {
 
         // Initialize the proxy, cache and loaders
         mSystemServicesProxy = new SystemServicesProxy(context);
-        mPackageMonitor = new RecentsPackageMonitor(context);
+        mPackageMonitor = new RecentsPackageMonitor();
         mLoadQueue = new TaskResourceLoadQueue();
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);

@@ -53,6 +53,12 @@ public class DozeTrigger {
         mHasTriggered = false;
     }
 
+    /** Stops dozing. */
+    public void stopDozing() {
+        mHandler.removeCallbacks(mDozeRunnable);
+        mIsDozing = false;
+    }
+
     /** Poke this dozer to wake it up for a little bit. */
     public void poke() {
         mHandler.removeCallbacks(mDozeRunnable);

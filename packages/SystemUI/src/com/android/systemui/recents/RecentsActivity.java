@@ -17,7 +17,7 @@
 package com.android.systemui.recents;
 
 import android.app.Activity;
-import android.appwidget.AppWidgetHost;
+import android.app.ActivityOptions;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -44,30 +45,50 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-/** Our special app widget host */
-class RecentsAppWidgetHost extends AppWidgetHost {
-    /* Callbacks to notify when an app package changes */
-    interface RecentsAppWidgetHostCallbacks {
-        public void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo);
-    }
-
-    RecentsAppWidgetHostCallbacks mCb;
-
-    public RecentsAppWidgetHost(Context context, int hostId, RecentsAppWidgetHostCallbacks cb) {
-        super(context, hostId);
-        mCb = cb;
-    }
-
-    @Override
-    protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
-        mCb.onProviderChanged(appWidgetId, appWidget);
-    }
-}
-
 /* Activity */
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
         FullScreenTransitionView.FullScreenTransitionViewCallbacks {
+
+    /**
+     * A Runnable to finish Recents either with/without a transition, and either by calling finish()
+     * or just launching the specified intent.
+     */
+    class FinishRecentsRunnable implements Runnable {
+        boolean mUseCustomFinishTransition;
+        Intent mLaunchIntent;
+        ActivityOptions mLaunchOpts;
+
+        public FinishRecentsRunnable(boolean withTransition) {
+            mUseCustomFinishTransition = withTransition;
+        }
+
+        public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
+            mLaunchIntent = launchIntent;
+            mLaunchOpts = opts;
+        }
+
+        @Override
+        public void run() {
+            // Mark Recents as no longer visible
+            AlternateRecentsComponent.notifyVisibilityChanged(false);
+            // Finish Recents
+            if (mLaunchIntent != null) {
+                if (mLaunchOpts != null) {
+                    startActivityAsUser(mLaunchIntent, new UserHandle(UserHandle.USER_CURRENT));
+                } else {
+                    startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(),
+                            new UserHandle(UserHandle.USER_CURRENT));
+                }
+            } else {
+                finish();
+                if (mUseCustomFinishTransition) {
+                    overridePendingTransition(R.anim.recents_to_launcher_enter,
+                            R.anim.recents_to_launcher_exit);
+                }
+            }
+        }
+    }
 
     FrameLayout mContainerView;
     RecentsView mRecentsView;
@@ -78,12 +99,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     RecentsConfiguration mConfig;
 
-    AppWidgetHost mAppWidgetHost;
+    RecentsAppWidgetHost mAppWidgetHost;
     AppWidgetProviderInfo mSearchAppWidgetInfo;
     AppWidgetHostView mSearchAppWidgetHostView;
 
     boolean mVisible;
     boolean mTaskLaunched;
+
+    // Runnables to finish the Recents activity
+    FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
+    FinishRecentsRunnable mFinishWithoutAnimationRunnable = new FinishRecentsRunnable(false);
+    FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     private static Method sPropertyMethod;
     static {
@@ -115,9 +141,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     // If we are mid-animation into Recents, then reverse it and finish
                     if (mFullScreenshotView == null ||
                             !mFullScreenshotView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
-                        // Otherwise, just finish the activity without launching any other activities
+                        // Otherwise, either finish Recents, or launch Home directly
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(context,
-                                null, mFinishRunnable, null);
+                                null, mFinishLaunchHomeRunnable, null);
                         mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     }
@@ -141,23 +167,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Mark recents as no longer visible
-            AlternateRecentsComponent.notifyVisibilityChanged(false);
-            // Finish without an animations
-            finish();
-        }
-    };
-
-    // A runnable to finish the Recents activity
-    Runnable mFinishRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Mark recents as no longer visible
-            AlternateRecentsComponent.notifyVisibilityChanged(false);
-            // Finish with an animations
-            finish();
-            overridePendingTransition(R.anim.recents_to_launcher_enter,
-                    R.anim.recents_to_launcher_exit);
+            mFinishWithoutAnimationRunnable.run();
         }
     };
 
@@ -280,17 +290,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     if (mConfig.launchedFromHome) {
                         // Just start the animation out of recents
                         ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                                null, mFinishRunnable, null);
+                                null, mFinishLaunchHomeRunnable, null);
                         mRecentsView.startExitToHomeAnimation(
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     } else {
                         // Otherwise, try and launch the first task
                         if (!mRecentsView.launchFirstTask()) {
                             // If there are no tasks, then just finish recents
-                            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                                    null, mFinishRunnable, null);
-                            mRecentsView.startExitToHomeAnimation(
-                                    new ViewAnimation.TaskViewExitContext(exitTrigger));
+                            mFinishLaunchHomeRunnable.run();
                         }
                     }
                 }
@@ -316,8 +323,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsTaskLoader.initialize(this);
         mConfig = RecentsConfiguration.reinitialize(this);
 
+        // Create the home intent runnable
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
+                ActivityOptions.makeCustomAnimation(this, R.anim.recents_to_launcher_enter,
+                        R.anim.recents_to_launcher_exit));
+
         // Initialize the widget host (the host id is static and does not change)
-        mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId, this);
+        mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
 
         // Create the view hierarchy
         mRecentsView = new RecentsView(this);
@@ -346,6 +362,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
+        // Add the views to the layout
         mContainerView = new FrameLayout(this);
         mContainerView.addView(mStatusBarScrimView);
         mContainerView.addView(mRecentsView);
@@ -430,11 +447,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         super.onStart();
 
-        // Start listening for widget package changes if there is one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            mAppWidgetHost.startListening();
-        }
-
         mVisible = true;
     }
 
@@ -470,6 +482,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Register any broadcast receivers for the task loader
         RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
+
+        // Start listening for widget package changes if there is one bound
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.startListening(this);
+        }
     }
 
     @Override
@@ -485,6 +502,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         unregisterReceiver(mServiceBroadcastReceiver);
         unregisterReceiver(mScreenOffReceiver);
         RecentsTaskLoader.getInstance().unregisterReceivers();
+
+        // Stop listening for widget package changes if there was one bound
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.stopListening();
+        }
     }
 
     @Override
@@ -503,11 +525,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onStop();
-
-        // Stop listening for widget package changes if there was one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            mAppWidgetHost.stopListening();
-        }
 
         mVisible = false;
         mTaskLaunched = false;
@@ -557,17 +574,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 if (mConfig.launchedFromHome) {
                     // Just start the animation out of recents
                     ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                            null, mFinishRunnable, null);
+                            null, mFinishLaunchHomeRunnable, null);
                     mRecentsView.startExitToHomeAnimation(
                             new ViewAnimation.TaskViewExitContext(exitTrigger));
                 } else {
                     // Otherwise, try and launch the first task
                     if (!mRecentsView.launchFirstTask()) {
                         // If there are no tasks, then just finish recents
-                        ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                                null, mFinishRunnable, null);
-                        mRecentsView.startExitToHomeAnimation(
-                                new ViewAnimation.TaskViewExitContext(exitTrigger));
+                        mFinishLaunchHomeRunnable.run();
                     }
                 }
             }
@@ -608,18 +622,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
-    @Override
-    public void onExitAnimationTriggered() {
-        // Fade out the scrim
-        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
-            mNavBarScrimView.animate()
-                    .translationY(mNavBarScrimView.getMeasuredHeight())
-                    .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .start();
-        }
-    }
+    /**** FullScreenTransitionView.FullScreenTransitionViewCallbacks Implementation ****/
 
     @Override
     public void onEnterAnimationComplete(boolean canceled) {
@@ -636,6 +639,21 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         AlternateRecentsComponent.consumeLastScreenshot();
     }
 
+    /**** RecentsView.RecentsViewCallbacks Implementation ****/
+
+    @Override
+    public void onExitAnimationTriggered() {
+        // Fade out the scrim
+        if (mConfig.hasNavBarScrim() && mConfig.shouldAnimateNavBarScrim()) {
+            mNavBarScrimView.animate()
+                    .translationY(mNavBarScrimView.getMeasuredHeight())
+                    .setStartDelay(0)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .start();
+        }
+    }
+
     @Override
     public void onTaskLaunching() {
         mTaskLaunched = true;
@@ -644,16 +662,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         AlternateRecentsComponent.notifyVisibilityChanged(false);
     }
 
+    /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
+
     @Override
-    public void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
-        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-        if (appWidgetId > -1 && appWidgetId == mConfig.searchBarAppWidgetId) {
-            // The search provider may have changed, so just delete the old widget and bind it again
-            ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
-            mConfig.updateSearchBarAppWidgetId(this, -1);
-            // Load the widget again
-            bindSearchBarAppWidget();
-            addSearchBarAppWidgetView();
-        }
+    public void refreshSearchWidget() {
+        // Load the Search widget again
+        bindSearchBarAppWidget();
+        addSearchBarAppWidgetView();
     }
 }

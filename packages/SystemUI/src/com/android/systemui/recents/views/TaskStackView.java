@@ -26,7 +26,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -71,7 +70,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStackViewCallbacks mCb;
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mTaskTransforms = new ArrayList<TaskViewTransform>();
-    DozeTrigger mDozeTrigger;
+    DozeTrigger mUIDozeTrigger;
 
     // The various rects that define the stack view
     Rect mRect = new Rect();
@@ -119,7 +118,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTouchHandler = new TaskStackViewTouchHandler(context, this);
         mViewPool = new ViewPool<TaskView, Task>(context, this);
         mInflater = LayoutInflater.from(context);
-        mDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
+        mUIDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
             @Override
             public void run() {
                 // Show the task bar dismiss buttons
@@ -854,7 +853,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mAwaitingFirstLayout = false;
 
             // Start dozing
-            mDozeTrigger.startDozing();
+            mUIDozeTrigger.startDozing();
 
             // Prepare the first view for its enter animation
             int offsetTopAlign = -mTaskRect.top;
@@ -933,8 +932,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     void onUserInteraction() {
         // If the dozer is not running, then either we have not yet laid out, or it has already
         // fallen asleep, so just let it rest.
-        if (mDozeTrigger.isDozing()) {
-            mDozeTrigger.poke();
+        if (mUIDozeTrigger.isDozing()) {
+            mUIDozeTrigger.poke();
         }
     }
 
@@ -1221,7 +1220,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.setClipViewInStack(true);
 
         // If the doze trigger has already fired, then update the state for this task view
-        if (mDozeTrigger.hasTriggered()) {
+        if (mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
         }
 
@@ -1298,6 +1297,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Console.log(Constants.Log.UI.ClickEvents, "[TaskStack|Clicked|Thumbnail]",
                     task + " cb: " + mCb);
         }
+
+        // Cancel any doze triggers
+        mUIDozeTrigger.stopDozing();
 
         if (mCb != null) {
             mCb.onTaskLaunched(this, tv, mStack, task);

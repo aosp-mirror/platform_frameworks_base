@@ -37,29 +37,29 @@ public class RecentsPackageMonitor extends PackageMonitor {
 
     PackageCallbacks mCb;
     List<ActivityManager.RecentTaskInfo> mTasks;
-    SystemServicesProxy mSsp;
-    boolean mRegistered;
-
-    public RecentsPackageMonitor(Context context) {
-        mSsp = new SystemServicesProxy(context);
-    }
+    SystemServicesProxy mSystemServicesProxy;
 
     /** Registers the broadcast receivers with the specified callbacks. */
     public void register(Context context, PackageCallbacks cb) {
+        mSystemServicesProxy = new SystemServicesProxy(context);
         mCb = cb;
-        if (!mRegistered) {
+        try {
             register(context, Looper.getMainLooper(), false);
-            mRegistered = true;
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
     }
 
     /** Unregisters the broadcast receivers. */
     @Override
     public void unregister() {
-        if (mRegistered) {
+        try {
             super.unregister();
-            mRegistered = false;
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
+        mSystemServicesProxy = null;
+        mCb = null;
         mTasks.clear();
     }
 
@@ -106,7 +106,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
                     // If we know that the component still exists in the package, then skip
                     continue;
                 }
-                if (mSsp.getActivityInfo(cn) != null) {
+                if (mSystemServicesProxy.getActivityInfo(cn) != null) {
                     componentsKnownToExist.add(cn);
                 } else {
                     componentsToRemove.add(cn);
