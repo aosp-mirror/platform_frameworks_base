@@ -44,59 +44,13 @@ page.type=about
 .auto-img-frame-cols {
   z-index:2;
   position:relative;
+  width:460px;
 }
 .auto-img-shot-cols {
+  width:447px;
   position:absolute;
-  top:5px;
-  left:2px;
-  z-index:1;
-}
-</style>
-
-
-    <style>
-.fullpage>#footer,
-#jd-content>.content-footer.wrap {
-  display:none;
-}
-</style>
-
-<style>
-#footer {
-  display: none;
-}
-.content-footer {
-  display: none;
-}
-#hero-height {
-  height:calc(100% - 110px);
-}
-.img-logo {
-  margin:0 auto;
-  display:block;
-  margin-bottom:-28px !important;
-}
-.img-logo-thin {
-  margin:0 auto;
-  display:block;
-  margin-bottom:-55px !important;
-}
-.col-5 {
-  width:170px;
-}
-.auto-img-container-cols {
-  position:relative;
-  margin-bottom:25px;
-  margin-top:25px;
-}
-.auto-img-frame-cols {
-  z-index:2;
-  position:relative;
-}
-.auto-img-shot-cols {
-  position:absolute;
-  top:5px;
-  left:2px;
+  top:8px;
+  left:7px;
   z-index:1;
 }
 </style>
@@ -214,8 +168,8 @@ page.type=about
           <div class="landing-section-header">
             <div class="landing-h1">Minimize Distraction</div>
             <div class="landing-subhead">
-             Standard UI templates for several app categories let users focus on the road. 
-            </div>       
+             Standard UI templates for several app categories let users focus on the road.
+            </div>
           </div>
           <div class="landing-body">
             <div class="cols">
