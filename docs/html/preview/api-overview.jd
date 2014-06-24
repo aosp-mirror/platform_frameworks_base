@@ -30,12 +30,7 @@ sdk.platform.apiLevel=20
       <li><a href="#WebView">WebView updates</a></li>
     </ol>
   </li>
-  <li><a href="#UserInput">User Input</a>
-    <ol>
-      <li><a href="#IME">IME bug fixes and improvements</a></li>
-    </ol>
-  </li>
-  <li><a href="#Animations">Animation &amp; Graphics</a>
+  <li><a href="#Graphics">Graphics</a>
     <ol>
       <li><a href="#OpenGLES-3-1">Support for OpenGL ES 3.1</a></li>
       <li><a href="#AndroidExtensionPack">Android Extension Pack</a></li>
@@ -80,6 +75,11 @@ sdk.platform.apiLevel=20
   <li><a href="#TestingA11y">Testing &amp; Accessibility</a>
     <ol>
       <li><a href="#TestingA11yImprovements">Testing and accessibility improvements</a></li>
+    </ol>
+  </li>
+  <li><a href="#IME">IME</a>
+    <ol>
+      <li><a href="#Switching">Easier switching between input languages</a></li>
     </ol>
   </li>
   <li><a href="#Manifest">Manifest Declarations</a>
@@ -297,11 +297,9 @@ notification object, attach the replacement notification to it through the
 
 <h3 id="NotificationsMetadata">Notifications metadata</h3>
 <p>The L Developer Preview uses metadata associated with your app notifications
-to sort the notifications more intelligently. The metadata you set also
-controls how the system presents your app notifications when the user is in <em>Do
-Not Disturb</em> mode. To set the metadata, call the following methods in
-{@code android.app.Notification.Builder} when you construct the
-notification:</p>
+to sort the notifications more intelligently. To set the metadata, call the
+following methods in {@code android.app.Notification.Builder} when you
+construct the notification:</p>
 
 <ul>
 <li>{@code setCategory()}. Depending on the message category, this tells
@@ -322,11 +320,11 @@ people as being more important.</li>
 <p>In previous releases, the
 <a href="{@docRoot}design/get-started/ui-overview.html">Recents screen</a>
 could only display a single task for each app that the user interacted with
-most recently. The L Developer Preview enables your app to open more tasks as
+most recently. Now your app can open more tasks as
 needed for additional concurrent activities for documents.
-This feature facilitates multitasking
-by letting users quickly switch between individual activities and documents
-from the Recents screen, with a consistent switching experience across all apps.
+This feature facilitates multitasking by letting users quickly switch between
+individual activities and documents from the Recents screen, with a consistent
+switching experience across all apps.
 Examples of such concurrent tasks might include open tabs in a web
 browser app, documents in a productivity app, concurrent matches in
 a game, or chats in a messaging app. Your app can manage its tasks
@@ -362,35 +360,12 @@ as well as bug fixes. The default user-agent string for a
 been updated to incorporate 36.0.0.0 as the version number.</p>
 
 <p>Additionally, this release brings support for the
-<a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">WebAudio</a>,
-<a href="https://www.khronos.org/webgl/">WebGL</a>, and
-<a href="http://www.webrtc.org/">WebRTC</a> open standards. To learn more about
-the new features included in this release, see <a href="https://developer.chrome.com/multidevice/webview/overview">WebView for Android</a>.</p>
+<a href="http://webaudio.github.io/web-audio-api/" class="external-link">WebAudio</a>,
+<a href="https://www.khronos.org/webgl/" class="external-link">WebGL</a>, and
+<a href="http://www.webrtc.org/" class="external-link">WebRTC</a> open standards. To learn more about
+the new features included in this release, see <a href="https://developer.chrome.com/multidevice/webview/overview" class="external-link">WebView for Android</a>.</p>
 
-<h2 id="UserInput">User Input</h2>
-
-<h3 id="IME">IME bug fixes and improvements</h3>
-
-<p>Beginning in the L Developer Preview, users can more easily switch between
-all <a href="{@docRoot}guide/topics/text/creating-input-method.html">input
-method editors (IME)</a> supported by the platform. Performing the designated
-switching action (usually touching a Globe icon on the soft keyboard) will cycle
-among all such IMEs. This change takes place in
-{@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod
-InputMethodManager.shouldOfferSwitchingToNextInputMethod()}.</p>
-
-<p>In addition, the framework now checks whether the next IME includes a
-switching mechanism at all (and, thus, whether that IME supports switching to
-the IME after it). An
-IME with a switching mechanism will not cycle to an IME without one. This
-change takes place in
-{@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod
-InputMethodManager.switchToNextInputMethod}.
-
-<p>To see an example of how to use the updated IME-switching APIs, refer to the
-updated soft-keyboard implementation sample in this release.</p>
-
-<h2 id="Animations">Animation &amp; Graphics</h2>
+<h2 id="Graphics">Graphics</h2>
 
 <h3 id="OpenGLES-3-1">Support for OpenGL ES 3.1</h3>
 <p>The L Developer Preview adds Java interfaces and native support for OpenGL
@@ -761,9 +736,8 @@ $ historian.par [-p powerfile] bugreport.txt > out.html
 <p>The L Developer Preview provides new functionality for running apps within
 an enterprise environment. A
 <a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a> can
-initiate a managed provisioning process to add a co-present but separate <em>Android
-work profile</em> to a device, if the user has an existing personal account.
-Apps that are associated with Android work profiles will appear alongside
+initiate a managed provisioning process to add a co-present but separate <em>managed profile</em> to a device, if the user has an existing personal account.
+Apps that are associated with managed profiles will appear alongside
 non-managed apps in the user’s Launcher, Recent apps screen, and notifications.</p>
 
 <p>To start the managed provisioning process, send {@code
@@ -771,15 +745,11 @@ ACTION_PROVISION_MANAGED_PROFILE} in an {@link android.content.Intent}. If the
 call is successful, the system triggers the {@code
 android.app.admin.DeviceAdminReceiver. onProfileProvisioningComplete()} callback.
 You can then call {@code app.admin.DevicePolicyManager. setProfileEnabled()} to
-enable this Android work profile.</p>
-
-<p>A device administrator can associate a user with more than one Android
-work profile. To get a list of the Android work profiles associated with the
-user, call {@code android.os.UserManager. getUserProfiles()}.</p>
+enable this managed profile.</p>
 
 <p>If you are developing a Launcher app, you can use the new {@code
 android.content.pm.LauncherApps} class to get a list of launchable activities
-for the current user and any associated Android work profiles. Your Launcher can make
+for the current user and any associated managed profiles. Your Launcher can make
 the managed apps visually prominent by appending a “work” badge to the icon
 drawable with {@code android.os.UserManager. getBadgeDrawableForUser()}.</p>
 
@@ -801,7 +771,7 @@ specially-configured <em>device owner</em> app, through the {@code android.app.a
 
 <p>To set up a device owner, follow these steps:</p>
 <ol>
-<li>Attach a device running an <a href="https://source.android.com/source/building-running.html">Android {@code userdebug} build</a> to your development machine.</li>
+<li>Attach a device running an Android <a href="https://source.android.com/source/building-running.html" class="external-link">{@code userdebug}</a> build to your development machine.</li>
 <li>Install your device owner app.</li>
 <li>Create a {@code device_owner.xml} file and save it to the {@code /data/system}
 directory on the device.
@@ -849,7 +819,7 @@ Your app can obtain a page for rendering with {@code openPage()}, then call
 {@code render()} to turn the opened {@code PdfRenderer.Page} into a bitmap. You
 can also set additional parameters if you only want to convert a portion of the
 document into a bitmap image (for example, to implement
-<a href="http://en.wikipedia.org/wiki/Tiled_rendering">tiled rendering</a> in
+<a href="http://en.wikipedia.org/wiki/Tiled_rendering" class="external-link">tiled rendering</a> in
 order to zoom in on the document).</p>
 
 <h2 id="TestingA11y">Testing &amp; Accessibility </h2>
@@ -883,6 +853,29 @@ actions to perform on an {@link android.view.accessibility.AccessibilityNodeInfo
 The new {@code AccessibilityAction} class replaces the actions-related APIs
 previously found in {@code AccessibilityNodeInfo}.
 </ul>
+
+<h2 id="IME">IME</h2>
+
+<h3 id="Switching">Easier switching between input languages</h3>
+
+<p>Beginning in the L Developer Preview, users can more easily switch between
+all <a href="{@docRoot}guide/topics/text/creating-input-method.html">input
+method editors (IME)</a> supported by the platform. Performing the designated
+switching action (usually touching a Globe icon on the soft keyboard) will cycle
+among all such IMEs. This change takes place in
+{@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod
+InputMethodManager.shouldOfferSwitchingToNextInputMethod()}.</p>
+
+<p>In addition, the framework now checks whether the next IME includes a
+switching mechanism at all (and, thus, whether that IME supports switching to
+the IME after it). An
+IME with a switching mechanism will not cycle to an IME without one. This
+change takes place in
+{@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod
+InputMethodManager.switchToNextInputMethod}.
+
+<p>To see an example of how to use the updated IME-switching APIs, refer to the
+updated soft-keyboard implementation sample in this release.</p>
 
 <h2 id="Manifest">Manifest Declarations</h2>
 
