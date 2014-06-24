@@ -124,6 +124,9 @@ public class Toolbar extends ViewGroup {
     private CharSequence mTitleText;
     private CharSequence mSubtitleText;
 
+    private int mTitleTextColor;
+    private int mSubtitleTextColor;
+
     // Clear me after use.
     private final ArrayList<View> mTempViews = new ArrayList<View>();
 
@@ -498,7 +501,12 @@ public class Toolbar extends ViewGroup {
                 mTitleTextView = new TextView(context);
                 mTitleTextView.setSingleLine();
                 mTitleTextView.setEllipsize(TextUtils.TruncateAt.END);
-                mTitleTextView.setTextAppearance(context, mTitleTextAppearance);
+                if (mTitleTextAppearance != 0) {
+                    mTitleTextView.setTextAppearance(context, mTitleTextAppearance);
+                }
+                if (mTitleTextColor != 0) {
+                    mTitleTextView.setTextColor(mTitleTextColor);
+                }
             }
             if (mTitleTextView.getParent() == null) {
                 addSystemView(mTitleTextView);
@@ -546,7 +554,12 @@ public class Toolbar extends ViewGroup {
                 mSubtitleTextView = new TextView(context);
                 mSubtitleTextView.setSingleLine();
                 mSubtitleTextView.setEllipsize(TextUtils.TruncateAt.END);
-                mSubtitleTextView.setTextAppearance(context, mSubtitleTextAppearance);
+                if (mSubtitleTextAppearance != 0) {
+                    mSubtitleTextView.setTextAppearance(context, mSubtitleTextAppearance);
+                }
+                if (mSubtitleTextColor != 0) {
+                    mSubtitleTextView.setTextColor(mSubtitleTextColor);
+                }
             }
             if (mSubtitleTextView.getParent() == null) {
                 addSystemView(mSubtitleTextView);
@@ -579,6 +592,30 @@ public class Toolbar extends ViewGroup {
         mSubtitleTextAppearance = resId;
         if (mSubtitleTextView != null) {
             mSubtitleTextView.setTextAppearance(context, resId);
+        }
+    }
+
+    /**
+     * Sets the text color of the title, if present.
+     *
+     * @param color The new text color in 0xAARRGGBB format
+     */
+    public void setTitleTextColor(int color) {
+        mTitleTextColor = color;
+        if (mTitleTextView != null) {
+            mTitleTextView.setTextColor(color);
+        }
+    }
+
+    /**
+     * Sets the text color of the subtitle, if present.
+     *
+     * @param color The new text color in 0xAARRGGBB format
+     */
+    public void setSubtitleTextColor(int color) {
+        mSubtitleTextColor = color;
+        if (mSubtitleTextView != null) {
+            mSubtitleTextView.setTextColor(color);
         }
     }
 
