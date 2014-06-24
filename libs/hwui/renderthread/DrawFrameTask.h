@@ -41,7 +41,7 @@ class RenderThread;
 
 enum SyncResult {
     kSync_OK = 0,
-    kSync_UIRedrawRequired = 1 << 1,
+    kSync_UIRedrawRequired = 1 << 0,
 };
 
 /*
