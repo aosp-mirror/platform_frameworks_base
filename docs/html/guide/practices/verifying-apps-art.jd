@@ -66,7 +66,7 @@ to prevent <a
 href="{@docRoot}/tools/debugging/debugging-memory.html#LogMessages"><code>GC_FOR_ALLOC</code></a>-type
 occurrences or to reduce fragmentation. You can verify which runtime is in use
 by calling {@link java.lang.System#getProperty(java.lang.String)
-System.getProperty("dalvik.vm.version")}. If ART is in use, the property's value
+System.getProperty("java.vm.version")}. If ART is in use, the property's value
 is <code>"2.0.0"</code> or higher.</p>
 
 <p>Furthermore, a compacting garbage collector is under development in the <a
