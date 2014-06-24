@@ -353,7 +353,7 @@ public class LocalTransport extends BackupTransport {
 
     // ------------------------------------------------------------------------------------
     // Restore handling
-    static final long[] POSSIBLE_SETS = { 2, 3, 4, 5, 6, 7, 8, 9 }; 
+    static final long[] POSSIBLE_SETS = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
     @Override
     public RestoreSet[] getAvailableRestoreSets() {
@@ -384,7 +384,8 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public int startRestore(long token, PackageInfo[] packages) {
-        if (DEBUG) Log.v(TAG, "start restore " + token);
+        if (DEBUG) Log.v(TAG, "start restore " + token + " : " + packages.length
+                + " matching packages");
         mRestorePackages = packages;
         mRestorePackage = -1;
         mRestoreToken = token;
@@ -438,7 +439,8 @@ public class LocalTransport extends BackupTransport {
         if (mRestoreType != RestoreDescription.TYPE_KEY_VALUE) {
             throw new IllegalStateException("getRestoreData(fd) for non-key/value dataset");
         }
-        File packageDir = new File(mRestoreSetDir, mRestorePackages[mRestorePackage].packageName);
+        File packageDir = new File(mRestoreSetIncrementalDir,
+                mRestorePackages[mRestorePackage].packageName);
 
         // The restore set is the concatenation of the individual record blobs,
         // each of which is a file in the package's directory.  We return the

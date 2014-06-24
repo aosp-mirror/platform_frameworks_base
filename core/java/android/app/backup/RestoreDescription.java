@@ -50,6 +50,13 @@ public class RestoreDescription implements Parcelable {
     /** This package's restore data is a tarball-type full data stream */
     public static final int TYPE_FULL_STREAM = 2;
 
+    @Override
+    public String toString() {
+        return "RestoreDescription{" + mPackageName + " : "
+                + ((mDataType == TYPE_KEY_VALUE) ? "KEY_VALUE" : "STREAM")
+                + '}';
+    }
+
     // ---------------------------------------
     // API
 
