@@ -72,6 +72,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         super(activity.getWindow(), names, getListener(activity, isReturning),
                 isReturning);
         viewsReady(mapSharedElements(accepted, mapped));
+        stripOffscreenViews();
         mIsBackgroundReady = !isReturning;
         mActivity = activity;
     }
