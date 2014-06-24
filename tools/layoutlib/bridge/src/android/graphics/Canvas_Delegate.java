@@ -627,8 +627,7 @@ public final class Canvas_Delegate {
                 // set the color
                 graphics.setColor(new Color(color, true /*alpha*/));
 
-                Composite composite = PorterDuffXfermode_Delegate.getComposite(
-                        PorterDuffXfermode_Delegate.getPorterDuffMode(mode), 0xFF);
+                Composite composite = PorterDuffXfermode_Delegate.getComposite(mode, 0xFF);
                 if (composite != null) {
                     graphics.setComposite(composite);
                 }

@@ -43,11 +43,6 @@ public class LightingColorFilter_Delegate extends ColorFilter_Delegate {
     // ---- Public Helper methods ----
 
     @Override
-    public boolean isSupported() {
-        return false;
-    }
-
-    @Override
     public String getSupportMessage() {
         return "Lighting Color Filters are not supported.";
     }
