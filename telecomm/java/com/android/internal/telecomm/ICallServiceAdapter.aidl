@@ -27,8 +27,6 @@ import android.telecomm.ConnectionRequest;
  * {@hide}
  */
 oneway interface ICallServiceAdapter {
-    void setIsCompatibleWith(String callId, boolean isCompatible);
-
     void notifyIncomingCall(in CallInfo callInfo);
 
     void handleSuccessfulOutgoingCall(String callId);

@@ -356,6 +356,13 @@ public abstract class Connection {
     }
 
     /**
+     * Returns whether this connection is capable of being conferenced.
+     */
+    public boolean isConferenceCapable() {
+        return mIsConferenceCapable;
+    }
+
+    /**
      * Sets the value of the {@link #getHandle()} property and notifies listeners.
      *
      * @param handle The new handle.

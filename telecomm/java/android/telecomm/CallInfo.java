@@ -52,8 +52,7 @@ public final class CallInfo implements Parcelable {
     private final GatewayInfo mGatewayInfo;
 
     /**
-     * Additional information that can be persisted. For example, extra handoff information can
-     * attached to a call using {@link CallServiceSelectorAdapter#setHandoffInfo(String,Uri,Bundle).
+     * Additional information that can be persisted.
      */
     private final Bundle mExtras;
 

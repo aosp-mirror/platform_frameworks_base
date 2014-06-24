@@ -156,7 +156,7 @@ public abstract class InCallService extends Service {
     }
 
     /**
-     * @return The attached {@link CallServiceSelectorAdapter} if attached, or null otherwise.
+     * @return The attached {@link InCallAdapter} if attached, or null otherwise.
      */
     protected final InCallAdapter getAdapter() {
         return mAdapter;

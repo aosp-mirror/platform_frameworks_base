@@ -27582,7 +27582,6 @@ package android.telecomm {
     method protected final android.telecomm.CallServiceAdapter getAdapter();
     method public final android.os.IBinder getBinder();
     method public abstract void hold(java.lang.String);
-    method public abstract void isCompatibleWith(android.telecomm.CallInfo);
     method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
@@ -27605,7 +27604,6 @@ package android.telecomm {
     method public void setActive(java.lang.String);
     method public void setDialing(java.lang.String);
     method public void setDisconnected(java.lang.String, int, java.lang.String);
-    method public void setIsCompatibleWith(java.lang.String, boolean);
     method public void setOnHold(java.lang.String);
     method public void setRequestingRingback(java.lang.String, boolean);
     method public void setRinging(java.lang.String);
@@ -27640,22 +27638,6 @@ package android.telecomm {
     method public android.os.IBinder onBind(android.content.Intent);
   }
 
-  public abstract class CallServiceSelector extends android.app.Service {
-    ctor protected CallServiceSelector();
-    method protected final void cancelOutgoingCall(android.telecomm.CallInfo);
-    method protected final android.telecomm.CallServiceSelectorAdapter getAdapter();
-    method protected final java.util.Collection<android.telecomm.CallInfo> getCalls();
-    method protected void onAdapterAttached(android.telecomm.CallServiceSelectorAdapter);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract void select(android.telecomm.CallInfo, java.util.List<android.telecomm.CallServiceDescriptor>);
-  }
-
-  public final class CallServiceSelectorAdapter {
-    method public void cancelOutgoingCall(java.lang.String);
-    method public void setHandoffInfo(java.lang.String, android.net.Uri, android.os.Bundle);
-    method public void setSelectedCallServices(java.lang.String, java.util.List<android.telecomm.CallServiceDescriptor>);
-  }
-
   public final class CallState extends java.lang.Enum {
     method public static android.telecomm.CallState valueOf(java.lang.String);
     method public static final android.telecomm.CallState[] values();
@@ -27676,6 +27658,7 @@ package android.telecomm {
     method public java.util.List<android.telecomm.Connection> getChildConnections();
     method public final android.net.Uri getHandle();
     method public android.telecomm.Connection getParentConnection();
+    method public boolean isConferenceCapable();
     method public boolean isConferenceConnection();
     method public boolean isRequestingRingback();
     method protected void onAbort();
@@ -27760,14 +27743,12 @@ package android.telecomm {
     method public final void disconnect(java.lang.String);
     method public java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
-    method public final void isCompatibleWith(android.telecomm.CallInfo);
     method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
     method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
-    method public void onFindSubscriptions(android.net.Uri, android.telecomm.Response<android.net.Uri, android.telecomm.Subscription>);
     method public final void onPostDialContinue(java.lang.String, boolean);
     method public final void onPostDialWait(android.telecomm.Connection, java.lang.String);
     method public final void playDtmfTone(java.lang.String, char);
@@ -27856,7 +27837,6 @@ package android.telecomm {
     ctor public TelecommConstants();
     field public static final java.lang.String ACTION_CALL_SERVICE;
     field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
-    field public static final java.lang.String ACTION_CALL_SERVICE_SELECTOR;
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
