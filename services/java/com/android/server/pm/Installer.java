@@ -24,6 +24,7 @@ import android.util.Slog;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 public final class Installer {
     private static final String TAG = "Installer";
@@ -335,8 +336,8 @@ public final class Installer {
         }
     }
 
-    public int pruneDexCache() {
-        return execute("prunedexcache");
+    public int pruneDexCache(String cacheSubDir) {
+        return execute("prunedexcache " + cacheSubDir);
     }
 
     public int freeCache(long freeStorageSize) {
