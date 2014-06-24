@@ -1437,9 +1437,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // changed. Consider this significant, and wipe away all other
                 // existing dexopt files to ensure we don't leave any dangling around.
                 //
-                // Additionally, delete all dex files from the root directory
-                // since there shouldn't be any there anyway.
-                //
                 // TODO: This should be revisited because it isn't as good an indicator
                 // as it used to be. It used to include the boot classpath but at some point
                 // DexFile.isDexOptNeeded started returning false for the boot
@@ -1447,7 +1444,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // small maintenance release update that the library and tool
                 // jars may be unchanged but APK could be removed resulting in
                 // unused dalvik-cache files.
-                mInstaller.pruneDexCache();
+                for (String instructionSet : instructionSets) {
+                    mInstaller.pruneDexCache(instructionSet);
+                }
+
+                // Additionally, delete all dex files from the root directory
+                // since there shouldn't be any there anyway, unless we're upgrading
+                // from an older OS version or a build that contained the "old" style
+                // flat scheme.
+                mInstaller.pruneDexCache(".");
             }
 
             // Collect vendor overlay packages.
