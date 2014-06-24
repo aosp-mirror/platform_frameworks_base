@@ -670,11 +670,8 @@ public final class ViewRootImpl implements ViewParent,
      *                          has invoked. If false, the functor may be invoked
      *                          asynchronously.
      */
-    public boolean invokeFunctor(long functor, boolean waitForCompletion) {
+    public void invokeFunctor(long functor, boolean waitForCompletion) {
         ThreadedRenderer.invokeFunctor(functor, waitForCompletion);
-        // TODO: Remove the return value. This is here for compatibility
-        // with current webview, which expects a boolean
-        return true;
     }
 
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
