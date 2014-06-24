@@ -13,10 +13,12 @@ page.title=Views and Shadows
 </div>
 </div>
 
-<p>In apps with material design, depth has meaning. You should assign higher elevation values to more
-important UI elements in your app. The elevation value of a view determines the size of its
-shadow: views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane
-under an orthographic projection (the views do not scale for different values of Z).</p>
+<p>The elevation of a view determines the size of its shadow:
+views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane under an
+orthographic projection (the views do not scale for different values of Z).</p>
+
+<p>Elevation is also useful to create animations where widgets temporarily rise above the
+view plane when performing some action.</p>
 
 
 <h2 id="elevation">View Elevation</h2>
@@ -35,52 +37,59 @@ static component, and the translation is used for animations:</p>
 
 <p>To set the translation of a view, use the <code>View.setTranslationZ</code> method.</p>
 
-<p>The Z values are measured in the same units as the X and Y values (like <code>dp</code> or
-<code>px</code>).</p>
+<p>The new <code>ViewPropertyAnimator.z</code> and <code>ViewPropertyAnimator.translationZ</code>
+methods enable you to easily animate the elevation of views. For more information, see
+the API reference for <code>ViewPropertyAnimator</code> and the <a
+href="{@docRoot}guide/topics/graphics/prop-animation.html#object-animator">Property Animation</a>
+developer guide.</p>
+
+<p>The Z values are measured in the same units as the X and Y values.</p>
 
 
 <h2 id="shadows">Shadows and Outlines</h2>
 
-<p>The bounds of a view's background drawable determine the default shape of its shadow. To define
-a custom shape for a shadow, such as an oval, use the <code>View.setOutline</code> method:</p>
+<p>The bounds of a view's background drawable determine the default shape of its shadow.
+<strong>Outlines</strong> represent the outer shape of a graphics object and define the ripple
+area for touch feedback.</p>
+
+<p>For example, if you define a view with a background drawable:</p>
 
 <pre>
-View v = findViewById(R.id.my_view);
-
-// add 10px to the static elevation
-v.setTranslationZ(10);
-
-// set an oval shadow
-Outline outline = new Outline();
-outline.setOval(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-myView.setOutline(outline);
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
 </pre>
 
-<p>An <code>Outline</code> represents the outer shape of a graphics object. You can create
-<code>Outline</code> objects as in this example, or you can obtain the outline from a
-<code>Drawable</code> object with the <code>getOutline</code> method.</p>
+<p>where the background drawable is defined as a rectangle with rounded corners:</p>
 
-<p>The outline of a view also defines the ripple area for touch feedback.</p>
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>Then this view and drawable cast the appropiate shadow.</p>
+
+<p>You can also create outlines in your code using the methods in the <code>Outline</code> class,
+and you can assign them to views with the <code>View.setOutline</code> method.</p>
 
 <p>To prevent a view from casting a shadow, set its outline to <code>null</code>.</p>
 
 
 <h2 id="clip">Clipping Views</h2>
 
-<p>The Android L Developer Preview lets you clip a view to its outline area using the
+<p>Clip a view to its outline area using the
 <code>View.setClipToOutline</code> method. Only rectangle, circle, and round rectangle outlines
 support clipping, as determined by the <code>Outline.canClip</code> method.</p>
 
-<p>To determine if a view has been clipped, use the <code>View.getClipToOutline</code> method.</p>
+<p>To clip a view to the shape of a drawable, set the drawable as the background of the view
+(as shown above) and call the <code>View.setClipToOutline</code> method.</p>
 
-<pre>
-// clip a view to an oval
-View v = findViewById(R.id.my_view);
-outline.setOval(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-myView.setOutline(outline);
-
-// if the view is not already clipped
-if (v.getClipToOutline() == false) {
-    v.setClipToOutline(true);
-}
-</pre>
+<p>Because clipping views is an expensive operation, don't animate the shape you use to
+clip a view. To achieve this effect, use a <a
+href="{@docRoot}preview/material/animations.html#reveal">Reveal Effect</a> animation.</p>

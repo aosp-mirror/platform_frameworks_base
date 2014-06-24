@@ -3,11 +3,11 @@ page.type=design
 
 @jd:body
 
-<p itemprop="description">The Android L Developer Preview includes support for material design apps. Material design
-is a comprehensive guide for visual, motion, and interaction design across platforms and devices.
-To use material design in your Android apps, follow the guidelines defined in the
-<a href="">material design specification</a> and use the new components and functionality
-available in the Android L Developer Preview.</p>
+<p itemprop="description">The Android L Developer Preview includes support for material design
+apps. Material design is a comprehensive guide for visual, motion, and interaction design across
+platforms and devices. To use material design in your Android apps, follow the guidelines defined
+in the <a href="http://www.google.com/design/spec">material design specification</a> and use the
+new components and functionality available in the Android L Developer Preview.</p>
 
 <p>The Android L Developer Preview provides the following elements for you to build material
 design apps:</p>
@@ -27,13 +27,13 @@ their color palette, and default animations for touch feedback and activity tran
 <!-- two columns -->
 <div style="width:700px;margin-top:25px;margin-bottom:20px">
 <div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
-  <img src="{@docRoot}preview/material/images/MaterialDark.png" style="width:250px;"/>
+  <img src="{@docRoot}preview/material/images/MaterialDark.png" width="500" height="238"/>
   <div style="width:140px;margin:0 auto">
   <p style="margin-top:8px">Dark Material theme</p>
   </div>
 </div>
 <div style="float:left;width:250px;margin-right:0px;">
-  <img src="{@docRoot}preview/material/images/MaterialLight.png" style="width:250px;"/>
+  <img src="{@docRoot}preview/material/images/MaterialLight.png" width="500" height="238"/>
   <div style="width:140px;margin:0 auto">
   <p style="margin-top:8px">Light Material theme</p>
   </div>
@@ -49,12 +49,12 @@ their color palette, and default animations for touch feedback and activity tran
 <!-- two columns -->
 <div style="width:700px;margin-top:25px;margin-bottom:20px">
 <div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
-  <img src="{@docRoot}preview/material/images/list_mail.png" style="width:250px;"/>
+  <img src="{@docRoot}preview/material/images/list_mail.png" width="500" height="426"/>
   <p>The new <code>RecyclerView</code> widget is a more advanced version of <code>ListView</code>
-  provides performance improvements for dynamic views and is easier to use.</p>
+  that provides performance improvements for dynamic views and is easier to use.</p>
 </div>
 <div style="float:left;width:250px;margin-right:0px;">
-  <img src="{@docRoot}preview/material/images/card_travel.png" style="width:250px;"/>
+  <img src="{@docRoot}preview/material/images/card_travel.png" width="500" height="426"/>
   <p>The new <code>CardView</code> widget lets you display important pieces of information inside
   cards that have a consistent look and feel.</p>
 </div>
@@ -64,9 +64,13 @@ their color palette, and default animations for touch feedback and activity tran
 
 <h3>View Shadows</h3>
 
-<p>In addition to the X and Y components, views in the Android L Developer Preview have a Z
-component. This new component represents the elevation of a view, which determines the size of
-its shadow: views with higher Z values cast bigger shadows.</p>
+<p>In addition to the X and Y properties, views in the Android L Developer Preview have a Z
+property. This new property represents the elevation of a view, which determines:</p>
+
+<ul>
+<li>The size of the shadow - Views with higher Z values cast bigger shadows.</li>
+<li>The drawing order - Views with higher Z values appear on top of other views.</li>
+</ul>
 
 <div style="width:290px;margin-left:35px;float:right">
   <div class="framed-nexus5-port-span-5">
@@ -86,7 +90,7 @@ its shadow: views with higher Z values cast bigger shadows.</p>
 <p>The Android L Developer Preview provides new APIs that let you create custom animations for
 touch feedback in UI controls, view state changes, and activity transitions.</p>
 
-<p>The new animation APIs in the Android L Developer Preview let you:</p>
+<p>The new animation APIs let you:</p>
 
 <ul>
 <li style="margin-bottom:15px">
@@ -99,7 +103,7 @@ Hide and show views with <strong>reveal effect</strong> animations.
 Switch between activities with custom <strong>activity transition</strong> animations.
 </li>
 <li style="margin-bottom:15px">
-Create custom animation patterns with <strong>curved motion</strong>.
+Create more natural animations with <strong>curved motion</strong>.
 </li>
 <li style="margin-bottom:15px">
 Animate changes in one or more view properties with <strong>view state change</strong> animations.
@@ -109,9 +113,16 @@ Show animations in <strong>state list drawables</strong> between view state chan
 </li>
 </ul>
 
+<p>Touch feedback animations are built into several standard views, such as buttons. The new APIs
+let you customize these animations and add animations to your custom views.</p>
+
 
 <h3>New Capabilities for Drawables</h3>
 
 <p>The Android L Developer Preview supports <strong>drawable tinting</strong>: you can define
-bitmaps as an alpha mask and tint them using a color resource. You can create these assets only
-once and color each instance to match your theme.</p>
+bitmaps as an alpha mask and tint them using a color resource. You create these assets only
+once and color each instance to match your theme. Drawables also now support specifying most XML
+properties as <strong>theme attributes</strong>.</p>
+
+<p>The Android L Developer Preview Support Library includes a <strong>color extraction</strong>
+library that lets you automatically extract prominent colors from a bitmap image.</p>
