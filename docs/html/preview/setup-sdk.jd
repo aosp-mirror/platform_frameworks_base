@@ -111,15 +111,31 @@ image to your device.</p>
 
 <h2 id="createProject">Create a Project</h2>
 
-<ol>
-  <li>Create a new Android project with the following properties:
-    <ul>
-      <li>Minimum SDK Version: L</li>
-      <li>Target SDK Version: L</li>
-      <li>Build Target: L</li>
-    </ul>
-  </li>
-  <li>Choose the theme <code>Theme.Material</code>
-    <!-- put in name as it appears in Eclipse menu? -->
+<p>Android Studio makes it easy to create a project for the L Developer Preview. Follow
+the steps described in <a href="{@docRoot}sdk/installing/create-project.html">Creating a
+Project</a>. In the <strong>Form Factors</strong> screen:</p>
 
-</ol>
+<ul>
+  <li>Check <strong>Phone and Tablet</strong>.</li>
+  <li>Select <strong>API 20+: Android L (Preview)</strong> in <strong>Minimum SDK</strong>.</li>
+</ul>
+
+<p>On the development environment, open the <code>build.gradle</code> file for your module
+and make sure that:</p>
+
+<ul>
+  <li><code>compileSdkVersion</code> is set to <code>'android-L'</code></li>
+  <li><code>minSdkVersion</code> is set to <code>'L'</code></li>
+  <li><code>targetSdkVersion</code> is set to <code>'L'</code></li>
+</ul>
+
+<p>To use the material theme, open the <code>values/styles.xml</code> in your project and make
+sure that you theme extends the material theme:</p>
+
+<pre>
+&lt;resources>
+    &lt;style name="AppTheme" parent="android:Theme.Material">
+        &lt;!-- Customize your theme here -->
+    &lt;/style>
+&lt;/resources>
+</pre>
