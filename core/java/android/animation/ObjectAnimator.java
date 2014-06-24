@@ -469,7 +469,10 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     public static <T> ObjectAnimator ofFloat(T target, Property<T, Float> xProperty,
             Property<T, Float> yProperty, Path path) {
-        return ofFloat(target, xProperty.getName(), yProperty.getName(), path);
+        Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, false);
+        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframe(xProperty, keyframes[0]);
+        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframe(yProperty, keyframes[1]);
+        return ofPropertyValuesHolder(target, x, y);
     }
 
     /**
