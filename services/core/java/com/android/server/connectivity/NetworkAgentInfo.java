@@ -78,6 +78,6 @@ public class NetworkAgentInfo {
 
     public String name() {
         return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ")]";
+                networkInfo.getSubtypeName() + ") - " + network.toString() + "]";
     }
 }

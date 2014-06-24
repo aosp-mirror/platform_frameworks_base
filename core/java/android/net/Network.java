@@ -190,13 +190,20 @@ public class Network implements Parcelable {
             }
     };
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof Network == false) return false;
         Network other = (Network)obj;
         return this.netId == other.netId;
     }
 
+    @Override
     public int hashCode() {
         return netId * 11;
+    }
+
+    @Override
+    public String toString() {
+        return Integer.toString(netId);
     }
 }
