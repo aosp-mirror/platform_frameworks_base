@@ -26,6 +26,7 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -338,22 +339,25 @@ public class SurfaceTextureRenderer {
         }
 
         int maxLength = 0;
-        int[] dimens = new int[2];
         for (EGLSurfaceHolder holder : surfaces) {
-            LegacyCameraDevice.nativeDetectSurfaceDimens(holder.surface, dimens);
-            int length = dimens[0] * dimens[1];
-            // Find max surface size, ensure PBuffer can hold this many pixels
-            maxLength = (length > maxLength) ? length : maxLength;
-            int[] surfaceAttribs = {
-                    EGL14.EGL_WIDTH, dimens[0],
-                    EGL14.EGL_HEIGHT, dimens[1],
-                    EGL14.EGL_NONE
-            };
-            holder.width = dimens[0];
-            holder.height = dimens[1];
-            holder.eglSurface =
-                    EGL14.eglCreatePbufferSurface(mEGLDisplay, mConfigs, surfaceAttribs, 0);
-            checkEglError("eglCreatePbufferSurface");
+            try {
+                Size size = LegacyCameraDevice.getSurfaceSize(holder.surface);
+                int length = size.getWidth() * size.getHeight();
+                // Find max surface size, ensure PBuffer can hold this many pixels
+                maxLength = (length > maxLength) ? length : maxLength;
+                int[] surfaceAttribs = {
+                        EGL14.EGL_WIDTH, size.getWidth(),
+                        EGL14.EGL_HEIGHT, size.getHeight(),
+                        EGL14.EGL_NONE
+                };
+                holder.width = size.getWidth();
+                holder.height = size.getHeight();
+                holder.eglSurface =
+                        EGL14.eglCreatePbufferSurface(mEGLDisplay, mConfigs, surfaceAttribs, 0);
+                checkEglError("eglCreatePbufferSurface");
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
+            }
         }
         mPBufferPixels = ByteBuffer.allocateDirect(maxLength * PBUFFER_PIXEL_BYTES)
                 .order(ByteOrder.nativeOrder());
@@ -438,15 +442,19 @@ public class SurfaceTextureRenderer {
 
         for (Surface s : surfaces) {
             // If pixel conversions aren't handled by egl, use a pbuffer
-            if (LegacyCameraDevice.needsConversion(s)) {
-                LegacyCameraDevice.nativeSetSurfaceFormat(s, ImageFormat.YV12);
-                EGLSurfaceHolder holder = new EGLSurfaceHolder();
-                holder.surface = s;
-                mConversionSurfaces.add(holder);
-            } else {
-                EGLSurfaceHolder holder = new EGLSurfaceHolder();
-                holder.surface = s;
-                mSurfaces.add(holder);
+            try {
+                if (LegacyCameraDevice.needsConversion(s)) {
+                    LegacyCameraDevice.setSurfaceFormat(s, ImageFormat.YV12);
+                    EGLSurfaceHolder holder = new EGLSurfaceHolder();
+                    holder.surface = s;
+                    mConversionSurfaces.add(holder);
+                } else {
+                    EGLSurfaceHolder holder = new EGLSurfaceHolder();
+                    holder.surface = s;
+                    mSurfaces.add(holder);
+                }
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping configuration... ", e);
             }
         }
 
@@ -503,10 +511,14 @@ public class SurfaceTextureRenderer {
                 GLES20.glReadPixels(/*x*/ 0, /*y*/ 0, holder.width, holder.height, GLES20.GL_RGBA,
                         GLES20.GL_UNSIGNED_BYTE, mPBufferPixels);
                 checkGlError("glReadPixels");
-                int format = LegacyCameraDevice.nativeDetectSurfaceType(holder.surface);
-                LegacyCameraDevice.nativeProduceFrame(holder.surface, mPBufferPixels.array(),
-                        holder.width, holder.height, format);
-                swapBuffers(holder.eglSurface);
+                try {
+                    int format = LegacyCameraDevice.detectSurfaceType(holder.surface);
+                    LegacyCameraDevice.produceFrame(holder.surface, mPBufferPixels.array(),
+                            holder.width, holder.height, format);
+                    swapBuffers(holder.eglSurface);
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.w(TAG, "Surface abandoned, dropping frame. ", e);
+                }
             }
         }
     }

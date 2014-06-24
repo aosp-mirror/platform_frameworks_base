@@ -35,6 +35,7 @@ import android.view.Surface;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.hardware.camera2.legacy.LegacyExceptionUtils.*;
 import static android.hardware.camera2.utils.CameraBinderDecorator.*;
 import static com.android.internal.util.Preconditions.*;
 
@@ -183,8 +184,8 @@ public class LegacyCameraDevice implements AutoCloseable {
      * @return {@code true} if the surfaces uses {@link ImageFormat#YUV_420_888} or a compatible
      *          format.
      */
-    static boolean needsConversion(Surface s) {
-        int nativeType = LegacyCameraDevice.nativeDetectSurfaceType(s);
+    static boolean needsConversion(Surface s) throws BufferQueueAbandonedException {
+        int nativeType = detectSurfaceType(s);
         return nativeType == ImageFormat.YUV_420_888 || nativeType == ImageFormat.YV12 ||
                 nativeType == ImageFormat.NV21;
     }
@@ -377,28 +378,71 @@ public class LegacyCameraDevice implements AutoCloseable {
      * @throws NullPointerException if the {@code surface} was {@code null}
      * @throws IllegalStateException if the {@code surface} was invalid
      */
-    static Size getSurfaceSize(Surface surface) {
+    static Size getSurfaceSize(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
 
         int[] dimens = new int[2];
-        nativeDetectSurfaceDimens(surface, /*out*/dimens);
+        LegacyExceptionUtils.throwOnError(nativeDetectSurfaceDimens(surface, /*out*/dimens));
 
         return new Size(dimens[0], dimens[1]);
     }
 
-    protected static native int nativeDetectSurfaceType(Surface surface);
+    static int detectSurfaceType(Surface surface) throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceType(surface));
+    }
 
-    protected static native void nativeDetectSurfaceDimens(Surface surface,
+    static void configureSurface(Surface surface, int width, int height,
+                                 int pixelFormat) throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        checkArgumentPositive(width, "width must be positive.");
+        checkArgumentPositive(height, "height must be positive.");
+
+        LegacyExceptionUtils.throwOnError(nativeConfigureSurface(surface, width, height,
+                pixelFormat));
+    }
+
+    static void produceFrame(Surface surface, byte[] pixelBuffer, int width,
+                             int height, int pixelFormat)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        checkNotNull(pixelBuffer);
+        checkArgumentPositive(width, "width must be positive.");
+        checkArgumentPositive(height, "height must be positive.");
+
+        LegacyExceptionUtils.throwOnError(nativeProduceFrame(surface, pixelBuffer, width, height,
+                pixelFormat));
+    }
+
+    static void setSurfaceFormat(Surface surface, int pixelFormat)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+
+        LegacyExceptionUtils.throwOnError(nativeSetSurfaceFormat(surface, pixelFormat));
+    }
+
+    static void setSurfaceDimens(Surface surface, int width, int height)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        checkArgumentPositive(width, "width must be positive.");
+        checkArgumentPositive(height, "height must be positive.");
+
+        LegacyExceptionUtils.throwOnError(nativeSetSurfaceDimens(surface, width, height));
+    }
+
+    private static native int nativeDetectSurfaceType(Surface surface);
+
+    private static native int nativeDetectSurfaceDimens(Surface surface,
             /*out*/int[/*2*/] dimens);
 
-    protected static native void nativeConfigureSurface(Surface surface, int width, int height,
+    private static native int nativeConfigureSurface(Surface surface, int width, int height,
                                                         int pixelFormat);
 
-    protected static native void nativeProduceFrame(Surface surface, byte[] pixelBuffer, int width,
+    private static native int nativeProduceFrame(Surface surface, byte[] pixelBuffer, int width,
                                                     int height, int pixelFormat);
 
-    protected static native void nativeSetSurfaceFormat(Surface surface, int pixelFormat);
+    private static native int nativeSetSurfaceFormat(Surface surface, int pixelFormat);
 
-    protected static native void nativeSetSurfaceDimens(Surface surface, int width, int height);
+    private static native int nativeSetSurfaceDimens(Surface surface, int width, int height);
 
 }

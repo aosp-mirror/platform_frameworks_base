@@ -34,6 +34,7 @@ using namespace android;
 // fully-qualified class name
 #define CAMERA_DEVICE_CLASS_NAME "android/hardware/camera2/legacy/LegacyCameraDevice"
 #define CAMERA_DEVICE_BUFFER_SLACK  3
+#define DONT_CARE 0
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(*(a)))
 
@@ -336,71 +337,72 @@ static jint LegacyCameraDevice_nativeDetectSurfaceType(JNIEnv* env, jobject thiz
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return 0;
+        return BAD_VALUE;
     }
     int32_t fmt = 0;
     status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt);
     if(err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                                "Error while querying surface pixel format (error code %d)", err);
-        return 0;
+        ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
     }
     return fmt;
 }
 
-static void LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject thiz,
+static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject thiz,
           jobject surface, jintArray dimens) {
     ALOGV("nativeGetSurfaceDimens");
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return;
+        return BAD_VALUE;
     }
     int32_t dimenBuf[2];
     status_t err = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, dimenBuf);
     if(err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                        "Error while querying surface width (error code %d)", err);
-        return;
+        ALOGE("%s: Error while querying surface width %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
     }
     err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
     if(err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Error while querying surface height (error code %d)", err);
-        return;
+        ALOGE("%s: Error while querying surface height %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
     }
     env->SetIntArrayRegion(dimens, /*start*/0, /*length*/ARRAY_SIZE(dimenBuf), dimenBuf);
+    return NO_ERROR;
 }
 
-static void LegacyCameraDevice_nativeConfigureSurface(JNIEnv* env, jobject thiz, jobject surface,
+static jint LegacyCameraDevice_nativeConfigureSurface(JNIEnv* env, jobject thiz, jobject surface,
         jint width, jint height, jint pixelFormat) {
     ALOGV("nativeConfigureSurface");
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return;
+        return BAD_VALUE;
     }
     status_t err = configureSurface(anw, width, height, pixelFormat, CAMERA_DEVICE_BUFFER_SLACK);
     if (err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Error while producing frame (error code %d)", err);
-        return;
+        ALOGE("%s: Error while configuring surface %s (%d).", __FUNCTION__, strerror(-err), err);
+        return err;
     }
+    return NO_ERROR;
 }
 
-static void LegacyCameraDevice_nativeProduceFrame(JNIEnv* env, jobject thiz, jobject surface,
+static jint LegacyCameraDevice_nativeProduceFrame(JNIEnv* env, jobject thiz, jobject surface,
         jbyteArray pixelBuffer, jint width, jint height, jint pixelFormat) {
     ALOGV("nativeProduceFrame");
     sp<ANativeWindow> anw;
 
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return;
+        return BAD_VALUE;
     }
 
     if (pixelBuffer == NULL) {
         jniThrowNullPointerException(env, "pixelBuffer");
-        return;
+        return DONT_CARE;
     }
 
     int32_t bufSize = static_cast<int32_t>(env->GetArrayLength(pixelBuffer));
@@ -408,7 +410,7 @@ static void LegacyCameraDevice_nativeProduceFrame(JNIEnv* env, jobject thiz, job
 
     if (pixels == NULL) {
         jniThrowNullPointerException(env, "pixels");
-        return;
+        return DONT_CARE;
     }
 
     status_t err = produceFrame(anw, reinterpret_cast<uint8_t*>(pixels), width, height,
@@ -416,42 +418,42 @@ static void LegacyCameraDevice_nativeProduceFrame(JNIEnv* env, jobject thiz, job
     env->ReleaseByteArrayElements(pixelBuffer, pixels, JNI_ABORT);
 
     if (err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Error while producing frame (error code %d)", err);
-        return;
+        ALOGE("%s: Error while producing frame %s (%d).", __FUNCTION__, strerror(-err), err);
+        return err;
     }
+    return NO_ERROR;
 }
 
-static void LegacyCameraDevice_nativeSetSurfaceFormat(JNIEnv* env, jobject thiz, jobject surface,
+static jint LegacyCameraDevice_nativeSetSurfaceFormat(JNIEnv* env, jobject thiz, jobject surface,
         jint pixelFormat) {
     ALOGV("nativeSetSurfaceType");
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return;
+        return BAD_VALUE;
     }
     status_t err = native_window_set_buffers_format(anw.get(), pixelFormat);
     if (err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Error while setting surface format (error code %d)", err);
-        return;
+        ALOGE("%s: Error while setting surface format %s (%d).", __FUNCTION__, strerror(-err), err);
+        return err;
     }
+    return NO_ERROR;
 }
 
-static void LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz, jobject surface,
+static jint LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz, jobject surface,
         jint width, jint height) {
     ALOGV("nativeSetSurfaceDimens");
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
-        return;
+        return BAD_VALUE;
     }
     status_t err = native_window_set_buffers_dimensions(anw.get(), width, height);
     if (err != NO_ERROR) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Error while setting surface format (error code %d)", err);
-        return;
+        ALOGE("%s: Error while setting surface dimens %s (%d).", __FUNCTION__, strerror(-err), err);
+        return err;
     }
+    return NO_ERROR;
 }
 
 } // extern "C"
@@ -461,19 +463,19 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceType },
     { "nativeDetectSurfaceDimens",
-    "(Landroid/view/Surface;[I)V",
+    "(Landroid/view/Surface;[I)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceDimens },
     { "nativeConfigureSurface",
-    "(Landroid/view/Surface;III)V",
+    "(Landroid/view/Surface;III)I",
     (void *)LegacyCameraDevice_nativeConfigureSurface },
     { "nativeProduceFrame",
-    "(Landroid/view/Surface;[BIII)V",
+    "(Landroid/view/Surface;[BIII)I",
     (void *)LegacyCameraDevice_nativeProduceFrame },
     { "nativeSetSurfaceFormat",
-    "(Landroid/view/Surface;I)V",
+    "(Landroid/view/Surface;I)I",
     (void *)LegacyCameraDevice_nativeSetSurfaceFormat },
     { "nativeSetSurfaceDimens",
-    "(Landroid/view/Surface;II)V",
+    "(Landroid/view/Surface;II)I",
     (void *)LegacyCameraDevice_nativeSetSurfaceDimens },
 };
 

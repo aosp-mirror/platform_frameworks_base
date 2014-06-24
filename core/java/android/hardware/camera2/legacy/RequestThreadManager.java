@@ -201,11 +201,15 @@ public class RequestThreadManager {
                 return;
             }
             for (Surface s : holder.getHolderTargets()) {
-                if (RequestHolder.jpegType(s)) {
-                    Log.i(TAG, "Producing jpeg buffer...");
-                    LegacyCameraDevice.nativeSetSurfaceDimens(s, data.length, /*height*/1);
-                    LegacyCameraDevice.nativeProduceFrame(s, data, data.length, /*height*/1,
-                            CameraMetadataNative.NATIVE_JPEG_FORMAT);
+                try {
+                    if (RequestHolder.jpegType(s)) {
+                        Log.i(TAG, "Producing jpeg buffer...");
+                        LegacyCameraDevice.setSurfaceDimens(s, data.length, /*height*/1);
+                        LegacyCameraDevice.produceFrame(s, data, data.length, /*height*/1,
+                                CameraMetadataNative.NATIVE_JPEG_FORMAT);
+                    }
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.w(TAG, "Surface abandoned, dropping frame. ", e);
                 }
             }
             mReceivedJpeg.open();
@@ -323,14 +327,18 @@ public class RequestThreadManager {
 
         if (outputs != null) {
             for (Surface s : outputs) {
-                int format = LegacyCameraDevice.nativeDetectSurfaceType(s);
-                switch (format) {
-                    case CameraMetadataNative.NATIVE_JPEG_FORMAT:
-                        mCallbackOutputs.add(s);
-                        break;
-                    default:
-                        mPreviewOutputs.add(s);
-                        break;
+                try {
+                    int format = LegacyCameraDevice.detectSurfaceType(s);
+                    switch (format) {
+                        case CameraMetadataNative.NATIVE_JPEG_FORMAT:
+                            mCallbackOutputs.add(s);
+                            break;
+                        default:
+                            mPreviewOutputs.add(s);
+                            break;
+                    }
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.w(TAG, "Surface abandoned, skipping...", e);
                 }
             }
         }
@@ -338,9 +346,12 @@ public class RequestThreadManager {
         if (mPreviewOutputs.size() > 0) {
             List<Size> outputSizes = new ArrayList<>(outputs.size());
             for (Surface s : mPreviewOutputs) {
-                int[] dimens = {0, 0};
-                LegacyCameraDevice.nativeDetectSurfaceDimens(s, dimens);
-                outputSizes.add(new Size(dimens[0], dimens[1]));
+                try {
+                    Size size = LegacyCameraDevice.getSurfaceSize(s);
+                    outputSizes.add(size);
+                } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                    Log.w(TAG, "Surface abandoned, skipping...", e);
+                }
             }
 
             Size largestOutput = findLargestByArea(outputSizes);
@@ -434,14 +445,18 @@ public class RequestThreadManager {
          */
         List<Size> configuredJpegSizes = new ArrayList<Size>();
         for (Surface callbackSurface : callbackOutputs) {
-            int format = LegacyCameraDevice.nativeDetectSurfaceType(callbackSurface);
+            try {
+                int format = LegacyCameraDevice.detectSurfaceType(callbackSurface);
 
-            if (format != CameraMetadataNative.NATIVE_JPEG_FORMAT) {
-                continue; // Ignore non-JPEG callback formats
+                if (format != CameraMetadataNative.NATIVE_JPEG_FORMAT) {
+                    continue; // Ignore non-JPEG callback formats
+                }
+
+                Size jpegSize = LegacyCameraDevice.getSurfaceSize(callbackSurface);
+                configuredJpegSizes.add(jpegSize);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
             }
-
-            Size jpegSize = LegacyCameraDevice.getSurfaceSize(callbackSurface);
-            configuredJpegSizes.add(jpegSize);
         }
         if (!configuredJpegSizes.isEmpty()) {
             /*

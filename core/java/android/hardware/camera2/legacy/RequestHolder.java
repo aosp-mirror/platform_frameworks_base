@@ -18,6 +18,7 @@ package android.hardware.camera2.legacy;
 
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.util.Log;
 import android.view.Surface;
 
 import java.util.Collection;
@@ -26,6 +27,7 @@ import java.util.Collection;
  * Immutable container for a single capture request and associated information.
  */
 public class RequestHolder {
+    private static final String TAG = "RequestHolder";
 
     private final boolean mRepeating;
     private final CaptureRequest mRequest;
@@ -89,8 +91,12 @@ public class RequestHolder {
      */
     public boolean hasJpegTargets() {
         for (Surface s : getHolderTargets()) {
-            if (jpegType(s)) {
-                return true;
+            try {
+                if (jpegType(s)) {
+                    return true;
+                }
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
             }
         }
         return false;
@@ -102,8 +108,12 @@ public class RequestHolder {
      */
     public boolean hasPreviewTargets() {
         for (Surface s : getHolderTargets()) {
-            if (previewType(s)) {
-                return true;
+            try {
+                if (previewType(s)) {
+                    return true;
+                }
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
             }
         }
         return false;
@@ -115,8 +125,12 @@ public class RequestHolder {
      */
     public Surface getFirstPreviewTarget() {
         for (Surface s : getHolderTargets()) {
-            if (previewType(s)) {
-                return s;
+            try {
+                if (previewType(s)) {
+                    return s;
+                }
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
             }
         }
         return null;
@@ -128,8 +142,9 @@ public class RequestHolder {
      * @param s a {@link Surface} to check.
      * @return true if the surface requires a jpeg buffer.
      */
-    public static boolean jpegType(Surface s) {
-        if (LegacyCameraDevice.nativeDetectSurfaceType(s) ==
+    public static boolean jpegType(Surface s)
+            throws LegacyExceptionUtils.BufferQueueAbandonedException {
+        if (LegacyCameraDevice.detectSurfaceType(s) ==
                 CameraMetadataNative.NATIVE_JPEG_FORMAT) {
             return true;
         }
@@ -149,8 +164,9 @@ public class RequestHolder {
      * @param s a {@link Surface} to check.
      * @return true if the surface requires a non-jpeg buffer type.
      */
-    public static boolean previewType(Surface s) {
-        if (LegacyCameraDevice.nativeDetectSurfaceType(s) !=
+    public static boolean previewType(Surface s)
+            throws LegacyExceptionUtils.BufferQueueAbandonedException {
+        if (LegacyCameraDevice.detectSurfaceType(s) !=
                 CameraMetadataNative.NATIVE_JPEG_FORMAT) {
             return true;
         }
