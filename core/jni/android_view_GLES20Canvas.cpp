@@ -32,6 +32,7 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
+#include <SkPorterDuff.h>
 #include <SkRegion.h>
 #include <SkScalerContext.h>
 #include <SkTemplates.h>
@@ -437,9 +438,10 @@ static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawColor(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint color, jint mode) {
+        jlong rendererPtr, jint color, jint modeHandle) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    renderer->drawColor(color, static_cast<SkXfermode::Mode>(mode));
+    SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
+    renderer->drawColor(color, SkPorterDuff::ToXfermodeMode(mode));
 }
 
 static void android_view_GLES20Canvas_drawRect(JNIEnv* env, jobject clazz,
