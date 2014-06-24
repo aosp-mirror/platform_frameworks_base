@@ -442,8 +442,9 @@ public class ProcessCpuTracker {
                 final String[] procStatsString = mProcessFullStatsStringData;
                 final long[] procStats = mProcessFullStatsData;
                 st.base_uptime = SystemClock.uptimeMillis();
-                if (Process.readProcFile(st.statFile.toString(),
-                        PROCESS_FULL_STATS_FORMAT, procStatsString,
+                String path = st.statFile.toString();
+                //Slog.d(TAG, "Reading proc file: " + path);
+                if (Process.readProcFile(path, PROCESS_FULL_STATS_FORMAT, procStatsString,
                         procStats, null)) {
                     // This is a possible way to filter out processes that
                     // are actually kernel threads...  do we want to?  Some
