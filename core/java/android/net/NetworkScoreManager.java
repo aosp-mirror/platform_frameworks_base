@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -38,7 +39,9 @@ import android.os.ServiceManager;
  * <li>Declares the {@link android.Manifest.permission#SCORE_NETWORKS} permission.
  * <li>Includes a receiver for {@link #ACTION_SCORE_NETWORKS} guarded by the
  *     {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission which scores networks
- *     and (eventually) calls {@link #updateScores} with the results.
+ *     and (eventually) calls {@link #updateScores} with the results. If this receiver specifies an
+ *     android:label attribute, this label will be used when referring to the application throughout
+ *     system settings; otherwise, the application label will be used.
  * </ul>
  *
  * <p>The system keeps track of an active scorer application; at any time, only this application
@@ -105,7 +108,11 @@ public class NetworkScoreManager {
      *         scorer.
      */
     public String getActiveScorerPackage() {
-        return NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData app = NetworkScorerAppManager.getActiveScorer(mContext);
+        if (app == null) {
+            return null;
+        }
+        return app.mPackageName;
     }
 
     /**

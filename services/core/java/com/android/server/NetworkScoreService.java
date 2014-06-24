@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
 import android.net.NetworkScorerAppManager;
+import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -165,12 +166,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
-        String currentScorer = NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData currentScorer = NetworkScorerAppManager.getActiveScorer(mContext);
         if (currentScorer == null) {
             writer.println("Scoring is disabled.");
             return;
         }
-        writer.println("Current scorer: " + currentScorer);
+        writer.println("Current scorer: " + currentScorer.mPackageName);
         writer.flush();
 
         for (INetworkScoreCache scoreCache : getScoreCaches()) {
