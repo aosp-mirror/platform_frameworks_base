@@ -214,6 +214,9 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) Slog.d(TAG, "add " + info.getId());
                 userState.inputMap.put(info.getId(), info);
                 userState.packageList.add(si.packageName);
+
+                // Reconnect the service if existing input is updated.
+                updateServiceConnectionLocked(info.getId(), userId);
             } catch (IOException | XmlPullParserException e) {
                 Slog.e(TAG, "Can't load TV input " + si.name, e);
             }
@@ -353,6 +356,9 @@ public final class TvInputManagerService extends SystemService {
 
             Intent i = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(
                     userState.inputMap.get(inputId).getComponent());
+            // Binding service may fail if the service is updating.
+            // In that case, the connection will be revived in buildTvInputListLocked called by
+            // onSomePackagesChanged.
             serviceState.mBound = mContext.bindServiceAsUser(
                     i, serviceState.mConnection, Context.BIND_AUTO_CREATE, new UserHandle(userId));
         } else if (serviceState.mService != null && isStateEmpty) {
