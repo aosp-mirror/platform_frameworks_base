@@ -1,12 +1,20 @@
-page.title=UI Overview
+page.title=Phones &amp; Tablets
 @jd:body
 
-<p>Android's system UI provides the framework on top of which you build your app. Important aspects
-include the Home screen experience, global device navigation, and notifications.</p>
-<p>Your app will play an important part in keeping the overall Android experience consistent and
-enjoyable to use. At the end of this chapter we introduce the main elements for achieving this goal
-in your app.</p>
-<p>Read on for a quick overview of the most important aspects of the Android user interface.</p>
+<p>
+Android's system UI provides the framework on top of which you build your app,
+whether you're designing for phones, tablets, watches, or other form factors.
+Aspects of UI that are especially important for phones and tablets include
+the Home screen experience, global device navigation, and notifications.
+</p>
+
+<p>
+Your app will play an important part in keeping the overall Android experience
+consistent and enjoyable to use. This page introduces some of the main elements
+that can help you achieve this goal. The main Android Design topics listed on
+the left, after the Devices sections, provide detailed guidelines for phones
+and tablets.
+</p>
 
 <h2 id="home-all-apps-recents">Home, All Apps, and Recents</h2>
 
