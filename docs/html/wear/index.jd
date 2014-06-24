@@ -84,9 +84,8 @@ page.type=about
             <div class="landing-breakout cols">
               <div class="col-3-wide">
 
-                <div class="landing-inset-video-container">
-                  <img class="landing-bezel-only" src="{@docRoot}wear/images/screens/bezel.png" alt="">
-                  <img class="gif" src="{@docRoot}wear/images/screens/reservation_animated.gif">
+                <div class="framed-wear-square"
+                  <img src="{@docRoot}wear/images/screens/reservation_animated.gif">
                 </div>
 
                 <p class="landing-small">
