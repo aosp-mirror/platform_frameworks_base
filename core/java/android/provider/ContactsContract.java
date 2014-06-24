@@ -811,7 +811,6 @@ public final class ContactsContract {
          * The position at which the contact is pinned. If {@link PinnedPositions#UNPINNED},
          * the contact is not pinned. Also see {@link PinnedPositions}.
          * <P>Type: INTEGER </P>
-         * @hide
          */
         public static final String PINNED = "pinned";
 
@@ -7745,8 +7744,8 @@ public final class ContactsContract {
 
     /**
      * <p>
-     * API allowing applications to send pinning information for specified contacts to the
-     * Contacts Provider.
+     * Contact-specific information about whether or not a contact has been pinned by the user
+     * at a particular position within the system contact application's user interface.
      * </p>
      *
      * <p>
@@ -7771,47 +7770,8 @@ public final class ContactsContract {
      * pinned positions can be positive integers that range anywhere from 0 to
      * {@link PinnedPositions#UNPINNED}.
      * </p>
-     *
-     * <p>
-     * When using {@link PinnedPositions#UPDATE_URI} to update the pinned positions of
-     * certain contacts, it may make sense for your application to star any pinned contacts
-     * by default. To specify this behavior, set the boolean query parameter
-     * {@link PinnedPositions#STAR_WHEN_PINNING} to true to force all pinned and unpinned
-     * contacts to be automatically starred and unstarred.
-     * </p>
-     *
-     * @hide
      */
     public static final class PinnedPositions {
-
-        /**
-         * <p>
-         * This URI allows applications to update pinned positions for a provided set of contacts.
-         * </p>
-         *
-         * <p>
-         * The list of contactIds to pin and their corresponding pinned positions should be
-         * provided in key-value pairs stored in a {@link ContentValues} object where the key
-         * is a valid contactId, while each pinned position is a positive integer.
-         * </p>
-         *
-         * <p>
-         * Example:
-         * <pre>
-         * ContentValues values = new ContentValues();
-         * values.put("10", 20);
-         * values.put("12", 2);
-         * values.put("15", PinnedPositions.UNPINNED);
-         * int count = resolver.update(PinnedPositions.UPDATE_URI, values, null, null);
-         * </pre>
-         *
-         * This pins the contact with id 10 at position 20, the contact with id 12 at position 2,
-         * and unpins the contact with id 15.
-         * </p>
-         */
-        public static final Uri UPDATE_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "pinned_position_update");
-
         /**
          * <p>
          * The method to invoke in order to undemote a formerly demoted contact. The contact id of
@@ -7826,7 +7786,6 @@ public final class ContactsContract {
          * resolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
          *         String.valueOf(contactId), null);
          * </pre>
-         *
          * </p>
          */
         public static final String UNDEMOTE_METHOD = "undemote";
@@ -7844,55 +7803,6 @@ public final class ContactsContract {
          * just hidden from view.
          */
         public static final int DEMOTED = -1;
-
-        /**
-         * <p> Clients can provide this value as a pinned position to undemote a formerly demoted
-         * contact. If the contact was formerly demoted, it will be restored to an
-         * {@link #UNPINNED} position. If it was otherwise already pinned at another position,
-         * it will not be affected.
-         * </p>
-         *
-         * <p>
-         * Example:
-         * <pre>
-         * ContentValues values = new ContentValues();
-         * values.put("15", PinnedPositions.UNDEMOTE);
-         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
-         *          .build(), values, null, null);
-         * </pre>
-         *
-         * This restores the contact with id 15 to an {@link #UNPINNED} position, meaning that
-         * other apps (e.g. the Dialer) that were formerly hiding this contact from view based on
-         * its {@link #DEMOTED} position will start displaying it again.
-         * </p>
-         */
-        public static final String UNDEMOTE = "undemote";
-
-        /**
-         * <p>
-         * A boolean query parameter that can be used with {@link #UPDATE_URI}.
-         * If "1" or "true", any contact that is pinned or unpinned will be correspondingly
-         * starred or unstarred. Otherwise, starring information will not be affected by pinned
-         * updates. This is false by default.
-         * </p>
-         *
-         * <p>
-         * Example:
-         * <pre>
-         * ContentValues values = new ContentValues();
-         * values.put("10", 20);
-         * values.put("15", PinnedPositions.UNPINNED);
-         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
-         *          .appendQueryParameter(PinnedPositions.FORCE_STAR_WHEN_PINNING, "true").build(),
-         *          values, null, null);
-         * </pre>
-         *
-         * This will pin the contact with id 10 at position 20 and star it automatically if not
-         * already starred, and unpin the contact with id 15, and unstar it automatically if not
-         * already unstarred.
-         * </p>
-         */
-        public static final String STAR_WHEN_PINNING = "star_when_pinning";
     }
 
     /**
