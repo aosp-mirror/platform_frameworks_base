@@ -1,0 +1,206 @@
+page.title=Optimizing Navigation for TV
+parent.title=Designing for TV
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Optimizing Layouts for TV
+previous.link=optimizing-layouts-tv.html
+next.title=Handling Features Not Supported on TV
+next.link=unsupported-features-tv.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#HandleDpadNavigation">Handle D-pad Navigation</a></li>
+  <li><a href="#HandleFocusSelection">Provide Clear Visual Indication for Focus and Selection</a></li>
+  <li><a href="#DesignForEasyNavigation">Design for Easy Navigation</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>
+An important aspect of the user experience when operating a TV is the direct human interface: a remote control. 
+As you optimize your Android application for TVs, you should pay special attention to how the user actually navigates 
+around your application when using a remote control instead of a touchscreen.
+</p>
+<p>
+This lesson shows you how to optimize navigation for TV by:
+</p>
+
+<ul>
+  <li>Ensuring all layout controls are D-pad navigable.</li>
+  <li>Providing highly obvious feedback for UI navigation.</li>
+  <li>Placing layout controls for easy access.</li>
+</ul>
+
+<h2 id="HandleDpadNavigation">Handle D-pad Navigation</h2> 
+
+<p>
+On a TV, users navigate with controls on a TV remote, using either a D-pad or arrow keys. 
+This limits movement to up, down, left, and right. 
+To build a great TV-optimized app, you must provide a navigation scheme in which the user can 
+quickly learn how to navigate your app using the remote.
+</p>
+
+<p>
+When you design navigation for D-pad, follow these guidelines:
+</p>
+
+<ul>
+  <li>Ensure that the D-pad  can navigate to all the visible controls on the screen.</li>
+  <li>For scrolling lists with focus, D-pad up/down keys scroll the list and Enter key selects an item in the list. Ensure that users can 
+  select an element in the list and that the list still scrolls when an element is selected.</li> 
+  <li>Ensure that movement between controls is straightforward and predictable.</li>
+</ul>
+
+<p>
+Android usually handles navigation order between layout elements automatically, so you don't need to do anything extra. If the screen layout 
+makes navigation difficult, or if you want users to move through the layout in a specific way, you can set up explicit navigation for your 
+controls.  
+For example, for an {@code android.widget.EditText}, to define the next control to receive focus, use:
+<pre>
+&lt;EditText android:id="@+id/LastNameField" android:nextFocusDown="@+id/FirstNameField"\&gt;
+</pre>
+The following table lists all of the available navigation attributes:
+</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Function</th>
+</tr>
+<tr>
+<td>{@link android.R.attr#nextFocusDown}</td>
+<td>Defines the next view to receive focus when the user navigates down.</td>
+</tr>
+<tr>
+<td>{@link android.R.attr#nextFocusLeft}</td>
+<td>Defines the next view to receive focus when the user navigates left.</td>
+</tr>
+<tr>
+<td>{@link android.R.attr#nextFocusRight}</td>
+<td>Defines the next view to receive focus when the user navigates right.</td>
+</tr>
+<tr>
+<td>{@link android.R.attr#nextFocusUp}</td>
+<td>Defines the next view to receive focus when the user navigates up.</td>
+</tr>
+</table>
+
+<p>
+To use one of these explicit navigation attributes, set the value to the ID (android:id value) of another widget in the layout. You should set 
+up the navigation order as a loop, so that the last control directs focus back to the first one.
+</p>
+
+<p>
+Note: You should only use these attributes to modify the navigation order if the default order that the system applies does not work well.
+</p>
+
+<h2 id="HandleFocusSelection">Provide Clear Visual Indication for Focus and Selection</h2>
+
+<p>
+Use appropriate color highlights for all navigable and selectable elements in the UI. This makes it easy for users to know whether the control 
+is currently focused or selected when they navigate with a D-pad. Also, use uniform highlight scheme across your application.
+</p>
+
+<p>
+Android provides <a href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">Drawable State List Resources</a> to implement highlights 
+for selected and focused controls. For example:
+</p>
+
+res/drawable/button.xml:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:state_pressed="true"
+          android:drawable="@drawable/button_pressed" /&gt; &lt;!-- pressed --&gt;
+    &lt;item android:state_focused="true"
+          android:drawable="@drawable/button_focused" /&gt; &lt;!-- focused --&gt;
+    &lt;item android:state_hovered="true"
+          android:drawable="@drawable/button_focused" /&gt; &lt;!-- hovered --&gt;
+    &lt;item android:drawable="@drawable/button_normal" /&gt; &lt;!-- default --&gt;
+&lt;/selector&gt;
+</pre>
+
+<p>
+This layout XML applies the above state list drawable to a {@link android.widget.Button}:
+</p>
+<pre>
+&lt;Button
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:background="@drawable/button" /&gt;
+</pre>
+
+<p>
+Provide sufficient padding within the focusable and selectable controls so that the highlights around them are clearly visible. 
+</p>
+
+<h2 id="DesignForEasyNavigation">Design for Easy Navigation</h2>
+
+<p>
+Users should be able to navigate to any UI control with a couple of D-pad clicks. Navigation should be easy and  intuitive to 
+understand.  For any non-intuitive actions, provide users with written help, using a dialog triggered by a help button or action bar icon. 
+</p>
+
+<p>
+Predict the next screen that the user will want to navigate to and provide one click navigation to it. If the current screen UI is very sparse, 
+consider making it a multi pane screen. Use fragments for making multi-pane screens. For example, consider the multi-pane UI below with continent names 
+on the left and list of cool places in each continent on the right. 
+</p>
+
+<img src="{@docRoot}images/training/cool-places.png" alt="" />
+
+<p>
+The above UI consists of three Fragments - <code>left_side_action_controls</code>, <code>continents</code> and 
+<code>places</code> - as shown in its layout 
+xml file below. Such multi-pane UIs make D-pad navigation easier and make good use of the horizontal screen space for 
+TVs.
+</p>
+res/layout/cool_places.xml
+<pre>
+&lt;LinearLayout   
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+   &gt;
+   &lt;fragment
+        android:id="@+id/left_side_action_controls"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dip"
+        android:layout_weight="0.2"/&gt;
+    &lt;fragment
+        android:id="@+id/continents"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dip"
+        android:layout_weight="0.2"/&gt;
+
+    &lt;fragment
+        android:id="@+id/places"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dip"
+        android:layout_weight="0.6"/&gt;
+
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>
+Also, notice in the UI layout above action controls are on the left hand side of a vertically scrolling list to make 
+them easily accessible using D-pad. 
+In general, for layouts with horizontally scrolling components, place action controls on left or right hand side and 
+vice versa for vertically scrolling components.
+</p>
+

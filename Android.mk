@@ -721,6 +721,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
 		-hdf android.whichdoc online \
+		-briefdocs \
 		$(sample_groups) \
 		-hdf android.hasSamples true \
 		-samplesdir $(samples_dir)
