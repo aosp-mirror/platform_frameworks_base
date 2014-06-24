@@ -1172,7 +1172,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/",
     "timestamp": null,
-    "image": "https://developers.google.com/edu/images/edu-guidelines.jpg",
+    "image": "https://developers.google.com/edu/images/home-android.png",
     "title": "Chrome Apps in Google Play for Education",
     "summary": "Find out more about Chrome apps in Google Play for Education.",
     "keywords": [],
