@@ -67,6 +67,7 @@ LOCAL_SRC_FILES:= \
 	android_view_VelocityTracker.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
+	android_text_StaticLayout.cpp \
 	android_os_Debug.cpp \
 	android_os_MemoryFile.cpp \
 	android_os_MessageQueue.cpp \
