@@ -26,7 +26,6 @@ import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.Density;
 import com.android.resources.LayoutDirection;
-import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -59,11 +58,14 @@ import java.io.InputStream;
  */
 abstract class CustomBar extends LinearLayout {
 
+    private final int mSimulatedPlatformVersion;
+
     protected abstract TextView getStyleableTextView();
 
-    protected CustomBar(Context context, Density density, int orientation, String layoutPath,
-            String name) throws XmlPullParserException {
+    protected CustomBar(Context context, int orientation, String layoutPath,
+            String name, int simulatedPlatformVersion) throws XmlPullParserException {
         super(context);
+        mSimulatedPlatformVersion = simulatedPlatformVersion;
         setOrientation(orientation);
         if (orientation == LinearLayout.HORIZONTAL) {
             setGravity(Gravity.CENTER_VERTICAL);
@@ -100,7 +102,8 @@ abstract class CustomBar extends LinearLayout {
             pathOut[0] = "/bars/" + density.getResourceValue() + "/" + iconName;
         }
 
-        InputStream stream = getClass().getResourceAsStream(pathOut[0]);
+        // TODO: Change this with a more generic method.
+        InputStream stream = getIconWithApi(pathOut, iconName);
         if (stream == null && tryOtherDensities) {
             for (Density d : Density.values()) {
                 if (d != density) {
@@ -119,6 +122,19 @@ abstract class CustomBar extends LinearLayout {
         }
 
         return stream;
+    }
+
+    private InputStream getIconWithApi(String[] pathOut, String iconName) {
+        if (mSimulatedPlatformVersion == 0) {
+            String path = pathOut[0];
+            String dirName = path.substring(0, path.lastIndexOf('/'));
+            pathOut[0] = dirName + "-v21" + "/" + iconName;
+            InputStream stream = getClass().getResourceAsStream(pathOut[0]);
+            if (stream != null) {
+                return stream;
+            }
+        }
+        return getClass().getResourceAsStream(pathOut[0]);
     }
 
     protected void loadIcon(int index, String iconName, Density density) {
@@ -158,78 +174,8 @@ abstract class CustomBar extends LinearLayout {
         }
     }
 
-    protected void loadIcon(int index, String iconReference) {
-        ResourceValue value = getResourceValue(iconReference);
-        if (value != null) {
-            loadIcon(index, value);
-        }
-    }
-
-    protected void loadIconById(int id, String iconReference) {
-        ResourceValue value = getResourceValue(iconReference);
-        if (value != null) {
-            loadIconById(id, value);
-        }
-    }
-
-
-    protected Drawable loadIcon(int index, ResourceType type, String name) {
-        BridgeContext bridgeContext = (BridgeContext) mContext;
-        RenderResources res = bridgeContext.getRenderResources();
-
-        // find the resource
-        ResourceValue value = res.getFrameworkResource(type, name);
-
-        // resolve it if needed
-        value = res.resolveResValue(value);
-        return loadIcon(index, value);
-    }
-
-    private Drawable loadIcon(int index, ResourceValue value) {
-        View child = getChildAt(index);
-        if (child instanceof ImageView) {
-            ImageView imageView = (ImageView) child;
-
-            return loadIcon(imageView, value);
-        }
-
-        return null;
-    }
-
-    private Drawable loadIconById(int id, ResourceValue value) {
-        View child = findViewById(id);
-        if (child instanceof ImageView) {
-            ImageView imageView = (ImageView) child;
-
-            return loadIcon(imageView, value);
-        }
-
-        return null;
-    }
-
-
-    private Drawable loadIcon(ImageView imageView, ResourceValue value) {
-        Drawable drawable = ResourceHelper.getDrawable(value, (BridgeContext) mContext);
-        if (drawable != null) {
-            imageView.setImageDrawable(drawable);
-        }
-
-        return drawable;
-    }
-
     protected TextView setText(int index, String stringReference) {
         View child = getChildAt(index);
-        if (child instanceof TextView) {
-            TextView textView = (TextView) child;
-            setText(textView, stringReference);
-            return textView;
-        }
-
-        return null;
-    }
-
-    protected TextView setTextById(int id, String stringReference) {
-        View child = findViewById(id);
         if (child instanceof TextView) {
             TextView textView = (TextView) child;
             setText(textView, stringReference);
@@ -256,7 +202,7 @@ abstract class CustomBar extends LinearLayout {
         ResourceValue value = res.findItemInTheme(themeEntryName, true /*isFrameworkAttr*/);
         value = res.resolveResValue(value);
 
-        if (value instanceof StyleResourceValue == false) {
+        if (!(value instanceof StyleResourceValue)) {
             return;
         }
 
