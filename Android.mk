@@ -336,6 +336,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputHardware.aidl \
 	media/java/android/media/tv/ITvInputHardwareCallback.aidl \
 	media/java/android/media/tv/ITvInputManager.aidl \
+	media/java/android/media/tv/ITvInputManagerCallback.aidl \
 	media/java/android/media/tv/ITvInputService.aidl \
 	media/java/android/media/tv/ITvInputServiceCallback.aidl \
 	media/java/android/media/tv/ITvInputSession.aidl \

@@ -82,20 +82,9 @@ public abstract class TvInputService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.media.tv.input";
 
-    private String mId;
     private final Handler mHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
-    // STOPSHIP: Redesign the API around the availability change. For now, the service will be
-    // always available.
-    private final boolean mAvailable = true;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mId = TvInputInfo.generateInputIdForComponentName(
-                new ComponentName(getPackageName(), getClass().getName()));
-    }
 
     @Override
     public final IBinder onBind(Intent intent) {
@@ -104,13 +93,6 @@ public abstract class TvInputService extends Service {
             public void registerCallback(ITvInputServiceCallback cb) {
                 if (cb != null) {
                     mCallbacks.register(cb);
-                    // The first time a callback is registered, the service needs to report its
-                    // availability status so that the system can know its initial value.
-                    try {
-                        cb.onAvailabilityChanged(mId, mAvailable);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "error in onAvailabilityChanged", e);
-                    }
                 }
             }
 
@@ -733,7 +715,6 @@ public abstract class TvInputService extends Service {
     @SuppressLint("HandlerLeak")
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
-        private static final int DO_BROADCAST_AVAILABILITY_CHANGE = 2;
 
         @Override
         public final void handleMessage(Message msg) {
@@ -757,20 +738,6 @@ public abstract class TvInputService extends Service {
                         Log.e(TAG, "error in onSessionCreated");
                     }
                     args.recycle();
-                    return;
-                }
-                case DO_BROADCAST_AVAILABILITY_CHANGE: {
-                    boolean isAvailable = (Boolean) msg.obj;
-                    int n = mCallbacks.beginBroadcast();
-                    try {
-                        for (int i = 0; i < n; i++) {
-                            mCallbacks.getBroadcastItem(i).onAvailabilityChanged(mId, isAvailable);
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Unexpected exception", e);
-                    } finally {
-                        mCallbacks.finishBroadcast();
-                    }
                     return;
                 }
                 default: {
