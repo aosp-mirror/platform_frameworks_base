@@ -47,27 +47,15 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void addNotification(StatusBarNotification notification) {
+    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
     }
 
     @Override
-    public void addNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
+    protected void updateNotificationRanking(RankingMap ranking) {
     }
 
     @Override
-    protected void updateRankingInternal(RankingMap ranking) {
-    }
-
-    @Override
-    public void updateNotification(StatusBarNotification notification) {
-    }
-
-    @Override
-    public void removeNotificationInternal(String key, RankingMap ranking) {
-    }
-
-    @Override
-    public void removeNotification(String key) {
+    public void removeNotification(String key, RankingMap ranking) {
     }
 
     @Override

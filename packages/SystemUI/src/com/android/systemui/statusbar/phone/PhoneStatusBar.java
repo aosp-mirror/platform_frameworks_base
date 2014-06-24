@@ -1072,7 +1072,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void addNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
+    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
         if (mZenMode != Global.ZEN_MODE_OFF && mIntercepted.tryIntercept(notification, ranking)) {
             // Forward the ranking so we can sort the new notification.
@@ -1165,21 +1165,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void updateNotificationInternal(StatusBarNotification notification, RankingMap ranking) {
-        super.updateNotificationInternal(notification, ranking);
-        // if we're here, then the notification is already in the shade
-        mIntercepted.remove(notification.getKey());
-    }
-
-    @Override
-    protected void updateRankingInternal(RankingMap ranking) {
+    protected void updateNotificationRanking(RankingMap ranking) {
         mNotificationData.updateRanking(ranking);
         mIntercepted.retryIntercepts(ranking);
         updateNotifications();
     }
 
     @Override
-    public void removeNotificationInternal(String key, RankingMap ranking) {
+    public void removeNotification(String key, RankingMap ranking) {
         if (ENABLE_HEADS_UP && mHeadsUpNotificationView.getEntry() != null
                 && key.equals(mHeadsUpNotificationView.getEntry().notification.getKey())) {
             mHeadsUpNotificationView.clear();
