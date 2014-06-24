@@ -73,7 +73,7 @@ page.type=about
               effort.
             </p>
             <p class="landing-small">
-              <a href="/design/tv/index.html">Learn about design for TV</a>
+              <a href="{@docRoot}preview/tv/design/index.html">Learn about design for TV</a>
             </p>
           </div>
 

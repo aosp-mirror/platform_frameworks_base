@@ -13,8 +13,8 @@ footer.hide=1
 #text-overlay {
   position: absolute;
   left: 0;
-  top: 420px;
-  width: 360px;
+  top: 410px;
+  width: 340px;
 
 }
 #hero-image {

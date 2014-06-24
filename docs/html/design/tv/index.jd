@@ -1,9 +1,9 @@
-page.title=TV
+page.title=Android TV
 @jd:body
 
 
-<img src="{@docRoot}preview/tv/design/images/atv-home.jpg"
-  width="460" height="283" style="float:right;margin:0 0 40px 40px" /> 
+<img src="{@docRoot}design/media/android-tv.png"
+  width="460" style="float:right;margin:0 0 40px 40px" /> 
 
 
 <p>Android TV is <strong>coming soon</strong> and lets you engage your users in a new, shared environment.</p>

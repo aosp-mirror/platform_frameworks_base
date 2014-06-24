@@ -1,78 +1,69 @@
-page.title=App Structure for Wear
+page.title=App Structure for Android Wear
 @jd:body
 
 
-<p>As outlined in the <a href="{@docRoot}design/wear/creative-vision.html">Creative Vision</a>,
-Android Wear apps do not adhere to the traditional mobile app model of touching an icon to launch into a self-contained experience. Rather, it is useful to think about the different spaces in the Android Wear UI and how your app might present itself across these spaces. For example, a typical app might begin by showing a notification card in the stream at a contextually relevant moment, then jump into a custom full screen UI for a micro-interaction, or maybe open the cue card to capture voice input that is then relayed back to the in-stream card.</p>
+<p>Users are used to tapping icons to launch apps. Android Wear is different. A typical Wear app adds a card to the stream at a contextually relevant moment. It might have a button that opens a full screen view for a fast micro interaction, like below, but it just as well might not.
+</p>
 
-<p>It’s important to make some fundamental decisions about how your users will interact with your app. There are a number of ways that functionality can manifest itself in Android Wear, and it is important to choose the places that provide maximum value and ease of use.</p>
+<img src="{@docRoot}design/media/wear/appstructuresample.png" alt="" />
 
-<p>For example, application functionality might show up in the following ways:</p>
+<p>These are the building blocks, ordered by simplicity. You can use one of them or some of them, but we strongly recommend not building apps the user has to launch and quit before thinking really hard about how you could react to a specific location, activity, time of day, or something happening in the cloud.</p>
+
 
 <ul>
-  <li>As a <strong>card in the main context stream</strong>:
+  <li><strong>Contextual card in the stream</strong>:
   <ul>
-    <li><strong>Bridged notifications</strong> are pushed to the wearable from the connected handheld (a phone or tablet) using the standard Android notifications framework. In general, bridged notifications mirror what’s happening on the handheld and use one of a predefined layout templates. Example: new message notification.
-    <li><strong>Contextual notifications</strong> are like smart notifications. They are generated locally on the wearable and appear at contextually relevant moments specificed by the app developer. Contextual notifications allow more freedom of control, allowing for custom layouts and dynamic updating of card contents. Example: live updating exercise stats.
+    <li><a href="#Bridged"><strong>Bridged notifications</strong></a> are pushed to the wearable from the connected handheld such as new message notifications, using standard Android notifications. These require little or no code on the wearable.
+    <li><a href="#Contextual"><strong>Contextual notifications</strong></a> are generated locally on the wearable and appear at contextually relevant moments such as an exercise card that appears when you’re going on a run. You can do more with this kind of card than with a notification bridged from the handheld.
   </ul>
   </li>
-  <li>As a <strong>full screen UI</strong> that temporarily overlays on top of the context stream:
+  <li><strong>Full screen UI app</strong>:
   <ul>
-    <li>The <strong>2D Picker</strong> is a simple design pattern (available in the SDK as a prebuilt component) aimed at asking the user to select from a set of items. This is a common interaction and a familiar pattern, so use of the familiar 2D Picker pattern is encouraged wherever possible. Example: choose from a set of artists and albums to play.
-    <li><strong>Custom layouts</strong> are also possible where apps need to extend beyond the basic card/stream metaphor. These apps should be distinctly separate from the core user experience in both appearance and interaction.</li>
+    <li><a href="#2DPicker"><strong>2D Picker</strong></a> is design pattern that allows the user to select from a set of items, such as choosing artists and then albums. We recommend using this pre-built component from the SDK whenever relevant.
+    <li><a href="#Custom"><strong>Custom layouts</strong></a> are also possible where apps need to extend beyond the basic card/stream metaphor.</li>
   </ul>
   </li>
 </ul>
 
-
-<p>Apps can also open the cue card to capture voice input.</p>
-
-<p>Note that the different approaches above are listed in order of complexity. When designing your interactions, try to achieve them with the simplest approach possible. If your needs are more involved, move to the next level of complexity.</p>
-
 <p>Many applications will consist of a combination of these views, possibly with connections between them. For example, a contextual card may have an action that launches a more immersive experience. Inversely, an immersive experience may result in a card being added to the stream.</p>
-
-<p>Think of these different components as building blocks that can be snapped together into a single user flow. Avoid single monolithic full screen UIs that need to be launched and quit. Place simple notifications and ongoing information in the stream, and jump in and out of simple full screen activities to complete quick tasks before returning to the stream.</p>
-
-<p>In this section we will look at these different approaches and how combine them to create the best experience for your users.</p>
 
 
 <h2 id="Bridged">Bridged Notifications</h2>
 
-<div class="framed-wear-square-small" style="float:right;margin:0 -22px 60px 40px">
-  <img src="{@docRoot}design/media/wear/bridgednotifications.jpg">
-</div>
+<img src="{@docRoot}design/media/wear/bridgednotifications.jpg" height="147" style="float:right;margin:0 0 20px 20px" alt="">
+<img src="{@docRoot}design/media/wear/Bluebird.png" height="147" style="float:right;margin:0 0 20px 40px" alt="">
 
-<p>Bridged notifications are the simplest way of having content appear on an Android wearable. Since cards in the Android Wear stream are synced from the notifications on your connected handheld, any notifications created there automatically appear on Android Wear. Where appropriate, make sure to use the new APIs in the support library that enhance your app's notifications with features such as voice replies and notification pages.</p>
+<p>This is the simplest way to get on Android Wear. In fact, your app already does this if it uses notifications. You can add Wear-specific features like extra pages and voice replies by using the new notification APIs. </p>
 
-
-
-<h2 id="Contextual">Contextual Notifications</h2>
-
-<p>Displaying information on contextual cards is at the core of the Android Wear user experience. Cards with focused trigger criteria appear at just the right time, delighting and assisting the user with timely, useful content. Refer to the Design principles section for details on how to think about triggering cards, and the UI overview section for a breakdown of the familiar system UI components that make up an entry in the context stream.</p>
-
-<p>An important aspect of creating contextual notifications is defining trigger conditions: what is the specific scenario in which your notification should appear? Think about using all sensor information available to you -- time, location, movement, identity, user habits and patterns, interaction with nearby devices, and more -- and describe the specific combination of sensor readings that should result in your app presenting itself.</p>
+<a class="notice-developers left" style="clear:none" href="{@docRoot}training/wearables/notifications/creating.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating a Notification</p>
+  </div>
+</a>
 
 
-<img src="{@docRoot}design/media/wear/contextualnotification.png" width="500" alt="" />
+<h2 id="Contextual" style="clear:both">Contextual Notifications</h2>
 
 
-<p>For example, imagine you were building a running app. If the user is standing at the beginning of their regular running trail, at the time that they often go for a run, and we detect a running activity... they are probably going for a run! This would be a great time to present a contextual card that offers to track their run.</p>
+<img src="{@docRoot}design/media/wear/context_workout.png" width="323" height="147" style="float:right;margin:0 0 20px 40px;clear:right" alt="" />
+<img src="{@docRoot}design/media/wear/context_lights.png" width="323" height="147" style="float:right;margin:0 0 20px 40px;clear:right" alt="" />
 
-<p>Putting effort into getting your contextual triggering just right is one of the most impactful things you can do to create a delightful experience for your users.</p>
+<p>This is what Android Wear does best; showing users information just when they need it.</p>
 
-<p>You may use the standard Android notifications framework to create cards using a range of provided templates, or draw your own ActivityView inside cards for a custom card layout. Make sure to refer to the Style section to make sure your custom ActivityView layouts are sympathetic to the overall design of cards in the stream. Use ActivityViews to create custom card layouts that are stylistically consistent with neighboring cards in the stream; do not invent entirely new or conflicting UI patterns inside cards.</p>
+<p>Here’s how it works: Your app knows when it is relevant for the user, and when it happens, you trigger a contextual notification. Maybe you’re building a running app that’s relevant when the user is running. Maybe it’s a museum guide that’s relevant when the user is visiting a particular museum. Check out the design principles for more on thinking about your app contextually. </p>
 
-<p>Contextual cards are ideal for situations where it may be useful to push information to the user, when the information may be useful on an ongoing basis or referred back to, or when context strongly indicates that the information is useful. Refer to the section on Respecting Users Attention in the Design Principles section for details on targeted triggering. Triggering too often or in unsuitable contexts will result in users being annoyed by your app.</p>
+<p>Getting contextual triggering right is one of the most impactful things you can do to craft a great user experience. </p>
+
+<p>The easiest way to do this is to use standard templates for Android notifications. If you decide to make your own ActivityView, we strongly recommend you take a look at the <a href="{@docRoot}design/wear/style.html">Style</a> guide to make sure you stay consistent with the rest of the device. </p>
+
+<p>Don’t forget to test your triggering thoroughly. Triggering too often can be so annoying that users might end up blocking all your notifications. </p>
 
 
 
-<h2 id="Picker">2D Picker</h2>
+<h2 id="2DPicker">2D Picker</h2>
 
-<p>The 2D Picker design pattern (available as the GridViewPager component) is useful for showing a range of options or asking a user to make a quick selection. Google search results on Android Wear are a great example of the GridViewPager pattern in action.</p>
-
-<p>A 2D Picker is called up as an overlay on the main UI by tapping a card or button, or through a voice action. It preserves the same look and feel as the main context stream, giving users a familiar and predictable set of interaction patterns to rely on.</p>
-
-<p>On Android Wear, the basic hierarchy is vertical-then-horizontal, never horizontal-then-vertical, with a recommended vertical limit of five cards. Each vertical slot may consist of one card, as in the Google results case, or multiple cards which may be swiped horizontally.</p>
+<p>The 2D Picker design pattern (available as the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">GridViewPager component</a>) is useful for showing a range of options or asking a user to make a quick selection. Google search results on Android Wear are a great example of the GridViewPager pattern in action.</p>
 
 <img src="{@docRoot}design/media/wear/1D_picker.png" alt="" width="499px" />
 <p class="img-caption">This pattern can be used to present a single vertical list, or a “1D Picker”</p>
@@ -80,37 +71,60 @@ Android Wear apps do not adhere to the traditional mobile app model of touching 
 <img src="{@docRoot}design/media/wear/2D_picker.png" alt="" width:760px" />
 <p class="img-caption">It can also be used as a 2D matrix of options, as a way of presenting categorized options.</p>
 
-<p>This flexibility means that developers can choose to present a one or two-dimensional set of options. For example, a music app could use a vertical list to present a list of albums by a given artist (one dimension of options), and it could additionally allow each album slot to be horizontally swipeable to also choose a song from each album (a second dimension of options).</p>
 
-<p>Do not add buttons or pages to horizontal 2D Picker rows; rows should only be used to present a list or grid of similar options in this context. Provide a clear call to action on the card using the Action cards pattern detailed in the <a href="{@docRoot}design/wear/patterns.html">UI Patterns</a> guide.</p>
+<img src="{@docRoot}design/media/wear/2d_picker_indicated.png" alt="" width="760px" />
+<p class="img-caption">Navigation should be vertical-then-horizontal, not horizontal-then-vertical, and limit the the vertical set to around five cards.</p>
 
+
+<h3>Actions</h3>
+<p>For actions on each cards, use the <a href="{@docRoot}design/wear/patterns.html#Actions">Action cards pattern</a>.</p>
+
+
+<h3>Exiting</h3>
 <p>2D Picker should be automatically dismissed when a selection is made. It may also be exited by swiping back down on the first card, or by swiping left to right on a leftmost card.</p>
 
-<p>The simplicity of individual cards within a 2D Picker is a feature. Remember that in many cases the user may be on the go or attempting to complete a task as quickly as possible. As such, micro-interactions and familiar input mechanism are paramount, and using the already-familiar pattern of vertically-then-horizontally oriented cards gives users exactly what they want with as little fuss as possible. Strive to minimize the number of results or options that you present. Show the most popular or repeatedly-used options at the top of the list of cards to avoid scrolling. Learn the user's preferences and use context detection to put the most likely option for any given situation at the top. In general, optimize for fast task completion over excessive customization.</p>
+<h3>Making it fast</h3>
+<p>A few of our favorite tips on how to make the 2D picker really fast for your users:</p>
+<ul>
+<li>Minimize the number of cards</li>
+<li>Show the most popular card at the top </li>
+<li>Keep the cards extremely simple</li>
+<li>Optimize for speed over customization</li>
+
+</ul>
 
 
 
-<h2 id="Custom">Custom Layouts</h2>
+<h2 id="Custom">Breaking out of the card (with custom layouts)</h2>
 
-<p>Some interactions may require a broader range of input mechanisms than is possible within the limitations of a card-based UI. For example, an app that allows for location selection may require the user to swipe in many directions before tapping to drop a pin. In cases like this, it is recommended to momentarily launch out of the context stream UI and present an immersive, full screen app with a custom layout.</p>
-
-<p>Custom full screen apps provides the benefit of flexibility: you can launch your own Android activity that takes up the entire screen, and capture all touch events, making a wide range of UIs possible.</p>
-
-<img src="{@docRoot}design/media/wear/customlayout.jpg" alt="" width="760px" />
+<p>There are some things you can’t do on a card. Swiping in many directions on a map or a joystick are a few examples. In those cases it might be good idea to momentarily go full screen.</p>
 
 
-<p>However, be cautious of making this the default way of accessing your app’s functionality. Users will thank you for presenting your content in the familiar, simple environment of the context stream if it is possible to do so. Only enter full screen mode when the interactions required are not possible using the card UI. Full screen is a modal state to be entered for the purpose of achieving a specific task, and in most cases should be easily and quickly exited. You should use full screen apps to achieve a single, quick task within a broader user flow that hinges off the Context Stream. A great full screen experience will present itself quickly, ask for some user input, and then self-quit back to the stream.</p>
+<a class="notice-developers" href="{@docRoot}training/wearables/apps/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Wearable Apps</p>
+  </div>
+</a>
 
-<p>To avoid confusion, avoid using the specific styles and idioms of the context stream when designing immersive experiences. If you find yourself replicating the structure of the card layout, your should probably be using a 2D Picker. Make your immersive experience visually distinct. However, still adhere to the <a href="{@docRoot}design/wear/principles.html">Design Principles</a>, which apply universally to Android Wear interfaces.</p>
+<img src="{@docRoot}design/media/wear/customlayout.png" alt="" width="760px" />
 
-<p>Because Android wearables do not feature a home or back button, exiting the application at the appropriate time is the responsibility of the app developer. Exiting always leads back to the context stream. Where possible, exit automatically or present the option to exit at logical break points using acknowledge/cancel buttons. For example:</p>
+<h3>When to go full screen</h3>
+<p>We highly recommend only going full screen when you can’t do what you want on a card, and quickly exit back to the stream the moment you’re done. That way your app will feel like an integrated part of the system.</p>
 
-<ol>
-<li>A map view that allows the user to slide a map to drop a pin on a location should automatically exit when the pin has been placed.</li>
-<li>A short game should automatically exit back to the stream at the end of each game.</li>
-<li>A drawing app should display the option to exit after 5 seconds of inactivity.</li>
-</ol>
+<h3>Be distinct</h3>
+<p>Your full screen design shouldn’t look too much like the card stream or it could confuse users. The 2D picker is always available if you need a card-like UI.</p>
 
-<p>Even with logical exit points like these, some cases may exist where the user may want to immediately initiate an exit. This may be particularly common in apps of longer duration. In all cases, the developer should <strong>present the option to quit the app on long press</strong> using DismissOverlayView. Your design should long press for the sole purpose of prompting to quit.</p>
+<h3>Automatically exiting</h3>
+<p>Many devices don’t have back or home buttons, so exiting is your responsibility as the app designer. Here’s a few examples of natural exits:</p>
+<ul>
+  <li>A map that asks the user to drop a pin should exit when it happens</li>
+  <li>A short game can exit when the game finishes</li>
+  <li>A drawing app can finish after 5 seconds of inactivity.</li>
+</ul>
 
-<p>Seamlessly and fluidly moving between the context stream and immersive mode makes your app feel like an integrated part of the Android Wear experience.</p>
+<h3>Manually exiting</h3>
+<p>Even with logical exit points like these, some cases may exist where the user may want to immediately exit. This may be common in apps that are used for a longer while. In all cases, the developer should present the option to quit the app on long press using 
+<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>DismissOverlayView</code></a>. Your design should reserve long press for the sole purpose of prompting to quit.</p>
+
+
