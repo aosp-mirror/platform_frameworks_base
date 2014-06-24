@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter_Delegate;
 import android.graphics.Paint;
 import android.graphics.Paint_Delegate;
 import android.graphics.Rect;
@@ -48,8 +49,8 @@ import java.util.ArrayList;
  * This is based on top of {@link Graphics2D} but can operate independently if none are available
  * yet when setting transforms and clip information.
  * <p>
- * This allows for drawing through {@link #draw(Drawable, Paint_Delegate)} and
- * {@link #draw(Drawable, Paint_Delegate)}
+ * This allows for drawing through {@link #draw(Drawable, Paint_Delegate, boolean, boolean)} and
+ * {@link #draw(Drawable)}
  *
  * Handling of layers (created with {@link Canvas#saveLayer(RectF, Paint, int)}) is handled through
  * a list of Graphics2D for each layers. The class actually maintains a list of {@link Layer}
@@ -203,7 +204,7 @@ public class GcSnapshot {
      * called before the snapshot can be used to draw. Transform and clip operations are permitted
      * before.
      *
-     * @param image the image to associate to the snapshot or null.
+     * @param bitmap the image to associate to the snapshot or null.
      * @return the root snapshot
      */
     public static GcSnapshot createDefaultSnapshot(Bitmap_Delegate bitmap) {
@@ -557,7 +558,6 @@ public class GcSnapshot {
      * Executes the Drawable's draw method, with a null paint delegate.
      * <p/>
      * Note that the method can be called several times if there are more than one active layer.
-     * @param drawable
      */
     public void draw(Drawable drawable) {
         draw(drawable, null, false /*compositeOnly*/, false /*forceSrcMode*/);
@@ -567,20 +567,19 @@ public class GcSnapshot {
      * Executes the Drawable's draw method.
      * <p/>
      * Note that the method can be called several times if there are more than one active layer.
-     * @param drawable
-     * @param paint
      * @param compositeOnly whether the paint is used for composite only. This is typically
      *          the case for bitmaps.
      * @param forceSrcMode if true, this overrides the composite to be SRC
      */
     public void draw(Drawable drawable, Paint_Delegate paint, boolean compositeOnly,
             boolean forceSrcMode) {
+        int forceMode = forceSrcMode ? AlphaComposite.SRC : 0;
         // the current snapshot may not have a mLocalLayer (ie it was created on save() instead
         // of saveLayer(), but that doesn't mean there's no layer.
         // mLayers however saves all the information we need (flags).
         if (mLayers.size() == 1) {
             // no layer, only base layer. easy case.
-            drawInLayer(mLayers.get(0), drawable, paint, compositeOnly, forceSrcMode);
+            drawInLayer(mLayers.get(0), drawable, paint, compositeOnly, forceMode);
         } else {
             // draw in all the layers until the layer save flags tells us to stop (ie drawing
             // in that layer is limited to the layer itself.
@@ -590,7 +589,7 @@ public class GcSnapshot {
             do {
                 Layer layer = mLayers.get(i);
 
-                drawInLayer(layer, drawable, paint, compositeOnly, forceSrcMode);
+                drawInLayer(layer, drawable, paint, compositeOnly, forceMode);
 
                 // then go to previous layer, only if there are any left, and its flags
                 // doesn't restrict drawing to the layer itself.
@@ -601,20 +600,61 @@ public class GcSnapshot {
     }
 
     private void drawInLayer(Layer layer, Drawable drawable, Paint_Delegate paint,
-            boolean compositeOnly, boolean forceSrcMode) {
+            boolean compositeOnly, int forceMode) {
         Graphics2D originalGraphics = layer.getGraphics();
-        // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D configuredGraphics2D =
-            paint != null ?
-                    createCustomGraphics(originalGraphics, paint, compositeOnly, forceSrcMode) :
-                        (Graphics2D) originalGraphics.create();
+        if (paint == null) {
+            drawOnGraphics((Graphics2D) originalGraphics.create(), drawable,
+                    null /*paint*/, layer);
+        } else {
+            ColorFilter_Delegate filter = paint.getColorFilter();
+            if (filter == null || !filter.isSupported()) {
+                // get a Graphics2D object configured with the drawing parameters.
+                Graphics2D configuredGraphics = createCustomGraphics(originalGraphics, paint,
+                        compositeOnly, forceMode);
+                drawOnGraphics(configuredGraphics, drawable, paint, layer);
+                return;
+            }
 
+            int width = layer.getImage().getWidth();
+            int height = layer.getImage().getHeight();
+
+            // Create a temporary image to which the color filter will be applied.
+            BufferedImage image = new BufferedImage(width, height,
+                    BufferedImage.TYPE_INT_ARGB);
+            Graphics2D imageBaseGraphics = (Graphics2D) image.getGraphics();
+            // Configure the Graphics2D object with drawing parameters and shader.
+            Graphics2D imageGraphics = createCustomGraphics(
+                    imageBaseGraphics, paint, compositeOnly,
+                    AlphaComposite.SRC_OVER);
+            // get a Graphics2D object configured with the drawing parameters, but no shader.
+            Graphics2D configuredGraphics = createCustomGraphics(originalGraphics, paint,
+                    true /*compositeOnly*/, forceMode);
+            try {
+                // The main draw operation.
+                drawable.draw(imageGraphics, paint);
+
+                // Apply the color filter.
+                filter.applyFilter(imageGraphics, width, height);
+
+                // Draw the tinted image on the main layer.
+                configuredGraphics.drawImage(image, 0, 0, null);
+                layer.change();
+            } finally {
+                // dispose Graphics2D objects
+                imageGraphics.dispose();
+                imageBaseGraphics.dispose();
+                configuredGraphics.dispose();
+            }
+        }
+    }
+
+    private void drawOnGraphics(Graphics2D g, Drawable drawable, Paint_Delegate paint,
+            Layer layer) {
         try {
-            drawable.draw(configuredGraphics2D, paint);
+            drawable.draw(g, paint);
             layer.change();
         } finally {
-            // dispose Graphics2D object
-            configuredGraphics2D.dispose();
+            g.dispose();
         }
     }
 
@@ -685,7 +725,7 @@ public class GcSnapshot {
         // now draw put the content of the local layer onto the layer,
         // using the paint information
         Graphics2D g = createCustomGraphics(baseGfx, mLocalLayerPaint,
-                true /*alphaOnly*/, false /*forceSrcMode*/);
+                true /*alphaOnly*/, 0 /*forceMode*/);
 
         g.drawImage(mLocalLayer.getImage(),
                 mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
@@ -701,7 +741,7 @@ public class GcSnapshot {
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
     private Graphics2D createCustomGraphics(Graphics2D original, Paint_Delegate paint,
-            boolean compositeOnly, boolean forceSrcMode) {
+            boolean compositeOnly, int forceMode) {
         // make new one graphics
         Graphics2D g = (Graphics2D) original.create();
 
@@ -714,70 +754,73 @@ public class GcSnapshot {
                     RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
+        // set the shader first, as it'll replace the color if it can be used it.
         boolean customShader = false;
-
-        // get the shader first, as it'll replace the color if it can be used it.
-        if (compositeOnly == false) {
-            Shader_Delegate shaderDelegate = paint.getShader();
-            if (shaderDelegate != null) {
-                if (shaderDelegate.isSupported()) {
-                    java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
-                    assert shaderPaint != null;
-                    if (shaderPaint != null) {
-                        g.setPaint(shaderPaint);
-                        customShader = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(LayoutLog.TAG_SHADER,
-                            shaderDelegate.getSupportMessage(),
-                            null /*throwable*/, null /*data*/);
-                }
-            }
-
-            // if no shader, use the paint color
-            if (customShader == false) {
-                g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
-            }
-
+        if (!compositeOnly) {
+            customShader = setShader(g, paint);
             // set the stroke
             g.setStroke(paint.getJavaStroke());
         }
+        // set the composite.
+        setComposite(g, paint, compositeOnly || customShader, forceMode);
 
-        // the alpha for the composite. Always opaque if the normal paint color is used since
-        // it contains the alpha
-        int alpha = (compositeOnly || customShader) ? paint.getAlpha() : 0xFF;
+        return g;
+    }
 
-        if (forceSrcMode) {
-            g.setComposite(AlphaComposite.getInstance(
-                    AlphaComposite.SRC, (float) alpha / 255.f));
-        } else {
-            boolean customXfermode = false;
-            Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
-            if (xfermodeDelegate != null) {
-                if (xfermodeDelegate.isSupported()) {
-                    Composite composite = xfermodeDelegate.getComposite(alpha);
-                    assert composite != null;
-                    if (composite != null) {
-                        g.setComposite(composite);
-                        customXfermode = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(LayoutLog.TAG_XFERMODE,
-                            xfermodeDelegate.getSupportMessage(),
-                            null /*throwable*/, null /*data*/);
+    private boolean setShader(Graphics2D g, Paint_Delegate paint) {
+        Shader_Delegate shaderDelegate = paint.getShader();
+        if (shaderDelegate != null) {
+            if (shaderDelegate.isSupported()) {
+                java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
+                assert shaderPaint != null;
+                if (shaderPaint != null) {
+                    g.setPaint(shaderPaint);
+                    return true;
                 }
-            }
-
-            // if there was no custom xfermode, but we have alpha (due to a shader and a non
-            // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
-            // that will handle the alpha.
-            if (customXfermode == false && alpha != 0xFF) {
-                g.setComposite(AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER, (float) alpha / 255.f));
+            } else {
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_SHADER,
+                        shaderDelegate.getSupportMessage(),
+                        null /*throwable*/, null /*data*/);
             }
         }
 
-        return g;
+        // if no shader, use the paint color
+        g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
+
+        return false;
+    }
+
+    private void setComposite(Graphics2D g, Paint_Delegate paint, boolean usePaintAlpha,
+            int forceMode) {
+        // the alpha for the composite. Always opaque if the normal paint color is used since
+        // it contains the alpha
+        int alpha = usePaintAlpha ? paint.getAlpha() : 0xFF;
+        if (forceMode != 0) {
+            g.setComposite(AlphaComposite.getInstance(forceMode, (float) alpha / 255.f));
+            return;
+        }
+        Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
+        if (xfermodeDelegate != null) {
+            if (xfermodeDelegate.isSupported()) {
+                Composite composite = xfermodeDelegate.getComposite(alpha);
+                assert composite != null;
+                if (composite != null) {
+                    g.setComposite(composite);
+                    return;
+                }
+            } else {
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_XFERMODE,
+                        xfermodeDelegate.getSupportMessage(),
+                        null /*throwable*/, null /*data*/);
+            }
+        }
+        // if there was no custom xfermode, but we have alpha (due to a shader and a non
+        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
+        // that will handle the alpha.
+        if (alpha != 0xFF) {
+            g.setComposite(AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER, (float) alpha / 255.f));
+        }
     }
 
     private void mapRect(AffineTransform matrix, RectF dst, RectF src) {

@@ -827,8 +827,8 @@ public class Paint_Delegate {
 
         delegate.mColorFilter = ColorFilter_Delegate.getDelegate(filter);
 
-        // since none of those are supported, display a fidelity warning right away
-        if (delegate.mColorFilter != null && delegate.mColorFilter.isSupported() == false) {
+        // Log warning if it's not supported.
+        if (delegate.mColorFilter != null && !delegate.mColorFilter.isSupported()) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_COLORFILTER,
                     delegate.mColorFilter.getSupportMessage(), null, null /*data*/);
         }
@@ -873,7 +873,7 @@ public class Paint_Delegate {
         delegate.mMaskFilter = MaskFilter_Delegate.getDelegate(maskfilter);
 
         // since none of those are supported, display a fidelity warning right away
-        if (delegate.mMaskFilter != null && delegate.mMaskFilter.isSupported() == false) {
+        if (delegate.mMaskFilter != null && !delegate.mMaskFilter.isSupported()) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MASKFILTER,
                     delegate.mMaskFilter.getSupportMessage(), null, null /*data*/);
         }
@@ -906,7 +906,7 @@ public class Paint_Delegate {
         delegate.mRasterizer = Rasterizer_Delegate.getDelegate(rasterizer);
 
         // since none of those are supported, display a fidelity warning right away
-        if (delegate.mRasterizer != null && delegate.mRasterizer.isSupported() == false) {
+        if (delegate.mRasterizer != null && !delegate.mRasterizer.isSupported()) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_RASTERIZER,
                     delegate.mRasterizer.getSupportMessage(), null, null /*data*/);
         }
