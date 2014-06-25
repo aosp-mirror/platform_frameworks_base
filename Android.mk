@@ -306,6 +306,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteControlDisplay.aidl \
 	media/java/android/media/IRemoteDisplayCallback.aidl \
 	media/java/android/media/IRemoteDisplayProvider.aidl \
+	media/java/android/media/IRemoteVolumeController.aidl \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \

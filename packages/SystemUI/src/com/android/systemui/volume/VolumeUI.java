@@ -5,7 +5,11 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
+import android.media.IRemoteVolumeController;
 import android.media.IVolumeController;
+import android.media.session.ISessionController;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -42,12 +46,21 @@ public class VolumeUI extends SystemUI {
 
     private final Handler mHandler = new Handler();
     private AudioManager mAudioManager;
+    private MediaSessionManager mMediaSessionManager;
     private VolumeController mVolumeController;
+    private RemoteVolumeController mRemoteVolumeController;
+
+    private VolumePanel mDialogPanel;
+    private VolumePanel mPanel;
 
     @Override
     public void start() {
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mVolumeController = new VolumeController(mContext);
+        mMediaSessionManager = (MediaSessionManager) mContext
+                .getSystemService(Context.MEDIA_SESSION_SERVICE);
+        initPanel();
+        mVolumeController = new VolumeController();
+        mRemoteVolumeController = new RemoteVolumeController();
         putComponent(VolumeComponent.class, mVolumeController);
         updateController();
         mContext.getContentResolver().registerContentObserver(SETTING_URI, false, mObserver);
@@ -57,10 +70,30 @@ public class VolumeUI extends SystemUI {
         if (Settings.Global.getInt(mContext.getContentResolver(), SETTING, DEFAULT) != 0) {
             Log.d(TAG, "Registering volume controller");
             mAudioManager.setVolumeController(mVolumeController);
+            mMediaSessionManager.setRemoteVolumeController(mRemoteVolumeController);
         } else {
             Log.d(TAG, "Unregistering volume controller");
             mAudioManager.setVolumeController(null);
+            mMediaSessionManager.setRemoteVolumeController(null);
         }
+    }
+
+    private void initPanel() {
+        mPanel = new VolumePanel(mContext, null, new ZenModeControllerImpl(mContext, mHandler));
+        final int delay = mContext.getResources().getInteger(R.integer.feedback_start_delay);
+        mPanel.setZenModePanelCallback(new ZenModePanel.Callback() {
+            @Override
+            public void onMoreSettings() {
+                mHandler.removeCallbacks(mStartZenSettings);
+                mHandler.postDelayed(mStartZenSettings, delay);
+            }
+
+            @Override
+            public void onInteraction() {
+                mDialogPanel.resetTimeout();
+            }
+        });
+        mDialogPanel = mPanel;
     }
 
     private final ContentObserver mObserver = new ContentObserver(mHandler) {
@@ -71,55 +104,18 @@ public class VolumeUI extends SystemUI {
         }
     };
 
+    private final Runnable mStartZenSettings = new Runnable() {
+        @Override
+        public void run() {
+            mDialogPanel.postDismiss();
+            final Intent intent = ZenModePanel.ZEN_SETTINGS;
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        }
+    };
+
     /** For now, simply host an unmodified base volume panel in this process. */
     private final class VolumeController extends IVolumeController.Stub implements VolumeComponent {
-        private final VolumePanel mDialogPanel;
-        private VolumePanel mPanel;
-
-        public VolumeController(Context context) {
-            mPanel = new VolumePanel(context, null, new ZenModeControllerImpl(mContext, mHandler));
-            final int delay = context.getResources().getInteger(R.integer.feedback_start_delay);
-            mPanel.setZenModePanelCallback(new ZenModePanel.Callback() {
-                @Override
-                public void onMoreSettings() {
-                    mHandler.removeCallbacks(mStartZenSettings);
-                    mHandler.postDelayed(mStartZenSettings, delay);
-                }
-
-                @Override
-                public void onInteraction() {
-                    mDialogPanel.resetTimeout();
-                }
-            });
-            mDialogPanel = mPanel;
-        }
-
-        private final Runnable mStartZenSettings = new Runnable() {
-            @Override
-            public void run() {
-                mDialogPanel.postDismiss();
-                final Intent intent = ZenModePanel.ZEN_SETTINGS;
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-            }
-        };
-
-        @Override
-        public void hasNewRemotePlaybackInfo() throws RemoteException {
-            mPanel.postHasNewRemotePlaybackInfo();
-        }
-
-        @Override
-        public void remoteVolumeChanged(int streamType, int flags)
-                throws RemoteException {
-            mPanel.postRemoteVolumeChanged(streamType, flags);
-        }
-
-        @Override
-        public void remoteSliderVisibility(boolean visible)
-                throws RemoteException {
-            mPanel.postRemoteSliderVisibility(visible);
-        }
 
         @Override
         public void displaySafeVolumeWarning(int flags) throws RemoteException {
@@ -161,6 +157,23 @@ public class VolumeUI extends SystemUI {
         @Override
         public void setVolumePanel(VolumePanel panel) {
             mPanel = panel == null ? mDialogPanel : panel;
+        }
+    }
+
+    private final class RemoteVolumeController extends IRemoteVolumeController.Stub {
+
+        @Override
+        public void remoteVolumeChanged(ISessionController binder, int flags)
+                throws RemoteException {
+            MediaController controller = MediaController.fromBinder(binder);
+            mPanel.postRemoteVolumeChanged(controller, flags);
+        }
+
+        @Override
+        public void updateRemoteController(ISessionController session) throws RemoteException {
+            mPanel.postRemoteSliderVisibility(session != null);
+            // TODO stash default session in case the slider can be opened other
+            // than by remoteVolumeChanged.
         }
     }
 }

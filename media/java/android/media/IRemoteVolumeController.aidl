@@ -16,22 +16,17 @@
 
 package android.media;
 
+import android.media.session.ISessionController;
+
 /**
- * AIDL for the AudioService to report interesting events to a volume control
- * dialog in another process.
+ * AIDL for the MediaSessionService to report interesting events on remote playback
+ * to a volume control dialog. See also IVolumeController for the AudioService half.
+ * TODO add in better support for multiple remote sessions.
  * @hide
  */
-oneway interface IVolumeController {
-
-    void displaySafeVolumeWarning(int flags);
-
-    void volumeChanged(int streamType, int flags);
-
-    void masterVolumeChanged(int flags);
-
-    void masterMuteChanged(int flags);
-
-    void setLayoutDirection(int layoutDirection);
-
-    void dismiss();
+oneway interface IRemoteVolumeController {
+    void remoteVolumeChanged(ISessionController session, int flags);
+    // sets the default session to use with the slider, replaces remoteSliderVisibility
+    // on IVolumeController
+    void updateRemoteController(ISessionController session);
 }

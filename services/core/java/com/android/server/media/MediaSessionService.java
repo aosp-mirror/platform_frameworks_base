@@ -27,8 +27,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.media.IAudioService;
+import android.media.IRemoteVolumeController;
 import android.media.routeprovider.RouteRequest;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
@@ -97,6 +97,10 @@ public class MediaSessionService extends SystemService implements Monitor {
     // Used to keep track of the current request to show routes for a specific
     // session so we drop late callbacks properly.
     private int mShowRoutesRequestId = 0;
+
+    // Used to notify system UI when remote volume was changed. TODO find a
+    // better way to handle this.
+    private IRemoteVolumeController mRvc;
 
     // TODO refactor to have per user state for providers. See
     // MediaRouterService for an example
@@ -222,6 +226,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         if (updateSessions) {
             mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
+        }
+    }
+
+    public void onSessionPlaybackTypeChanged(MediaSessionRecord record) {
+        synchronized (mLock) {
+            if (!mAllSessions.contains(record)) {
+                Log.d(TAG, "Unknown session changed playback type. Ignoring.");
+                return;
+            }
+            pushRemoteVolumeUpdateLocked(record.getUserId());
         }
     }
 
@@ -367,6 +381,13 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    private void enforceStatusBarPermission(String action, int pid, int uid) {
+        if (getContext().checkPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                pid, uid) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Only system ui may " + action);
+        }
+    }
+
     /**
      * This checks if the component is an enabled notification listener for the
      * specified user. Enabled components may only operate on behalf of the user
@@ -497,6 +518,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             for (int i = 0; i < size; i++) {
                 tokens.add(new MediaSessionToken(records.get(i).getControllerBinder()));
             }
+            pushRemoteVolumeUpdateLocked(userId);
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
                 SessionsListenerRecord record = mSessionsListeners.get(i);
                 if (record.mUserId == UserHandle.USER_ALL || record.mUserId == userId) {
@@ -508,6 +530,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mSessionsListeners.remove(i);
                     }
                 }
+            }
+        }
+    }
+
+    private void pushRemoteVolumeUpdateLocked(int userId) {
+        if (mRvc != null) {
+            try {
+                MediaSessionRecord record = mPriorityStack.getDefaultRemoteSession(userId);
+                mRvc.updateRemoteController(record == null ? null : record.getControllerBinder());
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error sending default remote volume to sys ui.", e);
             }
         }
     }
@@ -844,6 +877,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
+        public void setRemoteVolumeController(IRemoteVolumeController rvc) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                enforceStatusBarPermission("listen for volume changes", pid, uid);
+                mRvc = rvc;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -929,6 +975,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             } else {
                 session.adjustVolumeBy(delta, flags);
+                if (mRvc != null) {
+                    try {
+                        mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
+                    } catch (Exception e) {
+                        Log.wtf(TAG, "Error sending volume change to system UI.", e);
+                    }
+                }
             }
         }
 

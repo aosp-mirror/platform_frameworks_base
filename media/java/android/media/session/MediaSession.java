@@ -127,12 +127,12 @@ public final class MediaSession {
     /**
      * The session uses local playback.
      */
-    public static final int VOLUME_TYPE_LOCAL = 1;
+    public static final int PLAYBACK_TYPE_LOCAL = 1;
 
     /**
      * The session uses remote playback.
      */
-    public static final int VOLUME_TYPE_REMOTE = 2;
+    public static final int PLAYBACK_TYPE_REMOTE = 2;
 
     private final Object mLock = new Object();
 
@@ -265,7 +265,7 @@ public final class MediaSession {
      */
     public void setPlaybackToLocal(int stream) {
         try {
-            mBinder.configureVolumeHandling(VOLUME_TYPE_LOCAL, stream, 0);
+            mBinder.configureVolumeHandling(PLAYBACK_TYPE_LOCAL, stream, 0);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToLocal.", e);
         }
@@ -294,7 +294,7 @@ public final class MediaSession {
         });
 
         try {
-            mBinder.configureVolumeHandling(VOLUME_TYPE_REMOTE, volumeProvider.getVolumeControl(),
+            mBinder.configureVolumeHandling(PLAYBACK_TYPE_REMOTE, volumeProvider.getVolumeControl(),
                     volumeProvider.getMaxVolume());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);

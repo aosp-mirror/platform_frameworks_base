@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.media.IRemoteVolumeController;
 import android.media.session.ISessionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -211,6 +212,21 @@ public final class MediaSessionManager {
             mService.removeSessionsListener(listener.mStub);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in removeActiveSessionsListener.", e);
+        }
+    }
+
+    /**
+     * Set the remote volume controller to receive volume updates on. Only for
+     * use by system UI.
+     *
+     * @param rvc The volume controller to receive updates on.
+     * @hide
+     */
+    public void setRemoteVolumeController(IRemoteVolumeController rvc) {
+        try {
+            mService.setRemoteVolumeController(rvc);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setRemoteVolumeController.", e);
         }
     }
 
