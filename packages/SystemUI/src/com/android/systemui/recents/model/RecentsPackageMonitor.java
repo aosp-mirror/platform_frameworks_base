@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Looper;
 import com.android.internal.content.PackageMonitor;
+import com.android.systemui.recents.SystemServicesProxy;
 
 import java.util.HashSet;
 import java.util.List;

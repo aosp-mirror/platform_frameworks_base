@@ -56,6 +56,7 @@ final class TaskRecord extends ThumbnailHolder {
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_TASKTYPE = "task_type";
+    private static final String ATTR_LASTACTIVETIME = "last_active_time";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
@@ -136,8 +137,8 @@ final class TaskRecord extends ThumbnailHolder {
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
-            String _lastDescription, ArrayList<ActivityRecord> activities, long lastTimeMoved,
-            boolean neverRelinquishIdentity) {
+            String _lastDescription, ArrayList<ActivityRecord> activities, long _lastActiveTime,
+            long lastTimeMoved, boolean neverRelinquishIdentity) {
         mService = service;
         taskId = _taskId;
         intent = _intent;
@@ -152,10 +153,13 @@ final class TaskRecord extends ThumbnailHolder {
         taskType = _taskType;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = _userId;
+        lastActiveTime = _lastActiveTime;
         lastDescription = _lastDescription;
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
         mNeverRelinquishIdentity = neverRelinquishIdentity;
+        // Recompute the task description for this task
+        updateTaskDescription();
     }
 
     void touchActiveTime() {
@@ -703,6 +707,7 @@ final class TaskRecord extends ThumbnailHolder {
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
+        out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
         out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
         if (lastDescription != null) {
@@ -753,6 +758,7 @@ final class TaskRecord extends ThumbnailHolder {
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
         String lastDescription = null;
+        long lastActiveTime = 0;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
         int taskId = -1;
@@ -779,6 +785,8 @@ final class TaskRecord extends ThumbnailHolder {
                 userId = Integer.valueOf(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.valueOf(attrValue);
+            } else if (ATTR_LASTACTIVETIME.equals(attrName)) {
+                lastActiveTime = Long.valueOf(attrValue);
             } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
                 lastDescription = attrValue;
             } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
@@ -818,8 +826,8 @@ final class TaskRecord extends ThumbnailHolder {
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
-                askedCompatMode, taskType, userId, lastDescription, activities, lastTimeOnTop,
-                neverRelinquishIdentity);
+                askedCompatMode, taskType, userId, lastDescription, activities, lastActiveTime,
+                lastTimeOnTop, neverRelinquishIdentity);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);

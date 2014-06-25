@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
@@ -27,11 +27,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
-import android.util.LruCache;
 import android.util.Pair;
-import com.android.systemui.recents.model.SpaceNode;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.Console;
+import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -204,8 +203,8 @@ class TaskResourceLoader implements Runnable {
                 final Task t = nextTaskData.first;
                 final boolean forceLoadTask = nextTaskData.second;
                 if (t != null) {
-                    Drawable loadIcon = mApplicationIconCache.get(t.key);
-                    Bitmap loadThumbnail = mThumbnailCache.get(t.key);
+                    Drawable loadIcon = mApplicationIconCache.getCheckLastActiveTime(t.key);
+                    Bitmap loadThumbnail = mThumbnailCache.getCheckLastActiveTime(t.key);
                     if (Console.Enabled) {
                         Console.log(Constants.Log.App.TaskDataLoader,
                                 "  [TaskResourceLoader|load]",
@@ -279,40 +278,6 @@ class TaskResourceLoader implements Runnable {
                 }
             }
         }
-    }
-}
-
-/**
- * The drawable cache.  By using the Task's key, we can prevent holding onto a reference to the Task
- * resource data, while keeping the cache data in memory where necessary.
- */
-class DrawableLruCache extends LruCache<Task.TaskKey, Drawable> {
-    public DrawableLruCache(int cacheSize) {
-        super(cacheSize);
-    }
-
-    @Override
-    protected int sizeOf(Task.TaskKey t, Drawable d) {
-        // The cache size will be measured in kilobytes rather than number of items
-        // NOTE: this isn't actually correct, as the icon may be smaller
-        int maxBytes = (d.getIntrinsicWidth() * d.getIntrinsicHeight() * 4);
-        return maxBytes / 1024;
-    }
-}
-
-/**
- * The bitmap cache.  By using the Task's key, we can prevent holding onto a reference to the Task
- * resource data, while keeping the cache data in memory where necessary.
- */
-class BitmapLruCache extends LruCache<Task.TaskKey, Bitmap> {
-    public BitmapLruCache(int cacheSize) {
-        super(cacheSize);
-    }
-
-    @Override
-    protected int sizeOf(Task.TaskKey t, Bitmap bitmap) {
-        // The cache size will be measured in kilobytes rather than number of items
-        return bitmap.getAllocationByteCount() / 1024;
     }
 }
 
@@ -417,7 +382,7 @@ public class RecentsTaskLoader {
     }
 
     /** Reload the set of recent tasks */
-    SpaceNode reload(Context context, int preloadCount) {
+    public SpaceNode reload(Context context, int preloadCount) {
         long t1 = System.currentTimeMillis();
 
         if (Console.Enabled) {
@@ -456,7 +421,7 @@ public class RecentsTaskLoader {
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
-                    activityIcon, activityColor, t.userId);
+                    activityIcon, activityColor, t.userId, t.lastActiveTime);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -466,45 +431,44 @@ public class RecentsTaskLoader {
                             "i: " + i + " task: " + t.baseIntent.getComponent().getPackageName());
                 }
 
-                // Load the icon (if possible and not the foremost task, from the cache)
-                if (!isForemostTask) {
-                    task.applicationIcon = mApplicationIconCache.get(task.key);
-                    if (task.applicationIcon != null) {
-                        // Even though we get things from the cache, we should update them
-                        // if they've changed in the bg
-                        tasksToForceLoad.add(task);
-                    }
-                }
+                // Load the icon from the cache if possible
+                task.applicationIcon = mApplicationIconCache.getCheckLastActiveTime(task.key);
                 if (task.applicationIcon == null) {
-                    task.applicationIcon = ssp.getActivityIcon(info, task.userId);
-                    if (task.applicationIcon != null) {
-                        mApplicationIconCache.put(task.key, task.applicationIcon);
+                    if (isForemostTask) {
+                        // We force loading the application icon for the foremost task
+                        task.applicationIcon = ssp.getActivityIcon(info, task.userId);
+                        if (task.applicationIcon != null) {
+                            mApplicationIconCache.put(task.key, task.applicationIcon);
+                        } else {
+                            task.applicationIcon = mDefaultApplicationIcon;
+                        }
                     } else {
-                        task.applicationIcon = mDefaultApplicationIcon;
+                        // Either the task has updated, or we haven't cached any information for the
+                        // task, so reload it
+                        tasksToForceLoad.add(task);
                     }
                 }
 
                 // Load the thumbnail (if possible and not the foremost task, from the cache)
-                if (!isForemostTask) {
-                    task.thumbnail = mThumbnailCache.get(task.key);
-                    if (task.thumbnail != null && !tasksToForceLoad.contains(task)) {
-                        // Even though we get things from the cache, we should update them if
-                        // they've changed in the bg
-                        tasksToForceLoad.add(task);
-                    }
-                }
+                task.thumbnail = mThumbnailCache.getCheckLastActiveTime(task.key);
                 if (task.thumbnail == null) {
                     if (Console.Enabled) {
                         Console.log(Constants.Log.App.TaskDataLoader,
                                 "[RecentsTaskLoader|loadingTaskThumbnail]");
                     }
-
-                    task.thumbnail = ssp.getTaskThumbnail(task.key.id);
-                    if (task.thumbnail != null) {
-                        task.thumbnail.setHasAlpha(false);
-                        mThumbnailCache.put(task.key, task.thumbnail);
+                    if (isForemostTask) {
+                        // We force loading the thumbnail icon for the foremost task
+                        task.thumbnail = ssp.getTaskThumbnail(task.key.id);
+                        if (task.thumbnail != null) {
+                            task.thumbnail.setHasAlpha(false);
+                            mThumbnailCache.put(task.key, task.thumbnail);
+                        } else {
+                            task.thumbnail = mDefaultThumbnail;
+                        }
                     } else {
-                        task.thumbnail = mDefaultThumbnail;
+                        // Either the task has updated, or we haven't cached any information for the
+                        // task, so reload it
+                        tasksToForceLoad.add(task);
                     }
                 }
             }
@@ -613,7 +577,7 @@ public class RecentsTaskLoader {
      * Handles signals from the system, trimming memory when requested to prevent us from running
      * out of memory.
      */
-    void onTrimMemory(int level) {
+    public void onTrimMemory(int level) {
         if (Console.Enabled) {
             Console.log(Constants.Log.App.Memory, "[RecentsTaskLoader|onTrimMemory]",
                     Console.trimMemoryLevelToString(level));

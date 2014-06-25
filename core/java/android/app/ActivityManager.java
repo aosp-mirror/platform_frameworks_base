@@ -652,6 +652,12 @@ public class ActivityManager {
         public int userId;
 
         /**
+         * The last time this task was active.
+         * @hide
+         */
+        public long lastActiveTime;
+
+        /**
          * The recent activity values for the highest activity in the stack to have set the values.
          * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
          *
@@ -688,6 +694,7 @@ public class ActivityManager {
             }
             dest.writeInt(stackId);
             dest.writeInt(userId);
+            dest.writeLong(lastActiveTime);
         }
 
         public void readFromParcel(Parcel source) {
@@ -700,6 +707,7 @@ public class ActivityManager {
                     TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
+            lastActiveTime = source.readLong();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
