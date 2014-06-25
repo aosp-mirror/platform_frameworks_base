@@ -90,6 +90,9 @@ The status bar should almost always have a clear delineation from the primary to
 full-bleed imagery cases and when you use a gradient as a protection.
 </p>
 
+<p>When customizing the navigation and status bars, make them both transparent or modify only
+the status bar. The navigation bar should remain black in all other cases.</p>
+
 
 <h2 id="inheritance">Theme Individual Views</h3>
 
