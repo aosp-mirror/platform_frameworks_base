@@ -141,7 +141,7 @@ public class StateListAnimator {
             return;
         }
         if (mLastMatch != null) {
-            cancel(mLastMatch);
+            cancel();
         }
         mLastMatch = match;
         if (match != null) {
@@ -151,13 +151,15 @@ public class StateListAnimator {
 
     private void start(Tuple match) {
         match.mAnimator.setTarget(getTarget());
-        mRunningAnimator = match.mAnimator;
-        match.mAnimator.start();
+        mRunningAnimator = match.mAnimator.clone();
+        mRunningAnimator.start();
     }
 
-    private void cancel(Tuple lastMatch) {
-        lastMatch.mAnimator.cancel();
-        lastMatch.mAnimator.setTarget(null);
+    private void cancel() {
+        if (mRunningAnimator != null) {
+            mRunningAnimator.cancel();
+            mRunningAnimator = null;
+        }
     }
 
     /**
