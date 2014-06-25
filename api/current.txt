@@ -4699,7 +4699,7 @@ package android.app {
     ctor public Notification.MediaStyle();
     ctor public Notification.MediaStyle(android.app.Notification.Builder);
     method public android.app.Notification buildStyled(android.app.Notification);
-    method public android.app.Notification.MediaStyle setMediaSession(android.media.session.MediaSessionToken);
+    method public android.app.Notification.MediaStyle setMediaSession(android.media.session.MediaSession.Token);
     method public android.app.Notification.MediaStyle setShowActionsInCompactView(int...);
   }
 
@@ -15774,7 +15774,7 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolumeBy(int, int);
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
-    method public static android.media.session.MediaController fromToken(android.media.session.MediaSessionToken);
+    method public static android.media.session.MediaController fromToken(android.media.session.MediaSession.Token);
     method public android.media.MediaMetadata getMetadata();
     method public android.media.session.PlaybackState getPlaybackState();
     method public int getRatingType();
@@ -15818,7 +15818,7 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
-    method public android.media.session.MediaSessionToken getSessionToken();
+    method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isActive();
     method public void release();
     method public void removeCallback(android.media.session.MediaSession.Callback);
@@ -15843,6 +15843,12 @@ package android.media.session {
     method public void onMediaButtonEvent(android.content.Intent);
   }
 
+  public static final class MediaSession.Token implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public static abstract class MediaSession.TransportControlsCallback {
     ctor public MediaSession.TransportControlsCallback();
     method public void onFastForward();
@@ -15865,12 +15871,6 @@ package android.media.session {
   public static abstract class MediaSessionManager.SessionListener {
     ctor public MediaSessionManager.SessionListener();
     method public abstract void onActiveSessionsChanged(java.util.List<android.media.session.MediaController>);
-  }
-
-  public final class MediaSessionToken implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class PlaybackState implements android.os.Parcelable {

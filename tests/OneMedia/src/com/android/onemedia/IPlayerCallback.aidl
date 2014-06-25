@@ -15,8 +15,8 @@
 
 package com.android.onemedia;
 
-import android.media.session.MediaSessionToken;
+import android.media.session.MediaSession;
 
 interface IPlayerCallback {
-    void onSessionChanged(in MediaSessionToken session);
+    void onSessionChanged(in MediaSession.Token session);
 }

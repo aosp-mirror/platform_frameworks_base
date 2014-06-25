@@ -17,7 +17,7 @@ package com.android.onemedia;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.session.MediaSessionToken;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -149,7 +149,7 @@ public class PlayerService extends Service {
         }
 
         @Override
-        public MediaSessionToken getSessionToken() throws RemoteException {
+        public MediaSession.Token getSessionToken() throws RemoteException {
             return mSession.getSessionToken();
         }
     }

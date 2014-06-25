@@ -42,7 +42,7 @@ import java.util.ArrayList;
  * <p>
  * A MediaController can be created through {@link MediaSessionManager} if you
  * hold the "android.permission.MEDIA_CONTENT_CONTROL" permission or directly if
- * you have a {@link MediaSessionToken} from the session owner.
+ * you have a {@link MediaSession.Token} from the session owner.
  * <p>
  * MediaController objects are thread-safe.
  */
@@ -86,7 +86,7 @@ public final class MediaController {
      * @param token The session token to control.
      * @return A controller for the session or null if inaccessible.
      */
-    public static MediaController fromToken(@NonNull MediaSessionToken token) {
+    public static MediaController fromToken(@NonNull MediaSession.Token token) {
         return fromBinder(token.getBinder());
     }
 

@@ -15,12 +15,12 @@
 
 package android.media.session;
 
-import android.media.session.MediaSessionToken;
+import android.media.session.MediaSession;
 
 /**
  * Listens for changes to the list of active sessions.
  * @hide
  */
 oneway interface IActiveSessionsListener {
-    void onActiveSessionsChanged(in List<MediaSessionToken> sessions);
+    void onActiveSessionsChanged(in List<MediaSession.Token> sessions);
 }

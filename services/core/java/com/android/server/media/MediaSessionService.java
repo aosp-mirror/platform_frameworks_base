@@ -34,10 +34,9 @@ import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
-import android.media.session.MediaSessionToken;
+import android.media.session.MediaSession;
 import android.media.session.RouteInfo;
 import android.media.session.RouteOptions;
-import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -511,9 +510,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             if (size > 0) {
                 persistMediaButtonReceiverLocked(records.get(0));
             }
-            ArrayList<MediaSessionToken> tokens = new ArrayList<MediaSessionToken>();
+            ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
             for (int i = 0; i < size; i++) {
-                tokens.add(new MediaSessionToken(records.get(i).getControllerBinder()));
+                tokens.add(new MediaSession.Token(records.get(i).getControllerBinder()));
             }
             pushRemoteVolumeUpdateLocked(userId);
             for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {

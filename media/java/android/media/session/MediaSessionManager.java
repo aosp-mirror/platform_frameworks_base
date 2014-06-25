@@ -292,7 +292,7 @@ public final class MediaSessionManager {
 
         private final IActiveSessionsListener.Stub mStub = new IActiveSessionsListener.Stub() {
             @Override
-            public void onActiveSessionsChanged(List<MediaSessionToken> tokens)
+            public void onActiveSessionsChanged(List<MediaSession.Token> tokens)
                     throws RemoteException {
                 ArrayList<MediaController> controllers = new ArrayList<MediaController>();
                 int size = tokens.size();
