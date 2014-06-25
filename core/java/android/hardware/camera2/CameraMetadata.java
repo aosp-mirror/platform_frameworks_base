@@ -16,11 +16,13 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -101,7 +103,8 @@ public abstract class CameraMetadata<TKey> {
     @SuppressWarnings("unchecked")
     public List<TKey> getKeys() {
         Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
-        return Collections.unmodifiableList(getKeysStatic(thisClass, getKeyClass(), this));
+        return Collections.unmodifiableList(
+                getKeysStatic(thisClass, getKeyClass(), this, /*filterTags*/null));
     }
 
     /**
@@ -111,13 +114,24 @@ public abstract class CameraMetadata<TKey> {
      * <p>
      * Optionally, if {@code instance} is not null, then filter out any keys with null values.
      * </p>
+     *
+     * <p>
+     * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
+     * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
+     * sorted as a side effect.
+     * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
     static <TKey> ArrayList<TKey> getKeysStatic(
              Class<?> type, Class<TKey> keyClass,
-             CameraMetadata<TKey> instance) {
+             CameraMetadata<TKey> instance,
+             int[] filterTags) {
 
         if (VERBOSE) Log.v(TAG, "getKeysStatic for " + type);
+
+        if (filterTags != null) {
+            Arrays.sort(filterTags);
+        }
 
         ArrayList<TKey> keyList = new ArrayList<TKey>();
 
@@ -137,12 +151,53 @@ public abstract class CameraMetadata<TKey> {
                 }
 
                 if (instance == null || instance.getProtected(key) != null) {
-                    keyList.add(key);
+                    if (shouldKeyBeAdded(key, filterTags)) {
+                        keyList.add(key);
+
+                        if (VERBOSE) {
+                            Log.v(TAG, "getKeysStatic - key was added - " + key);
+                        }
+                    } else if (VERBOSE) {
+                        Log.v(TAG, "getKeysStatic - key was filtered - " + key);
+                    }
                 }
             }
         }
 
         return keyList;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static <TKey> boolean shouldKeyBeAdded(TKey key, int[] filterTags) {
+        if (key == null) {
+            throw new NullPointerException("key must not be null");
+        }
+
+        CameraMetadataNative.Key nativeKey;
+
+        /*
+         * Get the native key from the public api key
+         */
+        if (key instanceof CameraCharacteristics.Key) {
+            nativeKey = ((CameraCharacteristics.Key)key).getNativeKey();
+        } else if (key instanceof CaptureResult.Key) {
+            nativeKey = ((CaptureResult.Key)key).getNativeKey();
+        } else if (key instanceof CaptureRequest.Key) {
+            nativeKey = ((CaptureRequest.Key)key).getNativeKey();
+        } else {
+            // Reject fields that aren't a key
+            throw new IllegalArgumentException("key type must be that of a metadata key");
+        }
+
+        // No filtering necessary
+        if (filterTags == null) {
+            return true;
+        }
+
+        int keyTag = nativeKey.getTag();
+
+        // non-negative result is returned iff the value is in the array
+        return Arrays.binarySearch(filterTags, keyTag) >= 0;
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
