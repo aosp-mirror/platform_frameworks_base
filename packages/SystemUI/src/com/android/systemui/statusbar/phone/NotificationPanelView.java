@@ -302,6 +302,8 @@ public class NotificationPanelView extends PanelView implements
         mUnlockIconActive = false;
         mPageSwiper.reset();
         closeQs();
+        mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
+                true /* cancelAnimators */);
     }
 
     public void closeQs() {
