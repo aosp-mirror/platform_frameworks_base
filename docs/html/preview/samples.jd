@@ -3,38 +3,13 @@ page.title=Samples
 @jd:body
 
 <p>The following code samples are provided for the L Developer Preview. You can
-download them with the Android SDK Manager.</p>
-
-<p>To import a downloaded project:<p>
-
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Android Studio</a></p>
-
-  <div class="toggle-content-toggleme">
-
-  <ol>
-    <li>Unpack the downloaded project package.</li>
-    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, chose
-    <strong>File > Import Project</strong> and select the root folder of
-    the unpacked project.
-      <p>Android Studio may ask you to choose the type of project you are
-        importing. If it does, make sure to choose <strong>Import project from
-        external model</strong> and select the <strong>Gradle</strong> option.
-      </p>
-    </li>
-  </ol>
-
-  </div>
-</div>
+download them in the Android SDK Manager under the <b>SDK Samples</b> component
+for the L Developer Preview.</p>
 
 <p class="note">
   <strong>Note:</strong> At this time, the downloadable projects are designed
    for use with Gradle and Android Studio.
 </p>
-
-
 
 
 <h3 id="BasicManagedProfile">BasicManagedProfile</h3>
@@ -84,7 +59,6 @@ demonstrates how you can display camera preview and take pictures.</p>
 </div>
 -->
 <p>This sample demonstrates how to record video using the Camera2 API.</p>
-
 
 <h3 id="ActivitySceneTransitionBasic">ActivitySceneTransitionBasic</h3>
 <div class="figure" style="width:220px">
@@ -152,6 +126,14 @@ This sample demonstrates clipping on a {@link android.view.View}.
 </p>
 
 
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}preview/images/JobSchedulerSample.png"
+      srcset="{@docRoot}preview/images/JobSchedulerSample@2x.png 2x"
+      alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 3.</strong> The JobSchedulerSample sample app.
+  </p>
+</div>
 
 <h3 id="GameControllerSample">GameControllerSample</h3>
 <!--
@@ -201,14 +183,6 @@ This sample demonstrates use of the Android TV Leanback Support Library.
 
 <h3 id="JobSchedulerSample">JobSchedulerSample</h3>
 
-<div class="figure" style="width:220px">
-  <img src="{@docRoot}preview/images/JobSchedulerSample.png"
-      srcset="{@docRoot}preview/images/JobSchedulerSample@2x.png 2x"
-      alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure 3.</strong> The JobSchedulerSample sample app.
-  </p>
-</div>
 
 <p>
 This sample app allows the user to schedule jobs through the UI, and shows
