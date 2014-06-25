@@ -36,10 +36,10 @@ import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.DozeTrigger;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsPackageMonitor;
-import com.android.systemui.recents.RecentsTaskLoader;
 import com.android.systemui.recents.ReferenceCountedTrigger;
 import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.model.RecentsPackageMonitor;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 

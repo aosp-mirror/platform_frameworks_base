@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.model;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -40,11 +39,17 @@ public class Task {
         public final int id;
         public final Intent baseIntent;
         public final int userId;
+        public long lastActiveTime;
 
-        public TaskKey(int id, Intent intent, int userId) {
+        public TaskKey(int id, Intent intent, int userId, long lastActiveTime) {
             this.id = id;
             this.baseIntent = intent;
             this.userId = userId;
+            this.lastActiveTime = lastActiveTime;
+        }
+
+        public void updateLastActiveTime(long lastActiveTime) {
+            this.lastActiveTime = lastActiveTime;
         }
 
         @Override
@@ -64,7 +69,8 @@ public class Task {
         @Override
         public String toString() {
             return "Task.Key: " + id + ", "
-                    + "u" + userId + ", "
+                    + "u: " + userId + ", "
+                    + "lat: " + lastActiveTime + ", "
                     + baseIntent.getComponent().getPackageName();
         }
     }
@@ -85,8 +91,8 @@ public class Task {
     }
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                BitmapDrawable activityIcon, int colorPrimary, int userId) {
-        this.key = new TaskKey(id, intent, userId);
+                BitmapDrawable activityIcon, int colorPrimary, int userId, long lastActiveTime) {
+        this.key = new TaskKey(id, intent, userId, lastActiveTime);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.colorPrimary = colorPrimary;
