@@ -2,4 +2,247 @@ page.title=Samples
 
 @jd:body
 
-<p>&nbsp;</p>
+<p>The following code samples are provided for the L Developer Preview. You can
+download them with the Android SDK Manager.</p>
+
+<p>To import a downloaded project:<p>
+
+<div class="toggle-content closed">
+<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  />Using Android Studio</a></p>
+
+  <div class="toggle-content-toggleme">
+
+  <ol>
+    <li>Unpack the downloaded project package.</li>
+    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, chose
+    <strong>File > Import Project</strong> and select the root folder of
+    the unpacked project.
+      <p>Android Studio may ask you to choose the type of project you are
+        importing. If it does, make sure to choose <strong>Import project from
+        external model</strong> and select the <strong>Gradle</strong> option.
+      </p>
+    </li>
+  </ol>
+
+  </div>
+</div>
+
+<p class="note">
+  <strong>Note:</strong> At this time, the downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+
+
+
+<h3 id="BasicManagedProfile">BasicManagedProfile</h3>
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}preview/images/BasicManagedProfile.png"
+     srcset="{@docRoot}preview/images/hun-BasicManagedProfile@2x.png 2x"
+     alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 1.</strong> The BasicManagedProfile sample app.
+  </p>
+</div>
+
+<p>This sample demonstrates how to create a managed profile. You can also:</p>
+<ul>
+  <li>Enable or disable other apps, and set restrictions on them.</li>
+  <li>Configure intents to be forwarded between the primary account and the
+   managed profile.</li>
+  <li>Wipe all the data associated with the managed profile.</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> There can be only one managed profile on
+  a device at a time.</p>
+
+<h3 id="Camera2Basic">Camera2Basic</h3>
+
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>This sample demonstrates the basic use of the Camera2 API. The sample code
+demonstrates how you can display camera preview and take pictures.</p>
+
+
+
+<h3 id="Camera2Video">Camera2Video</h3>
+<!--
+<div class="figure" style="width:220px">
+<img src="" srcset="@2x.png 2x" alt="" height="375" />
+    <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>This sample demonstrates how to record video using the Camera2 API.</p>
+
+
+<h3 id="ActivitySceneTransitionBasic">ActivitySceneTransitionBasic</h3>
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}preview/images/ActivitySceneTransitionBasic.png"
+      srcset="{@docRoot}preview/images/ActivitySceneTransitionBasic@2x.png 2x"
+      alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 2.</strong> The ActivitySceneTransitionBasic sample app.
+  </p>
+  </div>
+
+<p> This sample demonstrates how to the use {@link android.app.Activity} scene
+transitions when transitioning from one activity to another. Uses a combination
+of <code>moveImage</code> and <code>changeBounds</code> to nicely transition
+from a grid of images to an activity with a large image and detail text. </p>
+
+
+<h3 id="ElevationBasic">ElevationBasic</h3>
+<!--
+<div class="figure" style="width:220px">
+<img src="" srcset="@2x.png 2x" alt="" height="375" />
+    <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample demonstrates two alternative ways to move a view in the z-axis:</p>
+
+<ul>
+  <li>With a fixed elevation, using XML.</li>
+  <li>Raising the elevation when the user taps on it, using
+      <code>setTranslationZ()</code>.</li>
+</ul>
+
+
+
+<h3 id="ElevationDrag">ElevationDrag</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+
+<p>This sample demonstrates a drag and drop action on different shapes.
+Elevation and z-translation are used to render the shadows. The views are
+clipped using different outlines.</p>
+
+
+
+<h3 id="ClippingBasic">ClippingBasic</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample demonstrates clipping on a {@link android.view.View}.
+</p>
+
+
+
+<h3 id="GameControllerSample">GameControllerSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample implements a multi-player game, demonstrating game controller input
+handling.
+</p>
+
+
+
+<h3 id="Visual-Game-Controller">Visual-Game-Controller</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample displays events received from a game controller shown on the screen.
+</p>
+
+
+
+<h3 id="AndroidTVLeanbackSample">AndroidTVLeanbackSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample demonstrates use of the Android TV Leanback Support Library.
+</p>
+
+
+
+<h3 id="JobSchedulerSample">JobSchedulerSample</h3>
+
+<div class="figure" style="width:220px">
+  <img src="{@docRoot}preview/images/JobSchedulerSample.png"
+      srcset="{@docRoot}preview/images/JobSchedulerSample@2x.png 2x"
+      alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure 3.</strong> The JobSchedulerSample sample app.
+  </p>
+</div>
+
+<p>
+This sample app allows the user to schedule jobs through the UI, and shows
+visual cues when the jobs are executed.
+</p>
+
+
+
+<h3 id="NavigationDrawerSample">NavigationDrawerSample</h3>
+<!--
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+-->
+<p>
+This sample illustrates a common usage of the Android support library's
+{@link android.support.v4.widget.DrawerLayout} widget.
+</p>
+
+
+<!--
+<h3 id="">SampleName</h3>
+
+<div class="figure" style="width:220px">
+  <img src="" srcset="@2x.png 2x" alt="" height="375" />
+  <p class="img-caption">
+    <strong>Figure n.</strong> Single sentence summarizing the figure.
+  </p>
+</div>
+
+<p>
+**description**
+</p>
+-->
