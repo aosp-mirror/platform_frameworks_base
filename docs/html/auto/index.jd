@@ -401,10 +401,6 @@ page.type=about
                    width="120" height="120" class="img-logo" />
             </div>
             <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/auto/mercedesbenz.png"
-                   width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
                    width="120" height="120" class="img-logo" />
             </div>
@@ -412,12 +408,12 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/nissan.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/opel.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/ram.png"
                    width="120" height="120" class="img-logo" />
@@ -434,12 +430,12 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/skoda.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/subaru.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
                    width="120" height="120" class="img-logo" />
@@ -451,6 +447,10 @@ page.type=about
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/volvo.png"
                    width="120" height="120" class="img-logo" />
+            </div>
+            <div class="col-5">
+              <!--<img src="/auto/images/logos/auto/skoda.png"
+                   width="120" height="120" class="img-logo" />-->
             </div>
             <div class="col-5">
               <!--<img src="/auto/images/logos/auto/skoda.png"
