@@ -3427,7 +3427,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final String pkgName = intent.getPackage();
             boolean queryCrossProfile = (flags & PackageManager.NO_CROSS_PROFILE) == 0;
             if (pkgName == null) {
-                ResolveInfo resolveInfo;
+                ResolveInfo resolveInfo = null;
                 if (queryCrossProfile) {
                     // Check if the intent needs to be forwarded to another user for this package
                     ArrayList<ResolveInfo> crossProfileResult =
