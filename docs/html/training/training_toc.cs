@@ -638,7 +638,6 @@ include the action bar on devices running Android 2.1 or higher."
             </li>
         </ul>
       </li>
-
     </ul>
   </li>
   <!-- End connectivity and cloud -->
@@ -727,6 +726,90 @@ include the action bar on devices running Android 2.1 or higher."
   <!-- End privacy and location -->
 
 
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/building-wearables.html">
+      <span class="small">Building Apps for</span><br/>
+              Wearables
+      </a>
+    </div>
+    <ul>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/notifications/index.html"
+             description="How to build handheld notifications that are synced to
+             and look great on wearables."
+            >Adding Wearable Features to Notifications</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/creating.html">Creating a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/voice-input.html">Receiving Voice Input in a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/pages.html">Adding Pages to a Notification</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/notifications/stacks.html">Stacking Notifications</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/apps/index.html"
+             description="How to build apps that run directly on wearables."
+            >Creating Wearable Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/creating.html">Creating and Running a Wearable App</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/layouts.html">Creating Custom Layouts</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/voice.html">Adding Voice Capabilities</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/packaging.html">Packaging Wearable Apps</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/apps/bt-debugging.html">Debugging over Bluetooth</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/data-layer/index.html"
+             description="How to sync data between handhelds and wearables."
+            >Sending and Syncing Data</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/accessing.html">Accessing the Wearable Data Layer</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/data-items.html">Syncing Data Items</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/assets.html">Transferring Assets</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/messages.html">Sending and Receiving Messages</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/data-layer/events.html">Handling Data Layer Events</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <!-- End Building for wearables -->
 
   <li class="nav-section">
     <div class="nav-section-header">
