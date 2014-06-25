@@ -666,47 +666,6 @@ public:
         return count;
     }
 
-    static int doTextGlyphs(JNIEnv* env, SkPaint* paint, const jchar* text, jint start, jint count,
-            jint contextCount, jint flags, jcharArray glyphs) {
-        NPE_CHECK_RETURN_ZERO(env, paint);
-        NPE_CHECK_RETURN_ZERO(env, text);
-
-        if ((start | count | contextCount) < 0 || contextCount < count || !glyphs) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-        if (count == 0) {
-            return 0;
-        }
-        size_t glypthsLength = env->GetArrayLength(glyphs);
-        if ((size_t)count > glypthsLength) {
-            doThrowAIOOBE(env);
-            return 0;
-        }
-
-        jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
-
-        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-                text, start, count, contextCount, flags);
-        const jchar* shapedGlyphs = value->getGlyphs();
-        size_t glyphsCount = value->getGlyphsCount();
-        memcpy(glyphsArray, shapedGlyphs, sizeof(jchar) * glyphsCount);
-
-        env->ReleaseCharArrayElements(glyphs, glyphsArray, JNI_ABORT);
-        return glyphsCount;
-    }
-
-    static jint getTextGlyphs__StringIIIII_C(JNIEnv* env, jobject clazz, jlong paintHandle,
-            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
-            jcharArray glyphs) {
-        SkPaint* paint = reinterpret_cast<SkPaint*>(paintHandle);
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        int count = doTextGlyphs(env, paint, textArray + contextStart, start - contextStart,
-                end - start, contextEnd - contextStart, flags, glyphs);
-        env->ReleaseStringChars(text, textArray);
-        return count;
-    }
-
     static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, TypefaceImpl* typeface, const jchar *text,
                                     jint start, jint count, jint contextCount, jboolean isRtl,
                                     jfloatArray advances, jint advancesIndex) {
@@ -1154,9 +1113,6 @@ static JNINativeMethod methods[] = {
     {"native_getTextRunAdvances","(JJLjava/lang/String;IIIIZ[FI)F",
         (void*) SkPaintGlue::getTextRunAdvances__StringIIIIZ_FI},
 
-
-    {"native_getTextGlyphs","(JLjava/lang/String;IIIII[C)I",
-        (void*) SkPaintGlue::getTextGlyphs__StringIIIII_C},
     {"native_getTextRunCursor", "(J[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(JLjava/lang/String;IIIII)I",
         (void*) SkPaintGlue::getTextRunCursor__String},
