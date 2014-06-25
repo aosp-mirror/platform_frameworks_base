@@ -27,11 +27,11 @@ page.type=about
             <div class="col-10">
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android TV</div>
-                <div class="landing-subhead hero">Your apps on the big screen</div>
+                <div class="landing-subhead hero">Big screen apps, games, and content</div>
                 <div class="landing-hero-description">
-                  <p>Engage users from the comfort of their couches.
-                    Put your app on TV and bring everyone into
-                    the action.</p>
+                  <p>Recommend great content to users right on the home screen.
+                    Enable users to find movies through voice search.
+                    Engage users with fluid, immersive games.</p>
                 </div>
               </div>
 
@@ -56,6 +56,7 @@ page.type=about
 
       <div class="landing-section" style="background-color:#f5f5f5" id="reimagine-your-app">
         <div class="wrap">
+
           <div class="landing-section-header">
             <div class="landing-h1">Reimagine Your App</div>
             <div class="landing-subhead">
@@ -63,50 +64,19 @@ page.type=about
             </div>
           </div>
 
-          <div class="landing-body">
-            <div class="landing-breakout cols">
-
-              <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
-
-                <p>Simple</p>
-                <p class="landing-small">
-                  Smooth, fast interactions are key to a successful TV app. Keep navigation simple
-                  and light. Bring your content forward to let users enjoy it with a minimum of
-                  fuss.
-                </p>
-                <p class="landing-small">
-                  <a href="{@docRoot}design/tv/index.html">Learn about TV design</a>
-                </p>
-              </div>
-
-              <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
-
-                <p>Cinematic</p>
-                <p class="landing-small">
-                  What would your app look like if it were a film? Use movement, animation and sound to make your app into an experience.
-                </p>
-                <p class="landing-small">
-                  <a href="{@docRoot}design/tv/index.html">Learn about TV design</a>
-                </p>
-              </div>
-
-              <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
-
-                <p>Beautiful</p>
-                <p class="landing-small">
-                  Apps on TV should be a pleasure to look at, as well as enjoyable to use. Use
-                  made-for-TV styles to make your app familiar and fun.
-                </p>
-                <p class="landing-small">
-                  <a href="{@docRoot}design/tv/index.html">Learn about design for TV</a>
-                </p>
-              </div>
-            </div>
-
+          <div class="landing-body landing-align-center">
+            <img src="{@docRoot}tv/images/atv-framed.png" alt="Android TV" >
+            <p>Simple. Cinematic. Beautiful.</p>
+            <p class="landing-small">
+              Smooth, fast interactions are key to a successful TV app. Keep navigation simple
+              and light. <br>Bring your content forward to let users enjoy it with a minimum of
+              effort.
+            </p>
+            <p class="landing-small">
+              <a href="/design/tv/index.html">Learn about design for TV</a>
+            </p>
           </div>
+
         </div>  <!-- end .wrap -->
       </div>  <!-- end .landing-section -->
 
@@ -125,7 +95,8 @@ page.type=about
             <div class="landing-breakout cols">
 
               <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+                <img src="{@docRoot}tv/images/components.png" alt="TV layout components"
+                  style="margin-left: 23px;">
 
                 <p>Made for TV</p>
                 <p class="landing-small">
@@ -138,7 +109,8 @@ page.type=about
               </div>
 
               <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+                <img src="{@docRoot}tv/images/search.png" alt="Search"
+                  style="margin-left: 23px;">
 
                 <p>Get Found</p>
                 <p class="landing-small">
@@ -150,7 +122,8 @@ page.type=about
               </div>
 
               <div class="col-3-wide">
-                <img src="{@docRoot}tv/images/placeholder-square.png" alt="">
+                <img src="{@docRoot}tv/images/recommendations.png" alt="Recommendations"
+                  style="margin-left: 23px;">
 
                 <p>Recommend</p>
                 <p class="landing-small">
@@ -168,7 +141,7 @@ page.type=about
         </div>  <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
-      <div class="landing-section landing-red-background">
+      <div class="landing-section landing-red-background" id="start">
         <div class="wrap">
           <div class="landing-section-header">
             <div class="landing-h1 landing-align-left">Get Started with Android TV</div>
@@ -180,10 +153,10 @@ page.type=about
           <div class="landing-body">
             <div class="landing-breakout cols">
               <div class="col-8" style="margin-left: -8px;">
-                <p style="font-size: 24px;">L-Preview SDK</p>
+                <p style="font-size: 24px;">L Developer Preview</p>
                 <p>
-                  The preview SDK includes all the tools you need to build and test apps for TV.
-                  Download it and start creating your big-screen app.
+                   Get all the tools you need to build and test TV apps. Download the preview and
+                   start creating your big-screen experience.
                 </p>
 
               </div>
@@ -191,8 +164,9 @@ page.type=about
               <div class="col-8">
                 <p style="font-size: 24px;">ADT-1 Developer Kit</p>
                 <p>
-                  Request an ADT-1 Developer Kit, a compact and powerful streaming media player
-                  and gamepad, ideal for developing and testing apps for TV.
+                  Request an <a href="{@docRoot}preview/tv/adt-1/index.html"
+                  style="color: white;"><u>ADT-1 Developer Kit</u></a>, a compact and powerful
+                  streaming media player and gamepad, ideal for developing and testing apps for TV.
                 </p>
 
               </div>
@@ -204,14 +178,15 @@ page.type=about
             <div class="landing-breakout cols">
 
               <div class="col-8">
-                <a href="{@docRoot}preview/setup-sdk.html" class="landing-button landing-primary">
-                  Download the Preview SDK
+                <a href="{@docRoot}preview/tv/start/index.html" class="landing-button landing-primary">
+                  Get Started
                 </a>
               </div>
 
               <div class="col-8">
-                <a href="{@docRoot}preview/tv/adt-1/request.html" class="landing-button landing-primary">
-                  Request ADT-1 Developer Kit
+                <a href="https://support.google.com/googleplay/android-developer/contact/adt_request"
+                  class="landing-button landing-primary">
+                  Request the ADT-1 Developer Kit
                 </a>
               </div>
             </div>
