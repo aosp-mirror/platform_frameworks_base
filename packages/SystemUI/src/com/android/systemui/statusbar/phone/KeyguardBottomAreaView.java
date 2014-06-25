@@ -238,6 +238,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
     public void onMethodSecureChanged(boolean methodSecure) {
         updateTrust();
         updateCameraVisibility();

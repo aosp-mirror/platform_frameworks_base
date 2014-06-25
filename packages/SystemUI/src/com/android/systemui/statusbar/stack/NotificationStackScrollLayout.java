@@ -420,7 +420,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int bottomStackPeekSize = mBottomStackPeekSize;
         int minStackHeight = itemHeight + bottomStackPeekSize;
         int stackHeight;
-        if (newStackHeight - mTopPadding >= minStackHeight) {
+        if (newStackHeight - mTopPadding >= minStackHeight || getNotGoneChildCount() == 0) {
             setTranslationY(0);
             stackHeight = newStackHeight;
         } else {
@@ -1264,6 +1264,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             setTranslationY(0);
         }
         setTopPadding(clampPadding((int) start), animate);
+    }
+
+    public int getPeekHeight() {
+        return mIntrinsicPadding + mCollapsedSize + mBottomStackPeekSize;
     }
 
     private int clampPadding(int desiredPadding) {

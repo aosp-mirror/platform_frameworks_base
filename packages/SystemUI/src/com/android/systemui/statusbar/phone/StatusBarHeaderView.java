@@ -405,4 +405,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateVisibilities();
         updateSystemIconsLayoutParams();
     }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return !mKeyguardShowing || mExpanded;
+    }
 }

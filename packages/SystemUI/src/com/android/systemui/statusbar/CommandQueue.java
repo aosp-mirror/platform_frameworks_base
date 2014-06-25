@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -77,7 +76,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void disable(int state);
+        public void disable(int state, boolean animate);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
@@ -254,7 +253,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 }
                 case MSG_DISABLE:
-                    mCallbacks.disable(msg.arg1);
+                    mCallbacks.disable(msg.arg1, true /* animate */);
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
                     mCallbacks.animateExpandNotificationsPanel();

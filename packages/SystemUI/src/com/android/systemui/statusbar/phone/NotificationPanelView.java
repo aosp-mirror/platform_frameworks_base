@@ -55,6 +55,7 @@ public class NotificationPanelView extends PanelView implements
     private static final int CAP_HEIGHT = 1456;
     private static final int FONT_HEIGHT = 2163;
 
+    private static final float HEADER_RUBBERBAND_FACTOR = 2.15f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
     private KeyguardPageSwipeHelper mPageSwiper;
@@ -97,7 +98,6 @@ public class NotificationPanelView extends PanelView implements
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
-    private boolean mHeaderHidden;
     private boolean mUnlockIconActive;
     private int mNotificationsHeaderCollideDistance;
     private int mUnlockMoveDistance;
@@ -207,9 +207,7 @@ public class NotificationPanelView extends PanelView implements
         boolean animate = mNotificationStackScroller.isAddOrRemoveAnimationPending();
         int stackScrollerPadding;
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
-            int bottom = mStackScrollerOverscrolling
-                    ? mHeader.getCollapsedHeight()
-                    : mHeader.getBottom();
+            int bottom = mHeader.getCollapsedHeight();
             stackScrollerPadding = bottom + mQsPeekHeight
                     + mNotificationTopPadding;
             mTopPaddingAdjustment = 0;
@@ -562,6 +560,10 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setKeyguardShowing(boolean keyguardShowing) {
+        if (!mKeyguardShowing && keyguardShowing) {
+            setQsTranslation(mQsExpansionHeight);
+            mHeader.setTranslationY(0f);
+        }
         mKeyguardShowing = keyguardShowing;
         updateQsState();
     }
@@ -602,9 +604,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void setQsTranslation(float height) {
-        mQsContainer.setY(height - mQsContainer.getHeight());
+        mQsContainer.setY(height - mQsContainer.getHeight() + getHeaderTranslation());
     }
-
 
     private void requestScrollerTopPaddingUpdate(boolean animate) {
         mNotificationStackScroller.updateTopPadding(mQsExpansionHeight,
@@ -728,6 +729,11 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected int getMaxPanelHeight() {
+        if (mStatusBar.getBarState() != StatusBarState.KEYGUARD
+                && mNotificationStackScroller.getNotGoneChildCount() == 0) {
+            return (int) ((mQsMinExpansionHeight + getOverExpansionAmount())
+                    * HEADER_RUBBERBAND_FACTOR);
+        }
         // TODO: Figure out transition for collapsing when QS is open, adjust height here.
         int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
         int maxHeight = mNotificationStackScroller.getHeight() - emptyBottomMargin
@@ -746,8 +752,22 @@ public class NotificationPanelView extends PanelView implements
             positionClockAndNotifications();
         }
         mNotificationStackScroller.setStackHeight(expandedHeight);
-        updateKeyguardHeaderVisibility();
+        updateHeader();
         updateUnlockIcon();
+        updateNotificationTranslucency();
+    }
+
+    private void updateNotificationTranslucency() {
+        float alpha = (mNotificationStackScroller.getNotificationsTopY()
+                + mNotificationStackScroller.getItemHeight())
+                / (mQsMinExpansionHeight
+                        + mNotificationStackScroller.getItemHeight() / 2);
+        alpha = Math.max(0, Math.min(alpha, 1));
+        alpha = (float) Math.pow(alpha, 0.75);
+
+        // TODO: Draw a rect with DST_OUT over the notifications to achieve the same effect -
+        // this would be much more efficient.
+        mNotificationStackScroller.setAlpha(alpha);
     }
 
     @Override
@@ -786,49 +806,59 @@ public class NotificationPanelView extends PanelView implements
     /**
      * Hides the header when notifications are colliding with it.
      */
-    private void updateKeyguardHeaderVisibility() {
+    private void updateHeader() {
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
-            boolean hidden;
-            if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
-                
-                // When on Keyguard, we hide the header as soon as the top card of the notification
-                // stack scroller is close enough (collision distance) to the bottom of the header.
-                hidden = mNotificationStackScroller.getNotificationsTopY()
-                        <= mHeader.getBottom() + mNotificationsHeaderCollideDistance;
-            } else {
-
-                // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
-                // soon as we start translating the stack.
-                hidden = mNotificationStackScroller.getTranslationY() < 0;
-            }
-
-            if (hidden && !mHeaderHidden) {
-                mHeader.animate()
-                        .alpha(0f)
-                        .withLayer()
-                        .translationY(-mHeader.getHeight()/2)
-                        .setInterpolator(mFastOutLinearInterpolator)
-                        .setDuration(200);
-            } else if (!hidden && mHeaderHidden) {
-                mHeader.animate()
-                        .alpha(1f)
-                        .withLayer()
-                        .translationY(0)
-                        .setInterpolator(mLinearOutSlowInInterpolator)
-                        .setDuration(200);
-            }
-            mHeaderHidden = hidden;
+            updateHeaderKeyguard();
         } else {
-            mHeader.animate().cancel();
-            mHeader.setAlpha(1f);
-            mHeader.setTranslationY(0f);
-            if (mHeader.getLayerType() != LAYER_TYPE_NONE) {
-                mHeader.setLayerType(LAYER_TYPE_NONE, null);
-            }
-            mHeaderHidden = false;
+            updateHeaderShade();
         }
 
+    }
+
+    private void updateHeaderShade() {
+        mHeader.setAlpha(1f);
+        mHeader.setTranslationY(getHeaderTranslation());
+        setQsTranslation(mQsExpansionHeight);
+    }
+
+    private float getHeaderTranslation() {
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
+                || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
+            return 0;
+        }
+        if (mNotificationStackScroller.getNotGoneChildCount() == 0) {
+            if (mExpandedHeight / HEADER_RUBBERBAND_FACTOR >= mQsMinExpansionHeight) {
+                return 0;
+            } else {
+                return mExpandedHeight / HEADER_RUBBERBAND_FACTOR - mQsMinExpansionHeight;
+            }
+        }
+        return Math.min(0, mNotificationStackScroller.getTranslationY()) / HEADER_RUBBERBAND_FACTOR;
+    }
+
+    private void updateHeaderKeyguard() {
+        mHeader.setTranslationY(0f);
+        float alpha;
+        if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+
+            // When on Keyguard, we hide the header as soon as the top card of the notification
+            // stack scroller is close enough (collision distance) to the bottom of the header.
+            alpha = mNotificationStackScroller.getNotificationsTopY()
+                    /
+                    (mQsMinExpansionHeight + mNotificationsHeaderCollideDistance);
+
+        } else {
+
+            // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
+            // soon as we start translating the stack.
+            alpha = mNotificationStackScroller.getNotificationsTopY() / mQsMinExpansionHeight;
+        }
+        alpha = Math.max(0, Math.min(alpha, 1));
+        alpha = (float) Math.pow(alpha, 0.75);
+        mHeader.setAlpha(alpha);
+        mKeyguardBottomArea.setAlpha(alpha);
+        setQsTranslation(mQsExpansionHeight);
     }
 
     @Override
@@ -1006,5 +1036,14 @@ public class NotificationPanelView extends PanelView implements
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
                 ? mKeyguardBottomArea.getPhoneImageView()
                 : mKeyguardBottomArea.getCameraImageView();
+    }
+
+    @Override
+    protected float getPeekHeight() {
+        if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
+            return mNotificationStackScroller.getPeekHeight();
+        } else {
+            return mQsMinExpansionHeight;
+        }
     }
 }
