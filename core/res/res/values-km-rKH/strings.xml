@@ -57,7 +57,7 @@
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល​"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"លេខ​សម្គាល់​អ្នក​ហៅ​ចេញ"</string>
     <string name="CfMmi" msgid="5123218989141573515">"បញ្ជូន​ការ​ហៅ​បន្ត"</string>
     <string name="CwMmi" msgid="9129678056795016867">"រង់ចាំ​ការ​ហៅ"</string>
@@ -114,7 +114,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="fcComplete" msgid="3118848230966886575">"កូដ​លក្ខណៈ​ពេញលេញ។"</string>
     <string name="fcError" msgid="3327560126588500777">"បញ្ហា​ការ​តភ្ជាប់​ ឬ​កូដ​លក្ខណៈ​​​មិន​ត្រឹមត្រូវ​។"</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"យល់​ព្រម​"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"យល់​ព្រម"</string>
     <string name="httpError" msgid="7956392511146698522">"មាន​កំហុស​បណ្ដាញ។"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"រក​មិន​ឃើញ URL ។"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"គ្រោងការណ៍​ផ្ទៀងផ្ទាត់​តំបន់បណ្ដាញ​មិន​ត្រូវ​បាន​គាំទ្រ។"</string>
@@ -172,7 +172,7 @@
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"បើក​សំឡេង"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ​"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ការ​កំណត់"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
@@ -182,7 +182,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"សារ​របស់​អ្នក"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"អាន និង​សរសេរ​សារ SMS, អ៊ីមែល និង​សារ​ផ្សេងៗ​ទៀត​របស់​អ្នក។"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់​អ្នក"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​អ្នក​ ដែល​បា​ន​រក្សាទុក​ក្នុង​កាត​ទំនាក់ទំនង​របស់​អ្នក។​"</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​អ្នក​ ដែល​បា​ន​រក្សាទុក​ក្នុង​កាត​ទំនាក់ទំនង​របស់​អ្នក។"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ព័ត៌មាន​សង្គម​របស់​អ្នក"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​ទំនាក់ទំនង និង​ការ​ភ្ជាប់​សង្គម​របស់​អ្នក។"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"ទីតាំង​របស់​អ្នក"</string>
@@ -371,7 +371,7 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ឲ្យ​កម្មវិធី​មើល​គ្រាប់​ចុច​ដែល​អ្នក​ចុច​ពេល​មាន​អន្តរកម្ម​ជា​មួយ​កម្មវិធី​ផ្សេង (ដូចជា បញ្ចូល​ពាក្យ​សម្ងាត់)។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ចង​ទៅ​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​វិធី​សាស្ត្រ​បញ្ចូល។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ចង​សេវា​កម្ម​ភាព​មធ្យោបាយ​ងាយស្រួល​"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ចង​សេវា​កម្ម​ភាព​មធ្យោបាយ​ងាយស្រួល"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ឲ្យ​​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ភាព​ងាយស្រួល។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"ចង​សេវាកម្ម​​បោះពុម្ព"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
@@ -387,11 +387,11 @@
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ឲ្យ​ម្ចាស់​ចង​ចំណុចប្រទាក់​កម្រិត​កំពូល​នៃ​ផ្ទាំង​រូបភាព។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក​"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ទាក់ទង​ជា​មួយ​អ្នកគ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ឲ្យ​ម្ចាស់​ផ្ញើ​គោលបំណង​​ទៅ​អ្នក​គ្រប់គ្រង​ឧបករណ៍។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​​​ឧបករណ៍​​"</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​​​ឧបករណ៍"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"អនុញ្ញាត​​​ឲ្យ​ម្ចាស់​​​បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​ឧបករណ៍​សកម្ម​ចេញ​។ មិន​គួរ​ប្រើ​សម្រាប់​កម្មវិធី​​ធម្មតា​ទេ​។"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ប្ដូរ​ទិស​អេក្រង់"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​បង្វិល​អេក្រង់​នៅ​ពេល​ណា​មួយ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
@@ -403,9 +403,9 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"ឲ្យ​កម្មវិធី​ស្នើ​​សញ្ញា​ដែល​បាន​ផ្ដល់​ត្រូវ​ផ្ញើ​ទៅ​ដំណើរការ​ស្ថិតស្ថេរ​​ទាំង​អស់។"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ធ្វើ​ឲ្យ​កម្មវិធី​ដំណើរការ​ជា​និច្ច"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ឲ្យ​កម្មវិធី​ធ្វើជា​ផ្នែក​​ស្ថិតស្ថេរ​ដោយ​ខ្លួន​ឯង​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កំណត់​អង្គ​ចងចាំ​ដែល​អាច​ប្រើ​បាន​ចំពោះ​កម្មវិធី​ផ្សេងៗ​ ដោយ​ធ្វើឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត។"</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ឲ្យ​កម្មវិធី ធ្វើជា​ផ្នែក​អចិន្ត្រៃយ៍​នៃ​ខ្លួន​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កម្រិត​អង្គ​ចងចាំ​អាច​ប្រើ​បាន​ ដើម្បី​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ធ្វើ​ឲ្យ​ទូរស័ព្ទ​របស់​អ្នក​យឺត។​"</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ឲ្យ​កម្មវិធី ធ្វើជា​ផ្នែក​អចិន្ត្រៃយ៍​នៃ​ខ្លួន​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កម្រិត​អង្គ​ចងចាំ​អាច​ប្រើ​បាន​ ដើម្បី​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ធ្វើ​ឲ្យ​ទូរស័ព្ទ​របស់​អ្នក​យឺត។"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"លុប​កម្មវិធី"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"ឲ្យ​កម្មវិធី​លុប​កញ្ចប់ Android ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប​កម្មវិធី​សំខាន់​ៗ។ ​"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"ឲ្យ​កម្មវិធី​លុប​កញ្ចប់ Android ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប​កម្មវិធី​សំខាន់​ៗ។"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"លុប​ទិន្នន័យ​របស់​​កម្មវិធី​ផ្សេង"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"ឲ្យ​កម្មវិធី​សម្អាត​ទិន្នន័យ​អ្នក​ប្រើ។"</string>
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"លុប​ឃ្លាំង​សម្ងាត់​កម្មវិធី​ផ្សេងៗ"</string>
@@ -454,7 +454,7 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​អំពី​ទំនាក់ទំនង​របស់​អ្នក​ដែល​បាន​រក្សាទុក​ក្នុង​កុំព្យូទ័រ​បន្ទះ រួមមាន​ប្រេកង់​​ដែល​អ្នក​បាន​ហៅ អ៊ីមែល ឬ​ទាក់ទង​តាម​វិធី​ផ្សេងៗ​ជា​មួយ​ទំនាក់ទំនង​ជាក់លាក់។ សិទ្ធិ​​នេះ​អនុញ្ញាត​ឲ្យ​​​កម្មវិធី​លុប​ទិន្នន័យ​ទំនាក់ទំនង​របស់​អ្នក។"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​អំពី​ទំនាក់ទំនង​របស់​អ្នក​ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​ប្រេកង់​ដែល​អ្នក​បាន​ហៅ អ៊ីមែល ឬ​បាន​ទាក់ទង​​តាម​វិធី​ផ្សេងៗ​ជា​មួយ​ទំនាក់​ទំនាក់​ជាក់លាក់។ សិទ្ធិ​នេះ​ឲ្យ​កម្មវិធី​លុប​ទិន្នន័យ​ទំនាក់ទំនង។"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"អាន​​កំណត់​ហេតុ​​​ហៅ"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ឲ្យ​កម្មវិធី​អាន​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នក​ដឹង។​"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ឲ្យ​កម្មវិធី​អាន​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នក​ដឹង។"</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ឲ្យ​កម្មវិធី​អាន​​​បញ្ជី​ហៅ​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នកដឹង។"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"សរសេរ​បញ្ជី​ហៅ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ឲ្យ​កម្មវិធី​កែ​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។​កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប ឬ​កែ​បញ្ជី​ហៅ​របស់​អ្នក។"</string>
@@ -582,7 +582,7 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"ឲ្យ​កម្មវិធី​កំណត់​ជំនួយ​ទំហំ​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"កំណត់​ប្រព័ន្ធ​ទៅ​លំនាំដើម​រោងចក្រ​ឡើងវិញ"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"ឲ្យ​កម្មវិធី​កំណត់​ប្រព័ន្ធ​​ដូច​ការ​កំណត់​ចេញ​ពី​រោងចក្រ​ឡើងវិញ​ពេញលេញ ដោយ​លុប​ទិន្នន័យ ការ​កំណត់​រចនាសម្ព័ន្ធ និង​កម្មវិធី​បាន​ដំឡើង។"</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"កំណត់​​ម៉ោង​"</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"កំណត់​​ម៉ោង"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​កុំព្យូទ័រ​បន្ទះ។"</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​ទូរស័ព្ទ។"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"កំណត់​តំបន់​ពេលវេលា"</string>
@@ -741,7 +741,7 @@
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"កន្លែង​ធ្វើការ"</item>
     <item msgid="4378074129049520373">"ផ្សេងៗ"</item>
-    <item msgid="3455047468583965104">"តាម​តម្រូវ​ការ​"</item>
+    <item msgid="3455047468583965104">"តាម​តម្រូវ​ការ"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -757,7 +757,7 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"ផ្ទះ"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"​ចល័ត"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"កន្លែង​ធ្វើការ"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ទូរសារ​កន្លែង​ធ្វើការ​"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ទូរសារ​កន្លែង​ធ្វើការ"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ទូរសារ​ផ្ទះ"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"ភេយ័រ"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"ផ្សេងៗ"</string>
@@ -882,7 +882,7 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"ដើម្បី​ដោះ​សោ ចូល​គណនី Google របស់​អ្នក។"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ីមែល​)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ពាក្យសម្ងាត់​"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ពាក្យសម្ងាត់"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ចូល"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ភ្លេច​ឈ្មោះ​អ្នក​ប្រើ ឬ​ពាក្យ​សម្ងាត់​របស់​អ្នក?\nមើល "<b>"google.com/accounts/recovery"</b>" ។"</string>
@@ -927,7 +927,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"បាន​បរាជ័យ​ក្នុង​ការ​សាកល្បង​រោងចក្រ"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"សកម្មភាព FACTORY_TEST ត្រូវ​បាន​គាំទ្រ​សម្រាប់​តែ​កញ្ចប់​បាន​ដំឡើង​ក្នុង /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"រក​មិន​ឃើញ​កញ្ចប់​ដែល​ផ្ដល់​សកម្មភាព FACTORY_TEST ។"</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"ចាប់​ផ្ដើម​ឡើង​វិញ​"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"ចាប់​ផ្ដើម​ឡើង​វិញ"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"ទំព័រ​មាន​ចំណងជើង \"<xliff:g id="TITLE">%s</xliff:g>\" សរសេរ៖"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"បញ្ជាក់​ការ​រុករក"</string>
@@ -985,7 +985,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ម៉ឺនុយ +"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"ដកឃ្លា"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"លុប​"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"លុប"</string>
     <string name="search_go" msgid="8298016669822141719">"ស្វែងរក"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"ស្វែងរក"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"ស្វែងរក​សំណួរ"</string>
@@ -1069,18 +1069,18 @@
     <string name="preposition_for_date" msgid="9093949757757445117">"នៅ <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"នៅ​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ក្នុង​ឆ្នាំ <xliff:g id="YEAR">%s</xliff:g>"</string>
-    <string name="day" msgid="8144195776058119424">"ថ្ងៃ​"</string>
+    <string name="day" msgid="8144195776058119424">"ថ្ងៃ"</string>
     <string name="days" msgid="4774547661021344602">"​ថ្ងៃ"</string>
     <string name="hour" msgid="2126771916426189481">"ម៉ោង"</string>
     <string name="hours" msgid="894424005266852993">"ម៉ោង"</string>
-    <string name="minute" msgid="9148878657703769868">"នាទី​"</string>
+    <string name="minute" msgid="9148878657703769868">"នាទី"</string>
     <string name="minutes" msgid="5646001005827034509">"នាទី"</string>
-    <string name="second" msgid="3184235808021478">"វិនាទី​"</string>
+    <string name="second" msgid="3184235808021478">"វិនាទី"</string>
     <string name="seconds" msgid="3161515347216589235">"វិនាទី"</string>
-    <string name="week" msgid="5617961537173061583">"សប្ដាហ៍​"</string>
-    <string name="weeks" msgid="6509623834583944518">"សប្ដាហ៍​"</string>
-    <string name="year" msgid="4001118221013892076">"ឆ្នាំ​"</string>
-    <string name="years" msgid="6881577717993213522">"ឆ្នាំ​"</string>
+    <string name="week" msgid="5617961537173061583">"សប្ដាហ៍"</string>
+    <string name="weeks" msgid="6509623834583944518">"សប្ដាហ៍"</string>
+    <string name="year" msgid="4001118221013892076">"ឆ្នាំ"</string>
+    <string name="years" msgid="6881577717993213522">"ឆ្នាំ"</string>
   <plurals name="duration_seconds">
     <item quantity="one" msgid="6962015528372969481">"1 វិនាទី"</item>
     <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
@@ -1096,12 +1096,12 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"បញ្ហា​វីដេអូ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"វីដេអូ​នេះ​មិន​ត្រឹមត្រូវ​សម្រាប់​​ចរន្ត​ចូល​ឧបករណ៍​នេះ។"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"មិន​អាច​ចាក់​វីដេអូ​នេះ។"</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"យល់​ព្រម​"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"យល់​ព្រម"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"រសៀល"</string>
     <string name="Noon" msgid="3342127745230013127">"រសៀល"</string>
     <string name="midnight" msgid="7166259508850457595">"កណ្ដាលអធ្រាត្រ"</string>
-    <string name="Midnight" msgid="5630806906897892201">"កណ្ដាល​អធ្រាត្រ​"</string>
+    <string name="Midnight" msgid="5630806906897892201">"កណ្ដាល​អធ្រាត្រ"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"ជ្រើស​ទាំងអស់"</string>
@@ -1118,13 +1118,13 @@
     <string name="inputMethod" msgid="1653630062304567879">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"សកម្មភាព​អត្ថបទ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"អស់​ទំហំ​ផ្ទុក"</string>
-    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ប៉ះ​ ដើម្បី​មើល​ព័ត៌មាន​បន្ថែម ឬ​បញ្ឈប់​កម្មវិធី។"</string>
-    <string name="ok" msgid="5970060430562524910">"យល់​ព្រម​"</string>
-    <string name="cancel" msgid="6442560571259935130">"បោះ​បង់​"</string>
-    <string name="yes" msgid="5362982303337969312">"យល់​ព្រម​"</string>
-    <string name="no" msgid="5141531044935541497">"បោះ​បង់​"</string>
+    <string name="ok" msgid="5970060430562524910">"យល់​ព្រម"</string>
+    <string name="cancel" msgid="6442560571259935130">"បោះ​បង់"</string>
+    <string name="yes" msgid="5362982303337969312">"យល់​ព្រម"</string>
+    <string name="no" msgid="5141531044935541497">"បោះ​បង់"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ប្រយ័ត្ន"</string>
     <string name="loading" msgid="7933681260296021180">"កំពុង​ផ្ទុក..."</string>
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
@@ -1133,7 +1133,7 @@
     <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព​​"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ជ្រើស​កម្មវិធី​សម្រាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="noApplications" msgid="2991814273936504689">"គ្មាន​កម្មវិធី​អាច​អនុវត្ត​សកម្មភាព​នេះ។"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -1144,7 +1144,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"សកម្មភាព <xliff:g id="ACTIVITY">%1$s</xliff:g> មិន​ឆ្លើយតប។\n\nតើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> មិន​ឆ្លើយតប។ តើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_process" msgid="6513209874880517125">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> មិន​ឆ្លើយតប។ \n\nតើ​អ្នក​ចង់​បិទ​វា​ឬ?"</string>
-    <string name="force_close" msgid="8346072094521265605">"យល់​ព្រម​"</string>
+    <string name="force_close" msgid="8346072094521265605">"យល់​ព្រម"</string>
     <string name="report" msgid="4060218260984795706">"រាយការណ៍"</string>
     <string name="wait" msgid="7147118217226317732">"រង់ចាំ"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"ទំព័រ​ក្លាយ​ជា​មិន​ឆ្លើយតប។\n\nតើ​អ្នក​​ចង់​បិទ​វា?"</string>
@@ -1226,19 +1226,19 @@
     <string name="sms_short_code_details" msgid="3492025719868078457"><font fgcolor="#ffffb060">"នេះ​អាច​កាត់​លុយ"</font>" លើ​គណនី​ចល័ត​របស់​អ្នក។"</string>
     <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"វា​នឹង​គិត​ថ្លៃ​សេវាកម្ម​លើ​គណនី​ចល័ត​របស់​អ្នក។"</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ផ្ញើ"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"បោះ​បង់​"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"បោះ​បង់"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ចងចាំ​ជម្រើស​របស់​ខ្ញុំ"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"អ្នក​អាច​ប្ដូរ​វា​ពេល​ក្រោយ​ក្នុង​ការ​កំណត់ &gt; កម្មវិធី"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"អនុញ្ញាត​ជា​និច្ច"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"កុំ​អនុញ្ញាត"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"បាន​ដក​ស៊ីម​កាត​ចេញ"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"បណ្ដាញ​ចល័ត​នឹង​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​ចាប់ផ្ដើម​ជា​មួយ​ស៊ីម​កាត​ដែល​បា​បញ្ចូល​ត្រឹមត្រូវ។​"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"បណ្ដាញ​ចល័ត​នឹង​ប្រើ​លែង​បាន​រហូត​ដល់​អ្នក​ចាប់ផ្ដើម​ជា​មួយ​ស៊ីម​កាត​ដែល​បា​បញ្ចូល​ត្រឹមត្រូវ។"</string>
     <string name="sim_done_button" msgid="827949989369963775">"រួចរាល់"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើង​វិញ ដើម្បី​ចូល​ដំណើរការ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង​"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ​"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"កំណត់"</string>
     <string name="date_time_done" msgid="2507683751759308828">"រួចរាល់"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"ថ្មី៖ "</font></string>
@@ -1316,7 +1316,7 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"ឲ្យ​កម្មវិធី​ដក​សេវាកម្ម​នៃ​កម្មវិធី​ផ្ទុក​​លំនាំដើម ដើម្បី​ចម្លង​មាតិកា។​ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​លំនាំដើម។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​សុវត្ថិភាព​"</string>
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​សុវត្ថិភាព"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"ឲ្យ​កម្មវិធី​ចូល​​ការ​ផ្ទុក​មាន​សុវត្ថិភាព keguard ។"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"ពិនិត្យ​ការ​បង្ហាញ និង​លាក់​ការ​ការពារ"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង keguard ។"</string>
@@ -1325,7 +1325,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"ទៅ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ស្វែងរក"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ផ្ញើ"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"បន្ទាប់​"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"បន្ទាប់"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"រួចរាល់"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"មុន"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"អនុវត្ត"</string>
@@ -1334,7 +1334,7 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"កម្មវិធី​មួយ ឬ​ច្រើន​ដូច​ខាង​ក្រោម​ស្នើ​សិទ្ធិ ដើម្បី​ចូល​គណនី​របស់​អ្នក​ឥឡូវ និង​ពេល​អនាគត។"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"តើ​អ្នក​ចង់​អនុញ្ញាត​សំណើ​នេះ?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"ស្នើ​ចូល"</string>
-    <string name="allow" msgid="7225948811296386551">"អនុញ្ញាត​"</string>
+    <string name="allow" msgid="7225948811296386551">"អនុញ្ញាត"</string>
     <string name="deny" msgid="2081879885755434506">"បដិសេធ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"បាន​ស្នើ​សិទ្ធិ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"បាន​ស្នើ​សិទ្ធិ\nសម្រាប់​គណនី <xliff:g id="ACCOUNT">%s</xliff:g> ។"</string>
@@ -1356,12 +1356,12 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"គ្មាន​ឯកសារ​បាន​ជ្រើស"</string>
     <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
     <string name="submit" msgid="1602335572089911941">"ដាក់​ស្នើ"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"បាន​បើក​របៀប​រថយន្ត​"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"បាន​បើក​របៀប​រថយន្ត"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"ប៉ះ​ ដើម្បី​ចេញ​ពី​របៀប​រថយន្ត​។"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ភ្ជាប់ ឬ​ហតស្ពត​សកម្ម"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"ប៉ះ​ ដើម្បី​រៀបចំ។"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ថយក្រោយ"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់​"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"រំលង"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"ការ​ប្រើ​ទិន្នន័យ​ចល័ត​ខ្ពស់"</string>
     <string name="throttle_warning_notification_message" msgid="3340822228599337743">"ប៉ះ​ ដើម្បី​​ស្វែងយល់​បន្ថែម​អំពី​ការ​ប្រើ​​​ទិន្នន័យ​ចល័ត​។"</string>
@@ -1387,7 +1387,7 @@
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​បច្ចុប្បន្ន​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ។"</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"បច្ចុប្បន្ន​កាត​អេសឌី​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ"</string>
     <string name="media_unknown_state" msgid="729192782197290385">"មិន​ស្គាល់​ស្ថានភាព​មេឌៀ​ខាង​ក្រៅ។"</string>
-    <string name="share" msgid="1778686618230011964">"ចែក​រំលែក​"</string>
+    <string name="share" msgid="1778686618230011964">"ចែក​រំលែក"</string>
     <string name="find" msgid="4808270900322985960">"រក"</string>
     <string name="websearch" msgid="4337157977400211589">"ស្វែងរក​តាម​បណ្ដាញ"</string>
     <string name="find_next" msgid="5742124618942193978">"រក​បន្ទាប់"</string>
@@ -1403,7 +1403,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"មិន​ធ្វើ​ការ​លុប​វិញ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"មិន​ធ្វើអ្វី​ទេ​ឥឡូវ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ជ្រើស​គណនី"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី​​"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"បន្ថែម​គណនី"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"បង្កើន"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"បន្ថយ"</string>
@@ -1422,15 +1422,15 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"បង្កើន​​ឆ្នាំ"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"បន្ថយ​ឆ្នាំ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់​"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"លុប"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"រួចរាល់"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ប្ដូរ​របៀប"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ជ្រើស​កម្មវិធី​​"</string>
+    <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ជ្រើស​កម្មវិធី"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ចែករំលែក​ជា​មួយ​"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ចែករំលែក​ជា​មួយ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ចែក​រំលែក​ជា​មួយ <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"គ្រប់គ្រង​ការ​រុញ។ ប៉ះ &amp; សង្កត់។"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
@@ -1453,7 +1453,7 @@
     <string name="storage_internal" msgid="4891916833657929263">"ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"កាត​អេសឌី"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ប៉ះ ដើម្បី​មើល​ការ​ប្រើ និង​ការ​កំណត់។"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"បាន​បិទ​ទិន្នន័យ 2G​-3G"</string>
@@ -1510,7 +1510,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"ទំនេរ"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"មិន​ទំនេរ"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"កំពុង​ប្រើ"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"អេក្រង់​ជាប់​"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"អេក្រង់​ជាប់"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"អេក្រង់ HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"#<xliff:g id="ID">%1$d</xliff:g> ត្រួត​គ្នា"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
@@ -1542,7 +1542,7 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ដើម្បី​ដោះ​សោ ចូល​ក្នុង​គណនី Google ។"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ី​ម៉ែ​ល​)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់​"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ចូល"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ភ្លេច​ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​របស់​អ្នក?\nមើល "<b>"google.com/accounts/recovery"</b>" ។"</string>
@@ -1651,7 +1651,7 @@
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
     <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"​មិន​ស្គាល់​បញ្ឈរ"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"មិន​ស្គាល់​ទេសភាព"</string>
-    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់​"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"កំហុស​ក្នុង​ការ​សរសេរ​មាតិកា"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"មិន​ស្គាល់"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"មិន​បា​ន​បើក​សេវាកម្ម​បោះពុម្ព"</string>
