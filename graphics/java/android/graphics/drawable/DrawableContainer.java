@@ -16,12 +16,14 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.PorterDuff.Mode;
@@ -120,6 +122,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mCurrDrawable.getOpticalInsets();
         }
         return Insets.NONE;
+    }
+
+    @Override
+    public boolean getOutline(@NonNull Outline outline) {
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.getOutline(outline);
+        }
+        return false;
     }
 
     @Override
