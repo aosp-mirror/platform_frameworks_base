@@ -153,8 +153,7 @@ page.tags="leanback","recyclerview","launcher"
 </p>
 
 <p>If you decide to use the v17 leanback library for your app, you should note that it is
-  dependent on the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
-  appcompat library</a>, which is, in turn, dependent on the
+  dependent on the
   <a href="{@docRoot}tools/support-library/features.html#v4">v4 support library</a>. This means
   that apps that use the leanback support library should include all of these support
   libraries:</p>
@@ -162,12 +161,11 @@ page.tags="leanback","recyclerview","launcher"
 <ul>
   <li>v17 leanback support library</li>
   <li>v7 recyclerview support library</li>
-  <li>v7 appcompat support library</li>
   <li>v4 support library</li>
 </ul>
 
-<p>Two of these libraries (v17 leanback and v7 appcompat) contain resources, which require
-  you to take specific steps to include them in app projects. For instructions on
+<p>The v17 leanback library contain resources, which requires
+  you to take specific steps to include it in app projects. For instructions on
   importing a support library with resources, see
   <a href="http://developer.android.com/tools/support-library/setup.html#libs-with-res">
   Support Library Setup</a>.

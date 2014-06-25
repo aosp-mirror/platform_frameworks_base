@@ -152,10 +152,9 @@ private void buildRowsAdapter() {
   image as users browse through content. This technique can make interaction with your app feel more
   cinematic and enjoyable for users.</p>
 
-<p>The Leanback support library provides a {@link
-  android.support.v17.leanback.app.BackgroundManager} class for changing the background of your TV
-  app activity. The following example shows how to create a simple method for updating the
-  background within your TV app activity:</p>
+<p>The Leanback support library provides a {@code BackgroundManager} class for changing the
+  background of your TV app activity. The following example shows how to create a simple method
+  for updating the background within your TV app activity:</p>
 
 <pre>
 protected void updateBackground(Drawable drawable) {
@@ -166,7 +165,7 @@ protected void updateBackground(Drawable drawable) {
 <p>Many of the existing media-browse apps automatically update the background as the user
   navigates through media listings. In order to do this, you can set up a selection listener to
   automatically update the background based on the user's current selection. The following example
-  shows you how to set up an {@link android.support.v17.leanback.widget.OnItemSelectedListener}
+  shows you how to set up an {@code OnItemSelectedListener}
   class to catch selection events and update the background:</p>
 
 <pre>
