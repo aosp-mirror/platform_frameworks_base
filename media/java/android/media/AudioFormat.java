@@ -227,6 +227,22 @@ public class AudioFormat {
     private int mChannelMask;
     private int mPropertySetMask;
 
+    int getEncoding() {
+        return mEncoding;
+    }
+
+    int getSampleRate() {
+        return mSampleRate;
+    }
+
+    int getChannelMask() {
+        return mChannelMask;
+    }
+
+    int getPropertySetMask() {
+        return mPropertySetMask;
+    }
+
     /**
      * @hide CANDIDATE FOR PUBLIC API
      * Builder class for {@link AudioFormat} objects.

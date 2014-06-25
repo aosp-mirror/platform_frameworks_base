@@ -40,14 +40,23 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioTrack";
+static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
 
-struct fields_t {
+struct audio_track_fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
     jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
     jfieldID  jniData;      // stores in Java additional resources used by the native AudioTrack
+    jfieldID  fieldStreamType; // ... mStreamType field in the AudioTrack Java object
 };
-static fields_t javaAudioTrackFields;
+struct audio_attributes_fields_t {
+    jfieldID  fieldUsage;       // AudioAttributes.mUsage
+    jfieldID  fieldContentType; // AudioAttributes.mContentType
+    jfieldID  fieldFlags;       // AudioAttributes.mFlags
+    jfieldID  fieldTags;        // AudioAttributes.mTags
+};
+static audio_track_fields_t      javaAudioTrackFields;
+static audio_attributes_fields_t javaAudioAttrFields;
 
 struct audiotrack_callback_cookie {
     jclass      audioTrack_class;
@@ -66,12 +75,10 @@ class AudioTrackJniStorage {
         sp<MemoryHeapBase>         mMemHeap;
         sp<MemoryBase>             mMemBase;
         audiotrack_callback_cookie mCallbackData;
-        audio_stream_type_t        mStreamType;
 
     AudioTrackJniStorage() {
         mCallbackData.audioTrack_class = 0;
         mCallbackData.audioTrack_ref = 0;
-        mStreamType = AUDIO_STREAM_DEFAULT;
     }
 
     ~AudioTrackJniStorage() {
@@ -174,15 +181,20 @@ static sp<AudioTrack> setAudioTrack(JNIEnv* env, jobject thiz, const sp<AudioTra
     env->SetLongField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (jlong)at.get());
     return old;
 }
-
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint streamType, jint sampleRateInHertz, jint javaChannelMask,
-        jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession)
-{
+        jobject jaa,
+        jint sampleRateInHertz, jint javaChannelMask,
+        jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession) {
+
     ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
         sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
+
+    if (jaa == 0) {
+        ALOGE("Error creating AudioTrack: invalid audio attributes");
+        return (jint) AUDIO_JAVA_ERROR;
+    }
 
     // Java channel masks don't map directly to the native definition, but it's a simple shift
     // to skip the two deprecated channel configurations "default" and "mono".
@@ -194,9 +206,6 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     }
 
     uint32_t channelCount = popcount(nativeChannelMask);
-
-    // stream type already checked in Java
-    audio_stream_type_t atStreamType = (audio_stream_type_t) streamType;
 
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
@@ -251,10 +260,25 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // create the native AudioTrack object
     sp<AudioTrack> lpTrack = new AudioTrack();
 
+    audio_attributes_t *paa = NULL;
+    // read the AudioAttributes values
+    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
+    const jstring jtags    = (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldTags);
+    const char* tags = env->GetStringUTFChars(jtags, NULL);
+    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
+    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    env->ReleaseStringUTFChars(jtags, tags);
+    paa->usage = (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
+    paa->content_type =
+            (audio_content_type_t) env->GetIntField(jaa, javaAudioAttrFields.fieldContentType);
+    paa->flags = env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
+
+    ALOGV("AudioTrack_setup for usage=%d content=%d flags=0x%#x tags=%s",
+            paa->usage, paa->content_type, paa->flags, paa->tags);
+
     // initialize the callback information:
     // this data will be passed with every AudioTrack callback
     AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
-    lpJniStorage->mStreamType = atStreamType;
     lpJniStorage->mCallbackData.audioTrack_class = (jclass)env->NewGlobalRef(clazz);
     // we use a weak reference so the AudioTrack object can be garbage collected.
     lpJniStorage->mCallbackData.audioTrack_ref = env->NewGlobalRef(weak_this);
@@ -266,17 +290,21 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     case MODE_STREAM:
 
         status = lpTrack->set(
-            atStreamType,// stream type
-            sampleRateInHertz,
-            format,// word length, PCM
-            nativeChannelMask,
-            frameCount,
-            audio_is_linear_pcm(format) ? AUDIO_OUTPUT_FLAG_NONE : AUDIO_OUTPUT_FLAG_DIRECT,
-            audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
-            0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-            0,// shared mem
-            true,// thread can call Java
-            sessionId);// audio session ID
+                AUDIO_STREAM_DEFAULT,// stream type
+                sampleRateInHertz,
+                format,// word length, PCM
+                nativeChannelMask,
+                frameCount,
+                AUDIO_OUTPUT_FLAG_NONE,
+                audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
+                0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
+                0,// shared mem
+                true,// thread can call Java
+                sessionId,// audio session ID
+                AudioTrack::TRANSFER_DEFAULT, // default transfer mode
+                NULL,                         // default offloadInfo
+                -1, -1,                       // default uid, pid values
+                paa);
         break;
 
     case MODE_STATIC:
@@ -288,17 +316,21 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         }
 
         status = lpTrack->set(
-            atStreamType,// stream type
-            sampleRateInHertz,
-            format,// word length, PCM
-            nativeChannelMask,
-            frameCount,
-            AUDIO_OUTPUT_FLAG_NONE,
-            audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
-            0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-            lpJniStorage->mMemBase,// shared mem
-            true,// thread can call Java
-            sessionId);// audio session ID
+                AUDIO_STREAM_DEFAULT,// stream type
+                sampleRateInHertz,
+                format,// word length, PCM
+                nativeChannelMask,
+                frameCount,
+                AUDIO_OUTPUT_FLAG_NONE,
+                audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
+                0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
+                lpJniStorage->mMemBase,// shared mem
+                true,// thread can call Java
+                sessionId,// audio session ID
+                AudioTrack::TRANSFER_DEFAULT, // default transfer mode
+                NULL,                         // default offloadInfo
+                -1, -1,                       // default uid, pid values
+                paa);
         break;
 
     default:
@@ -333,10 +365,21 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     //ALOGV("storing lpJniStorage: %x\n", (long)lpJniStorage);
     env->SetLongField(thiz, javaAudioTrackFields.jniData, (jlong)lpJniStorage);
 
+    // since we had audio attributes, the stream type was derived from them during the
+    // creation of the native AudioTrack: push the same value to the Java object
+    env->SetIntField(thiz, javaAudioTrackFields.fieldStreamType, (jint) lpTrack->streamType());
+    // audio attributes were copied in AudioTrack creation
+    free(paa);
+    paa = NULL;
+
+
     return (jint) AUDIO_JAVA_SUCCESS;
 
     // failures:
 native_init_failure:
+    if (paa != NULL) {
+        free(paa);
+    }
     if (nSession != NULL) {
         env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     }
@@ -948,7 +991,7 @@ static JNINativeMethod gMethods[] = {
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},
     {"native_pause",         "()V",      (void *)android_media_AudioTrack_pause},
     {"native_flush",         "()V",      (void *)android_media_AudioTrack_flush},
-    {"native_setup",         "(Ljava/lang/Object;IIIIII[I)I",
+    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;IIIII[I)I",
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
@@ -992,6 +1035,7 @@ static JNINativeMethod gMethods[] = {
 #define JAVA_POSTEVENT_CALLBACK_NAME                    "postEventFromNative"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
 #define JAVA_JNIDATA_FIELD_NAME                         "mJniData"
+#define JAVA_STREAMTYPE_FIELD_NAME                      "mStreamType"
 
 // ----------------------------------------------------------------------------
 // preconditions:
@@ -1041,12 +1085,39 @@ int register_android_media_AudioTrack(JNIEnv *env)
         ALOGE("Can't find AudioTrack.%s", JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME);
         return -1;
     }
-    //      jniData;
+    //      jniData
     javaAudioTrackFields.jniData = env->GetFieldID(
             audioTrackClass,
             JAVA_JNIDATA_FIELD_NAME, "J");
     if (javaAudioTrackFields.jniData == NULL) {
         ALOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
+        return -1;
+    }
+    //      fieldStreamType
+    javaAudioTrackFields.fieldStreamType = env->GetFieldID(audioTrackClass,
+            JAVA_STREAMTYPE_FIELD_NAME, "I");
+    if (javaAudioTrackFields.fieldStreamType == NULL) {
+        ALOGE("Can't find AudioTrack.%s", JAVA_STREAMTYPE_FIELD_NAME);
+        return -1;
+    }
+
+    // Get the AudioAttributes class and fields
+    jclass audioAttrClass = env->FindClass(kAudioAttributesClassPathName);
+    if (audioAttrClass == NULL) {
+        ALOGE("Can't find %s", kAudioAttributesClassPathName);
+        return -1;
+    }
+    jclass audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
+    javaAudioAttrFields.fieldUsage = env->GetFieldID(audioAttributesClassRef, "mUsage", "I");
+    javaAudioAttrFields.fieldContentType
+                                   = env->GetFieldID(audioAttributesClassRef, "mContentType", "I");
+    javaAudioAttrFields.fieldFlags = env->GetFieldID(audioAttributesClassRef, "mFlags", "I");
+    javaAudioAttrFields.fieldTags  = env->GetFieldID(audioAttributesClassRef, "mFormattedTags",
+            "Ljava/lang/String;");
+    env->DeleteGlobalRef(audioAttributesClassRef);
+    if (javaAudioAttrFields.fieldUsage == NULL || javaAudioAttrFields.fieldContentType == NULL
+            || javaAudioAttrFields.fieldFlags == NULL || javaAudioAttrFields.fieldTags == NULL) {
+        ALOGE("Can't initialize AudioAttributes fields");
         return -1;
     }
 
