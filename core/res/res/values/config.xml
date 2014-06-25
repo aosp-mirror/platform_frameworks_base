@@ -1184,7 +1184,7 @@
     <bool name="config_dreamsActivatedOnDockByDefault">true</bool>
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
-    <!-- ComponentName of the default dream (Settings.Secure.SCREENSAVER_COMPONENT) -->
+    <!-- ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT) -->
     <string name="config_dreamsDefaultComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Are we allowed to dream while not plugged in? -->
@@ -1205,8 +1205,7 @@
          try to start this dream if possible.  The dream should typically call startDozing()
          to put the display into a low power state and allow the application processor
          to be suspended.  When the dream ends, the system will go to sleep as usual.
-         Specify the component name (Settings.Secure.SCREENSAVER_COMPONENT) or an
-         empty string if none.
+         Specify the component name or an empty string if none.
 
          Note that doze dreams are not subject to the same start conditions as ordinary dreams.
          Doze dreams will run whenever the power manager is in a dozing state. -->

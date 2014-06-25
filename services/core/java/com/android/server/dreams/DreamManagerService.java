@@ -103,6 +103,9 @@ public final class DreamManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (Build.IS_DEBUGGABLE) {
+                SystemProperties.addChangeCallback(mSystemPropertiesChanged);
+            }
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -127,6 +130,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamCanDoze=" + mCurrentDreamCanDoze);
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
         pw.println("mCurrentDreamDozeHardware=" + mCurrentDreamDozeHardware);
+        pw.println("getDozeComponent()=" + getDozeComponent());
         pw.println();
 
         DumpUtils.dumpAsync(mHandler, new DumpUtils.Dump() {
@@ -653,4 +657,18 @@ public final class DreamManagerService extends SystemService {
             }
         }
     }
+
+    private final Runnable mSystemPropertiesChanged = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "System properties changed");
+            synchronized(mLock) {
+                if (mCurrentDreamName != null && mCurrentDreamCanDoze
+                        && !mCurrentDreamName.equals(getDozeComponent())) {
+                    // may have updated the doze component, wake up
+                    stopDreamLocked();
+                }
+            }
+        }
+    };
 }

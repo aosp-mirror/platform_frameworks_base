@@ -33,6 +33,7 @@ public class AmbientState {
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
     private float mScrimAmount;
+    private boolean mDark;
 
     public int getScrollY() {
         return mScrollY;
@@ -62,6 +63,11 @@ public class AmbientState {
         mDimmed = dimmed;
     }
 
+    /** In dark mode, we draw as little as possible, assuming a black background */
+    public void setDark(boolean dark) {
+        mDark = dark;
+    }
+
     /**
      * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
      * interaction. This child is then scaled normally and its background is fully opaque.
@@ -72,6 +78,10 @@ public class AmbientState {
 
     public boolean isDimmed() {
         return mDimmed;
+    }
+
+    public boolean isDark() {
+        return mDark;
     }
 
     public ActivatableNotificationView getActivatedChild() {

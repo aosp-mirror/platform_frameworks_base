@@ -148,6 +148,9 @@ public class StackScrollState {
                 // apply dimming
                 child.setDimmed(state.dimmed, false /* animate */);
 
+                // apply dark
+                child.setDark(state.dark, false /* animate */);
+
                 // apply scrimming
                 child.setScrimAmount(state.scrimAmount);
 
@@ -224,6 +227,7 @@ public class StackScrollState {
         boolean gone;
         float scale;
         boolean dimmed;
+        boolean dark;
 
         /**
          * A value between 0 and 1 indicating how much the view should be scrimmed.

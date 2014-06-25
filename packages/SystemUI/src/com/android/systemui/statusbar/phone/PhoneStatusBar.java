@@ -100,6 +100,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.CircularClipper;
 import com.android.systemui.qs.QSPanel;
@@ -225,6 +226,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
+    private DozeServiceHost mDozeServiceHost;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -405,6 +407,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mSettingsClosing;
     private boolean mVisible;
     private boolean mWaitingForKeyguardExit;
+    private boolean mDozing;
 
     private Interpolator mLinearOutSlowIn;
     private Interpolator mAlphaOut = new PathInterpolator(0f, 0.4f, 1f, 1f);
@@ -427,6 +430,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<String> mCurrentlyVisibleNotifications = new ArraySet<String>();
     private long mLastVisibilityReportUptimeMs;
+
+    private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
 
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
@@ -537,6 +542,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         startKeyguard();
+
+        mDozeServiceHost = new DozeServiceHost();
+        putComponent(DozeService.Host.class, mDozeServiceHost);
     }
 
     // ================================================================================
@@ -1232,7 +1240,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         for (View remove : toRemove) {
             mStackScroller.removeView(remove);
         }
-
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
@@ -1265,6 +1272,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateRowStates();
         updateSpeedbump();
         mNotificationPanel.setQsExpansionEnabled(provisioned && mUserSetup);
+        mShadeUpdates.check();
     }
 
     private void updateSpeedbump() {
@@ -2273,6 +2281,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         pw.println(windowStateToString(mStatusBarWindowState));
         pw.print("  mStatusBarMode=");
         pw.println(BarTransitions.modeToString(mStatusBarMode));
+        pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mZenMode=");
         pw.println(Settings.Global.zenModeToString(mZenMode));
         pw.print("  mUseHeadsUp=");
@@ -2675,7 +2684,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (newlyVisible.isEmpty() && noLongerVisible.isEmpty()) {
             return;
         }
-
         String[] newlyVisibleAr = newlyVisible.toArray(new String[newlyVisible.size()]);
         String[] noLongerVisibleAr = noLongerVisible.toArray(new String[noLongerVisible.size()]);
         try {
@@ -2950,11 +2958,32 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.setKeyguardShowing(false);
             mScrimController.setKeyguardShowing(false);
         }
+        updateDozingState();
         updateStackScrollerState();
         updatePublicMode();
         updateNotifications();
         checkBarModes();
         updateCarrierLabelVisibility(false);
+    }
+
+    private void updateDozingState() {
+        final boolean bottomGone = mKeyguardBottomArea.getVisibility() == View.GONE;
+        if (mDozing) {
+            mNotificationPanel.setBackgroundColor(0xff000000);
+            mHeader.setVisibility(View.INVISIBLE);
+            if (!bottomGone) {
+                mKeyguardBottomArea.setVisibility(View.INVISIBLE);
+            }
+            mStackScroller.setDark(true, false /*animate*/);
+        } else {
+            mNotificationPanel.setBackground(null);
+            mHeader.setVisibility(View.VISIBLE);
+            if (!bottomGone) {
+                mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            }
+            mStackScroller.setDark(false, false /*animate*/);
+        }
+        mScrimController.setDozing(mDozing);
     }
 
     public void updateStackScrollerState() {
@@ -3228,5 +3257,122 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
         }
         notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    private final class ShadeUpdates {
+        private final ArraySet<String> mVisibleNotifications = new ArraySet<String>();
+        private final ArraySet<String> mNewVisibleNotifications = new ArraySet<String>();
+
+        public void check() {
+            mNewVisibleNotifications.clear();
+            for (int i = 0; i < mNotificationData.size(); i++) {
+                final Entry entry = mNotificationData.get(i);
+                final boolean visible = entry.row != null
+                        && entry.row.getVisibility() == View.VISIBLE;
+                if (visible) {
+                    mNewVisibleNotifications.add(entry.key + entry.notification.getPostTime());
+                }
+            }
+            final boolean updates = !mVisibleNotifications.containsAll(mNewVisibleNotifications);
+            mVisibleNotifications.clear();
+            mVisibleNotifications.putAll(mNewVisibleNotifications);
+
+            // We have new notifications
+            if (updates && mDozeServiceHost != null) {
+                mDozeServiceHost.fireNewNotifications();
+            }
+        }
+    }
+
+    private final class DozeServiceHost implements DozeService.Host {
+        // Amount of time to allow to update the time shown on the screen before releasing
+        // the wakelock.  This timeout is design to compensate for the fact that we don't
+        // currently have a way to know when time display contents have actually been
+        // refreshed once we've finished rendering a new frame.
+        private static final long PROCESSING_TIME = 500;
+
+        private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+        private final H mHandler = new H();
+
+        private DozeService mCurrentDozeService;
+
+        public void fireNewNotifications() {
+            for (Callback callback : mCallbacks) {
+                callback.onNewNotifications();
+            }
+        }
+
+        @Override
+        public void addCallback(Callback callback) {
+            mCallbacks.add(callback);
+        }
+
+        @Override
+        public void removeCallback(Callback callback) {
+            mCallbacks.remove(callback);
+        }
+
+        @Override
+        public void requestDoze(DozeService dozeService) {
+            if (dozeService == null) return;
+            dozeService.stayAwake(PROCESSING_TIME);
+            mHandler.obtainMessage(H.REQUEST_DOZE, dozeService).sendToTarget();
+        }
+
+        @Override
+        public void requestTease(DozeService dozeService) {
+            if (dozeService == null) return;
+            dozeService.stayAwake(PROCESSING_TIME);
+            mHandler.obtainMessage(H.REQUEST_TEASE, dozeService).sendToTarget();
+        }
+
+        @Override
+        public void dozingStopped(DozeService dozeService) {
+            if (dozeService == null) return;
+            dozeService.stayAwake(PROCESSING_TIME);
+            mHandler.obtainMessage(H.DOZING_STOPPED, dozeService).sendToTarget();
+        }
+
+        private void handleRequestDoze(DozeService dozeService) {
+            mCurrentDozeService = dozeService;
+            if (!mDozing) {
+                mDozing = true;
+                updateDozingState();
+            }
+            mCurrentDozeService.startDozing();
+        }
+
+        private void handleRequestTease(DozeService dozeService) {
+            if (!dozeService.equals(mCurrentDozeService)) return;
+            final long stayAwake = mScrimController.tease();
+            mCurrentDozeService.stayAwake(stayAwake);
+        }
+
+        private void handleDozingStopped(DozeService dozeService) {
+            if (dozeService.equals(mCurrentDozeService)) {
+                mCurrentDozeService = null;
+            }
+            if (mDozing) {
+                mDozing = false;
+                updateDozingState();
+            }
+        }
+
+        private final class H extends Handler {
+            private static final int REQUEST_DOZE = 1;
+            private static final int REQUEST_TEASE = 2;
+            private static final int DOZING_STOPPED = 3;
+
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == REQUEST_DOZE) {
+                    handleRequestDoze((DozeService) msg.obj);
+                } else if (msg.what == REQUEST_TEASE) {
+                    handleRequestTease((DozeService) msg.obj);
+                } else if (msg.what == DOZING_STOPPED) {
+                    handleDozingStopped((DozeService) msg.obj);
+                }
+            }
+        }
     }
 }

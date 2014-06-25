@@ -25,6 +25,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -89,6 +91,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0, 0, 0.5f, 1);
 
     private boolean mDimmed;
+    private boolean mDark;
+    private final Paint mDarkPaint = createDarkPaint();
 
     private int mBgResId = com.android.internal.R.drawable.notification_material_bg;
     private int mDimmedBgResId = com.android.internal.R.drawable.notification_material_bg_dim;
@@ -293,6 +297,34 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 updateBackground();
             }
         }
+    }
+
+    public void setDark(boolean dark, boolean fade) {
+        // TODO implement fade
+        if (mDark != dark) {
+            mDark = dark;
+            if (mDark) {
+                setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
+            } else {
+                setLayerType(View.LAYER_TYPE_NONE, null);
+            }
+        }
+    }
+
+    private static Paint createDarkPaint() {
+        final Paint p = new Paint();
+        final float[] invert = {
+            -1f,  0f,  0f, 1f, 1f,
+             0f, -1f,  0f, 1f, 1f,
+             0f,  0f, -1f, 1f, 1f,
+             0f,  0f,  0f, 1f, 0f
+        };
+        final ColorMatrix m = new ColorMatrix(invert);
+        final ColorMatrix grayscale = new ColorMatrix();
+        grayscale.setSaturation(0);
+        m.preConcat(grayscale);
+        p.setColorFilter(new ColorMatrixColorFilter(m));
+        return p;
     }
 
     /**
