@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ļauj lietotnei iestatīt signālu instalētajā modinātājpulksteņa lietotnē. Dažās modinātājpulksteņu lietotnēs šo funkciju, iespējams, nevar ieviest."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pievienot balss pastu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ļauj lietotnei pievienot ziņojumus jūsu balss pasta iesūtnei."</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lasīt visus balss pasta ziņojumus"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"Ļauj lietotnei lasīt visus jūsu balss pasta ziņojumus."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ļauj lietotnei modificēt pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietotnes to var izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"pakotņu verificēšana"</string>
@@ -1727,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Atlasiet gadu."</string>
     <string name="item_is_selected" msgid="949687401682476608">"Atlasīts: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vai izmantot bloķēšanu darbībai vienā lietotnē?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Konfigurācija \"Bloķēšana darbībai vienā lietotnē\" nobloķē ekrānu vienā lietotnē.\n\nLai izietu, nospiediet un turiet pogu “Pēdējās izmantotās lietotnes” $."</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NĒ"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"SĀKT"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Sākt bloķēšanu darbībai vienā lietotnē"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Iziet no bloķēšanas darbībai vienā lietotnē"</string>
 </resources>

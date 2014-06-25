@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能沒有這項功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增留言"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件箱。"</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"讀取所有語音留言"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"允許應用程式讀取您的所有語音留言。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允許應用程式修改瀏覽器的地理資訊權限。惡意應用程式可能會藉此允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"驗證套件"</string>
@@ -1727,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="item_is_selected" msgid="949687401682476608">"已選取<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"使用 Lock-to-app？"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-app 會鎖定螢幕，只顯示單一應用程式的畫面。\n\n如要結束，請按住最近使用的應用程式按鈕 $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"否"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"啟動 Lock-to-app"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"結束 Lock-to-app"</string>
 </resources>

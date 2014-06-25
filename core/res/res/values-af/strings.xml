@@ -189,7 +189,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Veiligmodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Persoonlike programme"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Werk"</string>
+    <string name="managed_profile_label" msgid="4287077106125758391">"Android-werk"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dienste wat jou geld kos"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Doen dinge wat jou geld kan kos."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Kies jaar"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> gekies"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> uitgevee"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Gebruik Sluit-na-program?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Sluit-na-program sluit die skerm in \'n enkele program.\n\nOm uit te gaan, druk en hou die knoppie vir onlangse programme $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"BEGIN"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Begin Sluit-na-program"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Gaan uit Sluit-na-program"</string>
 </resources>

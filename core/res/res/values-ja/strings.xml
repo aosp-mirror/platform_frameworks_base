@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ボイスメールの追加"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ボイスメール受信トレイにメッセージを追加することをアプリに許可します｡"</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"すべてのボイスメールの読み取り"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"すべてのボイスメールの読み取りをアプリに許可します。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ブラウザの現在地情報に対する権限の変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ブラウザの現在地情報に対する権限の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、任意のウェブサイトに現在地情報が送信される恐れがあります。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"パッケージのベリファイ"</string>
@@ -1727,4 +1725,17 @@
     <string name="select_year" msgid="7952052866994196170">"年を選択"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
+    <skip />
+    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
+    <skip />
+    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
+    <skip />
 </resources>

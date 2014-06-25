@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Chagua mwaka"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kimechaguliwa"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> kimefutwa"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kazi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Ungependa kutumia lazimisha kutumia programu?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Lazimisha kutumia programu huonyeshwa katika programu moja. \n\n Ili uondoke bonyeza na ushikilie kitufe cha programu za hivi majuzi $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"HAPANA"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"ANZA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Anzisha Lazimisha kutumia programu"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Ondoka kwenye Lazimisha kutumia programu"</string>
 </resources>

@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Жилийг сонгоно уу"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> сонгогдсон"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Апп-дотор-түгжих-г ашиглах уу?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Апп-дотор-түгжих нь дэлгэцийг нэг апп дотор түгжинэ.\n\nГарахын тулд саяхны апп-ууд товчийг дараад барина уу $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"ҮГҮЙ"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"ЭХЛҮҮЛЭХ"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Апп-дотор-түгжих-г эхлүүлэх"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Апп-дотор-түгжих-с гарах"</string>
 </resources>

@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Válassza ki az évet"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kiválasztva"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Használni szeretné az alkalmazászárolást?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Az alkalmazászárolás lezárja a kijelzőt az adott alkalmazásban.\n\nA kilépéshez tartsa lenyomva a legutóbbi alkalmazások gombot ($)."</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEM"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"INDÍT"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Az alkalmazászárolás indítása"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Kilépés az alkalmazászárolásból"</string>
 </resources>

@@ -1280,7 +1280,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Angiv tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angiv dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Angiv"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"Udført"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"Udfør"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NY: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Leveret af <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
@@ -1424,7 +1424,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 match"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"Udført"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"Udfør"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Demonterer USB-lageret..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Demonterer SD-kortet..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Sletter USB-lageret..."</string>
@@ -1475,7 +1475,7 @@
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuller"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Slet"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Udført"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Udfør"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Ændring af tilstand"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Angiv"</string>
@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"Vælg år"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vil du bruge Lås-til-app?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Med Lås-til-app låses skærmen, så den kun viser én app.\n\nHvis du vil afslutte denne tilstand, skal du trykke på knappen for seneste apps og holde fingeren nede $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NEJ"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Start Lås-til-app"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Afslut Lås-til-app"</string>
 </resources>

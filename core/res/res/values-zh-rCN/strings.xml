@@ -1001,10 +1001,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允许应用向您的语音信箱收件箱添加邮件。"</string>
-    <!-- no translation found for permlab_readAllVoicemail (5834057671176753416) -->
-    <skip />
-    <!-- no translation found for permdesc_readAllVoicemail (7429033637738774985) -->
-    <skip />
+    <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"读取所有语音邮件"</string>
+    <string name="permdesc_readAllVoicemail" msgid="7429033637738774985">"允许应用读取您所有的语音邮件。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改“浏览器”地理位置的权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允许应用修改“浏览器”的地理位置权限。恶意应用可能借此向任意网站发送位置信息。"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"验证软件包"</string>
@@ -1727,4 +1725,18 @@
     <string name="select_year" msgid="7952052866994196170">"选择年份"</string>
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
+    <skip />
+    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
+    <skip />
+    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
+    <skip />
+    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
+    <skip />
 </resources>

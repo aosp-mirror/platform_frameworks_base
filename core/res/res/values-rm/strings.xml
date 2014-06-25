@@ -2879,4 +2879,18 @@
     <skip />
     <!-- no translation found for deleted_key (7659477886625566590) -->
     <skip />
+    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
+    <skip />
+    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
+    <skip />
+    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
+    <skip />
+    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
+    <skip />
+    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
+    <skip />
 </resources>

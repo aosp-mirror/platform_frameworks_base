@@ -1725,4 +1725,11 @@
     <string name="select_year" msgid="7952052866994196170">"เลือกปี"</string>
     <string name="item_is_selected" msgid="949687401682476608">"เลือก <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"ลบ <xliff:g id="KEY">%1$s</xliff:g> แล้ว"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"ใช้การล็อกแอปไหม"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"การล็อกแอปจะล็อกการแสดงไว้ในแอปเดียว\n\nหากต้องการออก ให้กดปุ่มแอปล่าสุด $ ค้างไว้"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"ไม่"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"เริ่มต้น"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"เริ่มใช้การล็อกแอป"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"ออกจากการล็อกแอป"</string>
 </resources>

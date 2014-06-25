@@ -1725,4 +1725,12 @@
     <string name="select_year" msgid="7952052866994196170">"Aasta valimine"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valitud"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> on kustutatud"</string>
+    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
+    <skip />
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Kas soovite kasutada rakendusele lukustamist?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Rakendusele lukustamise funktsioon lukustab kuva ühele rakendusele.\n\nVäljumiseks hoidke hiljutiste rakenduste nuppu $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"EI"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"KÄIVITA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Käivita rakendusele lukustamine"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Välju rakendusele lukustamisest"</string>
 </resources>
