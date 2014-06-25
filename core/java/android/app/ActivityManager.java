@@ -538,6 +538,30 @@ public class ActivityManager {
         }
 
         /**
+         * Sets the label for this task description.
+         * @hide
+         */
+        public void setLabel(String label) {
+            mLabel = label;
+        }
+
+        /**
+         * Sets the primary color for this task description.
+         * @hide
+         */
+        public void setPrimaryColor(int primaryColor) {
+            mColorPrimary = primaryColor;
+        }
+
+        /**
+         * Sets the icon for this task description.
+         * @hide
+         */
+        public void setIcon(Bitmap icon) {
+            mIcon = icon;
+        }
+
+        /**
          * @return The label and description of the current state of this task.
          */
         public String getLabel() {

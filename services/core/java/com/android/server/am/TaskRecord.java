@@ -60,6 +60,7 @@ final class TaskRecord extends ThumbnailHolder {
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
+    private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
@@ -138,7 +139,8 @@ final class TaskRecord extends ThumbnailHolder {
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _lastActiveTime,
-            long lastTimeMoved, boolean neverRelinquishIdentity) {
+            long lastTimeMoved, boolean neverRelinquishIdentity,
+            ActivityManager.TaskDescription _lastTaskDescription) {
         mService = service;
         taskId = _taskId;
         intent = _intent;
@@ -158,8 +160,7 @@ final class TaskRecord extends ThumbnailHolder {
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
         mNeverRelinquishIdentity = neverRelinquishIdentity;
-        // Recompute the task description for this task
-        updateTaskDescription();
+        lastTaskDescription = _lastTaskDescription;
     }
 
     void touchActiveTime() {
@@ -714,6 +715,11 @@ final class TaskRecord extends ThumbnailHolder {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
 
+        if (lastTaskDescription != null) {
+            TaskPersister.saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
+                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime, out);
+        }
+
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
             affinityIntent.saveToXml(out);
@@ -758,11 +764,12 @@ final class TaskRecord extends ThumbnailHolder {
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
         String lastDescription = null;
-        long lastActiveTime = 0;
+        long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
         int taskId = -1;
         final int outerDepth = in.getDepth();
+        ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription();
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -793,6 +800,9 @@ final class TaskRecord extends ThumbnailHolder {
                 lastTimeOnTop = Long.valueOf(attrValue);
             } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
                 neverRelinquishIdentity = Boolean.valueOf(attrValue);
+            } else if (TaskPersister.readTaskDescriptionAttribute(taskDescription, attrName,
+                    attrValue)) {
+                // Completed in TaskPersister.readTaskDescriptionAttribute()
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -824,10 +834,15 @@ final class TaskRecord extends ThumbnailHolder {
             }
         }
 
+        if (lastActiveTime >= 0) {
+            taskDescription.setIcon(TaskPersister.restoreImage(String.valueOf(taskId) +
+                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime));
+        }
+
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
                 askedCompatMode, taskType, userId, lastDescription, activities, lastActiveTime,
-                lastTimeOnTop, neverRelinquishIdentity);
+                lastTimeOnTop, neverRelinquishIdentity, taskDescription);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);

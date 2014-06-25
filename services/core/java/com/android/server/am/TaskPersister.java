@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Debug;
@@ -55,6 +56,9 @@ public class TaskPersister {
     private static final String IMAGE_EXTENSION = ".png";
 
     private static final String TAG_TASK = "task";
+
+    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
+    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
 
     private static File sImagesDir;
     private static File sTasksDir;
@@ -141,6 +145,36 @@ public class TaskPersister {
                 imageFile.close();
             }
         }
+    }
+
+    static void saveTaskDescription(ActivityManager.TaskDescription taskDescription,
+            String iconFilename, XmlSerializer out) throws IOException {
+        if (taskDescription != null) {
+            final String label = taskDescription.getLabel();
+            if (label != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
+            }
+            final int colorPrimary = taskDescription.getPrimaryColor();
+            if (colorPrimary != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
+            }
+            final Bitmap icon = taskDescription.getIcon();
+            if (icon != null) {
+                saveImage(icon, iconFilename);
+            }
+        }
+    }
+
+    static boolean readTaskDescriptionAttribute(ActivityManager.TaskDescription taskDescription,
+        String attrName, String attrValue) {
+        if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
+            taskDescription.setLabel(attrValue);
+            return true;
+        } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+            taskDescription.setPrimaryColor((int) Long.parseLong(attrValue, 16));
+            return true;
+        }
+        return false;
     }
 
     ArrayList<TaskRecord> restoreTasksLocked() {

@@ -79,8 +79,6 @@ final class ActivityRecord {
     private static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
-    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
-    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
     private static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
     final ActivityManagerService service; // owner
@@ -1064,20 +1062,10 @@ final class ActivityRecord {
         }
         out.attribute(null, ATTR_COMPONENTSPECIFIED, String.valueOf(componentSpecified));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
+
         if (taskDescription != null) {
-            final String label = taskDescription.getLabel();
-            if (label != null) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
-            }
-            final int colorPrimary = taskDescription.getPrimaryColor();
-            if (colorPrimary != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
-            }
-            final Bitmap icon = taskDescription.getIcon();
-            if (icon != null) {
-                TaskPersister.saveImage(icon, String.valueOf(task.taskId) + ACTIVITY_ICON_SUFFIX +
-                        createTime);
-            }
+            TaskPersister.saveTaskDescription(taskDescription, String.valueOf(task.taskId) +
+                    ACTIVITY_ICON_SUFFIX + createTime, out);
         }
 
         out.startTag(null, TAG_INTENT);
@@ -1100,10 +1088,9 @@ final class ActivityRecord {
         String resolvedType = null;
         boolean componentSpecified = false;
         int userId = 0;
-        String activityLabel = null;
-        int activityColor = 0;
         long createTime = -1;
         final int outerDepth = in.getDepth();
+        TaskDescription taskDescription = new TaskDescription();
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1122,10 +1109,9 @@ final class ActivityRecord {
                 componentSpecified = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.valueOf(attrValue);
-            } else if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
-                activityLabel = attrValue;
-            } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
-                activityColor = (int) Long.parseLong(attrValue, 16);
+            } else if (TaskPersister.readTaskDescriptionAttribute(taskDescription, attrName,
+                    attrValue)) {
+                // Completed in TaskPersister.readTaskDescriptionAttribute()
             } else {
                 Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
             }
@@ -1169,12 +1155,11 @@ final class ActivityRecord {
 
         r.persistentState = persistentState;
 
-        Bitmap icon = null;
         if (createTime >= 0) {
-            icon = TaskPersister.restoreImage(String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX +
-                    createTime);
+            taskDescription.setIcon(TaskPersister.restoreImage(String.valueOf(taskId) +
+                    ACTIVITY_ICON_SUFFIX + createTime));
         }
-        r.taskDescription = new TaskDescription(activityLabel, icon, activityColor);
+        r.taskDescription = taskDescription;
         r.createTime = createTime;
 
         return r;
