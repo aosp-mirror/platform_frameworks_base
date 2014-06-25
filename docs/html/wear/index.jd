@@ -83,33 +83,35 @@ page.type=about
           <div class="landing-body">
             <div class="landing-breakout cols">
               <div class="col-3-wide">
-
-                <div class="framed-wear-square">
-                  <img src="{@docRoot}wear/images/screens/reservation_animated.gif">
+              <div class="framed-wear-square">
+                <img src="{@docRoot}wear/images/notifications.png" itemprop="image" alt="">
                 </div>
-
-                <p class="landing-small">
-                  Say “Ok Google” to ask questions and get stuff done.
-                </p>
-              </div>
-              <div class="col-3-wide">
-                <img src="{@docRoot}wear/images/screens/circle_message2.png" itemprop="image" alt="">
+                <br />
                 <p class="landing-small">
                   Get glanceable, actionable information at just the right time with notifications
                   that are synced from your handheld device.
-
                 </p>
               </div>
               <div class="col-3-wide">
-                <img src="{@docRoot}wear/images/screens/fitness-24.png" alt="">
+                <div class="framed-wear-square">
+                  <img src="{@docRoot}wear/images/voicecommands.png">
+                </div>
+                <br />
+                <p class="landing-small">
+                  Say “Ok Google” to send messages, ask questions, and get stuff done.
+                </p>
+              </div>
+              <div class="col-3-wide">
+              <div class="framed-wear-square">
+                <img src="{@docRoot}wear/images/steps.png" alt="">
+                </div>
+                <br />
                 <p class="landing-small">
                   Design apps that can access a wide range of sensors and other hardware
                    directly on the wearable.
-
                 </p>
               </div>
             </div>
-
             <p>
               Before you start building, check out the
               <a href="{@docRoot}design/wear/index.html">Android Wear Design Principles</a>
@@ -126,7 +128,7 @@ page.type=about
             <div class="landing-subhead">
              The Android Wear APIs are delivered in the Android Support Library and Google Play
              services. When using these libraries, handheld devices running Android 4.3
-             (API Level 18) or later can communicate with wearables.</div>
+             or later can communicate with wearables.</div>
           </div>
 
           <div class="landing-body">
@@ -166,7 +168,7 @@ page.type=about
               </div>
               <div class="col-4">
                 <img src="{@docRoot}wear/images/features/send-data.png" alt="">
-                <p>Synced Data</p>
+                <p>Send Data</p>
                 <p class="landing-small">
                   Send data and actions between handhelds and wearables with
                   data replication APIs and RPCs.

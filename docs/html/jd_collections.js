@@ -2,9 +2,9 @@ var RESOURCE_COLLECTIONS = {
   "index/primary": {
     "title": "",
     "resources": [
-      "distribute/essentials/quality/tablets.html",
-      "distribute/engage/game-services.html",
-      "distribute/googleplay/edu/about.html" 
+      "training/building-wearables.html",
+      "preview/material/index.html",
+      "sdk/installing/studio.html" 
     ]
   },
   "index/devices": {

@@ -6,43 +6,37 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 @jd:body
 
-<!-- Top full-bleed carousel -->
-<div class="home-new-carousel-1" style="margin-top:40px">
+<div class="home-new-carousel-1">
   <div class="fullscreen-carousel-content">
     <div class="vcenter">
       <div class="wrap clearfix">
 
         <div class="static resource-flow-layout wrap col-16">
           <div class="resource resource-card resource-card-18x6">
-            <div class="card-bg" style="background-image: url('/preview/images/l-dev-prev.png');"></div>
-            <div class="card-info">
-              <div class="section"></div>
-              <div class="title">Android L Developer Preview</div>
-              <div class="description ellipsis" style="height: 285px;">
-                <div class="text" style="height: auto;">
-                  <p style="font-size:16px;">Get an early look at the next Android release and
-                    start using new APIs so your apps are ready when the platform officially launches.</p>
-                  <p>
-                  <a href="{@docRoot}preview/index.html" class="landing-button landing-secondary">Learn more</a></p>
-                </div>
-              </div>
+
+
+      <div class="landing-section-header">
+            <div class="col-10"><img src="{@docRoot}preview/images/l-dev-prev.png" style=" margin:40px 60px 0 20px"></div>
+            <div class="col-5" style=" margin-top:60px "><p>
+            <h3>L Developer Preview</h3>
+          Get an early look at the next release of the Android platform. 
+           The L Developer Preview lets you try out all the new features of the next major
+           release of Android. </p><br/>
+            <a href="{@docRoot}preview/index.html" class="landing-button landing-primary">Get Started</a>
             </div>
           </div>
+          </div>
         </div>
-
-        <div class="resource-widget resource-flow-layout wrap col-16 no-section"
-          data-query="collection:index/primary"
-          data-resourceStyle="card"
-          data-sortOrder="-timestamp"
-          data-maxResults="3"
-          data-cardSizes="6x2,6x2,6x2">
-        </div> <!-- end .resource-widget -->
+ <h2 style="margin-bottom: 0px;">&nbsp;</h2>
+        <div style="margin-top:10px" class="resource-widget resource-flow-layout wrap col-16
+        no-section" data-query="collection:index/primary" data-resourcestyle="card"
+        data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> <!-- end .resource-widget -->
       </div> <!-- end .wrap -->
     </div> <!-- end .vcenter -->
   </div> <!-- end .fullscreen-carousel-content -->
 </div> <!-- end .fullscreen-carousel -->
 
-<div class="actions-bar" style="margin-top:30px">
+<div class="actions-bar" style="margin-top:40px">
   <div class="wrap">
     <div class="actions">
       <div><a href="{@docRoot}sdk/index.html">Get the SDK</a></div>
@@ -59,16 +53,17 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   <div class="landing-section">
     <div class="wrap">
       <div class="landing-section-header">
-        <div class="landing-h1">Develop for Multiple Form Factors</div>
+        
+            <div class="landing-h1" style="margin-top:0px">Build for a Multi-Screen World</div>
         <div class="landing-subhead" style="margin-top: 20px;">
-          Android runs on hundreds of millions of handheld devices around the world, <br />
+          Android runs on hundreds of millions of handheld devices around the world, <br>
           and it now supports these exciting, new form-factors.
         </div>
       </div>
       <div class="landing-body" style="margin-top: 50px;">
         <div class="landing-breakout cols">
           <div class="col-3-wide">
-              <img src="{@docRoot}images/home/wear-wordmark.png" />
+              <img src="{@docRoot}images/home/wear-wordmark.png">
               <img src="{@docRoot}images/home/wear.png">
               <p class="landing-small">
                 Provide information on-the-go for your users, whenever they need it.
@@ -78,9 +73,9 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
             </p>
           </div>
           <div class="col-3-wide">
-              <img src="{@docRoot}images/home/tv-wordmark.png" />
+              <img src="{@docRoot}images/home/tv-wordmark.png">
              <img src="{@docRoot}images/home/tv.png">
-              <p class="landing-small" >
+              <p class="landing-small">
                 Build your apps for the big screen and bring your content to life.
               </p>
             <p class="landing-small">
@@ -89,7 +84,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
             </p>
           </div>
           <div class="col-3-wide">
-              <img src="{@docRoot}images/home/auto-wordmark.png" />
+              <img src="{@docRoot}images/home/auto-wordmark.png">
               <img src="{@docRoot}images/home/auto.png">
               <p class="landing-small">
                 Extend your music apps to automobile
