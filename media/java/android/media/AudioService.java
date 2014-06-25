@@ -85,6 +85,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -4791,5 +4792,92 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         mVolumeController.setController(controller);
+    }
+
+    public static class VolumeController {
+        private static final String TAG = "VolumeController";
+
+        private IVolumeController mController;
+
+        public void setController(IVolumeController controller) {
+            mController = controller;
+        }
+
+        public boolean isSameBinder(IVolumeController controller) {
+            return Objects.equals(asBinder(), binder(controller));
+        }
+
+        public IBinder asBinder() {
+            return binder(mController);
+        }
+
+        private static IBinder binder(IVolumeController controller) {
+            return controller == null ? null : controller.asBinder();
+        }
+
+        @Override
+        public String toString() {
+            return "VolumeController(" + asBinder() + ")";
+        }
+
+        public void postDisplaySafeVolumeWarning(int flags) {
+            if (mController == null)
+                return;
+            try {
+                mController.displaySafeVolumeWarning(flags);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling displaySafeVolumeWarning", e);
+            }
+        }
+
+        public void postVolumeChanged(int streamType, int flags) {
+            if (mController == null)
+                return;
+            try {
+                mController.volumeChanged(streamType, flags);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling volumeChanged", e);
+            }
+        }
+
+        public void postMasterVolumeChanged(int flags) {
+            if (mController == null)
+                return;
+            try {
+                mController.masterVolumeChanged(flags);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling masterVolumeChanged", e);
+            }
+        }
+
+        public void postMasterMuteChanged(int flags) {
+            if (mController == null)
+                return;
+            try {
+                mController.masterMuteChanged(flags);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling masterMuteChanged", e);
+            }
+        }
+
+        public void setLayoutDirection(int layoutDirection) {
+            if (mController == null)
+                return;
+            try {
+                mController.setLayoutDirection(layoutDirection);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling setLayoutDirection", e);
+            }
+        }
+
+        public void postDismiss() {
+            if (mController == null)
+                return;
+            try {
+                mController.dismiss();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling dismiss", e);
+            }
+        }
     }
 }

@@ -77,7 +77,7 @@ public class MediaFocusControl implements OnFinished {
     private final MediaEventHandler mEventHandler;
     private final Context mContext;
     private final ContentResolver mContentResolver;
-    private final VolumeController mVolumeController;
+    private final AudioService.VolumeController mVolumeController;
     private final BroadcastReceiver mReceiver = new PackageIntentsReceiver();
     private final AppOpsManager mAppOps;
     private final KeyguardManager mKeyguardManager;
@@ -85,7 +85,7 @@ public class MediaFocusControl implements OnFinished {
     private final NotificationListenerObserver mNotifListenerObserver;
 
     protected MediaFocusControl(Looper looper, Context cntxt,
-            VolumeController volumeCtrl, AudioService as) {
+            AudioService.VolumeController volumeCtrl, AudioService as) {
         mEventHandler = new MediaEventHandler(looper);
         mContext = cntxt;
         mContentResolver = mContext.getContentResolver();
