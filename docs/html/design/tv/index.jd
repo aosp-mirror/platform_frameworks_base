@@ -1,31 +1,15 @@
-page.title=Design for TV
-header.justLinks=1
-footer.hide=1
+page.title=TV
 @jd:body
 
-<style>
-#landing-graphic-container {
-  position: relative;
-}
 
-#text-overlay {
-  position: absolute;
-  left: 0;
-  top: 402px;
-  width: 220px;
-}
-</style>
+<img src="{@docRoot}preview/tv/design/images/atv-home.jpg"
+  width="460" height="283" style="float:right;margin:0 0 40px 40px" /> 
 
-<div id="landing-graphic-container">
-  <div id="text-overlay">
-    <span itemprop="description">
-      Build beautiful apps for the biggest screen in the house.</span>
-    <br><br>
-    <a href="{@docRoot}design/tv/principles.html"
-       class="landing-page-link">Design Principles</a>
-  </div>
 
-  <a href="{@docRoot}design/tv/principles.html">
-    <img src="{@docRoot}design/tv/images/atv.png" style="margin-left: 70px;">
-  </a>
-</div>
+<p>Android TV is <strong>coming soon</strong> and lets you engage your users in a new, shared environment.</p>
+
+<p>Users bring a specific set of expectations to the experience of watching TV, versus interacting
+with a phone or tablet. So find out how to get your app ready for its big-screen debut
+later this year by reading the
+<a href="{@docRoot}preview/tv/design/index.html">Android TV Design Guide</a>
+in the L Developer Preview.</p>

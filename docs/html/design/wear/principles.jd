@@ -1,0 +1,52 @@
+page.title=Design Principles for Wear
+@jd:body
+
+<style>
+p.try {
+  background:#e4e4e4;
+  padding:10px;
+}
+</style>
+
+<p>These design principles provide some simple heuristics about how you should plan and assess your
+Android Wear app design.</p>
+
+
+<h2>Focus on not stopping the user and all else will follow</h2>
+<p>A watch is a perfect form factor for a device that you can use while doing something else, such as cooking, eating, walking, running, or even having a conversation. If using your wearable app causes the user to stop whatever they’re doing, it’s a good occasion to consider how to improve it using the principles in this section.</p>
+
+<p class="try"><strong>Try this:</strong> Time a typical use of your Wear app. If using it takes more than 5 seconds, you should think about making your app more focused. Also try using your app while you’re having a conversation, and see how it affects your train of thought and eye contact.</p>
+
+
+<h2>Design for big gestures</h2>
+
+<p>When you swipe through photos on your phone you’re using a large area of the display, and you don’t have to be precise at all. That’s the best kind of interaction for a wearable device. Your users are going to use your app in all sorts of situations, the least frequent one might actually be sitting down at their desk.</p>
+
+<p class="try"><strong>Try this:</strong> Use your app in various everyday situations, such as walking, eating, talking to people, or ordering coffee. If you have to slow down while walking or stop the conversation to be precise, you should consider how your gestures could be bigger.</p>
+
+<h2>Think about stream cards first</h2>
+<p>The best experience on a wearable device is when the right content is there just when the user needs it. You can figure out when to show your cards with sensors, or events happening in the cloud. For the cases where it’s impossible to know when the user needs your app, you can rely on a voice action or touch.</p>
+
+<p class="try"><strong>Try this:</strong> Make a list of all the situations a user would find your app useful. What do they have in common? Same location? Time of day? Certain physical activities? You will most likely come up with several different situations - that’s a good sign, because it means that you can specialize your cards to those situations. Remember that the user always has the option of completely muting your stream cards if they feel they aren’t relevant enough.</p>
+
+
+<p>[image] </p>
+<p class="img-caption">An app that offers to check in users could appear in the stream suggesting the most likely place nearby, after a certain amount of time.</p>
+
+
+<h2>Do one thing, really fast</h2>
+<p>While users will engage with your app for only a few seconds at time, they'll use it many times throughout the day. A well-designed stream card carries one bit of information and potentially offers a few action buttons when the user swipes over.</p>
+
+<p class="try"><strong>Try this:</strong> How many bits of information is there in your design? Is everything absolutely necessary, or could you split it up into separate cards? If you’re designing a card, don’t forget that you can use multiple pages.</p>
+
+
+<h2>Design for the corner of the eye</h2>
+<p>The longer the user is looking at your app, the more you are pulling them out of the real world. Thinking about how to design your app for glanceability can vastly help the user get full value from your app and quickly go back to what they were doing.</p>
+
+<p class="try"><strong>Try this:</strong> To view your app with your peripheral vision, try focusing on your knuckles while your watch is displaying the app. Do you get a sense of what it is trying to do? Is it distinguishable from other apps? Does the background image help conveying the message? Does it use photos or a distinct shape and color?</p>
+
+<h2>
+Don’t be a constant shoulder tapper</h2>
+<p>A watch constantly touches the user’s skin. Being this intimate, you want to buzz the watch fewer times than you’re used to on the phone.</p>
+
+<p class="try"><strong>Try this:</strong> Next time you’re in a conversation, imagine someone tapping you your shoulder, interrupting you with the information you want your app to deliver. If the information delivered did not justify suspending a conversation, you should not make the notification interruptive.</p>

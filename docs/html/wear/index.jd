@@ -84,7 +84,7 @@ page.type=about
             <div class="landing-breakout cols">
               <div class="col-3-wide">
 
-                <div class="framed-wear-square"
+                <div class="framed-wear-square">
                   <img src="{@docRoot}wear/images/screens/reservation_animated.gif">
                 </div>
 
