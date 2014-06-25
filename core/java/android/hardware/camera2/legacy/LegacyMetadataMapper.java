@@ -346,6 +346,14 @@ public class LegacyMetadataMapper {
     }
 
     private static void mapControlOther(CameraMetadataNative m, Camera.Parameters p) {
+        /*
+         * android.control.maxRegions
+         */
+        int[] maxRegions = new int[3];
+        maxRegions[0] = p.getMaxNumMeteringAreas();
+        maxRegions[1] = 0; // AWB regions not supported in API1
+        maxRegions[2] = p.getMaxNumFocusAreas();
+        m.set(CONTROL_MAX_REGIONS, maxRegions);
         // TODO
     }
 
