@@ -254,7 +254,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void startSharedElementTransition(Bundle sharedElementState) {
-        setEpicenter();
         // Remove rejected shared elements
         ArrayList<String> rejectedNames = new ArrayList<String>(mAllSharedElementNames);
         rejectedNames.removeAll(mSharedElementNames);
@@ -327,14 +326,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             boolean startSharedElementTransition) {
         Transition sharedElementTransition = null;
         if (startSharedElementTransition && !mSharedElementNames.isEmpty()) {
-            sharedElementTransition = configureTransition(getSharedElementTransition());
+            sharedElementTransition = configureTransition(getSharedElementTransition(), false);
         }
         Transition viewsTransition = null;
         if (startEnterTransition && !mTransitioningViews.isEmpty()) {
-            viewsTransition = configureTransition(getViewsTransition());
+            viewsTransition = configureTransition(getViewsTransition(), true);
             if (viewsTransition != null) {
                 stripOffscreenViews();
-                viewsTransition = addTargets(viewsTransition, mTransitioningViews);
             }
         }
 
@@ -465,7 +463,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         startTransition(new Runnable() {
             @Override
             public void run() {
-                setEpicenter();
                 boolean startEnterTransition = true;
                 boolean startSharedElementTransition = false;
                 Transition transition = beginTransition(startEnterTransition,
