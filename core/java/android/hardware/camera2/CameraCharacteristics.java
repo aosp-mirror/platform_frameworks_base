@@ -1354,7 +1354,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Range of valid exposure
      * times used by {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}.</p>
+     * <p>The min value will be &lt;= 100e3 (100 us). For FULL
+     * capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL),
+     * max will be &gt;= 100e6 (100ms)</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
     public static final Key<android.util.Range<Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE =
@@ -1371,7 +1375,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Refer to
      * StreamConfigurationMap#getOutputMinFrameDuration(int,Size)
      * for the minimum frame duration values.</p>
+     * <p>For FULL capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL),
+     * max will be &gt;= 100e6 (100ms).</p>
      *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
@@ -1748,18 +1755,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Generally classifies the overall set of the camera device functionality.</p>
      * <p>Camera devices will come in two flavors: LIMITED and FULL.</p>
-     * <p>A FULL device has the most support possible and will enable the
-     * widest range of use cases such as:</p>
+     * <p>A FULL device has the most support possible and will support below capabilities:</p>
      * <ul>
      * <li>30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.</li>
      * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
      * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
      * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_POST_PROCESSING)</li>
+     * <li>Arbitrary cropping region ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM)</li>
+     * <li>At least 3 processed (but not stalling) format output streams ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
+     * <li>The required stream configuration defined in android.scaler.availableStreamConfigurations</li>
+     * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
+     * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
      * </ul>
      * <p>A LIMITED device may have some or none of the above characteristics.
      * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC
+     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
+     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL

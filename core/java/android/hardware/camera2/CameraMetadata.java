@@ -310,7 +310,9 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}</li>
      * </ul>
      * </li>
-     * <li>Lens shading map information<ul>
+     * <li>Manual lens shading map control<ul>
+     * <li>{@link CaptureRequest#SHADING_MODE android.shading.mode}</li>
+     * <li>{@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode}</li>
      * <li>android.statistics.lensShadingMap</li>
      * <li>android.lens.info.shadingMapSize</li>
      * </ul>
@@ -323,6 +325,8 @@ public abstract class CameraMetadata<TKey> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#SHADING_MODE
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
