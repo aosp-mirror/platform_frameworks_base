@@ -35,7 +35,7 @@ style="float:right;margin:0 0 20px 40px" />
 using the emulator for a wearable device, enable <b>Hardware keyboard present</b> in the AVD settings
 so you can type replies instead.</p>
 
-<h2 id="RemoteInput">Define the Voice Input</h2>
+<h2 id="VoiceInput">Define the Voice Input</h2>
 
 <p>To create an action that supports voice input, create an instance of 
   {@link android.support.v4.app.RemoteInput.Builder} that you can add to your notification action.
