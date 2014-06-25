@@ -301,7 +301,11 @@ public:
     }
 
     static void freeTextLayoutCaches(JNIEnv* env, jobject) {
+#ifdef USE_MINIKIN
+        Layout::purgeCaches();
+#else
         TextLayoutEngine::getInstance().purgeCaches();
+#endif
     }
 
     static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {

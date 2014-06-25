@@ -59,7 +59,6 @@ std::string MinikinUtils::setLayoutProperties(Layout* layout, const SkPaint* pai
     SkPaintOptionsAndroid::FontVariant var = paint->getPaintOptionsAndroid().getFontVariant();
     const char* varstr = var == SkPaintOptionsAndroid::kElegant_Variant ? "elegant" : "compact";
     off = snprintfcat(css, off, sizeof(css), " -minikin-variant: %s;", varstr);
-    layout->setProperties(css);
     return std::string(css);
 }
 
