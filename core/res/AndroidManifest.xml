@@ -650,12 +650,19 @@
         android:permissionGroupFlags="personalInfo"
         android:priority="280" />
 
-   <!-- Allows an application to add voicemails into the system. -->
+    <!-- Allows an application to add voicemails into the system. -->
     <permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"
         android:permissionGroup="android.permission-group.VOICEMAIL"
         android:protectionLevel="dangerous"
         android:label="@string/permlab_addVoicemail"
         android:description="@string/permdesc_addVoicemail" />
+
+    <!-- Allows an application to remove any voicemails from the system. -->
+    <permission android:name="com.android.voicemail.permission.REMOVE_VOICEMAIL"
+        android:permissionGroup="android.permission-group.VOICEMAIL"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_removeVoicemail"
+        android:description="@string/permdesc_removeVoicemail" />
 
     <!-- Allows an application to read all the voicemails in the system. -->
     <permission android:name="com.android.voicemail.permission.READ_ALL_VOICEMAIL"

@@ -2963,6 +2963,14 @@
       not implement this feature.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to remove voicemails from the user's voicemail
+        inbox. [CHAR LIMIT=NONE] -->
+    <string name="permlab_removeVoicemail">remove voicemails</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_removeVoicemail">Allows the app to remove messages from your voicemail inbox.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_addVoicemail">add voicemail</string>
     <!-- Description of an application permission, listed so the user can choose whether
