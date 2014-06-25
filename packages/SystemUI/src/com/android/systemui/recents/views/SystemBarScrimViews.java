@@ -16,11 +16,8 @@
 
 package com.android.systemui.recents.views;
 
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.app.Activity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsConfiguration;
 
@@ -37,20 +34,10 @@ public class SystemBarScrimViews {
     boolean mHasStatusBarScrim;
     boolean mShouldAnimateNavBarScrim;
 
-    public SystemBarScrimViews(RecentsConfiguration config) {
+    public SystemBarScrimViews(Activity activity, RecentsConfiguration config) {
         mConfig = config;
-    }
-
-    /** Inflates the scrim views */
-    public void inflate(LayoutInflater inflater, ViewGroup parent) {
-        mStatusBarScrimView = inflater.inflate(R.layout.recents_status_bar_scrim, parent, false);
-        mStatusBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
-        mNavBarScrimView = inflater.inflate(R.layout.recents_nav_bar_scrim, parent, false);
-        mNavBarScrimView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+        mStatusBarScrimView = activity.findViewById(R.id.status_bar_scrim);
+        mNavBarScrimView = activity.findViewById(R.id.nav_bar_scrim);
     }
 
     /**
@@ -118,15 +105,5 @@ public class SystemBarScrimViews {
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
                     .start();
         }
-    }
-
-    /** Returns the status bar scrim view. */
-    public View getStatusBarScrimView() {
-        return mStatusBarScrimView;
-    }
-
-    /** Returns the nav bar scrim view. */
-    public View getNavBarScrimView() {
-        return mNavBarScrimView;
     }
 }

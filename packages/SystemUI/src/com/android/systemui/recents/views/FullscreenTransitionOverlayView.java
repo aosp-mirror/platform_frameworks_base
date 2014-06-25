@@ -25,10 +25,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.android.systemui.R;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -38,9 +39,9 @@ import com.android.systemui.recents.RecentsConfiguration;
  * The full screen transition view that gets animated down from the full screen into a task
  * thumbnail view.
  */
-public class FullScreenTransitionView extends FrameLayout {
+public class FullscreenTransitionOverlayView extends FrameLayout {
 
-    /** The FullScreenTransitionView callbacks */
+    /** The FullscreenTransitionOverlayView callbacks */
     public interface FullScreenTransitionViewCallbacks {
         void onEnterAnimationComplete(boolean canceled);
     }
@@ -56,18 +57,35 @@ public class FullScreenTransitionView extends FrameLayout {
     boolean mIsAnimating;
     AnimatorSet mEnterAnimation;
 
-    public FullScreenTransitionView(Context context, FullScreenTransitionViewCallbacks cb) {
+    public FullscreenTransitionOverlayView(Context context) {
         super(context);
+    }
+
+    public FullscreenTransitionOverlayView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public FullscreenTransitionOverlayView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public FullscreenTransitionOverlayView(Context context, AttributeSet attrs, int defStyleAttr,
+                                           int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
-        mCb = cb;
-        mScreenshotView = new ImageView(context);
-        mScreenshotView.setScaleType(ImageView.ScaleType.FIT_XY);
-        mScreenshotView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        addView(mScreenshotView);
         setClipTop(getClipTop());
         setClipBottom(getClipBottom());
         setWillNotDraw(false);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        mScreenshotView = (ImageView) findViewById(R.id.image);
+    }
+
+    /** Sets the callbacks */
+    public void setCallbacks(FullScreenTransitionViewCallbacks cb) {
+        mCb = cb;
     }
 
     /** Sets the top clip */
