@@ -102,9 +102,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     // better way to handle this.
     private IRemoteVolumeController mRvc;
 
-    // TODO refactor to have per user state for providers. See
-    // MediaRouterService for an example
-
     public MediaSessionService(Context context) {
         super(context);
         mSessionManagerImpl = new SessionManagerImpl();
