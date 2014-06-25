@@ -181,6 +181,8 @@ public class TransitionInflater {
                 createTransitionFromXml(parser, attrs, ((TransitionSet) transition));
                 a.recycle();
                 newTransition = true;
+            } else if ("transition".equals(name)) {
+                transition = createCustomTransition(attrs);
             } else if ("targets".equals(name)) {
                 if (parser.getDepth() - 1 > depth && transition != null) {
                     // We're inside the child tag - add targets to the child
@@ -203,6 +205,29 @@ public class TransitionInflater {
         }
 
         return transition;
+    }
+
+    private Transition createCustomTransition(AttributeSet attrs) {
+        String className = attrs.getAttributeValue(null, "class");
+
+        if (className == null) {
+            throw new RuntimeException("transition tag must have a 'class' attribute");
+        }
+
+        try {
+            Class c = Class.forName(className);
+            if (!Transition.class.isAssignableFrom(c)) {
+                throw new RuntimeException("transition class must be a Transition: " + className);
+            }
+            return (Transition) c.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException("Could not instantiate transition class", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not access default constructor for transition class "
+                    + className, e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Could not find transition class " + className, e);
+        }
     }
 
     private Slide createSlideTransition(AttributeSet attrs) {
