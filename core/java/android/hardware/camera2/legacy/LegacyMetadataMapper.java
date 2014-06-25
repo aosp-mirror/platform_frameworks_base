@@ -19,6 +19,7 @@ package android.hardware.camera2.legacy;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -47,6 +48,8 @@ public class LegacyMetadataMapper {
     private static final String TAG = "LegacyMetadataMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
+    private static final long NS_PER_MS = 1000000;
+
     // from graphics.h
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
@@ -54,10 +57,21 @@ public class LegacyMetadataMapper {
     // for metadata
     private static final float LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS = 0.0f;
 
-    private static final long APPROXIMATE_CAPTURE_DELAY_MS = 200; // ms
-    private static final long APPROXIMATE_SENSOR_AREA = (1 << 23); // 8mp
-    private static final long APPROXIMATE_JPEG_ENCODE_TIME = 600; // ms
-    private static final long NS_PER_MS = 1000000;
+    private static final int REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_RAW = 0; // no raw support
+    private static final int REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_PROC = 3; // preview, video, cb
+    private static final int REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_PROC_STALL = 1; // 1 jpeg only
+    private static final int REQUEST_MAX_NUM_INPUT_STREAMS_COUNT = 0; // no reprocessing
+
+    /** Assume 3 HAL1 stages: Exposure, Read-out, Post-Processing */
+    private static final int REQUEST_PIPELINE_MAX_DEPTH_HAL1 = 3;
+    /** Assume 3 shim stages: Preview input, Split output, Format conversion for output */
+    private static final int REQUEST_PIPELINE_MAX_DEPTH_OURS = 3;
+    /* TODO: Update above maxDepth values once we do more performance measurements */
+
+    // For approximating JPEG stall durations
+    private static final long APPROXIMATE_CAPTURE_DELAY_MS = 200; // 200 milliseconds
+    private static final long APPROXIMATE_SENSOR_AREA_PX = (1 << 23); // 8 megapixels
+    private static final long APPROXIMATE_JPEG_ENCODE_TIME_MS = 600; // 600 milliseconds
 
     /*
      * Development hijinks: Lie about not supporting certain capabilities
@@ -113,11 +127,11 @@ public class LegacyMetadataMapper {
 
         CameraMetadataNative m = new CameraMetadataNative();
 
-        mapCameraInfo(m, info.info);
+        mapCharacteristicsFromInfo(m, info.info);
 
         Camera.Parameters params = Camera.getEmptyParameters();
         params.unflatten(parameters);
-        mapCameraParameters(m, params);
+        mapCharacteristicsFromParameters(m, params);
 
         if (VERBOSE) {
             Log.v(TAG, "createCharacteristics metadata:");
@@ -129,21 +143,51 @@ public class LegacyMetadataMapper {
         return new CameraCharacteristics(m);
     }
 
-    private static void mapCameraInfo(CameraMetadataNative m, CameraInfo i) {
+    private static void mapCharacteristicsFromInfo(CameraMetadataNative m, CameraInfo i) {
         m.set(LENS_FACING, i.facing == CameraInfo.CAMERA_FACING_BACK ?
                 LENS_FACING_BACK : LENS_FACING_FRONT);
         m.set(SENSOR_ORIENTATION, i.orientation);
     }
 
-    private static void mapCameraParameters(CameraMetadataNative m, Camera.Parameters p) {
+    private static void mapCharacteristicsFromParameters(CameraMetadataNative m,
+            Camera.Parameters p) {
+        /*
+         * info.supportedHardwareLevel
+         */
         m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
         mapStreamConfigs(m, p);
+        /*
+         * control.ae*
+         */
         mapControlAe(m, p);
+        /*
+         * control.awb*
+         */
         mapControlAwb(m, p);
-        mapCapabilities(m, p);
+        /*
+         * control.*
+         * - Anything that doesn't have a set of related fields
+         */
+        mapControlOther(m, p);
+        /*
+         * lens.*
+         */
         mapLens(m, p);
+        /*
+         * flash.*
+         */
         mapFlash(m, p);
+
+        /*
+         * request.*
+         */
+        mapRequest(m, p);
         // TODO: map other fields
+
+        /*
+         * sync.*
+         */
+        mapSync(m, p);
     }
 
     private static void mapStreamConfigs(CameraMetadataNative m, Camera.Parameters p) {
@@ -179,9 +223,15 @@ public class LegacyMetadataMapper {
         List<Camera.Size> jpegSizes = p.getSupportedPictureSizes();
         appendStreamConfig(availableStreamConfigs,
                 HAL_PIXEL_FORMAT_BLOB, p.getSupportedPictureSizes());
+        /*
+         * scaler.availableStreamConfigurations
+         */
         m.set(SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
                 availableStreamConfigs.toArray(new StreamConfiguration[0]));
 
+        /*
+         * scaler.availableMinFrameDurations
+         */
         // No frame durations available
         m.set(SCALER_AVAILABLE_MIN_FRAME_DURATIONS, new StreamConfigurationDuration[0]);
 
@@ -197,9 +247,15 @@ public class LegacyMetadataMapper {
                 longestStallDuration = stallDuration;
             }
         }
+        /*
+         * scaler.availableStallDurations
+         */
         // Set stall durations for jpeg, other formats use default stall duration
         m.set(SCALER_AVAILABLE_STALL_DURATIONS, jpegStalls);
 
+        /*
+         * sensor.info.maxFrameDuration
+         */
         m.set(SENSOR_INFO_MAX_FRAME_DURATION, longestStallDuration);
     }
 
@@ -289,9 +345,8 @@ public class LegacyMetadataMapper {
         }
     }
 
-    private static void mapCapabilities(CameraMetadataNative m, Camera.Parameters p) {
-        int[] capabilities = { REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE };
-        m.set(REQUEST_AVAILABLE_CAPABILITIES, capabilities);
+    private static void mapControlOther(CameraMetadataNative m, Camera.Parameters p) {
+        // TODO
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
@@ -300,6 +355,9 @@ public class LegacyMetadataMapper {
          *  but if it's not, we can't tell the minimum focus distance, so leave it null then.
          */
         if (p.getFocusMode() == Camera.Parameters.FOCUS_MODE_FIXED) {
+            /*
+             * lens.info.minimumFocusDistance
+             */
             m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
         }
     }
@@ -321,7 +379,49 @@ public class LegacyMetadataMapper {
             flashAvailable = false;
         }
 
+        /*
+         * flash.info.available
+         */
         m.set(FLASH_INFO_AVAILABLE, flashAvailable);
+    }
+
+    private static void mapRequest(CameraMetadataNative m, Parameters p) {
+        /*
+         * request.availableCapabilities
+         */
+        int[] capabilities = { REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE };
+        m.set(REQUEST_AVAILABLE_CAPABILITIES, capabilities);
+
+        /*
+         * request.maxNumOutputStreams
+         */
+        int[] outputStreams = {
+                /* RAW */
+                REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_RAW,
+                /* Processed & Not-Stalling */
+                REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_PROC,
+                /* Processed & Stalling */
+                REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_PROC_STALL,
+        };
+        m.set(REQUEST_MAX_NUM_OUTPUT_STREAMS, outputStreams);
+
+        /*
+         * request.maxNumInputStreams
+         */
+        m.set(REQUEST_MAX_NUM_INPUT_STREAMS, REQUEST_MAX_NUM_INPUT_STREAMS_COUNT);
+
+        /*
+         * request.pipelineMaxDepth
+         */
+        m.set(REQUEST_PIPELINE_MAX_DEPTH,
+                (byte)(REQUEST_PIPELINE_MAX_DEPTH_HAL1 + REQUEST_PIPELINE_MAX_DEPTH_OURS));
+    }
+
+    private static void mapSync(CameraMetadataNative m, Parameters p) {
+        /*
+         * sync.maxLatency
+         */
+        m.set(SYNC_MAX_LATENCY, SYNC_MAX_LATENCY_UNKNOWN);
     }
 
     private static void appendStreamConfig(
@@ -398,8 +498,8 @@ public class LegacyMetadataMapper {
     private static long calculateJpegStallDuration(Camera.Size size) {
         long baseDuration = APPROXIMATE_CAPTURE_DELAY_MS * NS_PER_MS; // 200ms for capture
         long area = size.width * (long) size.height;
-        long stallPerArea = APPROXIMATE_JPEG_ENCODE_TIME * NS_PER_MS /
-                APPROXIMATE_SENSOR_AREA; // 600ms stall for 8mp
+        long stallPerArea = APPROXIMATE_JPEG_ENCODE_TIME_MS * NS_PER_MS /
+                APPROXIMATE_SENSOR_AREA_PX; // 600ms stall for 8mp
         return baseDuration + area * stallPerArea;
     }
 
