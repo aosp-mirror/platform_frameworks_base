@@ -1,0 +1,8 @@
+page.title=Building Apps for Wearables
+page.trainingcourse=true
+
+@jd:body
+
+
+<p>These classes teach you how to build notifications in a handheld app that are automatically
+synced to wearables as well as how to build apps that run on wearables.</p>
