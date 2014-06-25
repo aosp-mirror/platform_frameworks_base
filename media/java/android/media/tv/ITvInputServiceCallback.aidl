@@ -16,13 +16,14 @@
 
 package android.media.tv;
 
-import android.content.ComponentName;
+import android.media.tv.TvInputInfo;
 
 /**
- * Helper interface for ITvInputService to allow the TV input to notify the client when its status
- * has been changed.
+ * Helper interface for ITvInputService to allow the service to notify the
+ * TvInputManagerService.
  * @hide
  */
 oneway interface ITvInputServiceCallback {
-    void onInputStateChanged(int state);
+    void addTvInput(in TvInputInfo inputInfo);
+    void removeTvInput(in String inputId);
 }
