@@ -197,7 +197,8 @@ public class LauncherAppsService extends SystemService {
             mainIntent.setPackage(packageName);
             long ident = Binder.clearCallingIdentity();
             try {
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent, 0,
+                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent,
+                        PackageManager.NO_CROSS_PROFILE, // We only want the apps for this user
                         user.getIdentifier());
                 return apps;
             } finally {

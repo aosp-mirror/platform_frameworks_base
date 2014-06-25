@@ -3425,31 +3425,35 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final String pkgName = intent.getPackage();
+            boolean queryCrossProfile = (flags & PackageManager.NO_CROSS_PROFILE) == 0;
             if (pkgName == null) {
-                //Check if the intent needs to be forwarded to another user for this package
-                ArrayList<ResolveInfo> crossProfileResult =
-                        queryIntentActivitiesCrossProfilePackage(
-                                intent, resolvedType, flags, userId);
-                if (!crossProfileResult.isEmpty()) {
-                    // Skip the current profile
-                    return crossProfileResult;
-                }
-                List<ResolveInfo> result;
-                List<CrossProfileIntentFilter> matchingFilters =
-                        getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
-                // Check for results that need to skip the current profile.
-                ResolveInfo resolveInfo = querySkipCurrentProfileIntents(matchingFilters, intent,
-                        resolvedType, flags, userId);
-                if (resolveInfo != null) {
-                    result = new ArrayList<ResolveInfo>(1);
-                    result.add(resolveInfo);
-                    return result;
+                ResolveInfo resolveInfo;
+                if (queryCrossProfile) {
+                    // Check if the intent needs to be forwarded to another user for this package
+                    ArrayList<ResolveInfo> crossProfileResult =
+                            queryIntentActivitiesCrossProfilePackage(
+                                    intent, resolvedType, flags, userId);
+                    if (!crossProfileResult.isEmpty()) {
+                        // Skip the current profile
+                        return crossProfileResult;
+                    }
+                    List<CrossProfileIntentFilter> matchingFilters =
+                            getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
+                    // Check for results that need to skip the current profile.
+                    resolveInfo = querySkipCurrentProfileIntents(matchingFilters, intent,
+                            resolvedType, flags, userId);
+                    if (resolveInfo != null) {
+                        List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
+                        result.add(resolveInfo);
+                        return result;
+                    }
+                    // Check for cross profile results.
+                    resolveInfo = queryCrossProfileIntents(
+                            matchingFilters, intent, resolvedType, flags, userId);
                 }
                 // Check for results in the current profile.
-                result = mActivities.queryIntent(intent, resolvedType, flags, userId);
-                // Check for cross profile results.
-                resolveInfo = queryCrossProfileIntents(
-                        matchingFilters, intent, resolvedType, flags, userId);
+                List<ResolveInfo> result = mActivities.queryIntent(
+                        intent, resolvedType, flags, userId);
                 if (resolveInfo != null) {
                     result.add(resolveInfo);
                 }
@@ -3457,12 +3461,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                ArrayList<ResolveInfo> crossProfileResult =
-                        queryIntentActivitiesCrossProfilePackage(
-                                intent, resolvedType, flags, userId, pkg, pkgName);
-                if (!crossProfileResult.isEmpty()) {
-                    // Skip the current profile
-                    return crossProfileResult;
+                if (queryCrossProfile) {
+                    ArrayList<ResolveInfo> crossProfileResult =
+                            queryIntentActivitiesCrossProfilePackage(
+                                    intent, resolvedType, flags, userId, pkg, pkgName);
+                    if (!crossProfileResult.isEmpty()) {
+                        // Skip the current profile
+                        return crossProfileResult;
+                    }
                 }
                 return mActivities.queryIntentForPackage(intent, resolvedType, flags,
                         pkg.activities, userId);
