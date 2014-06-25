@@ -208,7 +208,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": [],
     "type": "support",
     "titleFriendly": ""
-  },   
+  },
   {
     "lang": "en",
     "group": "",
@@ -571,7 +571,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"http://chart.googleapis.com/chart?chl=GL%201.1%20only%7CGL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A0.1%2C93.5%2C6.4&chco=c4df9b%2C6fad0c&chs=400x250&cht=p",
     "lang":"en",
     "type":"about"
-  }, 
+  },
   {
     "lang": "en",
     "group": "",
@@ -700,7 +700,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "timestamp": 1383243492000,
     "image": "http://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
     "title": "Introducing Google Play for Education",
-    "summary": "Google Play for Education is a destination where schools can find great, teacher-approved, educational apps and videos on Play Store. Teachers can filter content by subject matter, grade and other criteria. Bulk purchase and instant distribution let educators bring your apps directly to classrooms and schools.",
+    "summary": "Google Play for Education is a destination where schools can find great, teacher-approved, educational content&mdash;from videos and books, to educational apps&mdash;all in one place. Teachers can filter content by subject matter, grade and other criteria. Bulk purchase and instant distribution let educators bring your apps directly to classrooms and schools.",
     "keywords": [],
     "type": "youtube",
     "titleFriendly": ""
@@ -1128,5 +1128,57 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["analytics, user behavior"],
     "type": "sdk",
     "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/edu/guidelines",
+    "timestamp": null,
+    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "title": "Education Guidelines",
+    "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
+    "keywords": [],
+    "type": "",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/edu/faq",
+    "timestamp": null,
+    "image": "http://developer.android.com/distribute/images/gpfe-faq.jpg",
+    "title": "Education FAQ",
+    "summary": "Answers to common questions you might have about Google Play for Education.",
+    "keywords": [],
+    "type": "",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/edu/",
+    "timestamp": null,
+    "image": "https://developers.google.com/edu/images/edu-guidelines.jpg",
+    "title": "Chrome Apps in Google Play for Education",
+    "summary": "Find out more about Chrome apps in Google Play for Education.",
+    "keywords": [],
+    "type": "",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/edu/tablets/#tablets-family",
+    "timestamp": null,
+    "image": "https://www.google.com/edu/images/tablets/big-tablet.png",
+    "title": "Google Play for Education Tablets",
+    "summary": "Google Play for Education leverages a diverse set up tablets approved for the classroom which may help inform you how to build educational apps.",
+    "keywords": [],
+    "type": "",
+    "titleFriendly": ""
   }
-]); 
+]);
