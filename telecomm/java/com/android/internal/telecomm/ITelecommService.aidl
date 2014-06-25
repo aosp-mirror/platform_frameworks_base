@@ -16,6 +16,7 @@
 
 package com.android.internal.telecomm;
 
+import android.content.ComponentName;
 import android.telecomm.Subscription;
 
 /**
@@ -55,4 +56,9 @@ interface ITelecommService {
      * Sets a given Subscription as the system default.
      */
     void setSystemDefault(in Subscription subscription);
+
+    /**
+     * Returns the component name of the default phone application.
+     */
+    ComponentName getDefaultPhoneApp();
 }
