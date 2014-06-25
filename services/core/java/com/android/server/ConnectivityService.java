@@ -331,7 +331,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /**
      * used internally to clear a wakelock when transitioning
-     * from one net to another
+     * from one net to another.  Clear happens when we get a new
+     * network - EVENT_EXPIRE_NET_TRANSITION_WAKELOCK happens
+     * after a timeout if no network is found (typically 1 min).
      */
     private static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 8;
 
@@ -419,6 +421,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * obj = Messenger
      */
     private static final int EVENT_UNREGISTER_NETWORK_FACTORY = 23;
+
+    /**
+     * used internally to expire a wakelock when transitioning
+     * from one net to another.  Expire happens when we fail to find
+     * a new network (typically after 1 minute) -
+     * EVENT_CLEAR_NET_TRANSITION_WAKELOCK happens if we had found
+     * a replacement network.
+     */
+    private static final int EVENT_EXPIRE_NET_TRANSITION_WAKELOCK = 24;
 
 
     /** Handler used for internal events. */
@@ -3290,6 +3301,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
                 removeDataActivityTracking(nai);
                 mActiveDefaultNetwork = ConnectivityManager.TYPE_NONE;
+                requestNetworkTransitionWakelock(nai.name());
             }
             for (NetworkAgentInfo networkToActivate : toActivate) {
                 networkToActivate.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
@@ -3391,6 +3403,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void handleMessage(Message msg) {
             NetworkInfo info;
             switch (msg.what) {
+                case EVENT_EXPIRE_NET_TRANSITION_WAKELOCK:
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
@@ -3398,10 +3411,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 mNetTransitionWakeLock.isHeld()) {
                             mNetTransitionWakeLock.release();
                             causedBy = mNetTransitionWakeLockCausedBy;
+                        } else {
+                            break;
                         }
                     }
-                    if (causedBy != null) {
-                        log("NetTransition Wakelock for " + causedBy + " released by timeout");
+                    if (msg.what == EVENT_EXPIRE_NET_TRANSITION_WAKELOCK) {
+                        log("Failed to find a new network - expiring NetTransition Wakelock");
+                    } else {
+                        log("NetTransition Wakelock (" + (causedBy == null ? "unknown" : causedBy) +
+                                " cleared because we found a replacement network");
                     }
                     break;
                 }
@@ -3602,15 +3620,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // restarted by subsequent callers.
     public void requestNetworkTransitionWakelock(String forWhom) {
         enforceConnectivityInternalPermission();
+        int serialNum = 0;
         synchronized (this) {
             if (mNetTransitionWakeLock.isHeld()) return;
-            mNetTransitionWakeLockSerialNumber++;
+            serialNum = ++mNetTransitionWakeLockSerialNumber;
             mNetTransitionWakeLock.acquire();
             mNetTransitionWakeLockCausedBy = forWhom;
         }
         mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
-                mNetTransitionWakeLockSerialNumber, 0),
+                EVENT_EXPIRE_NET_TRANSITION_WAKELOCK, serialNum, 0),
                 mNetTransitionWakeLockTimeout);
         return;
     }
