@@ -223,11 +223,6 @@ page.type=about
               and tools to make your existing apps compatible with Android Auto. The first version
               of the SDK will provide templates and APIs for music, podcast, live radio, and audio
               news apps, as well as limited voice actions.</p>
-            <p>
-              Future versions of the Android Auto SDK will include support for a selection of
-              Android notifications, additional voice actions, and templates and APIs for
-              messaging, communication, local search, and more.
-            </p>
 
             <div class="cols" style="margin-top:40px">
               <div class="col-3-wide">
