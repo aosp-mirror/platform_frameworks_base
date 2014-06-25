@@ -67,8 +67,27 @@ mirroring session from the Quick Settings shade.</li>
 	the locale is set to {@code fr} (FRENCH).</li></ul>
 
 <h3 id="Wireless">Wireless and Connectivity</h3>
-<ul><li>The {@code android.bluetooth.le} APIs are supported only on Nexus 5
-devices.</li></ul>
+<ul>
+<li>The {@code android.bluetooth.le} APIs are supported only on Nexus 5
+devices.</li>
+<li>You might encounter these issues while using Bluetooth LE scanning:
+	<ul>
+	<li><em>Settings</em> does not show all Bluetooth LE devices when a scan
+		filter is set.</li>
+	<li>System returns non-intuitive error messages during a Bluetooth LE scan,
+		when Bluetooth is off.</li>
+	<li>The {@code BluetoothLeScanner.startScan()} method starts failing after
+		six concurrent scans with different callbacks.</li>
+	</ul>
+</li>
+<li>You might encounter these issues while using Bluetooth LE advertising:
+	<ul>
+		<li>The device MAC address does not change for multiple advertising
+		when the application processor is asleep.</li>
+		<li>The TX Power Level is always 0 in advertising packets.</li>
+	</ul>
+</li>
+</ul>
 
 <h3 id="Enterprise">Enterprise</h3>
 <ul>
