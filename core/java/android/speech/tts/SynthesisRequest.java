@@ -34,7 +34,7 @@ import android.os.Bundle;
  * and {@link TextToSpeech#synthesizeToFile}.
  */
 public final class SynthesisRequest {
-    private final String mText;
+    private final CharSequence mText;
     private final Bundle mParams;
     private String mLanguage;
     private String mCountry;
@@ -49,10 +49,25 @@ public final class SynthesisRequest {
         mParams = new Bundle(params);
     }
 
+    public SynthesisRequest(CharSequence text, Bundle params) {
+        mText = text;
+        // Makes a copy of params.
+        mParams = new Bundle(params);
+    }
+
+    /**
+     * Gets the text which should be synthesized.
+     * @deprecated As of API level 20, replaced by {@link #getCharSequenceText}.
+     */
+    @Deprecated
+    public String getText() {
+        return mText.toString();
+    }
+
     /**
      * Gets the text which should be synthesized.
      */
-    public String getText() {
+    public CharSequence getCharSequenceText() {
         return mText;
     }
 

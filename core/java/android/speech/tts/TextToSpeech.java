@@ -593,7 +593,7 @@ public class TextToSpeech {
     // too.
     private final boolean mUseFallback;
     private final Map<String, Uri> mEarcons;
-    private final Map<String, Uri> mUtterances;
+    private final Map<CharSequence, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
     private final String mPackageName;
@@ -644,7 +644,7 @@ public class TextToSpeech {
         mUseFallback = useFallback;
 
         mEarcons = new HashMap<String, Uri>();
-        mUtterances = new HashMap<String, Uri>();
+        mUtterances = new HashMap<CharSequence, Uri>();
         mUtteranceProgressListener = null;
 
         mEnginesHelper = new TtsEngines(mContext);
@@ -825,6 +825,40 @@ public class TextToSpeech {
     }
 
     /**
+     * Adds a mapping between a CharSequence (may be spanned with TtsSpans) of text
+     * and a sound resource in a package. After a call to this method, subsequent calls to
+     * {@link #speak(String, int, HashMap)} will play the specified sound resource
+     * if it is available, or synthesize the text it is missing.
+     *
+     * @param text
+     *            The string of text. Example: <code>"south_south_east"</code>
+     *
+     * @param packagename
+     *            Pass the packagename of the application that contains the
+     *            resource. If the resource is in your own application (this is
+     *            the most common case), then put the packagename of your
+     *            application here.<br/>
+     *            Example: <b>"com.google.marvin.compass"</b><br/>
+     *            The packagename can be found in the AndroidManifest.xml of
+     *            your application.
+     *            <p>
+     *            <code>&lt;manifest xmlns:android=&quot;...&quot;
+     *      package=&quot;<b>com.google.marvin.compass</b>&quot;&gt;</code>
+     *            </p>
+     *
+     * @param resourceId
+     *            Example: <code>R.raw.south_south_east</code>
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int addSpeech(CharSequence text, String packagename, int resourceId) {
+        synchronized (mStartLock) {
+            mUtterances.put(text, makeResourceUri(packagename, resourceId));
+            return SUCCESS;
+        }
+    }
+
+    /**
      * Adds a mapping between a string of text and a sound file. Using this, it
      * is possible to add custom pronounciations for a string of text.
      * After a call to this method, subsequent calls to {@link #speak(String, int, HashMap)}
@@ -840,6 +874,28 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(String text, String filename) {
+        synchronized (mStartLock) {
+            mUtterances.put(text, Uri.parse(filename));
+            return SUCCESS;
+        }
+    }
+
+    /**
+     * Adds a mapping between a CharSequence (may be spanned with TtsSpans and a sound file.
+     * Using this, it is possible to add custom pronounciations for a string of text.
+     * After a call to this method, subsequent calls to {@link #speak(String, int, HashMap)}
+     * will play the specified sound resource if it is available, or synthesize the text it is
+     * missing.
+     *
+     * @param text
+     *            The string of text. Example: <code>"south_south_east"</code>
+     * @param filename
+     *            The full path to the sound file (for example:
+     *            "/sdcard/mysounds/hello.wav")
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int addSpeech(CharSequence text, String filename) {
         synchronized (mStartLock) {
             mUtterances.put(text, Uri.parse(filename));
             return SUCCESS;
@@ -910,6 +966,51 @@ public class TextToSpeech {
     }
 
     /**
+     * Speaks the text using the specified queuing strategy and speech parameters, the text may
+     * be spanned with TtsSpans.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
+     *
+     * @param text The string of text to be spoken. No longer than
+     *            {@link #getMaxSpeechInputLength()} characters.
+     * @param queueMode The queuing strategy to use, {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
+     *            {@link Engine#KEY_PARAM_STREAM},
+     *            {@link Engine#KEY_PARAM_VOLUME},
+     *            {@link Engine#KEY_PARAM_PAN}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
+     * @param utteranceId An unique identifier for this request.
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
+     */
+    public int speak(final CharSequence text,
+                     final int queueMode,
+                     final HashMap<String, String> params,
+                     final String utteranceId) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                Uri utteranceUri = mUtterances.get(text);
+                if (utteranceUri != null) {
+                    return service.playAudio(getCallerIdentity(), utteranceUri, queueMode,
+                            getParams(params), utteranceId);
+                } else {
+                    return service.speak(getCallerIdentity(), text, queueMode, getParams(params),
+                            utteranceId);
+                }
+            }
+        }, ERROR, "speak");
+    }
+
+    /**
      * Speaks the string using the specified queuing strategy and speech parameters.
      * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
      * requests and then returns. The synthesis might not have finished (or even started!) at the
@@ -933,20 +1034,50 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
+     * @deprecated As of API level 20, replaced by
+     *         {@link #speak(CharSequence, int, HashMap, String)}.
      */
+    @Deprecated
     public int speak(final String text, final int queueMode, final HashMap<String, String> params) {
+        return speak(text, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+    }
+
+    /**
+     * Plays the earcon using the specified queueing mode and parameters.
+     * The earcon must already have been added with {@link #addEarcon(String, String)} or
+     * {@link #addEarcon(String, String, int)}.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
+     *
+     * @param earcon The earcon that should be played
+     * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
+     *            {@link Engine#KEY_PARAM_STREAM},
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
+     */
+    public int playEarcon(final String earcon, final int queueMode,
+            final HashMap<String, String> params, final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                Uri utteranceUri = mUtterances.get(text);
-                if (utteranceUri != null) {
-                    return service.playAudio(getCallerIdentity(), utteranceUri, queueMode,
-                            getParams(params));
-                } else {
-                    return service.speak(getCallerIdentity(), text, queueMode, getParams(params));
+                Uri earconUri = mEarcons.get(earcon);
+                if (earconUri == null) {
+                    return ERROR;
                 }
+                return service.playAudio(getCallerIdentity(), earconUri, queueMode,
+                        getParams(params), utteranceId);
             }
-        }, ERROR, "speak");
+        }, ERROR, "playEarcon");
     }
 
     /**
@@ -972,20 +1103,44 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
+     * @deprecated As of API level 20, replaced by
+     *         {@link #playEarcon(String, int, HashMap, String)}.
      */
+    @Deprecated
     public int playEarcon(final String earcon, final int queueMode,
             final HashMap<String, String> params) {
+        return playEarcon(earcon, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+    }
+
+    /**
+     * Plays silence for the specified amount of time using the specified
+     * queue mode.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
+     *
+     * @param durationInMs The duration of the silence.
+     * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
+     * @param utteranceId An unique identifier for this request.
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
+     */
+    public int playSilence(final long durationInMs, final int queueMode,
+            final HashMap<String, String> params, final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                Uri earconUri = mEarcons.get(earcon);
-                if (earconUri == null) {
-                    return ERROR;
-                }
-                return service.playAudio(getCallerIdentity(), earconUri, queueMode,
-                        getParams(params));
+                return service.playSilence(getCallerIdentity(), durationInMs, queueMode, utteranceId);
             }
-        }, ERROR, "playEarcon");
+        }, ERROR, "playSilence");
     }
 
     /**
@@ -1009,16 +1164,13 @@ public class TextToSpeech {
      *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
+     * @deprecated As of API level 20, replaced by
+     *         {@link #playEarcon(String, int, HashMap, String)}.
      */
+    @Deprecated
     public int playSilence(final long durationInMs, final int queueMode,
             final HashMap<String, String> params) {
-        return runAction(new Action<Integer>() {
-            @Override
-            public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.playSilence(getCallerIdentity(), durationInMs, queueMode,
-                        params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
-            }
-        }, ERROR, "playSilence");
+        return playSilence(durationInMs, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
     /**
@@ -1294,25 +1446,22 @@ public class TextToSpeech {
      * requests and then returns. The synthesis might not have finished (or even started!) at the
      * time when this method returns. In order to reliably detect errors during synthesis,
      * we recommend setting an utterance progress listener (see
-     * {@link #setOnUtteranceProgressListener}) and using the
-     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
+     * {@link #setOnUtteranceProgressListener}).
      *
      * @param text The text that should be synthesized. No longer than
      *            {@link #getMaxSpeechInputLength()} characters.
      * @param params Parameters for the request. Can be null.
-     *            Supported parameter names:
-     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *            Engine specific parameters may be passed in but the parameter keys
      *            must be prefixed by the name of the engine they are intended for. For example
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
      *            engine named "com.svox.pico" if it is being used.
      * @param filename Absolute file filename to write the generated audio data to.It should be
      *            something like "/sdcard/myappsounds/mysound.wav".
-     *
+     * @param utteranceId An unique identifier for this request.
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
      */
-    public int synthesizeToFile(final String text, final HashMap<String, String> params,
-            final String filename) {
+    public int synthesizeToFile(final CharSequence text, final HashMap<String, String> params,
+            final String filename, final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
@@ -1329,7 +1478,7 @@ public class TextToSpeech {
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
                     returnValue = service.synthesizeToFileDescriptor(getCallerIdentity(), text,
-                            fileDescriptor, getParams(params));
+                            fileDescriptor, getParams(params), utteranceId);
                     fileDescriptor.close();
                     return returnValue;
                 } catch (FileNotFoundException e) {
@@ -1341,6 +1490,36 @@ public class TextToSpeech {
                 }
             }
         }, ERROR, "synthesizeToFile");
+    }
+
+    /**
+     * Synthesizes the given text to a file using the specified parameters.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
+     *
+     * @param text The text that should be synthesized. No longer than
+     *            {@link #getMaxSpeechInputLength()} characters.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
+     * @param filename Absolute file filename to write the generated audio data to.It should be
+     *            something like "/sdcard/myappsounds/mysound.wav".
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
+     * @deprecated As of API level 20, replaced by
+     *         {@link #synthesizeToFile(CharSequence, HashMap, String, String)}.
+     */
+    public int synthesizeToFile(final String text, final HashMap<String, String> params,
+            final String filename) {
+        return synthesizeToFile(text, params, filename, params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
     private Bundle getParams(HashMap<String, String> params) {

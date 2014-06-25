@@ -637,11 +637,13 @@ public abstract class TextToSpeechService extends Service {
      */
     private abstract class SpeechItemV1 extends UtteranceSpeechItem {
         protected final Bundle mParams;
+        protected final String mUtteranceId;
 
         SpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params) {
+                Bundle params, String utteranceId) {
             super(callerIdentity, callerUid, callerPid);
             mParams = params;
+            mUtteranceId = utteranceId;
         }
 
         boolean hasLanguage() {
@@ -658,7 +660,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         public String getUtteranceId() {
-            return getStringParam(mParams, Engine.KEY_PARAM_UTTERANCE_ID, null);
+            return mUtteranceId;
         }
 
         AudioOutputParams getAudioParams() {
@@ -668,7 +670,7 @@ public abstract class TextToSpeechService extends Service {
 
     class SynthesisSpeechItemV1 extends SpeechItemV1 {
         // Never null.
-        private final String mText;
+        private final CharSequence mText;
         private final SynthesisRequest mSynthesisRequest;
         private final String[] mDefaultLocale;
         // Non null after synthesis has started, and all accesses
@@ -678,8 +680,8 @@ public abstract class TextToSpeechService extends Service {
         private final int mCallerUid;
 
         public SynthesisSpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, String text) {
-            super(callerIdentity, callerUid, callerPid, params);
+                Bundle params, String utteranceId, CharSequence text) {
+            super(callerIdentity, callerUid, callerPid, params, utteranceId);
             mText = text;
             mCallerUid = callerUid;
             mSynthesisRequest = new SynthesisRequest(mText, mParams);
@@ -689,7 +691,7 @@ public abstract class TextToSpeechService extends Service {
                     mPackageName);
         }
 
-        public String getText() {
+        public CharSequence getText() {
             return mText;
         }
 
@@ -774,8 +776,9 @@ public abstract class TextToSpeechService extends Service {
         private final FileOutputStream mFileOutputStream;
 
         public SynthesisToFileOutputStreamSpeechItemV1(Object callerIdentity, int callerUid,
-                int callerPid, Bundle params, String text, FileOutputStream fileOutputStream) {
-            super(callerIdentity, callerUid, callerPid, params, text);
+                int callerPid, Bundle params, String utteranceId, CharSequence text,
+                FileOutputStream fileOutputStream) {
+            super(callerIdentity, callerUid, callerPid, params, utteranceId, text);
             mFileOutputStream = fileOutputStream;
         }
 
@@ -801,8 +804,8 @@ public abstract class TextToSpeechService extends Service {
         private final AudioPlaybackQueueItem mItem;
 
         public AudioSpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, Uri uri) {
-            super(callerIdentity, callerUid, callerPid, params);
+                Bundle params, String utteranceId, Uri uri) {
+            super(callerIdentity, callerUid, callerPid, params, utteranceId);
             mItem = new AudioPlaybackQueueItem(this, getCallerIdentity(),
                     TextToSpeechService.this, uri, getAudioParams());
         }
@@ -909,19 +912,20 @@ public abstract class TextToSpeechService extends Service {
     // they can be used as message objects (which are tested for equality using ==).
     private final ITextToSpeechService.Stub mBinder = new ITextToSpeechService.Stub() {
         @Override
-        public int speak(IBinder caller, String text, int queueMode, Bundle params) {
+        public int speak(IBinder caller, CharSequence text, int queueMode, Bundle params,
+                String utteranceId) {
             if (!checkNonNull(caller, text, params)) {
                 return TextToSpeech.ERROR;
             }
 
             SpeechItem item = new SynthesisSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, text);
+                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, text);
             return mSynthHandler.enqueueSpeechItem(queueMode, item);
         }
 
         @Override
-        public int synthesizeToFileDescriptor(IBinder caller, String text, ParcelFileDescriptor
-                fileDescriptor, Bundle params) {
+        public int synthesizeToFileDescriptor(IBinder caller, CharSequence text, ParcelFileDescriptor
+                fileDescriptor, Bundle params, String utteranceId) {
             if (!checkNonNull(caller, text, fileDescriptor, params)) {
                 return TextToSpeech.ERROR;
             }
@@ -933,19 +937,20 @@ public abstract class TextToSpeechService extends Service {
                     fileDescriptor.detachFd());
 
             SpeechItem item = new SynthesisToFileOutputStreamSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, text,
+                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, text,
                     new ParcelFileDescriptor.AutoCloseOutputStream(sameFileDescriptor));
             return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
         }
 
         @Override
-        public int playAudio(IBinder caller, Uri audioUri, int queueMode, Bundle params) {
+        public int playAudio(IBinder caller, Uri audioUri, int queueMode, Bundle params,
+                String utteranceId) {
             if (!checkNonNull(caller, audioUri, params)) {
                 return TextToSpeech.ERROR;
             }
 
             SpeechItem item = new AudioSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, audioUri);
+                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, audioUri);
             return mSynthHandler.enqueueSpeechItem(queueMode, item);
         }
 

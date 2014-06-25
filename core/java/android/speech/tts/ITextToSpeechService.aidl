@@ -36,8 +36,10 @@ interface ITextToSpeechService {
      * @param text The text to synthesize.
      * @param queueMode Determines what to do to requests already in the queue.
      * @param param Request parameters.
+     * @param utteranceId Unique identifier of synthesized utterance.
      */
-    int speak(in IBinder callingInstance, in String text, in int queueMode, in Bundle params);
+    int speak(in IBinder callingInstance, in CharSequence text, in int queueMode, in Bundle params,
+            String utteranceId);
 
     /**
      * Tells the engine to synthesize some speech and write it to a file.
@@ -47,10 +49,11 @@ interface ITextToSpeechService {
      * @param text The text to synthesize.
      * @param fileDescriptor The file descriptor to write the synthesized audio to. Has to be
               writable.
+     * @param utteranceId Unique identifier of synthesized utterance.
      * @param param Request parameters.
      */
-    int synthesizeToFileDescriptor(in IBinder callingInstance, in String text,
-        in ParcelFileDescriptor fileDescriptor, in Bundle params);
+    int synthesizeToFileDescriptor(in IBinder callingInstance, in CharSequence text,
+        in ParcelFileDescriptor fileDescriptor, in Bundle params, String utteranceId);
 
     /**
      * Plays an existing audio resource.
@@ -59,9 +62,11 @@ interface ITextToSpeechService {
      *        TextToSpeech object.
      * @param audioUri URI for the audio resource (a file or android.resource URI)
      * @param queueMode Determines what to do to requests already in the queue.
+     * @param utteranceId Unique identifier of synthesized utterance.
      * @param param Request parameters.
      */
-    int playAudio(in IBinder callingInstance, in Uri audioUri, in int queueMode, in Bundle params);
+    int playAudio(in IBinder callingInstance, in Uri audioUri, in int queueMode, in Bundle params,
+            String utteranceId);
 
     /**
      * Plays silence.
