@@ -73,6 +73,24 @@ preferably from your mobile browser:</p>
 <img style="margin-top:40px" src="/preview/images/opt-in.png"></li>
 </ol>
 <h2 style="margin-bottom: 0px;">3. Start Building</h2><hr>
+
+<p>The Google Play services SDK is required if you want to sync and send data between wearable
+and handheld devices. To get the new SDK that is compatible with the Google Play services
+APK that you just installed, follow these steps: </p>
+
+<p class="note"><b>Note:</b> We highly recommend you use Android Studio for Wear development.</p>
+<ol>
+  <li>Start AVD Manager.</li>
+  <li>Update the Android SDK Tools and Platform-tools to versions 23 and 20 respectively.</li>
+  <li>Click <b>Tools > Manage Add-on Sites > User Defined Sites</b>.</li>
+  <li>Click <b>New</b>, enter
+  <code>https://dl-ssl.google.com/android/repository/addon-play-services-5.xml</code> into the
+  text field, and click <b>OK</b>.</li>
+  <li>Click Close. You should now see new emulator images that support this preview
+  release of Google Play services and the Google Play services client libraries you need to
+  start developing.</li>
+</ol>
+
 <p>Check out the <a href="/training/building-wearables">Building Apps for Wearables</a>
 training classes for information on how to build for Wear.</p>
     </div>
