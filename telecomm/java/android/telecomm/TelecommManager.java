@@ -16,7 +16,12 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
 
@@ -25,11 +30,14 @@ import com.android.internal.telecomm.ITelecommService;
  */
 public class TelecommManager {
     private static final String TAG = "TelecommManager";
+    private static final String TELECOMM_SERVICE_NAME = "telecomm";
 
     private final Context mContext;
     private final ITelecommService mService;
 
-    /** @hide */
+    /**
+     * @hide
+     */
     public TelecommManager(Context context, ITelecommService service) {
         Context appContext = context.getApplicationContext();
         if (appContext != null) {
@@ -41,8 +49,27 @@ public class TelecommManager {
         mService = service;
     }
 
-    /** {@hide} */
+    /**
+     * @hide
+     */
     public static TelecommManager from(Context context) {
         return (TelecommManager) context.getSystemService(Context.TELECOMM_SERVICE);
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public ComponentName getDefaultPhoneApp() {
+        try {
+            return getTelecommService().getDefaultPhoneApp();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the default phone app.", e);
+        }
+        return null;
+    }
+
+    private ITelecommService getTelecommService() {
+        return ITelecommService.Stub.asInterface(ServiceManager.getService(TELECOMM_SERVICE_NAME));
     }
 }
