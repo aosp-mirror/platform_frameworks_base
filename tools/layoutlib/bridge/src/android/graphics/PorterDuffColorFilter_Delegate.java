@@ -51,25 +51,13 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     private final int mSrcColor;
     private final Mode mMode;
-    private int mWidth;
-    private int mHeight;
-    private BufferedImage mImage;
 
 
     // ---- Public Helper methods ----
 
     @Override
     public boolean isSupported() {
-        switch (mMode) {
-        case CLEAR:
-        case SRC:
-        case SRC_IN:
-        case DST_IN:
-        case SRC_ATOP:
-            return true;
-        }
-
-        return false;
+        return getAlphaCompositeRule(mMode) != -1;
     }
 
     @Override
@@ -79,9 +67,9 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     @Override
     public void applyFilter(Graphics2D g, int width, int height) {
-        createFilterImage(width, height);
+        BufferedImage image = createFilterImage(width, height);
         g.setComposite(getComposite());
-        g.drawImage(mImage, 0, 0, null);
+        g.drawImage(image, 0, 0, null);
     }
 
     // ---- native methods ----
@@ -98,36 +86,65 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     private PorterDuffColorFilter_Delegate(int srcColor, int mode) {
         mSrcColor = srcColor;
-        // Temporarily change multiply to SRC_IN to render menus.
-        // TODO: support Mode.MULTIPLY
-        if (mode == Mode.MULTIPLY.nativeInt) {
-            mode = Mode.SRC_IN.nativeInt;
-        }
-        mMode = getPorterDuffMode(mode);
+        mMode = getCompatibleMode(getPorterDuffMode(mode));
     }
 
-    private void createFilterImage(int width, int height) {
-        if (mWidth == width && mHeight == height && mImage != null) {
-            return;
-        }
-        mWidth = width;
-        mHeight = height;
-        mImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = mImage.createGraphics();
+    private BufferedImage createFilterImage(int width, int height) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
         try {
             graphics.setColor(new java.awt.Color(mSrcColor, true /* hasAlpha */));
             graphics.fillRect(0, 0, width, height);
         } finally {
             graphics.dispose();
         }
+        return image;
     }
 
     private AlphaComposite getComposite() {
-        return AlphaComposite.getInstance(getAlphaCompositeRule(mMode),
-                getAlpha() / 255f);
+        return AlphaComposite.getInstance(getAlphaCompositeRule(mMode));
     }
 
-    private int getAlpha() {
-        return mSrcColor >>> 24;
+    // For filtering the colors, the src image should contain the "color" only for pixel values
+    // which are not transparent in the target image. But, we are using a simple rectangular image
+    // completely filled with color. Hence some AlphaComposite rules do not apply as intended.
+    // However, in such cases, they can usually be mapped to some other mode, which produces an
+    // equivalent result.
+    private Mode getCompatibleMode(Mode mode) {
+        Mode m = mode;
+        switch (mode) {
+            // Modes that are directly supported.
+            case CLEAR:
+            case DST:
+            case SRC_IN:
+            case DST_IN:
+            case DST_OUT:
+            case SRC_ATOP:
+                break;
+            // Modes that can be mapped to one of the supported modes.
+            case SRC:
+                m = Mode.SRC_IN;
+                break;
+            case SRC_OVER:
+                m = Mode.SRC_ATOP;
+                break;
+            case DST_OVER:
+                m = Mode.DST;
+                break;
+            case SRC_OUT:
+                m = Mode.CLEAR;
+                break;
+            case DST_ATOP:
+                m = Mode.DST_IN;
+                break;
+            case XOR:
+                m = Mode.DST_OUT;
+                break;
+            // This mode is not supported, but used by Action Bar Overflow Popup Menus. We map this
+            // to the closest supported mode, to prevent showing excessive warnings to the user.
+            case MULTIPLY:
+                m = Mode.SRC_IN;
+        }
+        return m;
     }
 }
