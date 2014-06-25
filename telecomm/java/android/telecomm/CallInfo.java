@@ -24,7 +24,7 @@ import android.os.Parcelable;
 import java.util.Date;
 
 /**
- * A parcelable holder class of Call information data. This class is intended for transfering call
+ * A parcelable holder class of Call information data. This class is intended for transferring call
  * information from Telecomm to call services and thus is read-only.
  * TODO(santoscordon): Need final public-facing comments in this file.
  */
@@ -52,6 +52,11 @@ public final class CallInfo implements Parcelable {
     private final GatewayInfo mGatewayInfo;
 
     /**
+     * Subscription information for the call.
+     */
+    private final Subscription mSubscription;
+
+    /**
      * Additional information that can be persisted.
      */
     private final Bundle mExtras;
@@ -60,7 +65,7 @@ public final class CallInfo implements Parcelable {
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
 
     public CallInfo(String id, CallState state, Uri handle) {
-        this(id, state, handle, null, Bundle.EMPTY, null);
+        this(id, state, handle, null, null, Bundle.EMPTY, null);
     }
 
     /**
@@ -70,6 +75,7 @@ public final class CallInfo implements Parcelable {
      * @param state The state of the call.
      * @param handle The handle to the other party in this call.
      * @param gatewayInfo Gateway information pertaining to this call.
+     * @param subscription Subscription information pertaining to this call.
      * @param extras Additional information that can be persisted.
      * @param currentCallServiceDescriptor The descriptor for the call service currently routing
      *         this call.
@@ -81,12 +87,14 @@ public final class CallInfo implements Parcelable {
             CallState state,
             Uri handle,
             GatewayInfo gatewayInfo,
+            Subscription subscription,
             Bundle extras,
             CallServiceDescriptor currentCallServiceDescriptor) {
         mId = id;
         mState = state;
         mHandle = handle;
         mGatewayInfo = gatewayInfo;
+        mSubscription = subscription;
         mExtras = extras;
         mCurrentCallServiceDescriptor = currentCallServiceDescriptor;
     }
@@ -119,6 +127,10 @@ public final class CallInfo implements Parcelable {
         return mGatewayInfo;
     }
 
+    public Subscription getSubscription() {
+        return mSubscription;
+    }
+
     public Bundle getExtras() {
         return mExtras;
     }
@@ -137,16 +149,13 @@ public final class CallInfo implements Parcelable {
             CallState state = CallState.valueOf(source.readString());
             Uri handle = Uri.CREATOR.createFromParcel(source);
 
-            boolean gatewayInfoPresent = source.readByte() != 0;
-            GatewayInfo gatewayInfo = null;
-            if (gatewayInfoPresent) {
-                gatewayInfo = GatewayInfo.CREATOR.createFromParcel(source);
-            }
+            GatewayInfo gatewayInfo = readProviderInfoIfExists(source, GatewayInfo.CREATOR);
+            Subscription subscription = readProviderInfoIfExists(source, Subscription.CREATOR);
 
             ClassLoader classLoader = CallInfo.class.getClassLoader();
             Bundle extras = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
-            return new CallInfo(id, state, handle, gatewayInfo, extras, descriptor);
+            return new CallInfo(id, state, handle, gatewayInfo, subscription, extras, descriptor);
         }
 
         @Override
@@ -172,14 +181,35 @@ public final class CallInfo implements Parcelable {
         destination.writeString(mState.name());
         mHandle.writeToParcel(destination, 0);
 
-        if (mGatewayInfo != null) {
-            destination.writeByte((byte) 1);
-            mGatewayInfo.writeToParcel(destination, 0);
-        } else {
-            destination.writeByte((byte) 0);
-        }
+        writeProviderInfoIfExists(destination, mGatewayInfo);
+        writeProviderInfoIfExists(destination, mSubscription);
 
         destination.writeParcelable(mExtras, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
+    }
+
+    /**
+     * Helper function to write provider information (either GatewayInfo or Subscription) to
+     * parcel. Will write a false byte if the information does not exist.
+     */
+    private void writeProviderInfoIfExists(Parcel destination, Parcelable provider) {
+        if (provider != null) {
+            destination.writeByte((byte) 1);
+            provider.writeToParcel(destination, 0);
+        } else {
+            destination.writeByte((byte) 0);
+        }
+    }
+
+    /**
+     * Helper function to read provider information (either GatewayInfo or Subscription) from
+     * parcel.
+     */
+    private static <T> T readProviderInfoIfExists(Parcel source,
+            Parcelable.Creator<T> creator) {
+        if (source.readByte() != 0) {
+            return creator.createFromParcel(source);
+        }
+        return null;
     }
 }

@@ -38,6 +38,7 @@ public final class InCallCall implements Parcelable {
     private final long mConnectTimeMillis;
     private final Uri mHandle;
     private final GatewayInfo mGatewayInfo;
+    private final Subscription mSubscription;
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
     private final CallServiceDescriptor mHandoffCallServiceDescriptor;
     private final String mParentCallId;
@@ -55,11 +56,12 @@ public final class InCallCall implements Parcelable {
             long connectTimeMillis,
             Uri handle,
             GatewayInfo gatewayInfo,
+            Subscription subscription,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor) {
         this(id, state, disconnectCauseCode, disconnectCauseMsg, cannedSmsResponses,
-                capabilities, connectTimeMillis, handle, gatewayInfo, descriptor, handoffDescriptor,
-                null, Collections.EMPTY_LIST);
+                capabilities, connectTimeMillis, handle, gatewayInfo, subscription, descriptor,
+                handoffDescriptor, null, Collections.EMPTY_LIST);
     }
 
     /** @hide */
@@ -73,6 +75,7 @@ public final class InCallCall implements Parcelable {
             long connectTimeMillis,
             Uri handle,
             GatewayInfo gatewayInfo,
+            Subscription subscription,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor,
             String parentCallId,
@@ -86,6 +89,7 @@ public final class InCallCall implements Parcelable {
         mConnectTimeMillis = connectTimeMillis;
         mHandle = handle;
         mGatewayInfo = gatewayInfo;
+        mSubscription = subscription;
         mCurrentCallServiceDescriptor = descriptor;
         mHandoffCallServiceDescriptor = handoffDescriptor;
         mParentCallId = parentCallId;
@@ -145,6 +149,11 @@ public final class InCallCall implements Parcelable {
         return mGatewayInfo;
     }
 
+    /** Subscription information for the call. */
+    public Subscription getSubscription() {
+        return mSubscription;
+    }
+
     /** The descriptor for the call service currently routing this call. */
     public CallServiceDescriptor getCurrentCallServiceDescriptor() {
         return mCurrentCallServiceDescriptor;
@@ -191,6 +200,7 @@ public final class InCallCall implements Parcelable {
             long connectTimeMillis = source.readLong();
             Uri handle = source.readParcelable(classLoader);
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
+            Subscription subscription = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
             CallServiceDescriptor handoffDescriptor = source.readParcelable(classLoader);
             String parentCallId = source.readString();
@@ -198,7 +208,7 @@ public final class InCallCall implements Parcelable {
             source.readList(childCallIds, classLoader);
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, gatewayInfo,
-                    descriptor, handoffDescriptor, parentCallId, childCallIds);
+                    subscription, descriptor, handoffDescriptor, parentCallId, childCallIds);
         }
 
         @Override
@@ -225,6 +235,7 @@ public final class InCallCall implements Parcelable {
         destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mHandle, 0);
         destination.writeParcelable(mGatewayInfo, 0);
+        destination.writeParcelable(mSubscription, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
         destination.writeParcelable(mHandoffCallServiceDescriptor, 0);
         destination.writeString(mParentCallId);

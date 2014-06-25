@@ -22870,6 +22870,7 @@ package android.provider {
     field public static final java.lang.String CACHED_NUMBER_LABEL = "numberlabel";
     field public static final java.lang.String CACHED_NUMBER_TYPE = "numbertype";
     field public static final java.lang.String CACHED_PHOTO_ID = "photo_id";
+    field public static final java.lang.String SUBSCRIPTION_COMPONENT_NAME = "component_name";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
@@ -22893,6 +22894,7 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final java.lang.String SUBSCRIPTION_ID = "subscription_id";
     field public static final java.lang.String TYPE = "type";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
     field public static final java.lang.String VOICEMAIL_URI = "voicemail_uri";
@@ -27594,6 +27596,7 @@ package android.telecomm {
     method public java.lang.String getId();
     method public android.net.Uri getOriginalHandle();
     method public android.telecomm.CallState getState();
+    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27872,6 +27875,7 @@ package android.telecomm {
     method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
+    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
