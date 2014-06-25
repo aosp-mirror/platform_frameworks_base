@@ -43,14 +43,9 @@
 #include <RenderNode.h>
 #include <CanvasProperty.h>
 
-#ifdef USE_MINIKIN
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
-#endif
-
-#include <TextLayout.h>
-#include <TextLayoutCache.h>
 
 namespace android {
 
@@ -569,23 +564,6 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 // Text
 // ----------------------------------------------------------------------------
 
-// TODO: this is moving to MinikinUtils, remove with USE_MINIKIN ifdef
-static float xOffsetForTextAlign(SkPaint* paint, float totalAdvance) {
-    switch (paint->getTextAlign()) {
-        case SkPaint::kCenter_Align:
-            return -totalAdvance / 2.0f;
-            break;
-        case SkPaint::kRight_Align:
-            return -totalAdvance;
-            break;
-        default:
-            break;
-    }
-    return 0;
-}
-
-#ifdef USE_MINIKIN
-
 class RenderTextFunctor {
 public:
     RenderTextFunctor(const Layout& layout, DisplayListRenderer* renderer, jfloat x, jfloat y,
@@ -632,38 +610,16 @@ static void renderTextLayout(DisplayListRenderer* renderer, Layout* layout,
     delete[] glyphs;
     delete[] pos;
 }
-#endif
 
 static void renderText(DisplayListRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int bidiFlags, SkPaint* paint, TypefaceImpl* typeface) {
-#ifdef USE_MINIKIN
     Layout layout;
     std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
     layout.doLayout(text, 0, count, count, css);
-    x += xOffsetForTextAlign(paint, layout.getAdvance());
+    x += MinikinUtils::xOffsetForTextAlign(paint, layout);
     renderTextLayout(renderer, &layout, x, y, paint);
-#else
-    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count, bidiFlags);
-    if (value == NULL) {
-        return;
-    }
-    const jchar* glyphs = value->getGlyphs();
-    size_t glyphsCount = value->getGlyphsCount();
-    jfloat totalAdvance = value->getTotalAdvance();
-    x += xOffsetForTextAlign(paint, totalAdvance);
-    const float* positions = value->getPos();
-    int bytesCount = glyphsCount * sizeof(jchar);
-    const SkRect& r = value->getBounds();
-    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
-    bounds.translate(x, y);
-
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
-            x, y, positions, paint, totalAdvance, bounds);
-#endif
 }
 
-#ifdef USE_MINIKIN
 class RenderTextOnPathFunctor {
 public:
     RenderTextOnPathFunctor(const Layout& layout, DisplayListRenderer* renderer, float hOffset,
@@ -688,12 +644,10 @@ private:
     SkPaint* paint;
     SkPath* path;
 };
-#endif
 
 static void renderTextOnPath(DisplayListRenderer* renderer, const jchar* text, int count,
         SkPath* path, jfloat hOffset, jfloat vOffset, int bidiFlags, SkPaint* paint,
         TypefaceImpl* typeface) {
-#ifdef USE_MINIKIN
     Layout layout;
     std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
     layout.doLayout(text, 0, count, count, css);
@@ -704,48 +658,16 @@ static void renderTextOnPath(DisplayListRenderer* renderer, const jchar* text, i
     RenderTextOnPathFunctor f(layout, renderer, hOffset, vOffset, paint, path);
     MinikinUtils::forFontRun(layout, paint, f);
     paint->setTextAlign(align);
-#else
-    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, 0, count, count, bidiFlags);
-    if (value == NULL) {
-        return;
-    }
-    const jchar* glyphs = value->getGlyphs();
-    size_t glyphsCount = value->getGlyphsCount();
-    int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawTextOnPath((const char*) glyphs, bytesCount, glyphsCount, path,
-            hOffset, vOffset, paint);
-#endif
 }
 
 static void renderTextRun(DisplayListRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int bidiFlags, SkPaint* paint, TypefaceImpl* typeface) {
-#ifdef USE_MINIKIN
     Layout layout;
     std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
     layout.doLayout(text, start, count, contextCount, css);
-    x += xOffsetForTextAlign(paint, layout.getAdvance());
+    x += MinikinUtils::xOffsetForTextAlign(paint, layout);
     renderTextLayout(renderer, &layout, x, y, paint);
-#else
-    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-            text, start, count, contextCount, bidiFlags);
-    if (value == NULL) {
-        return;
-    }
-    const jchar* glyphs = value->getGlyphs();
-    size_t glyphsCount = value->getGlyphsCount();
-    jfloat totalAdvance = value->getTotalAdvance();
-    x += xOffsetForTextAlign(paint, totalAdvance);
-    const float* positions = value->getPos();
-    int bytesCount = glyphsCount * sizeof(jchar);
-    const SkRect& r = value->getBounds();
-    android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
-    bounds.translate(x, y);
-
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
-            x, y, positions, paint, totalAdvance, bounds);
-#endif
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,

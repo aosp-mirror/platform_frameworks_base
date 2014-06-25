@@ -27,21 +27,17 @@
 #include "SkStream.h"
 #include "SkTypeface.h"
 
-#ifdef USE_MINIKIN
 #include <vector>
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/Layout.h>
 #include "SkPaint.h"
 #include "MinikinSkia.h"
-#endif
 
 #include "TypefaceImpl.h"
 #include "Utils.h"
 
 namespace android {
-
-#ifdef USE_MINIKIN
 
 // Any weight greater than or equal to this is considered "bold" for
 // legacy API.
@@ -135,30 +131,6 @@ static TypefaceImpl* createFromSkTypeface(SkTypeface* typeface) {
     return result;
 }
 
-// Delete when removing USE_MINIKIN ifdef
-TypefaceImpl* TypefaceImpl_createFromName(const char* name, SkTypeface::Style style) {
-    SkTypeface* face = SkTypeface::CreateFromName(name, style);
-    return createFromSkTypeface(face);
-}
-
-// Delete when removing USE_MINIKIN ifdef
-TypefaceImpl* TypefaceImpl_createFromFile(const char* filename) {
-    SkTypeface* face = SkTypeface::CreateFromFile(filename);
-    return createFromSkTypeface(face);
-}
-
-// Delete when removing USE_MINIKIN ifdef
-TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
-    SkStream* stream = new AssetStreamAdaptor(asset,
-                                              AssetStreamAdaptor::kYes_OwnAsset,
-                                              AssetStreamAdaptor::kYes_HasMemoryBase);
-    SkTypeface* face = SkTypeface::CreateFromStream(stream);
-    // SkTypeFace::CreateFromStream calls ref() on the stream, so we
-    // need to unref it here or it won't be freed later on
-    stream->unref();
-    return createFromSkTypeface(face);
-}
-
 TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
     std::vector<FontFamily *>familyVec;
     for (size_t i = 0; i < size; i++) {
@@ -201,53 +173,5 @@ int TypefaceImpl_getStyle(TypefaceImpl* face) {
 void TypefaceImpl_setDefault(TypefaceImpl* face) {
     gDefaultTypeface = face;
 }
-
-#else  // USE_MINIKIN
-
-/* Just use SkTypeface instead. */
-
-typedef SkTypeface TypefaceImpl;
-
-TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style) {
-    return SkTypeface::CreateFromTypeface(src, style);
-}
-
-TypefaceImpl* TypefaceImpl_createFromName(const char* name, SkTypeface::Style style) {
-    return SkTypeface::CreateFromName(name, style);
-}
-
-TypefaceImpl* TypefaceImpl_createFromFile(const char* filename) {
-    return SkTypeface::CreateFromFile(filename);
-}
-
-TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset) {
-    SkStream* stream = new AssetStreamAdaptor(asset,
-                                              AssetStreamAdaptor::kYes_OwnAsset,
-                                              AssetStreamAdaptor::kYes_HasMemoryBase);
-    SkTypeface* face = SkTypeface::CreateFromStream(stream);
-    // SkTypeFace::CreateFromStream calls ref() on the stream, so we
-    // need to unref it here or it won't be freed later on
-    stream->unref();
-
-    return face;
-}
-
-TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
-    // Should never be called in non-Minikin builds
-    return 0;
-}
-
-void TypefaceImpl_unref(TypefaceImpl* face) {
-    SkSafeUnref(face);
-}
-
-int TypefaceImpl_getStyle(TypefaceImpl* face) {
-    return face->style();
-}
-
-void TypefaceImpl_setDefault(TypefaceImpl* face) {
-}
-
-#endif  // USE_MINIKIN
 
 }

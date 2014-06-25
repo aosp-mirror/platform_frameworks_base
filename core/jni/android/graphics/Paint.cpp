@@ -34,14 +34,11 @@
 #include "unicode/uloc.h"
 #include "unicode/ushape.h"
 #include "utils/Blur.h"
-#include "TextLayout.h"
 
-#ifdef USE_MINIKIN
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
-#endif
 
 // temporary for debugging
 #include <Caches.h>
@@ -304,14 +301,8 @@ public:
     }
 
     static jlong setTypeface(JNIEnv* env, jobject clazz, jlong objHandle, jlong typefaceHandle) {
-#ifndef USE_MINIKIN
-        SkPaint* obj = reinterpret_cast<SkPaint*>(objHandle);
-        SkTypeface* typeface = reinterpret_cast<SkTypeface*>(typefaceHandle);
-        return reinterpret_cast<jlong>(obj->setTypeface(typeface));
-#else
-        // TODO(raph): not yet implemented
+        // TODO: in Paint refactoring, set typeface on android Paint, not SkPaint
         return NULL;
-#endif
     }
 
     static jlong setRasterizer(JNIEnv* env, jobject clazz, jlong objHandle, jlong rasterizerHandle) {
@@ -437,22 +428,18 @@ public:
         const int kElegantDescent = -500;
         const int kElegantLeading = 0;
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
-#ifdef USE_MINIKIN
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         typeface = TypefaceImpl_resolveDefault(typeface);
         FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
         float saveSkewX = paint->getTextSkewX();
         bool savefakeBold = paint->isFakeBoldText();
         MinikinFontSkia::populateSkPaint(paint, baseFont.font, baseFont.fakery);
-#endif
         SkScalar spacing = paint->getFontMetrics(metrics);
-#ifdef USE_MINIKIN
         // The populateSkPaint call may have changed fake bold / text skew
         // because we want to measure with those effects applied, so now
         // restore the original settings.
         paint->setTextSkewX(saveSkewX);
         paint->setFakeBoldText(savefakeBold);
-#endif
         SkPaintOptionsAndroid paintOpts = paint->getPaintOptionsAndroid();
         if (paintOpts.getFontVariant() == SkPaintOptionsAndroid::kElegant_Variant) {
             SkScalar size = paint->getTextSize();
@@ -534,17 +521,11 @@ public:
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = 0;
 
-#ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray, index, count, textLength, css);
         result = layout.getAdvance();
-#else
-        TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
-                bidiFlags, NULL /* dont need all advances */, &result);
-#endif
-
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
     }
@@ -568,16 +549,11 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
-#ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray, start, count, textLength, css);
         width = layout.getAdvance();
-#else
-        TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
-                bidiFlags, NULL /* dont need all advances */, &width);
-#endif
 
         env->ReleaseStringChars(text, textArray);
         return width;
@@ -596,16 +572,11 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
-#ifdef USE_MINIKIN
         Layout layout;
         TypefaceImpl* typeface = GraphicsJNI::getNativeTypeface(env, jpaint);
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray, 0, textLength, textLength, css);
         width = layout.getAdvance();
-#else
-        TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
-                bidiFlags, NULL /* dont need all advances */, &width);
-#endif
 
         env->ReleaseStringChars(text, textArray);
         return width;
@@ -632,15 +603,10 @@ public:
         AutoJavaFloatArray autoWidths(env, widths, count);
         jfloat* widthsArray = autoWidths.ptr();
 
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, 0, count, count, css);
         layout.getAdvances(widthsArray);
-#else
-        TextLayout::getTextRunAdvances(paint, text, 0, count, count,
-                bidiFlags, widthsArray, NULL /* dont need totalAdvance */);
-#endif
 
         return count;
     }
@@ -691,16 +657,11 @@ public:
 
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
 
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, start, count, contextCount, css);
         layout.getAdvances(advancesArray);
         totalAdvance = layout.getAdvance();
-#else
-        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, bidiFlags,
-                                       advancesArray, &totalAdvance);
-#endif
 
         if (advances != NULL) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
@@ -738,52 +699,9 @@ public:
 
     static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
             jint count, jint flags, jint offset, jint opt) {
-#ifdef USE_MINIKIN
         GraphemeBreak::MoveOpt moveOpt = GraphemeBreak::MoveOpt(opt);
         size_t result = GraphemeBreak::getTextRunCursor(text, start, count, offset, moveOpt);
         return static_cast<jint>(result);
-#else
-        jfloat scalarArray[count];
-
-        TextLayout::getTextRunAdvances(paint, text, start, count, start + count, flags,
-                scalarArray, NULL /* dont need totalAdvance */);
-
-        jint pos = offset - start;
-        switch (opt) {
-        case AFTER:
-          if (pos < count) {
-            pos += 1;
-          }
-          // fall through
-        case AT_OR_AFTER:
-          while (pos < count && scalarArray[pos] == 0) {
-            ++pos;
-          }
-          break;
-        case BEFORE:
-          if (pos > 0) {
-            --pos;
-          }
-          // fall through
-        case AT_OR_BEFORE:
-          while (pos > 0 && scalarArray[pos] == 0) {
-            --pos;
-          }
-          break;
-        case AT:
-        default:
-          if (scalarArray[pos] == 0) {
-            pos = -1;
-          }
-          break;
-        }
-
-        if (pos != -1) {
-          pos += start;
-        }
-
-        return pos;
-#endif
     }
 
     static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, jlong paintHandle, jcharArray text,
@@ -806,7 +724,6 @@ public:
         return result;
     }
 
-#ifdef USE_MINIKIN
     class GetTextFunctor {
     public:
         GetTextFunctor(const Layout& layout, SkPath* path, jfloat x, jfloat y, SkPaint* paint,
@@ -837,11 +754,9 @@ public:
         SkPoint* pos;
         SkPath tmpPath;
     };
-#endif
 
     static void getTextPath(JNIEnv* env, SkPaint* paint, TypefaceImpl* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, 0, count, count, css);
@@ -858,9 +773,6 @@ public:
         paint->setTextAlign(align);
         delete[] glyphs;
         delete[] pos;
-#else
-        TextLayout::getTextPath(paint, text, count, bidiFlags, x, y, path);
-#endif
     }
 
     static void getTextPath___C(JNIEnv* env, jobject clazz, jlong paintHandle,
@@ -908,7 +820,6 @@ public:
         size_t measuredCount = 0;
         float measured = 0;
 
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
         layout.doLayout(text, 0, count, count, css);
@@ -929,19 +840,6 @@ public:
             measured += width;
         }
         delete[] advances;
-#else
-        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
-                text, 0, count, count, bidiFlags);
-        if (value == NULL) {
-            return 0;
-        }
-        SkScalar m;
-        size_t bytes = paint.breakText(value->getGlyphs(), value->getGlyphsCount() << 1,
-                maxWidth, &m, textBufferDirection);
-        SkASSERT((bytes & 1) == 0);
-        measuredCount = bytes >> 1;
-        measured = SkScalarToFloat(m);
-#endif
 
         if (jmeasured && env->GetArrayLength(jmeasured) > 0) {
             AutoJavaFloatArray autoMeasured(env, jmeasured, 1);
@@ -1003,7 +901,6 @@ public:
         SkRect  r;
         SkIRect ir;
 
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, &paint, bidiFlags, typeface);
         layout.doLayout(text, 0, count, count, css);
@@ -1013,14 +910,6 @@ public:
         r.fTop = rect.mTop;
         r.fRight = rect.mRight;
         r.fBottom = rect.mBottom;
-#else
-        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
-                text, 0, count, count, bidiFlags);
-        if (value == NULL) {
-            return;
-        }
-        paint.measureText(value->getGlyphs(), value->getGlyphsCount() << 1, &r);
-#endif
         r.roundOut(&ir);
         GraphicsJNI::irect_to_jrect(ir, env, bounds);
     }

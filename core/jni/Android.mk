@@ -105,6 +105,8 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Interpolator.cpp \
 	android/graphics/MaskFilter.cpp \
 	android/graphics/Matrix.cpp \
+	android/graphics/MinikinSkia.cpp \
+	android/graphics/MinikinUtils.cpp \
 	android/graphics/Movie.cpp \
 	android/graphics/NinePatch.cpp \
 	android/graphics/NinePatchImpl.cpp \
@@ -120,8 +122,6 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
 	android/graphics/SurfaceTexture.cpp \
-	android/graphics/TextLayout.cpp \
-	android/graphics/TextLayoutCache.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/TypefaceImpl.cpp \
 	android/graphics/Utils.cpp \
@@ -197,6 +197,9 @@ LOCAL_C_INCLUDES += \
 	frameworks/opt/emoji \
 	libcore/include \
 	$(call include-path-for, audio-utils) \
+	frameworks/minikin/include \
+	external/freetype/include
+# TODO: clean up Minikin so it doesn't need the freetype include
 
 LOCAL_SHARED_LIBRARIES := \
 	libmemtrack \
@@ -237,21 +240,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libpdfium \
 	libimg_utils \
 	libnetd_client \
-	libsoundtrigger
+	libsoundtrigger \
+	libminikin \
+	libstlport
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
-endif
-
-ifeq ($(USE_MINIKIN), true)
-	LOCAL_CFLAGS += -DUSE_MINIKIN
-	LOCAL_C_INCLUDES += frameworks/minikin/include \
-		external/freetype/include
-	LOCAL_SRC_FILES += 	android/graphics/MinikinSkia.cpp \
-		android/graphics/MinikinUtils.cpp
-# note: the freetype include is spurious; minikin itself probably
-# shouldn't depend on it
-	LOCAL_SHARED_LIBRARIES += libminikin libstlport
 endif
 
 LOCAL_SHARED_LIBRARIES += \

@@ -117,7 +117,7 @@ public class Typeface {
         if (sSystemFontMap != null) {
             return create(sSystemFontMap.get(familyName), style);
         }
-        return new Typeface(nativeCreate(familyName, style));
+        return null;
     }
 
     /**
@@ -183,11 +183,9 @@ public class Typeface {
             if (fontFamily.addFontFromAsset(mgr, path)) {
                 FontFamily[] families = { fontFamily };
                 return createFromFamiliesWithDefault(families);
-            } else {
-                return null;
             }
         }
-        return new Typeface(nativeCreateFromAsset(mgr, path));
+        return null;
     }
 
     /**
@@ -212,11 +210,9 @@ public class Typeface {
             if (fontFamily.addFont(path)) {
                 FontFamily[] families = { fontFamily };
                 return createFromFamiliesWithDefault(families);
-            } else {
-                return null;
             }
         }
-        return new Typeface(nativeCreateFromFile(path));
+        return null;
     }
 
     /**
@@ -383,12 +379,9 @@ public class Typeface {
         return result;
     }
 
-    private static native long nativeCreate(String familyName, int style);
     private static native long nativeCreateFromTypeface(long native_instance, int style);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
-    private static native long nativeCreateFromAsset(AssetManager mgr, String path);
-    private static native long nativeCreateFromFile(String path);
     private static native long nativeCreateFromArray(long[] familyArray);
     private static native void nativeSetDefault(long native_instance);
 }

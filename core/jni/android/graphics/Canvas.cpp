@@ -29,14 +29,10 @@
 #include "SkTArray.h"
 #include "SkTemplates.h"
 
-#ifdef USE_MINIKIN
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
-#endif
 
-#include "TextLayout.h"
-#include "TextLayoutCache.h"
 #include "TypefaceImpl.h"
 
 #include "unicode/ubidi.h"
@@ -301,11 +297,7 @@ public:
     }
 
     static void freeTextLayoutCaches(JNIEnv* env, jobject) {
-#ifdef USE_MINIKIN
         Layout::purgeCaches();
-#else
-        TextLayoutEngine::getInstance().purgeCaches();
-#endif
     }
 
     static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {
@@ -908,7 +900,6 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
-#ifdef USE_MINIKIN
     class DrawTextFunctor {
     public:
         DrawTextFunctor(const Layout& layout, SkCanvas* canvas, jfloat x, jfloat y, SkPaint* paint,
@@ -950,7 +941,6 @@ public:
         delete[] glyphs;
         delete[] pos;
     }
-#endif
 
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
             int start, int end,
@@ -965,29 +955,10 @@ public:
             int start, int count, int contextCount,
             jfloat x, jfloat y, int bidiFlags, SkPaint* paint, TypefaceImpl* typeface) {
 
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(textArray, start, count, contextCount, css);
         drawGlyphsToSkia(canvas, paint, layout, x, y);
-#else
-        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
-                textArray, start, count, contextCount, bidiFlags);
-        if (value == NULL) {
-            return;
-        }
-        SkPaint::Align align = paint->getTextAlign();
-        if (align == SkPaint::kCenter_Align) {
-            x -= 0.5 * value->getTotalAdvance();
-        } else if (align == SkPaint::kRight_Align) {
-            x -= value->getTotalAdvance();
-        }
-        paint->setTextAlign(SkPaint::kLeft_Align);
-        doDrawGlyphsPos(canvas, value->getGlyphs(), value->getPos(), 0, value->getGlyphsCount(),
-                x, y, paint);
-        doDrawTextDecorations(canvas, x, y, value->getTotalAdvance(), paint);
-        paint->setTextAlign(align);
-#endif
     }
 
 // Same values used by Skia
@@ -1128,7 +1099,6 @@ public:
         delete[] posPtr;
     }
 
-#ifdef USE_MINIKIN
     class DrawTextOnPathFunctor {
     public:
         DrawTextOnPathFunctor(const Layout& layout, SkCanvas* canvas, float hOffset,
@@ -1153,11 +1123,9 @@ public:
         SkPaint* paint;
         SkPath* path;
     };
-#endif
 
     static void doDrawTextOnPath(SkPaint* paint, const jchar* text, int count, int bidiFlags,
             float hOffset, float vOffset, SkPath* path, SkCanvas* canvas, TypefaceImpl* typeface) {
-#ifdef USE_MINIKIN
         Layout layout;
         std::string css = MinikinUtils::setLayoutProperties(&layout, paint, bidiFlags, typeface);
         layout.doLayout(text, 0, count, count, css);
@@ -1171,9 +1139,6 @@ public:
         DrawTextOnPathFunctor f(layout, canvas, hOffset, vOffset, paint, path);
         MinikinUtils::forFontRun(layout, paint, f);
         paint->setTextAlign(align);
-#else
-        TextLayout::drawTextOnPath(paint, text, count, bidiFlags, hOffset, vOffset, path, canvas);
-#endif
     }
 
     static void drawTextOnPath___CIIPathFFPaint(JNIEnv* env, jobject,

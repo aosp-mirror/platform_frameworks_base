@@ -27,44 +27,33 @@
 #include <androidfw/AssetManager.h>
 #include "Utils.h"
 
-#ifdef USE_MINIKIN
 #include <minikin/FontFamily.h>
 #include "MinikinSkia.h"
-#endif
 
 namespace android {
 
 static jlong FontFamily_create(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
-#ifdef USE_MINIKIN
     FontLanguage fontLanguage;
     if (lang != NULL) {
         ScopedUtfChars str(env, lang);
         fontLanguage = FontLanguage(str.c_str(), str.size());
     }
     return (jlong)new FontFamily(fontLanguage, variant);
-#else
-    return 0;
-#endif
 }
 
 static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
-#ifdef USE_MINIKIN
     FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
     fontFamily->Unref();
-#endif
 }
 
-#ifdef USE_MINIKIN
 static jboolean addSkTypeface(FontFamily* family, SkTypeface* face) {
     MinikinFont* minikinFont = new MinikinFontSkia(face);
     bool result = family->addFont(minikinFont);
     minikinFont->Unref();
     return result;
 }
-#endif
 
 static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jstring path) {
-#ifdef USE_MINIKIN
     NPE_CHECK_RETURN_ZERO(env, path);
     ScopedUtfChars str(env, path);
     SkTypeface* face = SkTypeface::CreateFromFile(str.c_str());
@@ -74,14 +63,10 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
     }
     FontFamily* fontFamily = (FontFamily*)familyPtr;
     return addSkTypeface(fontFamily, face);
-#else
-    return false;
-#endif
 }
 
 static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPtr,
         jobject jassetMgr, jstring jpath) {
-#ifdef USE_MINIKIN
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
@@ -108,9 +93,6 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     }
     FontFamily* fontFamily = (FontFamily*)familyPtr;
     return addSkTypeface(fontFamily, face);
-#else
-    return false;
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

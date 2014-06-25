@@ -22,13 +22,10 @@
 #include "SkTypeface.h"
 #include <androidfw/AssetManager.h>
 
-#ifdef USE_MINIKIN
 #include <minikin/FontCollection.h>
-#endif
 
 namespace android {
 
-#ifdef USE_MINIKIN
 struct TypefaceImpl {
     FontCollection *fFontCollection;
     FontStyle fStyle;
@@ -41,17 +38,8 @@ struct TypefaceImpl {
 // TODO: when #ifdef USE_MINIKIN is removed, move to member functions.
 
 TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src);
-#else
-typedef SkTypeface TypefaceImpl;
-#endif
 
 TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style);
-
-TypefaceImpl* TypefaceImpl_createFromName(const char* name, SkTypeface::Style style);
-
-TypefaceImpl* TypefaceImpl_createFromFile(const char* filename);
-
-TypefaceImpl* TypefaceImpl_createFromAsset(Asset* asset);
 
 // When we remove the USE_MINIKIN ifdef, probably a good idea to move the casting
 // (from jlong to FontFamily*) to the caller in Typeface.cpp.
