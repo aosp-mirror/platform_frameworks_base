@@ -332,7 +332,7 @@ public interface IActivityManager extends IInterface {
 
     public IBinder newUriPermissionOwner(String name) throws RemoteException;
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
-            Uri uri, int mode, int userId) throws RemoteException;
+            Uri uri, int mode, int sourceUserId, int targetUserId) throws RemoteException;
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
             int mode, int userId) throws RemoteException;
 

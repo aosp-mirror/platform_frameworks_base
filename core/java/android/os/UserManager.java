@@ -310,6 +310,18 @@ public class UserManager {
      */
     public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
 
+    /**
+     * Key for user restrictions. Specifies if what is copied in the clipboard of this profile can
+     * be pasted in related profiles. Does not restrict if the clipboard of related profiles can be
+     * pasted in this profile.
+     * The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CROSS_PROFILE_COPY_PASTE = "no_cross_profile_copy_paste";
+
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
     /** @hide */
