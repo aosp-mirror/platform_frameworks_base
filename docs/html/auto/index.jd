@@ -76,9 +76,9 @@ page.type=about
                 <div class="landing-h1 hero">Android Auto</div>
                 <div class="landing-subhead hero">Entertainment and services on your dashboard</div>
                 <div class="landing-hero-description">
-                  <p style="width:450px">Display and control your handheld app in vehicles.
-                  Build apps with easy-to-use UI templates that
-                  let users keep their eyes on the road.</p>
+                  <p style="width:450px">Display and control your Android app in vehicles.
+                   Integrate your content with easy-to-use APIs and let Android Auto take
+                   care of the rest.</p>
                 </div>
 
               <div class="landing-body">
@@ -174,7 +174,7 @@ page.type=about
           <div class="landing-section-header">
             <div class="landing-h1">Minimize Distraction</div>
             <div class="landing-subhead">
-             Standard UI templates for several app categories let users focus on the road.
+             Android Auto displays different UIs for several app categories that let users focus on the road.
             </div>
           </div>
           <div class="landing-body">
@@ -192,11 +192,9 @@ page.type=about
                 </div>
               </div>
             </div>
-            <p>These templates define the user interaction model for all
-             apps and let you hook into a standard UI with touch and voice controls. The templates
-             meet international best practices for reducing driver
-             distraction while still letting you customize and brand them to properly deliver your
-             content.
+            <p>Android Auto defines the user interaction model for all
+             apps and let you hook into a standard UI with touch and voice controls. The interface
+             is designed to reduce driver distraction while still letting you customize and brand them to properly deliver your content.
              </p>
           </div>
         </div> <!-- end .wrap -->
@@ -212,7 +210,7 @@ page.type=about
           <div class="landing-body">
             <p>In the coming months, we’ll be releasing the Android Auto SDK, which includes APIs
               and tools to make your existing apps compatible with Android Auto. The first version
-              of the SDK will provide templates and APIs for music, podcast, live radio, and audio
+              of the SDK will provide APIs for music, podcast, live radio, and audio
               news apps, as well as limited voice actions.</p>
 
             <div class="cols" style="margin-top:40px">
@@ -291,16 +289,13 @@ page.type=about
             </div>
           </div>
           <div class="cols" style="margin-top:40px">
-             <div class="col-4">
+              <div class="col-4">
                 <img src="{@docRoot}auto/images/logos/apps/iheartradio.png"
                      width="160" height="160" class="img-logo" />
               </div>
               <div class="col-12">
                 <p><em>
                 "The Android Auto APIs provide an easy way to integrate the most important features and functionality of iHeartRadio’s robust music service into a safety-minded automotive infotainment solution. The process was seamless, utilizing a flexible construct that allowed us to quickly adapt our existing product without losing any of the core experience our listeners know and love."</em></p>
-
-                <b>Ryan Goff<br>
-                Director of Automotive Integrations for Clear Channel Media and Entertainment</b>
               </div>
           </div>
           <div class="cols" style="margin-top:60px">
@@ -312,11 +307,11 @@ page.type=about
               <div class="col-12"><p style="margin-top:20px"><em>
               "Android Auto offers Spotify the exciting opportunity to easily enable safe access to millions of songs while driving. We were able to quickly develop for the platform using the new Android voice and media API extensions. As a result, Android users will soon be able to continue the Spotify experience in their cars, including being able to play any song, artist, album or playlist by voice.</em></p>
               </div>
+              </div>
           </div>
-        </div>
+        </div> <!-- end .wrap -->
+      </div> <!-- end .landing-section -->
 
-      </div> <!-- end .wrap -->
-    </div> <!-- end .landing-section -->
 
 
 
@@ -440,102 +435,8 @@ page.type=about
                    width="120" height="120" class="img-logo" />-->
             </div>
           </div>
-
-          <div class="landing-body landing-align-center">
-              <div class="landing-subhead" style="margin-top:80px">
-                Android Auto is also coming soon to aftermarket systems from these manufacturers
-              </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/alpine.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/clarion.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/cloudcar.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/delphi.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/freescale.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/fujitsuten.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/harman.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/jvc.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/kenwood.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/lg.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/panasonic.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/parrot.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/pioneer.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/renesas.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/symphonyteleca.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-          </div>
-          <div class="cols">
-            <div class="col-5">
-              <img src="{@docRoot}auto/images/logos/hard/texasinstruments.png"
-                   width="120" height="120" class="img-logo-thin" />
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/hard/.png"
-                   width="120" height="120" class="img-logo-thin" />-->
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/hard/.png"
-                   width="120" height="120" class="img-logo-thin" />-->
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/hard/.png"
-                   width="120" height="120" class="img-logo-thin" />-->
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/hard/.png"
-                   width="120" height="120" class="img-logo-thin" />-->
-            </div>
-          </div>
-        </div> <!-- end .wrap -->
-      </div> <!-- end .landing-section -->
+        </div>
+      </div>
     </div> <!-- end .landing-rest-of-page -->
     <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement"
     style="border-top: none;">
