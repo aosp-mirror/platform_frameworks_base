@@ -82,7 +82,7 @@
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់​"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"លុប"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"រួចរាល់"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ប្ដូរ​របៀប"</string>
@@ -119,7 +119,7 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ដើម្បី​ដោះ​សោ ចូល​ក្នុង​គណនី Google ។"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ី​ម៉ែ​ល​)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់​"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ចូល"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ភ្លេច​ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​របស់​អ្នក?\nមើល "<b>"google.com/accounts/recovery"</b>" ។"</string>
