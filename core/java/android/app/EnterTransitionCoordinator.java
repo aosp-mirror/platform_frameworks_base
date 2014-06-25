@@ -79,12 +79,24 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
     }
 
-    public void viewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
+    public void viewInstancesReady(ArrayList<String> accepted, ArrayList<View> localViews) {
         if (mIsReadyForTransition) {
             return;
         }
-        super.viewsReady(accepted, localNames);
+        viewsReady(mapSharedElements(accepted, localViews));
+    }
 
+    public void namedViewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
+        if (mIsReadyForTransition) {
+            return;
+        }
+
+        viewsReady(mapNamedElements(accepted, localNames));
+    }
+
+    @Override
+    protected void viewsReady(ArrayMap<String, View> sharedElements) {
+        super.viewsReady(sharedElements);
         mIsReadyForTransition = true;
         if (mIsReturning) {
             mHandler = new Handler() {
@@ -103,6 +115,25 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mSharedElementsBundle != null) {
             onTakeSharedElements();
         }
+    }
+
+    private ArrayMap<String, View> mapNamedElements(ArrayList<String> accepted,
+            ArrayList<String> localNames) {
+        ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
+        getDecor().findNamedViews(sharedElements);
+        if (accepted != null) {
+            for (int i = 0; i < localNames.size(); i++) {
+                String localName = localNames.get(i);
+                String acceptedName = accepted.get(i);
+                if (localName != null && !localName.equals(acceptedName)) {
+                    View view = sharedElements.remove(localName);
+                    if (view != null) {
+                        sharedElements.put(acceptedName, view);
+                    }
+                }
+            }
+        }
+        return sharedElements;
     }
 
     private void sendSharedElementDestination() {

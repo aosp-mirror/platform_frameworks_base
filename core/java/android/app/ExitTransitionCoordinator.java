@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
@@ -67,9 +68,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private ArrayList<View> mSharedElementSnapshots;
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
-            ArrayList<String> accepted, ArrayList<String> mapped, boolean isReturning) {
-        super(activity.getWindow(), names, accepted, mapped, getListener(activity, isReturning),
+            ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
+        super(activity.getWindow(), names, getListener(activity, isReturning),
                 isReturning);
+        viewsReady(mapSharedElements(accepted, mapped));
         mIsBackgroundReady = !isReturning;
         mActivity = activity;
     }
@@ -101,16 +103,17 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             case MSG_START_EXIT_TRANSITION:
                 startExit();
                 break;
-            case MSG_ACTIVITY_STOPPED:
-                setViewVisibility(mTransitioningViews, View.VISIBLE);
-                setViewVisibility(mSharedElements, View.VISIBLE);
-                mIsHidden = true;
-                break;
             case MSG_SHARED_ELEMENT_DESTINATION:
                 mExitSharedElementBundle = resultData;
                 sharedElementExitBack();
                 break;
         }
+    }
+
+    public void resetViews() {
+        setViewVisibility(mTransitioningViews, View.VISIBLE);
+        setViewVisibility(mSharedElements, View.VISIBLE);
+        mIsHidden = true;
     }
 
     private void sharedElementExitBack() {

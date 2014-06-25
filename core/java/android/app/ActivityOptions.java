@@ -108,9 +108,9 @@ public class ActivityOptions {
 
     private static final String KEY_TRANSITION_IS_RETURNING = "android:transitionIsReturning";
     private static final String KEY_TRANSITION_SHARED_ELEMENTS = "android:sharedElementNames";
-    private static final String KEY_LOCAL_SHARED_ELEMENTS = "android:localSharedElementNames";
     private static final String KEY_RESULT_DATA = "android:resultData";
     private static final String KEY_RESULT_CODE = "android:resultCode";
+    private static final String KEY_EXIT_COORDINATOR_INDEX = "android:exitCoordinatorIndex";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -138,9 +138,9 @@ public class ActivityOptions {
     private ResultReceiver mTransitionReceiver;
     private boolean mIsReturning;
     private ArrayList<String> mSharedElementNames;
-    private ArrayList<String> mLocalSharedElementNames;
     private Intent mResultData;
     private int mResultCode;
+    private int mExitCoordinatorIndex;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -387,7 +387,7 @@ public class ActivityOptions {
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
 
         ArrayList<String> names = new ArrayList<String>();
-        ArrayList<String> mappedNames = new ArrayList<String>();
+        ArrayList<View> views = new ArrayList<View>();
 
         if (sharedElements != null) {
             for (int i = 0; i < sharedElements.length; i++) {
@@ -396,23 +396,22 @@ public class ActivityOptions {
                 if (sharedElementName == null) {
                     throw new IllegalArgumentException("Shared element name must not be null");
                 }
-                String name = sharedElement.first.getTransitionName();
-                if (name == null) {
-                    throw new IllegalArgumentException("Shared elements must have non-null " +
-                            "transitionNames");
-                }
-
                 names.add(sharedElementName);
-                mappedNames.add(name);
+                View view = sharedElement.first;
+                if (view == null) {
+                    throw new IllegalArgumentException("Shared element must not be null");
+                }
+                views.add(sharedElement.first);
             }
         }
 
         ExitTransitionCoordinator exit = new ExitTransitionCoordinator(activity, names, names,
-                mappedNames, false);
+                views, false);
         opts.mTransitionReceiver = exit;
         opts.mSharedElementNames = names;
-        opts.mLocalSharedElementNames = mappedNames;
         opts.mIsReturning = false;
+        opts.mExitCoordinatorIndex =
+                activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
         return opts;
     }
 
@@ -427,6 +426,8 @@ public class ActivityOptions {
         opts.mIsReturning = true;
         opts.mResultCode = resultCode;
         opts.mResultData = resultData;
+        opts.mExitCoordinatorIndex =
+                activity.mActivityTransitionState.addExitTransitionCoordinator(exitCoordinator);
         return opts;
     }
 
@@ -465,9 +466,9 @@ public class ActivityOptions {
                 mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER);
                 mIsReturning = opts.getBoolean(KEY_TRANSITION_IS_RETURNING, false);
                 mSharedElementNames = opts.getStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS);
-                mLocalSharedElementNames = opts.getStringArrayList(KEY_LOCAL_SHARED_ELEMENTS);
                 mResultData = opts.getParcelable(KEY_RESULT_DATA);
                 mResultCode = opts.getInt(KEY_RESULT_CODE);
+                mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
     }
@@ -523,18 +524,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public void dispatchActivityStopped() {
-        if (mTransitionReceiver != null) {
-            mTransitionReceiver.send(ActivityTransitionCoordinator.MSG_ACTIVITY_STOPPED, null);
-        }
-    }
-
-    /** @hide */
-    public void dispatchStartExit() {
-        if (mTransitionReceiver != null) {
-            mTransitionReceiver.send(ActivityTransitionCoordinator.MSG_START_EXIT_TRANSITION, null);
-        }
-    }
+    public int getExitCoordinatorKey() { return mExitCoordinatorIndex; }
 
     /** @hide */
     public void abort() {
@@ -547,11 +537,6 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public void setReturning() {
-        mIsReturning = true;
-    }
-
-    /** @hide */
     public boolean isReturning() {
         return mIsReturning;
     }
@@ -560,9 +545,6 @@ public class ActivityOptions {
     public ArrayList<String> getSharedElementNames() {
         return mSharedElementNames;
     }
-
-    /** @hide */
-    public ArrayList<String> getLocalSharedElementNames() { return mLocalSharedElementNames; }
 
     /** @hide */
     public ResultReceiver getResultReceiver() { return mTransitionReceiver; }
@@ -591,10 +573,10 @@ public class ActivityOptions {
         }
         mTransitionReceiver = null;
         mSharedElementNames = null;
-        mLocalSharedElementNames = null;
         mIsReturning = false;
         mResultData = null;
         mResultCode = 0;
+        mExitCoordinatorIndex = 0;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
                 mAnimationType = otherOptions.mAnimationType;
@@ -641,12 +623,12 @@ public class ActivityOptions {
                 mAnimationType = otherOptions.mAnimationType;
                 mTransitionReceiver = otherOptions.mTransitionReceiver;
                 mSharedElementNames = otherOptions.mSharedElementNames;
-                mLocalSharedElementNames = otherOptions.mLocalSharedElementNames;
                 mIsReturning = otherOptions.mIsReturning;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
                 mResultData = otherOptions.mResultData;
                 mResultCode = otherOptions.mResultCode;
+                mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
     }
@@ -695,9 +677,9 @@ public class ActivityOptions {
                 }
                 b.putBoolean(KEY_TRANSITION_IS_RETURNING, mIsReturning);
                 b.putStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS, mSharedElementNames);
-                b.putStringArrayList(KEY_LOCAL_SHARED_ELEMENTS, mLocalSharedElementNames);
                 b.putParcelable(KEY_RESULT_DATA, mResultData);
                 b.putInt(KEY_RESULT_CODE, mResultCode);
+                b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
         return b;
