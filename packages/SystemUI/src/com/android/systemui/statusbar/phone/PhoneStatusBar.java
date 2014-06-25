@@ -3086,11 +3086,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mSystemIcons;
     }
 
-    /**
-     * Reattaches the system icons to its normal parent in collapsed status bar.
-     */
-    public void reattachSystemIcons() {
-        mSystemIconArea.addView(mSystemIcons, 0);
+    public LinearLayout getSystemIconArea() {
+        return mSystemIconArea;
     }
 
     @Override

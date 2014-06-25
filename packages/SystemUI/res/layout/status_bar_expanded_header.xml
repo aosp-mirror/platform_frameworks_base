@@ -69,19 +69,24 @@
         android:src="@drawable/ic_settings_24dp"
         android:contentDescription="@string/accessibility_desc_quick_settings"/>
 
-    <FrameLayout android:id="@+id/system_icons_container"
+    <FrameLayout android:id="@+id/system_icons_super_container"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/status_bar_header_height"
         android:layout_toStartOf="@id/multi_user_switch"
         android:layout_alignWithParentIfMissing="true"
         android:layout_marginStart="16dp"
-        android:paddingEnd="2dp" />
+        android:paddingEnd="2dp">
+        <FrameLayout android:id="@+id/system_icons_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/status_bar_height"
+            android:layout_gravity="center_vertical"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/header_charging_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/system_icons_container"
+        android:layout_toEndOf="@id/system_icons_super_container"
         android:layout_below="@id/header_spacer"
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
