@@ -315,7 +315,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeReconfigure(long nativeBitmap, int width, int height,
-            int config, int allocSize) {
+            int config, int allocSize, boolean isPremultiplied) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                 "Bitmap.reconfigure() is not supported", null /*data*/);
     }
