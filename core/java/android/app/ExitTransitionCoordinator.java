@@ -134,6 +134,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         transition.addListener(new Transition.TransitionListenerAdapter() {
             @Override
             public void onTransitionEnd(Transition transition) {
+                transition.removeListener(this);
                 setViewVisibility(mSharedElements, View.INVISIBLE);
                 ViewGroupOverlay overlay = getDecor().getOverlay();
                 if (mSharedElementSnapshots != null) {
@@ -196,8 +197,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             @Override
             public void handleMessage(Message msg) {
                 mIsCanceled = true;
-                mActivity.finish();
-                mActivity = null;
+                finish();
             }
         };
         mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
@@ -269,6 +269,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             viewsTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
                     exitTransitionComplete();
                     if (mIsHidden) {
                         setViewVisibility(mTransitioningViews, View.VISIBLE);
@@ -295,6 +296,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             sharedElementTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
                     sharedElementTransitionComplete();
                     if (mIsHidden) {
                         setViewVisibility(mSharedElements, View.VISIBLE);
@@ -364,13 +366,29 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void finishIfNecessary() {
         if (mIsReturning && mExitNotified && mActivity != null && mSharedElementSnapshots == null) {
-            mActivity.finish();
-            mActivity.overridePendingTransition(0, 0);
-            mActivity = null;
+            finish();
         }
         if (!mIsReturning && mExitNotified) {
             mActivity = null; // don't need it anymore
         }
+    }
+
+    private void finish() {
+        mActivity.mActivityTransitionState.clear();
+        // Clear the state so that we can't hold any references accidentally and leak memory.
+        mHandler.removeMessages(MSG_CANCEL);
+        mHandler = null;
+        mActivity.finish();
+        mActivity.overridePendingTransition(0, 0);
+        mActivity = null;
+        mSharedElementBundle = null;
+        if (mBackgroundAnimator != null) {
+            mBackgroundAnimator.cancel();
+            mBackgroundAnimator = null;
+        }
+        mExitSharedElementBundle = null;
+        mSharedElementSnapshots = null;
+        clearState();
     }
 
     @Override

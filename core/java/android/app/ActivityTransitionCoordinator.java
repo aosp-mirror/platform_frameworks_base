@@ -191,7 +191,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      */
     public static final int MSG_SEND_SHARED_ELEMENT_DESTINATION = 108;
 
-    final private Window mWindow;
+    private Window mWindow;
     final protected ArrayList<String> mAllSharedElementNames;
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
     final protected ArrayList<String> mSharedElementNames = new ArrayList<String>();
@@ -505,6 +505,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             captureSharedElementState(sharedElement, name, bundle, tempBounds);
         }
         return bundle;
+    }
+
+    protected void clearState() {
+        // Clear the state so that we can't hold any references accidentally and leak memory.
+        mWindow = null;
+        mAllSharedElementNames.clear();
+        mSharedElements.clear();
+        mSharedElementNames.clear();
+        mTransitioningViews.clear();
+        mResultReceiver = null;
+        mPendingTransition = null;
     }
 
     protected long getFadeDuration() {
