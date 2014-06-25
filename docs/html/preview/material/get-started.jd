@@ -8,9 +8,9 @@ page.title=Get Started
 <ol>
   <li><a href="#applytheme">Apply the Material Theme</a></li>
   <li><a href="#layouts">Design Your Layouts</a></li>
-  <li><a href="#depth">Specify Depth in Your Views</a></li>
+  <li><a href="#depth">Specify Elevation in Your Views</a></li>
   <li><a href="#widgets">Use the New UI Widgets</a></li>
-  <li><a href="#apis">Use the New APIs</a></li>
+  <li><a href="#animations">Customize Your Animations</a></li>
 </ol>
 </div>
 </div>
@@ -19,7 +19,8 @@ page.title=Get Started
 
 <ol>
   <li style="margin-bottom:10px">
-    Take a look at the <a href="">material design specification</a>.</li>
+    Take a look at the <a href="http://www.google.com/design/spec">material design
+    specification</a>.</li>
   <li style="margin-bottom:10px">
     Apply the material <strong>theme</strong> to your app.</li>
   <li style="margin-bottom:10px">
@@ -27,11 +28,11 @@ page.title=Get Started
   <li style="margin-bottom:10px">
     Create your <strong>layouts</strong> following material design guidelines.</li>
   <li style="margin-bottom:10px">
-    Specify the <strong>depth</strong> for views to cast appropriate shadows.</li>
+    Specify the <strong>elevation</strong> of your views to cast appropriate shadows.</li>
   <li style="margin-bottom:10px">
     Use the new <strong>widgets</strong> for complex views, such as lists and cards.</li>
   <li style="margin-bottom:10px">
-    Use the new <strong>APIs</strong> to customize the animations in your app.</li>
+    Use the new APIs to customize the <strong>animations</strong> in your app.</li>
 </ol>
 
 <h3>Update Your App for the Android L Developer Preview</h3>
@@ -42,15 +43,16 @@ incorporating depth, touch feedback and animations in your UI.</p>
 
 <h3>Create New Apps for the Android L Developer Preview</h3>
 
-<p>If you are creating a new app for the Android L Developer Preview, the material design
-guidelines provide you with a solid design framework for your app. Follow these guidelines and
+<p>If you are creating a new app for the Android L Developer Preview, the <a
+href="http://www.google.com/design/spec">material design guidelines</a> provide you with a
+cohesive design framework for your app. Follow these guidelines and
 use the new functionality in the Android framework to design and develop your app.</p>
 
 
 <h2 id="applytheme">Apply the Material Theme</h2>
 
 <p>To apply the material theme in your app, specify a style that inherits from
-<code>android:theme.Material</code>:</p>
+<code>android:Theme.Material</code>:</p>
 
 <pre>
 &lt;!-- res/values/styles.xml -->
@@ -70,8 +72,8 @@ animations for touch feedback and activity transitions. For more details, see
 <h2 id="layouts">Design Your Layouts</h2>
 
 <p>In addition to applying and customizing the material theme, your layouts should conform to
-the material design guidelines. When you design your layouts, pay special attention to the
-following:</p>
+the <a href="http://www.google.com/design/spec">material design guidelines</a>. When you design
+your layouts, pay special attention to the following:</p>
 
 <ul>
 <li>Baseline grids</li>
@@ -81,25 +83,25 @@ following:</p>
 <li>Layout structure</li>
 </ul>
 
-<p>You still define layouts inside XML files using the standard tools from the Android framework.
-For details on the material design guidelines, see the <a href="">material design
-specification</a>.</p>
 
+<h2 id="depth">Specify Elevation in Your Views</h2>
 
-<h2 id="depth">Specify Depth in Your Views</h2>
-
-<p>In the Android L Developer Preview, views can cast shadows. The elevation value of a view
-determines the size of its shadow. To set the elevation of a view, use the
+<p>Views can cast shadows, and the elevation value of a view
+determines the size of its shadow and its drawing order. To set the elevation of a view, use the
 <code>android:elevation</code> attribute in your layouts:</p>
 
 <pre>
-&lt;Button
-    android:id="@+id/my_button"
+&lt;TextView
+    android:id="@+id/my_textview"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/next"
-    <strong>android:elevation</strong>="10dp" />
+    android:background="@color/white"
+    <strong>android:elevation</strong>="5dp" />
 </pre>
+
+<p>The new <code>translationZ</code> property lets you create animations that reflect temporary
+changes in the elevation of a view. For example, this is useful to respond to touch gestures.</p>
 
 <p>For more details, see <a href="{@docRoot}preview/material/views-shadows.html">Views and
 Shadows</a>.</p>
@@ -107,11 +109,10 @@ Shadows</a>.</p>
 
 <h2 id="widgets">Use the New UI Widgets</h2>
 
-<p>The Android L Developer Preview includes two new UI widgets for complex views,
-<code>RecyclerView</code> and <code>CardView</code>. <code>RecyclerView</code> is a more advanced
-version of <code>ListView</code> that provides performance improvements and is easier to use.
-<code>CardView</code> lets you show pieces of information inside cards with a consistent look
-across apps. To include a <code>CardView</code> in your layout:</p>
+<p><code>RecyclerView</code> is a more advanced version of <code>ListView</code> that provides
+performance improvements and is easier to use. <code>CardView</code> lets you show pieces of
+information inside cards with a consistent look across apps. To include a <code>CardView</code>
+in your layout:</p>
 
 <pre>
 &lt;android.support.v7.widget.CardView
@@ -126,7 +127,7 @@ across apps. To include a <code>CardView</code> in your layout:</p>
 <p>For more information, see <a href="{@docRoot}preview/material/ui-widgets.html">UI Widgets</a>.</p>
 
 
-<h2 id="apis">Use the APIs to Customize Your Animations</h2>
+<h2 id="animations">Customize Your Animations</h2>
 
 <p>The Android L Developer Preview includes new APIs to create custom animations in your app.
 For example, you can enable activity transitions and define an exit transition inside an
