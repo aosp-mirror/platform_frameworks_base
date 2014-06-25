@@ -35,6 +35,8 @@ oneway interface ICallServiceAdapter {
 
     void handleFailedOutgoingCall(in ConnectionRequest request, int errorCode, String errorMessage);
 
+    void cancelOutgoingCall(String callId);
+
     void setActive(String callId);
 
     void setRinging(String callId);

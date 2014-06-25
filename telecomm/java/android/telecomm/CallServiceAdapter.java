@@ -135,6 +135,20 @@ public final class CallServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Tells Telecomm to cancel the call.
+     *
+     * @param callId The ID of the outgoing call.
+     */
+    public void cancelOutgoingCall(String callId) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.cancelOutgoingCall(callId);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
      * Sets a call's state to active (e.g., an ongoing call where two parties can actively
      * communicate).
      *
