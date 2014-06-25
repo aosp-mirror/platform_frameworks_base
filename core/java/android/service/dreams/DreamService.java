@@ -124,6 +124,19 @@ import com.android.internal.util.DumpUtils.Dump;
  *     }
  * }
  * </pre>
+ *
+ * <p>When targeting api level 21 and above, you must declare the service in your manifest file
+ * with the {@link android.Manifest.permission#BIND_DREAM_SERVICE} permission. For example:</p>
+ * <pre>
+ * &lt;service
+ *     android:name=".MyDream"
+ *     android:exported="true"
+ *     android:icon="@drawable/my_icon"
+ *     android:label="@string/my_dream_label"
+ *     android:permission="android.permission.BIND_DREAM_SERVICE" >
+ *  ...
+ * &lt;/service>
+ * </pre>
  */
 public class DreamService extends Service implements Window.Callback {
     private final String TAG = DreamService.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";

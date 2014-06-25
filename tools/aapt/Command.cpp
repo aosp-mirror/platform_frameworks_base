@@ -819,6 +819,7 @@ int doDump(Bundle* bundle)
             bool hasCameraSecureActivity = false;
             bool hasLauncher = false;
             bool hasNotificationListenerService = false;
+            bool hasDreamService = false;
 
             bool actMainActivity = false;
             bool actWidgetReceivers = false;
@@ -831,6 +832,7 @@ int doDump(Bundle* bundle)
             bool actOffHostApduService = false;
             bool actDocumentsProvider = false;
             bool actNotificationListenerService = false;
+            bool actDreamService = false;
             bool actCamera = false;
             bool actCameraSecure = false;
             bool catLauncher = false;
@@ -846,6 +848,7 @@ int doDump(Bundle* bundle)
             bool hasBindNfcServicePermission = false;
             bool hasRequiredSafAttributes = false;
             bool hasBindNotificationListenerServicePermission = false;
+            bool hasBindDreamServicePermission = false;
 
             // These two implement the implicit permissions that are granted
             // to pre-1.6 applications.
@@ -1007,6 +1010,7 @@ int doDump(Bundle* bundle)
                                 hasPrintService |= (actPrintService && hasBindPrintServicePermission);
                                 hasNotificationListenerService |= actNotificationListenerService &&
                                         hasBindNotificationListenerServicePermission;
+                                hasDreamService |= actDreamService && hasBindDreamServicePermission;
                                 hasOtherServices |= (!actImeService && !actWallpaperService &&
                                         !actAccessibilityService && !actPrintService &&
                                         !actHostApduService && !actOffHostApduService &&
@@ -1389,6 +1393,7 @@ int doDump(Bundle* bundle)
                     hasBindNfcServicePermission = false;
                     hasRequiredSafAttributes = false;
                     hasBindNotificationListenerServicePermission = false;
+                    hasBindDreamServicePermission = false;
                     if (withinApplication) {
                         if(tag == "activity") {
                             withinActivity = true;
@@ -1486,6 +1491,8 @@ int doDump(Bundle* bundle)
                                     hasBindNfcServicePermission = true;
                                 } else if (permission == "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE") {
                                     hasBindNotificationListenerServicePermission = true;
+                                } else if (permission == "android.permission.BIND_DREAM_SERVICE") {
+                                    hasBindDreamServicePermission = true;
                                 }
                             } else {
                                 fprintf(stderr, "ERROR getting 'android:permission' attribute for"
@@ -1569,6 +1576,7 @@ int doDump(Bundle* bundle)
                         actOffHostApduService = false;
                         actDocumentsProvider = false;
                         actNotificationListenerService = false;
+                        actDreamService = false;
                         actCamera = false;
                         actCameraSecure = false;
                         catLauncher = false;
@@ -1654,6 +1662,8 @@ int doDump(Bundle* bundle)
                                 actOffHostApduService = true;
                             } else if (action == "android.service.notification.NotificationListenerService") {
                                 actNotificationListenerService = true;
+                            } else if (action == "android.service.dreams.DreamService") {
+                                actDreamService = true;
                             }
                         } else if (withinProvider) {
                             if (action == "android.content.action.DOCUMENTS_PROVIDER") {
@@ -1888,6 +1898,9 @@ int doDump(Bundle* bundle)
             }
             if (hasNotificationListenerService) {
                 printComponentPresence("notification-listener");
+            }
+            if (hasDreamService) {
+                printComponentPresence("dream");
             }
             if (hasCameraActivity) {
                 printComponentPresence("camera");

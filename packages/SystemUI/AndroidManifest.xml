@@ -267,6 +267,7 @@
             android:name=".DessertCaseDream"
             android:exported="true"
             android:label="@string/dessert_case"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
             android:enabled="false"
             android:process=":sweetsweetdesserts"
             >
@@ -305,6 +306,7 @@
         <!-- I dream of notifications -->
         <service
             android:name=".doze.DozeService"
-            android:exported="true" />
+            android:exported="true"
+            android:permission="android.permission.BIND_DREAM_SERVICE" />
     </application>
 </manifest>

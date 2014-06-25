@@ -16,6 +16,8 @@
 
 package com.android.server.dreams;
 
+import static android.Manifest.permission.BIND_DREAM_SERVICE;
+
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
@@ -29,6 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -193,7 +196,7 @@ public final class DreamManagerService extends SystemService {
 
     private void startDreamInternal(boolean doze) {
         final int userId = ActivityManager.getCurrentUser();
-        final ComponentName dream = doze ? getDozeComponent() : chooseDreamForUser(userId);
+        final ComponentName dream = chooseDreamForUser(doze, userId);
         if (dream != null) {
             synchronized (mLock) {
                 startDreamLocked(dream, false /*isTest*/, doze, userId);
@@ -245,9 +248,29 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private ComponentName chooseDreamForUser(int userId) {
+    private ComponentName chooseDreamForUser(boolean doze, int userId) {
+        if (doze) {
+            ComponentName dozeComponent = getDozeComponent();
+            return validateDream(dozeComponent) ? dozeComponent : null;
+        }
         ComponentName[] dreams = getDreamComponentsForUser(userId);
         return dreams != null && dreams.length != 0 ? dreams[0] : null;
+    }
+
+    private boolean validateDream(ComponentName component) {
+        if (component == null) return false;
+        final ServiceInfo serviceInfo = getServiceInfo(component);
+        if (serviceInfo == null) {
+            Slog.w(TAG, "Dream " + component + " does not exist");
+            return false;
+        } else if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.L
+                && !BIND_DREAM_SERVICE.equals(serviceInfo.permission)) {
+            Slog.w(TAG, "Dream " + component
+                    + " is not available because its manifest is missing the " + BIND_DREAM_SERVICE
+                    + " permission on the dream service declaration.");
+            return false;
+        }
+        return true;
     }
 
     private ComponentName[] getDreamComponentsForUser(int userId) {
@@ -260,10 +283,8 @@ public final class DreamManagerService extends SystemService {
         List<ComponentName> validComponents = new ArrayList<ComponentName>();
         if (components != null) {
             for (ComponentName component : components) {
-                if (serviceExists(component)) {
+                if (validateDream(component)) {
                     validComponents.add(component);
-                } else {
-                    Slog.w(TAG, "Dream " + component + " does not exist");
                 }
             }
         }
@@ -307,11 +328,11 @@ public final class DreamManagerService extends SystemService {
         return TextUtils.isEmpty(name) ? null : ComponentName.unflattenFromString(name);
     }
 
-    private boolean serviceExists(ComponentName name) {
+    private ServiceInfo getServiceInfo(ComponentName name) {
         try {
-            return name != null && mContext.getPackageManager().getServiceInfo(name, 0) != null;
+            return name != null ? mContext.getPackageManager().getServiceInfo(name, 0) : null;
         } catch (NameNotFoundException e) {
-            return false;
+            return null;
         }
     }
 
