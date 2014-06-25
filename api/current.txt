@@ -38177,6 +38177,7 @@ package android.widget {
     method public android.graphics.drawable.Drawable getLogo();
     method public java.lang.CharSequence getLogoDescription();
     method public android.view.Menu getMenu();
+    method public java.lang.CharSequence getNavigationContentDescription();
     method public android.graphics.drawable.Drawable getNavigationIcon();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();

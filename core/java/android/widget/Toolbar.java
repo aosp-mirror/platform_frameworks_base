@@ -635,6 +635,17 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
+     * Retrieve the currently configured content description for the navigation button view.
+     * This will be used to describe the navigation action to users through mechanisms such
+     * as screen readers or tooltips.
+     *
+     * @return The navigation button's content description
+     */
+    public CharSequence getNavigationContentDescription() {
+        return mNavButtonView != null ? mNavButtonView.getContentDescription() : null;
+    }
+
+    /**
      * Set a content description for the navigation button if one is present. The content
      * description will be read via screen readers or other accessibility systems to explain
      * the action of the navigation button.

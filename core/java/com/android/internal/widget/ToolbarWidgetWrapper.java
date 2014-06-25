@@ -152,6 +152,11 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
         a.recycle();
 
+        if (TextUtils.isEmpty(mToolbar.getNavigationContentDescription())) {
+            mToolbar.setNavigationContentDescription(
+                    getContext().getResources().getText(R.string.action_bar_up_description));
+        }
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             final ActionMenuItem mNavItem = new ActionMenuItem(mToolbar.getContext(),
                     0, android.R.id.home, 0, 0, mTitle);
