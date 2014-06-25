@@ -165,7 +165,8 @@ bool GLEnv::InitWithNewContext() {
   sp<IGraphicBufferProducer> producer;
   sp<IGraphicBufferConsumer> consumer;
   BufferQueue::createBufferQueue(&producer, &consumer);
-  surfaceTexture_ = new GLConsumer(consumer, 0);
+  surfaceTexture_ = new GLConsumer(consumer, 0, GLConsumer::TEXTURE_EXTERNAL,
+          true, false);
   window_ = new Surface(producer);
 
   surfaces_[0] = SurfaceWindowPair(eglCreateWindowSurface(display(), config, window_.get(), NULL), NULL);
