@@ -152,6 +152,7 @@ public final class CreateInfo implements ICreateInfo {
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
         "android.os.SystemProperties#native_get",
+        "dalvik.system.VMRuntime#newUnpaddedArray"
     };
 
     /**
