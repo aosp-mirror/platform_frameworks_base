@@ -93,9 +93,9 @@
       <a href="<?cs var:toroot ?>preview/license.html">License Agreement</a>
       </div>
   </li>
-  <li class="nav-section" style="margin: 20px 0 0 3px;">
-    <div class="nav-section-header paging-links empty">
-      <a href="<?cs var:toroot ?>index.html" class="prev-page-link">Developer Home</a>
+  <li class="nav-section" style="margin: 20px 0 0 -10px;">
+    <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>index.html" class="back-link">Developer Home</a>
       </div>
   </li>
 </ul>
