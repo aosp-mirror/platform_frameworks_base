@@ -64,7 +64,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -168,11 +167,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
-    /**
-     * Default value of {@link android.provider.Settings.Global#LOCK_SCREEN_SHOW_NOTIFICATIONS}.
-     */
-    private static final boolean ALLOW_NOTIFICATIONS_DEFAULT = false;
-
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
@@ -184,21 +178,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * The delay to reset the hint text when the hint animation is finished running.
      */
     private static final int HINT_RESET_DELAY_MS = 1200;
-
-    // fling gesture tuning parameters, scaled to display density
-    private float mSelfExpandVelocityPx; // classic value: 2000px/s
-    private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
-    private float mFlingExpandMinVelocityPx; // classic value: 200px/s
-    private float mFlingCollapseMinVelocityPx; // classic value: 200px/s
-    private float mCollapseMinDisplayFraction; // classic value: 0.08 (25px/min(320px,480px) on G1)
-    private float mExpandMinDisplayFraction; // classic value: 0.5 (drag open halfway to expand)
-    private float mFlingGestureMaxXVelocityPx; // classic value: 150px/s
-
-    private float mExpandAccelPx; // classic value: 2000px/s/s
-    private float mCollapseAccelPx; // classic value: 2000px/s/s (will be negated to collapse "up")
-
-    private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little
-                                                    // faster than mSelfCollapseVelocityPx)
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -397,12 +376,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }};
 
-    private Runnable mOnFlipRunnable;
-    private VelocityTracker mSettingsTracker;
-    private float mSettingsDownY;
-    private boolean mSettingsStarted;
-    private boolean mSettingsCancelled;
-    private boolean mSettingsClosing;
     private boolean mVisible;
     private boolean mWaitingForKeyguardExit;
 
@@ -419,10 +392,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     private int mDisabledUnmodified;
-
-    public void setOnFlipRunnable(Runnable onFlipRunnable) {
-        mOnFlipRunnable = onFlipRunnable;
-    }
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<String> mCurrentlyVisibleNotifications = new ArraySet<String>();
@@ -1627,10 +1596,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private Handler getHandler() {
-        return mHandler;
-    }
-
     View.OnFocusChangeListener mFocusChangeListener = new View.OnFocusChangeListener() {
         public void onFocusChange(View v, boolean hasFocus) {
             // Because 'v' is a ViewGroup, all its children will be (un)selected
@@ -1773,12 +1738,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if (false) postStartTracing();
-    }
-
-    private static void cancelAnim(Animator anim) {
-        if (anim != null) {
-            anim.cancel();
-        }
     }
 
     public void flipToNotifications(boolean animate) {
@@ -2407,28 +2366,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            synchronized (mNotificationData) {
-                mPostCollapseCleanup = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (DEBUG) {
-                            Log.v(TAG, "running post-collapse cleanup");
-                        }
-                        try {
-                            mBarService.onClearAllNotifications(mCurrentUserId);
-                        } catch (Exception ex) { }
-                    }
-                };
-
-                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                return;
-                // TODO: Handle this better with notification stack scroller
-            }
-        }
-    };
-
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
@@ -2453,12 +2390,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         public void onClick(View v) {
             startActivityDismissingKeyguard(
                     new Intent(Intent.ACTION_QUICK_CLOCK), true); // have fun, everyone
-        }
-    };
-
-    private View.OnClickListener mNotificationButtonListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            animateExpandNotificationsPanel();
         }
     };
 
@@ -2594,21 +2525,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
-
-        mSelfExpandVelocityPx = res.getDimension(R.dimen.self_expand_velocity);
-        mSelfCollapseVelocityPx = res.getDimension(R.dimen.self_collapse_velocity);
-        mFlingExpandMinVelocityPx = res.getDimension(R.dimen.fling_expand_min_velocity);
-        mFlingCollapseMinVelocityPx = res.getDimension(R.dimen.fling_collapse_min_velocity);
-
-        mCollapseMinDisplayFraction = res.getFraction(R.dimen.collapse_min_display_fraction, 1, 1);
-        mExpandMinDisplayFraction = res.getFraction(R.dimen.expand_min_display_fraction, 1, 1);
-
-        mExpandAccelPx = res.getDimension(R.dimen.expand_accel);
-        mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
-
-        mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
-
-        mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
 
         mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
         if (mNotificationPanelGravity <= 0) {

@@ -109,7 +109,6 @@ public class NotificationPanelView extends PanelView implements
             new KeyguardClockPositionAlgorithm();
     private KeyguardClockPositionAlgorithm.Result mClockPositionResult =
             new KeyguardClockPositionAlgorithm.Result();
-    private boolean mIsSwipedHorizontally;
     private boolean mIsExpanding;
 
     private boolean mBlockTouches;
@@ -122,18 +121,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
-        if (mStatusBar != null) {
-            mStatusBar.setOnFlipRunnable(null);
-        }
         mStatusBar = bar;
-        if (bar != null) {
-            mStatusBar.setOnFlipRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    requestPanelHeightUpdate();
-                }
-            });
-        }
     }
 
     @Override
