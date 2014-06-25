@@ -31164,6 +31164,36 @@ package android.text.style {
     field public static final int WEEKDAY_WEDNESDAY = 4; // 0x4
   }
 
+  public static abstract class TtsSpan.Builder {
+    ctor public TtsSpan.Builder(java.lang.String);
+    method public android.text.style.TtsSpan build();
+    method public C setIntArgument(java.lang.String, int);
+    method public C setLongArgument(java.lang.String, long);
+    method public C setStringArgument(java.lang.String, java.lang.String);
+  }
+
+  public static class TtsSpan.CardinalBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.CardinalBuilder();
+    ctor public TtsSpan.CardinalBuilder(long);
+    ctor public TtsSpan.CardinalBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.CardinalBuilder setNumber(long);
+    method public android.text.style.TtsSpan.CardinalBuilder setNumber(java.lang.String);
+  }
+
+  public static class TtsSpan.SemioticClassBuilder extends android.text.style.TtsSpan.Builder {
+    ctor public TtsSpan.SemioticClassBuilder(java.lang.String);
+    method public C setAnimacy(java.lang.String);
+    method public C setCase(java.lang.String);
+    method public C setGender(java.lang.String);
+    method public C setMultiplicity(java.lang.String);
+  }
+
+  public static class TtsSpan.TextBuilder extends android.text.style.TtsSpan.SemioticClassBuilder {
+    ctor public TtsSpan.TextBuilder();
+    ctor public TtsSpan.TextBuilder(java.lang.String);
+    method public android.text.style.TtsSpan.TextBuilder setText(java.lang.String);
+  }
+
   public class TypefaceSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
     ctor public TypefaceSpan(java.lang.String);
     ctor public TypefaceSpan(android.os.Parcel);
