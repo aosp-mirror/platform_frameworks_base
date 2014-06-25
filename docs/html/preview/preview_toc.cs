@@ -32,6 +32,19 @@
         Get Started</a></li>
       <li class="nav-section">
         <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>preview/tv/design/index.html">
+          Design</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>preview/tv/design/principles.html">
+            Creative Vision</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/design/patterns.html">
+            UI Patterns</a></li>
+          <li><a href="<?cs var:toroot ?>preview/tv/design/style.html">
+            Style</a></li>
+        </ul>
+      </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>preview/tv/ui/index.html">
           User Interface</a></div>
         <ul>
