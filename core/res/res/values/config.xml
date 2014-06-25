@@ -1570,6 +1570,7 @@
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
+        <item>lockdown</item>
         <item>bugreport</item>
         <item>users</item>
     </string-array>

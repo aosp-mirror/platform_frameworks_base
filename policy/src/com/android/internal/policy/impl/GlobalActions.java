@@ -21,6 +21,7 @@ import com.android.internal.app.AlertController.AlertParams;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
@@ -64,6 +65,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
+import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -94,6 +97,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
     private static final String GLOBAL_ACTION_KEY_USERS = "users";
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
+    private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
@@ -279,6 +283,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 addUsersToMenu(mItems);
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
+            } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey) && hasTrustAgents()) {
+                mItems.add(getLockdownAction());
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -315,6 +321,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         dialog.setOnDismissListener(this);
 
         return dialog;
+    }
+
+    private boolean hasTrustAgents() {
+        // TODO: Add implementation.
+        return true;
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
@@ -415,6 +426,32 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             @Override
             public boolean showBeforeProvisioning() {
                 return true;
+            }
+        };
+    }
+
+    private Action getLockdownAction() {
+        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_lock,
+                R.string.global_action_lockdown) {
+
+            @Override
+            public void onPress() {
+                new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);
+                try {
+                    WindowManagerGlobal.getWindowManagerService().lockNow(null);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error while trying to lock device.", e);
+                }
+            }
+
+            @Override
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showBeforeProvisioning() {
+                return false;
             }
         };
     }
