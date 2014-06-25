@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.HdmiConstants.IRT_MS;
+
 import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -37,13 +39,6 @@ final class SendKeyAction extends FeatureAction {
     // State in which the action is at work. The state is set in {@link #start()} and
     // persists throughout the process till it is set back to {@code STATE_NONE} at the end.
     private static final int STATE_PROCESSING_KEYCODE = 1;
-
-    // IRT(Initiator Repetition Time) in millisecond as recommended in the standard.
-    // Outgoing UCP commands, when in 'Press and Hold' mode, should be this much apart
-    // from the adjacent one so as not to place unnecessarily heavy load on the CEC line.
-    // TODO: This value might need tweaking per product basis. Consider putting it
-    //       in config.xml to allow customization.
-    private static final int IRT_MS = 450;
 
     // Logical address of the device to which the UCP/UCP commands are sent.
     private final int mTargetAddress;
@@ -77,7 +72,6 @@ final class SendKeyAction extends FeatureAction {
      *
      * @param keyCode key code of {@link KeyEvent} object
      * @param isPressed true if the key event is of {@link KeyEvent#ACTION_DOWN}
-     * @param param additional parameter that comes with the key event
      */
     void processKeyEvent(int keyCode, boolean isPressed) {
         if (mState != STATE_PROCESSING_KEYCODE) {

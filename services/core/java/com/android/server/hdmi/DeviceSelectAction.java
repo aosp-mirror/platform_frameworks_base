@@ -164,8 +164,10 @@ final class DeviceSelectAction extends FeatureAction {
     }
 
     private void turnOnDevice() {
-        sendRemoteKeyCommand(HdmiConstants.UI_COMMAND_POWER);
-        sendRemoteKeyCommand(HdmiConstants.UI_COMMAND_POWER_ON_FUNCTION);
+        sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
+                HdmiConstants.UI_COMMAND_POWER);
+        sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
+                HdmiConstants.UI_COMMAND_POWER_ON_FUNCTION);
         mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
         addTimer(mState, TIMEOUT_POWER_ON_MS);
     }
@@ -175,13 +177,6 @@ final class DeviceSelectAction extends FeatureAction {
                 getSourceAddress(), mTarget.getPhysicalAddress()));
         mState = STATE_WAIT_FOR_ACTIVE_SOURCE;
         addTimer(mState, TIMEOUT_ACTIVE_SOURCE_MS);
-    }
-
-    private void sendRemoteKeyCommand(int keyCode) {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
-                mTarget.getLogicalAddress(), keyCode));
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
-                mTarget.getLogicalAddress()));
     }
 
     @Override

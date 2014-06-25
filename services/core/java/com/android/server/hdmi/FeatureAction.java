@@ -248,4 +248,11 @@ abstract class FeatureAction {
     protected final int getSourcePath() {
         return mSource.getDeviceInfo().getPhysicalAddress();
     }
+
+    protected void sendUserControlPressedAndReleased(int targetAddress, int uiCommand) {
+        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(
+                getSourceAddress(), targetAddress, uiCommand));
+        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
+                getSourceAddress(), targetAddress));
+    }
 }

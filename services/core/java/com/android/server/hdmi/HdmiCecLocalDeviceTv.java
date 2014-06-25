@@ -56,6 +56,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private int mPrevPortId;
 
+    @GuardedBy("mLock")
+    private int mSystemAudioVolume = HdmiConstants.UNKNOWN_VOLUME;
+
+    @GuardedBy("mLock")
+    private boolean mSystemAudioMute = false;
+
     // Copy of mDeviceInfos to guarantee thread-safety.
     @GuardedBy("mLock")
     private List<HdmiCecDeviceInfo> mSafeAllDeviceInfos = Collections.emptyList();
@@ -353,6 +359,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        byte params[] = message.getParams();
+        if (params.length < 1) {
+            Slog.w(TAG, "Invalide <Report Audio Status> message:" + message);
+            return true;
+        }
+        int mute = params[0] & 0x80;
+        int volume = params[0] & 0x7F;
+        setAudioStatus(mute == 0x80, volume);
+        return true;
+    }
+
     @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
@@ -458,9 +480,64 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    @ServiceThreadOnly
     void setAudioStatus(boolean mute, int volume) {
-        mService.setAudioStatus(mute, volume);
+        synchronized (mLock) {
+            mSystemAudioMute = mute;
+            mSystemAudioVolume = volume;
+            // TODO: pass volume to service (audio service) after scale it to local volume level.
+            mService.setAudioStatus(mute, volume);
+        }
+    }
+
+    @ServiceThreadOnly
+    void changeVolume(int curVolume, int delta, int maxVolume) {
+        assertRunOnServiceThread();
+        if (delta == 0 || !isSystemAudioOn()) {
+            return;
+        }
+
+        int targetVolume = curVolume + delta;
+        int cecVolume = VolumeControlAction.scaleToCecVolume(targetVolume, maxVolume);
+        synchronized (mLock) {
+            // If new volume is the same as current system audio volume, just ignore it.
+            // Note that UNKNOWN_VOLUME is not in range of cec volume scale.
+            if (cecVolume == mSystemAudioVolume) {
+                // Update tv volume with system volume value.
+                mService.setAudioStatus(false,
+                        VolumeControlAction.scaleToCustomVolume(mSystemAudioVolume, maxVolume));
+                return;
+            }
+        }
+
+        // Remove existing volume action.
+        removeAction(VolumeControlAction.class);
+
+        HdmiCecDeviceInfo avr = getAvrDeviceInfo();
+        addAndStartAction(VolumeControlAction.ofVolumeChange(this, avr.getLogicalAddress(),
+                cecVolume, delta > 0));
+    }
+
+    @ServiceThreadOnly
+    void changeMute(boolean mute) {
+        assertRunOnServiceThread();
+        if (!isSystemAudioOn()) {
+            return;
+        }
+
+        // Remove existing volume action.
+        removeAction(VolumeControlAction.class);
+        HdmiCecDeviceInfo avr = getAvrDeviceInfo();
+        addAndStartAction(VolumeControlAction.ofMute(this, avr.getLogicalAddress(), mute));
+    }
+
+    private boolean isSystemAudioOn() {
+        if (getAvrDeviceInfo() == null) {
+            return false;
+        }
+
+        synchronized (mLock) {
+            return mSystemAudioMode;
+        }
     }
 
     @Override

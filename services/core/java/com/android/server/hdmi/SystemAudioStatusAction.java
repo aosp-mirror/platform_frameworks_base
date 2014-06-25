@@ -72,17 +72,10 @@ final class SystemAudioStatusAction extends FeatureAction {
         int uiCommand = tv().getSystemAudioMode()
                 ? HdmiConstants.UI_COMMAND_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
                 : HdmiConstants.UI_COMMAND_MUTE_FUNCTION;           // SystemAudioMode: OFF
-        sendUserControlPressedAndReleased(uiCommand);
+        sendUserControlPressedAndReleased(mAvrAddress, uiCommand);
 
         // Still return SUCCESS to callback.
         finishWithCallback(HdmiCec.RESULT_SUCCESS);
-    }
-
-    private void sendUserControlPressedAndReleased(int uiCommand) {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(
-                getSourceAddress(), mAvrAddress, uiCommand));
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
-                getSourceAddress(), mAvrAddress));
     }
 
     @Override
@@ -109,7 +102,7 @@ final class SystemAudioStatusAction extends FeatureAction {
 
             if ((tv().getSystemAudioMode() && mute) || (!tv().getSystemAudioMode() && !mute)) {
                 // Toggle AVR's mute status to match with the system audio status.
-                sendUserControlPressedAndReleased(HdmiConstants.UI_COMMAND_MUTE);
+                sendUserControlPressedAndReleased(mAvrAddress, HdmiConstants.UI_COMMAND_MUTE);
             }
             finishWithCallback(HdmiCec.RESULT_SUCCESS);
         } else {

@@ -97,5 +97,12 @@ final class HdmiConstants {
 
     static final int UNKNOWN_VOLUME = -1;
 
+    // IRT(Initiator Repetition Time) in millisecond as recommended in the standard.
+    // Outgoing UCP commands, when in 'Press and Hold' mode, should be this much apart
+    // from the adjacent one so as not to place unnecessarily heavy load on the CEC line.
+    // TODO: This value might need tweaking per product basis. Consider putting it
+    //       in config.xml to allow customization.
+    static final int IRT_MS = 300;
+
     private HdmiConstants() { /* cannot be instantiated */ }
 }

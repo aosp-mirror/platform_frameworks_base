@@ -151,6 +151,8 @@ abstract class HdmiCecLocalDevice {
                 return handleSetSystemAudioMode(message);
             case HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
                 return handleSystemAudioModeStatus(message);
+            case HdmiCec.MESSAGE_REPORT_AUDIO_STATUS:
+                return handleReportAudioStatus(message);
             default:
                 return false;
         }
@@ -260,6 +262,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleInitiateArc(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
         return false;
     }
 
