@@ -144,7 +144,6 @@ extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
-extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
@@ -1223,7 +1222,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
     REG_JNI(register_android_util_FloatMath),
-    REG_JNI(register_android_text_format_Time),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),
