@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -60,6 +61,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     RecentsConfiguration mConfig;
     LayoutInflater mInflater;
+    Paint mDebugModePaint;
 
     // The space partitioning root of this container
     SpaceNode mBSP;
@@ -106,6 +108,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackView.setCallbacks(this);
             addView(stackView);
             mHasTasks |= (stack.getTaskCount() > 0);
+        }
+
+        // Enable debug mode drawing
+        if (mConfig.debugModeEnabled) {
+            mDebugModePaint = new Paint();
+            mDebugModePaint.setColor(0xFFff0000);
+            mDebugModePaint.setStyle(Paint.Style.STROKE);
+            mDebugModePaint.setStrokeWidth(5f);
+            setWillNotDraw(false);
         }
     }
 
@@ -322,6 +333,29 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        // Debug mode drawing
+        if (mConfig.debugModeEnabled) {
+            canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), mDebugModePaint);
+        }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (Console.Enabled) {
+            Console.log(Constants.Log.UI.MeasureAndLayout,
+                    "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
+        }
+
+        // Update the configuration with the latest system insets and trigger a relayout
+        mConfig.updateSystemInsets(insets.getSystemWindowInsets());
+        requestLayout();
+
+        return insets.consumeSystemWindowInsets(false, false, false, true);
+    }
+
     /** Notifies each task view of the user interaction. */
     public void onUserInteraction() {
         // Get the first stack view
@@ -352,29 +386,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (stackView != null) {
             stackView.focusNextTask(forward);
         }
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.Draw, "[RecentsView|dispatchDraw]", "",
-                    Console.AnsiPurple);
-        }
-        super.dispatchDraw(canvas);
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (Console.Enabled) {
-            Console.log(Constants.Log.UI.MeasureAndLayout,
-                    "[RecentsView|fitSystemWindows]", "insets: " + insets, Console.AnsiGreen);
-        }
-
-        // Update the configuration with the latest system insets and trigger a relayout
-        mConfig.updateSystemInsets(insets.getSystemWindowInsets());
-        requestLayout();
-
-        return insets.consumeSystemWindowInsets(false, false, false, true);
     }
 
     /** Unfilters any filtered stacks */

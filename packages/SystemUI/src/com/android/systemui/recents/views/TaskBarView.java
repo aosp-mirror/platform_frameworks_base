@@ -90,11 +90,11 @@ class TaskBarView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (Constants.DebugFlags.App.EnableTaskBarTouchEvents) {
-            return super.onTouchEvent(event);
-        }
         // We ignore taps on the task bar except on the filter and dismiss buttons
-        return true;
+        if (!Constants.DebugFlags.App.EnableTaskBarTouchEvents) return true;
+        if (mConfig.debugModeEnabled) return true;
+
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -149,7 +149,7 @@ class TaskBarView extends FrameLayout {
     }
 
     /** Binds the bar view to the task */
-    void rebindToTask(Task t, boolean animate) {
+    void rebindToTask(Task t) {
         mTask = t;
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
@@ -160,15 +160,12 @@ class TaskBarView extends FrameLayout {
         }
         mActivityDescription.setText(t.activityLabel);
         // Try and apply the system ui tint
-        int tint = t.colorPrimary;
-        if (!Constants.DebugFlags.App.EnableTaskBarThemeColors || tint == 0) {
-            tint = mConfig.taskBarViewDefaultBackgroundColor;
-        }
-        setBackgroundColor(tint);
-        mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColor(tint,
-                mConfig.taskBarViewLightTextColor, mConfig.taskBarViewDarkTextColor));
-        mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColor(tint,
-                mLightDismissDrawable, mDarkDismissDrawable));
+        setBackgroundColor(t.colorPrimary);
+        mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColorGreyscale(
+                t.colorPrimaryGreyscale, mConfig.taskBarViewLightTextColor,
+                mConfig.taskBarViewDarkTextColor));
+        mDismissButton.setImageDrawable(Utilities.getIdealResourceForBackgroundColorGreyscale(
+                t.colorPrimaryGreyscale, mLightDismissDrawable, mDarkDismissDrawable));
     }
 
     /** Unbinds the bar view from the task */

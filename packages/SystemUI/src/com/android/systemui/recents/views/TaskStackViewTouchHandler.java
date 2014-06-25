@@ -371,11 +371,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     @Override
     public void onBeginDrag(View v) {
-        // Enable HW layers
-        mSv.addHwLayersRefCount("swipeBegin");
-        // Disable clipping with the stack while we are swiping
         TaskView tv = (TaskView) v;
+        // Disable clipping with the stack while we are swiping
         tv.setClipViewInStack(false);
+        // Enable HW layers on that task
+        tv.enableHwLayers();
+        // Disallow touch events from this task view
+        mSv.setTouchOnTaskView(tv, false);
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -391,25 +393,31 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onChildDismissed(View v) {
         TaskView tv = (TaskView) v;
-        mSv.onTaskDismissed(tv);
-
+        // Disable HW layers on that task
+        if (mSv.mHwLayersTrigger.getCount() == 0) {
+            tv.disableHwLayers();
+        }
         // Re-enable clipping with the stack (we will reuse this view)
         tv.setClipViewInStack(true);
-
-        // Disable HW layers
-        mSv.decHwLayersRefCount("swipeComplete");
+        // Remove the task view from the stack
+        mSv.onTaskDismissed(tv);
     }
 
     @Override
     public void onSnapBackCompleted(View v) {
-        // Re-enable clipping with the stack
-        TaskView tv = (TaskView) v;
-        tv.setClipViewInStack(true);
+        onDragCancelled(v);
     }
 
     @Override
     public void onDragCancelled(View v) {
-        // Disable HW layers
-        mSv.decHwLayersRefCount("swipeCancelled");
+        TaskView tv = (TaskView) v;
+        // Disable HW layers on that task
+        if (mSv.mHwLayersTrigger.getCount() == 0) {
+            tv.disableHwLayers();
+        }
+        // Re-enable clipping with the stack
+        tv.setClipViewInStack(true);
+        // Re-enable touch events from this task view
+        mSv.setTouchOnTaskView(tv, true);
     }
 }

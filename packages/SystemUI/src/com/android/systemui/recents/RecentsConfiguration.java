@@ -103,6 +103,7 @@ public class RecentsConfiguration {
 
     /** Dev options */
     public boolean developerOptionsEnabled;
+    public boolean debugModeEnabled;
 
     /** Private constructor */
     private RecentsConfiguration(Context context) {
@@ -141,9 +142,13 @@ public class RecentsConfiguration {
 
     /** Updates the state, given the specified context */
     void update(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
         mDisplayMetrics = dm;
+
+        // Debug mode
+        debugModeEnabled = settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false);
 
         // Animations
         animationPxMovementPerSecond =
@@ -168,7 +173,6 @@ public class RecentsConfiguration {
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
 
         // Update the search widget id
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
 
         // Task stack

@@ -935,6 +935,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.poke();
     }
 
+    /** Disables handling touch on this task view. */
+    void setTouchOnTaskView(TaskView tv, boolean enabled) {
+        tv.setOnClickListener(enabled ? this : null);
+    }
+
     /**** TaskStackCallbacks Implementation ****/
 
     @Override
@@ -1177,47 +1182,34 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void prepareViewToEnterPool(TaskView tv) {
         Task task = tv.getTask();
-        tv.resetViewProperties();
         if (Console.Enabled) {
             Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|returnToPool]",
                     tv.getTask() + " tv: " + tv);
         }
 
         // Report that this tasks's data is no longer being used
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.unloadTaskData(task);
+        RecentsTaskLoader.getInstance().unloadTaskData(task);
 
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
 
-        // Disable hw layers on this view
+        // Disable HW layers
         tv.disableHwLayers();
+
+        // Reset the view properties
+        tv.resetViewProperties();
     }
 
     @Override
-    public void prepareViewToLeavePool(TaskView tv, Task prepareData, boolean isNewView) {
+    public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
         if (Console.Enabled) {
             Console.log(Constants.Log.ViewPool.PoolCallbacks, "[TaskStackView|leavePool]",
                     "isNewView: " + isNewView);
         }
 
-        // Setup and attach the view to the window
-        Task task = prepareData;
-        // We try and rebind the task (this MUST be done before the task filled)
+        // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task);
-        // Request that this tasks's data be filled
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.loadTaskData(task);
-        // Find the index where this task should be placed in the children
-        int insertIndex = -1;
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            Task tvTask = ((TaskView) getChildAt(i)).getTask();
-            if (mStack.containsTask(task) && (mStack.indexOfTask(task) < mStack.indexOfTask(tvTask))) {
-                insertIndex = i;
-                break;
-            }
-        }
+        RecentsTaskLoader.getInstance().loadTaskData(task);
 
         // Sanity check, the task view should always be clipping against the stack at this point,
         // but just in case, re-enable it here
@@ -1226,6 +1218,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
+        }
+
+        // Find the index where this task should be placed in the stack
+        int insertIndex = -1;
+        int taskIndex = mStack.indexOfTask(task);
+        if (taskIndex != -1) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                Task tvTask = ((TaskView) getChildAt(i)).getTask();
+                if (taskIndex < mStack.indexOfTask(tvTask)) {
+                    insertIndex = i;
+                    break;
+                }
+            }
         }
 
         // Add/attach the view to the hierarchy
@@ -1237,7 +1243,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             addView(tv, insertIndex);
 
             // Set the callbacks and listeners for this new view
-            tv.setOnClickListener(this);
+            setTouchOnTaskView(tv, true);
             tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());

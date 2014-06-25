@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.SearchManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -25,12 +26,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
+import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
@@ -110,7 +113,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     // Broadcast receiver to handle messages from our RecentsService
-    BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
+    final BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -144,17 +147,28 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenOverlayView));
                 // Call our callback
                 onEnterAnimationTriggered();
+            } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
+                // Refresh the search widget
+                refreshSearchWidget();
             }
         }
     };
 
     // Broadcast receiver to handle messages from the system
-    BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
+    final BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mFinishWithoutAnimationRunnable.run();
         }
     };
+
+    // Debug trigger
+    final DebugTrigger mDebugTrigger = new DebugTrigger(new Runnable() {
+        @Override
+        public void run() {
+            onDebugModeTriggered();
+        }
+    });
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks(Intent launchIntent) {
@@ -432,6 +446,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
         filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
         filter.addAction(RecentsService.ACTION_START_ENTER_ANIMATION);
+        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register the broadcast receiver to handle messages when the screen is turned off
@@ -514,7 +529,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mRecentsView.focusNextTask(!backward);
             return true;
         }
-
+        // Pass through the debug trigger
+        mDebugTrigger.onKeyEvent(keyCode);
         return super.onKeyDown(keyCode, event);
     }
 
@@ -547,6 +563,23 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
+    /** Called when debug mode is triggered */
+    public void onDebugModeTriggered() {
+        if (mConfig.developerOptionsEnabled) {
+            SharedPreferences settings = getSharedPreferences(getPackageName(), 0);
+            if (settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false)) {
+                // Disable the debug mode
+                settings.edit().remove(Constants.Values.App.Key_DebugModeEnabled).apply();
+            } else {
+                // Enable the debug mode
+                settings.edit().putBoolean(Constants.Values.App.Key_DebugModeEnabled, true).apply();
+            }
+            Toast.makeText(this, "Debug mode (" + Constants.Values.App.DebugModeVersion +
+                    ") toggled, please restart Recents now", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Called when the enter recents animation is triggered. */
     public void onEnterAnimationTriggered() {
         // Animate the scrims in
         mScrimViews.startEnterRecentsAnimation();
