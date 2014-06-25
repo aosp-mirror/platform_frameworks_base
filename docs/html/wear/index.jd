@@ -124,15 +124,15 @@ page.type=about
           <div class="landing-section-header">
             <div class="landing-h1">Developing for Android Wear</div>
             <div class="landing-subhead">
-             The Android Wear APIs are delivered in the Android v4 support library and Google Play services.
-             This lets Android handhelds, old and new, communicate with Android wearables.
-            </div>
+             The Android Wear APIs are delivered in the Android Support Library and Google Play
+             services. When using these libraries, handheld devices running Android 4.3
+             (API Level 18) or later can communicate with wearables.</div>
           </div>
 
           <div class="landing-body">
             <div class="landing-breakout cols">
               <div class="col-4">
-                <img src="{@docRoot}wear/images/features/ts2.png" alt="">
+                <img src="{@docRoot}wear/images/features/notifications.png" alt="">
                 <p>Synced Notifications</p>
                 <p class="landing-small">
                   Notifications on handhelds can automatically sync to wearables, so design them
@@ -143,31 +143,7 @@ page.type=about
                 </p>
               </div>
               <div class="col-4">
-                <img src="{@docRoot}wear/images/features/ts1.png" alt="">
-                <p>Wearable Apps</p>
-                <p class="landing-small">
-                  Create custom experiences with activities, services, sensors, and much
-                  more with the Android SDK.
-                </p>
-                <p class="landing-small">
-                  <a href="{@docRoot}training/wearables/apps/index.html">Create wearable apps</a>
-
-                </p>
-              </div>
-              <div class="col-4">
-                <img src="{@docRoot}wear/images/features/ts2.png" alt="">
-                <p>Send Data</p>
-                <p class="landing-small">
-                  Send data and actions between handhelds and wearables with
-                  data replication APIs and RPCs.
-                </p>
-                <p class="landing-small">
-                  <a href="{@docRoot}training/wearables/data-layer/index.html">Work with the Data Layer</a>
-
-                </p>
-              </div>
-              <div class="col-4">
-                <img src="{@docRoot}wear/images/features/ts4.png" alt="">
+                <img src="{@docRoot}wear/images/features/voice.png" alt="">
                 <p>Voice Actions</p>
                 <p class="landing-small">
                   Register your app to handle voice actions, like "Ok Google, take a&nbsp;note,"
@@ -175,6 +151,29 @@ page.type=about
                 </p>
                 <p class="landing-small">
                   <a href="{@docRoot}training/wearables/apps/voice-actions.html">Integrate voice actions</a>
+                </p>
+              </div>
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/apps.png" alt="">
+                <p>Build Wearable Apps</p>
+                <p class="landing-small">
+                  Create custom experiences with activities, services, sensors, and much
+                  more with the Android SDK.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/apps/index.html">Create wearable apps</a>
+                </p>
+              </div>
+              <div class="col-4">
+                <img src="{@docRoot}wear/images/features/send-data.png" alt="">
+                <p>Synced Data</p>
+                <p class="landing-small">
+                  Send data and actions between handhelds and wearables with
+                  data replication APIs and RPCs.
+                </p>
+                <p class="landing-small">
+                  <a href="{@docRoot}training/wearables/data-layer/index.html">Work with the Data Layer</a>
+
                 </p>
               </div>
             </div>
@@ -185,7 +184,7 @@ page.type=about
       <div class="landing-section landing-white-background">
         <div class="wrap">
           <div class="landing-section-header">
-            <div class="landing-h2">Building an Ecosystem</div>
+            <div class="landing-h1">Building an Ecosystem</div>
             <div class="landing-body landing-align-center">
               <p class="landing-small">
                 We’re working with partners around the world to build watches powered by Android Wear!

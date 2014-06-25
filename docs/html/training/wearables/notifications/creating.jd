@@ -28,7 +28,7 @@ notifications properly, whether they appear on a handheld or wearable.
 <p class="note"><strong>Note:</strong>
 Notifications using {@link android.widget.RemoteViews} are stripped of custom
 layouts and the wearable only displays the text and icons. However, you can create
-<a href="{@docRoot}training/wearable/apps/custom-notifications.html">create custom notifications</a>
+<a href="{@docRoot}training/wearables/apps/layouts.html#CustomNotifications">create custom notifications</a>
 that use custom card layouts by creating a wearable app that runs on the wearable device.</p>
 </div>
 
@@ -123,7 +123,7 @@ the associated intent is invoked on the handheld.</p>
 <p class="note"><strong>Tip:</strong> If your notifications include a "Reply" action
   (such as for a messaging app), you can enhance the behavior by enabling
   voice input replies directly from the Android wearable. For more information, read
-  <a href="{@docRoot}training/wearables/notifications/remote-input.html">Receiving Remote Input from
+  <a href="{@docRoot}training/wearables/notifications/voice-input.html">Receiving Voice Input from
   a Notification</a>.
 </p>
 

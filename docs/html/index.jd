@@ -65,20 +65,22 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           and it now supports these exciting, new form-factors.
         </div>
       </div>
-      <div class="landing-body" style="margin-top: 80px;">
+      <div class="landing-body" style="margin-top: 50px;">
         <div class="landing-breakout cols">
           <div class="col-3-wide">
+              <img src="{@docRoot}images/home/wear-wordmark.png" />
               <img src="{@docRoot}images/home/wear.png">
-              <p class="landing-small" style="margin-top:30px">
+              <p class="landing-small">
                 Provide information on-the-go for your users, whenever they need it.
             </p>
             <p class="landing-small">
               <a href="{@docRoot}wear/index.html">Learn about Android Wear</a>
             </p>
           </div>
-          <div class="col-3-wide">            
+          <div class="col-3-wide">
+              <img src="{@docRoot}images/home/tv-wordmark.png" />
              <img src="{@docRoot}images/home/tv.png">
-              <p class="landing-small" style="margin-top:30px">
+              <p class="landing-small" >
                 Build your apps for the big screen and bring your content to life.
               </p>
             <p class="landing-small">
@@ -86,9 +88,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
             </p>
           </div>
-          <div class="col-3-wide">            
+          <div class="col-3-wide">
+              <img src="{@docRoot}images/home/auto-wordmark.png" />
               <img src="{@docRoot}images/home/auto.png">
-              <p class="landing-small" style="margin-top:30px">
+              <p class="landing-small">
                 Extend your music apps to automobile
                 entertainment systems.
              </p>
