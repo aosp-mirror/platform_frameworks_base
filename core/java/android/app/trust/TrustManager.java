@@ -71,6 +71,21 @@ public class TrustManager {
     }
 
     /**
+     * Reports that trust is disabled until credentials have been entered for user {@param userId}.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param userId either an explicit user id or {@link android.os.UserHandle#USER_ALL}
+     */
+    public void reportRequireCredentialEntry(int userId) {
+        try {
+            mService.reportRequireCredentialEntry(userId);
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
      * Registers a listener for trust events.
      *
      * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
