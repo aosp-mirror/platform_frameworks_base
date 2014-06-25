@@ -20,6 +20,9 @@ App</a> training lesson first.</a></p>
     <b>Install</b>.</li>
 </ol>
 
+<p class="note"><strong>Note:</strong> The Eclipse ADT plug-in requires Java 7
+if your compilation target is the L developer preview.</p>
+
 <h2 id="setupHardware">Set Up Hardware and AVDs</h2>
 
 <p>The Android L developer preview provides you with 32-bit system images
