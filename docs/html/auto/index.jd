@@ -53,6 +53,21 @@ page.type=about
   left:7px;
   z-index:1;
 }
+.sdk-link {
+  font-size:16px;
+  padding-left:5px;
+  padding-right:15px;
+}
+.sdk-link-title {
+  font-size:18px;
+  padding-left:5px;
+  padding-right:15px;
+}
+.sdk-link-desc {
+  font-size:14px;
+  padding-left:5px;
+  padding-right:15px;
+}
 </style>
 
 
@@ -201,9 +216,6 @@ page.type=about
           <div class="landing-section-header">
             <div class="landing-pre-h1">Coming soon</div>
             <div class="landing-h1">Android Auto SDK</div>
-            <div style="text-align:center;margin-top:20px;font-size:14pt;margin-bottom:-5px">
-                <a href="https://docs.google.com/a/google.com/forms/d/1ANgYOoYLkfyZ2JRPSU34Nep5yNaU-Ha2syXJ9b4xLrA/viewform">Sign up for updates</a>
-            </div>
           </div>
 
           <div class="landing-body">
@@ -211,19 +223,35 @@ page.type=about
               and tools to make your existing apps compatible with Android Auto. The first version
               of the SDK will provide templates and APIs for music, podcast, live radio, and audio
               news apps, as well as limited voice actions.</p>
-            <p style="margin-bottom:40px">
+            <p>
               Future versions of the Android Auto SDK will include support for a selection of
               Android notifications, additional voice actions, and templates and APIs for
-              messaging, communication, local search, and more.</p>
+              messaging, communication, local search, and more.
+            </p>
 
-              <a target="_blank" href="http://g.co/androidautodev">
-                <img class="landing-social-image" src="//www.google.com/images/icons/product/gplus-128.png" alt="+Android Auto Developers">
-              </a>
-              <p>
-                Join the Android Auto developer community on Google+ to stay involved, get the
-                latest updates, and exchange experiences with other developers.
-                <a target="_blank" href="http://g.co/androidautodev">+Android Auto Developers</a>
-              </p>
+            <div class="cols" style="margin-top:40px">
+              <div class="col-3-wide">
+                <p class="sdk-link-title">Updates</p>
+                <p class="sdk-link-desc">
+                  Register to receive more information and be notified when the SDK is available.
+                </p>
+                <a class="sdk-link" href="https://docs.google.com/a/google.com/forms/d/1ANgYOoYLkfyZ2JRPSU34Nep5yNaU-Ha2syXJ9b4xLrA/viewform">Sign up for updates</a>
+              </div>
+              <div class="col-3-wide">
+                <p class="sdk-link-title">Google+ Community</p>
+                <p class="sdk-link-desc">
+                  Stay involved, get updates, and exchange experiences with other developers.
+                </p>
+                <a class="sdk-link" href="http://g.co/androidautodev">Discuss on Google+</a>
+              </div>
+              <div class="col-3-wide">
+                <p class="sdk-link-title">Developer Overview</p>
+                <p class="sdk-link-desc">
+                  Learn more about developing apps for Android Auto when the SDK is available.
+                </p>
+                <a class="sdk-link" href="{@docRoot}auto/overview.html">Learn about the platform</a>
+              </div>
+            </div>
           </div>
 
         </div> <!-- end .wrap -->
