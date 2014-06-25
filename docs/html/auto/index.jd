@@ -59,6 +59,9 @@ page.type=about
   padding-left:5px;
   padding-right:15px;
 }
+.cols-leftp {
+  padding-left:95px;
+}
 </style>
 
 
@@ -325,7 +328,7 @@ page.type=about
                 Android Auto is coming soon to new cars from these manufacturers
               </div>
           </div>
-          <div class="cols">
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/abarth.png"
                    width="120" height="120" class="img-logo" />
@@ -342,12 +345,12 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/audi.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/bentley.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/chevrolet.png"
                    width="120" height="120" class="img-logo" />
@@ -360,6 +363,8 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/dodge.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/fiat.png"
                    width="120" height="120" class="img-logo" />
@@ -368,8 +373,6 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/ford.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/honda.png"
                    width="120" height="120" class="img-logo" />
@@ -378,6 +381,8 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/hyundai.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/infinity.png"
                    width="120" height="120" class="img-logo" />
@@ -390,12 +395,12 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/kia.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/maserati.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/mazda.png"
                    width="120" height="120" class="img-logo" />
@@ -413,7 +418,7 @@ page.type=about
                    width="120" height="120" class="img-logo" />
             </div>
           </div>
-          <div class="cols">
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/ram.png"
                    width="120" height="120" class="img-logo" />
@@ -430,12 +435,12 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/auto/skoda.png"
                    width="120" height="120" class="img-logo" />
             </div>
+          </div>
+          <div class="cols cols-leftp">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/subaru.png"
                    width="120" height="120" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
                    width="120" height="120" class="img-logo" />
@@ -447,14 +452,6 @@ page.type=about
             <div class="col-5">
               <img src="{@docRoot}auto/images/logos/auto/volvo.png"
                    width="120" height="120" class="img-logo" />
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/auto/skoda.png"
-                   width="120" height="120" class="img-logo" />-->
-            </div>
-            <div class="col-5">
-              <!--<img src="/auto/images/logos/auto/skoda.png"
-                   width="120" height="120" class="img-logo" />-->
             </div>
           </div>
         </div>
