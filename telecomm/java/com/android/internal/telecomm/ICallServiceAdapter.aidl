@@ -19,6 +19,8 @@ package com.android.internal.telecomm;
 import android.telecomm.CallInfo;
 import android.telecomm.ConnectionRequest;
 
+import com.android.internal.telecomm.RemoteServiceCallback;
+
 /**
  * Internal remote callback interface for call services.
  *
@@ -56,4 +58,6 @@ oneway interface ICallServiceAdapter {
     void onPostDialWait(String callId, String remaining);
 
     void handoffCall(String callId);
+
+    void queryRemoteConnectionServices(RemoteServiceCallback callback);
 }

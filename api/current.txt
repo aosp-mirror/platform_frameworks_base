@@ -27595,8 +27595,9 @@ package android.telecomm {
     method public abstract void unhold(java.lang.String);
   }
 
-  public final class CallServiceAdapter {
+  public final class CallServiceAdapter implements android.os.IBinder.DeathRecipient {
     method public void addConferenceCall(java.lang.String);
+    method public void binderDied();
     method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
     method public void handleSuccessfulOutgoingCall(java.lang.String);
     method public void handoffCall(java.lang.String);
@@ -27728,10 +27729,12 @@ package android.telecomm {
   public final class ConnectionRequest implements android.os.Parcelable {
     ctor public ConnectionRequest(android.net.Uri, android.os.Bundle);
     ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle);
+    ctor public ConnectionRequest(android.telecomm.Subscription, java.lang.String, android.net.Uri, android.os.Bundle);
     method public int describeContents();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
+    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27741,9 +27744,12 @@ package android.telecomm {
     method public final void abort(java.lang.String);
     method public final void answer(java.lang.String);
     method public final void call(android.telecomm.CallInfo);
+    method public void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.SimpleResponse<android.telecomm.ConnectionRequest, android.telecomm.RemoteConnection>);
     method public final void disconnect(java.lang.String);
     method public java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
+    method public void lookupRemoteSubscriptions(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.Subscription>>);
+    method public void maybeRespondToSubscriptionLookup();
     method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
@@ -27813,9 +27819,44 @@ package android.telecomm {
     method protected abstract void updateCall(android.telecomm.InCallCall);
   }
 
+  public final class RemoteConnection {
+    method public void addListener(android.telecomm.RemoteConnection.Listener);
+    method public void answer();
+    method public void disconnect();
+    method public int getDisconnectCause();
+    method public java.lang.String getDisconnectMessage();
+    method public void hold();
+    method public void playDtmf(char);
+    method public void postDialContinue(boolean);
+    method public void reject();
+    method public void removeListener(android.telecomm.RemoteConnection.Listener);
+    method public void stopDtmf();
+    method public void unhold();
+  }
+
+  public static abstract interface RemoteConnection.Listener {
+    method public abstract void onAudioStateChanged(android.telecomm.RemoteConnection, android.telecomm.CallAudioState);
+    method public abstract void onDestroyed(android.telecomm.RemoteConnection);
+    method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
+    method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
+    method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
+    method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
+  }
+
+  public class RemoteConnectionService implements android.os.IBinder.DeathRecipient {
+    method public void binderDied();
+    method public void createOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.SimpleResponse<android.telecomm.ConnectionRequest, android.telecomm.RemoteConnection>);
+    method public java.util.List<android.telecomm.Subscription> lookupSubscriptions(android.net.Uri);
+  }
+
   public abstract interface Response {
     method public abstract void onError(IN, int, java.lang.String);
     method public abstract void onResult(IN, OUT...);
+  }
+
+  public abstract interface SimpleResponse {
+    method public abstract void onError(IN);
+    method public abstract void onResult(IN, OUT);
   }
 
   public class Subscription implements android.os.Parcelable {
@@ -38350,6 +38391,22 @@ package android.widget {
     method public void setOnZoomOutClickListener(android.view.View.OnClickListener);
     method public void setZoomSpeed(long);
     method public void show();
+  }
+
+}
+
+package com.android.internal.telecomm {
+
+  public abstract interface RemoteServiceCallback implements android.os.IInterface {
+    method public abstract void onError() throws android.os.RemoteException;
+    method public abstract void onResult(java.util.List<android.content.ComponentName>, java.util.List<android.os.IBinder>) throws android.os.RemoteException;
+  }
+
+  public static abstract class RemoteServiceCallback.Stub extends android.os.Binder implements com.android.internal.telecomm.RemoteServiceCallback {
+    ctor public RemoteServiceCallback.Stub();
+    method public android.os.IBinder asBinder();
+    method public static com.android.internal.telecomm.RemoteServiceCallback asInterface(android.os.IBinder);
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
   }
 
 }

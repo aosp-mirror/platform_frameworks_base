@@ -16,12 +16,21 @@
 
 package android.telecomm;
 
+import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
+
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.telephony.DisconnectCause;
+
+import com.android.internal.telecomm.ICallService;
+import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +45,12 @@ public abstract class ConnectionService extends CallService {
     // Mappings from Connections to IDs as understood by the current CallService implementation
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
+    private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private SimpleResponse<Uri, List<Subscription>> mSubscriptionLookupResponse;
+    private Uri mSubscriptionLookupHandle;
+    private boolean mAreSubscriptionsInitialized = false;
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
         @Override
@@ -311,6 +326,71 @@ public abstract class ConnectionService extends CallService {
         Log.d(this, "onPostDialWait(%s, %s)", conn, remaining);
 
         getAdapter().onPostDialWait(mIdByConnection.get(conn), remaining);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void onAdapterAttached(CallServiceAdapter adapter) {
+        if (mAreSubscriptionsInitialized) {
+            // No need to query again if we already did it.
+            return;
+        }
+
+        getAdapter().queryRemoteConnectionServices(new RemoteServiceCallback.Stub() {
+            @Override
+            public void onResult(
+                    final List<ComponentName> componentNames,
+                    final List<IBinder> callServices) {
+                mHandler.post(new Runnable() {
+                    @Override public void run() {
+                        for (int i = 0; i < componentNames.size() && i < callServices.size(); i++) {
+                            mRemoteConnectionManager.addConnectionService(
+                                    componentNames.get(i),
+                                    ICallService.Stub.asInterface(callServices.get(i)));
+                        }
+                        mAreSubscriptionsInitialized = true;
+                        Log.d(this, "remote call services found: " + callServices);
+                        maybeRespondToSubscriptionLookup();
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                mHandler.post(new Runnable() {
+                    @Override public void run() {
+                        mAreSubscriptionsInitialized = true;
+                        maybeRespondToSubscriptionLookup();
+                    }
+                });
+            }
+        });
+    }
+
+    public void lookupRemoteSubscriptions(
+            Uri handle, SimpleResponse<Uri, List<Subscription>> response) {
+        mSubscriptionLookupResponse = response;
+        mSubscriptionLookupHandle = handle;
+        maybeRespondToSubscriptionLookup();
+    }
+
+    public void maybeRespondToSubscriptionLookup() {
+        if (mAreSubscriptionsInitialized && mSubscriptionLookupResponse != null) {
+            mSubscriptionLookupResponse.onResult(
+                    mSubscriptionLookupHandle,
+                    mRemoteConnectionManager.getSubscriptions(mSubscriptionLookupHandle));
+
+            mSubscriptionLookupHandle = null;
+            mSubscriptionLookupResponse = null;
+        }
+    }
+
+    public void createRemoteOutgoingConnection(
+            ConnectionRequest request,
+            SimpleResponse<ConnectionRequest, RemoteConnection> response) {
+        mRemoteConnectionManager.createOutgoingConnection(request, response);
     }
 
     /**

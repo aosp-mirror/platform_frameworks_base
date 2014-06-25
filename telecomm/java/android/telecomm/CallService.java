@@ -27,8 +27,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.ICallService;
 import com.android.internal.telecomm.ICallServiceAdapter;
 
-import java.util.List;
-
 /**
  * Base implementation of CallService which can be used to provide calls for the system
  * in-call UI. CallService is a one-way service from the framework's CallsManager to any app
@@ -72,7 +70,7 @@ public abstract class CallService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_CALL_SERVICE_ADAPTER:
-                    mAdapter = new CallServiceAdapter((ICallServiceAdapter) msg.obj);
+                    mAdapter.addAdapter((ICallServiceAdapter) msg.obj);
                     onAdapterAttached(mAdapter);
                     break;
                 case MSG_CALL:
@@ -259,7 +257,7 @@ public abstract class CallService extends Service {
      */
     private final CallServiceBinder mBinder = new CallServiceBinder();
 
-    private CallServiceAdapter mAdapter = null;
+    private CallServiceAdapter mAdapter = new CallServiceAdapter();
 
     /** {@inheritDoc} */
     @Override

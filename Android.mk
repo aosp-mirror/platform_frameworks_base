@@ -333,6 +333,7 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
 	telecomm/java/com/android/internal/telecomm/ITelecommService.aidl \
+	telecomm/java/com/android/internal/telecomm/RemoteServiceCallback.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
