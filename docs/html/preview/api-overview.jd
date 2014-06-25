@@ -24,7 +24,6 @@ sdk.platform.apiLevel=20
   <li><a href="#UI">User Interface</a>
     <ol>
       <li><a href="#MaterialDesign">Material design support</a></li>
-      <li><a href="#DoNotDisturb">Do Not Disturb mode</a></li>
       <li><a href="#LockscreenNotifications">Lockscreen notifications</a></li>
       <li><a href="#NotificationsMetadata">Notifications metadata</a></li>
       <li><a href="#Recents">Concurrent documents and activities in the Recents screen</a></li>
@@ -39,11 +38,12 @@ sdk.platform.apiLevel=20
   <li><a href="#Animations">Animation &amp; Graphics</a>
     <ol>
       <li><a href="#OpenGLES-3-1">Support for OpenGL ES 3.1</a></li>
+      <li><a href="#AndroidExtensionPack">Android Extension Pack</a></li>
     </ol>
   </li>
   <li><a href="#Multimedia">Multimedia</a>
     <ol>
-      <li><a href="#Camera-v2">Camera v2 API</a></li>
+      <li><a href="#Camera-v2">Camera API for advanced camera capabilities</a></li>
       <li><a href="#AudioPlayback">Audio playback</a></li>
       <li><a href="#MediaPlaybackControl">Media playback control</a></li>
     </ol>
@@ -55,7 +55,7 @@ sdk.platform.apiLevel=20
   </li>
   <li><a href="#Wireless">Wireless and Connectivity</a>
     <ol>
-      <li><a href="#Multinetwork">Dynamic network selection and seamless handoff</a></li>
+      <li><a href="#Multinetwork">Multiple network connections</a></li>
       <li><a href="#BluetoothBroadcasting">Bluetooth broadcasting</a></li>
       <li><a href="#NFCEnhancements">NFC enhancements</a></li>
     </ol>
@@ -85,15 +85,8 @@ sdk.platform.apiLevel=20
   <li><a href="#Manifest">Manifest Declarations</a>
     <ol>
       <li><a href="#ManifestFeatures">Declarable required features</a></li>
-      <li><a href="#ManifestPermissions">User permissions</a></li>
     </ol>
   </li>
-</ol>
-
-<h2>See also</h2>
-<ol>
-<li><a href="{@docRoot}sdk/api_diff/20/changes.html">API
-Differences Report &raquo;</a> </li>
 </ol>
 
 </div>
@@ -188,8 +181,8 @@ notifications look right with the new color scheme:</p>
 <p>If you are currently adding sounds and vibrations to your notifications by
 using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
 or {@link android.os.Vibrator} classes, remove this code so that
-the system can present notifications correctly in <a href="#DoNotDisturb">Do
-Not Disturb</a> mode. Instead, use the {@link android.app.Notification.Builder}
+the system can present notifications correctly in Do
+not Disturb mode. Instead, use the {@link android.app.Notification.Builder}
 methods instead to add sounds and vibration.</p>
 
 <p>Notifications now appear in a small floating window
@@ -302,31 +295,6 @@ notification, first create the replacement notification using
 notification object, attach the replacement notification to it through the
 {@code Notification.Builder.setPublicVersion()} method.</p>
 
-<h3 id="DoNotDisturb">Do Not Disturb mode</h3>
-
-<p>The L Developer Preview introduces a new <em>Do Not Disturb</em> mode. When
-the user puts the device in <em>Do Not Disturb</em> mode, the device limits
-the frequency of the notifications it shows the user (when the user
-wants to avoid distractions). The user can
-customize the feature in a number of ways, such as:</p>
-
-<ul>
-  <li>Specifying important people, whose calls should go through even when
-    the device is in <em>Do Not Disturb</em> mode.</li>
-  <li>Setting custom categories to allow notifications when the device is in
-    <em>Do Not Disturb</em> mode. Examples of such categories include phone
-    calls and direct communications (like Hangouts and Skype calls).</li>
-  <li>Setting rules so <em>Do Not Disturb</em> automatically goes into effect in
-    certain conditions (like at particular times of day).</li>
-</ul>
-
-<p>You should add the appropriate metadata to your app notifications to help
-make sure <em>Do Not Disturb</em> mode handles them properly. For example, if
-your app is an alarm clock,
-you can tag the notification as an alarm so it will wake the user up even if the
-device is in <em>Do Not Disturb</em> mode. For more information, see <a
-href="#NotificationsMetadata">Notifications metadata</a>.</p>
-
 <h3 id="NotificationsMetadata">Notifications metadata</h3>
 <p>The L Developer Preview uses metadata associated with your app notifications
 to sort the notifications more intelligently. The metadata you set also
@@ -338,7 +306,7 @@ notification:</p>
 <ul>
 <li>{@code setCategory()}. Depending on the message category, this tells
 the system how to handle your app notifications when the device is
-in <em>Do Not Disturb</em> mode (for example, if your notification represents an
+in <em>Do not Disturb</em> mode (for example, if your notification represents an
 incoming call, instant message, or alarm).
 <li>{@code setPriority()}. Notifications with the priority field set to
 {@code PRIORITY_MAX} or {@code PRIORITY_HIGH} will appear in a small floating
@@ -432,13 +400,13 @@ ES 3.1. Key new functionality provided in OpenGL ES 3.1 includes:</p>
 <li>Compute shaders
 <li>Separate shader objects
 <li>Indirect draw commands
-<li>Enhanced texturing functionality
+<li>Multisample and stencil textures
 <li>Shading language improvements
-<li>Optional extensions for per-sample shading, advanced blending modes, and more
+<li>Extensions for advanced blend modes and debugging
 <li>Backward compatibility with OpenGL ES 2.0 and 3.0
 </ul>
 
-<p>The Java interface for OpenGL ES 3.1 on Android is provided with GLES31. When
+<p>The Java interface for OpenGL ES 3.1 on Android is provided with {@code GLES31}. When
 using OpenGL ES 3.1, be sure that you declare it in your manifest file with the
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
 tag and the {@code android:glEsVversion} attribute. For example:</p>
@@ -454,9 +422,32 @@ tag and the {@code android:glEsVversion} attribute. For example:</p>
 device’s supported OpenGL ES version at runtime, see the
 <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
 
+<h3 id="AndroidExtensionPack">Android Extension Pack</h3>
+
+<p>In addition to OpenGL ES 3.1, this release provides an extension pack with Java interfaces and
+native support for advanced graphics functionality. These extensions are treated as a single
+package by Android. (If the {@code ANDROID_extension_pack_es31} extension is present, your app can
+assume all extensions in the package are present and enable the shading language features with
+a single {@code #extension} statement.</p>
+<p>The extension pack supports:</p>
+<ul>
+<li>Guaranteed fragment shader support for shader storage buffers, images, and
+  atomics (fragment shader support is optional in OpenGL ES 3.1.)</li>
+<li>Tessellation and geometry shaders</li>
+<li>ASTC (LDR) texture compression format</li>
+<li>Per-sample interpolation and shading</li>
+<li>Different blend modes for each color attachment in a frame buffer</li>
+</ul>
+
+<p>The Java interface for the extension pack is provided with {@code GLES31Ext}.
+In your app manifest, you can declare that support for the extension pack is
+required, with the
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+tag, but the precise syntax is not finalized in the L Developer Preview.</p>
+
 <h2 id="Multimedia">Multimedia</h2>
 
-<h3 id="Camera-v2">Camera v2 API</h3>
+<h3 id="Camera-v2">Camera API for advanced camera capabilities</h3>
 
 <p>The L Developer Preview introduces the new {@code android.hardware.camera2}
 API to facilitate fine-grain photo capture and image processing. You can now
@@ -473,6 +464,9 @@ capture request. Now when the system completes the image capture request, your
 {@code CameraCaptureSession.CaptureListener()} receives a call to
 {@code onCaptureCompleted()}, providing you with the image capture metadata in a
 {@code CaptureResult}.</p>
+
+<p>To see an example of how to use the updated Camera API, refer to the {@code Camera2Basic}
+and {@code Camera2Video} implementation samples in this release.</p>
 
 <h3 id="AudioPlayback">Audio playback</h3>
 <p>This release includes the following changes to
@@ -557,7 +551,7 @@ content.</p>
 
 <h2 id="Wireless">Wireless &amp; Connectivity</h2>
 
-<h3 id="Multinetwork">Dynamic network selection and seamless handoff</h3>
+<h3 id="Multinetwork">Multiple network connections</h3>
 <p>The L Developer Preview provides new multi-networking APIs. These let your app
 dynamically scan for available networks with specific capabilities, and
 establish a connection to them. This is useful when your app requires a
@@ -680,6 +674,9 @@ JobScheduler jobScheduler =
 jobScheduler.schedule(uploadTask);
 </pre>
 
+<p>To see an example of how to use the {@code JobScheduler} API, refer to the
+{@code JobSchedulerSample} implementation sample in this release.</p>
+
 <h3 id="PowerMeasurementTools">Developer tools for power measurement</h3>
 <p>The L Developer Preview provides several new developer tools and APIs to help
 you better measure and understand your app's power usage.</p>
@@ -762,31 +759,32 @@ $ historian.par [-p powerfile] bugreport.txt > out.html
 </div>
 
 <p>The L Developer Preview provides new functionality for running apps within
-an enterprise environment. A device administrator can
-initiate a managed provisioning process to add a co-present but separate <em>managed
-profile</em> to a device with an existing personal account. The administrator has
-control over the managed profile.</p>
+an enterprise environment. A
+<a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a> can
+initiate a managed provisioning process to add a co-present but separate <em>Android
+work profile</em> to a device, if the user has an existing personal account.
+Apps that are associated with Android work profiles will appear alongside
+non-managed apps in the user’s Launcher, Recent apps screen, and notifications.</p>
 
 <p>To start the managed provisioning process, send {@code
 ACTION_PROVISION_MANAGED_PROFILE} in an {@link android.content.Intent}. If the
 call is successful, the system triggers the {@code
 android.app.admin.DeviceAdminReceiver. onProfileProvisioningComplete()} callback.
 You can then call {@code app.admin.DevicePolicyManager. setProfileEnabled()} to
-set this profile to the enabled state.</p>
+enable this Android work profile.</p>
 
-<p>A user may be associated with more than one managed profile. To get a list of
-the managed profiles associated with the user, call
-{@code android.os.UserManager. getUserProfiles()}.</p>
-
-<p>Once a managed profile is created for a user, apps that are managed by the
-device administrator will appear alongside non-managed apps in the user’s
-Launcher, Recent apps screen, and notifications.</p>
+<p>A device administrator can associate a user with more than one Android
+work profile. To get a list of the Android work profiles associated with the
+user, call {@code android.os.UserManager. getUserProfiles()}.</p>
 
 <p>If you are developing a Launcher app, you can use the new {@code
 android.content.pm.LauncherApps} class to get a list of launchable activities
-for the current user and any associated managed profiles. Your Launcher can make
+for the current user and any associated Android work profiles. Your Launcher can make
 the managed apps visually prominent by appending a “work” badge to the icon
-drawable with {@code android.os.UserManager.getBadgeDrawableForUser()}.</p>
+drawable with {@code android.os.UserManager. getBadgeDrawableForUser()}.</p>
+
+<p>To see an example of how to use the new functionality, refer to the
+{@code BasicManagedProfile} implementation sample in this release.</p>
 
 <h3 id="TaskLocking">Task locking</h3>
 <p>The L Developer Preview introduces a new task locking API that
@@ -897,7 +895,7 @@ your app needs.</p>
 <ul>
 <li>{@code FEATURE_LEANBACK}. Declares that your app must be installed only on
 devices that support the
-<a href="{@docRoot}training/tv/index.html}">Android TV</a> user interface.
+<a href="{@docRoot}training/tv/index.html">Android TV</a> user interface.
 Example:
 <pre>
 &lt;uses-feature android:name="android.software.leanback"
@@ -912,13 +910,5 @@ devices that fully implement the {@code android.webkit.*} APIs. Example:
 </pre>
 </ul>
 
-<h3 id="ManifestPermissions">User permissions</h3>
-<p>The following values are now supported in the
-<a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
-  &lt;uses-permission&gt;}</a> to declare the
-permissions your app requires in order to access certain APIs.
-
-<ul>
-<li>{@code SIM_COMMUNICATION}. Required to communicate with a SIM card using
-  logical channels.
-</ul>
+<p class="note">For a detailed view of all API changes in the L Developer Preview, see the
+<a href="{@docRoot}preview/reference.html">API Differences Report</a>.</p>
