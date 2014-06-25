@@ -4582,12 +4582,6 @@ public final class Settings {
         public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
-         * If enabled, intercepted notifications will be displayed (not suppressed) in zen mode.
-         * @hide
-         */
-        public static final String DISPLAY_INTERCEPTED_NOTIFICATIONS = "display_intercepted_notifications";
-
-        /**
          * If enabled, apps should try to skip any introductory hints on first launch. This might
          * apply to users that are already familiar with the environment or temporary users.
          * <p>
