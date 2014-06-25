@@ -640,7 +640,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param device Remote Bluetooth Device
-     * @param data Data to send
+     * @param report Report to send
      * @return false on immediate error,
      *               true otherwise
      * @hide
