@@ -177,7 +177,7 @@ interface IImsCallSession {
     /**
      * Extends this call to the conference call with the specified recipients.
      *
-     * @participants participant list to be invited to the conference call after extending the call
+     * @param participants participant list to be invited to the conference call after extending the call
      * @see Listener#sessionConferenceExtened, Listener#sessionConferenceExtendFailed
      */
     void extendToConference(in String[] participants);
@@ -185,7 +185,7 @@ interface IImsCallSession {
     /**
      * Requests the conference server to invite an additional participants to the conference.
      *
-     * @participants participant list to be invited to the conference call
+     * @param participants participant list to be invited to the conference call
      * @see Listener#sessionInviteParticipantsRequestDelivered,
      *      Listener#sessionInviteParticipantsRequestFailed
      */
