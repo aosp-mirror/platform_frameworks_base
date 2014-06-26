@@ -86,20 +86,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Activity action: Used to indicate that the receiving activity is being started as part of the
-     * managed profile provisioning flow. This intent is typically sent to a mobile device
-     * management application (mdm) after the first part of the provisioning process is complete in
-     * the expectation that this app will (after optionally showing it's own UI) ultimately call
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} to complete the creation of the managed profile.
-     *
-     * <p> The intent may contain the extras {@link #EXTRA_PROVISIONING_TOKEN} and
-     * {@link #EXTRA_PROVISIONING_EMAIL_ADDRESS}.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SEND_PROVISIONING_VALUES
-        = "android.app.action.ACTION_SEND_PROVISIONING_VALUES";
-
-    /**
      * Activity action: Starts the provisioning flow which sets up a managed profile.
      *
      * <p>A managed profile allows data separation for example for the usage of a
@@ -128,17 +114,6 @@ public class DevicePolicyManager {
         = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
 
     /**
-     * A broadcast intent with this action can be sent to ManagedProvisionning to specify that the
-     * user has already consented to the creation of the managed profile.
-     * The intent must contain the extras
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} and
-     * {@link #EXTRA_PROVISIONING_TOKEN}
-     * @hide
-     */
-    public static final String ACTION_PROVISIONING_USER_HAS_CONSENTED
-        = "android.app.action.ACTION_PROVISIONING_USER_HAS_CONSENTED";
-
-    /**
      * A String extra holding the package name of the mobile device management application that
      * will be set as the profile owner or device owner.
      *
@@ -153,18 +128,6 @@ public class DevicePolicyManager {
         = "android.app.extra.deviceAdminPackageName";
 
     /**
-     * An int extra used to identify that during the current setup process the user has already
-     * consented to setting up a managed profile. This is typically received by
-     * a mobile device management application when it is started with
-     * {@link #ACTION_SEND_PROVISIONING_VALUES} and passed on in an intent
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} which starts the setup of the managed profile. The
-     * token indicates that steps asking for user consent can be skipped as the user has previously
-     * consented.
-     */
-    public static final String EXTRA_PROVISIONING_TOKEN
-        = "android.app.extra.token";
-
-    /**
      * A String extra holding the default name of the profile that is created during managed profile
      * provisioning.
      *
@@ -174,12 +137,15 @@ public class DevicePolicyManager {
         = "android.app.extra.defaultManagedProfileName";
 
     /**
-     * A String extra holding the email address of the profile that is created during managed
-     * profile provisioning. This is typically received by a mobile management application when it
-     * is started with {@link #ACTION_SEND_PROVISIONING_VALUES} and passed on in an intent
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} which starts the setup of the managed profile. It
-     * is eventually passed on in an intent
+     * A String extra that, holds the email address of the account which a managed profile is
+     * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
+     *
+     * <p> If the {@link #ACTION_PROVISION_MANAGED_PROFILE} intent that starts managed provisioning
+     * contains this extra, it is forwarded in the
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} intent to the mobile
+     * device management application that was set as the profile owner during provisioning.
+     * It is usually used to avoid that the user has to enter their email address twice.
      */
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
         = "android.app.extra.ManagedProfileEmailAddress";
