@@ -8,12 +8,15 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
-#include "TypefaceImpl.h"
 #include <jni.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
 class SkPaint;
+
+namespace android {
+class TypefaceImpl;
+}
 
 class GraphicsJNI {
 public:
