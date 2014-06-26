@@ -59,7 +59,7 @@ in ADT. The rest of this training assumes you're using Android Studio.
       <dd>Learn how to create an Android Studio project that
       contains both the wearable and handheld app modules and how to run the app on a device
       or emulator.</dd>
-    <dt><a href="{@docRoot}training/wearables/apps/activity.html">Creating Custom Layouts</a></dt>
+    <dt><a href="{@docRoot}training/wearables/apps/layouts.html">Creating Custom Layouts</a></dt>
       <dd>Learn how to create and display custom layouts for notifications and
       activities.</dd>
     <dt><a href="{@docRoot}training/wearables/apps/voice.html">Adding Voice Capabilities</a></dt>
