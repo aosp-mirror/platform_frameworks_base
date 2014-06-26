@@ -123,8 +123,6 @@ public abstract class Connection {
 
     /**
      * @return The state of this Connection.
-     *
-     * @hide
      */
     public final int getState() {
         return mState;
@@ -275,6 +273,8 @@ public abstract class Connection {
 
     /**
      * TODO(santoscordon): Needs updated documentation.
+     *
+     * @hide
      */
     public final void conference() {
         Log.d(this, "conference");
@@ -285,9 +285,14 @@ public abstract class Connection {
      * Inform this Connection that the state of its audio output has been changed externally.
      *
      * @param state The new audio state.
+     * @hide
      */
-    public void setAudioState(CallAudioState state) {
+    public final void setAudioState(CallAudioState state) {
         Log.d(this, "setAudioState %s", state);
+        mCallAudioState = state;
+        for (Listener l : mListeners) {
+            l.onAudioStateChanged(this, state);
+        }
         onSetAudioState(state);
     }
 
@@ -319,18 +324,21 @@ public abstract class Connection {
      * Returns whether this connection is requesting that the system play a ringback tone
      * on its behalf.
      */
-    public boolean isRequestingRingback() {
+    public final boolean isRequestingRingback() {
         return mRequestingRingback;
     }
 
     /**
      * Returns whether this connection is a conference connection (has child connections).
      */
-    public boolean isConferenceConnection() {
+    public final boolean isConferenceConnection() {
         return !mChildConnections.isEmpty();
     }
 
-    public void setParentConnection(Connection parentConnection) {
+    /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    public final void setParentConnection(Connection parentConnection) {
         Log.d(this, "parenting %s to %s", this, parentConnection);
         if (mParentConnection != parentConnection) {
             if (mParentConnection != null) {
@@ -347,18 +355,18 @@ public abstract class Connection {
         }
     }
 
-    public Connection getParentConnection() {
+    public final Connection getParentConnection() {
         return mParentConnection;
     }
 
-    public List<Connection> getChildConnections() {
+    public final List<Connection> getChildConnections() {
         return mChildConnections;
     }
 
     /**
      * Returns whether this connection is capable of being conferenced.
      */
-    public boolean isConferenceCapable() {
+    public final boolean isConferenceCapable() {
         return mIsConferenceCapable;
     }
 
@@ -367,7 +375,7 @@ public abstract class Connection {
      *
      * @param handle The new handle.
      */
-    protected void setHandle(Uri handle) {
+    public final void setHandle(Uri handle) {
         Log.d(this, "setHandle %s", handle);
         // TODO: Enforce super called
         mHandle = handle;
@@ -380,7 +388,7 @@ public abstract class Connection {
      * Sets state to active (e.g., an ongoing call where two or more parties can actively
      * communicate).
      */
-    protected void setActive() {
+    public final void setActive() {
         setRequestingRingback(false);
         setState(State.ACTIVE);
     }
@@ -388,21 +396,21 @@ public abstract class Connection {
     /**
      * Sets state to ringing (e.g., an inbound ringing call).
      */
-    protected void setRinging() {
+    public final void setRinging() {
         setState(State.RINGING);
     }
 
     /**
      * Sets state to dialing (e.g., dialing an outbound call).
      */
-    protected void setDialing() {
+    public final void setDialing() {
         setState(State.DIALING);
     }
 
     /**
      * Sets state to be on hold.
      */
-    protected void setOnHold() {
+    public final void setOnHold() {
         setState(State.HOLDING);
     }
 
@@ -416,7 +424,7 @@ public abstract class Connection {
      *         {@link android.telephony.DisconnectCause}.
      * @param message Optional call-service-provided message about the disconnect.
      */
-    protected void setDisconnected(int cause, String message) {
+    public final void setDisconnected(int cause, String message) {
         setState(State.DISCONNECTED);
         Log.d(this, "Disconnected with cause %d message %s", cause, message);
         for (Listener l : mListeners) {
@@ -430,7 +438,7 @@ public abstract class Connection {
      *
      * @param ringback Whether the ringback tone is to be played.
      */
-    protected void setRequestingRingback(boolean ringback) {
+    public final void setRequestingRingback(boolean ringback) {
         if (mRequestingRingback != ringback) {
             mRequestingRingback = ringback;
             for (Listener l : mListeners) {
@@ -442,7 +450,7 @@ public abstract class Connection {
     /**
      * TODO(santoscordon): Needs documentation.
      */
-    protected void setIsConferenceCapable(boolean isConferenceCapable) {
+    public final void setIsConferenceCapable(boolean isConferenceCapable) {
         if (mIsConferenceCapable != isConferenceCapable) {
             mIsConferenceCapable = isConferenceCapable;
             for (Listener l : mListeners) {
@@ -454,7 +462,7 @@ public abstract class Connection {
     /**
      * TODO(santoscordon): Needs documentation.
      */
-    protected void setDestroyed() {
+    public final void setDestroyed() {
         // It is possible that onDestroy() will trigger the listener to remove itself which will
         // result in a concurrent modification exception. To counteract this we make a copy of the
         // listeners and iterate on that.
@@ -466,46 +474,32 @@ public abstract class Connection {
     }
 
     /**
-     * Notifies this Connection and listeners that the {@link #getCallAudioState()} property
-     * has a new value.
-     *
-     * @param state The new call audio state.
-     */
-    protected void onSetAudioState(CallAudioState state) {
-        // TODO: Enforce super called
-        mCallAudioState = state;
-        for (Listener l : mListeners) {
-            l.onAudioStateChanged(this, state);
-        }
-    }
-
-    /**
      * Notifies this Connection and listeners of a change in the current signal levels
      * for the underlying data transport.
      *
      * @param details A {@link android.os.Bundle} containing details of the current level.
      */
-    protected void onSetSignal(Bundle details) {
-        // TODO: Enforce super called
+    public final void setSignal(Bundle details) {
         for (Listener l : mListeners) {
             l.onSignalChanged(this, details);
         }
     }
 
     /**
+     * Notifies this Connection and listeners that the {@link #getCallAudioState()} property
+     * has a new value.
+     *
+     * @param state The new call audio state.
+     */
+    protected void onSetAudioState(CallAudioState state) {}
+
+    /**
      * Notifies this Connection of an internal state change. This method is called before the
-     * state is actually changed. Overriding implementations must call
-     * {@code super.onSetState(state)}.
+     * state is actually changed.
      *
      * @param state The new state, a {@link Connection.State} member.
      */
-    protected void onSetState(int state) {
-        // TODO: Enforce super called
-        this.mState = state;
-        for (Listener l : mListeners) {
-            l.onStateChanged(this, state);
-        }
-    }
+    protected void onSetState(int state) {}
 
     /**
      * Notifies this Connection of a request to play a DTMF tone.
@@ -585,6 +579,10 @@ public abstract class Connection {
 
     private void setState(int state) {
         Log.d(this, "setState: %s", stateToString(state));
+        this.mState = state;
+        for (Listener l : mListeners) {
+            l.onStateChanged(this, state);
+        }
         onSetState(state);
     }
 }
