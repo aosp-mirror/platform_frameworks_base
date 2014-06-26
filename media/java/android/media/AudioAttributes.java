@@ -427,24 +427,46 @@ public final class AudioAttributes implements Parcelable {
         return 0;
     }
 
+    /**
+     * @hide
+     * Used to indicate that when parcelling, the tags should be parcelled through the flattened
+     * formatted string, not through the array of strings.
+     * Keep in sync with frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
+     * see definition of kAudioAttributesMarshallTagFlattenTags
+     */
+    public final static int FLATTEN_TAGS = 0x1;
+    /**
+     * When adding tags for writeToParcel(Parcel, int), add them in the list of flags (| NEW_FLAG)
+     */
+    private final static int ALL_PARCEL_FLAGS = FLATTEN_TAGS;
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mUsage);
         dest.writeInt(mContentType);
         dest.writeInt(mFlags);
-        String[] tagsArray = new String[mTags.size()];
-        mTags.toArray(tagsArray);
-        dest.writeStringArray(tagsArray);
+        dest.writeInt(flags & ALL_PARCEL_FLAGS);
+        if ((flags & FLATTEN_TAGS) == 0) {
+            String[] tagsArray = new String[mTags.size()];
+            mTags.toArray(tagsArray);
+            dest.writeStringArray(tagsArray);
+        } else if ((flags & FLATTEN_TAGS) == FLATTEN_TAGS) {
+            dest.writeString(mFormattedTags);
+        }
     }
 
     private AudioAttributes(Parcel in) {
         mUsage = in.readInt();
         mContentType = in.readInt();
         mFlags = in.readInt();
+        boolean hasFlattenedTags = ((in.readInt() & FLATTEN_TAGS) == FLATTEN_TAGS);
         mTags = new HashSet<String>();
-        String[] tagsArray = in.readStringArray();
-        for (int i = tagsArray.length - 1 ; i >= 0 ; i--) {
-            mTags.add(tagsArray[i]);
+        if (hasFlattenedTags) {
+            mTags.add(in.readString());
+        } else {
+            String[] tagsArray = in.readStringArray();
+            for (int i = tagsArray.length - 1 ; i >= 0 ; i--) {
+                mTags.add(tagsArray[i]);
+            }
         }
     }
 

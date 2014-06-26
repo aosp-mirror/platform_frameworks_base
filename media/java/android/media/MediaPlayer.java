@@ -1441,6 +1441,36 @@ public class MediaPlayer implements SubtitleController.Listener
 
     private native void _setAudioStreamType(int streamtype);
 
+    // Keep KEY_PARAMETER_* in sync with include/media/mediaplayer.h
+    private final static int KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
+    /**
+     * Sets the parameter indicated by key.
+     * @param key key indicates the parameter to be set.
+     * @param value value of the parameter to be set.
+     * @return true if the parameter is set successfully, false otherwise
+     * {@hide}
+     */
+    private native boolean setParameter(int key, Parcel value);
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Must call this method before prepare() or
+     * prepareAsync() in order for the audio attributes to become effective
+     * thereafter.
+     * @param attributes a non-null set of audio attributes
+     */
+    public void setAudioAttributes(AudioAttributes attributes) throws IllegalArgumentException {
+        if (attributes == null) {
+            final String msg = "Cannot set audio attributes to null";
+            throw new IllegalArgumentException(msg);
+        }
+        Parcel pattributes = Parcel.obtain();
+        attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
+        setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
+        pattributes.recycle();
+    }
+
     /**
      * Sets the player to be looping or non-looping.
      *
