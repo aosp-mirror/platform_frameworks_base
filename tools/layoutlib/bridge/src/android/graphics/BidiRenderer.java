@@ -28,6 +28,8 @@ import java.util.List;
 
 import com.ibm.icu.lang.UScript;
 import com.ibm.icu.lang.UScriptRun;
+import com.ibm.icu.text.Bidi;
+import com.ibm.icu.text.BidiRun;
 
 import android.graphics.Paint_Delegate.FontInfo;
 
@@ -38,7 +40,7 @@ import android.graphics.Paint_Delegate.FontInfo;
 @SuppressWarnings("deprecation")
 public class BidiRenderer {
 
-    /*package*/ static class ScriptRun {
+    private static class ScriptRun {
         int start;
         int limit;
         boolean isRtl;
@@ -66,7 +68,7 @@ public class BidiRenderer {
      * @param paint The Paint to use to get the fonts. Should not be null.
      * @param text Unidirectional text. Should not be null.
      */
-    /*package*/ BidiRenderer(Graphics2D graphics, Paint_Delegate paint, char[] text) {
+    public BidiRenderer(Graphics2D graphics, Paint_Delegate paint, char[] text) {
         assert (paint != null);
         mGraphics = graphics;
         mPaint = paint;
@@ -75,13 +77,45 @@ public class BidiRenderer {
         for (FontInfo fontInfo : paint.getFonts()) {
             mFonts.add(fontInfo.mFont);
         }
+        mBounds = new RectF();
+    }
+
+    /**
+     *
+     * @param x The x-coordinate of the left edge of where the text should be drawn on the given
+     *            graphics.
+     * @param y The y-coordinate at which to draw the text on the given mGraphics.
+     *
+     */
+    public BidiRenderer setRenderLocation(float x, float y) {
+        mBounds = new RectF(x, y, x, y);
+        mBaseline = y;
+        return this;
+    }
+
+    /**
+     * Perform Bidi Analysis on the text and then render it.
+     * <p/>
+     * To skip the analysis and render unidirectional text, see {@link
+     * #renderText(int, int, boolean, float[], int, boolean)}
+     */
+    public RectF renderText(int start, int limit, int bidiFlags, float[] advances,
+            int advancesIndex, boolean draw) {
+        Bidi bidi = new Bidi(mText, start, null, 0, limit - start, getIcuFlags(bidiFlags));
+        for (int i = 0; i < bidi.countRuns(); i++) {
+            BidiRun visualRun = bidi.getVisualRun(i);
+            boolean isRtl = visualRun.getDirection() == Bidi.RTL;
+            renderText(visualRun.getStart(), visualRun.getLimit(), isRtl, advances,
+                    advancesIndex, draw);
+        }
+        return mBounds;
     }
 
     /**
      * Render unidirectional text.
-     *
+     * <p/>
      * This method can also be used to measure the width of the text without actually drawing it.
-     *
+     * <p/>
      * @param start index of the first character
      * @param limit index of the first character that should not be rendered.
      * @param isRtl is the text right-to-left
@@ -90,17 +124,12 @@ public class BidiRenderer {
      * @param advancesIndex index into advances from where the advances need to be filled.
      * @param draw If true and {@code graphics} is not null, draw the rendered text on the graphics
      *            at the given co-ordinates
-     * @param x The x-coordinate of the left edge of where the text should be drawn on the given
-     *            graphics.
-     * @param y The y-coordinate at which to draw the text on the given mGraphics.
      * @return A rectangle specifying the bounds of the text drawn.
      */
-    /* package */ RectF renderText(int start, int limit, boolean isRtl, float[] advances,
-            int advancesIndex, boolean draw, float x, float y) {
+    public RectF renderText(int start, int limit, boolean isRtl, float[] advances,
+            int advancesIndex, boolean draw) {
         // We break the text into scripts and then select font based on it and then render each of
         // the script runs.
-        mBounds = new RectF(x, y, x, y);
-        mBaseline = y;
         for (ScriptRun run : getScriptRuns(mText, start, limit, isRtl, mFonts)) {
             int flag = Font.LAYOUT_NO_LIMIT_CONTEXT | Font.LAYOUT_NO_START_CONTEXT;
             flag |= isRtl ? Font.LAYOUT_RIGHT_TO_LEFT : Font.LAYOUT_LEFT_TO_RIGHT;
@@ -243,5 +272,23 @@ public class BidiRenderer {
             }
         }
         run.font = fonts.get(0);
+    }
+
+    private static int getIcuFlags(int bidiFlag) {
+        switch (bidiFlag) {
+            case Paint.BIDI_LTR:
+            case Paint.BIDI_FORCE_LTR:
+                return Bidi.DIRECTION_LEFT_TO_RIGHT;
+            case Paint.BIDI_RTL:
+            case Paint.BIDI_FORCE_RTL:
+                return Bidi.DIRECTION_RIGHT_TO_LEFT;
+            case Paint.BIDI_DEFAULT_LTR:
+                return Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT;
+            case Paint.BIDI_DEFAULT_RTL:
+                return Bidi.DIRECTION_DEFAULT_RIGHT_TO_LEFT;
+            default:
+                assert false;
+                return Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT;
+        }
     }
 }

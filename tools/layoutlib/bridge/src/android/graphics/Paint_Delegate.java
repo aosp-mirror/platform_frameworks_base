@@ -602,7 +602,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        RectF bounds = delegate.measureText(text, index, count, isRtl(bidiFlags));
+        RectF bounds = delegate.measureText(text, index, count, null, 0, bidiFlags);
         return bounds.right - bounds.left;
     }
 
@@ -618,11 +618,11 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_breakText(Paint thisPaint, char[] text, int index, int count,
-            float maxWidth, int bidiFlags, float[] measuredWidth) {
+    /*package*/ static int native_breakText(long nativePaint, long nativeTypeface, char[] text,
+            int index, int count, float maxWidth, int bidiFlags, float[] measuredWidth) {
 
         // get the delegate
-        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
             return 0;
         }
@@ -641,7 +641,7 @@ public class Paint_Delegate {
             }
 
             // measure from start to end
-            RectF bounds = delegate.measureText(text, start, end - start + 1, isRtl(bidiFlags));
+            RectF bounds = delegate.measureText(text, start, end - start + 1, null, 0, bidiFlags);
             float res = bounds.right - bounds.left;
 
             if (measuredWidth != null) {
@@ -660,10 +660,11 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int native_breakText(Paint thisPaint, String text, boolean measureForwards,
+    /*package*/ static int native_breakText(long nativePaint, long nativeTypeface, String text,
+            boolean measureForwards,
             float maxWidth, int bidiFlags, float[] measuredWidth) {
-        return native_breakText(thisPaint, text.toCharArray(), 0, text.length(), maxWidth,
-                bidiFlags, measuredWidth);
+        return native_breakText(nativePaint, nativeTypeface, text.toCharArray(), 0, text.length(),
+                maxWidth, bidiFlags, measuredWidth);
     }
 
     @LayoutlibDelegate
@@ -950,8 +951,25 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(long native_object, long native_typeface,
             char[] text, int index, int count, int bidiFlags, float[] widths) {
-        return (int) native_getTextRunAdvances(native_object, native_typeface, text, index, count,
-                index, count, bidiFlags, widths, 0);
+
+        if (widths != null) {
+            for (int i = 0; i< count; i++) {
+                widths[i]=0;
+            }
+        }
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            return 0;
+        }
+
+        // native_typeface is passed here since Framework's old implementation did not have the
+        // typeface object associated with the Paint. Since, we follow the new framework way,
+        // we store the typeface with the paint and use it directly.
+        assert (native_typeface == delegate.mNativeTypeface);
+
+        RectF bounds = delegate.measureText(text, index, count, widths, 0, bidiFlags);
+        return ((int) (bounds.right - bounds.left));
     }
 
     @LayoutlibDelegate
@@ -971,7 +989,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(long native_object, long native_typeface,
             char[] text, int index, int count, int contextIndex, int contextCount,
-            int flags, float[] advances, int advancesIndex) {
+            boolean isRtl, float[] advances, int advancesIndex) {
 
         if (advances != null)
             for (int i = advancesIndex; i< advancesIndex+count; i++)
@@ -987,25 +1005,21 @@ public class Paint_Delegate {
         // we store the typeface with the paint and use it directly.
         assert (native_typeface == delegate.mNativeTypeface);
 
-        boolean isRtl = isRtl(flags);
-
-        int limit = index + count;
-        RectF bounds = new BidiRenderer(null, delegate, text).renderText(
-                index, limit, isRtl, advances, advancesIndex, false, 0, 0);
+        RectF bounds = delegate.measureText(text, index, count, advances, advancesIndex, isRtl);
         return bounds.right - bounds.left;
     }
 
     @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(long native_object, long native_typeface,
             String text, int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex) {
+            boolean isRtl, float[] advances, int advancesIndex) {
         // FIXME: support contextStart and contextEnd
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
         return native_getTextRunAdvances(native_object, native_typeface, buffer, 0, count,
-                contextStart, contextEnd - contextStart, flags, advances, advancesIndex);
+                contextStart, contextEnd - contextStart, isRtl, advances, advancesIndex);
     }
 
     @LayoutlibDelegate
@@ -1062,7 +1076,7 @@ public class Paint_Delegate {
         // assert that the typeface passed is actually the one that we had stored.
         assert (native_typeface == delegate.mNativeTypeface);
 
-        delegate.measureText(text, index, count, isRtl(bidiFlags)).roundOut(bounds);
+        delegate.measureText(text, index, count, null, 0, bidiFlags).roundOut(bounds);
     }
 
     @LayoutlibDelegate
@@ -1158,9 +1172,16 @@ public class Paint_Delegate {
         }
     }
 
-    /*package*/ RectF measureText(char[] text, int index, int count, boolean isRtl) {
-        return new BidiRenderer(null, this, text).renderText(
-                index, index + count, isRtl, null, 0, false, 0, 0);
+    /*package*/ RectF measureText(char[] text, int index, int count, float[] advances,
+            int advancesIndex, int bidiFlags) {
+        return new BidiRenderer(null, this, text)
+                .renderText(index, index + count, bidiFlags, advances, advancesIndex, false);
+    }
+
+    /*package*/ RectF measureText(char[] text, int index, int count, float[] advances,
+            int advancesIndex, boolean isRtl) {
+        return new BidiRenderer(null, this, text)
+                .renderText(index, index + count, isRtl, advances, advancesIndex, false);
     }
 
     private float getFontMetrics(FontMetrics metrics) {
@@ -1196,17 +1217,6 @@ public class Paint_Delegate {
             delegate.mFlags |= flagMask;
         } else {
             delegate.mFlags &= ~flagMask;
-        }
-    }
-
-    private static boolean isRtl(int flag) {
-        switch(flag) {
-        case Paint.BIDI_RTL:
-        case Paint.BIDI_FORCE_RTL:
-        case Paint.BIDI_DEFAULT_RTL:
-            return true;
-        default:
-            return false;
         }
     }
 }

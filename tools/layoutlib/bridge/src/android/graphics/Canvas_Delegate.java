@@ -906,41 +906,10 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawText(long nativeCanvas,
-            final char[] text, final int index, final int count,
-            final float startX, final float startY, final int flags, long paint,
-            final long typeface) {
-
-        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
-                new GcSnapshot.Drawable() {
-            @Override
-            public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
-                // WARNING: the logic in this method is similar to Paint_Delegate.measureText.
-                // Any change to this method should be reflected in Paint.measureText
-
-                // assert that the typeface passed is actually the one stored in paint.
-                assert (typeface == paintDelegate.mNativeTypeface);
-
-
-                // Paint.TextAlign indicates how the text is positioned relative to X.
-                // LEFT is the default and there's nothing to do.
-                float x = startX;
-                int limit = index + count;
-                boolean isRtl = flags == Canvas.DIRECTION_RTL;
-                if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-                    RectF bounds = paintDelegate.measureText(text, index, count, isRtl);
-                    float m = bounds.right - bounds.left;
-                    if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
-                        x -= m / 2;
-                    } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
-                        x -= m;
-                    }
-                }
-
-                new BidiRenderer(graphics, paintDelegate, text).renderText(
-                        index, limit, isRtl, null, 0, true, x, startY);
-            }
-        });
+    /*package*/ static void native_drawText(long nativeCanvas, char[] text, int index, int count,
+            float startX, float startY, int flags, long paint, long typeface) {
+        drawText(nativeCanvas, text, index, count, startX, startY, flags == Canvas.DIRECTION_RTL,
+                paint, typeface);
     }
 
     @LayoutlibDelegate
@@ -957,19 +926,19 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawTextRun(long nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, long paint, long typeface) {
+            float x, float y, boolean isRtl, long paint, long typeface) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
-        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint, typeface);
+        drawText(nativeCanvas, buffer, 0, count, x, y, isRtl, paint, typeface);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_drawTextRun(long nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, long paint, long typeface) {
-        native_drawText(nativeCanvas, text, start, count, x, y, flags, paint, typeface);
+            float x, float y, boolean isRtl, long paint, long typeface) {
+        drawText(nativeCanvas, text, start, count, x, y, isRtl, paint, typeface);
     }
 
     @LayoutlibDelegate
@@ -978,7 +947,7 @@ public final class Canvas_Delegate {
                                                      int count, long path,
                                                      float hOffset,
                                                      float vOffset, int bidiFlags,
-                                                     long paint) {
+                                                     long paint, long typeface) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
@@ -989,7 +958,8 @@ public final class Canvas_Delegate {
                                                      String text, long path,
                                                      float hOffset,
                                                      float vOffset,
-                                                     int bidiFlags, long paint, long typeface) {
+                                                     int bidiFlags, long paint,
+                                                     long typeface) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
@@ -1045,6 +1015,41 @@ public final class Canvas_Delegate {
         }
 
         canvasDelegate.mSnapshot.draw(drawable);
+    }
+
+    private static void drawText(long nativeCanvas, final char[] text, final int index,
+            final int count, final float startX, final float startY, final boolean isRtl,
+            long paint, final long typeface) {
+
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+            @Override
+            public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
+                // WARNING: the logic in this method is similar to Paint_Delegate.measureText.
+                // Any change to this method should be reflected in Paint.measureText
+
+                // assert that the typeface passed is actually the one stored in paint.
+                assert (typeface == paintDelegate.mNativeTypeface);
+
+                // Paint.TextAlign indicates how the text is positioned relative to X.
+                // LEFT is the default and there's nothing to do.
+                float x = startX;
+                int limit = index + count;
+                if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
+                    RectF bounds = paintDelegate.measureText(text, index, count, null, 0,
+                            isRtl);
+                    float m = bounds.right - bounds.left;
+                    if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
+                        x -= m / 2;
+                    } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
+                        x -= m;
+                    }
+                }
+
+                new BidiRenderer(graphics, paintDelegate, text).setRenderLocation(x, startY)
+                        .renderText(index, limit, isRtl, null, 0, true);
+            }
+        });
     }
 
     private Canvas_Delegate(Bitmap_Delegate bitmap) {
