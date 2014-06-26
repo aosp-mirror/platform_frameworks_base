@@ -193,7 +193,9 @@ public abstract class WindowOrientationListener {
             pw.println(prefix + "mSensor=" + mSensor);
             pw.println(prefix + "mRate=" + mRate);
 
-            mSensorEventListener.dumpLocked(pw, prefix);
+            if (mSensorEventListener != null) {
+                mSensorEventListener.dumpLocked(pw, prefix);
+            }
         }
     }
 
