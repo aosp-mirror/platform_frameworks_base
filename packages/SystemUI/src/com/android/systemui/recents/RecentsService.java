@@ -30,6 +30,7 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
+import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewTransform;
 
 import java.lang.ref.WeakReference;
@@ -70,6 +71,7 @@ class SystemUIMessageHandler extends Handler {
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
                 TaskStack stack = new TaskStack(context);
                 TaskStackView tsv = new TaskStackView(context, stack);
+                TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
                 Bundle replyData = new Bundle();
                 TaskViewTransform transform;
 
@@ -85,7 +87,7 @@ class SystemUIMessageHandler extends Handler {
                 tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
                         systemInsets.top - systemInsets.bottom, 0, 0);
                 tsv.setStackScrollToInitialState();
-                transform = tsv.getStackTransform(0, tsv.getStackScroll());
+                transform = algo.getStackTransform(0, tsv.getStackScroll());
                 transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_SINGLE_TASK_STACK_RECT,
                         new Rect(transform.rect));
@@ -95,7 +97,7 @@ class SystemUIMessageHandler extends Handler {
                 tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
                         systemInsets.top - systemInsets.bottom, 0, 0);
                 tsv.setStackScrollToInitialState();
-                transform = tsv.getStackTransform(1, tsv.getStackScroll());
+                transform = algo.getStackTransform(1, tsv.getStackScroll());
                 transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_TWO_TASK_STACK_RECT,
                         new Rect(transform.rect));
@@ -105,7 +107,7 @@ class SystemUIMessageHandler extends Handler {
                 tsv.computeRects(taskStackBounds.width(), taskStackBounds.height() -
                         systemInsets.top - systemInsets.bottom, 0, 0);
                 tsv.setStackScrollToInitialState();
-                transform = tsv.getStackTransform(2, tsv.getStackScroll());
+                transform = algo.getStackTransform(2, tsv.getStackScroll());
                 transform.rect.offset(taskStackBounds.left, taskStackBounds.top);
                 replyData.putParcelable(AlternateRecentsComponent.KEY_MULTIPLE_TASK_STACK_RECT,
                         new Rect(transform.rect));

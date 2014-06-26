@@ -510,7 +510,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         } else {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
-            if (hasRecentTasks && Constants.DebugFlags.App.EnableHomeTransition) {
+            if (hasRecentTasks) {
                 ActivityOptions opts = getHomeTransitionActivityOptions();
                 startAlternateRecentsActivity(opts, EXTRA_FROM_HOME);
             } else {

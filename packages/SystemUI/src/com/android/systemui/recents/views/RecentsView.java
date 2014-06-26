@@ -56,6 +56,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskLaunching();
+        public void onLastTaskRemoved();
         public void onExitToHomeAnimationTriggered();
     }
 
@@ -201,14 +202,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // animations are started.
         ctx.postAnimationTrigger.increment();
 
-        if (Constants.DebugFlags.App.EnableHomeTransition) {
-            int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = getChildAt(i);
-                if (child instanceof TaskStackView) {
-                    TaskStackView stackView = (TaskStackView) child;
-                    stackView.startExitToHomeAnimation(ctx);
-                }
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TaskStackView) {
+                TaskStackView stackView = (TaskStackView) child;
+                stackView.startExitToHomeAnimation(ctx);
             }
         }
 
@@ -426,11 +425,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
+            transform = stackView.getStackAlgorithm().getStackTransform(stack.indexOfTask(task),
+                    stackScroll);
             offsetX = transform.rect.left;
             offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
         } else {
-            transform = stackView.getStackTransform(stack.indexOfTask(task), stackScroll);
+            transform = stackView.getStackAlgorithm().getStackTransform(stack.indexOfTask(task),
+                    stackScroll);
         }
 
         // Compute the thumbnail to scale up from
@@ -530,6 +531,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
         RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(t.key.id,
                 isDocument);
+    }
+
+    @Override
+    public void onLastTaskRemoved() {
+        mCb.onLastTaskRemoved();
     }
 
     @Override

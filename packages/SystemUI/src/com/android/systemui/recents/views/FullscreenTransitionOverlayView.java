@@ -23,6 +23,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -172,10 +173,12 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
         }
 
         // Calculate the bottom clip
-        float scale = (float) ctx.taskRect.width() / getMeasuredWidth();
-        int translationY = -mConfig.systemInsets.top + ctx.stackRectSansPeek.top +
-                ctx.transform.translationY;
-        int clipBottom = mConfig.systemInsets.top + (int) (ctx.taskRect.height() / scale);
+        Rect taskRect = ctx.taskRect;
+        float scale = (float) taskRect.width() / getMeasuredWidth();
+        float scaleYOffset = ((1f - scale) * getMeasuredHeight()) / 2;
+        float scaledTopInset = (int) (scale * mConfig.systemInsets.top);
+        int translationY = (int) -scaleYOffset + (int) (mConfig.systemInsets.top - scaledTopInset) + taskRect.top;
+        int clipBottom = mConfig.systemInsets.top + (int) (taskRect.height() / scale);
 
         // Enable the HW Layers on the screenshot view
         mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);

@@ -485,7 +485,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Compute the dim as a function of the scale of this view. */
     int getDimOverlayFromScale() {
-        float minScale = Constants.Values.TaskStackView.StackPeekMinScale;
+        float minScale = TaskStackViewLayoutAlgorithm.StackPeekMinScale;
         float scaleRange = 1f - minScale;
         float dim = (1f - getScaleX()) / scaleRange;
         dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));

@@ -264,7 +264,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (overScrollAmount != 0) {
                         // Bound the overscroll to a fixed amount, and inversely scale the y-movement
                         // relative to how close we are to the max overscroll
-                        float maxOverScroll = mSv.mTaskRect.height() / 3f;
+                        float maxOverScroll = mSv.mStackAlgorithm.mTaskRect.height() / 3f;
                         deltaY = Math.round(deltaY * (1f - (Math.min(maxOverScroll, overScrollAmount)
                                 / maxOverScroll)));
                     }
@@ -307,7 +307,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                             mSv.mMinScroll, mSv.mMaxScroll,
                             0, overscrollRange);
                     // Invalidate to kick off computeScroll
-                    mSv.invalidate(mSv.mStackRect);
+                    mSv.invalidate(mSv.mStackAlgorithm.mStackRect);
                 } else if (mSv.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     // XXX: Make this animation a function of the velocity OR distance

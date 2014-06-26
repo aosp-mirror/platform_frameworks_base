@@ -25,8 +25,6 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
-            // Enables the home->Recents transition
-            public static final boolean EnableHomeTransition = true;
             // Enables the screenshot app->Recents transition
             public static final boolean EnableScreenshotAppTransition = false;
             // Enables the filtering of tasks according to their grouping
@@ -96,10 +94,6 @@ public class Constants {
             public static String Key_DebugModeEnabled = "debugModeEnabled";
             public static String DebugModeVersion = "A";
         }
-        public static class Window {
-            // The dark background dim is set behind the empty recents view
-            public static final float DarkBackgroundDim = 0.5f;
-        }
 
         public static class RecentsTaskLoader {
             // XXX: This should be calculated on the first load
@@ -109,15 +103,6 @@ public class Constants {
         public static class TaskStackView {
             public static final int TaskStackOverscrollRange = 150;
             public static final int FilterStartDelay = 25;
-
-            // The overlap height relative to the task height
-            public static final float StackOverlapPct = 0.65f;
-            // The height of the peek space relative to the stack height
-            public static final float StackPeekHeightPct = 0.1f;
-            // The min scale of the last card in the peek area
-            public static final float StackPeekMinScale = 0.8f;
-            // The number of cards we see in the peek space
-            public static final int StackPeekNumCards = 3;
         }
     }
 }

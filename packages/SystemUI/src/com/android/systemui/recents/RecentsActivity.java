@@ -85,6 +85,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mUseCustomFinishTransition = withTransition;
         }
 
+        /**
+         * Creates a finish runnable that starts the specified intent, using the given
+         * ActivityOptions.
+         */
         public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
             mLaunchIntent = launchIntent;
             mLaunchOpts = opts;
@@ -616,6 +620,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Mark recents as no longer visible
         AlternateRecentsComponent.notifyVisibilityChanged(false);
+    }
+
+    @Override
+    public void onLastTaskRemoved() {
+        mFinishLaunchHomeRunnable.run();
     }
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
