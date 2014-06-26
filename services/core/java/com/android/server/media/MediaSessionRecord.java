@@ -280,6 +280,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param delta The amount to adjust the volume by.
      */
     public void adjustVolumeBy(int delta, int flags) {
+        if (isPlaybackActive(false)) {
+            flags &= ~AudioManager.FLAG_PLAY_SOUND;
+        }
         if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
             if (delta == 0) {
                 mAudioManager.adjustStreamVolume(mAudioStream, delta, flags);
