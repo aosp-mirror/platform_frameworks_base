@@ -19,24 +19,43 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.ScrollView;
 
-public class AnimatedVectorDrawableTest extends Activity {
-    private static final String LOGCAT = "VectorDrawableAnimationTest";
+public class AnimatedVectorDrawableTest extends Activity implements View.OnClickListener{
+    private static final String LOGCAT = "AnimatedVectorDrawableTest";
+
+    protected int[] icon = {
+            R.drawable.animation_vector_drawable_grouping_1,
+            R.drawable.animation_vector_progress_bar,
+            R.drawable.animation_vector_drawable_favorite,
+            R.drawable.animation_vector_drawable01,
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Button button = new Button(this);
-        button.setBackgroundResource(R.drawable.animation_vector_drawable01);
-        button.setOnClickListener(new View.OnClickListener() {
-                @Override
-            public void onClick(View v) {
-                AnimatedVectorDrawable frameAnimation = (AnimatedVectorDrawable) v.getBackground();
-                frameAnimation.start();
-            }
-        });
+        ScrollView scrollView = new ScrollView(this);
+        GridLayout container = new GridLayout(this);
+        scrollView.addView(container);
+        container.setColumnCount(1);
 
-        setContentView(button);
+        for (int i = 0; i < icon.length; i++) {
+            Button button = new Button(this);
+            button.setWidth(400);
+            button.setHeight(400);
+            button.setBackgroundResource(icon[i]);
+            container.addView(button);
+            button.setOnClickListener(this);
+        }
+
+        setContentView(scrollView);
+    }
+
+    @Override
+    public void onClick(View v) {
+        AnimatedVectorDrawable d = (AnimatedVectorDrawable) v.getBackground();
+        d.start();
     }
 }

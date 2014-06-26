@@ -1,0 +1,2 @@
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pathData="C0.2,0 0.1,1 0.5, 1 L 1,1" />
