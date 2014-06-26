@@ -83,7 +83,7 @@ public class TaskThumbnailView extends ImageView {
     }
 
     /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t, boolean animate) {
+    void rebindToTask(Task t) {
         mTask = t;
         if (t.thumbnail != null) {
             setImageBitmap(t.thumbnail);

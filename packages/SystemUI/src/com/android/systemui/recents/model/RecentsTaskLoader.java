@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.util.Pair;
 import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.SystemServicesProxy;
 
 import java.util.ArrayList;
@@ -254,7 +255,7 @@ class TaskResourceLoader implements Runnable {
                         mMainThreadHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                t.notifyTaskDataLoaded(newThumbnail, newIcon, forceLoadTask);
+                                t.notifyTaskDataLoaded(newThumbnail, newIcon);
                             }
                         });
                     }
@@ -388,6 +389,7 @@ public class RecentsTaskLoader {
         if (Console.Enabled) {
             Console.log(Constants.Log.App.TaskDataLoader, "[RecentsTaskLoader|reload]");
         }
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         Resources res = context.getResources();
         ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
         TaskStack stack = new TaskStack(context);
@@ -409,7 +411,7 @@ public class RecentsTaskLoader {
             ActivityManager.TaskDescription av = t.taskDescription;
             String activityLabel = null;
             BitmapDrawable activityIcon = null;
-            int activityColor = 0;
+            int activityColor = config.taskBarViewDefaultBackgroundColor;
             if (av != null) {
                 activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
                 activityIcon = (av.getIcon() != null) ? new BitmapDrawable(res, av.getIcon()) : null;
@@ -500,7 +502,7 @@ public class RecentsTaskLoader {
         return root;
     }
 
-    /** Acquires the task resource data from the pool. */
+    /** Acquires the task resource data directly from the pool. */
     public void loadTaskData(Task t) {
         Drawable applicationIcon = mApplicationIconCache.get(t.key);
         Bitmap thumbnail = mThumbnailCache.get(t.key);
@@ -523,7 +525,7 @@ public class RecentsTaskLoader {
         if (requiresLoad) {
             mLoadQueue.addTask(t, false);
         }
-        t.notifyTaskDataLoaded(thumbnail, applicationIcon, false);
+        t.notifyTaskDataLoaded(thumbnail, applicationIcon);
     }
 
     /** Releases the task resource data back into the pool. */

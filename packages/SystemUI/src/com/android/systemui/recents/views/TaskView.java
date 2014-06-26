@@ -123,7 +123,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mThumbnailView = (TaskThumbnailView) findViewById(R.id.task_view_thumbnail);
 
         if (mTaskDataLoaded) {
-            onTaskDataLoaded(false);
+            onTaskDataLoaded();
         }
     }
 
@@ -551,11 +551,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     }
 
     @Override
-    public void onTaskDataLoaded(boolean reloadingTaskData) {
+    public void onTaskDataLoaded() {
         if (mThumbnailView != null && mBarView != null) {
             // Bind each of the views to the new task data
-            mThumbnailView.rebindToTask(mTask, reloadingTaskData);
-            mBarView.rebindToTask(mTask, reloadingTaskData);
+            mThumbnailView.rebindToTask(mTask);
+            mBarView.rebindToTask(mTask);
             // Rebind any listeners
             mBarView.mApplicationIcon.setOnClickListener(this);
             mBarView.mDismissButton.setOnClickListener(this);

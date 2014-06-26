@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import com.android.systemui.recents.Utilities;
 
 
 /**
@@ -29,7 +30,7 @@ public class Task {
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded(boolean reloadingTaskData);
+        public void onTaskDataLoaded();
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
     }
@@ -80,6 +81,7 @@ public class Task {
     public Drawable activityIcon;
     public String activityLabel;
     public int colorPrimary;
+    public int colorPrimaryGreyscale;
     public Bitmap thumbnail;
     public boolean isActive;
     public int userId;
@@ -96,6 +98,7 @@ public class Task {
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.colorPrimary = colorPrimary;
+        this.colorPrimaryGreyscale = Utilities.colorToGreyscale(colorPrimary);
         this.isActive = isActive;
         this.userId = userId;
     }
@@ -106,12 +109,11 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon,
-                                     boolean reloadingTaskData) {
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
         this.applicationIcon = applicationIcon;
         this.thumbnail = thumbnail;
         if (mCb != null) {
-            mCb.onTaskDataLoaded(reloadingTaskData);
+            mCb.onTaskDataLoaded();
         }
     }
 

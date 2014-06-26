@@ -68,20 +68,20 @@ public class Utilities {
     }
 
     /** Calculates the luminance-preserved greyscale of a given color. */
-    private static int colorToGreyscale(int color) {
+    public static int colorToGreyscale(int color) {
         return Math.round(0.2126f * Color.red(color) + 0.7152f * Color.green(color) +
                 0.0722f * Color.blue(color));
     }
 
     /** Returns the ideal color to draw on top of a specified background color. */
-    public static int getIdealColorForBackgroundColor(int color, int lightRes, int darkRes) {
-        int greyscale = colorToGreyscale(color);
+    public static int getIdealColorForBackgroundColorGreyscale(int greyscale, int lightRes,
+                                                               int darkRes) {
         return (greyscale < 128) ? lightRes : darkRes;
     }
     /** Returns the ideal drawable to draw on top of a specified background color. */
-    public static Drawable getIdealResourceForBackgroundColor(int color, Drawable lightRes,
-                                                           Drawable darkRes) {
-        int greyscale = colorToGreyscale(color);
+    public static Drawable getIdealResourceForBackgroundColorGreyscale(int greyscale,
+                                                                       Drawable lightRes,
+                                                                       Drawable darkRes) {
         return (greyscale < 128) ? lightRes : darkRes;
     }
 
