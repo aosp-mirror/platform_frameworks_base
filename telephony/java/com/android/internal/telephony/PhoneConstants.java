@@ -133,6 +133,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_CBS = "cbs";
     /** APN type for IA Initial Attach APN */
     public static final String APN_TYPE_IA = "ia";
+    /** APN type for IA Emergency PDN */
+    public static final String APN_TYPE_EMERGENCY = "emergency";
 
     // FIXME: This looks to be used as default phoneId, rename
     // or use SubscriptionManager.DEFAULT_SUB_ID

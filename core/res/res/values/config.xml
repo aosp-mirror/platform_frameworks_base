@@ -195,6 +195,7 @@
         <item>"mobile_cbs,12,0,2,60000,true"</item>
         <item>"wifi_p2p,13,1,0,-1,true"</item>
         <item>"mobile_ia,14,0,2,-1,true"</item>
+        <item>"mobile_emergency,15,0,2,-1,true"</item>
     </string-array>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
@@ -204,6 +205,7 @@
         <item>11</item>
         <item>12</item>
         <item>14</item>
+        <item>15</item>
     </integer-array>
 
     <!-- This string array should be overridden by the device to present a list of radio

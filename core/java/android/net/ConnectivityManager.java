@@ -387,6 +387,12 @@ public class ConnectivityManager {
      */
     public static final int TYPE_MOBILE_IA = 14;
 
+/**
+     * Emergency PDN connection for emergency calls
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_EMERGENCY = 15;
+
     /**
      * The network that uses proxy to achieve connectivity.
      * {@hide}
@@ -490,6 +496,8 @@ public class ConnectivityManager {
                 return "WIFI_P2P";
             case TYPE_MOBILE_IA:
                 return "MOBILE_IA";
+            case TYPE_MOBILE_EMERGENCY:
+                return "MOBILE_EMERGENCY";
             case TYPE_PROXY:
                 return "PROXY";
             default:
@@ -515,6 +523,7 @@ public class ConnectivityManager {
             case TYPE_MOBILE_IMS:
             case TYPE_MOBILE_CBS:
             case TYPE_MOBILE_IA:
+            case TYPE_MOBILE_EMERGENCY:
                 return true;
             default:
                 return false;
