@@ -14,21 +14,21 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <div class="static resource-flow-layout wrap col-16">
           <div class="resource resource-card resource-card-18x6">
 
-
       <div class="landing-section-header">
-            <div class="col-10"><img src="{@docRoot}preview/images/l-dev-prev.png" style=" margin:40px 60px 0 20px"></div>
-            <div class="col-5" style=" margin-top:60px "><p>
-            <h3>L Developer Preview</h3>
-          Get an early look at the next release of the Android platform. 
-           The L Developer Preview lets you try out all the new features of the next major
-           release of Android. </p><br/>
-            <a href="{@docRoot}preview/index.html" class="landing-button landing-primary">Get Started</a>
+            <div class="col-10"><img src="{@docRoot}preview/images/l-dev-prev.png"
+            style="margin:40px 60px 0 20px"></div>
+            <div class="col-5" style=" margin-top:70px ">
+            <h3 stye="font-weight:300;">L Developer Preview</h3>
+            <p>The L Developer Preview lets you design and develop against the next major
+            release of Android. Take the time to test and build your app before the platform
+            officially launches. </p>
+            <a href="{@docRoot}preview/index.html" class="landing-button landing-primary">Learn More</a>
             </div>
           </div>
           </div>
         </div>
- <h2 style="margin-bottom: 0px;">&nbsp;</h2>
-        <div style="margin-top:10px" class="resource-widget resource-flow-layout wrap col-16
+       <h2>&nbsp;</h2>
+        <div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-16
         no-section" data-query="collection:index/primary" data-resourcestyle="card"
         data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> <!-- end .resource-widget -->
       </div> <!-- end .wrap -->
@@ -36,7 +36,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   </div> <!-- end .fullscreen-carousel-content -->
 </div> <!-- end .fullscreen-carousel -->
 
-<div class="actions-bar" style="margin-top:40px">
+<div class="actions-bar" style="margin-top:20px">
   <div class="wrap">
     <div class="actions">
       <div><a href="{@docRoot}sdk/index.html">Get the SDK</a></div>
