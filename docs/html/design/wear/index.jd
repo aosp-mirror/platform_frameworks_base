@@ -1,9 +1,9 @@
-page.title=Wear
+page.title=Android Wear
 @jd:body
 
 
 
-<p>Designing apps for wearables powered by Android Wear
+<p>Designing apps for wearable devices powered by Android Wear
 is substantially different than designing for phones or
 tablets: different strengths and weaknesses, different use cases, different ergonomics.
 To get started, you should understand the overall vision for the Android Wear experience,
@@ -26,7 +26,9 @@ spaces.</p>
 
 <p>This UI model ensures that users don’t have to launch many different applications to check for updates; they can simply glance at their stream for a brief update on what’s important to them.</p>
 
-<p>Cards in the stream are more than simple notifications. They can be swiped horizontally to reveal additional pages. Further horizontal swiping may reveal buttons, allowing the user to take action on the notification. Cards can also be dismissed by swiping left to right, removing them from the stream until the next time the app has useful information to display.</p>
+<p>Cards in the stream are more than simple notifications. They can be swiped horizontally to reveal additional
+<a href="{@docRoot}design/wear/patterns.html#Pages">pages</a>. Further horizontal swiping may reveal
+<a href="{@docRoot}design/wear/patterns.html#Actions">buttons</a>, allowing the user to take action on the notification. Cards can also be dismissed by swiping left to right, removing them from the stream until the next time the app has useful information to display.</p>
 
 
 
