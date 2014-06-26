@@ -48,6 +48,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioMode;
 
+    // The previous port id (input) before switching to the new one. This is remembered in order to
+    // be able to switch to it upon receiving <Inactive Source> from currently active source.
+    // This remains valid only when the active source was switched via one touch play operation
+    // (either by TV or source device). Manual port switching invalidates this value to
+    // HdmiConstants.PORT_INVALID, for which case <Inactive Source> does not do anything.
+    @GuardedBy("mLock")
+    private int mPrevPortId;
+
     // Copy of mDeviceInfos to guarantee thread-safety.
     @GuardedBy("mLock")
     private List<HdmiCecDeviceInfo> mSafeAllDeviceInfos = Collections.emptyList();
@@ -62,7 +70,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCec.DEVICE_TV);
-
+        mPrevPortId = HdmiConstants.INVALID_PORT_ID;
         // TODO: load system audio mode and set it to mSystemAudioMode.
     }
 
@@ -90,6 +98,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
+        if (targetAddress == HdmiCec.ADDR_INTERNAL) {
+            handleSelectInternalSource(callback);
+            return;
+        }
         HdmiCecDeviceInfo targetDevice = getDeviceInfo(targetAddress);
         if (targetDevice == null) {
             invokeCallback(callback, HdmiCec.RESULT_TARGET_NOT_AVAILABLE);
@@ -99,30 +111,85 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(new DeviceSelectAction(this, targetDevice, callback));
     }
 
-    /**
-     * Performs the action routing control.
-     *
-     * @param portId new HDMI port to route to
-     * @param callback callback object to report the result with
-     */
     @ServiceThreadOnly
-    void portSelect(int portId, IHdmiControlCallback callback) {
+    private void handleSelectInternalSource(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (isInPresetInstallationMode()) {
+        // Seq #18
+        if (isHdmiControlEnabled() && getActiveSource() != mAddress) {
+            updateActiveSource(mAddress, mService.getPhysicalAddress());
+            // TODO: Check if this comes from <Text/Image View On> - if true, do nothing.
+            HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                    mAddress, mService.getPhysicalAddress());
+            mService.sendCecCommand(activeSource);
+        }
+    }
+
+    @ServiceThreadOnly
+    void updateActiveSource(int activeSource, int activePath) {
+        assertRunOnServiceThread();
+        // Seq #14
+        if (activeSource == getActiveSource() && activePath == getActivePath()) {
+            return;
+        }
+        setActiveSource(activeSource);
+        setActivePath(activePath);
+        if (getDeviceInfo(activeSource) != null && activeSource != mAddress) {
+            if (mService.pathToPortId(activePath) == getActivePortId()) {
+                setPrevPortId(getActivePortId());
+            }
+            // TODO: Show the OSD banner related to the new active source device.
+        } else {
+            // TODO: If displayed, remove the OSD banner related to the previous
+            //       active source device.
+        }
+    }
+
+    /**
+     * Returns the previous port id kept to handle input switching on <Inactive Source>.
+     */
+    int getPrevPortId() {
+        synchronized (mLock) {
+            return mPrevPortId;
+        }
+    }
+
+    /**
+     * Sets the previous port id. INVALID_PORT_ID invalidates it, hence no actions will be
+     * taken for <Inactive Source>.
+     */
+    void setPrevPortId(int portId) {
+        synchronized (mLock) {
+            mPrevPortId = portId;
+        }
+    }
+
+    @ServiceThreadOnly
+    void updateActivePortId(int portId) {
+        assertRunOnServiceThread();
+        // Seq #15
+        if (portId == getActivePortId()) {
+            return;
+        }
+        setPrevPortId(portId);
+        // TODO: Actually switch the physical port here. Handle PAP/PIP as well.
+        //       Show OSD port change banner
+    }
+
+    @ServiceThreadOnly
+    void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
+        assertRunOnServiceThread();
+        // Seq #20
+        if (!isHdmiControlEnabled() || portId == getActivePortId()) {
             invokeCallback(callback, HdmiCec.RESULT_INCORRECT_MODE);
             return;
         }
-        // Make sure this call does not stem from <Active Source> message reception, in
-        // which case the two ports will be the same.
-        if (portId == getActivePortId()) {
-            invokeCallback(callback, HdmiCec.RESULT_SUCCESS);
-            return;
-        }
-        setActivePortId(portId);
+        // TODO: Make sure this call does not stem from <Active Source> message reception.
 
+        setActivePortId(portId);
         // TODO: Return immediately if the operation is triggered by <Text/Image View On>
+        //       and this is the first notification about the active input after power-on.
         // TODO: Handle invalid port id / active input which should be treated as an
-        //        internal tuner.
+        //       internal tuner.
 
         removeAction(RoutingControlAction.class);
 
@@ -164,6 +231,61 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int activePath = HdmiUtils.twoBytesToInt(message.getParams());
+        ActiveSourceHandler.create(this, null).process(message.getSource(), activePath);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleInactiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Seq #10
+
+        // Ignore <Inactive Source> from non-active source device.
+        if (getActiveSource() != message.getSource()) {
+            return true;
+        }
+        if (isInPresetInstallationMode()) {
+            return true;
+        }
+        int portId = getPrevPortId();
+        if (portId != HdmiConstants.INVALID_PORT_ID) {
+            // TODO: Do this only if TV is not showing multiview like PIP/PAP.
+
+            HdmiCecDeviceInfo inactiveSource = getDeviceInfo(message.getSource());
+            if (inactiveSource == null) {
+                return true;
+            }
+            if (mService.pathToPortId(inactiveSource.getPhysicalAddress()) == portId) {
+                return true;
+            }
+            // TODO: Switch the TV freeze mode off
+
+            setActivePortId(portId);
+            doManualPortSwitching(portId, null);
+            setPrevPortId(HdmiConstants.INVALID_PORT_ID);
+        }
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Seq #19
+        int address = getDeviceInfo().getLogicalAddress();
+        if (address == getActiveSource()) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildActiveSource(address, getActivePath()));
+        }
+        return true;
     }
 
     @Override

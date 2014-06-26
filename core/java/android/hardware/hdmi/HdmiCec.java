@@ -101,6 +101,9 @@ public final class HdmiCec {
     /** Logical address used to indicate it is not initialized or invalid. */
     public static final int ADDR_INVALID = -1;
 
+    /** Logical address used to indicate the source comes from internal device. */
+    public static final int ADDR_INTERNAL = 0xFFFF;
+
     // TODO: Complete the list of CEC messages definition.
     public static final int MESSAGE_FEATURE_ABORT = 0x00;
     public static final int MESSAGE_IMAGE_VIEW_ON = 0x04;
