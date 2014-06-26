@@ -20,14 +20,14 @@
     <string name="title_open" msgid="4353228937663917801">"បើក​ពី"</string>
     <string name="title_save" msgid="2433679664882857999">"រក្សា​ទុក​ទៅ"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"បង្កើត​ថត"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"ទិដ្ឋភាព​ក្រឡា​"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"ទិដ្ឋភាព​ក្រឡា"</string>
     <string name="menu_list" msgid="7279285939892417279">"ទិដ្ឋភាព​បញ្ជី"</string>
     <string name="menu_sort" msgid="7677740407158414452">"តម្រៀប​តាម"</string>
     <string name="menu_search" msgid="3816712084502856974">"ស្វែងរក"</string>
     <string name="menu_settings" msgid="6008033148948428823">"ការ​កំណត់"</string>
     <string name="menu_open" msgid="432922957274920903">"បើក"</string>
     <string name="menu_save" msgid="2394743337684426338">"រក្សាទុក"</string>
-    <string name="menu_share" msgid="3075149983979628146">"ចែករំលែក​"</string>
+    <string name="menu_share" msgid="3075149983979628146">"ចែករំលែក"</string>
     <string name="menu_delete" msgid="8138799623850614177">"លុប"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"បាន​ជ្រើស <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"តាម​ឈ្មោះ"</string>
@@ -47,7 +47,7 @@
     <string name="pref_advanced_devices" msgid="903257239609301276">"បង្ហាញ​ឧបករណ៍​កម្រិត​ខ្ពស់"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"បង្ហាញ​ទំហំ​ឯកសារ"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"បង្ហាញ​ទំហំ​ឧបករណ៍"</string>
-    <string name="empty" msgid="7858882803708117596">"គ្មានធាតុ​"</string>
+    <string name="empty" msgid="7858882803708117596">"គ្មានធាតុ"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"មិន​អាច​បើក​ឯកសារ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"មិន​អាច​លុប​ឯកសារ​មួយ​ចំនួន"</string>
     <string name="share_via" msgid="8966594246261344259">"ចែករំលែក​តាម"</string>
