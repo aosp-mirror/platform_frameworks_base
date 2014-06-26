@@ -56,14 +56,6 @@ public:
     virtual ~Renderer() {}
 
     /**
-     * Indicates whether this renderer is recording drawing commands for later playback.
-     * If this method returns true, the drawing commands are deferred.
-     */
-    virtual bool isRecording() const {
-        return false;
-    }
-
-    /**
      * Safely retrieves the mode from the specified xfermode. If the specified
      * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
      */
