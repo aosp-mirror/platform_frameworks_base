@@ -23197,6 +23197,7 @@ package android.provider {
     field public static final java.lang.String AUTHORITY = "com.android.contacts";
     field public static final android.net.Uri AUTHORITY_URI;
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
+    field public static final java.lang.String DEFERRED_SNIPPETING = "deferred_snippeting";
     field public static final java.lang.String DIRECTORY_PARAM_KEY = "directory";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
     field public static final java.lang.String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
@@ -23500,6 +23501,7 @@ package android.provider {
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri, boolean);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri);
     field public static final android.net.Uri CONTENT_FILTER_URI;
+    field public static final android.net.Uri CONTENT_FREQUENT_URI;
     field public static final android.net.Uri CONTENT_GROUP_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact";
     field public static final android.net.Uri CONTENT_LOOKUP_URI;
@@ -23545,6 +23547,7 @@ package android.provider {
     field public static final java.lang.String IN_VISIBLE_GROUP = "in_visible_group";
     field public static final java.lang.String IS_USER_PROFILE = "is_user_profile";
     field public static final java.lang.String LOOKUP_KEY = "lookup";
+    field public static final java.lang.String NAME_RAW_CONTACT_ID = "name_raw_contact_id";
     field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
     field public static final java.lang.String PHOTO_ID = "photo_id";
     field public static final java.lang.String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
@@ -23580,6 +23583,7 @@ package android.provider {
     field public static final java.lang.String IS_SUPER_PRIMARY = "is_super_primary";
     field public static final java.lang.String MIMETYPE = "mimetype";
     field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
+    field public static final java.lang.String RES_PACKAGE = "res_package";
     field public static final java.lang.String SYNC1 = "data_sync1";
     field public static final java.lang.String SYNC2 = "data_sync2";
     field public static final java.lang.String SYNC3 = "data_sync3";
@@ -23683,11 +23687,13 @@ package android.provider {
     field public static final java.lang.String GROUP_IS_READ_ONLY = "group_is_read_only";
     field public static final java.lang.String GROUP_VISIBLE = "group_visible";
     field public static final java.lang.String NOTES = "notes";
+    field public static final java.lang.String RES_PACKAGE = "res_package";
     field public static final java.lang.String SHOULD_SYNC = "should_sync";
     field public static final java.lang.String SUMMARY_COUNT = "summ_count";
     field public static final java.lang.String SUMMARY_WITH_PHONES = "summ_phones";
     field public static final java.lang.String SYSTEM_ID = "system_id";
     field public static final java.lang.String TITLE = "title";
+    field public static final java.lang.String TITLE_RES = "title_res";
   }
 
   public static final class ContactsContract.Intents {
@@ -23840,10 +23846,12 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.RawContactsColumns {
+    field public static final java.lang.String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
+    field public static final java.lang.String NAME_VERIFIED = "name_verified";
     field public static final java.lang.String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     field public static final java.lang.String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
   }
@@ -23853,6 +23861,13 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_ID = "data_id";
     field public static final android.net.Uri PROFILE_CONTENT_URI;
+  }
+
+  public static class ContactsContract.SearchSnippetColumns {
+    ctor public ContactsContract.SearchSnippetColumns();
+    field public static final java.lang.String DEFERRED_SNIPPETING_KEY = "deferred_snippeting";
+    field public static final java.lang.String SNIPPET = "snippet";
+    field public static final java.lang.String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
