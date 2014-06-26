@@ -2255,9 +2255,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
             utils.saveLockPassword(password, quality, false, userHandle);
+            boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
+            if (requireEntry) {
+                utils.requireCredentialEntry(UserHandle.USER_ALL);
+            }
             synchronized (this) {
-                int newOwner = (flags&DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY)
-                        != 0 ? callingUid : -1;
+                int newOwner = requireEntry ? callingUid : -1;
                 if (policy.mPasswordOwner != newOwner) {
                     policy.mPasswordOwner = newOwner;
                     saveSettingsLocked(userHandle);
@@ -2370,6 +2373,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getIPowerManager().goToSleep(SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
             // Ensure the device is locked
+            new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);
             getWindowManager().lockNow(null);
         } catch (RemoteException e) {
         } finally {
