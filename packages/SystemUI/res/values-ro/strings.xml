@@ -209,7 +209,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Neconectat"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nicio reţea"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi deconectat"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Ecran de trimitere"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="7482103121002965053">"Proiectați ecranul"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminozitate"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMAT"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inversați culori"</string>
@@ -229,11 +229,6 @@
     <string name="description_target_search" msgid="3091587249776033139">"Căutaţi"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisaţi în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisaţi spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-  <plurals name="zen_mode_notification_title">
-    <item quantity="one" msgid="7809876956258040354">"Notificare ascunsă"</item>
-    <item quantity="other" msgid="7388721375827338153">"%d de notificări ascunse"</item>
-  </plurals>
-    <string name="zen_mode_notification_text" msgid="8336623711388065713">"Atingeți pentru a afișa"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"Nu deranjaţi"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificările mai puțin urgente mai jos"</string>

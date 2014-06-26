@@ -231,11 +231,6 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pesquisar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>, deslize para cima."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>, deslize para a esquerda."</string>
-  <plurals name="zen_mode_notification_title">
-    <item quantity="one" msgid="7809876956258040354">"Notificação oculta"</item>
-    <item quantity="other" msgid="7388721375827338153">"%d notificações ocultas"</item>
-  </plurals>
-    <string name="zen_mode_notification_text" msgid="8336623711388065713">"Toque para mostrar"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"Não perturbe"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
