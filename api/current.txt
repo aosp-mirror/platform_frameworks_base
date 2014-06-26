@@ -16098,6 +16098,7 @@ package android.media.tv {
 
   public abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session();
+    method public void dispatchChannelRetuned(android.net.Uri);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -16135,6 +16136,7 @@ package android.media.tv {
 
   public static abstract class TvView.TvInputListener {
     ctor public TvView.TvInputListener();
+    method public void onChannelRetuned(java.lang.String, android.net.Uri);
     method public void onError(java.lang.String, int);
   }
 

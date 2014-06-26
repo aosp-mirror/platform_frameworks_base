@@ -286,6 +286,25 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Notifies the channel of the session is retuned by TV input.
+         *
+         * @param channelUri The URI of a channel.
+         */
+        public void dispatchChannelRetuned(final Uri channelUri) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchChannelRetuned");
+                        mSessionCallback.onChannelRetuned(channelUri);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchChannelRetuned");
+                    }
+                }
+            });
+        }
+
+        /**
          * Called when the session is released.
          */
         public abstract void onRelease();

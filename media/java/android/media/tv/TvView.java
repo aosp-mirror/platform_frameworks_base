@@ -456,6 +456,16 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is invoked when the channel of this TvView is changed by the underlying TV input
+         * with out any {@link TvView#tune(String, Uri)} request.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param channelUri The URI of a channel.
+         */
+        public void onChannelRetuned(String inputId, Uri channelUri) {
+        }
+
+        /**
          * This is invoked when a custom event from the bound TV input is sent to this view.
          *
          * @param eventType The type of the event.
@@ -558,6 +568,16 @@ public class TvView extends ViewGroup {
             }
             if (mListener != null) {
                 mListener.onClosedCaptionStreamChanged(mInputId, hasClosedCaption);
+            }
+        }
+
+        @Override
+        public void onChannelRetuned(Session session, Uri channelUri) {
+            if (DEBUG) {
+                Log.d(TAG, "onChannelChangedByTvInput(" + channelUri + ")");
+            }
+            if (mListener != null) {
+                mListener.onChannelRetuned(mInputId, channelUri);
             }
         }
 

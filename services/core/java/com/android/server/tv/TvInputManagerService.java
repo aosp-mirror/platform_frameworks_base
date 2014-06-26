@@ -485,6 +485,27 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
+            public void onChannelRetuned(Uri channelUri) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onChannelRetuned(" + channelUri + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        // TODO: Consider adding this channel change in the watch log. When we do
+                        // that, how we can protect the watch log from malicious tv inputs should
+                        // be addressed. e.g. add a field which represents where the channel change
+                        // originated from.
+                        sessionState.mClient.onChannelRetuned(channelUri, sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onChannelRetuned");
+                    }
+                }
+            }
+
+            @Override
             public void onSessionEvent(String eventType, Bundle eventArgs) {
                 synchronized (mLock) {
                     if (DEBUG) {

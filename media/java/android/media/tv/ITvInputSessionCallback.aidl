@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.media.tv.ITvInputSession;
+import android.net.Uri;
 import android.os.Bundle;
 
 /**
@@ -30,4 +31,5 @@ oneway interface ITvInputSessionCallback {
     void onVideoStreamChanged(int width, int height, boolean interlaced);
     void onAudioStreamChanged(int channelCount);
     void onClosedCaptionStreamChanged(boolean hasClosedCaption);
+    void onChannelRetuned(in Uri channelUri);
 }

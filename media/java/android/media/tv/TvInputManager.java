@@ -125,6 +125,16 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when the channel of this session is changed by the underlying TV input
+         * with out any {@link TvInputManager.Session#tune(Uri)} request.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param channelUri The URI of a channel.
+         */
+        public void onChannelRetuned(Session session, Uri channelUri) {
+        }
+
+        /**
          * This is called when a custom event has been sent from this session.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
@@ -190,6 +200,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onClosedCaptionStreamChanged(mSession, hasClosedCaption);
+                }
+            });
+        }
+
+        public void postChannelRetuned(final Uri channelUri) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onChannelRetuned(mSession, channelUri);
                 }
             });
         }
@@ -314,6 +333,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postClosedCaptionStreamChanged(hasClosedCaption);
+                }
+            }
+
+            @Override
+            public void onChannelRetuned(Uri channelUri, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postChannelRetuned(channelUri);
                 }
             }
 
