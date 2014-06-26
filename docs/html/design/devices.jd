@@ -13,7 +13,7 @@ footer.hide=1
 #text-overlay {
   position: absolute;
   left: 0;
-  top: 380px;
+  top: 410px;
   width: 340px;
 
 }
