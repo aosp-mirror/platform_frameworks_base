@@ -126,7 +126,34 @@ public class SurfaceTexture {
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
-        nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
+        nativeInit(false, texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
+    }
+
+    /**
+     * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
+     *
+     * In single buffered mode the application is responsible for serializing access to the image
+     * content buffer. Each time the image content is to be updated, the
+     * {@link #releaseTexImage()} method must be called before the image content producer takes
+     * ownership of the buffer. For example, when producing image content with the NDK
+     * ANativeWindow_lock and ANativeWindow_unlockAndPost functions, {@link #releaseTexImage()}
+     * must be called before each ANativeWindow_lock, or that call will fail. When producing
+     * image content with OpenGL ES, {@link #releaseTexImage()} must be called before the first
+     * OpenGL ES function call each frame.
+     *
+     * Unlike {@link #SurfaceTexture(int, boolean)}, which takes an OpenGL texture object name,
+     * this constructor creates the SurfaceTexture in detached mode. A texture name must be passed
+     * in using {@link #attachToGLContext} before calling {@link #releaseTexImage()} and producing
+     * image content using OpenGL ES.
+     *
+     * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+     *
+     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @hide
+     */
+    public SurfaceTexture(boolean singleBufferMode) {
+        mCreatorLooper = Looper.myLooper();
+        nativeInit(true, 0, singleBufferMode, new WeakReference<SurfaceTexture>(this));
     }
 
     /**
@@ -339,8 +366,8 @@ public class SurfaceTexture {
         }
     }
 
-    private native void nativeInit(int texName, boolean singleBufferMode,
-            WeakReference<SurfaceTexture> weakSelf)
+    private native void nativeInit(boolean isDetached, int texName,
+            boolean singleBufferMode, WeakReference<SurfaceTexture> weakSelf)
             throws Surface.OutOfResourcesException;
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);

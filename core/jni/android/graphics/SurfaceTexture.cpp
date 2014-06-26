@@ -227,7 +227,7 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 }
 
-static void SurfaceTexture_init(JNIEnv* env, jobject thiz,
+static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
         jint texName, jboolean singleBufferMode, jobject weakThiz)
 {
     sp<IGraphicBufferProducer> producer;
@@ -239,8 +239,15 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz,
         consumer->setDefaultMaxBufferCount(1);
     }
 
-    sp<GLConsumer> surfaceTexture(new GLConsumer(consumer, texName,
-            GL_TEXTURE_EXTERNAL_OES, true, true));
+    sp<GLConsumer> surfaceTexture;
+    if (isDetached) {
+        surfaceTexture = new GLConsumer(consumer, GL_TEXTURE_EXTERNAL_OES,
+                true, true);
+    } else {
+        surfaceTexture = new GLConsumer(consumer, texName,
+                GL_TEXTURE_EXTERNAL_OES, true, true);
+    }
+
     if (surfaceTexture == 0) {
         jniThrowException(env, OutOfResourcesException,
                 "Unable to create native SurfaceTexture");
@@ -338,7 +345,7 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
-    {"nativeInit",                 "(IZLjava/lang/ref/WeakReference;)V", (void*)SurfaceTexture_init },
+    {"nativeInit",                 "(ZIZLjava/lang/ref/WeakReference;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",       "()V",   (void*)SurfaceTexture_updateTexImage },
