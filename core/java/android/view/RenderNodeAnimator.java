@@ -172,12 +172,14 @@ public final class RenderNodeAnimator extends Animator {
 
     @Override
     public void cancel() {
-        mTarget.removeAnimator(this);
+        if (!mFinished) {
+            nCancel(mNativePtr.get());
 
-        final ArrayList<AnimatorListener> listeners = getListeners();
-        final int numListeners = listeners == null ? 0 : listeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            listeners.get(i).onAnimationCancel(this);
+            final ArrayList<AnimatorListener> listeners = getListeners();
+            final int numListeners = listeners == null ? 0 : listeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                listeners.get(i).onAnimationCancel(this);
+            }
         }
     }
 
@@ -219,10 +221,6 @@ public final class RenderNodeAnimator extends Animator {
         return mTarget;
     }
 
-    /**
-     * WARNING: May only be called once!!!
-     * TODO: Fix above -_-
-     */
     public void setStartValue(float startValue) {
         checkMutable();
         nSetStartValue(mNativePtr.get(), startValue);
@@ -231,6 +229,9 @@ public final class RenderNodeAnimator extends Animator {
     @Override
     public void setStartDelay(long startDelay) {
         checkMutable();
+        if (startDelay < 0) {
+            throw new IllegalArgumentException("startDelay must be positive; " + startDelay);
+        }
         nSetStartDelay(mNativePtr.get(), startDelay);
     }
 
@@ -242,6 +243,9 @@ public final class RenderNodeAnimator extends Animator {
     @Override
     public RenderNodeAnimator setDuration(long duration) {
         checkMutable();
+        if (duration < 0) {
+            throw new IllegalArgumentException("duration must be positive; " + duration);
+        }
         nSetDuration(mNativePtr.get(), duration);
         return this;
     }
@@ -269,7 +273,6 @@ public final class RenderNodeAnimator extends Animator {
 
     private void onFinished() {
         mFinished = true;
-        mTarget.removeAnimator(this);
 
         final ArrayList<AnimatorListener> listeners = getListeners();
         final int numListeners = listeners == null ? 0 : listeners.size();
@@ -296,10 +299,13 @@ public final class RenderNodeAnimator extends Animator {
             long canvasProperty, float finalValue);
     private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
             long canvasProperty, int paintField, float finalValue);
+
     private static native void nSetStartValue(long nativePtr, float startValue);
     private static native void nSetDuration(long nativePtr, long duration);
     private static native long nGetDuration(long nativePtr);
     private static native void nSetStartDelay(long nativePtr, long startDelay);
     private static native long nGetStartDelay(long nativePtr);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
+
+    private static native void nCancel(long animPtr);
 }

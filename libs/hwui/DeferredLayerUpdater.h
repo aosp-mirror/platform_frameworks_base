@@ -75,7 +75,7 @@ public:
 
     ANDROID_API void setPaint(const SkPaint* paint);
 
-    ANDROID_API bool apply(TreeInfo& info);
+    ANDROID_API bool apply();
 
     ANDROID_API Layer* backingLayer() {
         return mLayer;

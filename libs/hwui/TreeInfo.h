@@ -79,6 +79,17 @@ public:
         , errorHandler(NULL)
     {}
 
+    explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)
+        : mode(mode)
+        , frameTimeMs(clone.frameTimeMs)
+        , animationHook(clone.animationHook)
+        , prepareTextures(mode == MODE_FULL)
+        , damageAccumulator(clone.damageAccumulator)
+        , renderState(clone.renderState)
+        , renderer(clone.renderer)
+        , errorHandler(clone.errorHandler)
+    {}
+
     const TraversalMode mode;
     nsecs_t frameTimeMs;
     AnimationHook* animationHook;

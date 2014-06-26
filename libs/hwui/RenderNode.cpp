@@ -62,7 +62,7 @@ RenderNode::RenderNode()
         , mNeedsDisplayListDataSync(false)
         , mDisplayListData(0)
         , mStagingDisplayListData(0)
-        , mNeedsAnimatorsSync(false)
+        , mAnimatorManager(*this)
         , mLayer(0) {
 }
 
@@ -115,6 +115,10 @@ void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
 
     prepareTreeImpl(info);
+}
+
+void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+    mAnimatorManager.addAnimator(animator);
 }
 
 void RenderNode::damageSelf(TreeInfo& info) {
@@ -193,11 +197,11 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     info.damageAccumulator->pushTransform(this);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingPropertiesChanges(info);
-        evaluateAnimations(info);
+        mAnimatorManager.animate(info);
     } else if (info.mode == TreeInfo::MODE_MAYBE_DETACHING) {
         pushStagingPropertiesChanges(info);
     } else if (info.mode == TreeInfo::MODE_RT_ONLY) {
-        evaluateAnimations(info);
+        mAnimatorManager.animate(info);
     }
 
     prepareLayer(info);
@@ -210,33 +214,11 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     info.damageAccumulator->popTransform();
 }
 
-class PushAnimatorsFunctor {
-public:
-    PushAnimatorsFunctor(RenderNode* target, TreeInfo& info)
-            : mTarget(target), mInfo(info) {}
-
-    bool operator() (const sp<BaseRenderNodeAnimator>& animator) {
-        animator->setupStartValueIfNecessary(mTarget, mInfo);
-        return animator->isFinished();
-    }
-private:
-    RenderNode* mTarget;
-    TreeInfo& mInfo;
-};
-
 void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     // Push the animators first so that setupStartValueIfNecessary() is called
     // before properties() is trampled by stagingProperties(), as they are
     // required by some animators.
-    if (mNeedsAnimatorsSync) {
-        mAnimators.resize(mStagingAnimators.size());
-        std::vector< sp<BaseRenderNodeAnimator> >::iterator it;
-        PushAnimatorsFunctor functor(this, info);
-        // hint: this means copy_if_not()
-        it = std::remove_copy_if(mStagingAnimators.begin(), mStagingAnimators.end(),
-                mAnimators.begin(), functor);
-        mAnimators.resize(std::distance(mAnimators.begin(), it));
-    }
+    mAnimatorManager.pushStaging(info);
     if (mDirtyPropertyFields) {
         mDirtyPropertyFields = 0;
         damageSelf(info);
@@ -267,47 +249,13 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING, info.renderState);
-        oldTreeInfo.damageAccumulator = info.damageAccumulator;
+        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING, info);
         prepareSubTree(oldTreeInfo, mDisplayListData);
         delete mDisplayListData;
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = 0;
         damageSelf(info);
     }
-}
-
-class AnimateFunctor {
-public:
-    AnimateFunctor(RenderNode* target, TreeInfo& info)
-            : mTarget(target), mInfo(info) {}
-
-    bool operator() (const sp<BaseRenderNodeAnimator>& animator) {
-        return animator->animate(mTarget, mInfo);
-    }
-private:
-    RenderNode* mTarget;
-    TreeInfo& mInfo;
-};
-
-void RenderNode::evaluateAnimations(TreeInfo& info) {
-    if (!mAnimators.size()) return;
-
-    // TODO: Can we target this better? For now treat it like any other staging
-    // property push and just damage self before and after animators are run
-
-    damageSelf(info);
-    info.damageAccumulator->popTransform();
-
-    AnimateFunctor functor(this, info);
-    std::vector< sp<BaseRenderNodeAnimator> >::iterator newEnd;
-    newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
-    mAnimators.erase(newEnd, mAnimators.end());
-    mProperties.updateMatrix();
-    info.out.hasAnimations |= mAnimators.size();
-
-    info.damageAccumulator->pushTransform(this);
-    damageSelf(info);
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
