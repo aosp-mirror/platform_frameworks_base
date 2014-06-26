@@ -28,6 +28,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -869,5 +870,9 @@ public final class HdmiControlService extends SystemService {
 
     private HdmiCecLocalDevicePlayback playback() {
         return (HdmiCecLocalDevicePlayback) mCecController.getLocalDevice(HdmiCec.DEVICE_PLAYBACK);
+    }
+
+    AudioManager getAudioManager() {
+        return (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
     }
 }
