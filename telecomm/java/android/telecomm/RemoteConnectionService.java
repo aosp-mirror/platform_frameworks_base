@@ -43,7 +43,7 @@ public class RemoteConnectionService implements DeathRecipient {
 
     private String mConnectionId;
     private ConnectionRequest mPendingRequest;
-    private SimpleResponse<ConnectionRequest, RemoteConnection> mPendingResponse;
+    private ConnectionService.OutgoingCallResponse<RemoteConnection> mPendingOutgoingCallResponse;
     // Remote connection services only support a single connection.
     private RemoteConnection mConnection;
 
@@ -60,7 +60,7 @@ public class RemoteConnectionService implements DeathRecipient {
         public void handleSuccessfulOutgoingCall(String connectionId) {
             if (isPendingConnection(connectionId)) {
                 mConnection = new RemoteConnection(mCallService, connectionId);
-                mPendingResponse.onResult(mPendingRequest, mConnection);
+                mPendingOutgoingCallResponse.onSuccess(mPendingRequest, mConnection);
                 clearPendingInformation();
             }
         }
@@ -72,7 +72,17 @@ public class RemoteConnectionService implements DeathRecipient {
             if (isPendingConnection(request.getCallId())) {
                 // Use mPendingRequest instead of request so that we use the same object that was
                 // passed in to us.
-                mPendingResponse.onError(request);
+                mPendingOutgoingCallResponse.onFailure(mPendingRequest, errorCode, errorMessage);
+                mConnectionId = null;
+                clearPendingInformation();
+            }
+        }
+
+        /** ${inheritDoc} */
+            @Override
+        public void cancelOutgoingCall(String connectionId) {
+            if (isPendingConnection(connectionId)) {
+                mPendingOutgoingCallResponse.onCancel(mPendingRequest);
                 mConnectionId = null;
                 clearPendingInformation();
             }
@@ -208,7 +218,7 @@ public class RemoteConnectionService implements DeathRecipient {
      */
     public void createOutgoingConnection(
             ConnectionRequest request,
-            SimpleResponse<ConnectionRequest, RemoteConnection> response) {
+            ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
 
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
@@ -216,13 +226,13 @@ public class RemoteConnectionService implements DeathRecipient {
             try {
                 mCallService.call(callInfo);
                 mConnectionId = id;
-                mPendingResponse = response;
+                mPendingOutgoingCallResponse = response;
                 mPendingRequest = request;
             } catch (RemoteException e) {
-                response.onError(request);
+                response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, e.toString());
             }
         } else {
-            response.onError(request);
+            response.onFailure(request, DisconnectCause.ERROR_UNSPECIFIED, null);
         }
     }
 
@@ -254,7 +264,7 @@ public class RemoteConnectionService implements DeathRecipient {
     }
 
     private boolean isPendingConnection(String id) {
-        return TextUtils.equals(mConnectionId, id) && mPendingResponse != null;
+        return TextUtils.equals(mConnectionId, id) && mPendingOutgoingCallResponse != null;
     }
 
     private boolean isCurrentConnection(String id) {
@@ -263,7 +273,7 @@ public class RemoteConnectionService implements DeathRecipient {
 
     private void clearPendingInformation() {
         mPendingRequest = null;
-        mPendingResponse = null;
+        mPendingOutgoingCallResponse = null;
     }
 
     private void destroyConnection() {

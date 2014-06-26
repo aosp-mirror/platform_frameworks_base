@@ -27604,6 +27604,7 @@ package android.telecomm {
   public final class CallServiceAdapter implements android.os.IBinder.DeathRecipient {
     method public void addConferenceCall(java.lang.String);
     method public void binderDied();
+    method public void cancelOutgoingCall(java.lang.String);
     method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
     method public void handleSuccessfulOutgoingCall(java.lang.String);
     method public void handoffCall(java.lang.String);
@@ -27750,7 +27751,7 @@ package android.telecomm {
     method public final void abort(java.lang.String);
     method public final void answer(java.lang.String);
     method public final void call(android.telecomm.CallInfo);
-    method public void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.SimpleResponse<android.telecomm.ConnectionRequest, android.telecomm.RemoteConnection>);
+    method public void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
     method public final void disconnect(java.lang.String);
     method public java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
@@ -27760,7 +27761,7 @@ package android.telecomm {
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
     method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
-    method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
+    method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.Connection>);
     method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public final void onPostDialContinue(java.lang.String, boolean);
     method public final void onPostDialWait(android.telecomm.Connection, java.lang.String);
@@ -27769,6 +27770,12 @@ package android.telecomm {
     method public final void setIncomingCallId(java.lang.String, android.os.Bundle);
     method public final void stopDtmfTone(java.lang.String);
     method public final void unhold(java.lang.String);
+  }
+
+  public static abstract interface ConnectionService.OutgoingCallResponse {
+    method public abstract void onCancel(android.telecomm.ConnectionRequest);
+    method public abstract void onFailure(android.telecomm.ConnectionRequest, int, java.lang.String);
+    method public abstract void onSuccess(android.telecomm.ConnectionRequest, CONNECTION);
   }
 
   public class GatewayInfo implements android.os.Parcelable {
@@ -27851,7 +27858,7 @@ package android.telecomm {
 
   public class RemoteConnectionService implements android.os.IBinder.DeathRecipient {
     method public void binderDied();
-    method public void createOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.SimpleResponse<android.telecomm.ConnectionRequest, android.telecomm.RemoteConnection>);
+    method public void createOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
     method public java.util.List<android.telecomm.Subscription> lookupSubscriptions(android.net.Uri);
   }
 

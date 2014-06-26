@@ -52,6 +52,35 @@ public abstract class ConnectionService extends CallService {
     private Uri mSubscriptionLookupHandle;
     private boolean mAreSubscriptionsInitialized = false;
 
+    /**
+     * A callback for providing the resuilt of creating a connection.
+     */
+    public interface OutgoingCallResponse<CONNECTION> {
+        /**
+         * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
+         *
+         * @param request The original request.
+         * @param connection The connection.
+         */
+        void onSuccess(ConnectionRequest request, CONNECTION connection);
+
+        /**
+         * Tells Telecomm that an attempt to place the specified outgoing call failed.
+         *
+         * @param request The original request.
+         * @param code An integer code indicating the reason for failure.
+         * @param msg A message explaining the reason for failure.
+         */
+        void onFailure(ConnectionRequest request, int code, String msg);
+
+        /**
+         * Tells Telecomm to cancel the call.
+         *
+         * @param request The original request.
+         */
+        void onCancel(ConnectionRequest request);
+    }
+
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
         @Override
         public void onStateChanged(Connection c, int state) {
@@ -136,29 +165,23 @@ public abstract class ConnectionService extends CallService {
                         callInfo.getId(),
                         callInfo.getHandle(),
                         callInfo.getExtras()),
-                new Response<ConnectionRequest, Connection>() {
+                new OutgoingCallResponse<Connection>() {
                     @Override
-                    public void onResult(ConnectionRequest request, Connection... result) {
-                        if (result != null && result.length != 1) {
-                            Log.d(this, "adapter handleFailedOutgoingCall %s", callInfo);
-                            getAdapter().handleFailedOutgoingCall(
-                                    request,
-                                    DisconnectCause.ERROR_UNSPECIFIED,
-                                    "Created " + result.length + " Connections, expected 1");
-                            for (Connection c : result) {
-                                c.abort();
-                            }
-                        } else {
-                            Log.d(this, "adapter handleSuccessfulOutgoingCall %s",
-                                    callInfo.getId());
-                            getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
-                            addConnection(callInfo.getId(), result[0]);
-                        }
+                    public void onSuccess(ConnectionRequest request, Connection connection) {
+                        Log.d(this, "adapter handleSuccessfulOutgoingCall %s",
+                                callInfo.getId());
+                        getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
+                        addConnection(callInfo.getId(), connection);
                     }
 
                     @Override
-                    public void onError(ConnectionRequest request, int code, String msg) {
+                    public void onFailure(ConnectionRequest request, int code, String msg) {
                         getAdapter().handleFailedOutgoingCall(request, code, msg);
+                    }
+
+                    @Override
+                    public void onCancel(ConnectionRequest request) {
+                        getAdapter().cancelOutgoingCall(callInfo.getId());
                     }
                 }
         );
@@ -389,7 +412,7 @@ public abstract class ConnectionService extends CallService {
 
     public void createRemoteOutgoingConnection(
             ConnectionRequest request,
-            SimpleResponse<ConnectionRequest, RemoteConnection> response) {
+            OutgoingCallResponse<RemoteConnection> response) {
         mRemoteConnectionManager.createOutgoingConnection(request, response);
     }
 
@@ -408,7 +431,7 @@ public abstract class ConnectionService extends CallService {
      */
     public void onCreateConnections(
             ConnectionRequest request,
-            Response<ConnectionRequest, Connection> callback) {}
+            OutgoingCallResponse<Connection> callback) {}
 
     /**
      * Returns a new or existing conference connection when the the user elects to convert the
