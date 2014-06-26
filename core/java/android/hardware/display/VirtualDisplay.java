@@ -80,6 +80,18 @@ public final class VirtualDisplay {
     }
 
     /**
+     * Asks the virtual display to resize.
+     *<p>
+     * This is really just a convenience to allow applications using
+     * virtual displays to adapt to changing conditions without having
+     * to tear down and recreate the display.
+     * </p>
+     */
+    public void resize(int width, int height, int densityDpi) {
+        mGlobal.resizeVirtualDisplay(mToken, width, height, densityDpi);
+    }
+
+    /**
      * Releases the virtual display and destroys its underlying surface.
      * <p>
      * All remaining windows on the virtual display will be forcibly removed

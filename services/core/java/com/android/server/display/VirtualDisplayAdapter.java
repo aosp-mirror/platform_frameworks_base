@@ -83,6 +83,15 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         return device;
     }
 
+    public void resizeVirtualDisplayLocked(IBinder appToken,
+            int width, int height, int densityDpi) {
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
+        if (device != null) {
+            device.resizeLocked(width, height, densityDpi);
+        }
+    }
+
+
     public void setVirtualDisplaySurfaceLocked(IBinder appToken, Surface surface) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
         if (device != null) {
@@ -122,20 +131,24 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     private final class VirtualDisplayDevice extends DisplayDevice implements DeathRecipient {
+        private static final int PENDING_SURFACE_CHANGE = 0x01;
+        private static final int PENDING_RESIZE = 0x02;
+
         private final IBinder mAppToken;
         private final int mOwnerUid;
         final String mOwnerPackageName;
         final String mName;
-        private final int mWidth;
-        private final int mHeight;
-        private final int mDensityDpi;
         private final int mFlags;
         private final Callbacks mCallbacks;
 
+        private int mWidth;
+        private int mHeight;
+        private int mDensityDpi;
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
-        private int mState;
+        private int mDisplayState;
         private boolean mStopped;
+        private int mPendingChanges;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
@@ -152,7 +165,8 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mSurface = surface;
             mFlags = flags;
             mCallbacks = callbacks;
-            mState = Display.STATE_UNKNOWN;
+            mDisplayState = Display.STATE_UNKNOWN;
+            mPendingChanges |= PENDING_SURFACE_CHANGE;
         }
 
         @Override
@@ -175,8 +189,8 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void requestDisplayStateLocked(int state) {
-            if (state != mState) {
-                mState = state;
+            if (state != mDisplayState) {
+                mDisplayState = state;
                 if (state == Display.STATE_OFF) {
                     mCallbacks.dispatchDisplayPaused();
                 } else {
@@ -187,7 +201,13 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void performTraversalInTransactionLocked() {
-            setSurfaceInTransactionLocked(mSurface);
+            if ((mPendingChanges & PENDING_RESIZE) != 0) {
+                SurfaceControl.setDisplaySize(getDisplayTokenLocked(), mWidth, mHeight);
+            }
+            if ((mPendingChanges & PENDING_SURFACE_CHANGE) != 0) {
+                setSurfaceInTransactionLocked(mSurface);
+            }
+            mPendingChanges = 0;
         }
 
         public void setSurfaceLocked(Surface surface) {
@@ -198,6 +218,19 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
                 mSurface = surface;
                 mInfo = null;
+                mPendingChanges |= PENDING_SURFACE_CHANGE;
+            }
+        }
+
+        public void resizeLocked(int width, int height, int densityDpi) {
+            if (mWidth != width || mHeight != height || mDensityDpi != densityDpi) {
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
+                sendTraversalRequestLocked();
+                mWidth = width;
+                mHeight = height;
+                mDensityDpi = densityDpi;
+                mInfo = null;
+                mPendingChanges |= PENDING_RESIZE;
             }
         }
 
@@ -210,7 +243,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         public void dumpLocked(PrintWriter pw) {
             super.dumpLocked(pw);
             pw.println("mFlags=" + mFlags);
-            pw.println("mState=" + Display.stateToString(mState));
+            pw.println("mDisplayState=" + Display.stateToString(mDisplayState));
             pw.println("mStopped=" + mStopped);
         }
 

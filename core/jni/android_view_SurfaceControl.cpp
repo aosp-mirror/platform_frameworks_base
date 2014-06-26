@@ -369,6 +369,13 @@ static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
     SurfaceComposerClient::setDisplayProjection(token, orientation, layerStackRect, displayRect);
 }
 
+static void nativeSetDisplaySize(JNIEnv* env, jclass clazz,
+        jobject tokenObj, jint width, jint height) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+    SurfaceComposerClient::setDisplaySize(token, width, height);
+}
+
 static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
         jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -620,6 +627,8 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayLayerStack },
     {"nativeSetDisplayProjection", "(Landroid/os/IBinder;IIIIIIIII)V",
             (void*)nativeSetDisplayProjection },
+    {"nativeSetDisplaySize", "(Landroid/os/IBinder;II)V",
+            (void*)nativeSetDisplaySize },
     {"nativeGetDisplayConfigs", "(Landroid/os/IBinder;)[Landroid/view/SurfaceControl$PhysicalDisplayInfo;",
             (void*)nativeGetDisplayConfigs },
     {"nativeGetActiveConfig", "(Landroid/os/IBinder;)I",
