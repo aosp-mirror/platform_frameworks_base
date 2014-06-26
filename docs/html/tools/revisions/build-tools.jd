@@ -77,6 +77,25 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 20.0.0</a> <em>(June 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>General Notes:</dt>
+      <dd>
+        <ul>
+          <li>Added support for Android Wear.</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.1.0</a> <em>(May 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
