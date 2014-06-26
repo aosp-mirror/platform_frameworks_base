@@ -97,15 +97,14 @@ page.title=App Structure for Android Wear
 
 <h2 id="Custom">Breaking out of the card (with custom layouts)</h2>
 
-<p>There are some things you can’t do on a card. Swiping in many directions on a map or a joystick are a few examples. In those cases it might be good idea to momentarily go full screen.</p>
-
-
 <a class="notice-developers" href="{@docRoot}training/wearables/apps/index.html">
   <div>
     <h3>Developer Docs</h3>
     <p>Creating Wearable Apps</p>
   </div>
 </a>
+
+<p>There are some things you can’t do on a card. Swiping in many directions on a map or a joystick are a few examples. In those cases it might be good idea to momentarily go full screen.</p>
 
 <img src="{@docRoot}design/media/wear/customlayout.png" alt="" width="760px" />
 
