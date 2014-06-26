@@ -540,18 +540,92 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
-     * Returns true if this link has an IPv6 address.
+     * Returns true if this link has a global preferred IPv6 address.
      *
-     * @return {@code true} if there is an IPv6 address, {@code false} otherwise.
+     * @return {@code true} if there is a global preferred IPv6 address, {@code false} otherwise.
      * @hide
      */
-    public boolean hasIPv6Address() {
+    public boolean hasGlobalIPv6Address() {
         for (LinkAddress address : mLinkAddresses) {
-          if (address.getAddress() instanceof Inet6Address) {
+          if (address.getAddress() instanceof Inet6Address && address.isGlobalPreferred()) {
             return true;
           }
         }
         return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv4 default route.
+     *
+     * @return {@code true} if there is an IPv4 default route, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv4DefaultRoute() {
+        for (RouteInfo r : mRoutes) {
+          if (r.isIPv4Default()) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 default route.
+     *
+     * @return {@code true} if there is an IPv6 default route, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv6DefaultRoute() {
+        for (RouteInfo r : mRoutes) {
+          if (r.isIPv6Default()) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv4 DNS server.
+     *
+     * @return {@code true} if there is an IPv4 DNS server, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv4DnsServer() {
+        for (InetAddress ia : mDnses) {
+          if (ia instanceof Inet4Address) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 DNS server.
+     *
+     * @return {@code true} if there is an IPv6 DNS server, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasIPv6DnsServer() {
+        for (InetAddress ia : mDnses) {
+          if (ia instanceof Inet6Address) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link is provisioned for global connectivity. For IPv6, this requires an
+     * IP address, default route, and DNS server. For IPv4, this requires only an IPv4 address,
+     * because WifiStateMachine accepts static configurations that only specify an address but not
+     * DNS servers or a default route.
+     *
+     * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isProvisioned() {
+        return (hasIPv4Address() ||
+                (hasGlobalIPv6Address() && hasIPv6DefaultRoute() && hasIPv6DnsServer()));
     }
 
     /**
