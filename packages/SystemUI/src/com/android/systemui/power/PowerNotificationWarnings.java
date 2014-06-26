@@ -81,6 +81,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private long mScreenOffTime;
     private int mShowing;
 
+    private long mBucketDroppedNegativeTimeMs;
+
     private boolean mSaver;
     private int mSaverTriggerLevel;
     private boolean mWarning;
@@ -108,6 +110,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Override
     public void update(int batteryLevel, int bucket, long screenOffTime) {
         mBatteryLevel = batteryLevel;
+        if (bucket >= 0) {
+            mBucketDroppedNegativeTimeMs = 0;
+        } else if (bucket < mBucket) {
+            mBucketDroppedNegativeTimeMs = System.currentTimeMillis();
+        }
         mBucket = bucket;
         mScreenOffTime = screenOffTime;
         mFallbackDialogs.update(batteryLevel, bucket, screenOffTime);
@@ -146,6 +153,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private void showInvalidChargerNotification() {
         final Notification.Builder nb = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_power_low)
+                .setWhen(0)
                 .setShowWhen(false)
                 .setOngoing(true)
                 .setContentTitle(mContext.getString(R.string.invalid_charger_title))
@@ -166,6 +174,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 : R.string.battery_low_percent_format;
         final Notification.Builder nb = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_power_low)
+                // Bump the notification when the bucket dropped.
+                .setWhen(mBucketDroppedNegativeTimeMs)
                 .setShowWhen(false)
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
                 .setContentText(mContext.getString(textRes, mBatteryLevel))
@@ -198,6 +208,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentTitle(mContext.getString(R.string.battery_saver_notification_title))
                 .setContentText(mContext.getString(R.string.battery_saver_notification_text))
                 .setOngoing(true)
+                .setWhen(0)
                 .setShowWhen(false)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
