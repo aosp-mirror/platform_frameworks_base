@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import javax.net.SocketFactory;
 
@@ -148,7 +149,9 @@ public class Network implements Parcelable {
             // Query a property of the underlying socket to ensure the underlying
             // socket exists so a file descriptor is available to bind to a network.
             socket.getReuseAddress();
-            NetworkUtils.bindSocketToNetwork(socket.getFileDescriptor$().getInt$(), mNetId);
+            if (!NetworkUtils.bindSocketToNetwork(socket.getFileDescriptor$().getInt$(), mNetId)) {
+                throw new SocketException("Failed to bind socket to network.");
+            }
             return socket;
         }
     }

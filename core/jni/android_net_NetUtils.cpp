@@ -214,7 +214,8 @@ static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring if
     return android_net_utils_runDhcpCommon(env, clazz, ifname, info, false);
 }
 
-static jboolean android_net_utils_runDhcpRenew(JNIEnv* env, jobject clazz, jstring ifname, jobject info)
+static jboolean android_net_utils_runDhcpRenew(JNIEnv* env, jobject clazz, jstring ifname,
+        jobject info)
 {
     return android_net_utils_runDhcpCommon(env, clazz, ifname, info, true);
 }
@@ -252,14 +253,14 @@ static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket,
     }
 }
 
-static void android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
+static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
 {
-    setNetworkForProcess(netId);
+    return (jboolean) !setNetworkForProcess(netId);
 }
 
-static void android_net_utils_unbindProcessToNetwork(JNIEnv *env, jobject thiz)
+static jboolean android_net_utils_unbindProcessToNetwork(JNIEnv *env, jobject thiz)
 {
-    setNetworkForProcess(NETID_UNSET);
+    return (jboolean) !setNetworkForProcess(NETID_UNSET);
 }
 
 static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz)
@@ -267,19 +268,21 @@ static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz
     return getNetworkForProcess();
 }
 
-static void android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz, jint netId)
+static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz,
+        jint netId)
 {
-    setNetworkForResolv(netId);
+    return (jboolean) !setNetworkForResolv(netId);
 }
 
-static void android_net_utils_unbindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz)
+static jboolean android_net_utils_unbindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz)
 {
-    setNetworkForResolv(NETID_UNSET);
+    return (jboolean) !setNetworkForResolv(NETID_UNSET);
 }
 
-static void android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket, jint netId)
+static jboolean android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket,
+        jint netId)
 {
-    setNetworkForSocket(netId, socket);
+    return (jboolean) !setNetworkForSocket(netId, socket);
 }
 
 // ----------------------------------------------------------------------------
@@ -299,12 +302,12 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
     { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
-    { "bindProcessToNetwork", "(I)V", (void*) android_net_utils_bindProcessToNetwork },
+    { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
     { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
-    { "unbindProcessToNetwork", "()V", (void*) android_net_utils_unbindProcessToNetwork },
-    { "bindProcessToNetworkForHostResolution", "(I)V", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
-    { "unbindProcessToNetworkForHostResolution", "()V", (void*) android_net_utils_unbindProcessToNetworkForHostResolution },
-    { "bindSocketToNetwork", "(II)V", (void*) android_net_utils_bindSocketToNetwork },
+    { "unbindProcessToNetwork", "()Z", (void*) android_net_utils_unbindProcessToNetwork },
+    { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
+    { "unbindProcessToNetworkForHostResolution", "()Z", (void*) android_net_utils_unbindProcessToNetworkForHostResolution },
+    { "bindSocketToNetwork", "(II)Z", (void*) android_net_utils_bindSocketToNetwork },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
