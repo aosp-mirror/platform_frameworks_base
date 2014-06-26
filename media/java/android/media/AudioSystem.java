@@ -432,7 +432,10 @@ public class AudioSystem
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
-    private static final int NUM_FORCE_CONFIG = 12;
+    public static final int FORCE_SYSTEM_AUDIO_HDMI_ARC = 12;
+    public static final int FORCE_SYSTEM_AUDIO_SPDIF = 13;
+    public static final int FORCE_SYSTEM_LINE = 14;
+    private static final int NUM_FORCE_CONFIG = 15;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
