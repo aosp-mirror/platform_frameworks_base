@@ -152,7 +152,7 @@ page.type=about
                   for a hands-free experience.
                 </p>
                 <p class="landing-small">
-                  <a href="{@docRoot}training/wearables/apps/voice-actions.html">Integrate voice actions</a>
+                  <a href="{@docRoot}training/wearables/apps/voice.html">Integrate voice actions</a>
                 </p>
               </div>
               <div class="col-4">
