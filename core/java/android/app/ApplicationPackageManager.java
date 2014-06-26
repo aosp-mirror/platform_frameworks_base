@@ -621,10 +621,15 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public ProviderInfo resolveContentProvider(String name,
-                                               int flags) {
+    public ProviderInfo resolveContentProvider(String name, int flags) {
+        return resolveContentProviderAsUser(name, flags, mContext.getUserId());
+    }
+
+    /** @hide **/
+    @Override
+    public ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId) {
         try {
-            return mPM.resolveContentProvider(name, flags, mContext.getUserId());
+            return mPM.resolveContentProvider(name, flags, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
