@@ -39,6 +39,7 @@
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
+#include "TypefaceImpl.h"
 
 // temporary for debugging
 #include <Caches.h>
