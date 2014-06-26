@@ -1310,6 +1310,7 @@ package android {
     field public static final int viewportHeight = 16843805; // 0x101041d
     field public static final int viewportWidth = 16843804; // 0x101041c
     field public static final int visibility = 16842972; // 0x10100dc
+    field public static final int visibilityMode = 16843902; // 0x101047e
     field public static final int visible = 16843156; // 0x1010194
     field public static final int vmSafeMode = 16843448; // 0x10102b8
     field public static final int voiceLanguage = 16843349; // 0x1010255
@@ -30687,6 +30688,9 @@ package android.transition {
     method public android.animation.Animator onAppear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);
     method public android.animation.Animator onDisappear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
     method public android.animation.Animator onDisappear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);
+    method public void setMode(int);
+    field public static final int IN = 1; // 0x1
+    field public static final int OUT = 2; // 0x2
   }
 
   public abstract class VisibilityPropagation extends android.transition.TransitionPropagation {
