@@ -104,7 +104,7 @@ abstract class AbstractEventLogger {
 
         // onAudioDataWritten() should normally always be called, and hence mPlaybackStartTime
         // should be set, if an error does not occur.
-        if (statusCode != TextToSpeechClient.Status.SUCCESS
+        if (statusCode != TextToSpeech.SUCCESS
                 || mPlaybackStartTime == -1 || mEngineCompleteTime == -1) {
             logFailure(statusCode);
             return;

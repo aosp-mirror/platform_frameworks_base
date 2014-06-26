@@ -40,8 +40,24 @@ public abstract class UtteranceProgressListener {
      * the same utterance.
      *
      * @param utteranceId the utterance ID of the utterance.
+     * @deprecated Use {@link #onError(String,int)} instead
      */
+    @Deprecated
     public abstract void onError(String utteranceId);
+
+    /**
+     * Called when an error has occurred during processing. This can be called
+     * at any point in the synthesis process. Note that there might be calls
+     * to {@link #onStart(String)} for specified utteranceId but there will never
+     * be a call to both {@link #onDone(String)} and {@link #onError(String,int)} for
+     * the same utterance. The default implementation calls {@link #onError(String)}.
+     *
+     * @param utteranceId the utterance ID of the utterance.
+     * @param errorCode one of the ERROR_* codes from {@link TextToSpeech}
+     */
+    public void onError(String utteranceId, int errorCode) {
+        onError(utteranceId);
+    }
 
     /**
      * Wraps an old deprecated OnUtteranceCompletedListener with a shiny new

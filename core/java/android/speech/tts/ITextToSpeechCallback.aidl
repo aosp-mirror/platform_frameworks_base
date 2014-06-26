@@ -15,8 +15,6 @@
  */
 package android.speech.tts;
 
-import android.speech.tts.VoiceInfo;
-
 /**
  * Interface for callbacks from TextToSpeechService
  *
@@ -56,12 +54,8 @@ oneway interface ITextToSpeechCallback {
      *
      * @param utteranceId Unique id identifying synthesis request.
      * @param errorCode One of the values from
-     *        {@link android.speech.tts.v2.TextToSpeechClient.Status}.
+     *        {@link android.speech.tts.v2.TextToSpeech}.
      */
     void onError(String utteranceId, int errorCode);
 
-    /**
-     * Inform the client that set of available voices changed.
-     */
-    void onVoicesInfoChange(in List<VoiceInfo> voices);
 }

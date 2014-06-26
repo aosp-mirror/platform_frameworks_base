@@ -54,6 +54,6 @@ abstract class AbstractSynthesisCallback implements SynthesisCallback {
      * while in {@link TextToSpeechService#onSynthesizeText}.
      */
     int errorCodeOnStop() {
-        return mClientIsUsingV2 ? TextToSpeechClient.Status.STOPPED : TextToSpeech.ERROR;
+        return mClientIsUsingV2 ? TextToSpeech.STOPPED : TextToSpeech.ERROR;
     }
 }

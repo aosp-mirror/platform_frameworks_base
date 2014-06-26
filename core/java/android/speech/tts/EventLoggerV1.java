@@ -35,7 +35,7 @@ class EventLoggerV1 extends AbstractEventLogger {
         // We don't report stopped syntheses because their overall
         // total time spent will be inaccurate (will not correlate with
         // the length of the utterance).
-        if (statusCode != TextToSpeechClient.Status.STOPPED) {
+        if (statusCode != TextToSpeech.STOPPED) {
             EventLogTags.writeTtsSpeakFailure(mServiceApp, mCallerUid, mCallerPid,
                     getUtteranceLength(), getLocaleString(),
                     mRequest.getSpeechRate(), mRequest.getPitch());
