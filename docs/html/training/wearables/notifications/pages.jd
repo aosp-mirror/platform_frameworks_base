@@ -65,7 +65,7 @@ Notification twoPageNotification =
                 .build();
 
 // Issue the notification
-    notificationManager =
-            NotificationManagerCompat.from(this);
-    notificationManager.notify(notificationId, twoPageNotification);
+notificationManager =
+        NotificationManagerCompat.from(this);
+notificationManager.notify(notificationId, twoPageNotification);
 </pre>
