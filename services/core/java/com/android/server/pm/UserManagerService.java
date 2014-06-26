@@ -1047,6 +1047,11 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private UserInfo createUserInternal(String name, int flags, int parentId) {
+        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
+                UserManager.DISALLOW_ADD_USER, false)) {
+            Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
+            return null;
+        }
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         try {
