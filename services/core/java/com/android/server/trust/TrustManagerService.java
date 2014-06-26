@@ -88,6 +88,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_UNREGISTER_LISTENER = 2;
     private static final int MSG_DISPATCH_UNLOCK_ATTEMPT = 3;
     private static final int MSG_ENABLED_AGENTS_CHANGED = 4;
+    private static final int MSG_REQUIRE_CREDENTIAL_ENTRY = 5;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
@@ -314,6 +315,17 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+
+    private void requireCredentialEntry(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            mUserHasAuthenticatedSinceBoot.clear();
+            updateTrustAll();
+        } else {
+            mUserHasAuthenticatedSinceBoot.put(userId, false);
+            updateTrust(userId);
+        }
+    }
+
     // Listeners
 
     private void addListener(ITrustListener listener) {
@@ -367,6 +379,17 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
+        public void reportRequireCredentialEntry(int userId) throws RemoteException {
+            enforceReportPermission();
+            if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_OWNER) {
+                mHandler.obtainMessage(MSG_REQUIRE_CREDENTIAL_ENTRY, userId, 0).sendToTarget();
+            } else {
+                throw new IllegalArgumentException(
+                        "userId must be an explicit user id or USER_ALL");
+            }
+        }
+
+        @Override
         public void registerTrustListener(ITrustListener trustListener) throws RemoteException {
             enforceListenerPermission();
             mHandler.obtainMessage(MSG_REGISTER_LISTENER, trustListener).sendToTarget();
@@ -379,8 +402,8 @@ public class TrustManagerService extends SystemService {
         }
 
         private void enforceReportPermission() {
-            mContext.enforceCallingPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE,
-                    "reporting trust events");
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, "reporting trust events");
         }
 
         private void enforceListenerPermission() {
@@ -459,6 +482,9 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_ENABLED_AGENTS_CHANGED:
                     refreshAgentList();
+                    break;
+                case MSG_REQUIRE_CREDENTIAL_ENTRY:
+                    requireCredentialEntry(msg.arg1);
                     break;
             }
         }

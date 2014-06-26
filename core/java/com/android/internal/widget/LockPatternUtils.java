@@ -1460,4 +1460,11 @@ public class LockPatternUtils {
         }
         return activeTrustAgents;
     }
+
+    /**
+     * @see android.app.trust.TrustManager#reportRequireCredentialEntry(int)
+     */
+    public void requireCredentialEntry(int userId) {
+        getTrustManager().reportRequireCredentialEntry(userId);
+    }
 }
