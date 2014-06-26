@@ -110,7 +110,7 @@ methods that do not yet have reference material available on <a
 href="{@docRoot}">developer.android.com</a>. These API elements are
 formatted in {@code code style} in this document (without hyperlinks). For the
 preliminary API documentation for these elements, download the <a
-href="{@docRoot}preview/l-developer-preview-reference.zip">preview
+href="http://storage.googleapis.com/androiddevelopers/preview/l-developer-preview-reference.zip">preview
 reference</a>.</p>
 
 <h2 id="Behaviors">Important Behavior Changes</h2>
