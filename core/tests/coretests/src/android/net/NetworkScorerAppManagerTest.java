@@ -20,8 +20,10 @@ import android.Manifest.permission;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.test.InstrumentationTestCase;
 
 import com.google.android.collect.Lists;
@@ -63,11 +65,11 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
 
         setScorers(package1, package2, package3);
 
-        Iterator<String> result =
+        Iterator<NetworkScorerAppData> result =
                 NetworkScorerAppManager.getAllValidScorers(mMockContext).iterator();
 
         assertTrue(result.hasNext());
-        assertEquals("package1", result.next());
+        assertEquals("package1", result.next().mPackageName);
 
         assertFalse(result.hasNext());
     }
@@ -93,6 +95,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.packageName = packageName;
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
         if (hasReceiverPermission) {
             resolveInfo.activityInfo.permission = permission.BROADCAST_SCORE_NETWORKS;
         }
