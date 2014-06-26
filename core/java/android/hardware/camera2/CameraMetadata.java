@@ -1393,6 +1393,84 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
 
+    /**
+     * <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.</p>
+     * <p>The supported high speed video sizes and fps ranges are specified in
+     * android.control.availableHighSpeedVideoConfigurations. To get desired
+     * output frame rates, the application is only allowed to select video size
+     * and fps range combinations listed in this static metadata. The fps range
+     * can be control via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
+     * <p>In this mode, the camera device will override aeMode, awbMode, and afMode to
+     * ON, ON, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
+     * controls will be overridden to be FAST. Therefore, no manual control of capture
+     * and post-processing parameters is possible. All other controls operate the
+     * same as when {@link CaptureRequest#CONTROL_MODE android.control.mode} == AUTO. This means that all other
+     * android.control.* fields continue to work, such as</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION android.control.aeExposureCompensation}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_EFFECT_MODE android.control.effectMode}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}</li>
+     * </ul>
+     * <p>Outside of android.control.*, the following controls will work:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#FLASH_MODE android.flash.mode} (automatic flash for still capture will not work since aeMode is ON)</li>
+     * <li>{@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} (if it is supported)</li>
+     * <li>{@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}</li>
+     * <li>{@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode}</li>
+     * </ul>
+     * <p>For high speed recording use case, the actual maximum supported frame rate may
+     * be lower than what camera can output, depending on the destination Surfaces for
+     * the image data. For example, if the destination surface is from video encoder,
+     * the application need check if the video encoder is capable of supporting the
+     * high frame rate for a given video size, or it will end up with lower recording
+     * frame rate. If the destination surface is from preview window, the preview frame
+     * rate will be bounded by the screen refresh rate.</p>
+     * <p>The camera device will only support up to 2 output high speed streams
+     * (processed non-stalling format defined in android.request.maxNumOutputStreams)
+     * in this mode. This control will be effective only if all of below conditions are true:</p>
+     * <ul>
+     * <li>The application created no more than maxNumHighSpeedStreams processed non-stalling
+     * format output streams, where maxNumHighSpeedStreams is calculated as
+     * min(2, android.request.maxNumOutputStreams[Processed (but not-stalling)]).</li>
+     * <li>The stream sizes are selected from the sizes reported by
+     * android.control.availableHighSpeedVideoConfigurations.</li>
+     * <li>No processed non-stalling or raw streams are configured.</li>
+     * </ul>
+     * <p>When above conditions are NOT satistied, the controls of this mode and
+     * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange} will be ignored by the camera device,
+     * the camera device will fall back to {@link CaptureRequest#CONTROL_MODE android.control.mode} <code>==</code> AUTO,
+     * and the returned capture result metadata will give the fps range choosen
+     * by the camera device.</p>
+     * <p>Switching into or out of this mode may trigger some camera ISP/sensor
+     * reconfigurations, which may introduce extra latency. It is recommended that
+     * the application avoids unnecessary scene mode switch as much as possible.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#FLASH_MODE
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
     //

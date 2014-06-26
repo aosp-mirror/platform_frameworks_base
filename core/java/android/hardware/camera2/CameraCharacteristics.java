@@ -466,6 +466,34 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.control.maxRegionsAf", int.class);
 
     /**
+     * <p>List of available high speed video size and fps range configurations
+     * supported by the camera device, in the format of (width, height, fps_min, fps_max).</p>
+     * <p>When HIGH_SPEED_VIDEO is supported in {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes},
+     * this metadata will list the supported high speed video size and fps range
+     * configurations. All the sizes listed in this configuration will be a subset
+     * of the sizes reported by StreamConfigurationMap#getOutputSizes for processed
+     * non-stalling formats.</p>
+     * <p>For the high speed video use case, where the application will set
+     * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the application must
+     * select the video size and fps range from this metadata to configure the recording and
+     * preview streams and setup the recording requests. For example, if the application intends
+     * to do high speed recording, it can select the maximum size reported by this metadata to
+     * configure output streams. Once the size is selected, application can filter this metadata
+     * by selected size and get the supported fps ranges, and use these fps ranges to setup the
+     * recording requests.</p>
+     * <p>For normal video recording use case, where some application will NOT set
+     * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the fps ranges
+     * reported in this metadata must not be used to setup capture requests, or it will cause
+     * request error.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final Key<int[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
+            new Key<int[]>("android.control.availableHighSpeedVideoConfigurations", int[].class);
+
+    /**
      * <p>The set of edge enhancement modes supported by this camera device.</p>
      * <p>This tag lists the valid modes for {@link CaptureRequest#EDGE_MODE android.edge.mode}.</p>
      * <p>Full-capability camera devices must always support OFF and FAST.</p>

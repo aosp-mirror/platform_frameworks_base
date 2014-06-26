@@ -12517,6 +12517,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_DISABLED = 0; // 0x0
     field public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1; // 0x1
     field public static final int CONTROL_SCENE_MODE_FIREWORKS = 12; // 0xc
+    field public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17; // 0x11
     field public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4; // 0x4
     field public static final int CONTROL_SCENE_MODE_NIGHT = 5; // 0x5
     field public static final int CONTROL_SCENE_MODE_NIGHT_PORTRAIT = 6; // 0x6

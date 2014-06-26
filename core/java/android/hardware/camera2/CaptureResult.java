@@ -1581,6 +1581,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_SCENE_MODE_PARTY
      * @see #CONTROL_SCENE_MODE_CANDLELIGHT
      * @see #CONTROL_SCENE_MODE_BARCODE
+     * @see #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO
      */
     public static final Key<Integer> CONTROL_SCENE_MODE =
             new Key<Integer>("android.control.sceneMode", int.class);
