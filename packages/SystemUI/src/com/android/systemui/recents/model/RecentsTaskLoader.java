@@ -410,11 +410,12 @@ public class RecentsTaskLoader {
 
             ActivityManager.TaskDescription av = t.taskDescription;
             String activityLabel = null;
-            BitmapDrawable activityIcon = null;
+            Drawable activityIcon = null;
             int activityColor = config.taskBarViewDefaultBackgroundColor;
             if (av != null) {
                 activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
-                activityIcon = (av.getIcon() != null) ? new BitmapDrawable(res, av.getIcon()) : null;
+                activityIcon = (av.getIcon() != null) ?
+                        ssp.getBadgedIcon(new BitmapDrawable(res, av.getIcon()), t.userId) : null;
                 activityColor = av.getPrimaryColor();
             } else {
                 activityLabel = ssp.getActivityLabel(info);

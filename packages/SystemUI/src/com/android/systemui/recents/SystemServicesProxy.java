@@ -306,6 +306,13 @@ public class SystemServicesProxy {
         }
 
         Drawable icon = info.loadIcon(mPm);
+        return getBadgedIcon(icon, userId);
+    }
+
+    /**
+     * Returns the given icon for a user, badging if necessary.
+     */
+    public Drawable getBadgedIcon(Drawable icon, int userId) {
         if (userId != UserHandle.myUserId()) {
             icon = mUm.getBadgedDrawableForUser(icon, new UserHandle(userId));
         }
