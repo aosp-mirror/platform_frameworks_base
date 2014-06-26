@@ -927,10 +927,12 @@ public class BaseBundle {
 
     /**
      * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
+     * no mapping of the desired type exists for the given key or if a null
+     * value is explicitly associated with the given key.
      *
      * @param key a String, or null
-     * @param defaultValue Value to return if key does not exist
+     * @param defaultValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return the String value associated with the given key, or defaultValue
      *     if no valid String object is currently mapped to that key.
      */
@@ -960,10 +962,12 @@ public class BaseBundle {
 
     /**
      * Returns the value associated with the given key, or defaultValue if
-     * no mapping of the desired type exists for the given key.
+     * no mapping of the desired type exists for the given key or if a null
+     * value is explicitly associated with the given key.
      *
      * @param key a String, or null
-     * @param defaultValue Value to return if key does not exist
+     * @param defaultValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return the CharSequence value associated with the given key, or defaultValue
      *     if no valid CharSequence object is currently mapped to that key.
      */
