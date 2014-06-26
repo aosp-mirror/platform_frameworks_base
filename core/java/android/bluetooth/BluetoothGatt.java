@@ -267,7 +267,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (service == null) return;
 
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(
-                    charUuid.getUuid());
+                    charUuid.getUuid(), charInstId);
                 if (characteristic == null) return;
 
                 characteristic.addDescriptor(new BluetoothGattDescriptor(
