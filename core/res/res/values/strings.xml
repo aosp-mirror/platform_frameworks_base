@@ -443,6 +443,9 @@
     <!-- label for item that launches settings in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_settings">Settings</string>
 
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without entering a credential. [CHAR LIMIT=15] -->
+    <string name="global_action_lockdown">Lock now</string>
+
     <!-- Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
          values/config.xml) and must be truncated. May need to be localized
