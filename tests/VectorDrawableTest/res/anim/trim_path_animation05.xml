@@ -21,8 +21,8 @@
     <objectAnimator
         android:duration="3000"
         android:propertyName="pathData"
-        android:valueFrom="@string/triangle"
-        android:valueTo="@string/rectangle"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo=  "M300,70 l 0,-70 70,0  0,140 -70,0 z"
         android:valueType="pathType"/>
 
     <objectAnimator

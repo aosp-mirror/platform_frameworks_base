@@ -5447,9 +5447,9 @@
              greater than 0 or infinite. The default value is restart. -->
         <attr name="repeatMode"/>
         <!-- Value the animation starts from. -->
-        <attr name="valueFrom" format="float|integer|color|dimension"/>
+        <attr name="valueFrom" format="float|integer|color|dimension|string"/>
         <!-- Value the animation animates to. -->
-        <attr name="valueTo" format="float|integer|color|dimension"/>
+        <attr name="valueTo" format="float|integer|color|dimension|string"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
             <!-- valueFrom and valueTo are floats. This is the default value is valueType is
