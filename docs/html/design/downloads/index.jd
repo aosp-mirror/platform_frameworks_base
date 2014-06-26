@@ -2,27 +2,12 @@ page.title=Downloads
 page.tags=Icons,stencils,color swatches
 @jd:body
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-9">
 
-<p>Want everything? We've bundled all the downloads available on Android Design, except for the
-  <a href="#roboto">Roboto</a> font family, into a single ZIP file. You can also download
-  individual files listed below.</p>
+<p>You may use these materials without restriction to facilitate your app design
+and implementation.</p>
 
-<p>You may use these materials without restriction in your apps and to develop your apps.</p>
 
-  </div>
-  <div class="layout-content-col span-4">
-
-<p>
-  <a class="download-button" onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'All Design Assets']);"
-    href="{@docRoot}downloads/design/Android_Design_Downloads_20131106.zip">Download All</a>
-</p>
-
-  </div>
-</div>
-
-<h2 id="stencils">Stencils and Sources</h2>
+<h2 id="stencils">Phone &amp; Tablet Stencils</h2>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
@@ -54,6 +39,11 @@ available.</p>
   </div>
 </div>
 
+
+
+
+
+
 <h2 id="action-bar-icon-pack">Action Bar Icon Pack</h2>
 
 <div class="layout-content-row">
@@ -81,6 +71,76 @@ modify to match your theme, plus source files.</p>
   </div>
 </div>
 
+
+
+
+
+<h2 id="Wear">Android Wear Materials</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>UI toolkit</h4>
+<p>The toolkit contains detailed specs and measurements of all of the primary Android Wear UI components. Available in PDF and Illustrator formats.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_toolkit.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit AI']);"
+    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Illustrator&reg; Toolkit</a>
+
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit PDF']);"
+    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">PDF Toolkit</a>
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Sample app user flows</h4>
+<p>Examples of how to chain together simple Android Wear UI components into common user flows, from simple notifications to complex interactions involving full screen activities.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_flows.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample Flows AI']);"
+    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Illustrator&reg; App Flows</a>
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample Flows PDF']);"
+    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">PDF App Flows</a>
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Sample app design mocks</h4>
+<p>Stream cards and UI elements for some example apps in fully editable PSD format.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_psds.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample PSD Mocks']);"
+    href="{@docRoot}downloads/design/Android_Wear_Sample_Assets.zip">Adobe&reg; Photoshop&reg; mocks</a>
+  </div>
+</div>
+
+
+
+
+
+
+
 <h2 id="style">Style</h2>
 
 <div class="layout-content-row">
@@ -89,6 +149,7 @@ modify to match your theme, plus source files.</p>
 <h4 id="roboto">Roboto</h4>
 <p>Ice Cream Sandwich introduced a new type family named Roboto, created specifically for the
 requirements of UI and high-resolution screens.</p>
+<p>For Android Wear, Roboto Condensed is the system font and the Regular and Light variants should be used by all Wear apps.</p>
 <p><a href="{@docRoot}design/style/typography.html">More on Roboto</a></p>
 <p><a href="http://www.google.com/fonts/specimen/Roboto" class="external-link">Roboto on Google Fonts</a></p>
 <p><a href="http://www.google.com/fonts/specimen/Roboto+Condensed" class="external-link">Roboto Condensed on Google Fonts</a></p>
