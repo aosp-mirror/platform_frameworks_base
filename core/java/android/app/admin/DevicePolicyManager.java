@@ -2586,6 +2586,8 @@ public class DevicePolicyManager {
      * @param packages The list of packages allowed to enter lock task mode
      *
      * @see Activity#startLockTask()
+     * @see DeviceAdminReceiver#onLockTaskModeChanged(Context, Intent, boolean, String)
+     * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
     public void setLockTaskPackages(String[] packages) throws SecurityException {
         if (mService != null) {

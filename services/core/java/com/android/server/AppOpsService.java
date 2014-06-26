@@ -29,8 +29,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.AudioService;
@@ -102,10 +105,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     public final static class Ops extends SparseArray<Op> {
         public final String packageName;
         public final int uid;
+        public final boolean isPrivileged;
 
-        public Ops(String _packageName, int _uid) {
+        public Ops(String _packageName, int _uid, boolean _isPrivileged) {
             packageName = _packageName;
             uid = _uid;
+            isPrivileged = _isPrivileged;
         }
     }
 
@@ -560,7 +565,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         synchronized (this) {
-            if (isOpRestricted(uid, code)) {
+            if (isOpRestricted(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, false);
@@ -646,7 +651,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
-            if (isOpRestricted(uid, code)) {
+            if (isOpRestricted(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             if (op.duration == -1) {
@@ -683,7 +688,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
-            if (isOpRestricted(uid, code)) {
+            if (isOpRestricted(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -782,6 +787,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!edit) {
                 return null;
             }
+            boolean isPrivileged = false;
             // This is the first time we have seen this package name under this uid,
             // so let's make sure it is valid.
             if (uid != 0) {
@@ -789,12 +795,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                 try {
                     int pkgUid = -1;
                     try {
-                        pkgUid = mContext.getPackageManager().getPackageUid(packageName,
-                                UserHandle.getUserId(uid));
-                    } catch (NameNotFoundException e) {
-                        if ("media".equals(packageName)) {
-                            pkgUid = Process.MEDIA_UID;
+                        ApplicationInfo appInfo = ActivityThread.getPackageManager()
+                                .getApplicationInfo(packageName, 0, UserHandle.getUserId(uid));
+                        if (appInfo != null) {
+                            pkgUid = appInfo.uid;
+                            isPrivileged = (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+                        } else {
+                            if ("media".equals(packageName)) {
+                                pkgUid = Process.MEDIA_UID;
+                                isPrivileged = false;
+                            }
                         }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Could not contact PackageManager", e);
                     }
                     if (pkgUid != uid) {
                         // Oops!  The package name is not valid for the uid they are calling
@@ -807,7 +820,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
-            ops = new Ops(packageName, uid);
+            ops = new Ops(packageName, uid, isPrivileged);
             pkgOps.put(packageName, ops);
         }
         return ops;
@@ -851,10 +864,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         return op;
     }
 
-    private boolean isOpRestricted(int uid, int code) {
+    private boolean isOpRestricted(int uid, int code, String packageName) {
         int userHandle = UserHandle.getUserId(uid);
         boolean[] opRestrictions = mOpRestrictions.get(userHandle);
         if ((opRestrictions != null) && opRestrictions[code]) {
+            if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
+                synchronized (this) {
+                    Ops ops = getOpsLocked(uid, packageName, true);
+                    if ((ops != null) && ops.isPrivileged) {
+                        return false;
+                    }
+                }
+            }
             if (userHandle == UserHandle.USER_OWNER) {
                 if (uid != mDeviceOwnerUid) {
                     return true;
@@ -959,6 +980,27 @@ public class AppOpsService extends IAppOpsService.Stub {
     void readUid(XmlPullParser parser, String pkgName) throws NumberFormatException,
             XmlPullParserException, IOException {
         int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
+        String isPrivilegedString = parser.getAttributeValue(null, "p");
+        boolean isPrivileged = false;
+        if (isPrivilegedString == null) {
+            try {
+                IPackageManager packageManager = ActivityThread.getPackageManager();
+                if (packageManager != null) {
+                    ApplicationInfo appInfo = ActivityThread.getPackageManager()
+                            .getApplicationInfo(pkgName, 0, UserHandle.getUserId(uid));
+                    if (appInfo != null) {
+                        isPrivileged = (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+                    }
+                } else {
+                    // Could not load data, don't add to cache so it will be loaded later.
+                    return;
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not contact PackageManager", e);
+            }
+        } else {
+            isPrivileged = Boolean.parseBoolean(isPrivilegedString);
+        }
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -993,7 +1035,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 Ops ops = pkgOps.get(pkgName);
                 if (ops == null) {
-                    ops = new Ops(pkgName, uid);
+                    ops = new Ops(pkgName, uid, isPrivileged);
                     pkgOps.put(pkgName, ops);
                 }
                 ops.put(op.op, op);
@@ -1037,6 +1079,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(pkg.getUid()));
+                        synchronized (this) {
+                            Ops ops = getOpsLocked(pkg.getUid(), pkg.getPackageName(), false);
+                            // Should always be present as the list of PackageOps is generated
+                            // from Ops.
+                            if (ops != null) {
+                                out.attribute(null, "p", Boolean.toString(ops.isPrivileged));
+                            } else {
+                                out.attribute(null, "p", Boolean.toString(false));
+                            }
+                        }
                         List<AppOpsManager.OpEntry> ops = pkg.getOps();
                         for (int j=0; j<ops.size(); j++) {
                             AppOpsManager.OpEntry op = ops.get(j);

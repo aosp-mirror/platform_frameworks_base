@@ -27,6 +27,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
 
@@ -277,6 +278,24 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_TELEPHONY = "no_telephony";
+
+    /**
+     * Key for user restrictions. Specifies that windows besides app windows should not be
+     * created. This will block the creation of the following types of windows.
+     * <li>{@link LayoutParams#TYPE_TOAST}</li>
+     * <li>{@link LayoutParams#TYPE_PHONE}</li>
+     * <li>{@link LayoutParams#TYPE_PRIORITY_PHONE}</li>
+     * <li>{@link LayoutParams#TYPE_SYSTEM_ALERT}</li>
+     * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
+     * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
+     *
+     * <p>The default value is <code>false</code>.
+     * <p/>
+     * Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
 
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;

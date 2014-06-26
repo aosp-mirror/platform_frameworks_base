@@ -191,7 +191,9 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_MUTE_MICROPHONE = 44;
     /** @hide */
-    public static final int _NUM_OP = 45;
+    public static final int OP_TOAST_WINDOW = 45;
+    /** @hide */
+    public static final int _NUM_OP = 46;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -259,7 +261,8 @@ public class AppOpsManager {
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
             OP_GET_USAGE_STATS,
-            OP_MUTE_MICROPHONE
+            OP_MUTE_MICROPHONE,
+            OP_TOAST_WINDOW,
     };
 
     /**
@@ -310,6 +313,7 @@ public class AppOpsManager {
             null,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
+            null,
             null,
             null,
     };
@@ -364,6 +368,7 @@ public class AppOpsManager {
             "MONITOR_HIGH_POWER_LOCATION",
             "GET_USAGE_STATS",
             "OP_MUTE_MICROPHONE",
+            "TOAST_WINDOW",
     };
 
     /**
@@ -416,6 +421,7 @@ public class AppOpsManager {
             null, // no permission for high power location monitoring
             android.Manifest.permission.PACKAGE_USAGE_STATS,
             null, // no permission for muting/unmuting microphone
+            null, // no permission for displaying toasts
     };
 
     /**
@@ -448,7 +454,7 @@ public class AppOpsManager {
             null, //READ_ICC_SMS
             null, //WRITE_ICC_SMS
             null, //WRITE_SETTINGS
-            null, //SYSTEM_ALERT_WINDOW
+            UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS
             null, //CAMERA
             null, //RECORD_AUDIO
@@ -469,6 +475,60 @@ public class AppOpsManager {
             null, //MONITOR_HIGH_POWER_LOCATION
             null, //GET_USAGE_STATS
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
+            UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
+    };
+
+    /**
+     * This specifies whether each option should allow the system
+     * (and system ui) to bypass the user restriction when active.
+     */
+    private static boolean[] sOpAllowSystemRestrictionBypass = new boolean[] {
+            false, //COARSE_LOCATION
+            false, //FINE_LOCATION
+            false, //GPS
+            false, //VIBRATE
+            false, //READ_CONTACTS
+            false, //WRITE_CONTACTS
+            false, //READ_CALL_LOG
+            false, //WRITE_CALL_LOG
+            false, //READ_CALENDAR
+            false, //WRITE_CALENDAR
+            false, //WIFI_SCAN
+            false, //POST_NOTIFICATION
+            false, //NEIGHBORING_CELLS
+            false, //CALL_PHONE
+            false, //READ_SMS
+            false, //WRITE_SMS
+            false, //RECEIVE_SMS
+            false, //RECEIVE_EMERGECY_SMS
+            false, //RECEIVE_MMS
+            false, //RECEIVE_WAP_PUSH
+            false, //SEND_SMS
+            false, //READ_ICC_SMS
+            false, //WRITE_ICC_SMS
+            false, //WRITE_SETTINGS
+            true, //SYSTEM_ALERT_WINDOW
+            false, //ACCESS_NOTIFICATIONS
+            false, //CAMERA
+            false, //RECORD_AUDIO
+            false, //PLAY_AUDIO
+            false, //READ_CLIPBOARD
+            false, //WRITE_CLIPBOARD
+            false, //TAKE_MEDIA_BUTTONS
+            false, //TAKE_AUDIO_FOCUS
+            false, //AUDIO_MASTER_VOLUME
+            false, //AUDIO_VOICE_VOLUME
+            false, //AUDIO_RING_VOLUME
+            false, //AUDIO_MEDIA_VOLUME
+            false, //AUDIO_ALARM_VOLUME
+            false, //AUDIO_NOTIFICATION_VOLUME
+            false, //AUDIO_BLUETOOTH_VOLUME
+            false, //WAKE_LOCK
+            false, //MONITOR_LOCATION
+            false, //MONITOR_HIGH_POWER_LOCATION
+            false, //GET_USAGE_STATS
+            false, // MUTE_MICROPHONE
+            true, // TOAST_WINDOW
     };
 
     /**
@@ -520,6 +580,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_GET_USAGE_STATS
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -546,6 +607,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
@@ -608,6 +670,10 @@ public class AppOpsManager {
             throw new IllegalStateException("sOpRestrictions length " + sOpRestrictions.length
                     + " should be " + _NUM_OP);
         }
+        if (sOpAllowSystemRestrictionBypass.length != _NUM_OP) {
+            throw new IllegalStateException("sOpAllowSYstemRestrictionsBypass length "
+                    + sOpRestrictions.length + " should be " + _NUM_OP);
+        }
         for (int i=0; i<_NUM_OP; i++) {
             if (sOpToString[i] != null) {
                 sOpStrToOp.put(sOpToString[i], i);
@@ -646,6 +712,15 @@ public class AppOpsManager {
      */
     public static String opToRestriction(int op) {
         return sOpRestrictions[op];
+    }
+
+    /**
+     * Retrieve whether the op allows the system (and system ui) to
+     * bypass the user restriction.
+     * @hide
+     */
+    public static boolean opAllowSystemBypassRestriction(int op) {
+        return sOpAllowSystemRestrictionBypass[op];
     }
 
     /**

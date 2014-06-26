@@ -838,6 +838,7 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_TELEPHONY);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
         serializer.endTag(null, TAG_RESTRICTIONS);
     }
 
@@ -980,6 +981,7 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
         readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         readBoolean(parser, restrictions, UserManager.DISALLOW_TELEPHONY);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
     }
 
     private void readBoolean(XmlPullParser parser, Bundle restrictions,

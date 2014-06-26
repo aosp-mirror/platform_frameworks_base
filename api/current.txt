@@ -21704,6 +21704,7 @@ package android.os {
     field public static final java.lang.String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
     field public static final java.lang.String DISALLOW_CONFIG_VPN = "no_config_vpn";
     field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";
+    field public static final java.lang.String DISALLOW_CREATE_WINDOWS = "no_create_windows";
     field public static final java.lang.String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
     field public static final java.lang.String DISALLOW_FACTORY_RESET = "no_factory_reset";
     field public static final java.lang.String DISALLOW_INSTALL_APPS = "no_install_apps";
