@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛航模式為 [關閉]"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"超過 999"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允許應用程式修改觸控螢幕的校正參數 (一般應用程式並不需要)。"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"存取 DRM 憑證"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允許應用程式佈建及使用 DRM 憑證 (一般應用程式並不需要)。"</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽紀錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能無法執行這項功能。"</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增語音留言"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息新增至您的語音信箱收件匣。"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"讀取所有語音留言"</string>

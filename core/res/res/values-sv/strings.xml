@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flygplansläge är AKTIVERAT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flygplansläge är INAKTIVERAT"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Inställningar"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Säkert läge"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillåter att appen ändrar kalibreringsparametrarna för pekskärmen. Detta behövs aldrig för vanliga appar."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tillgång till DRM-certifikat"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillåter att en app tillhandahåller och använder DRM-certifikat. Behövs inte för vanliga appar."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Ta emot överföringssändningar."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Tillåter att information om överföringsstatus tas emot."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Bestäm hur många och vilka tecken som är tillåtna i skärmlåsets lösenord."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"ta bort röstmeddelanden"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Tillåter att appen tar bort meddelanden från röstbrevlådans inkorg."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lägg till röstbrevlåda"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Gör att appen lägger till meddelanden i röstbrevlådans inkorg."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"läsa alla röstmeddelanden"</string>

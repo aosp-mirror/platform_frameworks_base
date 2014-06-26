@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Uçak modu AÇIK"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Uçak modu KAPALI"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ayarlar"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Güvenli mod"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android Sistemi"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Uygulamaya, dokunmatik ekranın kalibrasyon parametrelerini değiştirme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikalarına eriş"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Bir uygulamanın DRM sertifikaları için temel hazırlık yapmasına ve bunları kullanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"sesli mesaj ekle"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Uygulamaya, sesli mesaj gelen kutunuza mesaj ekleme izni verir."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"tüm sesli mesajları oku"</string>
@@ -1726,16 +1736,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seçildi"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Uygulamaya kilitleme özelliği kullanılsın mı?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Uygulamaya kilitleme özelliği, ekranı tek bir uygulamaya kilitler.\n\nÇıkmak için son uygulamalar düğmesine ($) uzun basın"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"HAYIR"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"BAŞLAT"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Uygulamaya kilitleme özelliğini başlat"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Uygulamaya kilitleme özelliğinden çık"</string>
 </resources>

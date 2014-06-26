@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Uključen je način rada u zrakoplovu"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Isključen je način rada u zrakoplovu"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Postavke"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Siguran način rada"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sustav Android"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Omogućuje aplikaciji izmjenu parametara kalibracije dodirnog zaslona. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"pristup DRM certifikatima"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogućuje pružanje i korištenje DRM certifikata. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Upravljajte duljinom zaporki za otključavanje zaslona i dopuštenim znakovima u tim zaporkama."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Aplikaciji omogućuje izmjenu povijesti i oznaka Preglednika pohranjenih na telefonu. To aplikaciji može omogućiti brisanje ili izmjenu podataka Preglednika. Napomena: tu dozvolu ne mogu primijeniti preglednici treće strane ili druge aplikacije s mogućnostima pregledavanja weba."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"postavljanje alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Omogućuje aplikaciji postavljanje alarma na instaliranoj aplikaciji budilici. Neke aplikacije budilice možda neće primijeniti tu značajku."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodaj govornu poštu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Omogućuje aplikaciji da doda poruke u vašu govornu poštu."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"čitanje svih poruka u govornoj pošti"</string>
@@ -1726,16 +1736,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"Odabrana je stavka <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Izbrisan je broj <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Želite li upotrijebiti zaključavanje na aplikaciju?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Značajkom zaključavanja na aplikaciju zaključava se prikaz na pojedinačnu aplikaciju.\n\nDa biste je zatvorili, pritisnite i držite gumb za nedavne aplikacije $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"NE"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"POKRENI"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Pokretanje zaključavanja na aplikaciju"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Zatvaranje zaključavanja na aplikaciju"</string>
 </resources>

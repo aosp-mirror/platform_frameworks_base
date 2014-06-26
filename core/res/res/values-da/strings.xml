@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flytilstand er TIL"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flytilstand er slået FRA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Indstillinger"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"få adgang til DRM-certifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation leverer og anvender DRM-certfikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din telefon. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"indstille en alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillader, at appen kan indstille en alarm i en installeret alarmapp. Nogle alarmapps har muligvis ikke denne funktion."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføje telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"læs alle talebeskeder"</string>

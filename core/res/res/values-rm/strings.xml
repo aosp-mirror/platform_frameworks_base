@@ -242,6 +242,8 @@
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Il modus d\'aviun è deactivà."</string>
     <!-- no translation found for global_action_settings (1756531602592545966) -->
     <skip />
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
     <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
@@ -1244,6 +1246,10 @@
     <skip />
     <!-- no translation found for permdesc_accessDrmCertificates (8073288354426159089) -->
     <skip />
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <!-- no translation found for policydesc_limitPassword (3252114203919510394) -->
@@ -1661,6 +1667,10 @@
     <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
     <skip />
     <!-- no translation found for permdesc_setAlarm (316392039157473848) -->
+    <skip />
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
     <skip />
     <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />

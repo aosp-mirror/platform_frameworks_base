@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ĮJUNGTAS lėktuvo režimas"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"lėktuvo režimas IŠJUNGTAS"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nustatymai"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Leidžiama programai keisti jutiklinio ekrano kalibravimo parametrus. Neturėtų prireikti naudojant įprastas programas."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"gali pasiekti DRM sertifikatus"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Programai leidžiama pasiekti ir naudoti DRM sertifikatus. Neturėtų prireikti naudojant įprastas programas."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Valdyti leidžiamą ekrano atrakinimo slaptažodžių ilgį ir leidžiamus naudoti simbolius."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Stebėti bandymus atrakinti ekraną"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Leidžiama programai keisti naršyklės istoriją ar žymes, išsaugotas telefone. Dėl to programai gali būti leidžiama ištrinti ar keisti naršyklės duomenis. Pastaba: šis leidimas nesuteikiamas trečiosios šalies naršyklėms ar kitoms programoms, kuriomis galima naršyti žiniatinklį."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nustatyti pavojaus signalą"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Leidžiama programai nustatyti signalą įdiegtoje žadintuvo programoje. Kai kuriose žadintuvo programose ši funkcija gali nebūti nevykdoma."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridėti balso pašto pranešimų"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Leidžia programai pridėti pranešimų prie jūsų balso pašto gautųjų."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"skaityti visus balso pašto pranešimus"</string>

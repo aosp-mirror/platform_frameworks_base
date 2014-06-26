@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Einstellungen"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Jetzt sperren"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-System"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ermöglicht der App, die Kalibrierungsparameter des Touchscreens zu ändern. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"Auf DRM-Zertifikate zugreifen"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ermöglicht einer App die Bereitstellung und Nutzung von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Handover-Übertragungen empfangen"</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Ermöglicht das Empfangen von Informationen zum Handover-Übertragungsstatus"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ermöglicht der App, den Browserverlauf und die Lesezeichen auf Ihrem Telefon zu ändern. Damit kann die App Browserdaten löschen und ändern. Hinweis: Diese Berechtigung kann nicht von Browsern von Drittanbietern oder anderen Apps mit Internetfunktionen erzwungen werden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"Wecker stellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Alarm in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"Mailboxnachrichten entfernen"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Ermöglicht der App das Entfernen von Nachrichten aus Ihrer Mailbox"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailbox-Nachrichten hinzufügen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ermöglicht der App, Nachrichten zu Ihrem Mailbox-Posteingang hinzuzufügen"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"Alle Mailboxnachrichten abrufen"</string>

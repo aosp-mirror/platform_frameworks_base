@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo avión activado. Desactivar"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo avión desactivado. Activar"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ajustes"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear ahora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt; 999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite que la aplicación modifique los parámetros de calibración de la pantalla táctil. No debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"acceder a certificados DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite que una aplicación proporcione y utilice certificados DRM. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Recibe emisiones de la transferencia de la conexión."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Permite recibir información sobre el estado de la transferencia de la conexión."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en el teléfono. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: este permiso no pueden utilizarlo navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"establecer una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de reloj instalada. Es posible que algunas aplicaciones de reloj no incluyan esta función."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"eliminar mensajes de voz"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Permite que la aplicación elimine mensajes de la bandeja de entrada del buzón de voz."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"añadir buzón de voz"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que la aplicación añada mensajes a la bandeja de entrada del buzón de voz."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"consultar todos los mensajes de voz"</string>
@@ -1731,5 +1736,5 @@
     <string name="lock_to_app_negative" msgid="8522854387366288195">"NO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
     <string name="lock_to_app_start" msgid="8889002974248178076">"Iniciar bloqueo de aplicación"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Salir de bloqueo de aplicación"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Salir del bloqueo de aplicación"</string>
 </resources>

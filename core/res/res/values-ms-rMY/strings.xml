@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mod Pesawat DIHIDUPKAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mod Pesawat DIMATIKAN"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Tetapan"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod selamat"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Membenarkan apl mengubah suai parameter penentukuran skrin sentuh. Ini tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"akses sijil DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Membenarkan aplikasi memperuntuk dan menggunakan sijil DRM. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada telefon anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"tetapkan penggera"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Membenarkan apl untuk menambahkan mesej pada peti masuk mel suara anda."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"baca semua mel suara"</string>
@@ -1725,18 +1735,11 @@
     <string name="select_year" msgid="7952052866994196170">"Pilih tahun"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> dipilih"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> dipadamkan"</string>
-    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kerja <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Gunakan kunci ke apl?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Kunci ke apl mengunci paparan dalam apl tunggal.\n\nUntuk keluar tekan dan tahan butang apl terbaru $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"TIDAK"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"MULA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Mulakan Kunci ke apl"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Keluar kunci ke apl"</string>
 </resources>
