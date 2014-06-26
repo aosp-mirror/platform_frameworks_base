@@ -1,5 +1,7 @@
 page.title=Building Apps for Wearables
 page.trainingcourse=true
+page.image=wear/images/notifications.png
+page.metaDescription=Learn how to build notifications, send and sync data, and use voice actions.
 
 @jd:body
 

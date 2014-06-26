@@ -13,7 +13,7 @@ page.title=Creating and Running a Wearable App
 </ol>
 <h2>Dependencies and Prerequisites</h2>
   <ul>
-    <li>Android Studio 0.8 or later and Gradle 1.12 or later</li>
+    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
   </ul>
 </div>
 </div>

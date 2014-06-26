@@ -56,13 +56,16 @@ public void onCreate(Bundle bundle){
 }
 </pre>
   </li>
-  <li>Set the activity's <code>allowEmbedded</code> property to <code>true</code>
-  in the wearable app's Android manifest. This allows an activity that you create in your wearable
-  app to be displayed by the wearable's context stream process.</li>
+  <li>Define necessary properties for the activity in the Android manifest to allow
+  the activity to be displayed in the wearable's context stream process. You need to declare the
+  activity to be exportable, be embeddable, and have an empty task affinity. We also recommend
+  setting the theme to <code>Theme.DeviceDefault.Light</code>. For example:</li>
 <pre>
-&lt;activity android:allowEmbedded="true" ... &gt;
-...
-&lt;/activity&gt;
+&lt;activity android:name="com.example.MyDisplayActivity"
+     android:exported="true"
+     android:allowEmbedded="true"
+     android:taskAffinity=""
+     android:theme="@android:style/Theme.DeviceDefault.Light" /&gt;
 </pre>
   </li>
   <li>Create a {@link android.app.PendingIntent} for the activity that you want to display.
