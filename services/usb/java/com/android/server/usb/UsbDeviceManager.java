@@ -39,6 +39,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.Settings;
@@ -655,6 +656,17 @@ public class UsbDeviceManager {
                     }
                     break;
                 case MSG_USER_SWITCHED: {
+                    mCurrentUser = msg.arg1;
+
+                    UserManager userManager =
+                            (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                    if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
+                        Slog.v(TAG, "Switched to user with DISALLOW_USB_FILE_TRANSFER restriction;"
+                                + " disabling USB.");
+                        setUsbConfig("none");
+                        break;
+                    }
+
                     final boolean mtpActive =
                             containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)
                             || containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP);
@@ -663,7 +675,6 @@ public class UsbDeviceManager {
                         setUsbConfig("none");
                         setUsbConfig(mCurrentFunctions);
                     }
-                    mCurrentUser = msg.arg1;
                     break;
                 }
             }
