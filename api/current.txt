@@ -27662,14 +27662,14 @@ package android.telecomm {
 
   public abstract class Connection {
     ctor protected Connection();
-    method public final void conference();
     method public final android.telecomm.CallAudioState getCallAudioState();
-    method public java.util.List<android.telecomm.Connection> getChildConnections();
+    method public final java.util.List<android.telecomm.Connection> getChildConnections();
     method public final android.net.Uri getHandle();
-    method public android.telecomm.Connection getParentConnection();
-    method public boolean isConferenceCapable();
-    method public boolean isConferenceConnection();
-    method public boolean isRequestingRingback();
+    method public final android.telecomm.Connection getParentConnection();
+    method public final int getState();
+    method public final boolean isConferenceCapable();
+    method public final boolean isConferenceConnection();
+    method public final boolean isRequestingRingback();
     method protected void onAbort();
     method protected void onAnswer();
     method protected void onChildrenChanged(java.util.List<android.telecomm.Connection>);
@@ -27681,21 +27681,20 @@ package android.telecomm {
     method protected void onReject();
     method protected void onSeparate();
     method protected void onSetAudioState(android.telecomm.CallAudioState);
-    method protected void onSetSignal(android.os.Bundle);
     method protected void onSetState(int);
     method protected void onStopDtmfTone();
     method protected void onUnhold();
-    method protected void setActive();
-    method public void setAudioState(android.telecomm.CallAudioState);
-    method protected void setDestroyed();
-    method protected void setDialing();
-    method protected void setDisconnected(int, java.lang.String);
-    method protected void setHandle(android.net.Uri);
-    method protected void setIsConferenceCapable(boolean);
-    method protected void setOnHold();
-    method public void setParentConnection(android.telecomm.Connection);
-    method protected void setRequestingRingback(boolean);
-    method protected void setRinging();
+    method public final void setActive();
+    method public final void setDestroyed();
+    method public final void setDialing();
+    method public final void setDisconnected(int, java.lang.String);
+    method public final void setHandle(android.net.Uri);
+    method public final void setIsConferenceCapable(boolean);
+    method public final void setOnHold();
+    method public final void setParentConnection(android.telecomm.Connection);
+    method public final void setRequestingRingback(boolean);
+    method public final void setRinging();
+    method public final void setSignal(android.os.Bundle);
     method public static java.lang.String stateToString(int);
   }
 
