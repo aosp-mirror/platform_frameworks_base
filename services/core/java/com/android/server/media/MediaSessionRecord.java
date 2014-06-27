@@ -38,6 +38,7 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -1122,12 +1123,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void adjustVolumeBy(int delta, int flags) {
-            MediaSessionRecord.this.adjustVolumeBy(delta, flags);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaSessionRecord.this.adjustVolumeBy(delta, flags);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void setVolumeTo(int value, int flags) {
-            MediaSessionRecord.this.setVolumeTo(value, flags);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaSessionRecord.this.setVolumeTo(value, flags);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
