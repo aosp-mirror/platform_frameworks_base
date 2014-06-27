@@ -7992,43 +7992,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns the TextView_textColor attribute from the
-     * TypedArray, if set, or the TextAppearance_textColor
-     * from the TextView_textAppearance attribute, if TextView_textColor
-     * was not set directly.
+     * Returns the TextView_textColor attribute from the TypedArray, if set, or
+     * the TextAppearance_textColor from the TextView_textAppearance attribute,
+     * if TextView_textColor was not set directly.
      */
     public static ColorStateList getTextColors(Context context, TypedArray attrs) {
-        ColorStateList colors;
-        colors = attrs.getColorStateList(com.android.internal.R.styleable.
-                                         TextView_textColor);
-
+        // It's not safe to use this method from apps. The parameter 'attrs'
+        // must have been obtained using the TextView filter array which is not
+        // available to the SDK. As such, we grab a default TypedArray with the
+        // right filter instead here.
+        final TypedArray a = context.obtainStyledAttributes(R.styleable.TextView);
+        ColorStateList colors = a.getColorStateList(R.styleable.TextView_textColor);
         if (colors == null) {
-            int ap = attrs.getResourceId(com.android.internal.R.styleable.
-                                         TextView_textAppearance, -1);
-            if (ap != -1) {
-                TypedArray appearance;
-                appearance = context.obtainStyledAttributes(ap,
-                                            com.android.internal.R.styleable.TextAppearance);
-                colors = appearance.getColorStateList(com.android.internal.R.styleable.
-                                                  TextAppearance_textColor);
+            final int ap = a.getResourceId(R.styleable.TextView_textAppearance, 0);
+            if (ap != 0) {
+                final TypedArray appearance = context.obtainStyledAttributes(
+                        ap, R.styleable.TextAppearance);
+                colors = appearance.getColorStateList(R.styleable.TextAppearance_textColor);
                 appearance.recycle();
             }
         }
+        a.recycle();
 
         return colors;
     }
 
     /**
-     * Returns the default color from the TextView_textColor attribute
-     * from the AttributeSet, if set, or the default color from the
-     * TextAppearance_textColor from the TextView_textAppearance attribute,
-     * if TextView_textColor was not set directly.
+     * Returns the default color from the TextView_textColor attribute from the
+     * AttributeSet, if set, or the default color from the
+     * TextAppearance_textColor from the TextView_textAppearance attribute, if
+     * TextView_textColor was not set directly.
      */
-    public static int getTextColor(Context context,
-                                   TypedArray attrs,
-                                   int def) {
-        ColorStateList colors = getTextColors(context, attrs);
-
+    public static int getTextColor(Context context, TypedArray attrs, int def) {
+        final ColorStateList colors = getTextColors(context, attrs);
         if (colors == null) {
             return def;
         } else {
