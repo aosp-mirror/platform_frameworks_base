@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
  Copyright (C) 2014 The Android Open Source Project
 
@@ -14,22 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vector_drawable_grouping_1" >
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:ordering="sequentially" >
+    <target
+        android:name="sun"
+        android:animation="@anim/animation_grouping_1_01" />
+    <target
+        android:name="earth"
+        android:animation="@anim/animation_grouping_1_01" />
 
-    <objectAnimator
-        android:duration="3000"
-        android:propertyName="pathData"
-        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
-        android:valueTo=  "M300,70 l 0,-70 70,0  0,140 -70,0 z"
-        android:valueType="pathType"/>
-
-    <objectAnimator
-        android:duration="3000"
-        android:propertyName="pathData"
-        android:valueFrom="@string/rectangle2"
-        android:valueTo="@string/equal2"
-        android:valueType="pathType"/>
-
-</set>
+</animated-vector>

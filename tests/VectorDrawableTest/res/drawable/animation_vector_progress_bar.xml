@@ -14,28 +14,10 @@
      limitations under the License.
 -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable12" >
+    android:drawable="@drawable/vector_drawable_progress_bar" >
 
     <target
         android:name="pie1"
-        android:animation="@anim/trim_path_animation01" />
-    <target
-        android:name="v"
-        android:animation="@anim/trim_path_animation02" />
-    <target
-        android:name="v"
-        android:animation="@anim/trim_path_animation05" />
-    <target
-        android:name="rotationGroup"
-        android:animation="@anim/trim_path_animation03" />
-    <target
-        android:name="rotationGroup3"
-        android:animation="@anim/trim_path_animation03" />
-    <target
-        android:name="rotationGroupBlue"
-        android:animation="@anim/trim_path_animation03" />
-    <target
-        android:name="rotationGroup"
-        android:animation="@anim/trim_path_animation04" />
+        android:animation="@anim/trim_path_animation_progress_bar" />
 
 </animated-vector>

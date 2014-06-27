@@ -15,21 +15,12 @@
      limitations under the License.
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:ordering="sequentially" >
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <objectAnimator
-        android:duration="3000"
-        android:propertyName="pathData"
-        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
-        android:valueTo=  "M300,70 l 0,-70 70,0  0,140 -70,0 z"
-        android:valueType="pathType"/>
-
-    <objectAnimator
-        android:duration="3000"
-        android:propertyName="pathData"
-        android:valueFrom="@string/rectangle2"
-        android:valueTo="@string/equal2"
-        android:valueType="pathType"/>
-
+        android:duration="3300"
+        android:propertyName="rotation"
+        android:valueFrom="0"
+        android:valueTo="360"
+        android:repeatCount="-1" />
 </set>
