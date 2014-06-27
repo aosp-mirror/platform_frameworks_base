@@ -63,7 +63,7 @@ public class WifiScanner {
     public static final int WIFI_BAND_BOTH_WITH_DFS = 7;    /* both bands with DFS channels */
 
     /** Minimum supported scanning period */
-    public static final int MIN_SCAN_PERIOD_MS = 2000;      /* minimum supported period */
+    public static final int MIN_SCAN_PERIOD_MS = 1000;      /* minimum supported period */
     /** Maximum supported scanning period */
     public static final int MAX_SCAN_PERIOD_MS = 1024000;   /* maximum supported period */
 
@@ -141,7 +141,7 @@ public class WifiScanner {
         public int band;
         /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
         public ChannelSpec[] channels;
-        /** period of background scan; in millisecond */
+        /** period of background scan; in millisecond, 0 => single shot scan */
         public int periodInMs;
         /** must have a valid REPORT_EVENT value */
         public int reportEvents;
@@ -270,6 +270,7 @@ public class WifiScanner {
     /** @hide */
     public void scan(ScanSettings settings, ScanListener listener) {
         validateChannel();
+        settings.periodInMs = 0;
         sAsyncChannel.sendMessage(CMD_SCAN, 0, putListener(listener), settings);
     }
 
