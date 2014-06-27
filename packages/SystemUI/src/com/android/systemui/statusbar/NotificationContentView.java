@@ -51,19 +51,27 @@ public class NotificationContentView extends FrameLayout {
 
     private boolean mContractedVisible = true;
 
-    private Paint mFadePaint = new Paint();
+    private final Paint mFadePaint = new Paint();
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mActualHeight = mSmallHeight;
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        reset();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateClipping();
+    }
+
+    public void reset() {
+        removeAllViews();
+        mContractedChild = null;
+        mExpandedChild = null;
+        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        mActualHeight = mSmallHeight;
+        mContractedVisible = true;
     }
 
     public void setContractedChild(View child) {
