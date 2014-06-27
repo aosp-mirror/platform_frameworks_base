@@ -5313,7 +5313,7 @@
 
     <!-- Use specific transition subclass names as the root tag of the XML resource that
          describes a {@link android.transition.Transition Transition},
-         such as <code>move</code>, <code>fade</code>, and <code>set</code>. -->
+         such as <code>changeBounds</code>, <code>fade</code>, and <code>transitionSet</code>. -->
     <declare-styleable name="Transition">
         <!-- Amount of time (in milliseconds) that the transition should run. -->
         <attr name="duration" />
