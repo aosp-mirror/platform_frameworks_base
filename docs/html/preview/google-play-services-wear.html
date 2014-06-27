@@ -38,30 +38,29 @@ devices, which will degrade your apps’ user experience. We’ll publish an upd
 <p>If you attended Google I/O, your registered Google account is automatically whitelisted for
 these preview resources. You're done! Head to Step 2.</p>
 
-<p><stong><em>If you didn't attend Google I/O</em></strong> or want to use a different account,
-click following link to
-<a href="https://groups.google.com/group/io14androidweardev/subscribe" target="_blank">join
-the Google Group</a> and get whitelisted.</p>
+<p><strong><em>If you didn't attend Google I/O</em></strong> or want to use a different account,
+click following link to  and get whitelisted.</p>
+
+<a style="font-size:24px" href="https://groups.google.com/group/io14androidweardev/subscribe" target="_blank">
+Join the Preview Group</a>
 
 <h2 style="margin-bottom: 0px;">2. Download Required Apps</h2><hr>
-<p>You'll need the following apps to get the most out of Android Wear:</p>
+<p>You'll need the following apps to get the most out of Android Wear. You must be whitelisted
+in the Preview Group above and you must install these apps in this exact order:</p>
 
-<ul>
+<ol>
 <li><a href="https://play.google.com/apps/testing/com.google.android.gms">Google Play services</a>:
 Allows your Android Wear device to communicate with your handheld device. This is required to
 use the Android Wear app and other apps listed below.</li>
+  <li><a href="https://play.google.com/apps/testing/com.google.android.googlequicksearchbox">Google
+  Search</a>: Enables searches from Android Wear</li>
   <li><a href="https://play.google.com/apps/testing/com.google.android.wearable.app">Android Wear
   Companion</a>: The app for pairing a handheld to a wearable and providing syncing of
   notifications and data
   </li>
-  <li><a href="https://play.google.com/apps/testing/com.google.android.googlequicksearchbox">Google
-  Search</a>: Enables searches from Android Wear</li>
-  <li><a href="https://play.google.com/apps/testing/com.google.android.keep">Google Keep</a>:
-  Supports the "Take a note" command</li>
-  <li><a href="https://play.google.com/apps/testing/com.google.samples.apps.iosched">Google I/O
-  2014</a>:
-  Supports session feedback from Android Wear</li>
- </ul>
+  <p class="note"><b>Note:</b> After becoming a tester, it can take up to 1 hour to get access to
+  the preview versions of these apps.</p>
+ </ol>
 
 <p>To obtain these apps from Google Play, click each app link above and follow these instructions,
 preferably from your mobile browser:</p>
@@ -72,9 +71,22 @@ preferably from your mobile browser:</p>
  <li>Click the <b>Download &lt;app name&gt; from the Play Store</b> link to go to Google Play
  Store download page to get the app. The
  following screenshot shows how the opt-in process looks like:
-<img style="margin-top:40px" src="/preview/images/opt-in.png"></li>
+<img style="margin-top:40px" src="/preview/images/opt-in.png" /></li>
 </ol>
-<h2 style="margin-bottom: 0px;">3. Start Building</h2><hr>
+
+<h2>3. Download Optional Apps</h2>
+<p>Please join the Test Group and install the following apps to enhance your Android Wear experience:
+</p>
+
+<ol>
+  <li><a href="https://play.google.com/apps/testing/com.google.android.keep">Google Keep</a>:
+  Supports the "Take a note" command</li>
+  <li><a href="https://play.google.com/apps/testing/com.google.samples.apps.iosched">Google I/O
+  2014</a>:
+  Supports session feedback from Android Wear</li>
+  </ol>
+
+<h2 style="margin-bottom: 0px;">4. Start Building</h2><hr>
 
 <p>The Google Play services SDK is required if you want to sync and send data between wearable
 and handheld devices. To get the new SDK that is compatible with the Google Play services
@@ -82,7 +94,8 @@ APK that you just installed, follow these steps: </p>
 
 <p class="note"><b>Note:</b> Android Studio is required for Wear development.</p>
 <ol>
-  <li>Start AVD Manager.</li>
+  <li><a href="/sdk/installing/studio.html">Download and install Android Studio</a></li>
+  <li>Start SDK Manager.</li>
   <li>Update the Android SDK Tools and Platform-tools to versions 23 and 20 respectively.</li>
   <li>Click <b>Tools > Manage Add-on Sites > User Defined Sites</b>.</li>
   <li>Click <b>New</b>, enter
