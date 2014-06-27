@@ -3334,6 +3334,7 @@ package android.app {
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
     method public void onBackPressed();
+    method public void onBackgroundMediaPlayingChanged(boolean);
     method protected void onChildTitleChanged(android.app.Activity, java.lang.CharSequence);
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onContentChanged();
@@ -3389,6 +3390,7 @@ package android.app {
     method public boolean onSearchRequested();
     method protected void onStart();
     method protected void onStop();
+    method public void onStopMediaPlaying();
     method protected void onTitleChanged(java.lang.CharSequence, int);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
@@ -3423,6 +3425,7 @@ package android.app {
     method public void setFinishOnTouchOutside(boolean);
     method public void setImmersive(boolean);
     method public void setIntent(android.content.Intent);
+    method public boolean setMediaPlaying(boolean);
     method public final void setProgress(int);
     method public final void setProgressBarIndeterminate(boolean);
     method public final void setProgressBarIndeterminateVisibility(boolean);

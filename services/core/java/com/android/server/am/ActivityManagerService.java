@@ -5608,7 +5608,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    @Override
+    public final void mediaResourcesReleased(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                ActivityStack stack = ActivityRecord.getStackLocked(token);
+                if (stack != null) {
+                    stack.mediaResourcesReleased(token);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
@@ -9347,6 +9362,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (r.changeWindowTranslucency(true)) {
                     mWindowManager.setAppFullscreen(token, true);
+                    r.task.stack.releaseMediaResources();
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return true;
                 }
@@ -9376,6 +9392,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return false;
                 }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public boolean setMediaPlaying(IBinder token, boolean playing) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r != null) {
+                    return mStackSupervisor.setMediaPlayingLocked(r, playing);
+                }
+            }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public boolean isBackgroundMediaPlaying(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityStack stack = ActivityRecord.getStackLocked(token);
+                final boolean playing = stack == null ? false : stack.isMediaPlaying();
+                if (ActivityStackSupervisor.DEBUG_MEDIA_VISIBILITY) Slog.d(TAG,
+                        "isBackgroundMediaPlaying: stack=" + stack + " playing=" + playing);
+                return playing;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

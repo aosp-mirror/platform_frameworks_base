@@ -743,10 +743,13 @@ public class Activity extends ContextThemeWrapper
             return Activity.this.findViewById(id);
         }
     };
-    
+
+    // Most recent call to setMediaPlaying().
+    boolean mMediaPlaying;
+
     ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
-    
+
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -764,6 +767,7 @@ public class Activity extends ContextThemeWrapper
     // protected by synchronized (this) 
     int mResultCode = RESULT_CANCELED;
     Intent mResultData = null;
+
     private TranslucentConversionListener mTranslucentCallback;
     private boolean mChangeCanvasToTranslucent;
 
@@ -5322,6 +5326,101 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    /**
+     * Activities that want to show media behind a translucent activity above them must call this
+     * method anytime before a return from {@link #onPause()}. If this call is successful
+     * then the activity should continue to play media when {@link #onPause()} is called, but must
+     * stop playing and release resources prior to or within the call to
+     * {@link #onStopMediaPlaying()}. If this call returns false the activity must stop
+     * playing and release resources immediately.
+     *
+     * <p>Only fullscreen opaque activities may make this call. I.e. this call is a nop
+     * for dialog and translucent activities.
+     *
+     * <p>False will be returned any time this method is call between the return of onPause and
+     *      the next call to onResume.
+     *
+     * @param playing true to notify the system that media is starting or continuing playing,
+     *                false to indicate that media has stopped or is stopping. Resources must
+     *                be released when passing false to this method.
+     * @return the resulting play state. If true the activity may continue playing media beyond
+     *      {@link #onPause()}, if false then the caller must stop playing and immediately
+     *      release all media resources. Returning false may occur in lieu of a call to
+     *      onReleaseMediaResources() so the return value must be checked.
+     *
+     * @see #isBackgroundMediaPlaying()
+     * @see #onStopMediaPlaying()
+     * @see #onBackgroundMediaPlayingChanged(boolean)
+     */
+    public boolean setMediaPlaying(boolean playing) {
+        if (!mResumed) {
+            // Do not permit paused or stopped activities to start playing.
+            playing = false;
+        }
+        try {
+            mMediaPlaying = ActivityManagerNative.getDefault().setMediaPlaying(mToken, playing) &&
+                    playing;
+        } catch (RemoteException e) {
+            mMediaPlaying = false;
+        }
+        return mMediaPlaying;
+    }
+
+    /**
+     * Called when a translucent activity over playing media is becoming opaque or another
+     * activity is being launched. Activities that call {@link #setMediaPlaying(boolean)}
+     * must implement this method to at the minimum call
+     * <code>super.onStopMediaPlayback()</code>.
+     *
+     * <p>When this method is called the activity has 500 msec to release the media resources.
+     * If the activity has not returned from this method in 500 msec the system will destroy
+     * the activity and kill the process in order to recover the media resources for another
+     * process. Otherwise {@link #onStop()} will be called following return.
+     *
+     * @see #setMediaPlaying(boolean)
+     * @see #isBackgroundMediaPlaying()
+     * @see #onBackgroundMediaPlayingChanged(boolean)
+     */
+    public void onStopMediaPlaying() {
+        mCalled = true;
+    }
+
+    /**
+     * Translucent activities may call this to determine if there is an activity below it that
+     * is playing media.
+     *
+     * @return true if media is playing according to the most recent call to
+     * {@link #setMediaPlaying(boolean)}, false otherwise.
+     *
+     * @see #setMediaPlaying(boolean)
+     * @see #onStopMediaPlaying()
+     * @see #onBackgroundMediaPlayingChanged(boolean)
+     * @hide
+     */
+    public boolean isBackgroundMediaPlaying() {
+        try {
+            return ActivityManagerNative.getDefault().isBackgroundMediaPlaying(mToken);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
+     * The topmost foreground activity will receive this call when an activity below it either
+     * starts or stops playing media.
+     *
+     * This call may be a consequence of {@link #setMediaPlaying(boolean)} or might be
+     * due to a background activity finishing itself.
+     *
+     * @param playing true if media playback is starting, false if it is stopping.
+     *
+     * @see #setMediaPlaying(boolean)
+     * @see #isBackgroundMediaPlaying()
+     * @see #onStopMediaPlaying()
+     */
+    public void onBackgroundMediaPlayingChanged(boolean playing) {
     }
 
     /**

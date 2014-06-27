@@ -2176,6 +2176,33 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case SET_MEDIA_PLAYING_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean enable = data.readInt() > 0;
+            boolean success = setMediaPlaying(token, enable);
+            reply.writeNoException();
+            reply.writeInt(success ? 1 : 0);
+            return true;
+        }
+
+        case IS_BG_MEDIA_PLAYING_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            final boolean enabled = isBackgroundMediaPlaying(token);
+            reply.writeNoException();
+            reply.writeInt(enabled ? 1 : 0);
+            return true;
+        }
+
+        case MEDIA_RESOURCES_RELEASED: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            mediaResourcesReleased(token);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -5002,6 +5029,47 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(token);
         values.writeToParcel(data, 0);
         mRemote.transact(SET_TASK_DESCRIPTION_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public boolean setMediaPlaying(IBinder token, boolean playing) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(playing ? 1 : 0);
+        mRemote.transact(SET_MEDIA_PLAYING_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean success = reply.readInt() > 0;
+        data.recycle();
+        reply.recycle();
+        return success;
+    }
+
+    @Override
+    public boolean isBackgroundMediaPlaying(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IS_BG_MEDIA_PLAYING_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final boolean playing = reply.readInt() > 0;
+        data.recycle();
+        reply.recycle();
+        return playing;
+    }
+
+    @Override
+    public void mediaResourcesReleased(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(MEDIA_RESOURCES_RELEASED, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();

@@ -32,7 +32,6 @@ import static com.android.server.am.ActivityManagerService.VALIDATE_TOKENS;
 
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_APP;
@@ -47,6 +46,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
+import com.android.server.am.ActivityStackSupervisor.ActivityDisplay;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.TaskGroup;
 import com.android.server.wm.WindowManagerService;
@@ -252,14 +252,14 @@ final class ActivityStack {
     static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
     static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
     static final int TRANSLUCENT_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
+    static final int STOP_MEDIA_PLAYING_TIMEOUT_MSG =
+            ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
 
     static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
-        final boolean mOomAdj;
         final String mReason;
-        ScheduleDestroyArgs(ProcessRecord owner, boolean oomAdj, String reason) {
+        ScheduleDestroyArgs(ProcessRecord owner, String reason) {
             mOwner = owner;
-            mOomAdj = oomAdj;
             mReason = reason;
         }
     }
@@ -320,12 +320,21 @@ final class ActivityStack {
                 case DESTROY_ACTIVITIES_MSG: {
                     ScheduleDestroyArgs args = (ScheduleDestroyArgs)msg.obj;
                     synchronized (mService) {
-                        destroyActivitiesLocked(args.mOwner, args.mOomAdj, args.mReason);
+                        destroyActivitiesLocked(args.mOwner, args.mReason);
                     }
                 } break;
                 case TRANSLUCENT_TIMEOUT_MSG: {
                     synchronized (mService) {
                         notifyActivityDrawnLocked(null);
+                    }
+                } break;
+                case STOP_MEDIA_PLAYING_TIMEOUT_MSG: {
+                    synchronized (mService) {
+                        final ActivityRecord r = getMediaPlayer();
+                        Slog.e(TAG, "Timeout waiting for stopMediaPlaying player=" + r);
+                        if (r != null) {
+                            mService.killAppAtUsersRequest(r.app, null);
+                        }
                     }
                 } break;
             }
@@ -930,11 +939,14 @@ final class ActivityStack {
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             r.stopped = true;
             r.state = ActivityState.STOPPED;
+            if (mActivityContainer.mActivityDisplay.mMediaPlayingActivity == r) {
+                mStackSupervisor.setMediaPlayingLocked(r, false);
+            }
             if (r.finishing) {
                 r.clearOptionsLocked();
             } else {
                 if (r.configDestroy) {
-                    destroyActivityLocked(r, true, false, "stop-config");
+                    destroyActivityLocked(r, true, "stop-config");
                     mStackSupervisor.resumeTopActivitiesLocked();
                 } else {
                     mStackSupervisor.updatePreviousProcessLocked(r);
@@ -966,8 +978,10 @@ final class ActivityStack {
                     // instance right now, we need to first completely stop
                     // the current instance before starting the new one.
                     if (DEBUG_PAUSE) Slog.v(TAG, "Destroying after pause: " + prev);
-                    destroyActivityLocked(prev, true, false, "pause-config");
-                } else {
+                    destroyActivityLocked(prev, true, "pause-config");
+                } else if (!isMediaPlaying()) {
+                    // If we were playing then resumeTopActivities will release resources before
+                    // stopping.
                     mStackSupervisor.mStoppingActivities.add(prev);
                     if (mStackSupervisor.mStoppingActivities.size() > 3 ||
                             prev.frontOfTask && mTaskHistory.size() <= 1) {
@@ -1280,10 +1294,14 @@ final class ActivityStack {
                                 case PAUSED:
                                     // This case created for transitioning activities from
                                     // translucent to opaque {@link Activity#convertToOpaque}.
-                                    if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                                        mStackSupervisor.mStoppingActivities.add(r);
+                                    if (getMediaPlayer() == r) {
+                                        releaseMediaResources();
+                                    } else {
+                                        if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+                                            mStackSupervisor.mStoppingActivities.add(r);
+                                        }
+                                        mStackSupervisor.scheduleIdleLocked();
                                     }
-                                    mStackSupervisor.scheduleIdleLocked();
                                     break;
 
                                 default:
@@ -1548,8 +1566,6 @@ final class ActivityStack {
             // very soon and it would be a waste to let it get killed if it
             // happens to be sitting towards the end.
             if (next.app != null && next.app.thread != null) {
-                // No reason to do full oom adj update here; we'll let that
-                // happen whenever it needs to later.
                 mService.updateLruProcessLocked(next.app, true, null);
             }
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2433,7 +2449,7 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Stop failed; moving to STOPPED: " + r);
                 r.state = ActivityState.STOPPED;
                 if (r.configDestroy) {
-                    destroyActivityLocked(r, true, false, "stop-except");
+                    destroyActivityLocked(r, true, "stop-except");
                 }
             }
         }
@@ -2693,7 +2709,7 @@ final class ActivityStack {
             // If this activity is already stopped, we can just finish
             // it right now.
             r.makeFinishing();
-            boolean activityRemoved = destroyActivityLocked(r, true, oomAdj, "finish-imm");
+            boolean activityRemoved = destroyActivityLocked(r, true, "finish-imm");
             if (activityRemoved) {
                 mStackSupervisor.resumeTopActivitiesLocked();
             }
@@ -2856,6 +2872,9 @@ final class ActivityStack {
 
         // Get rid of any pending idle timeouts.
         removeTimeoutsForActivityLocked(r);
+        if (getMediaPlayer() == r) {
+            mStackSupervisor.setMediaPlayingLocked(r, false);
+        }
     }
 
     private void removeTimeoutsForActivityLocked(ActivityRecord r) {
@@ -2914,13 +2933,13 @@ final class ActivityStack {
         }
     }
 
-    final void scheduleDestroyActivities(ProcessRecord owner, boolean oomAdj, String reason) {
+    final void scheduleDestroyActivities(ProcessRecord owner, String reason) {
         Message msg = mHandler.obtainMessage(DESTROY_ACTIVITIES_MSG);
-        msg.obj = new ScheduleDestroyArgs(owner, oomAdj, reason);
+        msg.obj = new ScheduleDestroyArgs(owner, reason);
         mHandler.sendMessage(msg);
     }
 
-    final void destroyActivitiesLocked(ProcessRecord owner, boolean oomAdj, String reason) {
+    final void destroyActivitiesLocked(ProcessRecord owner, String reason) {
         boolean lastIsOpaque = false;
         boolean activityRemoved = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -2948,7 +2967,7 @@ final class ActivityStack {
                     if (DEBUG_SWITCH) Slog.v(TAG, "Destroying " + r + " in state " + r.state
                             + " resumed=" + mResumedActivity
                             + " pausing=" + mPausingActivity);
-                    if (destroyActivityLocked(r, true, oomAdj, reason)) {
+                    if (destroyActivityLocked(r, true, reason)) {
                         activityRemoved = true;
                     }
                 }
@@ -2965,8 +2984,7 @@ final class ActivityStack {
      * a configuration switch where we destroy the current client-side object
      * but then create a new client-side object for this same HistoryRecord.
      */
-    final boolean destroyActivityLocked(ActivityRecord r,
-            boolean removeFromApp, boolean oomAdj, String reason) {
+    final boolean destroyActivityLocked(ActivityRecord r, boolean removeFromApp, String reason) {
         if (DEBUG_SWITCH || DEBUG_CLEANUP) Slog.v(
             TAG, "Removing activity from " + reason + ": token=" + r
               + ", app=" + (r.app != null ? r.app.processName : "(null)"));
@@ -3075,6 +3093,49 @@ final class ActivityStack {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    void releaseMediaResources() {
+        if (isMediaPlaying() && !mHandler.hasMessages(STOP_MEDIA_PLAYING_TIMEOUT_MSG)) {
+            final ActivityRecord r = getMediaPlayer();
+            if (DEBUG_STATES) Slog.d(TAG, "releaseMediaResources activtyDisplay=" +
+                    mActivityContainer.mActivityDisplay + " mediaPlayer=" + r + " app=" + r.app +
+                    " thread=" + r.app.thread);
+            if (r != null && r.app != null && r.app.thread != null) {
+                try {
+                    r.app.thread.scheduleStopMediaPlaying(r.appToken);
+                } catch (RemoteException e) {
+                }
+                mHandler.sendEmptyMessageDelayed(STOP_MEDIA_PLAYING_TIMEOUT_MSG, 500);
+            } else {
+                Slog.e(TAG, "releaseMediaResources: activity " + r + " no longer running");
+                mediaResourcesReleased(r.appToken);
+            }
+        }
+    }
+
+    final void mediaResourcesReleased(IBinder token) {
+        mHandler.removeMessages(STOP_MEDIA_PLAYING_TIMEOUT_MSG);
+        final ActivityRecord r = getMediaPlayer();
+        if (r != null) {
+            mStackSupervisor.mStoppingActivities.add(r);
+            setMediaPlayer(null);
+        }
+        mStackSupervisor.resumeTopActivitiesLocked();
+    }
+
+    boolean isMediaPlaying() {
+        return isAttached() && mActivityContainer.mActivityDisplay.isMediaPlaying();
+    }
+
+    void setMediaPlayer(ActivityRecord r) {
+        if (isAttached()) {
+            mActivityContainer.mActivityDisplay.setMediaPlaying(r);
+        }
+    }
+
+    ActivityRecord getMediaPlayer() {
+        return isAttached() ? mActivityContainer.mActivityDisplay.mMediaPlayingActivity : null;
     }
 
     private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
@@ -3448,7 +3509,7 @@ final class ActivityStack {
             if (r.app == null || r.app.thread == null) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                         "Config is destroying non-running " + r);
-                destroyActivityLocked(r, true, false, "config");
+                destroyActivityLocked(r, true, "config");
             } else if (r.state == ActivityState.PAUSING) {
                 // A little annoying: we are waiting for this activity to
                 // finish pausing.  Let's not do anything now, but just

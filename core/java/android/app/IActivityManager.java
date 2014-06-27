@@ -415,11 +415,9 @@ public interface IActivityManager extends IInterface {
 
     public void performIdleMaintenance() throws RemoteException;
 
-    /** @hide */
     public IActivityContainer createActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException;
 
-    /** @hide */
     public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
 
     public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
@@ -427,27 +425,24 @@ public interface IActivityManager extends IInterface {
 
     public IBinder getHomeActivityToken() throws RemoteException;
 
-    /** @hide */
     public void startLockTaskModeOnCurrent() throws RemoteException;
 
-    /** @hide */
     public void startLockTaskMode(int taskId) throws RemoteException;
 
-    /** @hide */
     public void startLockTaskMode(IBinder token) throws RemoteException;
 
-    /** @hide */
     public void stopLockTaskMode() throws RemoteException;
 
-    /** @hide */
     public void stopLockTaskModeOnCurrent() throws RemoteException;
 
-    /** @hide */
     public boolean isInLockTaskMode() throws RemoteException;
 
-    /** @hide */
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
+
+    public boolean setMediaPlaying(IBinder token, boolean playing) throws RemoteException;
+    public boolean isBackgroundMediaPlaying(IBinder token) throws RemoteException;
+    public void mediaResourcesReleased(IBinder token) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -753,4 +748,7 @@ public interface IActivityManager extends IInterface {
     int STOP_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+222;
     int FINISH_VOICE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+223;
     int IS_TOP_OF_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+224;
+    int SET_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+225;
+    int IS_BG_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+226;
+    int MEDIA_RESOURCES_RELEASED = IBinder.FIRST_CALL_TRANSACTION+227;
 }

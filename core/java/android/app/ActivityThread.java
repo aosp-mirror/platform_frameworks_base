@@ -1153,6 +1153,16 @@ public final class ActivityThread {
         public final void updateTimePrefs(boolean is24Hour) {
             DateFormat.set24HourTimePref(is24Hour);
         }
+
+        @Override
+        public void scheduleStopMediaPlaying(IBinder token) {
+            sendMessage(H.STOP_MEDIA_PLAYING, token);
+        }
+
+        @Override
+        public void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean playing) {
+            sendMessage(H.BACKGROUND_MEDIA_PLAYING_CHANGED, token, playing ? 1 : 0);
+        }
     }
 
     private class H extends Handler {
@@ -1203,6 +1213,8 @@ public final class ActivityThread {
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         public static final int INSTALL_PROVIDER        = 145;
         public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
+        public static final int STOP_MEDIA_PLAYING = 147;
+        public static final int BACKGROUND_MEDIA_PLAYING_CHANGED = 148;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1253,6 +1265,8 @@ public final class ActivityThread {
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                     case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
                     case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
+                    case STOP_MEDIA_PLAYING: return "STOP_MEDIA_PLAYING";
+                    case BACKGROUND_MEDIA_PLAYING_CHANGED: return "BACKGROUND_MEDIA_PLAYING_CHANGED";
                 }
             }
             return Integer.toString(code);
@@ -1470,6 +1484,11 @@ public final class ActivityThread {
                 case ON_NEW_ACTIVITY_OPTIONS:
                     Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
                     onNewActivityOptions(pair.first, pair.second);
+                case STOP_MEDIA_PLAYING:
+                    handleStopMediaPlaying((IBinder) msg.obj);
+                    break;
+                case BACKGROUND_MEDIA_PLAYING_CHANGED:
+                    handleOnBackgroundMediaPlayingChanged((IBinder) msg.obj, msg.arg1 > 0);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2451,6 +2470,34 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             r.activity.onNewActivityOptions(options);
+        }
+    }
+
+    public void handleStopMediaPlaying(IBinder token) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            final Activity activity = r.activity;
+            if (activity.mMediaPlaying) {
+                activity.mCalled = false;
+                activity.onStopMediaPlaying();
+                // Tick, tick, tick. The activity has 500 msec to return or it will be destroyed.
+                if (!activity.mCalled) {
+                    throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
+                            " did not call through to super.onStopMediaPlayback()");
+                }
+                activity.mMediaPlaying = false;
+            }
+        }
+        try {
+            ActivityManagerNative.getDefault().mediaResourcesReleased(token);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void handleOnBackgroundMediaPlayingChanged(IBinder token, boolean playing) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onBackgroundMediaPlayingChanged(playing);
         }
     }
 
