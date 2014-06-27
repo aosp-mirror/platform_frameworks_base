@@ -66,4 +66,5 @@ oneway interface IBluetoothGattCallback {
     void onAdvertiseStateChange(in int advertiseState, in int status);
     void onMultiAdvertiseCallback(in int status);
     void onConfigureMTU(in String address, in int mtu, in int status);
+    void onConnectionCongested(in String address, in boolean congested);
 }

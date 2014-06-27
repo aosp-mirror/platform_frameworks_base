@@ -85,6 +85,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     /** A write operation exceeds the maximum length of the attribute */
     public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
 
+    /** A remote device connection is congested. */
+    public static final int GATT_CONNECTION_CONGESTED = 0x8f;
+
     /** A GATT operation failed, errors other than the above */
     public static final int GATT_FAILURE = 0x101;
 
@@ -603,6 +606,21 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 try {
                     mCallback.onConfigureMTU(BluetoothGatt.this, mtu, status);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception in callback", ex);
+                }
+            }
+
+            /**
+             * Callback indicating the remote device connection is congested.
+             * @hide
+             */
+            public void onConnectionCongested(String address, boolean congested) {
+                if (DBG) Log.d(TAG, "onConnectionCongested() - Device=" + address
+                        + " congested=" + congested);
+                if (!address.equals(mDevice.getAddress())) return;
+                try {
+                    mCallback.onConnectionCongested(BluetoothGatt.this, congested);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
