@@ -286,6 +286,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         mResultReceiver = null; // all done sending messages.
     }
 
+    @Override
+    protected void stripOffscreenViews() {
+        setViewVisibility(mTransitioningViews, View.VISIBLE);
+        super.stripOffscreenViews();
+        setViewVisibility(mTransitioningViews, View.INVISIBLE);
+    }
+
     private void onTakeSharedElements() {
         if (!mIsReadyForTransition || mSharedElementsBundle == null) {
             return;
@@ -325,7 +332,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition viewsTransition = null;
         if (startEnterTransition && !mTransitioningViews.isEmpty()) {
             viewsTransition = configureTransition(getViewsTransition());
-            viewsTransition = addTargets(viewsTransition, mTransitioningViews);
+            if (viewsTransition != null) {
+                stripOffscreenViews();
+                viewsTransition = addTargets(viewsTransition, mTransitioningViews);
+            }
         }
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
