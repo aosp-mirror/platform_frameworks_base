@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Lennurežiim on SEES"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Lennurežiim on VÄLJAS"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Seaded"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Lukusta kohe"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Turvarežiim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-süsteem"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lubab rakendusel muuta puuteekraani kalibreerimisparameetreid. Ei tohiks kunagi olla vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"juurdepääs DRM-i sertifikaatidele"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lubab rakendusel ette valmistada ja kasutada DRM-i sertifikaate. Tavarakenduste puhul ei tohiks see vajalik olla."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Üleandmise edastuste vastuvõtmine"</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Võimaldab vastu võtta üleandmise olekuteavet."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrollige ekraaniluku avamise paroolide pikkust ja tähemärke."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekraani avamiskatsed"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Võimaldab rakendusel muuta telefoni salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"määrake äratus"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Võimaldab rakendusel seada installitud äratuskellarakenduses äratuse. Mõned äratuskellarakendused ei pruugi seda funktsiooni juurutada."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"kõnepostisõnumite eemaldamine"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Võimaldab rakendusel teie kõneposti postkastist sõnumeid eemaldada."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisa kõneposti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Võimaldab rakendusel lisada sõnumeid teie kõneposti postkasti."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"kogu kõneposti lugemine"</string>
@@ -1725,8 +1730,7 @@
     <string name="select_year" msgid="7952052866994196170">"Aasta valimine"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valitud"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> on kustutatud"</string>
-    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
-    <skip />
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Kas soovite kasutada rakendusele lukustamist?"</string>
     <string name="lock_to_app_description" msgid="8597199033462406175">"Rakendusele lukustamise funktsioon lukustab kuva ühele rakendusele.\n\nVäljumiseks hoidke hiljutiste rakenduste nuppu $"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"EI"</string>

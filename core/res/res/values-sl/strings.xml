@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Način za letalo je VKLOPLJEN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Način za letalo je IZKLOPLJEN"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavitve"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
     <string name="safeMode" msgid="2788228061547930246">"Varni način"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Aplikaciji dovoli spreminjanje parametrov za umerjanje zaslona na dotik. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"dostop do potrdil za upravljanje digitalnih pravic"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogoča pripravo in uporabo potrdil za upravljanje digitalnih pravic. To naj ne bi bilo nikoli potrebno za običajne aplikacije."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Aplikaciji omogoča spreminjanje zgodovine ali zaznamkov brskalnika v telefonu. S tem lahko aplikacija izbriše ali spremeni podatke v brskalniku. Opomba: Tega dovoljenja ne morejo uveljavljati drugi brskalniki ali aplikacije, s katerimi je mogoče brskati po spletu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastavitev alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Programu omogoča nastavitev alarma v nameščenem programu budilke. Nekateri programi budilke morda nimajo te funkcije."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodajanje odzivnika"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Programu omogoča dodajanje sporočil prejetim sporočilom odzivnika."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"branje vseh sporočil v odzivniku"</string>
@@ -1726,10 +1736,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"Izbrano: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Želite uporabiti zaklepanje v aplikaciji?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Zaklepanje v aplikaciji zaklene zaslon v eni aplikaciji.\n\nČe želite zapustiti ta način, pritisnite in pridržite gumb za nedavne aplikacije $"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Želite uporabiti zaklepanje v aplikacijo?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Zaklepanje v aplikacijo zaklene zaslon v eni aplikaciji.\n\nČe želite zapustiti ta način, pritisnite in pridržite gumb za nedavne aplikacije $"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"NE"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Zagon zaklepanja v aplikaciji"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Izhod iz zaklepanja v aplikaciji"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Zagon zaklepanja v aplikacijo"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Izhod iz zaklepanja v aplikacijo"</string>
 </resources>

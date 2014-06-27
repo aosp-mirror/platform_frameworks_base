@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Imodi yendiza IVULIWE"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Imodi yendiza IVALIWE"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Izilungiselelo"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Khiya manje"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Uhlelo lwe-Android"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ivumela uhlelo lokusebenza ukuthi lushintshe imingcele yokulinganisa yesikrini esithintwayo. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"finyelela izitifiketi ze-DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ivumela uhlelo lokusebenza ekunikezweni nokusetshenziswa kwezitifiketi ze-DRM. Akufanele kudingeke kuzinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Thola ukusakaza kokuthuthukisela kokunikeza."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Ivumela ukuthola ulwazi lwesimo sokuthutha olunikezwayo."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ivumela uhlelo lokusebenza ukushintsha umlando wamabhukhimakhi noma wesiphequluli alondolozwe efonini yakho. Lokhu kungavumela uhlelo lokusebenza ukususa noma ukushintsha idatha yesiphequluli. Qaphela: le mvume kungenzeka ingaphoqelelwa iziphequluli ezivela eceleni noma ezinye izinhlelo zokusebenza ezinamandla okuphequlula iwebhu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setha i-alamu"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ivumela uhlelo lokusebenza ukuthi isethe i-alamu ensizeni efkiwe ye-alamu. Ezinye izinhlelo zokusebenza ze-alamu kungenzeka zingakusebenzisi lokho."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"susa amavoyisimeyili"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Ivumela uhlelo lokusebenza ukususa imilayezo kusuka kubhokisi lokungenayo levoyisimeyili."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"engeza imeyili yezwi"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ivumela uhlelo lokusebenza ukwengeza imiyalezo kwibhokisi lakho lemeyili yezwi."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"funda wonke amavoyisimeyili"</string>

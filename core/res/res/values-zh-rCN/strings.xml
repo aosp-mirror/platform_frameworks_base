@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允许应用修改触摸屏的校准参数。普通应用绝不需要此权限。"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"访问DRM证书"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允许应用配置和使用DRM证书。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允许应用向您的语音信箱收件箱添加邮件。"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"读取所有语音邮件"</string>
@@ -1725,18 +1735,11 @@
     <string name="select_year" msgid="7952052866994196170">"选择年份"</string>
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge (2355652472854327647) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"要使用“锁定到应用”吗？"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"“锁定到应用”功能会锁定屏幕，使其只显示一个应用。\n\n要退出，请按住“最近用过的应用”按钮 $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"算了"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"启动"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"启动“锁定到应用”"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"退出“锁定到应用”"</string>
 </resources>

@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Configuració"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Bloqueja ara"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accedir als certificats de DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats de gestió de drets digitals (DRM, Digital Rights Management). No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"rebre difusions de transferència d\'entrega"</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Permet rebre informació sobre l\'estat de la transferència d\'entrega."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar els intents de desbloqueig de pantalla"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permet que l\'aplicació modifiqui l\'historial del navegador o els marcadors del telèfon. Això pot permetre que l\'aplicació esborri o modifiqui les dades del navegador. Nota: És possible que aquest permís no s\'apliqui a navegadors de tercers o a altres aplicacions amb capacitats de navegació web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"configuració d\'una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permet que l\'aplicació defineixi una alarma en una aplicació de despertador instal·lada. És possible que algunes aplicacions de despertador no incorporin aquesta funció."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"suprimir correus de veu"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Permet que l\'aplicació suprimeixi missatges de la safata d\'entrada de la bústia de veu."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"afegeix bústia de veu"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permet que l\'aplicació afegeixi missatges a la safata d\'entrada de la bústia de veu."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"accedir a tots els correus de veu"</string>

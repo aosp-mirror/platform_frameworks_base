@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Η λειτουργία πτήσης είναι ενεργοποιημένη."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Λειτ. πτήσης είναι ανενεργή"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ρυθμίσεις"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Κλείδωμα τώρα"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Επιτρέπει στην εφαρμογή να τροποποιεί τις παραμέτρους βαθμονόμησης της οθόνης αφής. Δεν απαιτείται για τις κανονικές εφαρμογές."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"πρόσβαση σε πιστοποιητικά DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Επιτρέπει σε μια εφαρμογή να παρέχει και να χρησιμοποιεί πιστοποιητικά DRM. Δεν θα χρειαστεί ποτέ για κανονικές εφαρμογές."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Λήψη εκπομπών μεταφοράς παράδοσης."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Επιτρέπει τη λήψη πληροφοριών κατάστασης μεταφοράς παράδοσης."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Επιτρέπει στην εφαρμογή την τροποποίηση του ιστορικού του προγράμματος περιήγησης ή των σελιδοδεικτών που έχουν αποθηκευτεί στο τηλέφωνό σας. Αυτό μπορεί να δίνει τη δυνατότητα στην εφαρμογή να διαγράφει ή να τροποποιεί δεδομένα του προγράμματος περιήγησης. Σημείωση: αυτή η άδεια ίσως να μην μπορεί να εφαρμοστεί από τρίτα προγράμματα περιήγησης ή άλλες εφαρμογές με δυνατότητες περιήγησης ιστού."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ρύθμιση ξυπνητηριού"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Επιτρέπει στην εφαρμογή τη ρύθμιση μιας ειδοποίησης σε μια εγκατεστημένη εφαρμογή ξυπνητηριού. Ορισμένες εφαρμογές ξυπνητηριού ενδέχεται να μην μπορούν να ενσωματώσουν αυτήν τη λειτουργία."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"κατάργηση μηνυμάτων αυτόματου τηλεφωνητή"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Επιτρέπει στην εφαρμογή να καταργεί μηνύματα από τα εισερχόμενα του αυτόματου τηλεφωνητή σας."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"προσθήκη τηλεφωνητή"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Επιτρέπει στην εφαρμογή να προσθέτει μηνύματα στα εισερχόμενα του αυτόματου τηλεφωνητή σας."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"ανάγνωση όλων των μηνυμάτων του αυτόματου τηλεφωνητή"</string>

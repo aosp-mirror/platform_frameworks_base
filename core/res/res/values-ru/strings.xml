@@ -185,6 +185,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Выключить"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Включить"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Настройки"</string>
+    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Приложение сможет изменять параметры калибровки сенсорного экрана. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"Доступ к сертификатам DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Приложение сможет синхронизировать и использовать сертификаты DRM (разрешение актуально только для специальных приложений)."</string>
+    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
+    <skip />
+    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
@@ -999,6 +1005,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Приложение сможет изменять историю или закладки браузера, сохраненные на телефоне, а также удалять и изменять данные браузера. Обратите внимание: браузеры независимых поставщиков или другие приложения для просмотра веб-страниц могут не применять это разрешение."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"Установка будильника"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Приложение сможет настраивать будильник. Функция поддерживается не во всех программах."</string>
+    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
+    <skip />
+    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
+    <skip />
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Добавление голосовых сообщений"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Приложение сможет добавлять голосовые сообщения в папку \"Входящие\"."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"Доступ к голосовой почте"</string>
@@ -1726,16 +1736,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"Выбран элемент <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Цифра <xliff:g id="KEY">%1$s</xliff:g> удалена"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Использовать блокировку в приложении?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Функция блокирует переход в другие приложения.\n\nЧтобы выключить блокировку, нажмите и удерживайте кнопку \"Недавние приложения\" $"</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"НЕТ"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"ДА"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Запуск блокировки в приложении"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Выключить блокировку"</string>
 </resources>

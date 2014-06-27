@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Lentokonetila on KÄYTÖSSÄ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Lentokonetila on POIS KÄYTÖSTÄ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Asetukset"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Lukitse nyt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Suojattu tila"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Antaa sovelluksen muokata kosketusnäytön kalibrointiparametreja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-varmenteiden käyttö"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Antaa sovelluksen käyttää DRM-varmenteita ja hallita niiden käyttäjiä. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Vastaanota handover-siirtolähetyksiä."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Sallii handover-siirtotietojen vastaanottamisen."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Antaa sovelluksen muokata selaimen historiaa ja puhelimeen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"vastaajaviestien poistaminen"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Antaa sovelluksen poistaa viestejä saapuneista vastaajaviesteistä."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisää vastaajaviesti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Antaa sovelluksen lisätä viestejä saapuneisiin vastaajaviesteihin."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"kaikkien vastaajaviestien luku"</string>
@@ -1726,16 +1731,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valittu"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> poistettiin"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (työ)"</string>
-    <!-- no translation found for lock_to_app_title (5895142291937470019) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (8597199033462406175) -->
-    <skip />
-    <!-- no translation found for lock_to_app_negative (8522854387366288195) -->
-    <skip />
-    <!-- no translation found for lock_to_app_positive (7085139175671313864) -->
-    <skip />
-    <!-- no translation found for lock_to_app_start (8889002974248178076) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (7033017307788432861) -->
-    <skip />
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Käytetäänkö sovellukseen lukitusta?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Sovellukseen lukitus lukitsee näytön yhteen sovellukseen.\n\nPoistu pitämällä viimeaikaisten sovellusten painiketta $ painettuna."</string>
+    <string name="lock_to_app_negative" msgid="8522854387366288195">"EI"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"ALOITA"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Aloita sovellukseen lukitus"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lopeta sovellukseen lukitus"</string>
 </resources>

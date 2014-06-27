@@ -185,6 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndege IMEZIMWA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Mipangilio"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Funga sasa"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
@@ -726,6 +727,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Huruhusu programu kubadilisha vigezo vya urekebishaji vya skrini ya kugusa. Havipaswi kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"fikia vyeti vya DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Huruhusu programu kwa utoaji na matumizi ya vyeti vya DRM. Havifahi kuhitajika kwa ajili ya programu za kawaida."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Pokea matangazo ya makabidhiano ya uhamisho."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Huruhusu upokeaji wa maelezo ya hali ya makabidhiano ya uhamisho."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kudhibiti urefu na herufi zinazoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
@@ -999,6 +1002,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Inaruhusu programu kurekebisha historia ya Kivinjari au alamisho zilizohifadhiwa kwenye simu yako. Hii huenda ikaruhusu programu kufuta au kurekebisha data ya Kivinjari. Kumbuka: huenda idhini hii isitekelezwe na vivinjari vingine au programu nyingine zenye uwezo wa kuvinjari wavuti."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"weka kengele"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Inaruhusu programu kuweka kengele katika programu iliyosakinishwa ya kengele. Programu zingine za kengele zinawezakosa kutekeleza kipengee hiki."</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"ondoa ujumbe wa sauti"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Huruhusu programu kuondoa ujumbe kwenye kikasha chako cha ujumbe wa sauti."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ongeza barua ya sauti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Huruhusu programu kuongeza mawasiliano kwenye kikasha cha ujumbe wa sauti."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"soma ujumbe wote wa sauti"</string>
@@ -1725,9 +1730,9 @@
     <string name="select_year" msgid="7952052866994196170">"Chagua mwaka"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kimechaguliwa"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> kimefutwa"</string>
-    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kazi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ya kazini <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"Ungependa kutumia lazimisha kutumia programu?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lazimisha kutumia programu huonyeshwa katika programu moja. \n\n Ili uondoke bonyeza na ushikilie kitufe cha programu za hivi majuzi $"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Lazimisha kutumia programu katika programu moja. \n\n Ili uondoke bonyeza na ushikilie kitufe cha programu za hivi majuzi $"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"HAPANA"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ANZA"</string>
     <string name="lock_to_app_start" msgid="8889002974248178076">"Anzisha Lazimisha kutumia programu"</string>
