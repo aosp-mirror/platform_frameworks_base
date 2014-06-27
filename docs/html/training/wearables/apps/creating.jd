@@ -126,7 +126,7 @@ Project</a>. As you follow the wizard, enter the following information:</p>
   <p class="note"><b>Note:</b> The <b>wear</b> module also contains a "Hello World" activity that uses a
   <code>WatchViewStub</code> that inflates a layout based on whether the device's screen
   is round or square. The <code>WatchViewStub</code> class is one of the UI widgets that's provided
-  by the <a href="{@docRoot}training/wearables/apps/layouts#UiLibrary">wearable support library</a>.</p>
+  by the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">wearable support library</a>.</p>
 </li>
 
 <h2 id="Install">Install the Wearable app</h2>
