@@ -63,6 +63,8 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
+
+import android.telecomm.TelecommManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -2726,17 +2728,13 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private boolean isInCommunication() {
-        boolean isOffhook = false;
+        boolean isInAPhoneCall = false;
 
-        if (mVoiceCapable) {
-            try {
-                ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-                if (phone != null) isOffhook = phone.isOffhook();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Couldn't connect to phone service", e);
-            }
-        }
-        return (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION);
+        TelecommManager telecommManager =
+                (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
+        isInAPhoneCall = telecommManager.isInAPhoneCall();
+
+        return (isInAPhoneCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }
 
     /**

@@ -25,16 +25,6 @@ import android.telecomm.Subscription;
  * {@hide}
  */
 interface ITelecommService {
-
-    /**
-     * Silence the ringer if an incoming call is currently ringing.
-     * (If vibrating, stop the vibrator also.)
-     *
-     * It's safe to call this if the ringer has already been silenced, or
-     * even if there's no incoming call.  (If so, this method will do nothing.)
-     */
-    void silenceRinger();
-
     /**
      * Brings the in-call screen to the foreground if there is an active call.
      *
@@ -61,4 +51,33 @@ interface ITelecommService {
      * Returns the component name of the default phone application.
      */
     ComponentName getDefaultPhoneApp();
+
+    //
+    // Internal system apis relating to call management.
+    //
+
+    /**
+     * @see TelecommManager#silenceRinger
+     */
+    void silenceRinger();
+
+    /**
+     * @see TelecommManager#isInAPhoneCall
+     */
+    boolean isInAPhoneCall();
+
+    /**
+     * @see TelecomManager#isRinging
+     */
+    boolean isRinging();
+
+    /**
+     * @see TelecommManager#endCall
+     */
+    boolean endCall();
+
+    /**
+     * @see TelecommManager#acceptRingingCall
+     */
+    void acceptRingingCall();
 }
