@@ -80,20 +80,41 @@ import android.util.AttributeSet;
  */
 public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
     private final AnimationState mAnimationState;
+
+    /** The current frame, may be -1 when not animating. */
     private int mCurFrame = -1;
+
+    /** Whether the drawable has an animation callback posted. */
+    private boolean mRunning;
+
+    /** Whether the drawable should animate when visible. */
     private boolean mAnimating;
+
     private boolean mMutated;
 
     public AnimationDrawable() {
         this(null, null);
     }
 
+    /**
+     * Sets whether this AnimationDrawable is visible.
+     * <p>
+     * When the drawable becomes invisible, it will pause its animation. A
+     * subsequent change to visible with <code>restart</code> set to true will
+     * restart the animation from the first frame. If <code>restart</code> is
+     * false, the animation will resume from the most recent frame.
+     *
+     * @param visible true if visible, false otherwise
+     * @param restart when visible, true to force the animation to restart
+     *                from the first frame
+     * @return true if the new visibility is different than its previous state
+     */
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         final boolean changed = super.setVisible(visible, restart);
         if (visible) {
-            if (changed || restart) {
-                setFrame(0, true, mAnimating);
+            if (restart || changed) {
+                setFrame(restart ? 0 : mCurFrame, true, mAnimating);
             }
         } else {
             unscheduleSelf(this);
@@ -115,6 +136,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      */
     @Override
     public void start() {
+        mAnimating = true;
+
         if (!isRunning()) {
             run();
         }
@@ -129,6 +152,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      */
     @Override
     public void stop() {
+        mAnimating = false;
+
         if (isRunning()) {
             unscheduleSelf(this);
         }
@@ -141,7 +166,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      */
     @Override
     public boolean isRunning() {
-        return mAnimating;
+        return mRunning;
     }
 
     /**
@@ -158,7 +183,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     @Override
     public void unscheduleSelf(Runnable what) {
         mCurFrame = -1;
-        mAnimating = false;
+        mRunning = false;
         super.unscheduleSelf(what);
     }
 
@@ -219,6 +244,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         if (next >= N) {
             next = 0;
         }
+
         setFrame(next, unschedule, !mAnimationState.mOneShot || next < (N - 1));
     }
 
@@ -226,6 +252,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         if (frame >= mAnimationState.getChildCount()) {
             return;
         }
+        mAnimating = animate;
         mCurFrame = frame;
         selectDrawable(frame);
         if (unschedule || animate) {
@@ -234,7 +261,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         if (animate) {
             // Unscheduling may have clobbered these values; restore them
             mCurFrame = frame;
-            mAnimating = true;
+            mRunning = true;
             scheduleSelf(this, SystemClock.uptimeMillis() + mAnimationState.mDurations[frame]);
         }
     }
