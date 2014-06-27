@@ -3264,6 +3264,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.mRenderNode.setClipToBounds(clipChildren);
                 }
             }
+            invalidate();
         }
     }
 
@@ -3276,7 +3277,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
     public void setClipToPadding(boolean clipToPadding) {
-        setBooleanFlag(FLAG_CLIP_TO_PADDING, clipToPadding);
+        if (hasBooleanFlag(FLAG_CLIP_TO_PADDING) != clipToPadding) {
+            setBooleanFlag(FLAG_CLIP_TO_PADDING, clipToPadding);
+            invalidate();
+        }
     }
 
     /**
