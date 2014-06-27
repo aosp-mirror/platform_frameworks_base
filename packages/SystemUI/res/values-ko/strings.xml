@@ -231,11 +231,6 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-  <plurals name="zen_mode_notification_title">
-    <item quantity="one" msgid="7809876956258040354">"알림 숨김"</item>
-    <item quantity="other" msgid="7388721375827338153">"알림 %d개 숨김"</item>
-  </plurals>
-    <string name="zen_mode_notification_text" msgid="8336623711388065713">"표시하려면 터치"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"알림 일시중지"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>

@@ -231,11 +231,6 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-  <plurals name="zen_mode_notification_title">
-    <item quantity="one" msgid="7809876956258040354">"已隱藏通知"</item>
-    <item quantity="other" msgid="7388721375827338153">"已隱藏 %d 則通知"</item>
-  </plurals>
-    <string name="zen_mode_notification_text" msgid="8336623711388065713">"輕觸即可顯示"</string>
     <string name="zen_mode_title" msgid="8793432092004749188">"請勿打擾"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
