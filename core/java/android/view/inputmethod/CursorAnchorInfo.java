@@ -21,6 +21,8 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Layout;
+import android.text.SpannedString;
+import android.text.TextUtils;
 import android.view.inputmethod.SparseRectFArray.SparseRectFArrayBuilder;
 
 import java.util.Objects;
@@ -40,7 +42,7 @@ public final class CursorAnchorInfo implements Parcelable {
     /**
      * The text, tracked as a composing region.
      */
-    private final String mComposingText;
+    private final CharSequence mComposingText;
 
     /**
      * Horizontal position of the insertion marker, in the local coordinates that will be
@@ -88,7 +90,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mSelectionStart = source.readInt();
         mSelectionEnd = source.readInt();
         mComposingTextStart = source.readInt();
-        mComposingText = source.readString();
+        mComposingText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mInsertionMarkerHorizontal = source.readFloat();
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
@@ -109,7 +111,7 @@ public final class CursorAnchorInfo implements Parcelable {
         dest.writeInt(mSelectionStart);
         dest.writeInt(mSelectionEnd);
         dest.writeInt(mComposingTextStart);
-        dest.writeString(mComposingText);
+        TextUtils.writeToParcel(mComposingText, dest, flags);
         dest.writeFloat(mInsertionMarkerHorizontal);
         dest.writeFloat(mInsertionMarkerTop);
         dest.writeFloat(mInsertionMarkerBaseline);
@@ -210,12 +212,13 @@ public final class CursorAnchorInfo implements Parcelable {
             if (composingText == null) {
                 mComposingText = null;
             } else {
-                mComposingText = composingText.toString();
+                // Make a snapshot of the given char sequence.
+                mComposingText = new SpannedString(composingText);
             }
             return this;
         }
         private int mComposingTextStart = -1;
-        private String mComposingText = null;
+        private CharSequence mComposingText = null;
 
         /**
          * Sets the location of the text insertion point (zero width cursor) as a rectangle in
@@ -362,7 +365,7 @@ public final class CursorAnchorInfo implements Parcelable {
      * Returns the entire composing text.
      * @return null if there is no composition.
      */
-    public String getComposingText() {
+    public CharSequence getComposingText() {
         return mComposingText;
     }
 
