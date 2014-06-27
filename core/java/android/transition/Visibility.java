@@ -43,6 +43,20 @@ public abstract class Visibility extends Transition {
     private static final String PROPNAME_PARENT = "android:visibility:parent";
     private static final String PROPNAME_SCREEN_LOCATION = "android:visibility:screenLocation";
 
+    /**
+     * Mode used in {@link #setMode(int)} to make the transition
+     * operate on targets that are appearing. Maybe be combined with
+     * {@link #OUT} to target Visibility changes both in and out.
+     */
+    public static final int IN = 0x1;
+
+    /**
+     * Mode used in {@link #setMode(int)} to make the transition
+     * operate on targets that are disappearing. Maybe be combined with
+     * {@link #IN} to target Visibility changes both in and out.
+     */
+    public static final int OUT = 0x2;
+
     private static final String[] sTransitionProperties = {
             PROPNAME_VISIBILITY,
             PROPNAME_PARENT,
@@ -56,6 +70,22 @@ public abstract class Visibility extends Transition {
         int endVisibility;
         ViewGroup startParent;
         ViewGroup endParent;
+    }
+
+    private int mMode = IN | OUT;
+
+    /**
+     * Changes the transition to support appearing and/or disappearing Views, depending
+     * on <code>mode</code>.
+     *
+     * @param mode The behavior supported by this transition, a combination of
+     *             {@link #IN} and {@link #OUT}.
+     */
+    public void setMode(int mode) {
+        if ((mode & ~(IN | OUT)) != 0) {
+            throw new IllegalArgumentException("Only IN and OUT flags are allowed");
+        }
+        mMode = mode;
     }
 
     @Override
@@ -200,6 +230,9 @@ public abstract class Visibility extends Transition {
     public Animator onAppear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
+        if ((mMode & IN) != IN || endValues == null) {
+            return null;
+        }
         return onAppear(sceneRoot, endValues.view, startValues, endValues);
     }
 
@@ -260,6 +293,10 @@ public abstract class Visibility extends Transition {
     public Animator onDisappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
+        if ((mMode & OUT) != OUT) {
+            return null;
+        }
+
         View startView = (startValues != null) ? startValues.view : null;
         View endView = (endValues != null) ? endValues.view : null;
         View overlayView = null;

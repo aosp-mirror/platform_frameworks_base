@@ -5338,6 +5338,8 @@
          resource are available in addition to the specific attributes of Fade
          described here. -->
     <declare-styleable name="Fade">
+        <!-- Equivalent to <code>visibilityMode</code>, fadingMode works only
+             with the Fade transition. -->
         <attr name="fadingMode">
             <!-- Fade will only fade appearing items in. -->
             <enum name="fade_in" value="1" />
@@ -5366,6 +5368,21 @@
         </attr>
     </declare-styleable>
 
+    <!-- Use with {@link android.transition.Visibility} transitions, such as
+         <code>slide</code>, <code>explode</code>, and <code>fade</code> to mark which
+         views are supported. -->
+    <declare-styleable name="VisibilityTransition">
+        <!-- Changes whether the transition supports appearing and/or disappearing Views.
+             Corresponds to {@link android.transition.Visibility#setMode(int)}. -->
+        <attr name="visibilityMode">
+            <!-- Only appearing Views will be supported. -->
+            <enum name="mode_in" value="1" />
+            <!-- Only disappearing Views will be supported. -->
+            <enum name="mode_out" value="2" />
+            <!-- Both appearing and disappearing views will be supported. -->
+            <enum name="mode_in_out" value="3" />
+        </attr>
+    </declare-styleable>
     <!-- Use <code>target</code> as the root tag of the XML resource that
      describes a {@link android.transition.Transition#addTarget(int)
      targetId} of a transition. There can be one or more targets inside

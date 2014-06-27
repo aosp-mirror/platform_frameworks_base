@@ -349,6 +349,16 @@ public class TransitionInflater {
             transition.setMatchOrder(parseMatchOrder(matchOrder));
         }
         a.recycle();
+        if (transition instanceof Visibility) {
+            a = mContext.obtainStyledAttributes(attrs,
+                    com.android.internal.R.styleable.VisibilityTransition);
+            int mode = a.getInt(
+                    com.android.internal.R.styleable.VisibilityTransition_visibilityMode, 0);
+            a.recycle();
+            if (mode != 0) {
+                ((Visibility)transition).setMode(mode);
+            }
+        }
         return transition;
     }
 

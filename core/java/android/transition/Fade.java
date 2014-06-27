@@ -63,23 +63,23 @@ public class Fade extends Visibility {
     /**
      * Fading mode used in {@link #Fade(int)} to make the transition
      * operate on targets that are appearing. Maybe be combined with
-     * {@link #OUT} to fade both in and out.
+     * {@link #OUT} to fade both in and out. Equivalent to
+     * {@link Visibility#IN}.
      */
-    public static final int IN = 0x1;
+    public static final int IN = Visibility.IN;
+
     /**
      * Fading mode used in {@link #Fade(int)} to make the transition
      * operate on targets that are disappearing. Maybe be combined with
-     * {@link #IN} to fade both in and out.
+     * {@link #IN} to fade both in and out. Equivalent to
+     * {@link Visibility#OUT}.
      */
-    public static final int OUT = 0x2;
-
-    private int mFadingMode;
+    public static final int OUT = Visibility.OUT;
 
     /**
      * Constructs a Fade transition that will fade targets in and out.
      */
     public Fade() {
-        this(IN | OUT);
     }
 
     /**
@@ -90,7 +90,7 @@ public class Fade extends Visibility {
      * {@link #IN} and {@link #OUT}.
      */
     public Fade(int fadingMode) {
-        mFadingMode = fadingMode;
+        setMode(fadingMode);
     }
 
     /**
@@ -115,9 +115,6 @@ public class Fade extends Visibility {
     public Animator onAppear(ViewGroup sceneRoot, View view,
             TransitionValues startValues,
             TransitionValues endValues) {
-        if ((mFadingMode & IN) != IN || endValues == null) {
-            return null;
-        }
         if (DBG) {
             View startView = (startValues != null) ? startValues.view : null;
             Log.d(LOG_TAG, "Fade.onAppear: startView, startVis, endView, endVis = " +
@@ -129,10 +126,6 @@ public class Fade extends Visibility {
     @Override
     public Animator onDisappear(ViewGroup sceneRoot, final View view, TransitionValues startValues,
             TransitionValues endValues) {
-        if ((mFadingMode & OUT) != OUT) {
-            return null;
-        }
-
         return createAnimation(view, 1, 0);
     }
 
