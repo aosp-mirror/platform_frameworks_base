@@ -31,6 +31,11 @@ public class AudioDevicePortConfig extends AudioPortConfig {
         super((AudioPort)devicePort, samplingRate, channelMask, format, gain);
     }
 
+    AudioDevicePortConfig(AudioDevicePortConfig config) {
+        this(config.port(), config.samplingRate(), config.channelMask(), config.format(),
+                config.gain());
+    }
+
     /**
      * Returns the audio device port this AudioDevicePortConfig is issued from.
      */
