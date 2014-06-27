@@ -25,15 +25,17 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.test.InstrumentationTestCase;
-
-import com.google.android.collect.Lists;
+import android.util.Pair;
 
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
@@ -55,26 +57,60 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
 
     public void testGetAllValidScorers() throws Exception {
         // Package 1 - Valid scorer.
-        ResolveInfo package1 = buildResolveInfo("package1", true, true);
+        Pair<ResolveInfo, ResolveInfo> package1 = buildResolveInfo("package1", true, true, false);
 
         // Package 2 - Receiver does not have BROADCAST_SCORE_NETWORKS permission.
-        ResolveInfo package2 = buildResolveInfo("package2", false, true);
+        Pair<ResolveInfo, ResolveInfo> package2 = buildResolveInfo("package2", false, true, false);
 
         // Package 3 - App does not have SCORE_NETWORKS permission.
-        ResolveInfo package3 = buildResolveInfo("package3", true, false);
+        Pair<ResolveInfo, ResolveInfo> package3 = buildResolveInfo("package3", true, false, false);
 
-        setScorers(package1, package2, package3);
+        // Package 4 - Valid scorer w/ optional config activity.
+        Pair<ResolveInfo, ResolveInfo> package4 = buildResolveInfo("package4", true, true, true);
+
+        List<Pair<ResolveInfo, ResolveInfo>> scorers = new ArrayList<>();
+        scorers.add(package1);
+        scorers.add(package2);
+        scorers.add(package3);
+        scorers.add(package4);
+        setScorers(scorers);
 
         Iterator<NetworkScorerAppData> result =
                 NetworkScorerAppManager.getAllValidScorers(mMockContext).iterator();
 
         assertTrue(result.hasNext());
-        assertEquals("package1", result.next().mPackageName);
+        NetworkScorerAppData next = result.next();
+        assertEquals("package1", next.mPackageName);
+        assertNull(next.mConfigurationActivityClassName);
+
+        assertTrue(result.hasNext());
+        next = result.next();
+        assertEquals("package4", next.mPackageName);
+        assertEquals(".ConfigActivity", next.mConfigurationActivityClassName);
 
         assertFalse(result.hasNext());
     }
 
-    private void setScorers(ResolveInfo... scorers) {
+    private void setScorers(List<Pair<ResolveInfo, ResolveInfo>> scorers) {
+        List<ResolveInfo> receivers = new ArrayList<>();
+        for (final Pair<ResolveInfo, ResolveInfo> scorer : scorers) {
+            receivers.add(scorer.first);
+            if (scorer.second != null) {
+                // This scorer has a config activity.
+                Mockito.when(mMockPm.queryIntentActivities(
+                        Mockito.argThat(new ArgumentMatcher<Intent>() {
+                            @Override
+                            public boolean matches(Object object) {
+                                Intent intent = (Intent) object;
+                                return NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(
+                                        intent.getAction())
+                                        && scorer.first.activityInfo.packageName.equals(
+                                                intent.getPackage());
+                            }
+                        }), Mockito.eq(0))).thenReturn(Collections.singletonList(scorer.second));
+            }
+        }
+
         Mockito.when(mMockPm.queryBroadcastReceivers(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
@@ -83,11 +119,12 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                         return NetworkScoreManager.ACTION_SCORE_NETWORKS.equals(intent.getAction());
                     }
                 }), Mockito.eq(0)))
-                .thenReturn(Lists.newArrayList(scorers));
+                .thenReturn(receivers);
     }
 
-    private ResolveInfo buildResolveInfo(String packageName,
-            boolean hasReceiverPermission, boolean hasScorePermission) throws Exception {
+    private Pair<ResolveInfo, ResolveInfo> buildResolveInfo(String packageName,
+            boolean hasReceiverPermission, boolean hasScorePermission, boolean hasConfigActivity)
+            throws Exception {
         Mockito.when(mMockPm.checkPermission(permission.SCORE_NETWORKS, packageName))
                 .thenReturn(hasScorePermission ?
                         PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
@@ -99,6 +136,13 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         if (hasReceiverPermission) {
             resolveInfo.activityInfo.permission = permission.BROADCAST_SCORE_NETWORKS;
         }
-        return resolveInfo;
+
+        ResolveInfo configActivityInfo = null;
+        if (hasConfigActivity) {
+            configActivityInfo = new ResolveInfo();
+            configActivityInfo.activityInfo = new ActivityInfo();
+            configActivityInfo.activityInfo.name = ".ConfigActivity";
+        }
+        return Pair.create(resolveInfo, configActivityInfo);
     }
 }

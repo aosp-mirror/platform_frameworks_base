@@ -81,6 +81,17 @@ public class NetworkScoreManager {
     public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
 
     /**
+     * Activity action: launch a custom activity for configuring a scorer before enabling it.
+     * Scorer applications may choose to specify an activity for this action, in which case the
+     * framework will launch that activity which should return RESULT_OK if scoring was enabled.
+     *
+     * <p>If no activity is included in a scorer which implements this action, the system dialog for
+     * selecting a scorer will be shown instead.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
+
+    /**
      * Extra used with {@link #ACTION_SCORE_NETWORKS} to specify the networks to be scored, as an
      * array of {@link NetworkKey}s. Can be obtained with
      * {@link android.content.Intent#getParcelableArrayExtra(String)}}.

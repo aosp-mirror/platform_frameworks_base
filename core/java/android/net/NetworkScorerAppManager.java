@@ -17,6 +17,7 @@
 package android.net;
 
 import android.Manifest.permission;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -54,9 +55,18 @@ public final class NetworkScorerAppManager {
         /** Name of this scorer app for display. */
         public final CharSequence mScorerName;
 
-        public NetworkScorerAppData(String packageName, CharSequence scorerName) {
+        /**
+         * Optional class name of a configuration activity. Null if none is set.
+         *
+         * @see NetworkScoreManager#ACTION_CUSTOM_ENABLE
+         */
+        public final String mConfigurationActivityClassName;
+
+        public NetworkScorerAppData(String packageName, CharSequence scorerName,
+                @Nullable String configurationActivityClassName) {
             mScorerName = scorerName;
             mPackageName = packageName;
+            mConfigurationActivityClassName = configurationActivityClassName;
         }
     }
 
@@ -95,10 +105,23 @@ public final class NetworkScorerAppManager {
                 // approved it as a network scorer.
                 continue;
             }
+
+            // Optionally, this package may specify a configuration activity.
+            String configurationActivityClassName = null;
+            Intent intent = new Intent(NetworkScoreManager.ACTION_CUSTOM_ENABLE);
+            intent.setPackage(receiverInfo.packageName);
+            List<ResolveInfo> configActivities = pm.queryIntentActivities(intent, 0 /* flags */);
+            if (!configActivities.isEmpty()) {
+                ActivityInfo activityInfo = configActivities.get(0).activityInfo;
+                if (activityInfo != null) {
+                    configurationActivityClassName = activityInfo.name;
+                }
+            }
+
             // NOTE: loadLabel will attempt to load the receiver's label and fall back to the app
             // label if none is present.
-            scorers.add(new NetworkScorerAppData(
-                    receiverInfo.packageName, receiverInfo.loadLabel(pm)));
+            scorers.add(new NetworkScorerAppData(receiverInfo.packageName,
+                    receiverInfo.loadLabel(pm), configurationActivityClassName));
         }
 
         return scorers;
