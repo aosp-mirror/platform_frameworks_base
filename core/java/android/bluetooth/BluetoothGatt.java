@@ -85,7 +85,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     /** A write operation exceeds the maximum length of the attribute */
     public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
 
-    /** A remote device connection is congested. */
+    /** A remote device connection is congested.
+     * @hide
+     */
     public static final int GATT_CONNECTION_CONGESTED = 0x8f;
 
     /** A GATT operation failed, errors other than the above */
