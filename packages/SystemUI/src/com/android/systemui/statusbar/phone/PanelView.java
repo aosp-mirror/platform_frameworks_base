@@ -161,6 +161,7 @@ public abstract class PanelView extends FrameLayout {
                 mInitialTouchX = x;
                 mInitialOffsetOnTouch = mExpandedHeight;
                 mTouchSlopExceeded = false;
+                mJustPeeked = false;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -301,6 +302,7 @@ public abstract class PanelView extends FrameLayout {
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 mTouchSlopExceeded = false;
+                mJustPeeked = false;
                 initVelocityTracker();
                 trackMovement(event);
                 break;
