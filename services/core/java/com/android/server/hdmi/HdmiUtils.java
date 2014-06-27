@@ -104,6 +104,17 @@ final class HdmiUtils {
     }
 
     /**
+     * Assemble two bytes into single integer value.
+     *
+     * @param data to be assembled
+     * @param offset offset to the data to convert in the array
+     * @return assembled value
+     */
+    static int twoBytesToInt(byte[] data, int offset) {
+        return ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF);
+    }
+
+    /**
      * Assemble three bytes into single integer value.
      *
      * @param data to be assembled
@@ -119,6 +130,67 @@ final class HdmiUtils {
             list.add(array.valueAt(i));
         }
         return list;
+    }
+
+    /**
+     * See if the new path is affecting the active path.
+     *
+     * @param activePath current active path
+     * @param newPath new path
+     * @return true if the new path changes the current active path
+     */
+    static boolean isAffectingActiveRoutingPath(int activePath, int newPath) {
+        // The new path affects the current active path if the parent of the new path
+        // is an ancestor of the active path.
+        // (1.1.0.0, 2.0.0.0) -> true, new path alters the parent
+        // (1.1.0.0, 1.2.0.0) -> true, new path is a sibling
+        // (1.1.0.0, 1.2.1.0) -> false, new path is a descendant of a sibling
+        // (1.0.0.0, 3.2.0.0) -> false, in a completely different path
+
+        // Get the parent of the new path by clearing the least significant
+        // non-zero nibble.
+        for (int i = 0; i <= 12; i += 4) {
+            int nibble = (newPath >> i) & 0xF;
+            if (nibble != 0) {
+                int mask = 0xFFF0 << i;
+                newPath &= mask;
+                break;
+            }
+        }
+        if (newPath == 0x0000) {
+            return true;  // Top path always affects the active path
+        }
+        return isInActiveRoutingPath(activePath, newPath);
+    }
+
+    /**
+     * See if the new path is in the active path.
+     *
+     * @param activePath current active path
+     * @param newPath new path
+     * @return true if the new path in the active routing path
+     */
+    static boolean isInActiveRoutingPath(int activePath, int newPath) {
+        // Check each nibble of the currently active path and the new path till the position
+        // where the active nibble is not zero. For (activePath, newPath),
+        // (1.1.0.0, 1.0.0.0) -> true, new path is a parent
+        // (1.2.1.0, 1.2.1.2) -> true, new path is a descendant
+        // (1.1.0.0, 1.2.0.0) -> false, new path is a sibling
+        // (1.0.0.0, 2.0.0.0) -> false, in a completely different path
+        for (int i = 12; i >= 0; i -= 4) {
+            int nibbleActive = (activePath >> i) & 0xF;
+            if (nibbleActive == 0) {
+                break;
+            }
+            int nibbleNew = (newPath >> i) & 0xF;
+            if (nibbleNew == 0) {
+                break;
+            }
+            if (nibbleActive != nibbleNew) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

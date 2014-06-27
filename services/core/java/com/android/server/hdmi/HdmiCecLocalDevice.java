@@ -143,6 +143,8 @@ abstract class HdmiCecLocalDevice {
                 return handleGetCecVersion(message);
             case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
                 return handleReportPhysicalAddress(message);
+            case HdmiCec.MESSAGE_ROUTING_CHANGE:
+                return handleRoutingChange(message);
             case HdmiCec.MESSAGE_INITIATE_ARC:
                 return handleInitiateArc(message);
             case HdmiCec.MESSAGE_TERMINATE_ARC:
@@ -242,6 +244,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
         return false;
     }
 
@@ -468,41 +474,6 @@ abstract class HdmiCecLocalDevice {
         // TODO: Change this to check the right flag.
         synchronized (mLock) {
             return !mInputChangeEnabled;
-        }
-    }
-
-    boolean isHdmiControlEnabled() {
-        synchronized (mLock) {
-            return !mInputChangeEnabled;
-        }
-    }
-
-    /**
-     * Whether the given path is located in the tail of current active path.
-     *
-     * @param path to be tested
-     * @return true if the given path is located in the tail of current active path; otherwise,
-     *         false
-     */
-    // TODO: move this to local device tv.
-    boolean isTailOfActivePath(int path) {
-        synchronized (mLock) {
-            // If active routing path is internal source, return false.
-            if (mActiveRoutingPath == 0) {
-                return false;
-            }
-            for (int i = 12; i >= 0; i -= 4) {
-                int curActivePath = (mActiveRoutingPath >> i) & 0xF;
-                if (curActivePath == 0) {
-                    return true;
-                } else {
-                    int curPath = (path >> i) & 0xF;
-                    if (curPath != curActivePath) {
-                        return false;
-                    }
-                }
-            }
-            return false;
         }
     }
 

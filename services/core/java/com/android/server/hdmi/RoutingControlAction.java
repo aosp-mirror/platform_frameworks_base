@@ -86,7 +86,7 @@ final class RoutingControlAction extends FeatureAction {
             // If the routing path doesn't belong to the currently active one, we should
             // ignore it since it might have come from other routing change sequence.
             int routingPath = HdmiUtils.twoBytesToInt(params);
-            if (isInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
+            if (HdmiUtils.isInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
                 return true;
             }
             mCurrentRoutingPath = routingPath;
@@ -108,15 +108,11 @@ final class RoutingControlAction extends FeatureAction {
             if (isPowerStatusOnOrTransientToOn(devicePowerStatus)) {
                 sendSetStreamPath();
             } else {
-                // The whole action should be stopped here if the device is in standby mode.
-                // We don't attempt to wake it up by sending <Set Stream Path>.
+                tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
             }
-            invokeCallback(HdmiCec.RESULT_SUCCESS);
-            finish();
-          } else {
-              // TV is going into standby mode.
-              // TODO: Figure out what to do.
-          }
+        }
+        invokeCallback(HdmiCec.RESULT_SUCCESS);
+        finish();
      }
 
     private int getTvPowerStatus() {
@@ -133,29 +129,6 @@ final class RoutingControlAction extends FeatureAction {
                 mCurrentRoutingPath));
     }
 
-    private static boolean isInActiveRoutingPath(int activePath, int newPath) {
-        // Check each nibble of the currently active path and the new path till the position
-        // where the active nibble is not zero. For (activePath, newPath),
-        // (1.1.0.0, 1.0.0.0) -> true, new path is a parent
-        // (1.2.1.0, 1.2.1.2) -> true, new path is a descendant
-        // (1.1.0.0, 1.2.0.0) -> false, new path is a sibling
-        // (1.0.0.0, 2.0.0.0) -> false, in a completely different path
-        for (int i = 12; i >= 0; i -= 4) {
-            int nibbleActive = (activePath >> i) & 0xF;
-            if (nibbleActive == 0) {
-                break;
-            }
-            int nibbleNew = (newPath >> i) & 0xF;
-            if (nibbleNew == 0) {
-                break;
-            }
-            if (nibbleActive != nibbleNew) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Override
     public void handleTimerEvent(int timeoutState) {
         if (mState != timeoutState || mState == STATE_NONE) {
@@ -166,7 +139,7 @@ final class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
                 HdmiCecDeviceInfo device = tv().getDeviceInfoByPath(mCurrentRoutingPath);
                 if (device == null) {
-                    maybeChangeActiveInput(tv().pathToPortId(mCurrentRoutingPath));
+                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
                 } else {
                     // TODO: Also check followings and then proceed:
                     //       if routing change was neither triggered by TV at CEC enable time, nor
@@ -184,26 +157,13 @@ final class RoutingControlAction extends FeatureAction {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 int tvPowerStatus = getTvPowerStatus();
                 if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
-                    if (!maybeChangeActiveInput(localDevice().pathToPortId(mCurrentRoutingPath))) {
-                        sendSetStreamPath();
-                    }
+                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+                    sendSetStreamPath();
                 }
                 invokeCallback(HdmiCec.RESULT_SUCCESS);
                 finish();
                 return;
         }
-    }
-
-    // Called whenever an HDMI input of the TV shall become the active input.
-    private boolean maybeChangeActiveInput(int path) {
-        if (localDevice().getActivePortId() == localDevice().pathToPortId(path)) {
-            return false;
-        }
-        // TODO: Remember the currently active input
-        //       if PAP/PIP is active, move the focus to the right window, otherwise switch
-        //       the port.
-        //       Show the OSD input change banner.
-        return true;
     }
 
     private void queryDevicePowerStatus(int address, SendMessageCallback callback) {
@@ -216,7 +176,8 @@ final class RoutingControlAction extends FeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            maybeChangeActiveInput(localDevice().pathToPortId(mCurrentRoutingPath));
+            tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
+            sendSetStreamPath();
         }
     }
 

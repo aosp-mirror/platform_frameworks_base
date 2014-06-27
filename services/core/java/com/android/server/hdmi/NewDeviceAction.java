@@ -48,7 +48,6 @@ final class NewDeviceAction extends FeatureAction {
 
     private final int mDeviceLogicalAddress;
     private final int mDevicePhysicalAddress;
-    private final boolean mRequireRoutingChange;
 
     private int mVendorId;
     private String mDisplayName;
@@ -62,12 +61,11 @@ final class NewDeviceAction extends FeatureAction {
      * @param requireRoutingChange whether to initiate routing change or not
      */
     NewDeviceAction(HdmiCecLocalDevice source, int deviceLogicalAddress,
-            int devicePhysicalAddress, boolean requireRoutingChange) {
+            int devicePhysicalAddress) {
         super(source);
         mDeviceLogicalAddress = deviceLogicalAddress;
         mDevicePhysicalAddress = devicePhysicalAddress;
         mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
-        mRequireRoutingChange = requireRoutingChange;
     }
 
     @Override
@@ -83,10 +81,6 @@ final class NewDeviceAction extends FeatureAction {
                 addAndStartAction(new RequestArcInitiationAction(localDevice(),
                                 mDeviceLogicalAddress));
             }
-        }
-
-        if (mRequireRoutingChange) {
-            startRoutingChange();
         }
 
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
@@ -150,22 +144,6 @@ final class NewDeviceAction extends FeatureAction {
             }
         }
         return false;
-    }
-
-    private void startRoutingChange() {
-        // Stop existing routing control.
-        removeAction(RoutingControlAction.class);
-
-        // Send routing change. The the address is a path of the active port.
-        int newPath = toTopMostPortPath(mDevicePhysicalAddress);
-        sendCommand(HdmiCecMessageBuilder.buildRoutingChange(getSourceAddress(),
-                localDevice().getActivePath(), newPath));
-        addAndStartAction(new RoutingControlAction(localDevice(),
-                localDevice().pathToPortId(newPath), null));
-    }
-
-    private static int toTopMostPortPath(int physicalAddress) {
-        return physicalAddress & HdmiConstants.ROUTING_PATH_TOP_MASK;
     }
 
     private boolean mayProcessCommandIfCached(int destAddress, int opcode) {

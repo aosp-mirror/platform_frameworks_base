@@ -48,4 +48,5 @@ interface IHdmiControlService {
     void setSystemAudioMode(boolean enabled, IHdmiControlCallback callback);
     void addSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
     void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
+    void setControlEnabled(boolean enabled);
 }

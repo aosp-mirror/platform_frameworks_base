@@ -121,7 +121,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void handleSelectInternalSource(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         // Seq #18
-        if (isHdmiControlEnabled() && getActiveSource() != mAddress) {
+        if (mService.isControlEnabled() && getActiveSource() != mAddress) {
             updateActiveSource(mAddress, mService.getPhysicalAddress());
             // TODO: Check if this comes from <Text/Image View On> - if true, do nothing.
             HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
@@ -185,7 +185,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         // Seq #20
-        if (!isHdmiControlEnabled() || portId == getActivePortId()) {
+        if (!mService.isControlEnabled() || portId == getActivePortId()) {
             invokeCallback(callback, HdmiCec.RESULT_INCORRECT_MODE);
             return;
         }
@@ -243,8 +243,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        int activePath = HdmiUtils.twoBytesToInt(message.getParams());
-        ActiveSourceHandler.create(this, null).process(message.getSource(), activePath);
+        int address = message.getSource();
+        int path = HdmiUtils.twoBytesToInt(message.getParams());
+        if (getDeviceInfo(address) == null) {
+            handleNewDeviceAtTheTailOfActivePath(address, path);
+        } else {
+            ActiveSourceHandler.create(this, null).process(address, path);
+        }
         return true;
     }
 
@@ -286,10 +291,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #19
-        int address = getDeviceInfo().getLogicalAddress();
-        if (address == getActiveSource()) {
+        if (mAddress == getActiveSource()) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildActiveSource(address, getActivePath()));
+                    HdmiCecMessageBuilder.buildActiveSource(mAddress, getActivePath()));
         }
         return true;
     }
@@ -320,15 +324,70 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return true;
         }
 
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        int logicalAddress = message.getSource();
+        int path = HdmiUtils.twoBytesToInt(message.getParams());
+        int address = message.getSource();
+        if (!isInDeviceList(path, address)) {
+            handleNewDeviceAtTheTailOfActivePath(address, path);
+        }
+        addAndStartAction(new NewDeviceAction(this, address, path));
+        return true;
+    }
 
-        // If it is a new device and connected to the tail of active path,
-        // it's required to change routing path.
-        boolean requireRoutingChange = !isInDeviceList(physicalAddress, logicalAddress)
-                && isTailOfActivePath(physicalAddress);
-        addAndStartAction(new NewDeviceAction(this, message.getSource(), physicalAddress,
-                requireRoutingChange));
+    private void handleNewDeviceAtTheTailOfActivePath(int address, int path) {
+        // Seq #22
+        if (isTailOfActivePath(path, getActivePath())) {
+            removeAction(RoutingControlAction.class);
+            int newPath = mService.portIdToPath(getActivePortId());
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
+                    mAddress, getActivePath(), newPath));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+        }
+    }
+
+    /**
+     * Whether the given path is located in the tail of current active path.
+     *
+     * @param path to be tested
+     * @param activePath current active path
+     * @return true if the given path is located in the tail of current active path; otherwise,
+     *         false
+     */
+    static boolean isTailOfActivePath(int path, int activePath) {
+        // If active routing path is internal source, return false.
+        if (activePath == 0) {
+            return false;
+        }
+        for (int i = 12; i >= 0; i -= 4) {
+            int curActivePath = (activePath >> i) & 0xF;
+            if (curActivePath == 0) {
+                return true;
+            } else {
+                int curPath = (path >> i) & 0xF;
+                if (curPath != curActivePath) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Seq #21
+        byte[] params = message.getParams();
+        if (params.length != 4) {
+            Slog.w(TAG, "Wrong parameter: " + message);
+            return true;
+        }
+        int currentPath = HdmiUtils.twoBytesToInt(params);
+        if (HdmiUtils.isAffectingActiveRoutingPath(getActivePath(), currentPath)) {
+            int newPath = HdmiUtils.twoBytesToInt(params, 2);
+            setActivePath(newPath);
+            removeAction(RoutingControlAction.class);
+            addAndStartAction(new RoutingControlAction(this, newPath, null));
+        }
         return true;
     }
 
@@ -776,8 +835,41 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     final void removeCecDevice(int address) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo info = removeDeviceInfo(address);
+        handleRemoveActiveRoutingPath(info.getPhysicalAddress());
         mCecMessageCache.flushMessagesFrom(address);
         mService.invokeDeviceEventListeners(info, false);
+    }
+
+    private void handleRemoveActiveRoutingPath(int path) {
+        // Seq #23
+        if (isTailOfActivePath(path, getActivePath())) {
+            removeAction(RoutingControlAction.class);
+            int newPath = mService.portIdToPath(getActivePortId());
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
+                    mAddress, getActivePath(), newPath));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+        }
+    }
+
+    @ServiceThreadOnly
+    void routingAtEnableTime() {
+        assertRunOnServiceThread();
+        // Seq #24
+        if (getActivePortId() != HdmiConstants.INVALID_PORT_ID) {
+            // TODO: Check if TV was not powered on due to <Text/Image View On>,
+            //       TV is not in Preset Installation mode, not in initial setup mode, not
+            //       in Software updating mode, not in service mode, for following actions.
+            removeAction(RoutingControlAction.class);
+            int newPath = mService.portIdToPath(getActivePortId());
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildRoutingChange(mAddress, getActivePath(), newPath));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+        } else {
+            int activePath = mService.getPhysicalAddress();
+            setActivePath(activePath);
+            // TODO: Do following only when TV was not powered on due to <Text/Image View On>.
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(mAddress, activePath));
+        }
     }
 
     /**
@@ -804,12 +896,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * in a device info list. However, both are minimal condition and it could
      * be different device from the original one.
      *
-     * @param physicalAddress physical address of a device to be searched
      * @param logicalAddress logical address of a device to be searched
+     * @param physicalAddress physical address of a device to be searched
      * @return true if exist; otherwise false
      */
     @ServiceThreadOnly
-    boolean isInDeviceList(int physicalAddress, int logicalAddress) {
+    boolean isInDeviceList(int logicalAddress, int physicalAddress) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo device = getDeviceInfo(logicalAddress);
         if (device == null) {
@@ -820,7 +912,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    void onHotplug(int portNo, boolean connected) {
+    void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
 
         // Tv device will have permanent HotplugDetectionAction.

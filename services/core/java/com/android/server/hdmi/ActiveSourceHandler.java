@@ -67,9 +67,7 @@ final class ActiveSourceHandler {
         }
         HdmiCecDeviceInfo device = mService.getDeviceInfo(activeAddress);
         if (device == null) {
-            // "New device action" initiated by <Active Source> does not require
-            // "Routing change action".
-            tv.addAndStartAction(new NewDeviceAction(tv, activeAddress, activePath, false));
+            tv.addAndStartAction(new NewDeviceAction(tv, activeAddress, activePath));
         }
 
         int currentActive = tv.getActiveSource();

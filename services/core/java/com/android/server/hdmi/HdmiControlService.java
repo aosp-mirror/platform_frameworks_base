@@ -116,6 +116,11 @@ public final class HdmiControlService extends SystemService {
     private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
             new ArrayList<>();
 
+    // Set to true while HDMI control is enabled. If set to false, HDMI-CEC/MHL protocol
+    // handling will be disabled and no request will be handled.
+    @GuardedBy("mLock")
+    private boolean mHdmiControlEnabled;
+
     // List of listeners registered by callers that want to get notified of
     // system audio mode changes.
     private final ArrayList<IHdmiSystemAudioModeChangeListener>
@@ -163,6 +168,7 @@ public final class HdmiControlService extends SystemService {
 
         // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
+        mHdmiControlEnabled = true;
     }
 
     @ServiceThreadOnly
@@ -716,6 +722,29 @@ public final class HdmiControlService extends SystemService {
             enforceAccessPermission();
             HdmiControlService.this.removeSystemAudioModeChangeListener(listener);
         }
+
+        @Override
+        public void setControlEnabled(boolean enabled) {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                mHdmiControlEnabled = enabled;
+            }
+            // TODO: Stop the running actions when disabled, and start
+            //       address allocation/device discovery when enabled.
+            if (!enabled) {
+                return;
+            }
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        return;
+                    }
+                    tv.routingAtEnableTime();
+                }
+            });
+        }
     }
 
     @ServiceThreadOnly
@@ -874,5 +903,11 @@ public final class HdmiControlService extends SystemService {
 
     AudioManager getAudioManager() {
         return (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    boolean isControlEnabled() {
+        synchronized (mLock) {
+            return mHdmiControlEnabled;
+        }
     }
 }
