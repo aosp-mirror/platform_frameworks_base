@@ -1147,7 +1147,8 @@ final class ActivityRecord {
         final ActivityInfo aInfo = stackSupervisor.resolveActivity(intent, resolvedType, 0, null,
                 null, userId);
         if (aInfo == null) {
-            throw new XmlPullParserException("restoreActivity resolver error.");
+            throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
+                    " resolvedType=" + resolvedType);
         }
         final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
                 launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
