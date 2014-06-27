@@ -158,6 +158,9 @@ public class TransitionInflater {
             } else if ("moveImage".equals(name)) {
                 transition = new MoveImage();
                 newTransition = true;
+            } else if ("changeImageTransform".equals(name)) {
+                transition = new ChangeImageTransform();
+                newTransition = true;
             } else if ("changeTransform".equals(name)) {
                 transition = new ChangeTransform();
                 newTransition = true;

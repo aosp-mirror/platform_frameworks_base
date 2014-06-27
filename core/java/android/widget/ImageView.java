@@ -1117,6 +1117,20 @@ public class ImageView extends View {
         }
     }
 
+    /** @hide */
+    public void animateTransform(Matrix matrix) {
+        if (matrix == null) {
+            mDrawable.setBounds(0, 0, getWidth(), getHeight());
+        } else {
+            mDrawable.setBounds(0, 0, mDrawableWidth, mDrawableHeight);
+            if (mDrawMatrix == null) {
+                mDrawMatrix = new Matrix();
+            }
+            mDrawMatrix.set(matrix);
+        }
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

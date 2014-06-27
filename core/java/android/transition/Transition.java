@@ -68,8 +68,8 @@ import java.util.List;
  *
  * <p>This TransitionSet contains {@link android.transition.Explode} for visibility,
  * {@link android.transition.ChangeBounds}, {@link android.transition.ChangeTransform},
- * and {@link android.transition.ChangeClipBounds} for non-<code>ImageView</code>s and
- * {@link android.transition.MoveImage} for <code>ImageView</code>s:</p>
+ * and {@link android.transition.ChangeClipBounds} and
+ * {@link android.transition.ChangeImageTransform}:</p>
  *
  * {@sample development/samples/ApiDemos/res/transition/explode_move_together.xml MultipleTransform}
  *
