@@ -16,6 +16,8 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -52,7 +54,7 @@ import java.io.IOException;
  * <code>&lt!-- A red ripple masked against an opaque rectangle. --/>
  * &ltripple android:color="#ffff0000">
  *   &ltitem android:id="@android:id/mask"
- *         android:drawable="#ffffffff" />
+ *         android:drawable="@android:color/white" />
  * &ltripple /></code>
  * </pre>
  * <p>
@@ -62,9 +64,9 @@ import java.io.IOException;
  * If no mask layer is set, the ripple effect is masked against the composite
  * of the child layers.
  * <pre>
- * <code>&lt!-- A blue ripple drawn atop a green rectangle. --/>
+ * <code>&lt!-- A blue ripple drawn atop a black rectangle. --/>
  * &ltripple android:color="#ff00ff00">
- *   &ltitem android:drawable="#ff0000ff" />
+ *   &ltitem android:drawable="@android:color/black" />
  * &ltripple />
  *
  * &lt!-- A red ripple drawn atop a drawable resource. --/>
@@ -147,11 +149,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     /**
-     * Creates a new ripple drawable with the specified content and mask
-     * drawables.
-     *
-     * @param content The content drawable, may be {@code null}
-     * @param mask The mask drawable, may be {@code null}
+     * @hide TO BE REMOVED FOR L-RELEASE
      */
     public RippleDrawable(Drawable content, Drawable mask) {
         this(new RippleState(null, null, null), null, null);
@@ -164,6 +162,36 @@ public class RippleDrawable extends LayerDrawable {
             addLayer(content, null, android.R.id.mask, 0, 0, 0, 0);
         }
 
+        ensurePadding();
+
+        Log.e(LOG_TAG, "This constructor is being removed", new RuntimeException());
+    }
+
+    /**
+     * Creates a new ripple drawable with the specified ripple color and
+     * optional content and mask drawables.
+     *
+     * @param color The ripple color
+     * @param content The content drawable, may be {@code null}
+     * @param mask The mask drawable, may be {@code null}
+     */
+    public RippleDrawable(@NonNull ColorStateList color, @Nullable Drawable content,
+            @Nullable Drawable mask) {
+        this(new RippleState(null, null, null), null, null);
+
+        if (color == null) {
+            throw new IllegalArgumentException("RippleDrawable requires a non-null color");
+        }
+
+        if (content != null) {
+            addLayer(content, null, 0, 0, 0, 0, 0);
+        }
+
+        if (mask != null) {
+            addLayer(content, null, android.R.id.mask, 0, 0, 0, 0);
+        }
+
+        setColor(color);
         ensurePadding();
     }
 
