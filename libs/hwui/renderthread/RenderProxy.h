@@ -83,6 +83,7 @@ public:
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
+    ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
     ANDROID_API void flushCaches(Caches::FlushMode flushMode);
 

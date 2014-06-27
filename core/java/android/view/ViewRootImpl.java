@@ -640,17 +640,6 @@ public final class ViewRootImpl implements ViewParent,
         // TODO Implement
     }
 
-    void flushHardwareLayerUpdates() {
-        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
-            mAttachInfo.mHardwareRenderer.flushLayerUpdates();
-        }
-    }
-
-    void dispatchFlushHardwareLayerUpdates() {
-        mHandler.removeMessages(MSG_FLUSH_LAYER_UPDATES);
-        mHandler.sendMessageAtFrontOfQueue(mHandler.obtainMessage(MSG_FLUSH_LAYER_UPDATES));
-    }
-
     public void detachFunctor(long functor) {
         // TODO: Make the resize buffer some other way to not need this block
         mBlockResizeBuffer = true;
@@ -2999,8 +2988,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_DONE_ANIMATING = 22;
     private final static int MSG_INVALIDATE_WORLD = 23;
     private final static int MSG_WINDOW_MOVED = 24;
-    private final static int MSG_FLUSH_LAYER_UPDATES = 25;
-    private final static int MSG_SYNTHESIZE_INPUT_EVENT = 26;
+    private final static int MSG_SYNTHESIZE_INPUT_EVENT = 25;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3048,8 +3036,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_DONE_ANIMATING";
                 case MSG_WINDOW_MOVED:
                     return "MSG_WINDOW_MOVED";
-                case MSG_FLUSH_LAYER_UPDATES:
-                    return "MSG_FLUSH_LAYER_UPDATES";
                 case MSG_SYNTHESIZE_INPUT_EVENT:
                     return "MSG_SYNTHESIZE_INPUT_EVENT";
             }
@@ -3276,9 +3262,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mView != null) {
                     invalidateWorld(mView);
                 }
-            } break;
-            case MSG_FLUSH_LAYER_UPDATES: {
-                flushHardwareLayerUpdates();
             } break;
             }
         }

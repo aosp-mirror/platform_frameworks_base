@@ -119,5 +119,13 @@ void DeferredLayerUpdater::doUpdateTexImage() {
     }
 }
 
+void DeferredLayerUpdater::detachSurfaceTexture() {
+    if (mSurfaceTexture.get()) {
+        mSurfaceTexture->detachFromContext();
+        mSurfaceTexture = 0;
+        mLayer->clearTexture();
+    }
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

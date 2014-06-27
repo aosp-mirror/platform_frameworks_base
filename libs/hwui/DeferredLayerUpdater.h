@@ -81,6 +81,8 @@ public:
         return mLayer;
     }
 
+    ANDROID_API void detachSurfaceTexture();
+
 private:
     // Generic properties
     uint32_t mWidth;

@@ -245,15 +245,10 @@ public abstract class HardwareRenderer {
     abstract void invalidate(Surface surface);
 
     /**
-     * This method ensures the hardware renderer is in a valid state
-     * before executing the specified action.
-     *
-     * This method will attempt to set a valid state even if the window
-     * the renderer is attached to was destroyed.
-     *
-     * @return true if the action was run
+     * Detaches the layer's surface texture from the GL context and releases
+     * the texture id
      */
-    abstract boolean safelyRun(Runnable action);
+    abstract void detachSurfaceTexture(long hardwareLayer);
 
     /**
      * Setup the hardware renderer for drawing. This is called whenever the
@@ -315,8 +310,6 @@ public abstract class HardwareRenderer {
      * as soon as possible.
      *
      * @param layer The hardware layer that needs an update
-     *
-     * @see #flushLayerUpdates()
      */
     abstract void pushLayerUpdate(HardwareLayer layer);
 
@@ -325,13 +318,6 @@ public abstract class HardwareRenderer {
      * should remove the layer from any update queues.
      */
     abstract void onLayerDestroyed(HardwareLayer layer);
-
-    /**
-     * Forces all enqueued layer updates to be executed immediately.
-     *
-     * @see #pushLayerUpdate(HardwareLayer)
-     */
-    abstract void flushLayerUpdates();
 
     /**
      * Interface used to receive callbacks whenever a view is drawn by
@@ -373,16 +359,6 @@ public abstract class HardwareRenderer {
      * @return A hardware layer
      */
     abstract HardwareLayer createTextureLayer();
-
-    /**
-     * Creates a new {@link SurfaceTexture} that can be used to render into the
-     * specified hardware layer.
-     *
-     * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
-     *
-     * @return A {@link SurfaceTexture}
-     */
-    abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
 
     abstract boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap);
 
