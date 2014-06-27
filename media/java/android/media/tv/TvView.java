@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
@@ -339,6 +340,11 @@ public class TvView extends ViewGroup {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         mSurfaceView.setVisibility(visibility);
+        if (visibility == View.VISIBLE) {
+            createSessionOverlayView();
+        } else {
+            removeSessionOverlayView();
+        }
     }
 
     private void release() {
