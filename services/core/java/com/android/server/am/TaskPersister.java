@@ -177,6 +177,23 @@ public class TaskPersister {
         return false;
     }
 
+    private String fileToString(File file) {
+        final String newline = System.lineSeparator();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuffer sb = new StringBuffer((int) file.length() * 2);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + newline);
+            }
+            reader.close();
+            return sb.toString();
+        } catch (IOException ioe) {
+            Slog.e(TAG, "Couldn't read file " + file.getName());
+            return null;
+        }
+    }
+
     ArrayList<TaskRecord> restoreTasksLocked() {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
@@ -206,13 +223,18 @@ public class TaskPersister {
                         if (TAG_TASK.equals(name)) {
                             final TaskRecord task =
                                     TaskRecord.restoreFromXml(in, mStackSupervisor);
-                            if (DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" + task);
+                            if (true || DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" +
+                                    task);
                             if (task != null) {
                                 task.isPersistable = true;
+                                task.needsPersisting = true;
                                 tasks.add(task);
                                 final int taskId = task.taskId;
                                 recoveredTaskIds.add(taskId);
                                 mStackSupervisor.setNextTaskId(taskId);
+                            } else {
+                                Slog.e(TAG, "Unable to restore taskFile=" + taskFile + ": " +
+                                        fileToString(taskFile));
                             }
                         } else {
                             Slog.wtf(TAG, "restoreTasksLocked Unknown xml event=" + event +
@@ -223,6 +245,7 @@ public class TaskPersister {
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to parse " + taskFile + ". Error " + e);
+                Slog.e(TAG, "Failing file: " + fileToString(taskFile));
                 deleteFile = true;
             } finally {
                 if (reader != null) {
@@ -232,7 +255,7 @@ public class TaskPersister {
                     }
                 }
                 if (!DEBUG && deleteFile) {
-                    if (DEBUG) Slog.d(TAG, "Deleting file=" + taskFile.getName());
+                    if (true || DEBUG) Slog.d(TAG, "Deleting file=" + taskFile.getName());
                     taskFile.delete();
                 }
             }
@@ -276,7 +299,8 @@ public class TaskPersister {
                     continue;
                 }
                 if (!persistentTaskIds.contains(taskId)) {
-                    if (DEBUG) Slog.d(TAG, "removeObsoleteFile: deleting file=" + file.getName());
+                    if (true || DEBUG) Slog.d(TAG, "removeObsoleteFile: deleting file=" +
+                            file.getName());
                     file.delete();
                 }
             }
