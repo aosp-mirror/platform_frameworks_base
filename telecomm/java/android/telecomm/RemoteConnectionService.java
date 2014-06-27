@@ -26,6 +26,7 @@ import android.text.TextUtils;
 
 import com.android.internal.telecomm.ICallService;
 import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
@@ -102,6 +103,12 @@ public class RemoteConnectionService implements DeathRecipient {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setState(Connection.State.RINGING);
             }
+        }
+
+        /** ${inheritDoc} */
+        public void setCallVideoProvider(
+                String connectionId, ICallVideoProvider callVideoProvider) {
+            // not supported for remote connections.
         }
 
         /** ${inheritDoc} */

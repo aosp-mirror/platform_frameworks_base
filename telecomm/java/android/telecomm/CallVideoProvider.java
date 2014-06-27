@@ -25,7 +25,6 @@ import android.os.Message;
 
 import com.android.internal.telecomm.ICallVideoProvider;
 
-/** @hide */
 public abstract class CallVideoProvider {
     private static final int MSG_SET_CAMERA = 1;
 
@@ -58,6 +57,14 @@ public abstract class CallVideoProvider {
 
     protected CallVideoProvider() {
         mBinder = new CallVideoProviderBinder();
+    }
+
+    /**
+     * Returns binder object which can be used across IPC methods.
+     * @hide
+     */
+    public final ICallVideoProvider getInterface() {
+        return mBinder;
     }
 
     /**

@@ -27637,6 +27637,7 @@ package android.telecomm {
     method public void notifyIncomingCall(android.telecomm.CallInfo);
     method public void onPostDialWait(java.lang.String, java.lang.String);
     method public void setActive(java.lang.String);
+    method public void setCallVideoProvider(java.lang.String, android.telecomm.CallVideoProvider);
     method public void setDialing(java.lang.String);
     method public void setDisconnected(java.lang.String, int, java.lang.String);
     method public void setOnHold(java.lang.String);
@@ -27703,6 +27704,11 @@ package android.telecomm {
     field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
   }
 
+  public abstract class CallVideoProvider {
+    ctor protected CallVideoProvider();
+    method public abstract void setCamera(java.lang.String);
+  }
+
   public class CallVideoProviderWrapper implements android.os.IBinder.DeathRecipient {
     method public void binderDied();
     method public void setCamera(java.lang.String) throws android.os.RemoteException;
@@ -27733,6 +27739,7 @@ package android.telecomm {
     method protected void onStopDtmfTone();
     method protected void onUnhold();
     method public final void setActive();
+    method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
     method public final void setDestroyed();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
@@ -27754,6 +27761,7 @@ package android.telecomm {
     method public abstract void onHandleChanged(android.telecomm.Connection, android.net.Uri);
     method public abstract void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
     method public abstract void onRequestingRingback(android.telecomm.Connection, boolean);
+    method public abstract void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
     method public abstract void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
     method public abstract void onStateChanged(android.telecomm.Connection, int);
   }
@@ -27767,6 +27775,7 @@ package android.telecomm {
     method public void onHandleChanged(android.telecomm.Connection, android.net.Uri);
     method public void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
     method public void onRequestingRingback(android.telecomm.Connection, boolean);
+    method public void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
     method public void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
     method public void onStateChanged(android.telecomm.Connection, int);
   }

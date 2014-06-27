@@ -19,6 +19,7 @@ package com.android.internal.telecomm;
 import android.telecomm.CallInfo;
 import android.telecomm.ConnectionRequest;
 
+import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 /**
@@ -62,4 +63,6 @@ oneway interface ICallServiceAdapter {
     void handoffCall(String callId);
 
     void queryRemoteConnectionServices(RemoteServiceCallback callback);
+
+    void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);
 }

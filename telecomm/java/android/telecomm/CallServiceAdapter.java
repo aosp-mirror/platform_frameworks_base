@@ -23,6 +23,7 @@ import android.os.RemoteException;
 
 import com.android.internal.telecomm.ICallService;
 import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
@@ -335,6 +336,21 @@ public final class CallServiceAdapter implements DeathRecipient {
                 mAdapters.iterator().next().queryRemoteConnectionServices(callback);
             } catch (RemoteException e) {
                 Log.e(this, e, "Exception trying to query for remote CSs");
+            }
+        }
+    }
+
+    /**
+     * Sets the call video provider for a call.
+     *
+     * @param callId The unique ID of the call to set with the given call video provider.
+     * @param callVideoProvider The call video provider instance to set on the call.
+     */
+    public void setCallVideoProvider(String callId, CallVideoProvider callVideoProvider) {
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setCallVideoProvider(callId, callVideoProvider.getInterface());
+            } catch (RemoteException e) {
             }
         }
     }
