@@ -11584,7 +11584,7 @@ package android.graphics.drawable {
   }
 
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
-    ctor public RippleDrawable(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    ctor public RippleDrawable(android.content.res.ColorStateList, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setColor(android.content.res.ColorStateList);
   }
 
