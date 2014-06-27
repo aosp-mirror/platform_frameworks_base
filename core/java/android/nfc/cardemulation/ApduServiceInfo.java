@@ -351,20 +351,37 @@ public final class ApduServiceInfo implements Parcelable {
         }
     }
 
+    /**
+     * A valid AID according to ISO/IEC 7816-4:
+     * <ul>
+     * <li>Has >= 5 bytes and <=16 bytes (>=10 hex chars and <= 32 hex chars)
+     * <li>Consist of only hex characters
+     * <li>Additionally, we allow an asterisk at the end, to indicate
+     *     a prefix
+     * </ul>
+     */
     static boolean isValidAid(String aid) {
         if (aid == null)
             return false;
 
-        int aidLength = aid.length();
-        if (aidLength == 0 || (aidLength % 2) != 0) {
-            Log.e(TAG, "AID " + aid + " is not correctly formatted.");
+        // If a prefix AID, the total length must be odd (even # of AID chars + '*')
+        if (aid.endsWith("*") && ((aid.length() % 2) == 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }
-        // Minimum AID length is 5 bytes, 10 hex chars
-        if (aidLength < 10) {
-            Log.e(TAG, "AID " + aid + " is shorter than 5 bytes.");
+
+        // If not a prefix AID, the total length must be even (even # of AID chars)
+        if (!aid.endsWith("*") && ((aid.length() % 2) != 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }
+
+        // Verify hex characters
+        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?")) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
         return true;
     }
 
