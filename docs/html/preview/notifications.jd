@@ -47,11 +47,11 @@ appear on different types of devices.</p>
 
 <div style="margin-top:20px" >
   <div class="col-7">
-    <img src="{@docRoot}images/notifications/Basic.png"
+    <img src="{@docRoot}preview/images/notifications/Basic.png"
       alt=""/>
   </div>
   <div class="col-4" style="padding-top:60px; text-align:center" >
-    <img src="{@docRoot}images/notifications/WearBasic.png"
+    <img src="{@docRoot}preview/images/notifications/WearBasic.png"
       alt="" width="162" height="162" />
   </div>
 </div>
@@ -70,19 +70,19 @@ appear on different types of devices.</p>
 <p>You have the option to provide more details on notifications. You can use this to show the first few lines of a message or show a larger image preview. This provides the user with additional context, and - in some cases - may allow the user to read a message in its entirety. The user can pinch-zoom or perform a single-finger glide in order to toggle between compact and expanded layouts. For single event notifications, Android provides three expanded layout templates (text, inbox, and image) for you to re-use in your application. The following images show you how they look on handhelds and wearables.</p>
 
 <div class="col-5" style="margin-top:20px">
-  <img src="{@docRoot}images/notifications/ExpandedText.png"
+  <img src="{@docRoot}preview/images/notifications/ExpandedText.png"
     alt=""  />
-  <img style="margin-top:30px" src="{@docRoot}images/notifications/Stack.png"
+  <img style="margin-top:30px" src="{@docRoot}preview/images/notifications/Stack.png"
     alt=""/>
-  <img style="margin-top:30px" src="{@docRoot}images/notifications/ExpandedImage.png"
+  <img style="margin-top:30px" src="{@docRoot}preview/images/notifications/ExpandedImage.png"
     alt="" />
 </div>
 
 <div class="col-6" style="margin-top:20px">
-   <img style="margin-top:60px" src="{@docRoot}images/notifications/Expanded.png"
+   <img style="margin-top:60px" src="{@docRoot}preview/images/notifications/Expanded.png"
       alt="" />
 
-  <img style="margin-top:140px" src="{@docRoot}images/notifications/figure6.png"
+  <img style="margin-top:140px" src="{@docRoot}preview/images/notifications/figure6.png"
     alt="" />
 </div>
 
@@ -92,14 +92,14 @@ appear on different types of devices.</p>
 
 
 <div class="col-6" style="margin-top:20px">
-  <img src="{@docRoot}images/notifications/Action.png"
+  <img src="{@docRoot}preview/images/notifications/Action.png"
     alt="" />
   <p class="img-caption">
    Calendar reminder notification with two actions
   </p>
 </div>
 <div class="col-5" style="margin-top:20px">
-  <img src="{@docRoot}images/notifications/ReplyAction.png" width="156px" height="156px"
+  <img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
     alt="" />
   <p class="img-caption">
     Gmail new message notification - the actions appear to the right of the main card on Wear devices
@@ -149,7 +149,7 @@ appear on different types of devices.</p>
 </div>
 
 <div class="col-4" style="margin-top:20px">
-  <img src="{@docRoot}images/notifications/WearBasic.png" width="156px" height="156px"
+  <img src="{@docRoot}preview/images/notifications/WearBasic.png" width="156px" height="156px"
     alt="" />
 </div>
 
@@ -180,13 +180,13 @@ appear on different types of devices.</p>
 </div>
 
 <div class="col-4" style="margin-top:220px">
-  <img src="{@docRoot}images/notifications/ReplyAction.png" width="156px" height="156px"
+  <img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
     alt="" />
 </div>
 
 <h2 style="clear:left">Heads-up Notification</h2>
 <div class="figure" style="width:262px">
-  <img src="{@docRoot}images/notifications/Headsup.png"
+  <img src="{@docRoot}preview/images/notifications/Headsup.png"
     alt="" width="220" id="figure9" />
   <p class="img-caption">
     <strong>Figure 6.</strong> Example of a Heads-up notification (incoming phone call, high priority) coming in on top of an immersive app
@@ -209,7 +209,7 @@ appear on different types of devices.</p>
 
 
 <div class="figure" style="width:366px; margin-top:40px">
-  <img src="{@docRoot}images/notifications/Triggered.png"
+  <img src="{@docRoot}preview/images/notifications/Triggered.png"
     alt="" width="366" height="142" />
   <p class="img-caption">
     Notification that shows the person who triggered it and the content they are sending you
@@ -301,7 +301,7 @@ priority</strong></h4>
 </ul>
 
 
-  <img src="{@docRoot}images/notifications/notifications_pattern_priority.png"
+  <img src="{@docRoot}preview/images/notifications/notifications_pattern_priority.png"
     alt="" width="700"/>
 
 
@@ -435,7 +435,7 @@ priority</strong></h4>
 <div class="col-6">
 <p><strong>Don't</strong></p>
 
-  <img src="{@docRoot}images/notifications/Summarise_Dont.png"
+  <img src="{@docRoot}preview/images/notifications/Summarise_Dont.png"
     alt="" width="300" />
 
 </div>
@@ -443,7 +443,7 @@ priority</strong></h4>
 <div class="col-5">
 <p><strong>Do</strong></p>
 
-  <img src="{@docRoot}images/notifications/Summarise_Do.png"
+  <img src="{@docRoot}preview/images/notifications/Summarise_Do.png"
     alt="" width="300"/>
 </div>
 </div>
@@ -451,7 +451,7 @@ priority</strong></h4>
 
 <p style="clear:left">You can provide more detail about the individual notifications that make up a  summary by using the expanded digest layout. This allows users to gain a better sense of which notifications are pending and if they are interesting enough to be read in detail within the associated app.</p>
 
-  <img src="{@docRoot}images/notifications/Stack.png" style="margin-bottom:30px"
+  <img src="{@docRoot}preview/images/notifications/Stack.png" style="margin-bottom:30px"
     alt="" width="370" />
   <p class="img-caption">
   Expanded and contracted notification that is a summary (using InboxStyle)
@@ -469,7 +469,7 @@ by adding a notification settings item to your application settings.</p>
 notifications are currently pending.</p>
 
 <div class="figure">
-  <img src="{@docRoot}images/notifications/ProductIcons.png"
+  <img src="{@docRoot}preview/images/notifications/ProductIcons.png"
     alt="" width="420" />
 </div>
 
@@ -505,7 +505,7 @@ notifications are currently pending.</p>
 
 <h3 id="when_to_display_a_notification">When to display a notification</h3>
 <div class="figure">
-  <img src="{@docRoot}images/notifications/TimeSensitive.png"
+  <img src="{@docRoot}preview/images/notifications/TimeSensitive.png"
     alt="" width="360" />
   <p class="img-caption">
    Time sensitive notification examples
@@ -520,7 +520,7 @@ notifications are currently pending.</p>
 <h3 style="clear:both" id="when_not_to_display_a_notification">When not to display a notification</h3>
 
 <div class="figure" style="margin-top:60px">
-  <img src="{@docRoot}images/notifications/AntiSample1.png"
+  <img src="{@docRoot}preview/images/notifications/AntiSample1.png"
     alt="" width="280px" />
 </div>
 
@@ -543,7 +543,7 @@ notifications are currently pending.</p>
 
 <h3 id="ongoing_notifications">Ongoing notifications</h3>
 <div class="figure" style="width:337px">
-  <img src="{@docRoot}images/notifications/MusicPlayback.png"
+  <img src="{@docRoot}preview/images/notifications/MusicPlayback.png"
     alt="" width="337"  />
       <p class="img-caption">
     Ongoing notification due to music playback
@@ -574,7 +574,7 @@ and toasts are for feedback not notifications</h3>
 
 <p>To best take advantage of this sorting, developers should focus on the user experience they want to create rather than aiming for any particular spot on the list.</p>
 
-  <img src="{@docRoot}images/notifications/AntiSample3.png"
+  <img src="{@docRoot}preview/images/notifications/AntiSample3.png"
     alt="" width="700px" />
 
   <p class="img-caption" style="margin-top:20px">Gmail notifications are default priority, so they normally sort below messages from an instant messaging app like Hangouts, but Gmail will get a temporary bump when new messages come in.
@@ -594,7 +594,7 @@ and toasts are for feedback not notifications</h3>
 
 <h3>The user decides what shows on the secure lockscreen</h3>
 <div class="figure" style="width:249px">
-  <img src="{@docRoot}images/notifications/LockScreen.png"
+  <img src="{@docRoot}preview/images/notifications/LockScreen.png"
     alt="" width="249" height="482" id="figure22" />
       <p class="img-caption">
     Notifications on the lockscreen followed by the Pattern Unlock when the user attempts to unlock the phone.
