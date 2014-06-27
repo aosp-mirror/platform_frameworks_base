@@ -196,6 +196,10 @@ public final class SparseRectFArray implements Parcelable {
         private float[] mCoordinates = null;
         private static int INITIAL_SIZE = 16;
 
+        public boolean isEmpty() {
+            return mCount <= 0;
+        }
+
         /**
          * @return {@link SparseRectFArray} using parameters in this {@link SparseRectFArray}.
          */
