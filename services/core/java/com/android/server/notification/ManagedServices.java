@@ -44,6 +44,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.server.notification.NotificationManagerService.DumpFilter;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,15 +118,17 @@ abstract public class ManagedServices {
         mSettingsObserver.observe();
     }
 
-    public void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    All " + getCaption() + "s (" + mEnabledServicesForCurrentProfiles.size()
                 + ") enabled for current profiles:");
         for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
+            if (filter != null && !filter.matches(cmpt)) continue;
             pw.println("      " + cmpt);
         }
 
         pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
         for (ManagedServiceInfo info : mServices) {
+            if (filter != null && !filter.matches(info.component)) continue;
             pw.println("      " + info.component
                     + " (user " + info.userid + "): " + info.service
                     + (info.isSystem?" SYSTEM":""));

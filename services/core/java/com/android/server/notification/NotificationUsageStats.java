@@ -28,6 +28,8 @@ import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.server.notification.NotificationManagerService.DumpFilter;
+
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -168,12 +170,13 @@ public class NotificationUsageStats {
         return result;
     }
 
-    public synchronized void dump(PrintWriter pw, String indent) {
+    public synchronized void dump(PrintWriter pw, String indent, DumpFilter filter) {
         for (AggregatedStats as : mStats.values()) {
+            if (filter != null && !filter.matches(as.key)) continue;
             as.dump(pw, indent);
         }
         if (ENABLE_SQLITE_LOG) {
-            mSQLiteLog.dump(pw, indent);
+            mSQLiteLog.dump(pw, indent, filter);
         }
     }
 
@@ -511,7 +514,7 @@ public class NotificationUsageStats {
             mWriteHandler.sendMessage(mWriteHandler.obtainMessage(MSG_DISMISS, notification));
         }
 
-        public void printPostFrequencies(PrintWriter pw, String indent) {
+        public void printPostFrequencies(PrintWriter pw, String indent, DumpFilter filter) {
             SQLiteDatabase db = mHelper.getReadableDatabase();
             long nowMs = System.currentTimeMillis();
             String q = "SELECT " +
@@ -530,6 +533,7 @@ public class NotificationUsageStats {
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     int userId = cursor.getInt(0);
                     String pkg = cursor.getString(1);
+                    if (filter != null && !filter.matches(pkg)) continue;
                     int day = cursor.getInt(2);
                     int count = cursor.getInt(3);
                     pw.println(indent + "post_frequency{user_id=" + userId + ",pkg=" + pkg +
@@ -598,8 +602,8 @@ public class NotificationUsageStats {
             outCv.put(COL_AIRTIME_MS, r.stats.getCurrentAirtimeMs());
         }
 
-        public void dump(PrintWriter pw, String indent) {
-            printPostFrequencies(pw, indent);
+        public void dump(PrintWriter pw, String indent, DumpFilter filter) {
+            printPostFrequencies(pw, indent, filter);
         }
     }
 }

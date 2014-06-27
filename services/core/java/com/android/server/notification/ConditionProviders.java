@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -74,16 +75,19 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
-        super.dump(pw);
+    public void dump(PrintWriter pw, DumpFilter filter) {
+        super.dump(pw, filter);
         synchronized(mMutex) {
-            pw.print("    mListeners("); pw.print(mListeners.size()); pw.println("):");
-            for (int i = 0; i < mListeners.size(); i++) {
-                pw.print("      "); pw.println(mListeners.keyAt(i));
+            if (filter == null) {
+                pw.print("    mListeners("); pw.print(mListeners.size()); pw.println("):");
+                for (int i = 0; i < mListeners.size(); i++) {
+                    pw.print("      "); pw.println(mListeners.keyAt(i));
+                }
             }
             pw.print("    mRecords("); pw.print(mRecords.size()); pw.println("):");
             for (int i = 0; i < mRecords.size(); i++) {
                 final ConditionRecord r = mRecords.get(i);
+                if (filter != null && !filter.matches(r.component)) continue;
                 pw.print("      "); pw.println(r);
                 final String countdownDesc =  CountdownConditionProvider.tryParseDescription(r.id);
                 if (countdownDesc != null) {
