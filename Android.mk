@@ -332,6 +332,7 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecomm/ICallServiceLookupResponse.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallServiceProvider.aidl \
 	telecomm/java/com/android/internal/telecomm/ICallVideoProvider.aidl \
+	telecomm/java/com/android/internal/telecomm/ICallVideoClient.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallService.aidl \
 	telecomm/java/com/android/internal/telecomm/ITelecommService.aidl \

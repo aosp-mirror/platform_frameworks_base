@@ -27560,6 +27560,15 @@ package android.telecomm {
     field public final int supportedRouteMask;
   }
 
+  public final class CallCameraCapabilities implements android.os.Parcelable {
+    ctor public CallCameraCapabilities(boolean, float);
+    method public int describeContents();
+    method public float getMaxZoom();
+    method public boolean isZoomSupported();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class CallCapabilities {
     method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
@@ -27675,6 +27684,23 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState POST_DIAL;
     enum_constant public static final android.telecomm.CallState POST_DIAL_WAIT;
     enum_constant public static final android.telecomm.CallState RINGING;
+  }
+
+  public abstract class CallVideoClient {
+    ctor protected CallVideoClient();
+    method public abstract void onCallSessionEvent(int);
+    method public abstract void onCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
+    method public abstract void onReceiveSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public abstract void onReceiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
+    method public abstract void onUpdateCallDataUsage(int);
+    method public abstract void onUpdatedPeerDimensions(int, int);
+    field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
+    field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
+    field public static final int SESSION_EVENT_TX_START = 3; // 0x3
+    field public static final int SESSION_EVENT_TX_STOP = 4; // 0x4
+    field public static final int SESSION_MODIFY_REQUEST_FAIL = 2; // 0x2
+    field public static final int SESSION_MODIFY_REQUEST_INVALID = 3; // 0x3
+    field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
   }
 
   public class CallVideoProviderWrapper implements android.os.IBinder.DeathRecipient {
@@ -27924,6 +27950,24 @@ package android.telecomm {
   }
 
   public class TelecommManager {
+  }
+
+  public class VideoCallProfile implements android.os.Parcelable {
+    ctor public VideoCallProfile(int, int);
+    method public int describeContents();
+    method public int getQuality();
+    method public int getVideoState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int QUALITY_DEFAULT = 4; // 0x4
+    field public static final int QUALITY_HIGH = 1; // 0x1
+    field public static final int QUALITY_LOW = 3; // 0x3
+    field public static final int QUALITY_MEDIUM = 2; // 0x2
+    field public static final int VIDEO_STATE_AUDIO_ONLY = 0; // 0x0
+    field public static final int VIDEO_STATE_BIDIRECTIONAL = 3; // 0x3
+    field public static final int VIDEO_STATE_PAUSED = 4; // 0x4
+    field public static final int VIDEO_STATE_RX_ENABLED = 2; // 0x2
+    field public static final int VIDEO_STATE_TX_ENABLED = 1; // 0x1
   }
 
 }
