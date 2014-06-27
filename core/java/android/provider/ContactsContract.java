@@ -171,8 +171,6 @@ public final class ContactsContract {
      * A key to a boolean in the "extras" bundle of the cursor.
      * The boolean indicates that the provider did not create a snippet and that the client asking
      * for the snippet should do it (true means the snippeting was deferred to the client).
-     *
-     * @hide
      */
     public static final String DEFERRED_SNIPPETING = "deferred_snippeting";
 
@@ -849,7 +847,6 @@ public final class ContactsContract {
         /**
          * Reference to the row in the RawContacts table holding the contact name.
          * <P>Type: INTEGER REFERENCES raw_contacts(_id)</P>
-         * @hide
          */
         public static final String NAME_RAW_CONTACT_ID = "name_raw_contact_id";
 
@@ -1609,8 +1606,7 @@ public final class ContactsContract {
                 CONTENT_URI, "strequent");
 
         /**
-         * The content:// style URI for showing frequently contacted person listing.
-         * @hide
+         * The content:// style URI for showing a list of frequently contacted people.
          */
         public static final Uri CONTENT_FREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "frequent");
@@ -2229,7 +2225,6 @@ public final class ContactsContract {
          * type.  For applications that need to be aware of the data set, this can
          * be used instead of account type to distinguish sets of data.  This is
          * never intended to be used for specifying accounts.
-         * @hide
          */
         public static final String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
 
@@ -2273,8 +2268,6 @@ public final class ContactsContract {
          * The default value is "0"
          * </p>
          * <p>Type: INTEGER</p>
-         *
-         * @hide
          */
         public static final String NAME_VERIFIED = "name_verified";
 
@@ -3793,8 +3786,6 @@ public final class ContactsContract {
          * The package name to use when creating {@link Resources} objects for
          * this data row. This value is only designed for use when building user
          * interfaces, and should not be used to infer the owner.
-         *
-         * @hide
          */
         public static final String RES_PACKAGE = "res_package";
 
@@ -5096,12 +5087,10 @@ public final class ContactsContract {
     }
 
     /**
-     * Additional column returned by the {@link Contacts#CONTENT_FILTER_URI} providing the
-     * explanation of why the filter matched the contact.  Specifically, it contains the
-     * data elements that matched the query.  The overall number of words in the snippet
-     * can be capped.
-     *
-     * @hide
+     * Additional column returned by
+     * {@link ContactsContract.Contacts#CONTENT_FILTER_URI Contacts.CONTENT_FILTER_URI} explaining
+     * why the filter matched the contact.  Specifically, it contains the data elements that
+     * matched the query.  The overall number of words in the snippet can be capped.
      */
     public static class SearchSnippetColumns {
 
@@ -5111,8 +5100,6 @@ public final class ContactsContract {
          * <p>
          * The snippet may contain (parts of) several data elements comprising
          * the contact.
-         *
-         * @hide
          */
         public static final String SNIPPET = "snippet";
 
@@ -5128,8 +5115,6 @@ public final class ContactsContract {
          * tokens can be returned in total. A negative number indicates how many
          * tokens can be returned per occurrence of the search terms.</li>
          * </ul>
-         *
-         * @hide
          */
         public static final String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
 
@@ -5140,8 +5125,6 @@ public final class ContactsContract {
          * {@link ContactsContract#DEFERRED_SNIPPETING} in the cursor. If it exists, the client
          * should do its own snippeting. If it doesn't exist, the snippet column in the cursor
          * should already contain a snippetized string.
-         *
-         * @hide
          */
         public static final String DEFERRED_SNIPPETING_KEY = "deferred_snippeting";
     }
@@ -7007,8 +6990,6 @@ public final class ContactsContract {
          * The package name to use when creating {@link Resources} objects for
          * this group. This value is only designed for use when building user
          * interfaces, and should not be used to infer the owner.
-         *
-         * @hide
          */
         public static final String RES_PACKAGE = "res_package";
 
@@ -7016,8 +6997,6 @@ public final class ContactsContract {
          * The display title of this group to load as a resource from
          * {@link #RES_PACKAGE}, which may be localized.
          * <P>Type: TEXT</P>
-         *
-         * @hide
          */
         public static final String TITLE_RES = "title_res";
 
