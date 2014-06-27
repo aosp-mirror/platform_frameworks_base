@@ -90,19 +90,19 @@ modify to match your theme, plus source files.</p>
   </div>
   <div class="layout-content-col span-4">
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit AI']);"
-    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Illustrator&reg; Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140626.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
 
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Toolkit PDF']);"
-    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">PDF Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140626.pdf">PDF Toolkit</a>
   </div>
 </div>
 
+
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
-  <h4>Sample app user flows</h4>
-<p>Examples of how to chain together simple Android Wear UI components into common user flows, from simple notifications to complex interactions involving full screen activities.
+  <h4>Sample user flow patterns</h4>
+<p>Examples of how to chain together simple Android Wear UI components into common user flow patterns, from simple notifications to complex interactions involving full screen activities.
 </p>
-
   </div>
   <div class="layout-content-col span-4">
 
@@ -110,12 +110,13 @@ modify to match your theme, plus source files.</p>
 
   </div>
   <div class="layout-content-col span-4">
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample Flows AI']);"
-    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Illustrator&reg; App Flows</a>
-  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear Sample Flows PDF']);"
-    href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">PDF App Flows</a>
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns AI']);"
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140626.ai">Adobe&reg; Illustrator&reg; App Patterns</a>
+  <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Wear App Patterns PDF']);"
+    href="{@docRoot}downloads/design/Android_Wear_Patterns_20140626.pdf">PDF App Patterns</a>
   </div>
 </div>
+
 
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
