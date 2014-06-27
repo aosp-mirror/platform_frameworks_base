@@ -208,7 +208,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                             R.styleable.AnimatedVectorDrawable_drawable, 0);
                     if (drawableRes != 0) {
                         mAnimatedVectorState.mVectorDrawable = (VectorDrawable) res.getDrawable(
-                                drawableRes);
+                                drawableRes, theme);
                     }
                     a.recycle();
                 } else if (TARGET.equals(tagName)) {
@@ -234,7 +234,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     @Override
     public boolean canApplyTheme() {
         return super.canApplyTheme() || mAnimatedVectorState != null
-                && mAnimatedVectorState.canApplyTheme();
+                && mAnimatedVectorState.mVectorDrawable != null
+                && mAnimatedVectorState.mVectorDrawable.canApplyTheme();
     }
 
     @Override
