@@ -27677,6 +27677,11 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
+  public class CallVideoProviderWrapper implements android.os.IBinder.DeathRecipient {
+    method public void binderDied();
+    method public void setCamera(java.lang.String) throws android.os.RemoteException;
+  }
+
   public abstract class Connection {
     ctor protected Connection();
     method public final android.telecomm.CallAudioState getCallAudioState();
