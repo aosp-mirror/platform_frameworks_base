@@ -34840,7 +34840,7 @@ package android.view.inputmethod {
     ctor public CursorAnchorInfo(android.os.Parcel);
     method public int describeContents();
     method public android.graphics.RectF getCharacterRect(int);
-    method public java.lang.String getComposingText();
+    method public java.lang.CharSequence getComposingText();
     method public int getComposingTextStart();
     method public float getInsertionMarkerBaseline();
     method public float getInsertionMarkerBottom();
