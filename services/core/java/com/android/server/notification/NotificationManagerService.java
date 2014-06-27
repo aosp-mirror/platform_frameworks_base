@@ -440,7 +440,8 @@ public class NotificationManagerService extends SystemService {
             this.duration = duration;
         }
 
-        void dump(PrintWriter pw, String prefix) {
+        void dump(PrintWriter pw, String prefix, DumpFilter filter) {
+            if (filter != null && !filter.matches(pkg)) return;
             pw.println(prefix + this);
         }
 
@@ -1313,7 +1314,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            dumpImpl(pw);
+            dumpImpl(pw, DumpFilter.parseFromArguments(args));
         }
     };
 
@@ -1334,9 +1335,12 @@ public class NotificationManagerService extends SystemService {
         return keys.toArray(new String[keys.size()]);
     }
 
-    void dumpImpl(PrintWriter pw) {
-        pw.println("Current Notification Manager state:");
-
+    void dumpImpl(PrintWriter pw, DumpFilter filter) {
+        pw.print("Current Notification Manager state");
+        if (filter != null) {
+            pw.print(" (filtered to '"); pw.print(filter.pkgFilter); pw.print("')");
+        }
+        pw.println(':');
         int N;
 
         synchronized (mToastQueue) {
@@ -1344,11 +1348,10 @@ public class NotificationManagerService extends SystemService {
             if (N > 0) {
                 pw.println("  Toast Queue:");
                 for (int i=0; i<N; i++) {
-                    mToastQueue.get(i).dump(pw, "    ");
+                    mToastQueue.get(i).dump(pw, "    ", filter);
                 }
                 pw.println("  ");
             }
-
         }
 
         synchronized (mNotificationList) {
@@ -1356,29 +1359,35 @@ public class NotificationManagerService extends SystemService {
             if (N > 0) {
                 pw.println("  Notification List:");
                 for (int i=0; i<N; i++) {
-                    mNotificationList.get(i).dump(pw, "    ", getContext());
+                    final NotificationRecord nr = mNotificationList.get(i);
+                    if (filter != null && !filter.matches(nr.sbn)) continue;
+                    nr.dump(pw, "    ", getContext());
                 }
                 pw.println("  ");
             }
 
-            N = mLights.size();
-            if (N > 0) {
-                pw.println("  Lights List:");
-                for (int i=0; i<N; i++) {
-                    pw.println("    " + mLights.get(i));
+            if (filter == null) {
+                N = mLights.size();
+                if (N > 0) {
+                    pw.println("  Lights List:");
+                    for (int i=0; i<N; i++) {
+                        pw.println("    " + mLights.get(i));
+                    }
+                    pw.println("  ");
                 }
-                pw.println("  ");
-            }
 
-            pw.println("  mSoundNotification=" + mSoundNotification);
-            pw.println("  mVibrateNotification=" + mVibrateNotification);
-            pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
-            pw.println("  mSystemReady=" + mSystemReady);
+                pw.println("  mSoundNotification=" + mSoundNotification);
+                pw.println("  mVibrateNotification=" + mVibrateNotification);
+                pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
+                pw.println("  mSystemReady=" + mSystemReady);
+            }
             pw.println("  mArchive=" + mArchive.toString());
             Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
             int i=0;
             while (iter.hasNext()) {
-                pw.println("    " + iter.next());
+                final StatusBarNotification sbn = iter.next();
+                if (filter != null && !filter.matches(sbn)) continue;
+                pw.println("    " + sbn);
                 if (++i >= 5) {
                     if (iter.hasNext()) pw.println("    ...");
                     break;
@@ -1386,16 +1395,18 @@ public class NotificationManagerService extends SystemService {
             }
 
             pw.println("\n  Usage Stats:");
-            mUsageStats.dump(pw, "    ");
+            mUsageStats.dump(pw, "    ", filter);
 
-            pw.println("\n  Zen Mode:");
-            mZenModeHelper.dump(pw, "    ");
+            if (filter == null) {
+                pw.println("\n  Zen Mode:");
+                mZenModeHelper.dump(pw, "    ");
+            }
 
             pw.println("\n  Notification listeners:");
-            mListeners.dump(pw);
+            mListeners.dump(pw, filter);
 
             pw.println("\n  Condition providers:");
-            mConditionProviders.dump(pw);
+            mConditionProviders.dump(pw, filter);
         }
     }
 
@@ -2445,6 +2456,32 @@ public class NotificationManagerService extends SystemService {
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
             }
+        }
+    }
+
+    public static final class DumpFilter {
+        public String pkgFilter;
+
+        public static DumpFilter parseFromArguments(String[] args) {
+            if (args == null || args.length != 2 || !"p".equals(args[0])
+                    || args[1] == null || args[1].trim().isEmpty()) {
+                return null;
+            }
+            final DumpFilter filter = new DumpFilter();
+            filter.pkgFilter = args[1].trim().toLowerCase();
+            return filter;
+        }
+
+        public boolean matches(StatusBarNotification sbn) {
+            return sbn != null && (matches(sbn.getPackageName()) || matches(sbn.getOpPkg()));
+        }
+
+        public boolean matches(ComponentName component) {
+            return component != null && matches(component.getPackageName());
+        }
+
+        public boolean matches(String pkg) {
+            return pkg != null && pkg.toLowerCase().contains(pkgFilter);
         }
     }
 }
