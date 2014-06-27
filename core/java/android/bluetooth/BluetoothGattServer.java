@@ -32,12 +32,12 @@ import java.util.UUID;
  * Public API for the Bluetooth GATT Profile server role.
  *
  * <p>This class provides Bluetooth GATT server role functionality,
- * allowing applications to create and advertise Bluetooth Smart services
- * and characteristics.
+ * allowing applications to create Bluetooth Smart services and
+ * characteristics.
  *
  * <p>BluetoothGattServer is a proxy object for controlling the Bluetooth Service
- * via IPC.  Use {@link BluetoothAdapter#getProfileProxy} to get the
- * BluetoothGatt proxy object.
+ * via IPC.  Use {@link BluetoothManager#openGattServer} to get an instance
+ * of this class.
  */
 public final class BluetoothGattServer implements BluetoothProfile {
     private static final String TAG = "BluetoothGattServer";
@@ -545,7 +545,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Add a service to the list of services to be hosted.
      *
-     * <p>Once a service has been addded to the the list, the service and it's
+     * <p>Once a service has been addded to the the list, the service and its
      * included characteristics will be provided by the local device.
      *
      * <p>If the local device has already exposed services when this function
