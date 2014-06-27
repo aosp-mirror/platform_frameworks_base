@@ -47,6 +47,8 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.android.layoutlib.bridge.bars.Config.DEFAULT_RESOURCE_DIR;
+
 /**
  * Base "bar" class for the window decor around the the edited layout.
  * This is basically an horizontal layout that loads a given layout on creation (it is read
@@ -57,6 +59,12 @@ import java.io.InputStream;
  * It also provides a few utility methods to configure the content of the layout.
  */
 abstract class CustomBar extends LinearLayout {
+
+    // An upper-bound on the length of the path to the directory to find the icon in.
+    // This assumes that resource directory name for different api levels have same length.
+    private static final int ICON_PATH_LENGTH = DEFAULT_RESOURCE_DIR.length()
+            + LayoutDirection.RTL.getResourceValue().length() + 9;  // 9 = "-xxxhdpi/".length
+
 
     private final int mSimulatedPlatformVersion;
 
@@ -90,52 +98,69 @@ abstract class CustomBar extends LinearLayout {
     }
 
     private InputStream getIcon(String iconName, Density[] densityInOut, LayoutDirection direction,
-            String[] pathOut, boolean tryOtherDensities) {
+            StringBuilder[] pathOut, boolean tryOtherDensities) {
+        pathOut[0] = new StringBuilder(ICON_PATH_LENGTH + iconName.length());
+
+        if (Config.usesCustomResourceDir(mSimulatedPlatformVersion)) {
+            // current density.
+            Density density = densityInOut[0];
+            InputStream stream = getIcon(iconName, Config.getResourceDir(mSimulatedPlatformVersion),
+                    densityInOut, direction, pathOut, tryOtherDensities);
+            if (stream != null) {
+                return stream;
+            }
+            // reset the density.
+            densityInOut[0] = density;
+        }
+        return getIcon(iconName, DEFAULT_RESOURCE_DIR, densityInOut, direction, pathOut,
+                tryOtherDensities);
+
+    }
+
+    private InputStream getIcon(String iconName, String dir, Density[] densityInOut,
+            LayoutDirection direction, StringBuilder[] pathOut, boolean tryOtherDensities) {
         // current density
         Density density = densityInOut[0];
 
+        pathOut[0].setLength(0);
+
         // bitmap url relative to this class
-        if (direction != null) {
-            pathOut[0] = "/bars/" + direction.getResourceValue() + "-" + density.getResourceValue()
-                    + "/" + iconName;
+        if (direction == LayoutDirection.RTL) {
+            pathOut[0].append(dir)
+                    .append(direction.getResourceValue())
+                    .append('-')
+                    .append(density.getResourceValue())
+                    .append('/')
+                    .append(iconName);
         } else {
-            pathOut[0] = "/bars/" + density.getResourceValue() + "/" + iconName;
+            // Since we do not have any ldltr resource, skip the check.
+            pathOut[0].append(dir)
+                    .append(density.getResourceValue())
+                    .append('/')
+                    .append(iconName);
         }
 
-        // TODO: Change this with a more generic method.
-        InputStream stream = getIconWithApi(pathOut, iconName);
+        InputStream stream = getClass().getResourceAsStream(pathOut[0].toString());
         if (stream == null && tryOtherDensities) {
             for (Density d : Density.values()) {
                 if (d != density) {
                     densityInOut[0] = d;
-                    stream = getIcon(iconName, densityInOut, direction, pathOut,
+                    stream = getIcon(iconName, dir, densityInOut, direction, pathOut,
                             false /*tryOtherDensities*/);
                     if (stream != null) {
                         return stream;
                     }
                 }
-                // couldn't find resource with direction qualifier. try without.
-                if (direction != null) {
-                    return getIcon(iconName, densityInOut, null, pathOut, true);
-                }
+            }
+            // couldn't find resource with direction qualifier, try without.
+            if (direction == LayoutDirection.RTL) {
+                densityInOut[0] = density;
+                stream = getIcon(iconName, dir, densityInOut, null, pathOut,
+                        true /*tryOtherDensities*/);
             }
         }
 
         return stream;
-    }
-
-    private InputStream getIconWithApi(String[] pathOut, String iconName) {
-        if (mSimulatedPlatformVersion == 0) {
-            String path = pathOut[0];
-            String dirName = path.substring(0, path.lastIndexOf('/'));
-            path = dirName + "-v21" + "/" + iconName;
-            InputStream stream = getClass().getResourceAsStream(path);
-            if (stream != null) {
-                pathOut[0] = path;
-                return stream;
-            }
-        }
-        return getClass().getResourceAsStream(pathOut[0]);
     }
 
     protected void loadIcon(int index, String iconName, Density density) {
@@ -147,20 +172,21 @@ abstract class CustomBar extends LinearLayout {
         if (child instanceof ImageView) {
             ImageView imageView = (ImageView) child;
 
-            String[] pathOut = new String[1];
-            Density[] densityInOut = new Density[] { density };
-            LayoutDirection dir = isRtl ? LayoutDirection.RTL : LayoutDirection.LTR;
+            StringBuilder[] pathOut = new StringBuilder[1];
+            Density[] densityInOut = new Density[]{density};
+            LayoutDirection dir = isRtl ? LayoutDirection.RTL : null;
             InputStream stream = getIcon(iconName, densityInOut, dir, pathOut,
                     true /*tryOtherDensities*/);
             density = densityInOut[0];
+            String path = pathOut[0].toString();
 
             if (stream != null) {
                 // look for a cached bitmap
-                Bitmap bitmap = Bridge.getCachedBitmap(pathOut[0], true /*isFramework*/);
+                Bitmap bitmap = Bridge.getCachedBitmap(path, true /*isFramework*/);
                 if (bitmap == null) {
                     try {
                         bitmap = Bitmap_Delegate.createBitmap(stream, false /*isMutable*/, density);
-                        Bridge.setCachedBitmap(pathOut[0], bitmap, true /*isFramework*/);
+                        Bridge.setCachedBitmap(path, bitmap, true /*isFramework*/);
                     } catch (IOException e) {
                         return;
                     }
