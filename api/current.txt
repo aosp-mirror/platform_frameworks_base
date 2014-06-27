@@ -24817,6 +24817,7 @@ package android.provider {
     field public static final java.lang.String MESSAGE_BOX = "msg_box";
     field public static final int MESSAGE_BOX_ALL = 0; // 0x0
     field public static final int MESSAGE_BOX_DRAFTS = 3; // 0x3
+    field public static final int MESSAGE_BOX_FAILED = 5; // 0x5
     field public static final int MESSAGE_BOX_INBOX = 1; // 0x1
     field public static final int MESSAGE_BOX_OUTBOX = 4; // 0x4
     field public static final int MESSAGE_BOX_SENT = 2; // 0x2
