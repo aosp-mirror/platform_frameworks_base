@@ -20,6 +20,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.TextUtils;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.CursorAnchorInfo.Builder;
 
@@ -81,7 +82,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(SELECTION_START, info.getSelectionStart());
         assertEquals(SELECTION_END, info.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info.getComposingTextStart());
-        assertEquals(COMPOSING_TEXT, info.getComposingText());
+        assertTrue(TextUtils.equals(COMPOSING_TEXT, info.getComposingText()));
         assertEquals(INSERTION_MARKER_HORIZONTAL, info.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info.getInsertionMarkerBaseline());
@@ -97,7 +98,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(SELECTION_START, info2.getSelectionStart());
         assertEquals(SELECTION_END, info2.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info2.getComposingTextStart());
-        assertEquals(COMPOSING_TEXT, info2.getComposingText());
+        assertTrue(TextUtils.equals(COMPOSING_TEXT, info2.getComposingText()));
         assertEquals(INSERTION_MARKER_HORIZONTAL, info2.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info2.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info2.getInsertionMarkerBaseline());
@@ -110,12 +111,12 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(info, info2);
         assertEquals(info.hashCode(), info2.hashCode());
 
-        // Make sure that object can be marshalled via {@link Parsel}.
+        // Make sure that object can be marshaled via {@link Parsel}.
         final CursorAnchorInfo info3 = cloneViaParcel(info2);
         assertEquals(SELECTION_START, info3.getSelectionStart());
         assertEquals(SELECTION_END, info3.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info3.getComposingTextStart());
-        assertEquals(COMPOSING_TEXT, info3.getComposingText());
+        assertTrue(TextUtils.equals(COMPOSING_TEXT, info3.getComposingText()));
         assertEquals(INSERTION_MARKER_HORIZONTAL, info3.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info3.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info3.getInsertionMarkerBaseline());
