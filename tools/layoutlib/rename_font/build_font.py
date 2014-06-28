@@ -22,18 +22,44 @@ Usage: build_font.py /path/to/input_fonts1/ /path/to/input_fonts2/ /path/to/outp
 
 """
 
-import sys
-# fontTools is available at platform/external/fonttools
-from fontTools import ttx
-import re
-import os
-import xml.etree.ElementTree as etree
-import shutil
 import glob
 from multiprocessing import Pool
+import os
+import re
+import shutil
+import sys
+import xml.etree.ElementTree as etree
+
+# Prevent .pyc files from being created.
+sys.dont_write_bytecode = True
+
+# fontTools is available at platform/external/fonttools
+from fontTools import ttx
 
 # global variable
 dest_dir = '/tmp'
+
+
+class FontInfo(object):
+  family = None
+  style = None
+  version = None
+  ends_in_regular = False
+  fullname = None
+
+
+class InvalidFontException(Exception):
+  pass
+
+
+# These constants represent the value of nameID parameter in the namerecord for
+# different information.
+# see http://scripts.sil.org/cms/scripts/page.php?item_id=IWS-Chapter08#3054f18b
+NAMEID_FAMILY = 1
+NAMEID_STYLE = 2
+NAMEID_FULLNAME = 4
+NAMEID_VERSION = 5
+
 
 def main(argv):
   if len(argv) < 2:
@@ -54,22 +80,19 @@ def main(argv):
   for src_dir in src_dirs:
     for dirname, dirnames, filenames in os.walk(src_dir):
       for filename in filenames:
-          input_path = os.path.join(dirname, filename)
-          extension = os.path.splitext(filename)[1].lower()
-          if (extension == '.ttf'):
-            input_fonts.append(input_path)
-          elif (extension == '.xml'):
-            shutil.copy(input_path, dest_dir)
+        input_path = os.path.join(dirname, filename)
+        extension = os.path.splitext(filename)[1].lower()
+        if extension == '.ttf':
+          input_fonts.append(input_path)
+        elif extension == '.xml':
+          shutil.copy(input_path, dest_dir)
       if '.git' in dirnames:
-          # don't go into any .git directories.
-          dirnames.remove('.git')
+        # don't go into any .git directories.
+        dirnames.remove('.git')
   # Create as many threads as the number of CPUs
   pool = Pool(processes=None)
   pool.map(convert_font, input_fonts)
 
-
-class InvalidFontException(Exception):
-  pass
 
 def convert_font(input_path):
   filename = os.path.basename(input_path)
@@ -86,11 +109,8 @@ def convert_font(input_path):
     tree = etree.parse(ttx_path)
     root = tree.getroot()
     for name in root.iter('name'):
-      [old_ps_name, version] = get_font_info(name)
-      if old_ps_name is not None and version is not None:
-        new_ps_name = old_ps_name + version
-        update_name(name, new_ps_name)
-    tree.write(ttx_path, xml_declaration=True, encoding='utf-8' )
+      update_tag(name, get_font_info(name))
+    tree.write(ttx_path, xml_declaration=True, encoding='utf-8')
     # generate the udpated font now.
     ttx_args = ['-q', '-d', dest_dir, ttx_path]
     ttx.main(ttx_args)
@@ -110,37 +130,83 @@ def convert_font(input_path):
   except OSError:
     pass
 
+
 def get_font_info(tag):
-  ps_name = None
-  ps_version = None
+  """ Returns a list of FontInfo representing the various sets of namerecords
+      found in the name table of the font. """
+  fonts = []
+  font = None
+  last_name_id = sys.maxint
   for namerecord in tag.iter('namerecord'):
     if 'nameID' in namerecord.attrib:
-      # if the tag has nameID=6, it is the postscript name of the font.
-      # see: http://scripts.sil.org/cms/scripts/page.php?item_id=IWS-Chapter08#3054f18b
-      if namerecord.attrib['nameID'] == '6':
-        if ps_name is not None:
-          if not sanitize(namerecord.text) == ps_name:
-            raise InvalidFontException('found multiple possibilities of the font name')
-        else:
-          ps_name = sanitize(namerecord.text)
-      # nameID=5 means the font version
-      if namerecord.attrib['nameID'] == '5':
-        if ps_version is not None:
-          if not ps_version == get_version(namerecord.text):
-            raise InvalidFontException('found multiple possibilities of the font version')
-        else:
-          ps_version = get_version(namerecord.text)
-  return [ps_name, ps_version]
+      name_id = int(namerecord.attrib['nameID'])
+      # A new font should be created for each platform, encoding and language
+      # id. But, since the nameIDs are sorted, we use the easy approach of
+      # creating a new one when the nameIDs reset.
+      if name_id <= last_name_id and font is not None:
+        fonts.append(font)
+        font = None
+      last_name_id = name_id
+      if font is None:
+        font = FontInfo()
+      if name_id == NAMEID_FAMILY:
+        font.family = namerecord.text.strip()
+      if name_id == NAMEID_STYLE:
+        font.style = namerecord.text.strip()
+      if name_id == NAMEID_FULLNAME:
+        font.ends_in_regular = ends_in_regular(namerecord.text)
+        font.fullname = namerecord.text.strip()
+      if name_id == NAMEID_VERSION:
+        font.version = get_version(namerecord.text)
+  if font is not None:
+    fonts.append(font)
+  return fonts
 
 
-def update_name(tag, name):
+def update_tag(tag, fonts):
+  last_name_id = sys.maxint
+  fonts_iterator = fonts.__iter__()
+  font = None
   for namerecord in tag.iter('namerecord'):
     if 'nameID' in namerecord.attrib:
-      if namerecord.attrib['nameID'] == '6':
-        namerecord.text = name
+      name_id = int(namerecord.attrib['nameID'])
+      if name_id <= last_name_id:
+        font = fonts_iterator.next()
+        font = update_font_name(font)
+      last_name_id = name_id
+      if name_id == NAMEID_FAMILY:
+        namerecord.text = font.family
+      if name_id == NAMEID_FULLNAME:
+        namerecord.text = font.fullname
 
-def sanitize(string):
-  return re.sub(r'[^\w-]+', '', string)
+
+def update_font_name(font):
+  """ Compute the new font family name and font fullname. If the font has a
+      valid version, it's sanitized and appended to the font family name. The
+      font fullname is then created by joining the new family name and the
+      style. If the style is 'Regular', it is appended only if the original font
+      had it. """
+  if font.family is None or font.style is None:
+    raise InvalidFontException('Font doesn\'t have proper family name or style')
+  if font.version is not None:
+    new_family = font.family + font.version
+  else:
+    new_family = font.family
+  if font.style is 'Regular' and not font.ends_in_regular:
+    font.fullname = new_family
+  else:
+    font.fullname = new_family + ' ' + font.style
+  font.family = new_family
+  return font
+
+
+def ends_in_regular(string):
+  """ According to the specification, the font fullname should not end in
+      'Regular' for plain fonts. However, some fonts don't obey this rule. We
+      keep the style info, to minimize the diff. """
+  string = string.strip().split()[-1]
+  return string is 'Regular'
+
 
 def get_version(string):
   # The string must begin with 'Version n.nn '
@@ -149,6 +215,10 @@ def get_version(string):
   if not string.startswith('Version '):
     raise InvalidFontException('mal-formed font version')
   return sanitize(string.split()[1])
+
+
+def sanitize(string):
+  return re.sub(r'[^\w-]+', '', string)
 
 if __name__ == '__main__':
   main(sys.argv[1:])
