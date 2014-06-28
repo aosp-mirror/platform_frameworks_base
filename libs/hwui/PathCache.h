@@ -272,15 +272,18 @@ private:
     class PathTask: public Task<SkBitmap*> {
     public:
         PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
-            path(path), paint(*paint), texture(texture) {
+            path(*path), paint(*paint), texture(texture) {
         }
 
         ~PathTask() {
             delete future()->get();
         }
 
-        const SkPath* path;
-        //copied, since input paint may not be immutable
+        // copied, since input path not refcounted / guaranteed to survive for duration of task
+        // TODO: avoid deep copy with refcounting
+        const SkPath path;
+
+        // copied, since input paint may not be immutable
         const SkPaint paint;
         PathTexture* texture;
     };

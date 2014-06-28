@@ -338,7 +338,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 
     float left, top, offset;
     uint32_t width, height;
-    PathCache::computePathBounds(t->path, &t->paint, left, top, offset, width, height);
+    PathCache::computePathBounds(&t->path, &t->paint, left, top, offset, width, height);
 
     PathTexture* texture = t->texture;
     texture->left = left;
@@ -349,7 +349,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 
     if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
         SkBitmap* bitmap = new SkBitmap();
-        drawPath(t->path, &t->paint, *bitmap, left, top, offset, width, height);
+        drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
         t->setResult(bitmap);
     } else {
         texture->width = 0;
