@@ -33,10 +33,11 @@ class MyTest(unittest.TestCase):
     tree = etree.parse(ttx_path)
     root = tree.getroot()
     name_tag = root.find('name')
-    [f_name, f_version] = build_font.get_font_info(name_tag)
+    fonts = build_font.get_font_info(name_tag)
     shutil.rmtree(srcdir)
     shutil.rmtree(destdir)
-    self.assertEqual(f_name, "Roboto-Regular1200310")
+    self.assertEqual(fonts[0].family, "Roboto1200310")
+    self.assertEqual(fonts[0].fullname, "Roboto1200310 Regular")
 
 
 
