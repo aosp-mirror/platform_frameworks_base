@@ -126,12 +126,10 @@ import android.graphics.Paint;
 public class RenderNode {
     /**
      * Flag used when calling
-     * {@link HardwareCanvas#drawDisplayList(RenderNode, android.graphics.Rect, int)}
+     * {@link HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)}
      * When this flag is set, draw operations lying outside of the bounds of the
      * display list will be culled early. It is recommeneded to always set this
      * flag.
-     *
-     * @hide
      */
     public static final int FLAG_CLIP_CHILDREN = 0x1;
 
@@ -140,37 +138,29 @@ public class RenderNode {
     /**
      * Indicates that the display list is done drawing.
      *
-     * @see HardwareCanvas#drawDisplayList(RenderNode, android.graphics.Rect, int)
-     *
-     * @hide
+     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
      */
     public static final int STATUS_DONE = 0x0;
 
     /**
      * Indicates that the display list needs another drawing pass.
      *
-     * @see HardwareCanvas#drawDisplayList(RenderNode, android.graphics.Rect, int)
-     *
-     * @hide
+     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
      */
     public static final int STATUS_DRAW = 0x1;
 
     /**
      * Indicates that the display list needs to re-execute its GL functors.
      *
-     * @see HardwareCanvas#drawDisplayList(RenderNode, android.graphics.Rect, int)
+     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
      * @see HardwareCanvas#callDrawGLFunction(long)
-     *
-     * @hide
      */
     public static final int STATUS_INVOKE = 0x2;
 
     /**
      * Indicates that the display list performed GL drawing operations.
      *
-     * @see HardwareCanvas#drawDisplayList(RenderNode, android.graphics.Rect, int)
-     *
-     * @hide
+     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
      */
     public static final int STATUS_DREW = 0x4;
 
@@ -189,14 +179,12 @@ public class RenderNode {
     }
 
     /**
-     * Creates a new display list that can be used to record batches of
-     * drawing operations.
+     * Creates a new RenderNode that can be used to record batches of
+     * drawing operations, and store / apply render properties when drawn.
      *
-     * @param name The name of the display list, used for debugging purpose. May be null.
+     * @param name The name of the RenderNode, used for debugging purpose. May be null.
      *
-     * @return A new display list.
-     *
-     * @hide
+     * @return A new RenderNode.
      */
     public static RenderNode create(String name) {
         return new RenderNode(name);
@@ -263,8 +251,6 @@ public class RenderNode {
      * Reset native resources. This is called when cleaning up the state of display lists
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.
-     *
-     * @hide
      */
     public void destroyDisplayListData() {
         if (!mValid) return;
@@ -409,8 +395,6 @@ public class RenderNode {
      * for the matrix parameter.
      *
      * @param matrix The matrix, null indicates that the matrix should be cleared.
-     *
-     * @hide
      */
     public boolean setAnimationMatrix(Matrix matrix) {
         return nSetAnimationMatrix(mNativeRenderNode,
@@ -838,8 +822,6 @@ public class RenderNode {
     /**
      * Outputs the display list to the log. This method exists for use by
      * tools to output display lists for selected nodes to the log.
-     *
-     * @hide
      */
     public void output() {
         nOutput(mNativeRenderNode);

@@ -851,11 +851,10 @@ public abstract class Drawable {
     }
 
     /**
-     * Called to get the drawable to populate the Outline.
+     * Called to get the drawable to populate the Outline that defines its drawing area.
      * <p>
-     * This method will be called by a View on its background Drawable after bounds change, or its
-     * Drawable is invalidated, if the View's Outline isn't set explicitly. This allows the
-     * background Drawable to define the shape of the shadow cast by the View.
+     * This method is called by the default {@link android.view.ViewOutlineProvider} to define
+     * the outline of the View.
      * <p>
      * The default behavior defines the outline to be the bounding rectangle. Subclasses that wish
      * to convey a different shape must override this method.
@@ -863,7 +862,7 @@ public abstract class Drawable {
      * @return true if this drawable actually has an outline, else false. The outline must be
      *         populated by the drawable if true is returned.
      *
-     * @see View#setOutline(android.graphics.Outline)
+     * @see android.view.View#setOutlineProvider(android.view.ViewOutlineProvider)
      */
     public boolean getOutline(@NonNull Outline outline) {
         outline.setRect(getBounds());

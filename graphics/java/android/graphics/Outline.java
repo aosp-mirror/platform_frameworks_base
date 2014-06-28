@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -32,13 +31,15 @@ import android.view.View;
  */
 public final class Outline {
     /** @hide */
-    public Rect mRect;
+    public Path mPath;
 
+    /** @hide */
+    public Rect mRect;
     /** @hide */
     public float mRadius;
 
     /** @hide */
-    public Path mPath;
+    public boolean mIsFilled;
 
     /**
      * Constructs an empty Outline. Call one of the setter methods to make
@@ -59,9 +60,10 @@ public final class Outline {
      * @see #isEmpty()
      */
     public void setEmpty() {
-        mRadius = 0;
-        mRect = null;
         mPath = null;
+        mRect = null;
+        mRadius = 0;
+        mIsFilled = true;
     }
 
     /**
@@ -74,6 +76,36 @@ public final class Outline {
      */
     public boolean isEmpty() {
         return mRect == null && mPath == null;
+    }
+
+
+    /**
+     * Returns whether the outline can be used to clip a View.
+     *
+     * Currently, only outlines that can be represented as a rectangle, circle, or round rect
+     * support clipping.
+     *
+     * @see {@link View#setClipToOutline(boolean)}
+     */
+    public boolean canClip() {
+        return !isEmpty() && mRect != null;
+    }
+
+    /**
+     * Sets whether the outline represents a fully opaque area.
+     *
+     * A filled outline is assumed, by the drawing system, to fully cover content beneath it,
+     * meaning content beneath may be optimized away.
+     */
+    public void setFilled(boolean isFilled) {
+        mIsFilled = isFilled;
+    }
+
+    /**
+     * Returns whether the outline represents a fully opaque area.
+     */
+    public boolean isFilled() {
+        return !isEmpty() && mIsFilled;
     }
 
     /**
@@ -96,6 +128,7 @@ public final class Outline {
             mRect.set(src.mRect);
         }
         mRadius = src.mRadius;
+        mIsFilled = src.mIsFilled;
     }
 
     /**
@@ -122,6 +155,7 @@ public final class Outline {
         mRect.set(left, top, right, bottom);
         mRadius = radius;
         mPath = null;
+        mIsFilled = true;
     }
 
     /**
@@ -140,10 +174,11 @@ public final class Outline {
             setRoundRect(left, top, right, bottom, (bottom - top) / 2.0f);
             return;
         }
-        mRect = null;
         if (mPath == null) mPath = new Path();
         mPath.reset();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
+        mRect = null;
+        mIsFilled = true;
     }
 
     /**
@@ -162,20 +197,9 @@ public final class Outline {
         }
         if (mPath == null) mPath = new Path();
 
+        mPath.set(convexPath);
         mRect = null;
         mRadius = -1.0f;
-        mPath.set(convexPath);
-    }
-
-    /**
-     * Returns whether the outline can be used to clip a View.
-     *
-     * Currently, only outlines that can be represented as a rectangle, circle, or round rect
-     * support clipping.
-     *
-     * @see {@link View#setClipToOutline(boolean)}
-     */
-    public boolean canClip() {
-        return mRect != null;
+        mIsFilled = true;
     }
 }

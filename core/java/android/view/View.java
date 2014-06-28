@@ -2379,9 +2379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_CALLED_SUPER = 0x10;
 
-    /**
-     * Flag indicating that a view's outline has been specifically defined.
-     */
+    @Deprecated
     static final int PFLAG3_OUTLINE_DEFINED = 0x20;
 
     /**
@@ -3275,11 +3273,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private int[] mDrawableState = null;
 
-    /**
-     * Stores the outline of the view, passed down to the DisplayList level for
-     * defining shadow shape.
-     */
+    @Deprecated
     private Outline mOutline;
+    ViewOutlineProvider mOutlineProvider = ViewOutlineProvider.BACKGROUND;
 
     /**
      * Animator that automatically runs based on state changes.
@@ -10757,24 +10753,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /**
-     * Sets the {@link Outline} of the view, which defines the shape of the shadow it
-     * casts, and enables outline clipping.
-     * <p>
-     * By default, a View queries its Outline from its background drawable, via
-     * {@link Drawable#getOutline(Outline)}. Manually setting the Outline with this method allows
-     * this behavior to be overridden.
-     * <p>
-     * If the outline is {@link Outline#isEmpty()} or is <code>null</code>,
-     * shadows will not be cast.
-     * <p>
-     * Only outlines that return true from {@link Outline#canClip()} may be used for clipping.
-     *
-     * @param outline The new outline of the view.
-     *
-     * @see #setClipToOutline(boolean)
-     * @see #getClipToOutline()
-     */
+    @Deprecated
     public void setOutline(@Nullable Outline outline) {
         mPrivateFlags3 |= PFLAG3_OUTLINE_DEFINED;
 
@@ -10798,7 +10777,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Note that this flag will only be respected if the View's Outline returns true from
      * {@link Outline#canClip()}.
      *
-     * @see #setOutline(Outline)
+     * @see #setOutlineProvider(ViewOutlineProvider)
      * @see #setClipToOutline(boolean)
      */
     public final boolean getClipToOutline() {
@@ -10811,7 +10790,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Note that this flag will only be respected if the View's Outline returns true from
      * {@link Outline#canClip()}.
      *
-     * @see #setOutline(Outline)
+     * @see #setOutlineProvider(ViewOutlineProvider)
      * @see #getClipToOutline()
      */
     public void setClipToOutline(boolean clipToOutline) {
@@ -10821,25 +10800,74 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void queryOutlineFromBackgroundIfUndefined() {
-        if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) == 0) {
-            // Outline not currently defined, query from background
-            if (mOutline == null) {
-                mOutline = new Outline();
-            } else {
-                //invalidate outline, to ensure background calculates it
-                mOutline.setEmpty();
-            }
-            if (mBackground.getOutline(mOutline)) {
-                if (mOutline.isEmpty()) {
-                    throw new IllegalStateException("Background drawable failed to build outline");
+    /**
+     * Sets the {@link ViewOutlineProvider} of the view, which generates the Outline that defines
+     * the shape of the shadow it casts, and enables outline clipping.
+     * <p>
+     * The default ViewOutlineProvider, {@link ViewOutlineProvider#BACKGROUND}, queries the Outline
+     * from the View's background drawable, via {@link Drawable#getOutline(Outline)}. Changing the
+     * outline provider with this method allows this behavior to be overridden.
+     * <p>
+     * If the ViewOutlineProvider is null, if querying it for an outline returns false,
+     * or if the produced Outline is {@link Outline#isEmpty()}, shadows will not be cast.
+     * <p>
+     * Only outlines that return true from {@link Outline#canClip()} may be used for clipping.
+     *
+     * @see #setClipToOutline(boolean)
+     * @see #getClipToOutline()
+     * @see #getOutlineProvider()
+     */
+    public void setOutlineProvider(ViewOutlineProvider provider) {
+        mOutlineProvider = provider;
+        invalidateOutline();
+    }
+
+    /**
+     * Returns the current {@link ViewOutlineProvider} of the view, which generates the Outline
+     * that defines the shape of the shadow it casts, and enables outline clipping.
+     *
+     * @see #setOutlineProvider(ViewOutlineProvider)
+     */
+    public ViewOutlineProvider getOutlineProvider() {
+        return mOutlineProvider;
+    }
+
+    /**
+     * Called to rebuild this View's Outline from its {@link ViewOutlineProvider outline provider}
+     *
+     * @see #setOutlineProvider(ViewOutlineProvider)
+     */
+    public void invalidateOutline() {
+        if ((mPrivateFlags3 & PFLAG3_OUTLINE_DEFINED) != 0) {
+            // TODO: remove this when removing old outline code
+            // setOutline() was called to manually set outline, ignore provider
+            return;
+        }
+
+        // Unattached views ignore this signal, and outline is recomputed in onAttachedToWindow()
+        if (mAttachInfo == null) return;
+
+        final Outline outline = mAttachInfo.mTmpOutline;
+        outline.setEmpty();
+
+        if (mOutlineProvider == null) {
+            // no provider, remove outline
+            mRenderNode.setOutline(null);
+        } else {
+            if (mOutlineProvider.getOutline(this, outline)) {
+                if (outline.isEmpty()) {
+                    throw new IllegalStateException("Outline provider failed to build outline");
                 }
-                mRenderNode.setOutline(mOutline);
+                // provider has provided
+                mRenderNode.setOutline(outline);
             } else {
+                // provider failed to provide
                 mRenderNode.setOutline(null);
             }
-            notifySubtreeAccessibilityStateChangedIfNeeded();
         }
+
+        notifySubtreeAccessibilityStateChangedIfNeeded();
+        invalidateViewProperty(false, false);
     }
 
     /**
@@ -12669,6 +12697,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         jumpDrawablesToCurrentState();
 
         resetSubtreeAccessibilityStateChanged();
+
+        invalidateOutline();
 
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -14967,7 +14997,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
-            queryOutlineFromBackgroundIfUndefined();
         }
 
         // Attempt to use a display list if requested.
@@ -15012,7 +15041,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param renderNode Existing RenderNode, or {@code null}
      * @return A valid display list for the specified drawable
      */
-    private RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
+    private static RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
         if (renderNode == null) {
             renderNode = RenderNode.create(drawable.getClass().getName());
         }
@@ -15342,6 +15371,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOverlay.getOverlayView().setRight(newWidth);
             mOverlay.getOverlayView().setBottom(newHeight);
         }
+        invalidateOutline();
     }
 
     /**
@@ -15378,9 +15408,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(dirty.left + scrollX, dirty.top + scrollY,
                     dirty.right + scrollX, dirty.bottom + scrollY);
 
-            if (drawable == mBackground) {
-                queryOutlineFromBackgroundIfUndefined();
-            }
+            invalidateOutline();
         }
     }
 
@@ -19958,6 +19986,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Temporary for use in transforming invalidation rect
          */
         final Transformation mTmpTransformation = new Transformation();
+
+        /**
+         * Temporary for use in querying outlines from OutlineProviders
+         */
+        final Outline mTmpOutline = new Outline();
 
         /**
          * Temporary list for use in collecting focusable descendents of a view.

@@ -10643,9 +10643,11 @@ package android.graphics {
     ctor public Outline(android.graphics.Outline);
     method public boolean canClip();
     method public boolean isEmpty();
+    method public boolean isFilled();
     method public void set(android.graphics.Outline);
     method public void setConvexPath(android.graphics.Path);
     method public void setEmpty();
+    method public void setFilled(boolean);
     method public void setOval(int, int, int, int);
     method public void setOval(android.graphics.Rect);
     method public void setRect(int, int, int, int);
@@ -32731,6 +32733,7 @@ package android.view {
     method public int getNextFocusRightId();
     method public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
+    method public android.view.ViewOutlineProvider getOutlineProvider();
     method public int getOverScrollMode();
     method public android.view.ViewOverlay getOverlay();
     method public int getPaddingBottom();
@@ -32806,6 +32809,7 @@ package android.view {
     method public void invalidate(int, int, int, int);
     method public void invalidate();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
+    method public void invalidateOutline();
     method public boolean isAccessibilityFocused();
     method public boolean isActivated();
     method public boolean isAttachedToWindow();
@@ -33003,7 +33007,8 @@ package android.view {
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
-    method public void setOutline(android.graphics.Outline);
+    method public deprecated void setOutline(android.graphics.Outline);
+    method public void setOutlineProvider(android.view.ViewOutlineProvider);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
     method public void setPaddingRelative(int, int, int, int);
@@ -33547,6 +33552,12 @@ package android.view {
     method public abstract void addView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public abstract void removeView(android.view.View);
     method public abstract void updateViewLayout(android.view.View, android.view.ViewGroup.LayoutParams);
+  }
+
+  public abstract class ViewOutlineProvider {
+    ctor public ViewOutlineProvider();
+    method public abstract boolean getOutline(android.view.View, android.graphics.Outline);
+    field public static final android.view.ViewOutlineProvider BACKGROUND;
   }
 
   public class ViewOverlay {
