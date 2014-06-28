@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -272,6 +273,11 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
     @Override
     public int getIntrinsicHeight() {
         return mInsetState.mDrawable.getIntrinsicHeight();
+    }
+
+    @Override
+    public boolean getOutline(@NonNull Outline outline) {
+        return mInsetState.mDrawable.getOutline(outline);
     }
 
     @Override
