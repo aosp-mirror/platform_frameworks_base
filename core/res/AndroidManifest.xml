@@ -2893,36 +2893,42 @@
         <receiver android:name="com.android.server.updates.CertPinInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_PINS" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="com.android.server.updates.IntentFirewallInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_INTENT_FIREWALL" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMS_SHORT_CODES" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="com.android.server.updates.CarrierProvisioningUrlsInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="com.android.server.updates.TZInfoInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_TZINFO" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
         <receiver android:name="com.android.server.updates.SELinuxPolicyInstallReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SEPOLICY" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
