@@ -717,6 +717,7 @@ public class Handler {
 
     private final class MessengerImpl extends IMessenger.Stub {
         public void send(Message msg) {
+            msg.sendingUid = Binder.getCallingUid();
             Handler.this.sendMessage(msg);
         }
     }

@@ -71,6 +71,13 @@ public final class Message implements Parcelable {
      */
     public Messenger replyTo;
 
+    /**
+     * Optional field indicating the uid that sent the message.  This is
+     * only valid for messages posted by a {@link Messenger}; otherwise,
+     * it will be -1.
+     */
+    public int sendingUid = -1;
+
     /** If set message is in use.
      * This flag is set when the message is enqueued and remains set while it
      * is delivered and afterwards when it is recycled.  The flag is only cleared
@@ -137,6 +144,7 @@ public final class Message implements Parcelable {
         m.arg2 = orig.arg2;
         m.obj = orig.obj;
         m.replyTo = orig.replyTo;
+        m.sendingUid = orig.sendingUid;
         if (orig.data != null) {
             m.data = new Bundle(orig.data);
         }
@@ -277,6 +285,7 @@ public final class Message implements Parcelable {
         arg2 = 0;
         obj = null;
         replyTo = null;
+        sendingUid = -1;
         when = 0;
         target = null;
         callback = null;
@@ -303,6 +312,7 @@ public final class Message implements Parcelable {
         this.arg2 = o.arg2;
         this.obj = o.obj;
         this.replyTo = o.replyTo;
+        this.sendingUid = o.sendingUid;
 
         if (o.data != null) {
             this.data = (Bundle) o.data.clone();
@@ -534,6 +544,7 @@ public final class Message implements Parcelable {
         dest.writeLong(when);
         dest.writeBundle(data);
         Messenger.writeMessengerOrNullToParcel(replyTo, dest);
+        dest.writeInt(sendingUid);
     }
 
     private void readFromParcel(Parcel source) {
@@ -546,5 +557,6 @@ public final class Message implements Parcelable {
         when = source.readLong();
         data = source.readBundle();
         replyTo = Messenger.readMessengerOrNullFromParcel(source);
+        sendingUid = source.readInt();
     }
 }

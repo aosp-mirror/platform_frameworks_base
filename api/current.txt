@@ -21189,6 +21189,7 @@ package android.os {
     field public int arg2;
     field public java.lang.Object obj;
     field public android.os.Messenger replyTo;
+    field public int sendingUid;
     field public int what;
   }
 
