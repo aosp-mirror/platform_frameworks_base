@@ -27572,11 +27572,6 @@ package android.telecomm {
     method public abstract void setCamera(java.lang.String);
   }
 
-  public class CallVideoProviderWrapper implements android.os.IBinder.DeathRecipient {
-    method public void binderDied();
-    method public void setCamera(java.lang.String) throws android.os.RemoteException;
-  }
-
   public abstract class Connection {
     ctor protected Connection();
     method public final android.telecomm.CallAudioState getCallAudioState();
@@ -27723,6 +27718,7 @@ package android.telecomm {
 
   public final class InCallCall implements android.os.Parcelable {
     method public int describeContents();
+    method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider() throws android.os.RemoteException;
     method public java.util.List<java.lang.String> getCannedSmsResponses();
     method public int getCapabilities();
     method public long getConnectTimeMillis();
@@ -27750,6 +27746,11 @@ package android.telecomm {
     method protected abstract void setPostDial(java.lang.String, java.lang.String);
     method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
     method protected abstract void updateCall(android.telecomm.InCallCall);
+  }
+
+  public class RemoteCallVideoProvider implements android.os.IBinder.DeathRecipient {
+    method public void binderDied();
+    method public void setCamera(java.lang.String) throws android.os.RemoteException;
   }
 
   public final class RemoteConnection {

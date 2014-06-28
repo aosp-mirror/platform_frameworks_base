@@ -19,7 +19,10 @@ package android.telecomm;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.telephony.DisconnectCause;
+
+import com.android.internal.telecomm.ICallVideoProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,28 +44,10 @@ public final class InCallCall implements Parcelable {
     private final Subscription mSubscription;
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
     private final CallServiceDescriptor mHandoffCallServiceDescriptor;
+    private final ICallVideoProvider mCallVideoProvider;
+    private RemoteCallVideoProvider mRemoteCallVideoProvider;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
-
-    /** @hide */
-    @SuppressWarnings("unchecked")
-    public InCallCall(
-            String id,
-            CallState state,
-            int disconnectCauseCode,
-            String disconnectCauseMsg,
-            List<String> cannedSmsResponses,
-            int capabilities,
-            long connectTimeMillis,
-            Uri handle,
-            GatewayInfo gatewayInfo,
-            Subscription subscription,
-            CallServiceDescriptor descriptor,
-            CallServiceDescriptor handoffDescriptor) {
-        this(id, state, disconnectCauseCode, disconnectCauseMsg, cannedSmsResponses,
-                capabilities, connectTimeMillis, handle, gatewayInfo, subscription, descriptor,
-                handoffDescriptor, null, Collections.EMPTY_LIST);
-    }
 
     /** @hide */
     public InCallCall(
@@ -78,6 +63,7 @@ public final class InCallCall implements Parcelable {
             Subscription subscription,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor,
+            ICallVideoProvider callVideoProvider,
             String parentCallId,
             List<String> childCallIds) {
         mId = id;
@@ -92,6 +78,7 @@ public final class InCallCall implements Parcelable {
         mSubscription = subscription;
         mCurrentCallServiceDescriptor = descriptor;
         mHandoffCallServiceDescriptor = handoffDescriptor;
+        mCallVideoProvider = callVideoProvider;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
     }
@@ -168,6 +155,22 @@ public final class InCallCall implements Parcelable {
     }
 
     /**
+     * Returns an object for remotely communicating through the call video provider's binder.
+     * @return The call video provider.
+     */
+    public RemoteCallVideoProvider getCallVideoProvider() throws RemoteException {
+        if (mRemoteCallVideoProvider == null) {
+            try {
+                mRemoteCallVideoProvider = new RemoteCallVideoProvider(mCallVideoProvider);
+            } catch (RemoteException ignored) {
+                // Ignore RemoteException.
+            }
+        }
+
+        return mRemoteCallVideoProvider;
+    }
+
+    /**
      * The conference call to which this call is conferenced. Null if not conferenced.
      * @hide
      */
@@ -203,12 +206,15 @@ public final class InCallCall implements Parcelable {
             Subscription subscription = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
             CallServiceDescriptor handoffDescriptor = source.readParcelable(classLoader);
+            ICallVideoProvider callVideoProvider =
+                    ICallVideoProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, gatewayInfo,
-                    subscription, descriptor, handoffDescriptor, parentCallId, childCallIds);
+                    subscription, descriptor, handoffDescriptor, callVideoProvider, parentCallId,
+                    childCallIds);
         }
 
         @Override
@@ -238,6 +244,7 @@ public final class InCallCall implements Parcelable {
         destination.writeParcelable(mSubscription, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
         destination.writeParcelable(mHandoffCallServiceDescriptor, 0);
+        destination.writeStrongBinder(mCallVideoProvider.asBinder());
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
     }
