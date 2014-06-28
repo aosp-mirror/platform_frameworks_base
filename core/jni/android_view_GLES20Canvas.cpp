@@ -394,10 +394,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
     SkPaint* paint = reinterpret_cast<SkPaint*>(paintPtr);
     renderer->drawBitmapData(bitmap, left, top, paint);
 
-    // If the renderer is a deferred renderer it will own the bitmap
-    if (!renderer->isRecording()) {
-        delete bitmap;
-    }
+    // Note - bitmap isn't deleted as DisplayListRenderer owns it now
 }
 
 static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,

@@ -59,8 +59,6 @@ public:
 
     DisplayListData* finishRecording();
 
-    virtual bool isRecording() const { return true; }
-
 // ----------------------------------------------------------------------------
 // Frame state operations
 // ----------------------------------------------------------------------------

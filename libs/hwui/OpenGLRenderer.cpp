@@ -1515,17 +1515,15 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
         return true;
     }
 
-    if (!isRecording()) {
-        // not quick rejected, so enable the scissor if clipRequired
-        mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
-        mSkipOutlineClip = !roundRectClipRequired;
-    }
+    // not quick rejected, so enable the scissor if clipRequired
+    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+    mSkipOutlineClip = !roundRectClipRequired;
     return false;
 }
 
 void OpenGLRenderer::debugClip() {
 #if DEBUG_CLIP_REGIONS
-    if (!isRecording() && !currentSnapshot()->clipRegion->isEmpty()) {
+    if (!currentSnapshot()->clipRegion->isEmpty()) {
         SkPaint paint;
         paint.setColor(0x7f00ff00);
         drawRegionRects(*(currentSnapshot()->clipRegion, paint);
