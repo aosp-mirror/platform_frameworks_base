@@ -971,7 +971,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             } else {
                 session.adjustVolumeBy(delta, flags);
-                if (mRvc != null) {
+                if (session.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE
+                        && mRvc != null) {
                     try {
                         mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
                     } catch (Exception e) {
