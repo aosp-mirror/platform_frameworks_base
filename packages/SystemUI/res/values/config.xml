@@ -157,5 +157,8 @@
 
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
+
+    <!-- Doze: should the significant motion sensor be used as a tease signal? -->
+    <bool name="doze_tease_on_significant_motion">true</bool>
 </resources>
 

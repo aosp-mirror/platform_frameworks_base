@@ -25,12 +25,17 @@ import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.service.dreams.DozeHardware;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
+import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class DozeService extends DreamService {
     private static final boolean DEBUG = false;
@@ -48,10 +53,23 @@ public class DozeService extends DreamService {
     private PowerManager.WakeLock mWakeLock;
     private boolean mDreaming;
     private boolean mTeaseReceiverRegistered;
+    private boolean mSigMotionConfigured;
+    private boolean mSigMotionEnabled;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
         setDebug(DEBUG);
+    }
+
+    @Override
+    protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dumpOnHandler(fd, pw, args);
+        pw.print("  mDreaming: "); pw.println(mDreaming);
+        pw.print("  mDozeHardware: "); pw.println(mDozeHardware);
+        pw.print("  mTeaseReceiverRegistered: "); pw.println(mTeaseReceiverRegistered);
+        pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
+        pw.print("  mSigMotionConfigured: "); pw.println(mSigMotionConfigured);
+        pw.print("  mSigMotionEnabled: "); pw.println(mSigMotionEnabled);
     }
 
     @Override
@@ -70,6 +88,8 @@ public class DozeService extends DreamService {
         mSigMotionSensor = mSensors.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
+        mSigMotionConfigured = SystemProperties.getBoolean("doze.tease.sigmotion",
+                mContext.getResources().getBoolean(R.bool.doze_tease_on_significant_motion));
     }
 
     @Override
@@ -156,27 +176,39 @@ public class DozeService extends DreamService {
 
     private void listenForTeaseSignals(boolean listen) {
         if (DEBUG) Log.d(mTag, "listenForTeaseSignals: " + listen);
-        if (mHost == null) return;
         listenForSignificantMotion(listen);
+        listenForBroadcast(listen);
+        listenForNotifications(listen);
+    }
+
+    private void listenForSignificantMotion(boolean listen) {
+        if (!mSigMotionConfigured || mSigMotionSensor == null) return;
+        if (listen) {
+            mSigMotionEnabled =
+                    mSensors.requestTriggerSensor(mSigMotionListener, mSigMotionSensor);
+        } else if (mSigMotionEnabled) {
+            mSensors.cancelTriggerSensor(mSigMotionListener, mSigMotionSensor);
+        }
+    }
+
+    private void listenForBroadcast(boolean listen) {
         if (listen) {
             mContext.registerReceiver(mTeaseReceiver, new IntentFilter(TEASE_ACTION));
             mTeaseReceiverRegistered = true;
-            mHost.addCallback(mHostCallback);
         } else {
             if (mTeaseReceiverRegistered) {
                 mContext.unregisterReceiver(mTeaseReceiver);
             }
             mTeaseReceiverRegistered = false;
-            mHost.removeCallback(mHostCallback);
         }
     }
 
-    private void listenForSignificantMotion(boolean listen) {
-        if (mSigMotionSensor == null) return;
+    private void listenForNotifications(boolean listen) {
+        if (mHost == null) return;
         if (listen) {
-            mSensors.requestTriggerSensor(mSigMotionListener, mSigMotionSensor);
+            mHost.addCallback(mHostCallback);
         } else {
-            mSensors.cancelTriggerSensor(mSigMotionListener, mSigMotionSensor);
+            mHost.removeCallback(mHostCallback);
         }
     }
 

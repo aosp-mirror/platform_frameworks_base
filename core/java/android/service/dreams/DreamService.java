@@ -898,27 +898,32 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
         DumpUtils.dumpAsync(mHandler, new Dump() {
             @Override
             public void dump(PrintWriter pw) {
-                pw.print(TAG + ": ");
-                if (mWindowToken == null) {
-                    pw.println("stopped");
-                } else {
-                    pw.println("running (token=" + mWindowToken + ")");
-                }
-                pw.println("  window: " + mWindow);
-                pw.print("  flags:");
-                if (isInteractive()) pw.print(" interactive");
-                if (isLowProfile()) pw.print(" lowprofile");
-                if (isFullscreen()) pw.print(" fullscreen");
-                if (isScreenBright()) pw.print(" bright");
-                if (isWindowless()) pw.print(" windowless");
-                if (isDozing()) pw.print(" dozing");
-                pw.println();
+                dumpOnHandler(fd, pw, args);
             }
         }, pw, 1000);
+    }
+
+    /** @hide */
+    protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print(TAG + ": ");
+        if (mWindowToken == null) {
+            pw.println("stopped");
+        } else {
+            pw.println("running (token=" + mWindowToken + ")");
+        }
+        pw.println("  window: " + mWindow);
+        pw.print("  flags:");
+        if (isInteractive()) pw.print(" interactive");
+        if (isLowProfile()) pw.print(" lowprofile");
+        if (isFullscreen()) pw.print(" fullscreen");
+        if (isScreenBright()) pw.print(" bright");
+        if (isWindowless()) pw.print(" windowless");
+        if (isDozing()) pw.print(" dozing");
+        pw.println();
     }
 
     private final class DreamServiceWrapper extends IDreamService.Stub {
