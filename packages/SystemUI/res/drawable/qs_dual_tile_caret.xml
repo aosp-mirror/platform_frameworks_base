@@ -14,10 +14,7 @@
      limitations under the License.
 -->
 
-<resources>
-    <dimen name="status_bar_height">@*android:dimen/status_bar_height</dimen>
-    <dimen name="navigation_bar_height">@*android:dimen/navigation_bar_height</dimen>
-    <drawable name="notification_material_bg">@*android:drawable/notification_material_bg</drawable>
-    <drawable name="spinner_mtrl_am_alpha">@*android:drawable/spinner_mtrl_am_alpha</drawable>
-</resources>
-
+<nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
+        android:src="@drawable/spinner_mtrl_am_alpha"
+        android:tint="@color/qs_tile_text"
+        android:autoMirrored="true" />

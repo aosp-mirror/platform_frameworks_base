@@ -47,6 +47,7 @@ public class QSPanel extends ViewGroup {
     private int mCellHeight;
     private int mLargeCellWidth;
     private int mLargeCellHeight;
+    private int mPanelPaddingBottom;
     private boolean mExpanded;
 
     private TileRecord mDetailRecord;
@@ -80,6 +81,7 @@ public class QSPanel extends ViewGroup {
         mCellWidth = (int)(mCellHeight * TILE_ASPECT);
         mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
         mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+        mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         if (mColumns != columns) {
             mColumns = columns;
             postInvalidate();
@@ -204,7 +206,7 @@ public class QSPanel extends ViewGroup {
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
         }
-        int h = rows == 0 ? 0 : getRowTop(rows);
+        int h = rows == 0 ? 0 : (getRowTop(rows) + mPanelPaddingBottom);
         mDetail.measure(exactly(width), unspecified());
         if (mDetail.getVisibility() == VISIBLE && mDetail.getChildCount() > 0) {
             final int dmh = mDetail.getMeasuredHeight();

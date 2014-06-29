@@ -47,9 +47,13 @@ public class QSTileView extends ViewGroup {
     private final View mDivider;
     private final H mHandler = new H();
     private final int mIconSizePx;
+    private final int mTileSpacingPx;
+    private final int mTilePaddingTopPx;
+    private final int mTilePaddingBelowIconPx;
+    private final int mDualTilePaddingBelowDividerPx;
 
-    private int mTilePaddingPx;
     private TextView mLabel;
+    private QSDualTileLabel mDualLabel;
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
@@ -61,6 +65,11 @@ public class QSTileView extends ViewGroup {
         mContext = context;
         final Resources res = context.getResources();
         mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
+        mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
+        mTilePaddingTopPx = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);
+        mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
+        mDualTilePaddingBelowDividerPx =
+                res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_below_divider);
         recreateLabel();
         setClipChildren(false);
 
@@ -82,26 +91,46 @@ public class QSTileView extends ViewGroup {
         if (mLabel != null) {
             labelText = mLabel.getText();
             removeView(mLabel);
+            mLabel = null;
+        }
+        if (mDualLabel != null) {
+            labelText = mDualLabel.getText();
+            removeView(mDualLabel);
+            mDualLabel = null;
         }
         final Resources res = mContext.getResources();
-        mLabel = new TextView(mDual
-                ? new ContextThemeWrapper(mContext, R.style.BorderlessButton_Tiny)
-                : mContext);
-        mLabel.setId(android.R.id.title);
-        mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
-        mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
-        mLabel.setMinLines(2);
-        mTilePaddingPx = res.getDimensionPixelSize(
-                mDual ? R.dimen.qs_dual_tile_padding : R.dimen.qs_tile_padding);
-        final int bottomPadding = mDual ? 0 : mTilePaddingPx;
-        mLabel.setPadding(mTilePaddingPx, mTilePaddingPx, mTilePaddingPx, bottomPadding);
-        mLabel.setTypeface(CONDENSED);
-        mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
-        if (labelText != null) {
-            mLabel.setText(labelText);
+        if (mDual) {
+            final Context c = new ContextThemeWrapper(mContext, R.style.BorderlessButton_Tiny);
+            mDualLabel = new QSDualTileLabel(c);
+            mDualLabel.setId(android.R.id.title);
+            mDualLabel.setFirstLineBackground(res.getDrawable(R.drawable.qs_dual_tile_caret));
+            mDualLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mDualLabel.setPadding(0, mDualTilePaddingBelowDividerPx, 0, 0);
+            mDualLabel.setTypeface(CONDENSED);
+            mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
+            mDualLabel.setClickable(true);
+            mDualLabel.setOnClickListener(mClickSecondary);
+            if (labelText != null) {
+                mDualLabel.setText(labelText);
+            }
+            addView(mDualLabel);
+        } else {
+            mLabel = new TextView(mContext);
+            mLabel.setId(android.R.id.title);
+            mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            mLabel.setMinLines(2);
+            mLabel.setPadding(0, 0, 0, 0);
+            mLabel.setTypeface(CONDENSED);
+            mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
+            mLabel.setClickable(false);
+            if (labelText != null) {
+                mLabel.setText(labelText);
+            }
+            addView(mLabel);
         }
-        addView(mLabel);
     }
 
     public void setDual(boolean dual) {
@@ -110,14 +139,7 @@ public class QSTileView extends ViewGroup {
         if (changed) {
             recreateLabel();
         }
-        if (mDual) {
-            setOnClickListener(mClickPrimary);
-            mLabel.setClickable(true);
-            mLabel.setOnClickListener(mClickSecondary);
-        } else {
-            mLabel.setClickable(false);
-            setOnClickListener(mClickPrimary);
-        }
+        setOnClickListener(mClickPrimary);
         mDivider.setVisibility(dual ? VISIBLE : GONE);
         postInvalidate();
     }
@@ -145,13 +167,17 @@ public class QSTileView extends ViewGroup {
         return d;
     }
 
+    private View labelView() {
+        return mDual ? mDualLabel : mLabel;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int h = MeasureSpec.getSize(heightMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
         mIcon.measure(iconSpec, iconSpec);
-        mLabel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+        labelView().measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
         if (mDual) {
             mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
         }
@@ -165,14 +191,10 @@ public class QSTileView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
-        final int h = getMeasuredHeight();
 
-        final int contentHeight = mTilePaddingPx + mIcon.getMeasuredHeight()
-                + mLabel.getMeasuredHeight()
-                + (mDual ? (mTilePaddingPx + mDivider.getMeasuredHeight()) : 0);
-
-        int top = Math.max(0, (h - contentHeight) / 2);
-        top += mTilePaddingPx;
+        int top = 0;
+        top += mTileSpacingPx;
+        top += mTilePaddingTopPx;
         final int iconLeft = (w - mIcon.getMeasuredWidth()) / 2;
         layout(mIcon, iconLeft, top);
         if (mRipple != null) {
@@ -183,12 +205,12 @@ public class QSTileView extends ViewGroup {
             mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
         }
         top = mIcon.getBottom();
+        top += mTilePaddingBelowIconPx;
         if (mDual) {
-            top += mTilePaddingPx;
             layout(mDivider, 0, top);
             top = mDivider.getBottom();
         }
-        layout(mLabel, 0, top);
+        layout(labelView(), 0, top);
     }
 
     private static void layout(View child, int left, int top) {
@@ -204,7 +226,11 @@ public class QSTileView extends ViewGroup {
                 iv.setImageResource(state.iconId);
             }
         }
-        mLabel.setText(state.label);
+        if (mDual) {
+            mDualLabel.setText(state.label);
+        } else {
+            mLabel.setText(state.label);
+        }
         setContentDescription(state.contentDescription);
     }
 
