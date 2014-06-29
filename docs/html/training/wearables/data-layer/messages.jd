@@ -39,7 +39,7 @@ is received or when the request times out:
 
 <p class="note"><b>Note:</b> Read more about asynchronous and synchronous calls
 to Google Play services and when to use each in
-<a href="google/auth/api-client.html#Communicating">Communicate with Google Play Services</a>.
+<a href="{@docRoot}google/auth/api-client.html#Communicating">Communicate with Google Play Services</a>.
 </p>
 
 <pre>
