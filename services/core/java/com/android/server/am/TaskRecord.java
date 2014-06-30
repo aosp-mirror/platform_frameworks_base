@@ -131,8 +131,8 @@ final class TaskRecord extends ThumbnailHolder {
         taskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
-        setIntent(_intent, info);
         mActivities = new ArrayList<ActivityRecord>();
+        setIntent(_intent, info);
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
