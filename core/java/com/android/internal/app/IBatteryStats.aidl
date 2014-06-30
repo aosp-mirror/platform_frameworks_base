@@ -58,6 +58,8 @@ interface IBatteryStats {
 
     void noteVibratorOn(int uid, long durationMillis);
     void noteVibratorOff(int uid);
+    void noteFlashlightOn();
+    void noteFlashlightOff();
     void noteStartGps(int uid);
     void noteStopGps(int uid);
     void noteScreenState(int state);

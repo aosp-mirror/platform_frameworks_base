@@ -706,6 +706,15 @@ public class BatteryStatsHelper {
         }
     }
 
+    private void addFlashlightUsage() {
+        long flashlightOnTimeMs = mStats.getFlashlightOnTime(mRawRealtime, mStatsType) / 1000;
+        double flashlightPower = flashlightOnTimeMs
+                * mPowerProfile.getAveragePower(PowerProfile.POWER_FLASHLIGHT) / (60*60*1000);
+        if (flashlightPower != 0) {
+            addEntry(BatterySipper.DrainType.FLASHLIGHT, flashlightOnTimeMs, flashlightPower);
+        }
+    }
+
     private void addUserUsage() {
         for (int i=0; i<mUserSippers.size(); i++) {
             final int userId = mUserSippers.keyAt(i);
@@ -760,6 +769,7 @@ public class BatteryStatsHelper {
         addUserUsage();
         addPhoneUsage();
         addScreenUsage();
+        addFlashlightUsage();
         addWiFiUsage();
         addBluetoothUsage();
         addIdleUsage(); // Not including cellular idle power

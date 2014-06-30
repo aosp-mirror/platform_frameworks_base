@@ -365,6 +365,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteFlashlightOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFlashlightOnLocked();
+        }
+    }
+
+    public void noteFlashlightOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFlashlightOffLocked();
+        }
+    }
+
     public void noteWifiRunning(WorkSource ws) {
         enforceCallingPermission();
         synchronized (mStats) {
