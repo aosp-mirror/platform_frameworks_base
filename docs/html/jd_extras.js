@@ -1018,7 +1018,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "url": "http://www.google.com/ads/admob/#subid=us-en-et-dac",
     "timestamp": null,
     "image": "distribute/images/advertising.png",
-    "title": "AdMob for Android",
+    "title": "AdMob",
     "summary": "Make money by connecting with over a million Google advertisers all over the world, so your revenue scales with your app.",
     "keywords": ["ads"],
     "type": "distribute",
