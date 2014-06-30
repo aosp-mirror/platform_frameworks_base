@@ -144,8 +144,11 @@ public class RippleDrawable extends LayerDrawable {
     /** Whether the hotspot is currently active (e.g. focused or pressed). */
     private boolean mActive;
 
+    /**
+     * Constructor used for drawable inflation.
+     */
     RippleDrawable() {
-        this(null, null);
+        this(new RippleState(null, null, null), null, null);
     }
 
     /**
