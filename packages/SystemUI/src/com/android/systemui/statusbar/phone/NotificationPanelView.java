@@ -38,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.MirrorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -63,6 +64,8 @@ public class NotificationPanelView extends PanelView implements
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private TextView mClockView;
+
+    private MirrorView mSystemIconsCopy;
 
     private NotificationStackScrollLayout mNotificationStackScroller;
     private int mNotificationTopPadding;
@@ -118,6 +121,7 @@ public class NotificationPanelView extends PanelView implements
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mSystemIconsCopy = new MirrorView(context);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -692,14 +696,22 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         LinearLayout systemIcons = mStatusBar.getSystemIcons();
-        if (systemIcons.getParent() != null) {
-            ((ViewGroup) systemIcons.getParent()).removeView(systemIcons);
-        }
+        ViewGroup parent = ((ViewGroup) systemIcons.getParent());
         if (toHeader) {
+            int index = parent.indexOfChild(systemIcons);
+            parent.removeView(systemIcons);
+            mSystemIconsCopy.setMirroredView(
+                    systemIcons, systemIcons.getWidth(), systemIcons.getHeight());
+            parent.addView(mSystemIconsCopy, index);
             mHeader.attachSystemIcons(systemIcons);
         } else {
+            ViewGroup newParent = mStatusBar.getSystemIconArea();
+            int index = newParent.indexOfChild(mSystemIconsCopy);
+            parent.removeView(systemIcons);
             mHeader.onSystemIconsDetached();
-            mStatusBar.reattachSystemIcons();
+            mSystemIconsCopy.setMirroredView(null, 0, 0);
+            newParent.removeView(mSystemIconsCopy);
+            newParent.addView(systemIcons, index);
         }
     }
 

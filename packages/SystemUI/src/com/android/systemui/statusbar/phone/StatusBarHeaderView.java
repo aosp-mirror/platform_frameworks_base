@@ -50,6 +50,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private View mBackground;
     private ViewGroup mSystemIconsContainer;
+    private View mSystemIconsSuperContainer;
     private View mDateTime;
     private View mKeyguardCarrierText;
     private MultiUserSwitch mMultiUserSwitch;
@@ -90,6 +91,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     protected void onFinishInflate() {
         super.onFinishInflate();
         mBackground = findViewById(R.id.background);
+        mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
         mSystemIconsContainer = (ViewGroup) findViewById(R.id.system_icons_container);
         mDateTime = findViewById(R.id.datetime);
         mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
@@ -180,10 +182,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             setLayoutParams(lp);
         }
         int systemIconsContainerHeight = onKeyguardAndCollapsed ? mKeyguardHeight : mCollapsedHeight;
-        lp = mSystemIconsContainer.getLayoutParams();
+        lp = mSystemIconsSuperContainer.getLayoutParams();
         if (lp.height != systemIconsContainerHeight) {
             lp.height = systemIconsContainerHeight;
-            mSystemIconsContainer.setLayoutParams(lp);
+            mSystemIconsSuperContainer.setLayoutParams(lp);
         }
         lp = mMultiUserSwitch.getLayoutParams();
         if (lp.height != systemIconsContainerHeight) {
@@ -224,7 +226,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateSystemIconsLayoutParams() {
-        RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsContainer.getLayoutParams();
+        RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
         boolean systemIconsAboveClock = mExpanded && !mOverscrolled
                 && mShowChargingInfo && !mShowEmergencyCallsOnly;
         lp.setMarginEnd(0);
@@ -240,7 +242,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 lp.setMarginEnd(mSystemIconsSwitcherHiddenExpandedMargin);
             }
         }
-        mSystemIconsContainer.setLayoutParams(lp);
+        mSystemIconsSuperContainer.setLayoutParams(lp);
 
         RelativeLayout.LayoutParams clockLp = (LayoutParams) mDateTime.getLayoutParams();
         if (systemIconsAboveClock) {
