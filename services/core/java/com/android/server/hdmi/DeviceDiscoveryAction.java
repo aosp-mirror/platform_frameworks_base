@@ -111,7 +111,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
             public void onPollingFinished(List<Integer> ackedAddress) {
                 if (ackedAddress.isEmpty()) {
                     Slog.v(TAG, "No device is detected.");
-                    finish();
+                    wrapUpAndFinish();
                     return;
                 }
 
