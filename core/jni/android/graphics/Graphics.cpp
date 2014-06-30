@@ -385,7 +385,6 @@ android::TypefaceImpl* GraphicsJNI::getNativeTypeface(JNIEnv* env, jobject paint
     SkASSERT(env->IsInstanceOf(paint, gPaint_class));
     jlong typefaceHandle = env->GetLongField(paint, gPaint_nativeTypefaceID);
     android::TypefaceImpl* p = reinterpret_cast<android::TypefaceImpl*>(typefaceHandle);
-    SkASSERT(p);
     return p;
 }
 
