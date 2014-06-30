@@ -24,5 +24,7 @@ LOCAL_PACKAGE_NAME := MultiDexLegacyTestServicesTests
 
 LOCAL_SDK_VERSION := 9
 
+LOCAL_DEX_PREOPT := false
+
 include $(BUILD_PACKAGE)
 
