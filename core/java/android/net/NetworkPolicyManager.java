@@ -45,6 +45,8 @@ public class NetworkPolicyManager {
     public static final int POLICY_NONE = 0x0;
     /** Reject network usage on metered networks when application in background. */
     public static final int POLICY_REJECT_METERED_BACKGROUND = 0x1;
+    /** Allow network use (metered or not) in the background in battery save mode. */
+    public static final int POLICY_ALLOW_BACKGROUND_BATTERY_SAVE = 0x2;
 
     /** All network traffic should be allowed. */
     public static final int RULE_ALLOW_ALL = 0x0;
@@ -76,11 +78,35 @@ public class NetworkPolicyManager {
      * Set policy flags for specific UID.
      *
      * @param policy {@link #POLICY_NONE} or combination of flags like
-     *            {@link #POLICY_REJECT_METERED_BACKGROUND}.
+     * {@link #POLICY_REJECT_METERED_BACKGROUND}, {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
      */
     public void setUidPolicy(int uid, int policy) {
         try {
             mService.setUidPolicy(uid, policy);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Add policy flags for specific UID.  The given policy bits will be set for
+     * the uid.  Policy flags may be either
+     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     */
+    public void addUidPolicy(int uid, int policy) {
+        try {
+            mService.addUidPolicy(uid, policy);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Clear/remove policy flags for specific UID.  The given policy bits will be set for
+     * the uid.  Policy flags may be either
+     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     */
+    public void removeUidPolicy(int uid, int policy) {
+        try {
+            mService.removeUidPolicy(uid, policy);
         } catch (RemoteException e) {
         }
     }
@@ -96,6 +122,14 @@ public class NetworkPolicyManager {
     public int[] getUidsWithPolicy(int policy) {
         try {
             return mService.getUidsWithPolicy(policy);
+        } catch (RemoteException e) {
+            return new int[0];
+        }
+    }
+
+    public int[] getPowerSaveAppIdWhitelist() {
+        try {
+            return mService.getPowerSaveAppIdWhitelist();
         } catch (RemoteException e) {
             return new int[0];
         }

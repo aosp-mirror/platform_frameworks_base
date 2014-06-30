@@ -36,6 +36,7 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
 
+import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -50,6 +51,7 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -391,17 +393,20 @@ public class PackageManagerService extends IPackageManager.Stub {
     final Settings mSettings;
     boolean mRestoredSettings;
 
-    // Group-ids that are given to all packages as read from etc/permissions/*.xml.
-    int[] mGlobalGids;
+    // System configuration read by SystemConfig.
+    final int[] mGlobalGids;
+    final SparseArray<HashSet<String>> mSystemPermissions;
+    final HashMap<String, FeatureInfo> mAvailableFeatures;
 
-    // These are the built-in uid -> permission mappings that were read from the
-    // etc/permissions.xml file.
-    final SparseArray<HashSet<String>> mSystemPermissions =
-            new SparseArray<HashSet<String>>();
+    // If mac_permissions.xml was found for seinfo labeling.
+    boolean mFoundPolicyFile;
 
-    static final class SharedLibraryEntry {
-        final String path;
-        final String apk;
+    // If a recursive restorecon of /data/data/<pkg> is needed.
+    private boolean mShouldRestoreconData = SELinuxMMAC.shouldRestorecon();
+
+    public static final class SharedLibraryEntry {
+        public final String path;
+        public final String apk;
 
         SharedLibraryEntry(String _path, String _apk) {
             path = _path;
@@ -409,21 +414,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    // These are the built-in shared libraries that were read from the
-    // etc/permissions.xml file.
-    final HashMap<String, SharedLibraryEntry> mSharedLibraries
-            = new HashMap<String, SharedLibraryEntry>();
-
-    // These are the features this devices supports that were read from the
-    // etc/permissions.xml file.
-    final HashMap<String, FeatureInfo> mAvailableFeatures =
-            new HashMap<String, FeatureInfo>();
-
-    // If mac_permissions.xml was found for seinfo labeling.
-    boolean mFoundPolicyFile;
-
-    // If a recursive restorecon of /data/data/<pkg> is needed.
-    private boolean mShouldRestoreconData = SELinuxMMAC.shouldRestorecon();
+    // Currently known shared libraries.
+    final HashMap<String, SharedLibraryEntry> mSharedLibraries =
+            new HashMap<String, SharedLibraryEntry>();
 
     // All available activities, for your resolving pleasure.
     final ActivityIntentResolver mActivities =
@@ -1331,6 +1324,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         getDefaultDisplayMetrics(context, mMetrics);
 
+        SystemConfig systemConfig = SystemConfig.getInstance();
+        mGlobalGids = systemConfig.getGlobalGids();
+        mSystemPermissions = systemConfig.getSystemPermissions();
+        mAvailableFeatures = systemConfig.getAvailableFeatures();
+
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
@@ -1352,12 +1350,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             sUserManager = new UserManagerService(context, this,
                     mInstallLock, mPackages);
 
-            // Read permissions and features from system
-            readPermissions(Environment.buildPath(
-                    Environment.getRootDirectory(), "etc", "permissions"), false);
-            // Only read features from OEM
-            readPermissions(Environment.buildPath(
-                    Environment.getOemDirectory(), "etc", "permissions"), true);
+            // Propagate permission configuration in to package manager.
+            ArrayMap<String, SystemConfig.PermissionEntry> permConfig
+                    = systemConfig.getPermissions();
+            for (int i=0; i<permConfig.size(); i++) {
+                SystemConfig.PermissionEntry perm = permConfig.valueAt(i);
+                BasePermission bp = mSettings.mPermissions.get(perm.name);
+                if (bp == null) {
+                    bp = new BasePermission(perm.name, null, BasePermission.TYPE_BUILTIN);
+                    mSettings.mPermissions.put(perm.name, bp);
+                }
+                if (perm.gids != null) {
+                    bp.gids = appendInts(bp.gids, perm.gids);
+                }
+            }
+
+            ArrayMap<String, String> libConfig = systemConfig.getSharedLibraries();
+            for (int i=0; i<libConfig.size(); i++) {
+                mSharedLibraries.put(libConfig.keyAt(i),
+                        new SharedLibraryEntry(libConfig.valueAt(i), null));
+            }
 
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
@@ -1820,198 +1832,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         mSettings.removePackageLPw(ps.name);
-    }
-
-    void readPermissions(File libraryDir, boolean onlyFeatures) {
-        // Read permissions from .../etc/permission directory.
-        if (!libraryDir.exists() || !libraryDir.isDirectory()) {
-            Slog.w(TAG, "No directory " + libraryDir + ", skipping");
-            return;
-        }
-        if (!libraryDir.canRead()) {
-            Slog.w(TAG, "Directory " + libraryDir + " cannot be read");
-            return;
-        }
-
-        // Iterate over the files in the directory and scan .xml files
-        for (File f : libraryDir.listFiles()) {
-            // We'll read platform.xml last
-            if (f.getPath().endsWith("etc/permissions/platform.xml")) {
-                continue;
-            }
-
-            if (!f.getPath().endsWith(".xml")) {
-                Slog.i(TAG, "Non-xml file " + f + " in " + libraryDir + " directory, ignoring");
-                continue;
-            }
-            if (!f.canRead()) {
-                Slog.w(TAG, "Permissions library file " + f + " cannot be read");
-                continue;
-            }
-
-            readPermissionsFromXml(f, onlyFeatures);
-        }
-
-        // Read permissions from .../etc/permissions/platform.xml last so it will take precedence
-        final File permFile = new File(Environment.getRootDirectory(),
-                "etc/permissions/platform.xml");
-        readPermissionsFromXml(permFile, onlyFeatures);
-    }
-
-    private void readPermissionsFromXml(File permFile, boolean onlyFeatures) {
-        FileReader permReader = null;
-        try {
-            permReader = new FileReader(permFile);
-        } catch (FileNotFoundException e) {
-            Slog.w(TAG, "Couldn't find or open permissions file " + permFile);
-            return;
-        }
-
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(permReader);
-
-            XmlUtils.beginDocument(parser, "permissions");
-
-            while (true) {
-                XmlUtils.nextElement(parser);
-                if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
-                    break;
-                }
-
-                String name = parser.getName();
-                if ("group".equals(name) && !onlyFeatures) {
-                    String gidStr = parser.getAttributeValue(null, "gid");
-                    if (gidStr != null) {
-                        int gid = Process.getGidForName(gidStr);
-                        mGlobalGids = appendInt(mGlobalGids, gid);
-                    } else {
-                        Slog.w(TAG, "<group> without gid at "
-                                + parser.getPositionDescription());
-                    }
-
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-                } else if ("permission".equals(name) && !onlyFeatures) {
-                    String perm = parser.getAttributeValue(null, "name");
-                    if (perm == null) {
-                        Slog.w(TAG, "<permission> without name at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    perm = perm.intern();
-                    readPermission(parser, perm);
-
-                } else if ("assign-permission".equals(name) && !onlyFeatures) {
-                    String perm = parser.getAttributeValue(null, "name");
-                    if (perm == null) {
-                        Slog.w(TAG, "<assign-permission> without name at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    String uidStr = parser.getAttributeValue(null, "uid");
-                    if (uidStr == null) {
-                        Slog.w(TAG, "<assign-permission> without uid at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    int uid = Process.getUidForName(uidStr);
-                    if (uid < 0) {
-                        Slog.w(TAG, "<assign-permission> with unknown uid \""
-                                + uidStr + "\" at "
-                                + parser.getPositionDescription());
-                        XmlUtils.skipCurrentTag(parser);
-                        continue;
-                    }
-                    perm = perm.intern();
-                    HashSet<String> perms = mSystemPermissions.get(uid);
-                    if (perms == null) {
-                        perms = new HashSet<String>();
-                        mSystemPermissions.put(uid, perms);
-                    }
-                    perms.add(perm);
-                    XmlUtils.skipCurrentTag(parser);
-
-                } else if ("library".equals(name) && !onlyFeatures) {
-                    String lname = parser.getAttributeValue(null, "name");
-                    String lfile = parser.getAttributeValue(null, "file");
-                    if (lname == null) {
-                        Slog.w(TAG, "<library> without name at "
-                                + parser.getPositionDescription());
-                    } else if (lfile == null) {
-                        Slog.w(TAG, "<library> without file at "
-                                + parser.getPositionDescription());
-                    } else {
-                        //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                        mSharedLibraries.put(lname, new SharedLibraryEntry(lfile, null));
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("feature".equals(name)) {
-                    String fname = parser.getAttributeValue(null, "name");
-                    if (fname == null) {
-                        Slog.w(TAG, "<feature> without name at "
-                                + parser.getPositionDescription());
-                    } else {
-                        //Log.i(TAG, "Got feature " + fname);
-                        FeatureInfo fi = new FeatureInfo();
-                        fi.name = fname;
-                        mAvailableFeatures.put(fname, fi);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else {
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-                }
-
-            }
-            permReader.close();
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, "Got execption parsing permissions.", e);
-        } catch (IOException e) {
-            Slog.w(TAG, "Got execption parsing permissions.", e);
-        }
-    }
-
-    void readPermission(XmlPullParser parser, String name)
-            throws IOException, XmlPullParserException {
-
-        name = name.intern();
-
-        BasePermission bp = mSettings.mPermissions.get(name);
-        if (bp == null) {
-            bp = new BasePermission(name, null, BasePermission.TYPE_BUILTIN);
-            mSettings.mPermissions.put(name, bp);
-        }
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-               && (type != XmlPullParser.END_TAG
-                       || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG
-                    || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if ("group".equals(tagName)) {
-                String gidStr = parser.getAttributeValue(null, "gid");
-                if (gidStr != null) {
-                    int gid = Process.getGidForName(gidStr);
-                    bp.gids = appendInt(bp.gids, gid);
-                } else {
-                    Slog.w(TAG, "<group> without gid at "
-                            + parser.getPositionDescription());
-                }
-            }
-            XmlUtils.skipCurrentTag(parser);
-        }
     }
 
     static int[] appendInts(int[] cur, int[] add) {
