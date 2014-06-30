@@ -166,29 +166,28 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             mOkButton.setOnHoverListener(new LiftToActivateListener(getContext()));
         }
 
-        mDeleteButton = findViewById(R.id.delete_button);
-        if (mDeleteButton != null) {
-            mDeleteButton.setVisibility(View.VISIBLE);
-            mDeleteButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    // check for time-based lockouts
-                    if (mPasswordEntry.isEnabled()) {
-                        mPasswordEntry.deleteLastChar();
-                    }
-                    doHapticKeyClick();
+        mDeleteButton = findViewById(R.id.delete_button);{
+        mDeleteButton.setVisibility(View.VISIBLE);
+        mDeleteButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // check for time-based lockouts
+                if (mPasswordEntry.isEnabled()) {
+                    mPasswordEntry.deleteLastChar();
                 }
-            });
-            mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
-                    // check for time-based lockouts
-                    if (mPasswordEntry.isEnabled()) {
-                        resetPasswordText(true /* animate */);
-                    }
-                    doHapticKeyClick();
-                    return true;
+                doHapticKeyClick();
+            }
+        });
+        mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                // check for time-based lockouts
+                if (mPasswordEntry.isEnabled()) {
+                    resetPasswordText(true /* animate */);
                 }
-            });
-        }
+                doHapticKeyClick();
+                return true;
+            }
+        });
+
         mButton0 = findViewById(R.id.key0);
         mButton1 = findViewById(R.id.key1);
         mButton2 = findViewById(R.id.key2);
