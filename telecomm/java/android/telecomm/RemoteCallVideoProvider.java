@@ -42,5 +42,5 @@ public class RemoteCallVideoProvider implements IBinder.DeathRecipient {
      */
     public void setCamera(String cameraId) throws RemoteException {
         mCallVideoProvider.setCamera(cameraId);
-    };
+    }
 }

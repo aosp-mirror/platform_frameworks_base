@@ -159,7 +159,7 @@ public final class InCallCall implements Parcelable {
      * @return The call video provider.
      */
     public RemoteCallVideoProvider getCallVideoProvider() throws RemoteException {
-        if (mRemoteCallVideoProvider == null) {
+        if (mRemoteCallVideoProvider == null && mCallVideoProvider != null) {
             try {
                 mRemoteCallVideoProvider = new RemoteCallVideoProvider(mCallVideoProvider);
             } catch (RemoteException ignored) {
@@ -244,7 +244,8 @@ public final class InCallCall implements Parcelable {
         destination.writeParcelable(mSubscription, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
         destination.writeParcelable(mHandoffCallServiceDescriptor, 0);
-        destination.writeStrongBinder(mCallVideoProvider.asBinder());
+        destination.writeStrongBinder(
+                mCallVideoProvider != null ? mCallVideoProvider.asBinder() : null);
         destination.writeString(mParentCallId);
         destination.writeList(mChildCallIds);
     }
