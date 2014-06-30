@@ -82,6 +82,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -97,7 +99,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
 
 
 
@@ -109,19 +111,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-5831155-1']);
-  _gaq.push(['_trackPageview']);
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  ga('create', 'UA-5831155-1', 'android.com');
+  ga('create', 'UA-49880327-2', 'android.com', {'name': 'universal'});  // New tracker);
+  ga('send', 'pageview');
+  ga('universal.send', 'pageview'); // Send page view for new tracker.
 </script>
+
 </head>
 
 <body class="gc-documentation google
@@ -274,11 +277,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
         <!-- Expanded quicknav -->
-        <div id="quicknav" class="col-9">
+        <div id="quicknav" class="col-13">
           <ul>
+            <li class="about">
+              <ul>
+                <li><a href="/about/index.html">About</a></li>
+                <li><a href="/wear/index.html">Wear</a></li>
+                <li><a href="/tv/index.html">TV</a></li>
+                <li><a href="/auto/index.html">Auto</a></li>
+              </ul>
+            </li>
             <li class="design">
               <ul>
                 <li><a href="/design/index.html">Get Started</a></li>
+                <li><a href="/design/devices.html">Devices</a></li>
                 <li><a href="/design/style/index.html">Style</a></li>
                 <li><a href="/design/patterns/index.html">Patterns</a></li>
                 <li><a href="/design/building-blocks/index.html">Building Blocks</a></li>
@@ -312,7 +324,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                   ja-lang="リファレンス"
                   es-lang="Referencia"
                   >Reference</a></li>
-                <li><a href="/tools/index.html"
+                <li><a href="/sdk/index.html"
                   zh-tw-lang="相關工具"
                   zh-cn-lang="工具"
                   ru-lang="Инструменты"
@@ -320,7 +332,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                   ja-lang="ツール"
                   es-lang="Herramientas"
                   >Tools</a>
-                  <ul><li><a href="/sdk/index.html">Get the SDK</a></li></ul>
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
@@ -375,7 +386,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                   ja-lang="リファレンス"
                   es-lang="Referencia"
                   >Reference</a></li>
-                <li class="tools"><a href="/tools/index.html"
+                <li class="tools"><a href="/sdk/index.html"
                   zh-tw-lang="相關工具"
                   zh-cn-lang="工具"
                   ru-lang="Инструменты"
@@ -394,7 +405,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             </ul>
         </div>
     </div>
-    <!-- /Sendondary x-nav -->
+    <!-- /Sendondary x-nav DEVELOP -->
 
   
 
@@ -883,110 +894,117 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_schemaOrgType">Corpus_schemaOrgType</a></td>
+        <td class="jd-descrcol" width="100%"><p>schema.org type of documents in this corpus.</td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">Corpus_trimmable</a></td>
         <td class="jd-descrcol" width="100%"><p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam_paramName">FeatureParam_paramName</a></td>
         <td class="jd-descrcol" width="100%"><p>The name of this parameter.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam_paramValue">FeatureParam_paramValue</a></td>
         <td class="jd-descrcol" width="100%"><p>The value of this parameter.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus_allowShortcuts">GlobalSearchCorpus_allowShortcuts</a></td>
         <td class="jd-descrcol" width="100%"><p>Whether or not global search is enabled for this corpus.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionContent">GlobalSearchSection_sectionContent</a></td>
         <td class="jd-descrcol" width="100%"><p>The content of this global search section.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionType">GlobalSearchSection_sectionType</a></td>
         <td class="jd-descrcol" width="100%"><p>The type of global search section for this mapping.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentAction">GlobalSearch_defaultIntentAction</a></td>
         <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_action</code>.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentActivity">GlobalSearch_defaultIntentActivity</a></td>
         <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_aactivity</code>.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentData">GlobalSearch_defaultIntentData</a></td>
         <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_data</code>.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchEnabled">GlobalSearch_searchEnabled</a></td>
         <td class="jd-descrcol" width="100%"><p>Whether or not global search is enabled for this app.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">GlobalSearch_searchLabel</a></td>
         <td class="jd-descrcol" width="100%"><p>A localized string to identify this app's data within the global search app.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_settingsDescription">GlobalSearch_settingsDescription</a></td>
         <td class="jd-descrcol" width="100%"><p>A localized string to describe this apps data within the global search apps settings.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">IMECorpus_inputEnabled</a></td>
         <td class="jd-descrcol" width="100%"><p>Whether or not this corpus could be useful input for IME.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">IMECorpus_sourceClass</a></td>
         <td class="jd-descrcol" width="100%"><p>Class of the source.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">IMECorpus_toAddressesSection</a></td>
         <td class="jd-descrcol" width="100%"><p>Sections containing entities communicated with in a given document.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">IMECorpus_userInputSection</a></td>
         <td class="jd-descrcol" width="100%"><p>If this section is non-empty, the document is considered to be input by the user if
@@ -995,14 +1013,14 @@ Summary:
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">IMECorpus_userInputTag</a></td>
         <td class="jd-descrcol" width="100%"><p>Tag name for documents that contain data input by the user.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">IMECorpus_userInputValue</a></td>
         <td class="jd-descrcol" width="100%"><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
@@ -1010,7 +1028,7 @@ Summary:
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraBearing">MapAttrs_cameraBearing</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></code>
@@ -1018,7 +1036,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTargetLat">MapAttrs_cameraTargetLat</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLat">cameraTargetLat</a></code>
@@ -1026,7 +1044,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTargetLng">MapAttrs_cameraTargetLng</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLng">cameraTargetLng</a></code>
@@ -1034,7 +1052,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTilt">MapAttrs_cameraTilt</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTilt">cameraTilt</a></code>
@@ -1042,7 +1060,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraZoom">MapAttrs_cameraZoom</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraZoom">cameraZoom</a></code>
@@ -1050,7 +1068,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_mapType">MapAttrs_mapType</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#mapType">mapType</a></code>
@@ -1058,7 +1076,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiCompass">MapAttrs_uiCompass</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></code>
@@ -1066,7 +1084,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiRotateGestures">MapAttrs_uiRotateGestures</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiRotateGestures">uiRotateGestures</a></code>
@@ -1074,7 +1092,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiScrollGestures">MapAttrs_uiScrollGestures</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></code>
@@ -1082,7 +1100,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiTiltGestures">MapAttrs_uiTiltGestures</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></code>
@@ -1090,7 +1108,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiZoomControls">MapAttrs_uiZoomControls</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></code>
@@ -1098,7 +1116,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiZoomGestures">MapAttrs_uiZoomGestures</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></code>
@@ -1106,7 +1124,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_useViewLifecycle">MapAttrs_useViewLifecycle</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></code>
@@ -1114,7 +1132,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_zOrderOnTop">MapAttrs_zOrderOnTop</a></td>
         <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></code>
@@ -1122,27 +1140,34 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature_featureType">SectionFeature_featureType</a></td>
         <td class="jd-descrcol" width="100%"><p>The type of this feature.</td>
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></td>
         <td class="jd-descrcol" width="100%"><p>Indicates if this section should support prefix matching.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></td>
         <td class="jd-descrcol" width="100%"><p>Indicates if this section should not be indexed.</td>
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_schemaOrgProperty">Section_schemaOrgProperty</a></td>
+        <td class="jd-descrcol" width="100%"><p>Section corresponds to this schema.org property.</td>
+    </tr>
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionFormat">Section_sectionFormat</a></td>
@@ -1348,8 +1373,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AppDataSearch">AppDataSearch</a></td>
-          <td class="jd-descrcol" width="100%"><p>Applications that index data using AppDataSearch must provide their corpus configuration
-    in an XML file, typically called <code>appdatasearch.xml</code>.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a AppDataSearch.</td>
       </tr>
       
     
@@ -1360,7 +1384,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus">Corpus</a></td>
-          <td class="jd-descrcol" width="100%">The <code>Corpus</code> element represents a corpus within AppDataSearch.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a Corpus.</td>
       </tr>
       
     
@@ -1371,8 +1395,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam">FeatureParam</a></td>
-          <td class="jd-descrcol" width="100%">The <code>FeatureParam</code> element represents a parameter specified for a
-    <code><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></code>.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a FeatureParam.</td>
       </tr>
       
     
@@ -1383,8 +1406,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch">GlobalSearch</a></td>
-          <td class="jd-descrcol" width="100%">The <code>GlobalSearch</code> element should be included if you want your apps data to appear
-    in the global search app.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearch.</td>
       </tr>
       
     
@@ -1395,8 +1417,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus">GlobalSearchCorpus</a></td>
-          <td class="jd-descrcol" width="100%">Each <code>Corpus</code> element should include a <code>GlobalSearchCorpus</code> element if the
-    corpus is to appear in the global search app.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearchCorpus.</td>
       </tr>
       
     
@@ -1407,7 +1428,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection">GlobalSearchSection</a></td>
-          <td class="jd-descrcol" width="100%">This element provides a mapping of sections from this corpus to a global search section.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearchSection.</td>
       </tr>
       
     
@@ -1418,8 +1439,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus">IMECorpus</a></td>
-          <td class="jd-descrcol" width="100%">Each <code>Corpus</code> element should include a <code>IMECorpus</code> element if the
-    corpus is to be used for IME input.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a IMECorpus.</td>
       </tr>
 
 
@@ -1441,7 +1461,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section">Section</a></td>
-          <td class="jd-descrcol" width="100%">The <code>Section</code> element represents a section within a corpus.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a Section.</td>
       </tr>
       
     
@@ -1452,7 +1472,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></td>
-          <td class="jd-descrcol" width="100%">The <code>SectionFeature</code> element represents a feature of a section.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a SectionFeature.</td>
       </tr>
       
     
@@ -1463,17 +1483,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions">WalletFragmentOptions</a></td>
-          <td class="jd-descrcol" width="100%">Attributes for the WalletFragment &lt;fragment&gt; tag
-           <p>Includes the following attributes:</p>
-           <table>
-           <colgroup align="left" />
-           <colgroup align="left" />
-           <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">com.google.android.gms:environment</a></code></code></td><td> Google Wallet environment to use </td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">com.google.android.gms:fragmentMode</a></code></code></td><td> Fragment mode </td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">com.google.android.gms:fragmentStyle</a></code></code></td><td> A style resource specifing attributes to customize the look and feel of WalletFragment </td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_theme">com.google.android.gms:theme</a></code></code></td><td> Theme to be used for the Wallet selector </td></tr>
-           </table></td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a WalletFragmentOptions.</td>
       </tr>
 
 
@@ -1484,14 +1494,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle">WalletFragmentStyle</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that may be specified in a style resource to customize the look and feel of
-         WalletFragment
-           <p>Includes the following attributes:</p>
-           <table>
-           <colgroup align="left" />
-           <colgroup align="left" />
-           <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">com.google.android.gms:buyButtonAppearance</a></code></code></td><td> Appearance of the buy button.</td>
+          <td class="jd-descrcol" width="100%">Attributes that can be used with a WalletFragmentStyle.</td>
       </tr>
 
 
@@ -1942,7 +1945,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The URI of the content provider that the index should crawl to get the data for this
-    corpus. Required. This string must not change between configurations. 
+    corpus. Required. This string must not change between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2037,7 +2041,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The version of the corpus. Optional; defaults to <code>"0"</code>. This string must not change
-      between configurations. 
+      between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2064,6 +2069,53 @@ containing a value of this type.
 
 
 
+<A NAME="Corpus_schemaOrgType"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Corpus_schemaOrgType
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>schema.org type of documents in this corpus. Optional.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                4
+                (0x00000004)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="Corpus_trimmable"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2085,7 +2137,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.
-      Optional; defaults to <code>true</code>. 
+      Optional; defaults to <code>true</code>.
+
 
 
           <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -2228,12 +2281,15 @@ containing a value of this type.
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not global search is enabled for this corpus. Optional; defaults to
       <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>GlobalSearchCorpus</code>
-      element did not exist. 
- Allow shortcuts to global search results from this corpus to be created. If set to
+      element did not exist.
+
+
+      Allow shortcuts to global search results from this corpus to be created. If set to
       <code>true</code>, the global search app may allow the user to create shortcuts to results, for
       example on the users home screen. The shortcuts may be long lived, and may persist after the
       linked document has been deleted. The activity that handles the global search result intent
-      should be able to deal with this gracefully. Defaults to <code>false</code>. 
+      should be able to deal with this gracefully. Defaults to <code>false</code>.
+
 
 
           <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -2281,7 +2337,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The content of this global search section. This is a global search section template string.
-      It should contain a reference to a string which can change between configurations. 
+      It should contain a reference to a string which can change between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2386,7 +2443,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_action</code>. Optional.
-      This string must not change between configurations. 
+      This string must not change between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2434,7 +2492,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_aactivity</code>. Optional.
-      This string must not change between configurations. 
+      This string must not change between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2482,7 +2541,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_data</code>. Optional.
-      This string must not change between configurations. 
+      This string must not change between configurations.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2531,7 +2591,8 @@ containing a value of this type.
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not global search is enabled for this app. Optional; defaults to <code>true</code>.
       If set to <code>false</code>, it will be treated as if the <code>GlobalSearch</code> element did not
-      exist. 
+      exist.
+
 
 
           <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -2626,7 +2687,8 @@ containing a value of this type.
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p><p>A localized string to describe this apps data within the global search apps settings.
-      Optional. 
+      Optional.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2676,6 +2738,7 @@ containing a value of this type.
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not this corpus could be useful input for IME. Optional; defaults to
         <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>IMECorpus</code>
         element did not exist.
+
 
 
           <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -2777,6 +2840,7 @@ containing a value of this type.
         Entities can be names, email addresses or phone numbers.
 
 
+
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -2824,6 +2888,7 @@ containing a value of this type.
   <div class="jd-tagdata jd-tagdescr"><p><p>If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
         value.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -2919,6 +2984,7 @@ containing a value of this type.
       
   <div class="jd-tagdata jd-tagdescr"><p><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
         to be considered input by user.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -3638,10 +3704,20 @@ containing a value of this type.</p></div>
 <colgroup align="left" />
 <colgroup align="left" />
 <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>match_global_nicknames</code></td><td>1</td><td>  Enable global nickname matching on this section </td></tr>
-<tr><td><code>demote_common_words</code></td><td>2</td><td>  Demote common words by a factor in this section </td></tr>
-<tr><td><code>demote_rfc822_hostnames</code></td><td>3</td><td>  Demote RFC822 hostnames by a factor in this section. Only applicable to RFC822
-            sections </td></tr>
+<tr><td><code>match_global_nicknames</code></td><td>1</td><td> Enable global nickname matching on this section </td></tr>
+<tr><td><code>demote_common_words</code></td><td>2</td><td> Demote common words by a factor in this section </td></tr>
+<tr><td><code>demote_rfc822_hostnames</code></td><td>3</td><td>
+            Demote RFC822 hostnames by a factor in this section. Only applicable to RFC822
+            sections
+            </td></tr>
+<tr><td><code>omnibox_url_section</code></td><td>4</td><td>
+            Mark this is an omnibox url section. May enable special ranking and matching
+            behavior. Only application to url sections.
+            </td></tr>
+<tr><td><code>omnibox_title_section</code></td><td>5</td><td>
+            Mark this is an omnibox title section. May enable special ranking and matching
+            behavior.
+            </td></tr>
 </table>
           <p>This is a private symbol.</p></div>
 
@@ -3683,6 +3759,7 @@ containing a value of this type.</p></div>
 
   <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should support prefix matching. Optional; defaults to
       <code>false</code>.
+
 
 
           <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -3756,6 +3833,53 @@ containing a value of this type.
 
 
 
+<A NAME="Section_schemaOrgProperty"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        Section_schemaOrgProperty
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p><p>Section corresponds to this schema.org property. Optional.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          <p>This is a private symbol.</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                6
+                (0x00000006)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="Section_sectionFormat"></A>
 
 <div class="jd-details api apilevel-">
@@ -3788,6 +3912,7 @@ containing a value of this type.
 <tr><td><code>plain</code></td><td>0</td><td></td></tr>
 <tr><td><code>html</code></td><td>1</td><td></td></tr>
 <tr><td><code>rfc822</code></td><td>2</td><td></td></tr>
+<tr><td><code>url</code></td><td>3</td><td></td></tr>
 </table>
           <p>This is a private symbol.</p></div>
 
@@ -3923,6 +4048,7 @@ containing a value of this type.
 
   <div class="jd-tagdata jd-tagdescr"><p><p>Subsection separator. Optional. If not provided, the section is not split into
       subsections.
+
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -4219,6 +4345,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
              "48dp", or special values "match_parent" and "wrap_content".
 
 
+
           <p>May be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -4328,6 +4455,7 @@ containing a value of this type.
   <div class="jd-tagdata jd-tagdescr"><p><p>Width of the buy button. This includes an 8dp padding (4dp on each side) used for
              pressed and focused states of the button. The value can be a specific width, e.g.
              "300dp", or special values "match_parent" and "wrap_content".
+
 
 
           <p>May be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -4756,16 +4884,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>Applications that index data using AppDataSearch must provide their corpus configuration
-    in an XML file, typically called <code>appdatasearch.xml</code>. This file is referenced in your
-    manifest with a meta-data tag with the name <code>com.google.android.gms.appdatasearch</code> in the
-    <code>Application</code> section of the <code>AndroidManifest.xml</code>.</p>
-
-    <p>This is the root element of the XML file. It should contain a <code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus">Corpus</a></code> element for
-    each corpus, and optionally a <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch">GlobalSearch</a></code> element.</p>
-
-    <p>For more information about the <code>AppDataSearch</code> API, see
-    com.google.android.gms.appdatasearch.</p> 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a AppDataSearch.
 </p></div>
 
     
@@ -4794,25 +4913,25 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>Corpus</code> element represents a corpus within AppDataSearch. You should provide one
-    <code>Corpus</code> element for each corpus used by your application. This element should contain
-    a <code><a href="/reference/com/google/android/gms/R.styleable.html#Section">Section</a></code> element for each section within the corpus. If you want data from this corpus
-    to appear in global search, you must include a <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus">GlobalSearchCorpus</a></code> tag within this
-    element also. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a Corpus.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">com.google.android.gms:contentProviderUri</a></code></code></td><td> The URI of the content provider that the index should crawl to get the data for this
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">com.google.android.gms:contentProviderUri</a></code></code></td><td>
+    The URI of the content provider that the index should crawl to get the data for this
     corpus.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusId">com.google.android.gms:corpusId</a></code></code></td><td> The ID of the corpus.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusVersion">com.google.android.gms:corpusVersion</a></code></code></td><td> The version of the corpus.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">com.google.android.gms:trimmable</a></code></code></td><td> Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusVersion">com.google.android.gms:corpusVersion</a></code></code></td><td>
+      The version of the corpus.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_schemaOrgType">com.google.android.gms:schemaOrgType</a></code></code></td><td> schema.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">com.google.android.gms:trimmable</a></code></code></td><td>
+      Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">Corpus_contentProviderUri</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusId">Corpus_corpusId</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusVersion">Corpus_corpusVersion</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">Corpus_trimmable</a></code></li>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">Corpus_contentProviderUri</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusId">Corpus_corpusId</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusVersion">Corpus_corpusVersion</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_schemaOrgType">Corpus_schemaOrgType</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">Corpus_trimmable</a></code></li>
       </ul>
   </div>
 
@@ -4842,8 +4961,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>FeatureParam</code> element represents a parameter specified for a
-    <code><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a FeatureParam.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -4884,21 +5002,23 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>GlobalSearch</code> element should be included if you want your apps data to appear
-    in the global search app. It should be contained within the top level <code><a href="/reference/com/google/android/gms/R.styleable.html#AppDataSearch">AppDataSearch</a></code>
-    element. If you opt into global search, you should provide a <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus">GlobalSearchCorpus</a></code>
-    element within at least one of your <code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus">Corpus</a></code> elements. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearch.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentAction">com.google.android.gms:defaultIntentAction</a></code></code></td><td> The default value for the global search section <code>default_intent_action</code>.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentActivity">com.google.android.gms:defaultIntentActivity</a></code></code></td><td> The default value for the global search section <code>default_intent_aactivity</code>.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentData">com.google.android.gms:defaultIntentData</a></code></code></td><td> The default value for the global search section <code>default_intent_data</code>.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchEnabled">com.google.android.gms:searchEnabled</a></code></code></td><td> Whether or not global search is enabled for this app.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentAction">com.google.android.gms:defaultIntentAction</a></code></code></td><td>
+      The default value for the global search section <code>default_intent_action</code>.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentActivity">com.google.android.gms:defaultIntentActivity</a></code></code></td><td>
+      The default value for the global search section <code>default_intent_aactivity</code>.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentData">com.google.android.gms:defaultIntentData</a></code></code></td><td>
+      The default value for the global search section <code>default_intent_data</code>.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchEnabled">com.google.android.gms:searchEnabled</a></code></code></td><td>
+      Whether or not global search is enabled for this app.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">com.google.android.gms:searchLabel</a></code></code></td><td> A localized string to identify this app's data within the global search app.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_settingsDescription">com.google.android.gms:settingsDescription</a></code></code></td><td> A localized string to describe this apps data within the global search apps settings.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_settingsDescription">com.google.android.gms:settingsDescription</a></code></code></td><td>
+      A localized string to describe this apps data within the global search apps settings.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -4932,19 +5052,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Each <code>Corpus</code> element should include a <code>GlobalSearchCorpus</code> element if the
-    corpus is to appear in the global search app. This element contains several
-    <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection">GlobalSearchSection</a></code> elements describing how to present results from this corpus within
-    the global search app.
-
-    Including this element within a <code><a href="/reference/com/google/android/gms/R.styleable.html#Corpus">Corpus</a></code> will only have any effect if you also include a
-    <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch">GlobalSearch</a></code> element within the top level <code><a href="/reference/com/google/android/gms/R.styleable.html#AppDataSearch">AppDataSearch</a></code> element. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearchCorpus.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus_allowShortcuts">com.google.android.gms:allowShortcuts</a></code></code></td><td> Whether or not global search is enabled for this corpus.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus_allowShortcuts">com.google.android.gms:allowShortcuts</a></code></code></td><td>
+      Whether or not global search is enabled for this corpus.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -4978,15 +5093,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>This element provides a mapping of sections from this corpus to a global search section.
-    You should provide one such element for each global search section you care about within
-    the <code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus">GlobalSearchCorpus</a></code> element. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearchSection.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionContent">com.google.android.gms:sectionContent</a></code></code></td><td> The content of this global search section.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionContent">com.google.android.gms:sectionContent</a></code></code></td><td>
+      The content of this global search section.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionType">com.google.android.gms:sectionType</a></code></code></td><td> The type of global search section for this mapping.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
@@ -5021,22 +5135,24 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Each <code>Corpus</code> element should include a <code>IMECorpus</code> element if the
-    corpus is to be used for IME input. This element contains several <code><a href="/">ERROR(/#IMESection)</a></code>
-    elements describing which sections should be included.
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a IMECorpus.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">com.google.android.gms:inputEnabled</a></code></code></td><td> Whether or not this corpus could be useful input for IME.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">com.google.android.gms:inputEnabled</a></code></code></td><td>
+        Whether or not this corpus could be useful input for IME.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">com.google.android.gms:sourceClass</a></code></code></td><td> Class of the source.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">com.google.android.gms:toAddressesSection</a></code></code></td><td> Sections containing entities communicated with in a given document.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">com.google.android.gms:userInputSection</a></code></code></td><td> If this section is non-empty, the document is considered to be input by the user if
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">com.google.android.gms:toAddressesSection</a></code></code></td><td>
+        Sections containing entities communicated with in a given document.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">com.google.android.gms:userInputSection</a></code></code></td><td>
+        If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
         value.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">com.google.android.gms:userInputTag</a></code></code></td><td> Tag name for documents that contain data input by the user.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">com.google.android.gms:userInputValue</a></code></code></td><td> If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">com.google.android.gms:userInputValue</a></code></code></td><td>
+        If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
         to be considered input by user.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
@@ -5124,24 +5240,25 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>Section</code> element represents a section within a corpus. Each corpus can contain
-    up to 16 sections. You can optionally include some <code><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></code> elements within a
-    <code>Section</code> element. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a Section.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">com.google.android.gms:indexPrefixes</a></code></code></td><td> Indicates if this section should support prefix matching.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">com.google.android.gms:indexPrefixes</a></code></code></td><td>
+      Indicates if this section should support prefix matching.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">com.google.android.gms:noIndex</a></code></code></td><td> Indicates if this section should not be indexed.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_schemaOrgProperty">com.google.android.gms:schemaOrgProperty</a></code></code></td><td> Section corresponds to this schema.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionFormat">com.google.android.gms:sectionFormat</a></code></code></td><td> The format of the section.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionId">com.google.android.gms:sectionId</a></code></code></td><td> The ID of the section.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionWeight">com.google.android.gms:sectionWeight</a></code></code></td><td> The weight of the section.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">com.google.android.gms:subsectionSeparator</a></code></code></td><td> Subsection separator.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">com.google.android.gms:subsectionSeparator</a></code></code></td><td>
+      Subsection separator.</td></tr>
            </table></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionFormat">Section_sectionFormat</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionId">Section_sectionId</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionWeight">Section_sectionWeight</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">Section_subsectionSeparator</a></code></li>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_schemaOrgProperty">Section_schemaOrgProperty</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionFormat">Section_sectionFormat</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionId">Section_sectionId</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionWeight">Section_sectionWeight</a></code></li><li><code><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">Section_subsectionSeparator</a></code></li>
       </ul>
   </div>
 
@@ -5171,9 +5288,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The <code>SectionFeature</code> element represents a feature of a section. These features are
-    used to modify some semantic property of a section. This element can enclose 0 or more
-    <code><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam">FeatureParam</a></code> elements. 
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a SectionFeature.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -5213,7 +5328,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Attributes for the WalletFragment &lt;fragment&gt; tag
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a WalletFragmentOptions.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -5256,17 +5371,18 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Attributes that may be specified in a style resource to customize the look and feel of
-         WalletFragment
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a WalletFragmentStyle.
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">com.google.android.gms:buyButtonAppearance</a></code></code></td><td> Appearance of the buy button.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">com.google.android.gms:buyButtonHeight</a></code></code></td><td> Height of the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">com.google.android.gms:buyButtonHeight</a></code></code></td><td>
+             Height of the buy button.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonText">com.google.android.gms:buyButtonText</a></code></code></td><td> Text on the buy button.</td></tr>
-           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">com.google.android.gms:buyButtonWidth</a></code></code></td><td> Width of the buy button.</td></tr>
+           <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">com.google.android.gms:buyButtonWidth</a></code></code></td><td>
+             Width of the buy button.</td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsBackground">com.google.android.gms:maskedWalletDetailsBackground</a></code></code></td><td> Masked wallet details background </td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonBackground">com.google.android.gms:maskedWalletDetailsButtonBackground</a></code></code></td><td> "Change" button background in masked wallet details view </td></tr>
            <tr><td><code><code><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance">com.google.android.gms:maskedWalletDetailsButtonTextAppearance</a></code></code></td><td> TextAppearance for the "Change" button in masked wallet details view </td></tr>
