@@ -142,7 +142,6 @@ public abstract class BluetoothGattServerCallback {
      *
      * @param device The remote device the notification has been sent to
      * @param status 0 if the operation was successful
-     * @hide
      */
     public void onNotificationSent(BluetoothDevice device, int status) {
     }
@@ -157,7 +156,6 @@ public abstract class BluetoothGattServerCallback {
      *
      * @param device The remote device that triggered the congestion state change
      * @param congested true, if the connection is currently congested
-     * @hide
      */
     public void onConnectionCongested(BluetoothDevice device, boolean congested) {
     }

@@ -149,7 +149,6 @@ public abstract class BluetoothGattCallback {
      * @param gatt GATT client invoked {@link BluetoothGatt#configureMTU}
      * @param mtu The new MTU size
      * @param status {@link BluetoothGatt#GATT_SUCCESS} if the MTU has been changed successfully
-     * @hide
      */
     public void onConfigureMTU(BluetoothGatt gatt, int mtu, int status) {
     }
@@ -164,7 +163,6 @@ public abstract class BluetoothGattCallback {
      *
      * @param gatt The GATT client associated with the remote device
      * @param congested true, if the connection is currently congested
-     * @hide
      */
     public void onConnectionCongested(BluetoothGatt gatt, boolean congested) {
     }
