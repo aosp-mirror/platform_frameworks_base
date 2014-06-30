@@ -1041,4 +1041,29 @@ public class UserManager {
             Log.w(TAG, "Could not change restrictions pin");
         }
     }
+
+    /**
+     * @hide
+     * Set restrictions that should apply to any future guest user that's created.
+     */
+    public void setDefaultGuestRestrictions(Bundle restrictions) {
+        try {
+            mService.setDefaultGuestRestrictions(restrictions);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set guest restrictions");
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the default guest restrictions.
+     */
+    public Bundle getDefaultGuestRestrictions() {
+        try {
+            return mService.getDefaultGuestRestrictions();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set guest restrictions");
+        }
+        return new Bundle();
+    }
 }
