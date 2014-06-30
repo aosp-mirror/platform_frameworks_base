@@ -46,7 +46,7 @@ page.title=Layouts for TV
 <h3 id="leanback-theme">Leanback Theme</h3>
 
 <p>The Leanback library provides a standard theme for TV activities, called {@code
-  Leanback.Theme}, which establishes a consistent visual style for TV apps. Use of this theme is
+  Theme.Leanback}, which establishes a consistent visual style for TV apps. Use of this theme is
   recommended for most apps. This theme is recommended for any TV app that uses the Leanback
   library classes. The following code sample shows how to apply this theme to a given
   activity within an app:</p>
