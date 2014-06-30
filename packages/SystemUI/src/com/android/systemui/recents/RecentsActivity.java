@@ -549,6 +549,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onBackPressed() {
+        // Test mode where back does not do anything
+        if (mConfig.debugModeEnabled) return;
+
         // If we are mid-animation into Recents, then reverse it and finish
         if (mFullScreenOverlayView == null ||
                 !mFullScreenOverlayView.cancelAnimateOnEnterRecents(mFinishRunnable)) {
