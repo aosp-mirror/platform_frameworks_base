@@ -282,7 +282,7 @@ public abstract class PanelView extends FrameLayout {
                         onTrackingStarted();
                     }
                 }
-                final float newHeight = h + mInitialOffsetOnTouch;
+                final float newHeight = Math.max(0, h + mInitialOffsetOnTouch);
                 if (newHeight > mPeekHeight) {
                     if (mPeekAnimator != null) {
                         mPeekAnimator.cancel();
@@ -565,6 +565,7 @@ public abstract class PanelView extends FrameLayout {
             }
         }
 
+        mExpandedHeight = Math.max(0, mExpandedHeight);
         onHeightUpdated(mExpandedHeight);
         mExpandedFraction = Math.min(1f, fhWithoutOverExpansion == 0
                 ? 0
