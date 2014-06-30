@@ -1363,7 +1363,13 @@ public class ListPopupWindow {
             // Forward converted event to destination view, then recycle it.
             final boolean handled = dst.onForwardedEvent(dstEvent, mActivePointerId);
             dstEvent.recycle();
-            return handled;
+
+            // Always cancel forwarding when the touch stream ends.
+            final int action = srcEvent.getActionMasked();
+            final boolean keepForwarding = action != MotionEvent.ACTION_UP
+                    && action != MotionEvent.ACTION_CANCEL;
+
+            return handled && keepForwarding;
         }
 
         private class DisallowIntercept implements Runnable {
@@ -1492,7 +1498,7 @@ public class ListPopupWindow {
                     }
 
                     final View child = getChildAt(position - getFirstVisiblePosition());
-                    setPressedItem(child, position);
+                    setPressedItem(child, position, x, y);
                     handledEvent = true;
 
                     if (actionMasked == MotionEvent.ACTION_UP) {
@@ -1555,7 +1561,7 @@ public class ListPopupWindow {
             }
         }
 
-        private void setPressedItem(View child, int position) {
+        private void setPressedItem(View child, int position, float x, float y) {
             mDrawsInPressedState = true;
 
             // Ordering is essential. First update the pressed state and layout
@@ -1565,7 +1571,7 @@ public class ListPopupWindow {
 
             // Ensure that keyboard focus starts from the last touched position.
             setSelectedPositionInt(position);
-            positionSelectorLikeFocus(position, child);
+            positionSelectorLikeTouch(position, child, x, y);
 
             // Refresh the drawable state to reflect the new pressed state,
             // which will also update the selector state.

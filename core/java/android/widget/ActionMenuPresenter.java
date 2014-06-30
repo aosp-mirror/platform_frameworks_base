@@ -668,7 +668,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         private SubMenuBuilder mSubMenu;
 
         public ActionButtonSubmenu(Context context, SubMenuBuilder subMenu) {
-            super(context, subMenu);
+            super(context, subMenu, null, false,
+                    com.android.internal.R.attr.actionOverflowMenuStyle);
             mSubMenu = subMenu;
 
             MenuItemImpl item = (MenuItemImpl) subMenu.getItem();
