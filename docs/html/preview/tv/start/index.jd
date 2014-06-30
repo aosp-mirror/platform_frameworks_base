@@ -95,7 +95,7 @@ page.tags="leanback","recyclerview","launcher"
   &lt;activity
     android:name=&quot;com.example.android.<strong>TvActivity</strong>&quot;
     android:label=&quot;&#64;string/app_name&quot;
-    android:theme=&quot;&#64;android:style/Theme.Leanback&quot;&gt;
+    android:theme=&quot;&#64;style/Theme.Leanback&quot;&gt;
 
     &lt;intent-filter&gt;
       &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
