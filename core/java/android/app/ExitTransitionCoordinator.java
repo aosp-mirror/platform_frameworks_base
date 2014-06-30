@@ -256,7 +256,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Transition getExitTransition() {
         Transition viewsTransition = null;
         if (!mTransitioningViews.isEmpty()) {
-            viewsTransition = configureTransition(getViewsTransition());
+            viewsTransition = configureTransition(getViewsTransition(), true);
         }
         if (viewsTransition == null) {
             exitTransitionComplete();
@@ -283,7 +283,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Transition getSharedElementExitTransition() {
         Transition sharedElementTransition = null;
         if (!mSharedElements.isEmpty()) {
-            sharedElementTransition = configureTransition(getSharedElementTransition());
+            sharedElementTransition = configureTransition(getSharedElementTransition(), false);
         }
         if (sharedElementTransition == null) {
             sharedElementTransitionComplete();

@@ -288,16 +288,22 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
     }
 
-    protected static Transition addTargets(Transition transition, Collection<View> views) {
-        if (transition == null || views == null || views.isEmpty()) {
+    protected Transition setTargets(Transition transition, boolean add) {
+        if (transition == null || (add &&
+                (mTransitioningViews == null || mTransitioningViews.isEmpty()))) {
             return null;
         }
         // Add the targets to a set containing transition so that transition
         // remains unaffected. We don't want to modify the targets of transition itself.
         TransitionSet set = new TransitionSet();
-        if (views != null) {
-            for (View view : views) {
-                set.addTarget(view);
+        if (mTransitioningViews != null) {
+            for (int i = mTransitioningViews.size() - 1; i >= 0; i--) {
+                View view = mTransitioningViews.get(i);
+                if (add) {
+                    set.addTarget(view);
+                } else {
+                    set.excludeTarget(view, true);
+                }
             }
         }
         // By adding the transition after addTarget, we prevent addTarget from
@@ -306,10 +312,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return set;
     }
 
-    protected Transition configureTransition(Transition transition) {
+    protected Transition configureTransition(Transition transition,
+            boolean includeTransitioningViews) {
         if (transition != null) {
             transition = transition.clone();
             transition.setEpicenterCallback(mEpicenterCallback);
+            transition = setTargets(transition, includeTransitioningViews);
         }
         return transition;
     }
