@@ -30,6 +30,9 @@
 #include "../OpenGLRenderer.h"
 #include "../Stencil.h"
 
+#define TRIM_MEMORY_COMPLETE 80
+#define TRIM_MEMORY_UI_HIDDEN 20
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -156,6 +159,10 @@ void CanvasContext::prepareTree(TreeInfo& info) {
     }
 }
 
+void CanvasContext::stopDrawing() {
+    mRenderThread.removeFrameCallback(this);
+}
+
 void CanvasContext::notifyFramePending() {
     ATRACE_CALL();
     mRenderThread.pushBackFrameCallback(this);
@@ -216,8 +223,6 @@ void CanvasContext::doFrame() {
     profiler().startFrame();
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, mRenderThread.renderState());
-    info.prepareTextures = false;
-
     prepareTree(info);
     if (info.out.canDrawThisFrame) {
         draw();
@@ -241,10 +246,25 @@ bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap)
     return LayerRenderer::copyLayer(mRenderThread.renderState(), layer->backingLayer(), bitmap);
 }
 
-void CanvasContext::flushCaches(Caches::FlushMode flushMode) {
+void CanvasContext::destroyHardwareResources() {
+    stopDrawing();
     if (mEglManager.hasEglContext()) {
         requireGlContext();
-        Caches::getInstance().flush(flushMode);
+        TreeInfo info(TreeInfo::MODE_DESTROY_RESOURCES, mRenderThread.renderState());
+        mRootRenderNode->prepareTree(info);
+        Caches::getInstance().flush(Caches::kFlushMode_Layers);
+    }
+}
+
+void CanvasContext::trimMemory(RenderThread& thread, int level) {
+    // No context means nothing to free
+    if (!thread.eglManager().hasEglContext()) return;
+
+    if (level >= TRIM_MEMORY_COMPLETE) {
+        Caches::getInstance().flush(Caches::kFlushMode_Full);
+        thread.eglManager().destroy();
+    } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+        Caches::getInstance().flush(Caches::kFlushMode_Moderate);
     }
 }
 
@@ -264,11 +284,7 @@ Layer* CanvasContext::createTextureLayer() {
 }
 
 void CanvasContext::requireGlContext() {
-    if (mEglSurface != EGL_NO_SURFACE) {
-        makeCurrent();
-    } else {
-        mEglManager.usePBufferSurface();
-    }
+    mEglManager.requireGlContext();
 }
 
 void CanvasContext::setTextureAtlas(RenderThread& thread,

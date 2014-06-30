@@ -90,7 +90,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void destroy(boolean full) {
+    void destroy() {
         mInitialized = false;
         updateEnabledState(null);
         nDestroyCanvasAndSurface(mNativeProxy);
@@ -125,7 +125,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void destroyHardwareResources(View view) {
         destroyResources(view);
-        nFlushCaches(mNativeProxy, GLES20Canvas.FLUSH_CACHES_LAYERS);
+        nDestroyHardwareResources(mNativeProxy);
     }
 
     private static void destroyResources(View view) {
@@ -289,6 +289,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    void stopDrawing() {
+        nStopDrawing(mNativeProxy);
+    }
+
+    @Override
     public void notifyFramePending() {
         nNotifyFramePending(mNativeProxy);
     }
@@ -303,12 +308,8 @@ public class ThreadedRenderer extends HardwareRenderer {
         }
     }
 
-    static void startTrimMemory(int level) {
-        // TODO
-    }
-
-    static void endTrimMemory() {
-        // TODO
+    static void trimMemory(int level) {
+        nTrimMemory(level);
     }
 
     private static class AtlasInitializer {
@@ -403,9 +404,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nCancelLayerUpdate(long nativeProxy, long layer);
     private static native void nDetachSurfaceTexture(long nativeProxy, long layer);
 
-    private static native void nFlushCaches(long nativeProxy, int flushMode);
+    private static native void nDestroyHardwareResources(long nativeProxy);
+    private static native void nTrimMemory(int level);
 
     private static native void nFence(long nativeProxy);
+    private static native void nStopDrawing(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd);

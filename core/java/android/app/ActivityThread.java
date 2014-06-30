@@ -3962,10 +3962,6 @@ public final class ActivityThread {
 
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(false, config);
 
-        // Cleanup hardware accelerated stuff
-        // TODO: Do we actually want to do this in response to all config changes?
-        WindowManagerGlobal.getInstance().trimLocalMemory();
-
         freeTextLayoutCachesIfNeeded(configDiff);
 
         if (callbacks != null) {
@@ -4100,9 +4096,6 @@ public final class ActivityThread {
     final void handleTrimMemory(int level) {
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
-        final WindowManagerGlobal windowManager = WindowManagerGlobal.getInstance();
-        windowManager.startTrimMemory(level);
-
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
 
         final int N = callbacks.size();
@@ -4110,7 +4103,7 @@ public final class ActivityThread {
             callbacks.get(i).onTrimMemory(level);
         }
 
-        windowManager.endTrimMemory();
+        WindowManagerGlobal.getInstance().trimMemory(level);
     }
 
     private void setupGraphicsSupport(LoadedApk info, File cacheDir) {

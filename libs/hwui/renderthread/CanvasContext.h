@@ -66,7 +66,8 @@ public:
 
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
-    void flushCaches(Caches::FlushMode flushMode);
+    void destroyHardwareResources();
+    static void trimMemory(RenderThread& thread, int level);
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
 
@@ -78,6 +79,7 @@ public:
     ANDROID_API static void setTextureAtlas(RenderThread& thread,
             const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
+    void stopDrawing();
     void notifyFramePending();
 
     DrawProfiler& profiler() { return mProfiler; }

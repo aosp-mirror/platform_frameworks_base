@@ -85,9 +85,11 @@ public:
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
-    ANDROID_API void flushCaches(Caches::FlushMode flushMode);
+    ANDROID_API void destroyHardwareResources();
+    ANDROID_API static void trimMemory(int level);
 
     ANDROID_API void fence();
+    ANDROID_API void stopDrawing();
     ANDROID_API void notifyFramePending();
 
     ANDROID_API void dumpProfileInfo(int fd);
