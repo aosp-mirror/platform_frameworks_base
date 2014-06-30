@@ -455,7 +455,7 @@ public class VolumePanel extends Handler {
             if (sc.controller != null) {
                 sc.controller.setVolumeTo(index, flags);
             } else {
-                Log.wtf(mTag, "Adjusting remote volume without a controller!");
+                Log.w(mTag, "Adjusting remote volume without a controller!");
             }
         } else if (getStreamVolume(sc.streamType) != index) {
             if (sc.streamType == STREAM_MASTER) {
