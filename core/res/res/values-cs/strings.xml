@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Nouzový režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobní aplikace"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android pro práci"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Práce"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Zpoplatněné služby"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Provádět činnosti, které vás mohou stát peníze."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše zprávy"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteli navázat se na nejvyšší úroveň služby pro poslouchání oznámení. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"navázání na službu poskytovatele podmínky"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby poskytovatele podmínky. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"vyvolat konfigurační aplikaci poskytnutou operátorem"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje vyvolání konfigurační aplikace poskytnuté operátorem. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"naslouchat informacím o stavu sítě"</string>

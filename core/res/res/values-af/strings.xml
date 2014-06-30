@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Veiligmodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Persoonlike programme"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android-werk"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Werk"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dienste wat jou geld kos"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Doen dinge wat jou geld kan kos."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Laat die houer toe om aan die top-koppelvlak van \'n kennisgewingluisteraardiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"verbind met \'n toestandverskafferdiens"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Laat die houer toe om met die topvlak-koppelvlak van \'n toestandverskafferdiens te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"roep die opstellingprogram op wat deur die diensverskaffer voorsien is"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Laat die houer toe om die opstellingsprogram wat deur die diensverskaffer voorsien word, op te roep. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"luister vir waarnemings oor netwerktoestande"</string>

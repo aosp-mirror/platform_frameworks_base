@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicações pessoais"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Trabalho Android"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Trabalho"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serviços que implicam pagamento"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Efetuar ações que implicam pagamento."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"As suas mensagens"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o titular vincule a interface de nível superior de um serviço de escuta de notificações. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular a um serviço de fornecedor de condição"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite que o titular vincule a interface de nível superior de um serviço de fornecedor de condição. Nunca deverá ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar a aplicação de configuração fornecida pela operadora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o titular invoque a aplicação de configuração fornecida pela operadora. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ouvir observações sobre as condições da rede"</string>

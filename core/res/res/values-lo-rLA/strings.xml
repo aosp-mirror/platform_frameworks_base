@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ລະບົບ Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"​ແອັບຯ​ສ່ວນ​ໂຕ"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ບໍລິການທີ່ເຮັດໃຫ້ທ່ານເສຍເງິນ"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ເຮັດສິ່ງທີ່ທ່ານຕ້ອງເສຍຄ່າໃຊ້ຈ່າຍ."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ຂໍ້ຄວາມຂອງທ່ານ"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງເຊື່ອມໂຍງສ່ວນຕິດຕໍ່ລະດັບເທິງສຸດ ຂອງຜູ່ຟັງບໍລິການການແຈ້ງເຕືອນ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ເຊື່ອມ​ໂຍງ​ກັບ​ບໍ​ລິ​ການ​ຜູ່​ສະ​ໜອງ​ເງື່ອນ​ໄຂ"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ອະນຸຍາດ​ໃຫ້​ເຈົ້າຂອງ​ເຊື່ອມໂຍງ​ສ່ວນຕິດຕໍ່​ລະດັບ​ສູງສຸດ​ຂອງ​ບໍ​ລິ​ການ​ສະ​ໜອງ​ເງື່ອນ​ໄຂ. ບໍ່ຈຳເປັນ​ສຳລັບ​ແອັບຯທົ່ວໄປ."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ຮ້ອງຂໍແອັບຯປັບຄ່າທີ່ສະໜອງໂດຍຜູ່ໃຫ້ບໍລິການ"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າຂອງຮ້ອງຂໍແອັບຯປັບຄ່າທີ່ສະໜອງໂດຍຜູ່ໃຫ້ບໍລິການ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ຕິດຕາມເພື່ອສັງເກດສະພາບຂອງເຄືອຂ່າຍ"</string>
@@ -1710,7 +1714,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
@@ -1732,7 +1736,7 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"​ນຳ​ໃຊ້ lock-to-app ບໍ່?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-app ​​ຈະລັອກ​ໜ້າ​ຈໍ​ໄວ້​​ຢູ່​ກັບແອັບ​ດຽວ.\n\n​ເພື່​ອ​ອອກ​ຈາກ​ມັນ ກະ​ລຸ​ນາ​ກົດ​ປຸ​່ມ​ແອັບທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້ $"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-app ​​ຈະລັອກ​ໜ້າ​ຈໍ​ໄວ້​​ຢູ່​ກັບແອັບຯດຽວ.\n\n​ເພື່​ອ​ອອກ​ຈາກ​ມັນ ກະ​ລຸ​ນາ​ກົດ​ປຸ​່ມ​ແອັບທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້ $"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"ບໍ່"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
     <string name="lock_to_app_start" msgid="8889002974248178076">"​ເລີ່ມ​ຕົ້ນ Lock-to-app"</string>

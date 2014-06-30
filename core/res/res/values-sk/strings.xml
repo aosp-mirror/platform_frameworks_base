@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim V lietadle je ZAPNUTÝ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim V lietadle je VYPNUTÝ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavenia"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Uzamknúť"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Núdzový režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobné aplikácie"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android na prácu"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Práca"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Spoplatnené služby"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Vykonávanie činností, ktoré vás môžu stáť peniaze."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše správy"</string>
@@ -720,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteľovi naviazať sa na najvyššiu úroveň služby na počúvanie upozornení. Bežné aplikácie by toto nastavenie nemali nikdy požadovať."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"viazanie na službu poskytovateľa podmienky"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby poskytovateľa podmienky. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"vyvolanie aplikácie pre konfiguráciu poskytnutú operátorom"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje držiteľovi vyvolať aplikáciu pre konfiguráciu poskytnutú operátorom. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"zachytávať informácie o stave siete"</string>
@@ -728,10 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Umožňuje aplikácii upraviť parametre kalibrácie dotykovej obrazovky. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"prístup k certifikátom DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Umožňuje aplikácii vydávať a používať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Príjem vysielania pre prenos spojenia"</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Povoľuje príjem informácií o stave prenosu spojenia."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
@@ -1005,10 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v telefóne. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nastaviť budík"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Umožňuje aplikácii nastaviť budík v nainštalovanej aplikácii budík. Niektoré aplikácie budíka nemusia túto funkciu implementovať."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"odstraňovanie hlasových správ"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Povoľuje aplikácii odstraňovať správy z hlasovej schránky."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridať hlasovú schránku"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Umožní aplikácii pridávať správy do doručenej pošty hlasovej schránky."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"čítanie všetkých hlasových schránok"</string>

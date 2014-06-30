@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Suojattu tila"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Omat sovellukset"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Työ"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Maksulliset palvelut"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Suorita mahdollisesti maksullisia toimintoja."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Omat viestit"</string>
@@ -719,6 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Antaa sovelluksen sitoutua ilmoituskuuntelijan ylimmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ehtojen toimituspalveluun sitominen"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Antaa sovelluksen luoda sidoksen ehtojen toimituspalvelun ylätason rajapintaan. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"sitoudu Unelma-palveluun"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Antaa sovelluksen sitoutua Unelma-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Palveluntarjoajan määrityssovelluksen käynnistäminen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Antaa luvanhaltijan käynnistää palveluntarjoajan määrityssovelluksen. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"verkon tilahavaintojen kuunteleminen"</string>

@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"التطبيقات الشخصية"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"‏عمل Android"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"عمل"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"يمكنك تنفيذ إجراءات يمكن أن تكلفك مالاً."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"رسائلك"</string>
@@ -719,6 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"يتيح للمالك الربط بواجهة المستوى العلوي لخدمة تلقّي الإشعارات الصوتية. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"الربط بخدمة موفر الحالة"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة موفر الحالة. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"‏الالتزام بخدمة dream"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"‏للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة dream. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"استدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"للسماح للمالك باستدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"الاستماع إلى ملاحظات حول أحوال الشبكة"</string>

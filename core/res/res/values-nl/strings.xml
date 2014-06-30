@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-systeem"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Persoonlijke apps"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android werk"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Werk"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Services waarvoor u moet betalen"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Activiteiten uitvoeren waarvoor kosten in rekening kunnen worden gebracht."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Uw berichten"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Hiermee kan de houder koppelen aan de hoofdinterface van een listener-service voor meldingen. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binden aan de service van een provider van voorwaarden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Hiermee kan de houder binden aan de hoofdinterface van de service van een provider van voorwaarden. Nooit vereist voor normale apps."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"de door de provider geleverde configuratie-app aanroepen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Hiermee kan de houder de door de provider geleverde configuratie-app aanroepen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"controleren op waarnemingen met betrekking tot netwerkomstandigheden"</string>

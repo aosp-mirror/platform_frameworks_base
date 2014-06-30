@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Προσωπικές εφαρμογές"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Εργασία"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Υπηρεσίες επί πληρωμή"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Πραγματοποίηση ενεργειών για τις οποίες ενδέχεται να χρεωθείτε."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Τα μηνύματά σας"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ακρόασης ειδοποιήσεων. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"σύνδεση σε μια υπηρεσία παρόχου συνθηκών"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Επιτρέπει στον κάτοχο τη σύνδεση στη διεπαφή ανωτάτου επιπέδου ενός παρόχου συνθηκών. Δεν απαιτείται για κανονικές εφαρμογές."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Επιτρέπει στον κάτοχο την κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"λήψη παρατηρήσεων σχετικά με την κατάσταση δικτύου"</string>

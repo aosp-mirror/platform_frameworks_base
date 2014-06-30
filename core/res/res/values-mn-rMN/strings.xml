@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Нислэгийн горим асав"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Нислэгийн горим унтарсан"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Тохиргоо"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Одоо түгжих"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Андройд систем"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Хувийн апп-ууд"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Андройд Ажил"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Ажил"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Танаас төлбөр авдаг үйлчилгээнүүд"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Таны төлбөрт оруулах зүйлийг хийх."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Таны мессеж"</string>
@@ -720,6 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Эзэмшигч нь мэдэгдэл сонсох үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"нөхцөл нийлүүлэгч үйлчилгээнд холбох"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Эзэмшигчид нөхцөл нийлүүлэгч үйлчилгээний дээд-түвшний интерфейстэй холбох боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"дрийм үйлчилгээнд холбох"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Эзэмшигч нь дрийм үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"үүрэн компанийн нийлүүлсэн тохируулгын апп-г өдөөх"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Эзэмшигчид үүрэн компанийн нийлүүлсэн тохируулах апп-г өдөөх боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Сүлжээний байдлын талаар ажиглалтуудыг хүлээн авах"</string>
@@ -728,10 +729,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Мэдрэгчтэй дэлгэцний калибрешн параметрийг өөрчлөхийг апп-д зөвшөөрнө. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"хандалтын DRM сертификат"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Аппликешнд DRM сертификатыг ашиглах болон нийлүүлэхийг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Дамжуулалтын цацалтыг хүлээн авах."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Дамжуулалтын статусын мэдээллийг хүлээн авах боломж олгоно."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Дэлгэц түгжих нууц үгэнд зөвшөөрөгдсөн тэмдэгт болон уртыг удирдах"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>
@@ -1005,10 +1004,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"дуут шууданг устгах"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"бүх дуут шууданг унших"</string>

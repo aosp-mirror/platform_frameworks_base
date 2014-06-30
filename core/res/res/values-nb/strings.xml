@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flymodus er på"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flymodus er av"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Innstillinger"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nå"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Personlige apper"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Jobb"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Betaltjenester"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gjøre ting som kan koste deg penger."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Meldinger"</string>
@@ -720,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lar innehaveren binde seg til det øverste grensesnittnivået for en varsellyttertjeneste. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binde seg til en leverandørtjeneste for betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en leverandørtjeneste for betingelser. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"starte konfigurasjonsappen som ble levert av operatøren"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Gir innehaveren tillatelse til å kalle opp den konfigurasjonsappen som ble levert av operatøren. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lytte etter observasjoner om nettverksforhold"</string>
@@ -728,10 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"motta kunngjøringer om overføringer."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Gjør det mulig å motta statusinformasjon om overføring."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
@@ -1005,10 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Lar appen endre nettleserens logg eller bokmerker lagret på telefonen din. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stille alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"fjerne talepostmeldinger"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Appen kan fjerne meldinger fra talepostkassen."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"legge til talepost"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lar appen legge til meldinger i talepostkassen din."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"lese alle meldingene i talepostkassen"</string>

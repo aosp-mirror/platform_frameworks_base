@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Самолетният режим е ВКЛЮЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Самолетният режим е ИЗКЛЮЧЕН"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Настройки"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Заключване сега"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасен режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Системно от Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Лични приложения"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Служебен"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Услуги, които ви струват пари"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Извършват неща, които могат да ви струват пари."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Вашите съобщения"</string>
@@ -720,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Разрешава на притежателя да се обвърже с интерфейса от първо ниво на услуга за слушател на известия. Нормалните приложения не би трябвало никога да се нуждаят от това."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"свързване с услуга за предоставяне на условия"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за предоставяне на условия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"извикване на предоставеното от оператора приложение за конфигуриране"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Разрешава на притежателя да извиква предоставеното от оператора приложение за конфигуриране. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"слушане за наблюдения на мрежовите условия"</string>
@@ -728,10 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Разрешава на приложението да променя параметрите на калибриране на сензорния екран. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"достъп до сертификатите за управление на цифровите права (DRM)"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Разрешава на приложението да обезпечава и използва сертификатите за управление на цифровите права (DRM). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Получаване на излъчвания с данни за прехвърлянията."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Разрешава получаването на информация за състоянието на прехвърлянията."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролирайте дължината и разрешените знаци за паролите за отключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
@@ -1005,10 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на телефона ви. Това може да му позволи да изтрива или променя данните на браузъра. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на разрешението."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"навиване на будилника"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"премахване на гласови съобщения"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Разрешава на приложението да премахва съобщения от входящата ви гласова поща."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"добавяне на гласова поща"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Разрешава на приложението да добавя съобщения към входящата ви гласова поща."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"четене на цялата гласова поща"</string>

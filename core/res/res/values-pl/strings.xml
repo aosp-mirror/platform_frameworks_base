@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
     <string name="android_system_label" msgid="6577375335728551336">"System Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplikacje osobiste"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android w pracy"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Praca"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Usługi płatne"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Wykonywanie czynności, za które pobierana jest opłata."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Twoje wiadomości"</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi odbiornika powiadomień. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"powiąż z usługą dostawcy warunków"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi dostawcy warunków. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Zezwala na wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"śledź stan sieci"</string>

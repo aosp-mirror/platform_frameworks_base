@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Uhlelo lwe-Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Izinhlelo zokusebenza zomuntu siqu"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"I-Android Work"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Umsebenzi"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Amasevisi abiza imali"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Yenza izinto ezingakudla imali."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Imiyalezo yakho"</string>
@@ -719,6 +719,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ivumela umbambi ukubophezela kwisixhumi esibonakalayo sezinga eliphezulu lesevisi yomlaleli wesaziso. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"hlanganisa kwisevisi yomhlinzeki wesimo"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ivumela umbambi ukuhlanganisa isixhumi esibonakalayo seleveli ephezulu sesevisi yomhlinzeki wesimo. Akufanele kudingekele izinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"bophezela kusevisi yephupho"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ivumela isiphathi ukuthi sibophezele ukusebenzisana kwezinga eliphezulu kwesevisi yephupho. Akumele kudingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"buyisela uhlelo lokusebenza lokulungiselelwa okunikezwe yinkampani yenethiwekhi"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ivumela umnikazi ukuthi abuyisele uhlelo lokusebenza lokulungiselelwa. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Lalela okubonwayo kuzimo zenethiwekhi"</string>

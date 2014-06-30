@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modul Avion este ACTIVAT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modul avion este DEZACTIVAT"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Setări"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Blocați acum"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemul Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicații personale"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android pentru serviciu"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Serviciu"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicii cu plată"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Efectuează acţiuni care sunt cu plată."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajele dvs."</string>
@@ -720,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultă observații despre starea rețelei"</string>
@@ -728,10 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite aplicației să modifice parametrii de calibrare a ecranului tactil. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accesează certificatele DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite unei aplicații să furnizeze și să utilizeze certificate DRM. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Primiți difuzări despre transfer."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Permite primirea informațiilor despre starea transferului."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
@@ -1005,10 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite aplicaţiei să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicaţia poate şterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terţă parte sau de alte aplicaţii cu capacităţi de navigare pe web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite aplicaţiei să seteze o alarmă într-o aplicaţie de ceas cu alarmă instalată. Este posibil ca unele aplicaţii de ceas cu alarmă să nu implementeze această funcţie."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"eliminați mesaje vocale"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Permite aplicației să elimine mesaje din secțiunea de mesaje vocale primite."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adăugare mesagerie vocală"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite aplicaţiei să adauge mesaje în Mesaje primite în mesageria vocală."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"acces la toate mesajele vocale"</string>

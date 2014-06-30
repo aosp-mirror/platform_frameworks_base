@@ -190,7 +190,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Особисті додатки"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Android для бізнесу"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Службовий профіль"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Служби, які потребують оплати"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Виконувати дії, які потребують оплати."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ваші повідомл."</string>
@@ -719,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Дозволяє власнику прив’язуватися до інтерфейсу верхнього рівня служби читання сповіщень. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"підключитися до служби постачання умов"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби постачання умов. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"викликати надану оператором програму конфігурації"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
@@ -727,8 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Програма може змінювати параметри калібрування сенсорного екрана. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"отримувати доступ до сертифікатів DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволяє додатку надавати та використовувати сертифікати DRM. Ніколи не застосовується для звичайних додатків."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Отримувати широкомовні повідомлення про естафетне передавання."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Можна отримувати інформацію про статус естафетного передавання."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Отримувати широкомовні повідомлення про передавання даних."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Отримання інформацію про стан передавання даних."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>

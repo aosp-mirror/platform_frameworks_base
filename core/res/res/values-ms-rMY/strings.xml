@@ -185,13 +185,12 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mod Pesawat DIHIDUPKAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mod Pesawat DIMATIKAN"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Tetapan"</string>
-    <!-- no translation found for global_action_lockdown (8751542514724332873) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="8751542514724332873">"Kunci sekarang"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod selamat"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Apl peribadi"</string>
-    <string name="managed_profile_label" msgid="4287077106125758391">"Kerja Android"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"Tempat Kerja"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Perkhidmatan yang anda perlu bayar"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Melakukan perkara yang boleh mengenakan bayaran kepada anda."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesej anda"</string>
@@ -720,6 +719,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan pendengar pemberitahuan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"terikat kepada perkhidmatan pembekal keadaan"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan pembekal keadaan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
+    <skip />
+    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
+    <skip />
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"gunakan apl konfigurasi yang disediakan oleh pembawa"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Membenarkan pemegang menggunakan apl konfigurasi yang diberikan oleh pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"dengar pemerhatian mengenai keadaan rangkaian"</string>
@@ -728,10 +731,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Membenarkan apl mengubah suai parameter penentukuran skrin sentuh. Ini tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"akses sijil DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Membenarkan aplikasi memperuntuk dan menggunakan sijil DRM. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <!-- no translation found for permlab_handoverStatus (4558616203830448763) -->
-    <skip />
-    <!-- no translation found for permdesc_handoverStatus (5738446261941364055) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Terima siaran pemindahan penyerahan."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Membenarkan penerimaan maklumat status pemindahan penyerahan."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>
@@ -1005,10 +1006,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Membenarkan apl mengubah suai sejarah atau penanda halaman Penyemak Imbas yang tersimpan pada telefon anda. Ini boleh membenarkan apl untuk memadam atau mengubah suai data Penyemak Imbas. Nota: kebenaran ini tidak boleh dikuatkuasakan oleh penyemak imbas pihak ketiga atau aplikasi lain dengan keupayaan menyemak imbas web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"tetapkan penggera"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Membenarkan apl untuk menetapkan penggera dalam apl penggera jam yang dipasang. Sesetengah applikasi jam penggera tidak boleh melaksanakan ciri ini."</string>
-    <!-- no translation found for permlab_removeVoicemail (6328485960478155867) -->
-    <skip />
-    <!-- no translation found for permdesc_removeVoicemail (8113704917331103065) -->
-    <skip />
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"alih keluar mel suara"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"Membenarkan apl mengalih keluar mesej dari peti masuk mel suara anda."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambah mel suara"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Membenarkan apl untuk menambahkan mesej pada peti masuk mel suara anda."</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"baca semua mel suara"</string>
