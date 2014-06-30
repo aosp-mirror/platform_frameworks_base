@@ -56,11 +56,11 @@ than L will look and work the same in L, with only minor stylistic changes that 
 for you.</p>
 
 
-    <img src="{@docRoot}preview/images/notifications/basic_combo.png"
+    <img style="margin:20px 0 0 0" src="{@docRoot}preview/images/notifications/basic_combo.png"
       alt="" width="700px" />
 
 
-<div style="clear:both;">
+<div style="clear:both;margin-top:20px">
       <p class="img-caption">
       Base layout of a handheld notification and the same notification on Wear,
       with a user photo and a notification icon
@@ -135,11 +135,6 @@ actions that can't be accomplished with a single tap, either hide these actions 
 notification or consider hooking them up to a Wear app to allow the user to finish the action on
 their watch.</p>
 
-<div class="figure">
-  <img src="{@docRoot}preview/images/notifications/WearBasic.png" width="156px" height="156px"
-    alt="" />
-</div>
-
 <h4>Bridging notifications</h4>
 
 <p><strong>Notifications that should be bridged</strong></p>
@@ -147,6 +142,9 @@ their watch.</p>
 <ul>
   <li> New instant messages</li>
 </ul>
+
+<img src="{@docRoot}preview/images/notifications/WearBasic.png" width="156px" height="156px"
+  alt="" />
 
 <p><strong>Don't bridge</strong></p>
 
@@ -171,10 +169,7 @@ their watch.</p>
   <li> Actions that map to features that aren't possible on the watch</li>
 </ul>
 
-<div class="figure" style="margin-top:-10px">
-  <img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
-    alt="" />
-</div>
+
 
 <p><b>Unique actions to define for Wear</b></p>
 
@@ -184,6 +179,11 @@ their watch.</p>
   <li> A "Comment" or "Reply" action that brings up the speech input screen</li>
   <li> Actions that can launch Wear-specific apps</li>
 </ul>
+
+<img src="{@docRoot}preview/images/notifications/ReplyAction.png" width="156px" height="156px"
+  alt="" />
+
+  
 </div>
 
 
@@ -215,14 +215,6 @@ flagged as High or Max or a full-screen takeover, it gets a HUN in L.</p>
 <h2 style="clear:both" id="guidelines">Guidelines</h2>
 
 
-<div class="figure" style="width:311px; margin-top:40px">
-  <img src="{@docRoot}preview/images/notifications/Triggered.png"
-    alt="" width="311px"/>
-  <p class="img-caption">
-    Notification that shows the person who triggered it and the content they are sending you
-  </p>
-</div>
-
 <h3 id="MakeItPersonal">Make it personal</h3>
 
 <p>For notifications of items sent by another person (such as a message or status update), include
@@ -231,6 +223,14 @@ notification's metadata (see EXTRA_PEOPLE).</p>
 
 <p>Your notification's main icon will still be shown, so the user can associate it with the icon
 visible in the status bar.</p>
+
+
+<img src="{@docRoot}preview/images/notifications/Triggered.png"
+  alt="" width="311px"/>
+<p style="margin-top:10px" class="img-caption">
+  Notification that shows the person who triggered it and the content they are sending you
+</p>
+
 
 <h3 id="navigate_to_the_right_place">Navigate to the right place</h3>
 
@@ -324,10 +324,10 @@ for notifications that:</p>
   <li> Might immediately change the user's behavior in the real world</li>
 </ul>
 
-<p>Notifications set to Low and Min can still be very valuable for the user. Many if not most
-notifications just don't need to command the user's immediate attention, or vibrate the user's
-wrist, yet contain information that they will find valuable when they choose to look for
-notifications. Criteria for Low and Min priority notifications:</p>
+<p>Notifications set to <code>LOW</code> and <code>MIN</code> can still be very valuable for the
+user. Many if not most notifications just don't need to command the user's immediate attention, or
+vibrate the user's wrist, yet contain information that they will find valuable when they choose to
+look for notifications. Criteria for <code>LOW</code> and <code>MIN</code> priority notifications:</p>
 
 <ul>
   <li> Don't involve other people</li>
@@ -471,11 +471,10 @@ the app.</p>
 notifications of a particular kind are pending.</p>
 
 <div class="col-6">
-<p><strong>Don't</strong></p>
 
+<p><strong>Don't</strong></p>
   <img src="{@docRoot}preview/images/notifications/Summarise_Dont.png"
     alt="" width="311px" />
-
 </div>
 
 <div>
@@ -485,12 +484,12 @@ notifications of a particular kind are pending.</p>
     alt="" width="311px"/>
 </div>
 
-<p style="clear:left">You can provide more detail about the individual notifications that make up a
+<p style="clear:left; padding-top:30px; padding-bottom:20px">You can provide more detail about the individual notifications that make up a
  summary by using the expanded digest layout. This allows users to gain a better sense of which
  notifications are pending and if they are interesting enough to be read in detail within the
  associated app.</p>
 <div class="col-6">
-  <img src="{@docRoot}preview/images/notifications/Stack.png" style="margin-bottom:30px"
+  <img src="{@docRoot}preview/images/notifications/Stack.png" style="margin-bottom:20px"
     alt="" width="311px" />
   <p class="img-caption">
   Expanded and contracted notification that is a summary (using InboxStyle)
@@ -536,7 +535,7 @@ notifications are currently pending.</p>
 
 <p>Many Android devices contain a notification LED, which is used to keep the user informed about
 events while the screen is off. Notifications with a priority level of MAX, HIGH, or DEFAULT should
-cause the LED to glow, while those with lower priority (LOW and MIN) should not.</p>
+cause the LED to glow, while those with lower priority (<code>LOW</code> and <code>MIN</code>) should not.</p>
 
 <p>The user's control over notifications should extend to the LED. When you use DEFAULT_LIGHTS, the
 LED will glow with a white color. Your notifications shouldn't use a different color unless the
@@ -550,20 +549,20 @@ unimportant notifications can annoy the user or make them resent how much attent
 from them, so use notifications judiciously.</p>
 
 <h3 id="when_to_display_a_notification">When to display a notification</h3>
-<div class="figure">
-  <img src="{@docRoot}preview/images/notifications/TimeSensitive.png"
-    alt="" width="311px" />
-  <p class="img-caption">
-   Time sensitive notification examples
-  </p>
-</div>
+
 <p>To create an application that people enjoy using, it's important to recognize that the user's
 attention and focus is a resource that must be protected. While Android's notification system has
 been designed to minimize the impact of notifications on the user's attention, it is nonetheless
 still important to be aware of the fact that notifications are interrupting the user's task flow.
 As you plan your notifications, ask yourself if they are important enough to warrant an interruption. If you are unsure, allow the user to opt into a notification using your apps notification settings or adjust
-the notifications priority flag to Low or Min to avoid distracting the user while they are doing
+the notifications priority flag to <code>LOW</code> or <code>MIN</code> to avoid distracting the user while they are doing
 something else.</p>
+
+  <img src="{@docRoot}preview/images/notifications/TimeSensitive.png"
+    alt="" width="311px" />
+  <p style="margin-top:10px" class="img-caption">
+   Time sensitive notification examples
+  </p>
 
 <p>While well behaved apps generally only speak when spoken to, there are some limited cases where an app actually should interrupt the user with an unprompted notification.</p>
 
@@ -663,7 +662,7 @@ to create rather than aiming for any particular spot on the list.</p>
   <img src="{@docRoot}preview/images/notifications/AntiSample3.png"
     alt="" width="700px" />
 
-  <p class="img-caption" style="margin-top:20px">Gmail notifications are default priority, so they
+  <p class="img-caption" style="margin-top:10px">Gmail notifications are default priority, so they
   normally sort below messages from an instant messaging app like Hangouts, but Gmail will get a
   temporary bump when new messages come in.
   </p>
