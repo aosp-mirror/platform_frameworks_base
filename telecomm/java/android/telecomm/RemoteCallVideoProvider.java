@@ -22,10 +22,10 @@ import android.os.RemoteException;
 import com.android.internal.telecomm.ICallVideoProvider;
 
 
-public class CallVideoProviderWrapper implements IBinder.DeathRecipient {
+public class RemoteCallVideoProvider implements IBinder.DeathRecipient {
     private final ICallVideoProvider mCallVideoProvider;
 
-    CallVideoProviderWrapper(ICallVideoProvider callVideoProvider) throws RemoteException {
+    RemoteCallVideoProvider(ICallVideoProvider callVideoProvider) throws RemoteException {
         mCallVideoProvider = callVideoProvider;
         mCallVideoProvider.asBinder().linkToDeath(this, 0);
     }
