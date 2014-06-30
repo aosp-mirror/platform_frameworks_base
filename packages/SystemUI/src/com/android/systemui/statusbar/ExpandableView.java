@@ -123,6 +123,7 @@ public abstract class ExpandableView extends FrameLayout {
      * @param notifyListeners Whether the listener should be informed about the change.
      */
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
+        mActualHeightInitialized = true;
         mActualHeight = actualHeight;
         if (notifyListeners) {
             notifyHeightChanged();
@@ -130,7 +131,6 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     public void setActualHeight(int actualHeight) {
-        mActualHeightInitialized = true;
         setActualHeight(actualHeight, true);
     }
 

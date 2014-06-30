@@ -59,7 +59,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void disable(int state) {
+    public void disable(int state, boolean animate) {
     }
 
     @Override

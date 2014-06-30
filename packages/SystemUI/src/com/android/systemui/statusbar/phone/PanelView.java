@@ -93,15 +93,14 @@ public abstract class PanelView extends FrameLayout {
     }
 
     private void runPeekAnimation() {
+        mPeekHeight = getPeekHeight();
         if (DEBUG) logf("peek to height=%.1f", mPeekHeight);
         if (mHeightAnimator != null) {
             return;
         }
-        if (mPeekAnimator == null) {
-            mPeekAnimator = ObjectAnimator.ofFloat(this,
-                    "expandedHeight", mPeekHeight)
-                .setDuration(250);
-        }
+        mPeekAnimator = ObjectAnimator.ofFloat(this,
+                "expandedHeight", mPeekHeight)
+            .setDuration(250);
         mPeekAnimator.start();
     }
 
@@ -115,9 +114,6 @@ public abstract class PanelView extends FrameLayout {
 
     protected void loadDimens() {
         final Resources res = getContext().getResources();
-        mPeekHeight = res.getDimension(R.dimen.peek_height)
-            + getPaddingBottom(); // our window might have a dropshadow
-
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mHintDistance = res.getDimension(R.dimen.hint_move_distance);
@@ -758,4 +754,6 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public abstract void resetViews();
+
+    protected abstract float getPeekHeight();
 }

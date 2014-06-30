@@ -31,6 +31,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
@@ -221,6 +222,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     LinearLayout mStatusIcons;
     // the icons themselves
     IconMerger mNotificationIcons;
+    View mNotificationIconArea;
+
     // [+>
     View mMoreIcon;
 
@@ -300,16 +303,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         : null;
 
     private int mNavigationIconHints = 0;
-    private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            // double-check to avoid races
-            if (mStatusBarContents.getAlpha() == 0) {
-                if (DEBUG) Log.d(TAG, "makeIconsInvisible");
-                mStatusBarContents.setVisibility(View.INVISIBLE);
-            }
-        }
-    };
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -383,8 +376,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDozing;
 
     private Interpolator mLinearOutSlowIn;
-    private Interpolator mAlphaOut = new PathInterpolator(0f, 0.4f, 1f, 1f);
-    private Interpolator mAlphaIn = new PathInterpolator(0f, 0f, 0.8f, 1f);
+    private Interpolator mAlphaIn = new PathInterpolator(0f, 0.2f, 1f, 1f);
+    private Interpolator mAlphaOut = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
     private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
             new OnChildLocationsChangedListener() {
@@ -608,6 +601,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
         mSystemIcons = (LinearLayout) mStatusBarView.findViewById(R.id.system_icons);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
+        mNotificationIconArea = mStatusBarView.findViewById(R.id.notification_icon_area_inner);
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
@@ -1423,7 +1417,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
-    public void disable(int state) {
+    public void disable(int state, boolean animate) {
         mDisabledUnmodified = state;
         state = adjustDisableFlags(state);
         final int old = mDisabled;
@@ -1461,9 +1455,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             mSystemIconArea.animate().cancel();
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-                animateStatusBarHide(mSystemIconArea);
+                animateStatusBarHide(mSystemIconArea, animate);
             } else {
-                animateStatusBarShow(mSystemIconArea);
+                animateStatusBarShow(mSystemIconArea, animate);
             }
         }
 
@@ -1496,9 +1490,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (mTicking) {
                     haltTicker();
                 }
-                animateStatusBarHide(mNotificationIcons);
+                animateStatusBarHide(mNotificationIconArea, animate);
             } else {
-                animateStatusBarShow(mNotificationIcons);
+                animateStatusBarShow(mNotificationIconArea, animate);
             }
         }
     }
@@ -1506,35 +1500,49 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * Animates {@code v}, a view that is part of the status bar, out.
      */
-    private void animateStatusBarHide(View v) {
+    private void animateStatusBarHide(final View v, boolean animate) {
+        v.animate().cancel();
+        if (!animate) {
+            v.setAlpha(0f);
+            v.setVisibility(View.INVISIBLE);
+            return;
+        }
         v.animate()
                 .alpha(0f)
-                .withLayer()
                 .setDuration(160)
-                .setInterpolator(mAlphaIn)
                 .setStartDelay(0)
-                .setListener(mMakeIconsInvisible)
-                .start();
+                .setInterpolator(mAlphaOut)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        v.setVisibility(View.INVISIBLE);
+                    }
+                });
     }
 
     /**
      * Animates {@code v}, a view that is part of the status bar, in.
      */
-    private void animateStatusBarShow(View v) {
+    private void animateStatusBarShow(View v, boolean animate) {
+        v.animate().cancel();
         v.setVisibility(View.VISIBLE);
+        if (!animate) {
+            v.setAlpha(1f);
+            return;
+        }
         v.animate()
                 .alpha(1f)
-                .withLayer()
-                .setInterpolator(mAlphaOut)
                 .setDuration(320)
-                .setStartDelay(0);
+                .setInterpolator(mAlphaIn)
+                .setStartDelay(50);
 
         // Synchronize the motion with the Keyguard fading if necessary.
         if (mKeyguardFadingAway) {
             v.animate()
                     .setDuration(mKeyguardFadingAwayDuration)
                     .setInterpolator(mLinearOutSlowIn)
-                    .setStartDelay(mKeyguardFadingAwayDelay);
+                    .setStartDelay(mKeyguardFadingAwayDelay)
+                    .start();
         }
     }
 
@@ -1636,7 +1644,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         visibilityChanged(true);
         mWaitingForKeyguardExit = false;
-        disable(mDisabledUnmodified);
+        disable(mDisabledUnmodified, !force /* animate */);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
@@ -1810,10 +1818,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Shrink the window to the size of the status bar only
         mStatusBarWindowManager.setStatusBarExpanded(false);
 
-        if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
-            setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
-        }
-
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
 
@@ -1824,7 +1828,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
-        disable(mDisabledUnmodified);
+        disable(mDisabledUnmodified, true /* animate */);
     }
 
     public boolean interceptTouchEvent(MotionEvent event) {
@@ -2337,15 +2341,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 
-    void setNotificationIconVisibility(boolean visible, int anim) {
-        int old = mNotificationIcons.getVisibility();
-        int v = visible ? View.VISIBLE : View.INVISIBLE;
-        if (old != v) {
-            mNotificationIcons.setVisibility(v);
-            mNotificationIcons.startAnimation(loadAnim(anim, null));
-        }
-    }
-
     static final float saturate(float a) {
         return a < 0f ? 0f : (a > 1f ? 1f : a);
     }
@@ -2835,7 +2830,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
         mWaitingForKeyguardExit = false;
-        disable(mDisabledUnmodified);
+        disable(mDisabledUnmodified, true /* animate */);
     }
 
     /**
@@ -3093,7 +3088,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void setBouncerShowing(boolean bouncerShowing) {
         super.setBouncerShowing(bouncerShowing);
-        disable(mDisabledUnmodified);
+        disable(mDisabledUnmodified, true /* animate */);
     }
 
     public void onScreenTurnedOff() {

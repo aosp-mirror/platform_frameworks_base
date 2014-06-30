@@ -29,8 +29,9 @@ import android.view.animation.PathInterpolator;
 public class FlingAnimationUtils {
 
     private static final float LINEAR_OUT_SLOW_IN_X2 = 0.35f;
-    private static final float LINEAR_OUT_FASTER_IN_Y2_MIN = 0.7f;
-    private static final float LINEAR_OUT_FASTER_IN_Y2_MAX = 1f;
+    private static final float LINEAR_OUT_FASTER_IN_X2 = 0.5f;
+    private static final float LINEAR_OUT_FASTER_IN_Y2_MIN = 0.4f;
+    private static final float LINEAR_OUT_FASTER_IN_Y2_MAX = 0.5f;
     private static final float MIN_VELOCITY_DP_PER_SECOND = 250;
     private static final float HIGH_VELOCITY_DP_PER_SECOND = 3000;
 
@@ -203,9 +204,8 @@ public class FlingAnimationUtils {
         float velAbs = Math.abs(velocity);
         float y2 = calculateLinearOutFasterInY2(velAbs);
 
-        // The gradient at the start of the curve is just y2.
-        float startGradient = y2;
-        Interpolator mLinearOutFasterIn = new PathInterpolator(0, 0, 1, y2);
+        float startGradient = y2 / LINEAR_OUT_FASTER_IN_X2;
+        Interpolator mLinearOutFasterIn = new PathInterpolator(0, 0, LINEAR_OUT_FASTER_IN_X2, y2);
         float durationSeconds = startGradient * diff / velAbs;
         if (durationSeconds <= maxLengthSeconds) {
             mAnimatorProperties.interpolator = mLinearOutFasterIn;

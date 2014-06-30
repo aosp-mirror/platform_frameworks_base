@@ -48,28 +48,36 @@
         android:orientation="horizontal"
         >
 
-        <LinearLayout
+        <com.android.systemui.statusbar.AlphaOptimizedLinearLayout
             android:id="@+id/notification_icon_area"
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal"
             >
-            <com.android.systemui.statusbar.StatusBarIconView android:id="@+id/moreIcon"
-                android:layout_width="@dimen/status_bar_icon_size"
-                android:layout_height="match_parent"
-                android:src="@drawable/stat_notify_more"
-                android:visibility="gone"
-                />
-            <com.android.systemui.statusbar.phone.IconMerger android:id="@+id/notificationIcons"
+            <!-- The alpha of this area is both controlled from PhoneStatusBarTransitions and
+                 PhoneStatusBar (DISABLE_NOTIFICATION_ICONS), so we need two views here. -->
+            <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+                android:id="@+id/notification_icon_area_inner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"/>  
-        </LinearLayout>
+                >
+                <com.android.systemui.statusbar.StatusBarIconView android:id="@+id/moreIcon"
+                    android:layout_width="@dimen/status_bar_icon_size"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/stat_notify_more"
+                    android:visibility="gone"
+                    />
+                <com.android.systemui.statusbar.phone.IconMerger android:id="@+id/notificationIcons"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"/>
+            </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+        </com.android.systemui.statusbar.AlphaOptimizedLinearLayout>
 
-        <LinearLayout android:id="@+id/system_icon_area"
+        <com.android.systemui.statusbar.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
@@ -109,7 +117,7 @@
                 android:paddingStart="6dip"
                 android:gravity="center_vertical|start"
                 />
-        </LinearLayout>
+        </com.android.systemui.statusbar.AlphaOptimizedLinearLayout>
     </LinearLayout>
 
     <ViewStub
