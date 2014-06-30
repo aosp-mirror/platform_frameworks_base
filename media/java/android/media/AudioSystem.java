@@ -287,6 +287,9 @@ public class AudioSystem
                                                   DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
     public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
                                                   DEVICE_OUT_USB_DEVICE);
+    public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_LINE |
+                                                                DEVICE_OUT_HDMI_ARC |
+                                                                DEVICE_OUT_SPDIF);
 
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = DEVICE_BIT_IN | 0x1;
