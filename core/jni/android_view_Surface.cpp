@@ -277,6 +277,16 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 }
 
+static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
+        jlong nativeObject) {
+    sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
+    if (!isSurfaceValid(surface)) {
+        return;
+    }
+
+    surface->allocateBuffers();
+}
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
@@ -357,6 +367,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeLockCanvas },
     {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
+    {"nativeAllocateBuffers", "(J)V",
+            (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
