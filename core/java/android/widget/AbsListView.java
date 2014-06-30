@@ -3252,7 +3252,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     ((TransitionDrawable) d).resetTransition();
                                 }
                             }
-                            d.setHotspot(x, y);
+                            mSelector.setHotspot(x, y);
                         }
 
                         if (longClickable) {
