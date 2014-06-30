@@ -19,6 +19,7 @@ package android.os;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserManager;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -348,6 +349,7 @@ public class RecoverySystem {
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
+     * @throws SecurityException if the current user is not allowed to wipe data.
      */
     public static void rebootWipeUserData(Context context) throws IOException {
         rebootWipeUserData(context, false);
@@ -367,11 +369,16 @@ public class RecoverySystem {
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
+     * @throws SecurityException if the current user is not allowed to wipe data.
      *
      * @hide
      */
     public static void rebootWipeUserData(Context context, boolean shutdown)
         throws IOException {
+        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        if (um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
+            throw new SecurityException("Wiping data is not allowed for this user.");
+        }
         final ConditionVariable condition = new ConditionVariable();
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");

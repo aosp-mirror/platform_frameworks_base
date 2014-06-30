@@ -2480,6 +2480,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 RecoverySystem.rebootWipeUserData(mContext);
             } catch (IOException e) {
                 Slog.w(LOG_TAG, "Failed requesting data wipe", e);
+            } catch (SecurityException e) {
+                Slog.w(LOG_TAG, "Failed requesting data wipe", e);
             }
         }
     }
