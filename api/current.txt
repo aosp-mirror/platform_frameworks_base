@@ -27569,7 +27569,16 @@ package android.telecomm {
 
   public abstract class CallVideoProvider {
     ctor protected CallVideoProvider();
+    method public abstract void requestCallDataUsage();
+    method public abstract void requestCameraCapabilities();
+    method public abstract void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public abstract void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
     method public abstract void setCamera(java.lang.String);
+    method public abstract void setDeviceOrientation(int);
+    method public abstract void setDisplaySurface(android.view.Surface);
+    method public abstract void setPauseImage(java.lang.String);
+    method public abstract void setPreviewSurface(android.view.Surface);
+    method public abstract void setZoom(float);
   }
 
   public class CallVideoProviderWrapper implements android.os.IBinder.DeathRecipient {

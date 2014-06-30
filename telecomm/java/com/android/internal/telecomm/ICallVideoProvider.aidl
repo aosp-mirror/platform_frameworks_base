@@ -16,6 +16,9 @@
 
 package com.android.internal.telecomm;
 
+import android.view.Surface;
+import android.telecomm.VideoCallProfile;
+
 /**
  * Internal remote interface for a call video provider.
  * @see android.telecomm.CallVideoProvider
@@ -23,4 +26,22 @@ package com.android.internal.telecomm;
  */
 oneway interface ICallVideoProvider {
     void setCamera(String cameraId);
+
+    void setPreviewSurface(in Surface surface);
+
+    void setDisplaySurface(in Surface surface);
+
+    void setDeviceOrientation(int rotation);
+
+    void setZoom(float value);
+
+    void sendSessionModifyRequest(in VideoCallProfile reqProfile);
+
+    void sendSessionModifyResponse(in VideoCallProfile responseProfile);
+
+    void requestCameraCapabilities();
+
+    void requestCallDataUsage();
+
+    void setPauseImage(String uri);
 }
