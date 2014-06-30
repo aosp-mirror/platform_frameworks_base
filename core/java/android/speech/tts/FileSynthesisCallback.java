@@ -60,7 +60,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
         mFileChannel = fileChannel;
         mDispatcher = dispatcher;
         mCallerIdentity = callerIdentity;
-        mStatusCode = TextToSpeechClient.Status.SUCCESS;
+        mStatusCode = TextToSpeech.SUCCESS;
     }
 
     @Override
@@ -69,11 +69,11 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             if (mDone) {
                 return;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 return;
             }
 
-            mStatusCode = TextToSpeechClient.Status.STOPPED;
+            mStatusCode = TextToSpeech.STOPPED;
             cleanUp();
             if (mDispatcher != null) {
                 mDispatcher.dispatchOnStop();
@@ -109,11 +109,11 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
         }
         FileChannel fileChannel = null;
         synchronized (mStateLock) {
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return errorCodeOnStop();
             }
-            if (mStatusCode != TextToSpeechClient.Status.SUCCESS) {
+            if (mStatusCode != TextToSpeech.SUCCESS) {
                 if (DBG) Log.d(TAG, "Error was raised");
                 return TextToSpeech.ERROR;
             }
@@ -139,7 +139,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             Log.e(TAG, "Failed to write wav header to output file descriptor", ex);
             synchronized (mStateLock) {
                 cleanUp();
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
             }
             return TextToSpeech.ERROR;
         }
@@ -153,17 +153,17 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
         }
         FileChannel fileChannel = null;
         synchronized (mStateLock) {
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return errorCodeOnStop();
             }
-            if (mStatusCode != TextToSpeechClient.Status.SUCCESS) {
+            if (mStatusCode != TextToSpeech.SUCCESS) {
                 if (DBG) Log.d(TAG, "Error was raised");
                 return TextToSpeech.ERROR;
             }
             if (mFileChannel == null) {
                 Log.e(TAG, "File not open");
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
                 return TextToSpeech.ERROR;
             }
             if (!mStarted) {
@@ -180,7 +180,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             Log.e(TAG, "Failed to write to output file descriptor", ex);
             synchronized (mStateLock) {
                 cleanUp();
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
             }
             return TextToSpeech.ERROR;
         }
@@ -202,12 +202,12 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
                 // setStatusCode is set.
                 return TextToSpeech.ERROR;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return errorCodeOnStop();
             }
-            if (mDispatcher != null && mStatusCode != TextToSpeechClient.Status.SUCCESS &&
-                    mStatusCode != TextToSpeechClient.Status.STOPPED) {
+            if (mDispatcher != null && mStatusCode != TextToSpeech.SUCCESS &&
+                    mStatusCode != TextToSpeech.STOPPED) {
                 mDispatcher.dispatchOnError(mStatusCode);
                 return TextToSpeech.ERROR;
             }
@@ -247,7 +247,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
 
     @Override
     public void error() {
-        error(TextToSpeechClient.Status.ERROR_SYNTHESIS);
+        error(TextToSpeech.ERROR_SYNTHESIS);
     }
 
     @Override
@@ -303,18 +303,5 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
         header.flip();
 
         return header;
-    }
-
-    @Override
-    public int fallback() {
-        synchronized (mStateLock) {
-            if (hasStarted() || hasFinished()) {
-                return TextToSpeech.ERROR;
-            }
-
-            mDispatcher.dispatchOnFallback();
-            mStatusCode = TextToSpeechClient.Status.SUCCESS;
-            return TextToSpeechClient.Status.SUCCESS;
-        }
     }
 }

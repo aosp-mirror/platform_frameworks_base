@@ -76,7 +76,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         mDispatcher = dispatcher;
         mCallerIdentity = callerIdentity;
         mLogger = logger;
-        mStatusCode = TextToSpeechClient.Status.SUCCESS;
+        mStatusCode = TextToSpeech.SUCCESS;
     }
 
     @Override
@@ -88,13 +88,13 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             if (mDone) {
                 return;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 Log.w(TAG, "stop() called twice");
                 return;
             }
 
             item = mItem;
-            mStatusCode = TextToSpeechClient.Status.STOPPED;
+            mStatusCode = TextToSpeech.STOPPED;
         }
 
         if (item != null) {
@@ -102,14 +102,14 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             // point it will write an additional buffer to the item - but we
             // won't worry about that because the audio playback queue will be cleared
             // soon after (see SynthHandler#stop(String).
-            item.stop(TextToSpeechClient.Status.STOPPED);
+            item.stop(TextToSpeech.STOPPED);
         } else {
             // This happens when stop() or error() were called before start() was.
 
             // In all other cases, mAudioTrackHandler.stop() will
             // result in onSynthesisDone being called, and we will
             // write data there.
-            mLogger.onCompleted(TextToSpeechClient.Status.STOPPED);
+            mLogger.onCompleted(TextToSpeech.STOPPED);
             mDispatcher.dispatchOnStop();
         }
     }
@@ -145,14 +145,14 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         synchronized (mStateLock) {
             if (channelConfig == 0) {
                 Log.e(TAG, "Unsupported number of channels :" + channelCount);
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
                 return TextToSpeech.ERROR;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 if (DBG) Log.d(TAG, "stop() called before start(), returning.");
                 return errorCodeOnStop();
             }
-            if (mStatusCode != TextToSpeechClient.Status.SUCCESS) {
+            if (mStatusCode != TextToSpeech.SUCCESS) {
                 if (DBG) Log.d(TAG, "Error was raised");
                 return TextToSpeech.ERROR;
             }
@@ -183,14 +183,14 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         SynthesisPlaybackQueueItem item = null;
         synchronized (mStateLock) {
             if (mItem == null) {
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
                 return TextToSpeech.ERROR;
             }
-            if (mStatusCode != TextToSpeechClient.Status.SUCCESS) {
+            if (mStatusCode != TextToSpeech.SUCCESS) {
                 if (DBG) Log.d(TAG, "Error was raised");
                 return TextToSpeech.ERROR;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 return errorCodeOnStop();
             }
             item = mItem;
@@ -206,7 +206,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             item.put(bufferCopy);
         } catch (InterruptedException ie) {
             synchronized (mStateLock) {
-                mStatusCode = TextToSpeechClient.Status.ERROR_OUTPUT;
+                mStatusCode = TextToSpeech.ERROR_OUTPUT;
                 return TextToSpeech.ERROR;
             }
         }
@@ -228,7 +228,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 // setStatusCode
                 return TextToSpeech.ERROR;
             }
-            if (mStatusCode == TextToSpeechClient.Status.STOPPED) {
+            if (mStatusCode == TextToSpeech.STOPPED) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return errorCodeOnStop();
             }
@@ -238,7 +238,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 // .done() was called before .start. Treat it as successful synthesis
                 // for a client, despite service bad implementation.
                 Log.w(TAG, "done() was called before start() call");
-                if (mStatusCode == TextToSpeechClient.Status.SUCCESS) {
+                if (mStatusCode == TextToSpeech.SUCCESS) {
                     mDispatcher.dispatchOnSuccess();
                 } else {
                     mDispatcher.dispatchOnError(mStatusCode);
@@ -252,7 +252,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         }
 
         // Signal done or error to item
-        if (statusCode == TextToSpeechClient.Status.SUCCESS) {
+        if (statusCode == TextToSpeech.SUCCESS) {
             item.done();
         } else {
             item.stop(statusCode);
@@ -263,7 +263,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     @Override
     public void error() {
-        error(TextToSpeechClient.Status.ERROR_SYNTHESIS);
+        error(TextToSpeech.ERROR_SYNTHESIS);
     }
 
     @Override
@@ -274,19 +274,6 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 return;
             }
             mStatusCode = errorCode;
-        }
-    }
-
-    @Override
-    public int fallback() {
-        synchronized (mStateLock) {
-            if (hasStarted() || hasFinished()) {
-                return TextToSpeech.ERROR;
-            }
-
-            mDispatcher.dispatchOnFallback();
-            mStatusCode = TextToSpeechClient.Status.SUCCESS;
-            return TextToSpeechClient.Status.SUCCESS;
         }
     }
 }

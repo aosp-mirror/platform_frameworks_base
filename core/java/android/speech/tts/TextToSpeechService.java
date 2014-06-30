@@ -74,26 +74,6 @@ import java.util.Set;
  *
  * {@link #onGetLanguage} is not required as of JELLYBEAN_MR2 (API 18) and later, it is only
  * called on earlier versions of Android.
- * <p>
- * In order to fully support the V2 API ({@link TextToSpeechClient}),
- * these methods must be implemented:
- * <ul>
- * <li>{@link #onSynthesizeTextV2}</li>
- * <li>{@link #checkVoicesInfo}</li>
- * <li>{@link #onVoicesInfoChange}</li>
- * <li>{@link #implementsV2API}</li>
- * </ul>
- * In addition {@link #implementsV2API} has to return true.
- * <p>
- * If the service does not implement these methods and {@link #implementsV2API} returns false,
- * then the V2 API will be provided by converting V2 requests ({@link #onSynthesizeTextV2})
- * to V1 requests ({@link #onSynthesizeText}). On service setup, all of the available device
- * locales will be fed to {@link #onIsLanguageAvailable} to check if they are supported.
- * If they are, embedded and/or network voices will be created depending on the result of
- * {@link #onGetFeaturesForLanguage}.
- * <p>
- * Note that a V2 service will still receive requests from V1 clients and has to implement all
- * of the V1 API methods.
  */
 public abstract class TextToSpeechService extends Service {
 
@@ -113,9 +93,6 @@ public abstract class TextToSpeechService extends Service {
     private String mPackageName;
 
     private final Object mVoicesInfoLock = new Object();
-
-    private List<VoiceInfo> mVoicesInfoList;
-    private Map<String, VoiceInfo> mVoicesInfoLookup;
 
     @Override
     public void onCreate() {
@@ -236,149 +213,6 @@ public abstract class TextToSpeechService extends Service {
             SynthesisCallback callback);
 
     /**
-     * Check the available voices data and return an immutable list of the available voices.
-     * The output of this method will be passed to clients to allow them to configure synthesis
-     * requests.
-     *
-     * Can be called on multiple threads.
-     *
-     * The result of this method will be saved and served to all TTS clients. If a TTS service wants
-     * to update the set of available voices, it should call the {@link #forceVoicesInfoCheck()}
-     * method.
-     */
-    protected List<VoiceInfo> checkVoicesInfo() {
-        if (implementsV2API()) {
-            throw new IllegalStateException("For proper V2 API implementation this method has to" +
-                    "  be implemented");
-        }
-
-        // V2 to V1 interface adapter. This allows using V2 client interface on V1-only services.
-        Bundle defaultParams = new Bundle();
-        defaultParams.putFloat(TextToSpeechClient.Params.SPEECH_PITCH, 1.0f);
-        // Speech speed <= 0 makes it use a system wide setting
-        defaultParams.putFloat(TextToSpeechClient.Params.SPEECH_SPEED, 0.0f);
-
-        // Enumerate all locales and check if they are available
-        ArrayList<VoiceInfo> voicesInfo = new ArrayList<VoiceInfo>();
-        int id = 0;
-        for (Locale locale : Locale.getAvailableLocales()) {
-            int expectedStatus = TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE;
-            if (locale.getVariant().isEmpty()) {
-                if (locale.getCountry().isEmpty()) {
-                    expectedStatus = TextToSpeech.LANG_AVAILABLE;
-                } else {
-                    expectedStatus = TextToSpeech.LANG_COUNTRY_AVAILABLE;
-                }
-            }
-            try {
-                int localeStatus = onIsLanguageAvailable(locale.getISO3Language(),
-                        locale.getISO3Country(), locale.getVariant());
-                if (localeStatus != expectedStatus) {
-                    continue;
-                }
-            } catch (MissingResourceException e) {
-                // Ignore locale without iso 3 codes
-                continue;
-            }
-
-            Set<String> features = onGetFeaturesForLanguage(locale.getISO3Language(),
-                        locale.getISO3Country(), locale.getVariant());
-
-            VoiceInfo.Builder builder = new VoiceInfo.Builder();
-            builder.setLatency(VoiceInfo.LATENCY_NORMAL);
-            builder.setQuality(VoiceInfo.QUALITY_NORMAL);
-            builder.setLocale(locale);
-            builder.setParamsWithDefaults(defaultParams);
-
-            if (features == null || features.contains(
-                    TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS)) {
-                builder.setName(locale.toString() + "-embedded");
-                builder.setRequiresNetworkConnection(false);
-                voicesInfo.add(builder.build());
-            }
-
-            if (features != null && features.contains(
-                    TextToSpeech.Engine.KEY_FEATURE_NETWORK_SYNTHESIS)) {
-                builder.setName(locale.toString() + "-network");
-                builder.setRequiresNetworkConnection(true);
-                voicesInfo.add(builder.build());
-            }
-        }
-
-        return voicesInfo;
-    }
-
-    /**
-     * Tells the synthesis thread that it should reload voice data.
-     * There's a high probability that the underlying set of available voice data has changed.
-     * Called only on the synthesis thread.
-     */
-    protected void onVoicesInfoChange() {
-
-    }
-
-    /**
-     * Tells the service to synthesize speech from the given text. This method
-     * should block until the synthesis is finished. Used for requests from V2
-     * client {@link android.speech.tts.TextToSpeechClient}. Called on the
-     * synthesis thread.
-     *
-     * @param request The synthesis request.
-     * @param callback The callback the the engine must use to make data
-     *            available for playback or for writing to a file.
-     */
-    protected void onSynthesizeTextV2(SynthesisRequestV2 request,
-            VoiceInfo selectedVoice,
-            SynthesisCallback callback) {
-        if (implementsV2API()) {
-            throw new IllegalStateException("For proper V2 API implementation this method has to" +
-                    "  be implemented");
-        }
-
-        // Convert to V1 params
-        int speechRate = (int) (request.getVoiceParams().getFloat(
-                TextToSpeechClient.Params.SPEECH_SPEED, 1.0f) * 100);
-        int speechPitch = (int) (request.getVoiceParams().getFloat(
-                TextToSpeechClient.Params.SPEECH_PITCH, 1.0f) * 100);
-
-        // Provide adapter to V1 API
-        Bundle params = new Bundle();
-        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, request.getUtteranceId());
-        params.putInt(TextToSpeech.Engine.KEY_PARAM_PITCH, speechPitch);
-        params.putInt(TextToSpeech.Engine.KEY_PARAM_RATE, speechRate);
-        if (selectedVoice.getRequiresNetworkConnection()) {
-            params.putString(TextToSpeech.Engine.KEY_FEATURE_NETWORK_SYNTHESIS, "true");
-        } else {
-            params.putString(TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS, "true");
-        }
-
-        String noWarning = request.getMarkup().getParameter(Utterance.KEY_NO_WARNING_ON_FALLBACK);
-        if (noWarning == null || noWarning.equals("false")) {
-            Log.w("TextToSpeechService", "The synthesis engine does not support Markup, falling " +
-                                         "back to the given plain text.");
-        }
-
-        // Build V1 request
-        SynthesisRequest requestV1 = new SynthesisRequest(request.getText(), params);
-        Locale locale = selectedVoice.getLocale();
-        requestV1.setLanguage(locale.getISO3Language(), locale.getISO3Country(),
-                locale.getVariant());
-        requestV1.setSpeechRate(speechRate);
-        requestV1.setPitch(speechPitch);
-
-        // Synthesize using V1 interface
-        onSynthesizeText(requestV1, callback);
-    }
-
-    /**
-     * If true, this service implements proper V2 TTS API service. If it's false,
-     * V2 API will be provided through adapter.
-     */
-    protected boolean implementsV2API() {
-        return false;
-    }
-
-    /**
      * Queries the service for a set of features supported for a given language.
      *
      * Can be called on multiple threads.
@@ -390,69 +224,6 @@ public abstract class TextToSpeechService extends Service {
      */
     protected Set<String> onGetFeaturesForLanguage(String lang, String country, String variant) {
         return null;
-    }
-
-    private List<VoiceInfo> getVoicesInfo() {
-        synchronized (mVoicesInfoLock) {
-            if (mVoicesInfoList == null) {
-                // Get voices. Defensive copy to make sure TTS engine won't alter the list.
-                mVoicesInfoList = new ArrayList<VoiceInfo>(checkVoicesInfo());
-                // Build lookup map
-                mVoicesInfoLookup = new HashMap<String, VoiceInfo>((int) (
-                        mVoicesInfoList.size()*1.5f));
-                for (VoiceInfo voiceInfo : mVoicesInfoList) {
-                    VoiceInfo prev = mVoicesInfoLookup.put(voiceInfo.getName(), voiceInfo);
-                    if (prev != null) {
-                        Log.e(TAG, "Duplicate name (" + voiceInfo.getName() + ") of the voice ");
-                    }
-                }
-            }
-            return mVoicesInfoList;
-        }
-    }
-
-    public VoiceInfo getVoicesInfoWithName(String name) {
-        synchronized (mVoicesInfoLock) {
-            if (mVoicesInfoLookup != null) {
-                return mVoicesInfoLookup.get(name);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Force TTS service to reevaluate the set of available languages. Will result in
-     * a call to {@link #checkVoicesInfo()} on the same thread, {@link #onVoicesInfoChange}
-     * on the synthesizer thread and callback to
-     * {@link TextToSpeechClient.ConnectionCallbacks#onEngineStatusChange} of all connected
-     * TTS clients.
-     *
-     * Use this method only if you know that set of available languages changed.
-     *
-     * Can be called on multiple threads.
-     */
-    public void forceVoicesInfoCheck() {
-        synchronized (mVoicesInfoLock) {
-            List<VoiceInfo> old = mVoicesInfoList;
-
-            mVoicesInfoList = null; // Force recreation of voices info list
-            getVoicesInfo();
-
-            if (mVoicesInfoList == null) {
-                throw new IllegalStateException("This method applies only to services " +
-                        "supporting V2 TTS API. This services doesn't support V2 TTS API.");
-            }
-
-            if (old != null) {
-                // Flush all existing items, and inform synthesis thread about the change.
-                mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_FLUSH,
-                        new VoicesInfoChangeItem());
-                // TODO: Handle items that may be added to queue after SynthesizerRestartItem
-                // but before client reconnection
-                // Disconnect all of them
-                mCallbacks.dispatchVoicesInfoChange(mVoicesInfoList);
-            }
-        }
     }
 
     private int getDefaultSpeechRate() {
@@ -558,7 +329,7 @@ public abstract class TextToSpeechService extends Service {
             if (!speechItem.isValid()) {
                 if (utterenceProgress != null) {
                     utterenceProgress.dispatchOnError(
-                            TextToSpeechClient.Status.ERROR_INVALID_REQUEST);
+                            TextToSpeech.ERROR_INVALID_REQUEST);
                 }
                 return TextToSpeech.ERROR;
             }
@@ -589,7 +360,7 @@ public abstract class TextToSpeechService extends Service {
             } else {
                 Log.w(TAG, "SynthThread has quit");
                 if (utterenceProgress != null) {
-                    utterenceProgress.dispatchOnError(TextToSpeechClient.Status.ERROR_SERVICE);
+                    utterenceProgress.dispatchOnError(TextToSpeech.ERROR_SERVICE);
                 }
                 return TextToSpeech.ERROR;
             }
@@ -834,232 +605,6 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    class SynthesisSpeechItemV2 extends UtteranceSpeechItem {
-        private final SynthesisRequestV2 mSynthesisRequest;
-        private AbstractSynthesisCallback mSynthesisCallback;
-        private final EventLoggerV2 mEventLogger;
-
-        public SynthesisSpeechItemV2(Object callerIdentity, int callerUid, int callerPid,
-                SynthesisRequestV2 synthesisRequest) {
-            super(callerIdentity, callerUid, callerPid);
-
-            mSynthesisRequest = synthesisRequest;
-            mEventLogger = new EventLoggerV2(synthesisRequest, callerUid, callerPid,
-                    mPackageName);
-
-            updateSpeechSpeedParam(synthesisRequest);
-        }
-
-        private void updateSpeechSpeedParam(SynthesisRequestV2 synthesisRequest) {
-            Bundle voiceParams = mSynthesisRequest.getVoiceParams();
-
-            // Inject default speech speed if needed
-            if (voiceParams.containsKey(TextToSpeechClient.Params.SPEECH_SPEED)) {
-                if (voiceParams.getFloat(TextToSpeechClient.Params.SPEECH_SPEED) <= 0) {
-                    voiceParams.putFloat(TextToSpeechClient.Params.SPEECH_SPEED,
-                            getDefaultSpeechRate() / 100.0f);
-                }
-            }
-        }
-
-        /**
-         * Estimate of the character count equivalent of a Markup instance. Calculated
-         * by summing the characters of all Markups of type "text". Each other node
-         * is counted as a single character, as the character count of other nodes
-         * is non-trivial to calculate and we don't want to accept arbitrarily large
-         * requests.
-         */
-        private int estimateSynthesisLengthFromMarkup(Markup m) {
-            int size = 0;
-            if (m.getType() != null &&
-                m.getType().equals("text") &&
-                m.getParameter("text") != null) {
-                size += m.getParameter("text").length();
-            } else if (m.getType() == null ||
-                       !m.getType().equals("utterance")) {
-                size += 1;
-            }
-            for (Markup nested : m.getNestedMarkups()) {
-                size += estimateSynthesisLengthFromMarkup(nested);
-            }
-            return size;
-        }
-
-        @Override
-        public boolean isValid() {
-            if (mSynthesisRequest.getMarkup() == null) {
-                Log.e(TAG, "No markup in request.");
-                return false;
-            }
-            String type = mSynthesisRequest.getMarkup().getType();
-            if (type == null) {
-                Log.w(TAG, "Top level markup node should have type \"utterance\", not null");
-                return false;
-            } else if (!type.equals("utterance")) {
-                Log.w(TAG, "Top level markup node should have type \"utterance\" instead of " +
-                            "\"" + type + "\"");
-                return false;
-            }
-
-            int estimate = estimateSynthesisLengthFromMarkup(mSynthesisRequest.getMarkup());
-            if (estimate >= TextToSpeech.getMaxSpeechInputLength()) {
-                Log.w(TAG, "Text too long: estimated size of text was " + estimate + " chars.");
-                return false;
-            }
-
-            if (estimate <= 0) {
-                Log.e(TAG, "null synthesis text");
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        protected void playImpl() {
-            AbstractSynthesisCallback synthesisCallback;
-            if (mEventLogger != null) {
-                mEventLogger.onRequestProcessingStart();
-            }
-            synchronized (this) {
-                // stop() might have been called before we enter this
-                // synchronized block.
-                if (isStopped()) {
-                    return;
-                }
-                mSynthesisCallback = createSynthesisCallback();
-                synthesisCallback = mSynthesisCallback;
-            }
-
-            // Get voice info
-            VoiceInfo voiceInfo = getVoicesInfoWithName(mSynthesisRequest.getVoiceName());
-            if (voiceInfo != null) {
-                // Primary voice
-                TextToSpeechService.this.onSynthesizeTextV2(mSynthesisRequest, voiceInfo,
-                        synthesisCallback);
-            } else {
-                Log.e(TAG, "Unknown voice name:" + mSynthesisRequest.getVoiceName());
-                synthesisCallback.error(TextToSpeechClient.Status.ERROR_INVALID_REQUEST);
-            }
-
-            // Fix for case where client called .start() & .error(), but did not called .done()
-            if (!synthesisCallback.hasFinished()) {
-                synthesisCallback.done();
-            }
-        }
-
-        @Override
-        protected void stopImpl() {
-            AbstractSynthesisCallback synthesisCallback;
-            synchronized (this) {
-                synthesisCallback = mSynthesisCallback;
-            }
-            if (synthesisCallback != null) {
-                // If the synthesis callback is null, it implies that we haven't
-                // entered the synchronized(this) block in playImpl which in
-                // turn implies that synthesis would not have started.
-                synthesisCallback.stop();
-                TextToSpeechService.this.onStop();
-            }
-        }
-
-        protected AbstractSynthesisCallback createSynthesisCallback() {
-            return new PlaybackSynthesisCallback(getStreamType(), getVolume(), getPan(),
-                    mAudioPlaybackHandler, this, getCallerIdentity(), mEventLogger,
-                    implementsV2API());
-        }
-
-        private int getStreamType() {
-            return getIntParam(mSynthesisRequest.getAudioParams(),
-                    TextToSpeechClient.Params.AUDIO_PARAM_STREAM,
-                    Engine.DEFAULT_STREAM);
-        }
-
-        private float getVolume() {
-            return getFloatParam(mSynthesisRequest.getAudioParams(),
-                    TextToSpeechClient.Params.AUDIO_PARAM_VOLUME,
-                    Engine.DEFAULT_VOLUME);
-        }
-
-        private float getPan() {
-            return getFloatParam(mSynthesisRequest.getAudioParams(),
-                    TextToSpeechClient.Params.AUDIO_PARAM_PAN,
-                    Engine.DEFAULT_PAN);
-        }
-
-        @Override
-        public String getUtteranceId() {
-            return mSynthesisRequest.getUtteranceId();
-        }
-    }
-
-    private class SynthesisToFileOutputStreamSpeechItemV2 extends SynthesisSpeechItemV2 {
-        private final FileOutputStream mFileOutputStream;
-
-        public SynthesisToFileOutputStreamSpeechItemV2(Object callerIdentity, int callerUid,
-                int callerPid,
-                SynthesisRequestV2 synthesisRequest,
-                FileOutputStream fileOutputStream) {
-            super(callerIdentity, callerUid, callerPid, synthesisRequest);
-            mFileOutputStream = fileOutputStream;
-        }
-
-        @Override
-        protected AbstractSynthesisCallback createSynthesisCallback() {
-            return new FileSynthesisCallback(mFileOutputStream.getChannel(),
-                    this, getCallerIdentity(), implementsV2API());
-        }
-
-        @Override
-        protected void playImpl() {
-            super.playImpl();
-            try {
-              mFileOutputStream.close();
-            } catch(IOException e) {
-              Log.w(TAG, "Failed to close output file", e);
-            }
-        }
-    }
-
-    private class AudioSpeechItemV2 extends UtteranceSpeechItem {
-        private final AudioPlaybackQueueItem mItem;
-        private final Bundle mAudioParams;
-        private final String mUtteranceId;
-
-        public AudioSpeechItemV2(Object callerIdentity, int callerUid, int callerPid,
-                String utteranceId, Bundle audioParams, Uri uri) {
-            super(callerIdentity, callerUid, callerPid);
-            mUtteranceId = utteranceId;
-            mAudioParams = audioParams;
-            mItem = new AudioPlaybackQueueItem(this, getCallerIdentity(),
-                    TextToSpeechService.this, uri, getStreamType());
-        }
-
-        @Override
-        public boolean isValid() {
-            return true;
-        }
-
-        @Override
-        protected void playImpl() {
-            mAudioPlaybackHandler.enqueue(mItem);
-        }
-
-        @Override
-        protected void stopImpl() {
-            // Do nothing.
-        }
-
-        protected int getStreamType() {
-            return mAudioParams.getInt(TextToSpeechClient.Params.AUDIO_PARAM_STREAM);
-        }
-
-        public String getUtteranceId() {
-            return mUtteranceId;
-        }
-    }
-
-
     class SynthesisSpeechItemV1 extends SpeechItemV1 {
         // Never null.
         private final String mText;
@@ -1252,30 +797,6 @@ public abstract class TextToSpeechService extends Service {
         @Override
         public String getUtteranceId() {
             return mUtteranceId;
-        }
-    }
-
-    /**
-     * Call {@link TextToSpeechService#onVoicesInfoChange} on synthesis thread.
-     */
-    private class VoicesInfoChangeItem extends SpeechItem {
-        public VoicesInfoChangeItem() {
-            super(null, 0, 0); // It's never initiated by an user
-        }
-
-        @Override
-        public boolean isValid() {
-            return true;
-        }
-
-        @Override
-        protected void playImpl() {
-            TextToSpeechService.this.onVoicesInfoChange();
-        }
-
-        @Override
-        protected void stopImpl() {
-            // No-op
         }
     }
 
@@ -1475,58 +996,6 @@ public abstract class TextToSpeechService extends Service {
             }
             return true;
         }
-
-        @Override
-        public List<VoiceInfo> getVoicesInfo() {
-            return TextToSpeechService.this.getVoicesInfo();
-        }
-
-        @Override
-        public int speakV2(IBinder callingInstance,
-                SynthesisRequestV2 request) {
-            if (!checkNonNull(callingInstance, request)) {
-                return TextToSpeech.ERROR;
-            }
-
-            SpeechItem item = new SynthesisSpeechItemV2(callingInstance,
-                    Binder.getCallingUid(), Binder.getCallingPid(), request);
-            return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
-        }
-
-        @Override
-        public int synthesizeToFileDescriptorV2(IBinder callingInstance,
-                ParcelFileDescriptor fileDescriptor,
-                SynthesisRequestV2 request) {
-            if (!checkNonNull(callingInstance, request, fileDescriptor)) {
-                return TextToSpeech.ERROR;
-            }
-
-            // In test env, ParcelFileDescriptor instance may be EXACTLY the same
-            // one that is used by client. And it will be closed by a client, thus
-            // preventing us from writing anything to it.
-            final ParcelFileDescriptor sameFileDescriptor = ParcelFileDescriptor.adoptFd(
-                    fileDescriptor.detachFd());
-
-            SpeechItem item = new SynthesisToFileOutputStreamSpeechItemV2(callingInstance,
-                    Binder.getCallingUid(), Binder.getCallingPid(), request,
-                    new ParcelFileDescriptor.AutoCloseOutputStream(sameFileDescriptor));
-            return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
-
-        }
-
-        @Override
-        public int playAudioV2(
-                IBinder callingInstance, Uri audioUri, String utteranceId,
-                Bundle systemParameters) {
-            if (!checkNonNull(callingInstance, audioUri, systemParameters)) {
-                return TextToSpeech.ERROR;
-            }
-
-            SpeechItem item = new AudioSpeechItemV2(callingInstance,
-                    Binder.getCallingUid(), Binder.getCallingPid(), utteranceId, systemParameters,
-                    audioUri);
-            return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
-        }
     };
 
     private class CallbackMap extends RemoteCallbackList<ITextToSpeechCallback> {
@@ -1614,18 +1083,6 @@ public abstract class TextToSpeechService extends Service {
             synchronized (mCallerToCallback) {
                 mCallerToCallback.clear();
                 super.kill();
-            }
-        }
-
-        public void dispatchVoicesInfoChange(List<VoiceInfo> voicesInfo) {
-            synchronized (mCallerToCallback) {
-                for (ITextToSpeechCallback callback : mCallerToCallback.values()) {
-                    try {
-                        callback.onVoicesInfoChange(voicesInfo);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to request reconnect", e);
-                    }
-                }
             }
         }
 

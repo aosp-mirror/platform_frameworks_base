@@ -53,10 +53,7 @@ import java.util.Set;
  * notified of the completion of the initialization.<br>
  * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
  * to release the native resources used by the TextToSpeech engine.
- *
- * @deprecated Use {@link TextToSpeechClient} instead
  */
-@Deprecated
 public class TextToSpeech {
 
     private static final String TAG = "TextToSpeech";
@@ -69,6 +66,42 @@ public class TextToSpeech {
      * Denotes a generic operation failure.
      */
     public static final int ERROR = -1;
+
+    /**
+     * Denotes a stop requested by a client. It's used only on the service side of the API,
+     * client should never expect to see this result code.
+     */
+    public static final int STOPPED = -2;
+
+    /**
+     * Denotes a failure of a TTS engine to synthesize the given input.
+     */
+    public static final int ERROR_SYNTHESIS = -3;
+
+    /**
+     * Denotes a failure of a TTS service.
+     */
+    public static final int ERROR_SERVICE = -4;
+
+    /**
+     * Denotes a failure related to the output (audio device or a file).
+     */
+    public static final int ERROR_OUTPUT = -5;
+
+    /**
+     * Denotes a failure caused by a network connectivity problems.
+     */
+    public static final int ERROR_NETWORK = -6;
+
+    /**
+     * Denotes a failure caused by network timeout.
+     */
+    public static final int ERROR_NETWORK_TIMEOUT = -7;
+
+    /**
+     * Denotes a failure caused by an invalid request.
+     */
+    public static final int ERROR_INVALID_REQUEST = -8;
 
     /**
      * Queue mode where all entries in the playback queue (media to be played
@@ -1477,11 +1510,6 @@ public class TextToSpeech {
                 if (listener != null) {
                     listener.onStart(utteranceId);
                 }
-            }
-
-            @Override
-            public void onVoicesInfoChange(List<VoiceInfo> voicesInfo) throws RemoteException {
-                // Ignore it
             }
         };
 

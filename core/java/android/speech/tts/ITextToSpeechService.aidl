@@ -20,8 +20,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.speech.tts.ITextToSpeechCallback;
-import android.speech.tts.VoiceInfo;
-import android.speech.tts.SynthesisRequestV2;
 
 /**
  * Interface for TextToSpeech to talk to TextToSpeechService.
@@ -170,45 +168,4 @@ interface ITextToSpeechService {
      * @param cb The callback.
      */
     void setCallback(in IBinder caller, ITextToSpeechCallback cb);
-
-    /**
-     * Tells the engine to synthesize some speech and play it back.
-     *
-     * @param callingInstance a binder representing the identity of the calling
-     *        TextToSpeech object.
-     * @param text The text to synthesize.
-     * @param queueMode Determines what to do to requests already in the queue.
-     * @param request Request parameters.
-     */
-    int speakV2(in IBinder callingInstance, in SynthesisRequestV2 request);
-
-    /**
-     * Tells the engine to synthesize some speech and write it to a file.
-     *
-     * @param callingInstance a binder representing the identity of the calling
-     *        TextToSpeech object.
-     * @param text The text to synthesize.
-     * @param fileDescriptor The file descriptor to write the synthesized audio to. Has to be
-              writable.
-     * @param request Request parameters.
-     */
-    int synthesizeToFileDescriptorV2(in IBinder callingInstance,
-        in ParcelFileDescriptor fileDescriptor, in SynthesisRequestV2 request);
-
-    /**
-     * Plays an existing audio resource. V2 version
-     *
-     * @param callingInstance a binder representing the identity of the calling
-     *        TextToSpeech object.
-     * @param audioUri URI for the audio resource (a file or android.resource URI)
-     * @param utteranceId Unique identifier.
-     * @param audioParameters Parameters for audio playback (from {@link SynthesisRequestV2}).
-     */
-    int playAudioV2(in IBinder callingInstance, in Uri audioUri, in String utteranceId,
-        in Bundle audioParameters);
-
-    /**
-     * Request the list of available voices from the service.
-     */
-    List<VoiceInfo> getVoicesInfo();
 }

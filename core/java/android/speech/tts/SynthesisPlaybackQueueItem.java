@@ -72,7 +72,7 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem {
 
         mStopped = false;
         mDone = false;
-        mStatusCode = TextToSpeechClient.Status.SUCCESS;
+        mStatusCode = TextToSpeech.SUCCESS;
 
         mAudioTrack = new BlockingAudioTrack(streamType, sampleRate, audioFormat,
                 channelCount, volume, pan);
@@ -86,7 +86,7 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem {
         dispatcher.dispatchOnStart();
 
         if (!mAudioTrack.init()) {
-            dispatcher.dispatchOnError(TextToSpeechClient.Status.ERROR_OUTPUT);
+            dispatcher.dispatchOnError(TextToSpeech.ERROR_OUTPUT);
             return;
         }
 
@@ -110,9 +110,9 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem {
 
         mAudioTrack.waitAndRelease();
 
-        if (mStatusCode == TextToSpeechClient.Status.SUCCESS) {
+        if (mStatusCode == TextToSpeech.SUCCESS) {
             dispatcher.dispatchOnSuccess();
-        } else if(mStatusCode == TextToSpeechClient.Status.STOPPED) {
+        } else if(mStatusCode == TextToSpeech.STOPPED) {
             dispatcher.dispatchOnStop();
         } else {
             dispatcher.dispatchOnError(mStatusCode);

@@ -53,7 +53,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         dispatcher.dispatchOnStart();
         mPlayer = MediaPlayer.create(mContext, mUri);
         if (mPlayer == null) {
-            dispatcher.dispatchOnError(TextToSpeechClient.Status.ERROR_OUTPUT);
+            dispatcher.dispatchOnError(TextToSpeech.ERROR_OUTPUT);
             return;
         }
 
