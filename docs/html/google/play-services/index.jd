@@ -27,9 +27,10 @@ header.hide=1
   <div class="layout-content-col span-4">
 
 <h4>Google Technology</h4>
-<p>Google Play services provides you with easy access to Google services and is tightly
-integrated with the Android OS. Easy-to-use client libraries are provided for
-each service that let you implement the functionality you want easier and faster.</p>
+<p>Google Play services provides you with easy access to Google services and is
+tightly integrated with the Android OS. Easy-to-use client libraries are
+provided for each service that let you implement the functionality you want
+easier and faster.</p>
 
   </div>
   <div class="layout-content-col span-4">
@@ -61,7 +62,122 @@ about your users' Android version.</p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+    class="toggle-content-img"
+      alt=""/>Google Play services, Version 5.0</a> <em>(July 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 5.0</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 5.0, see the
+announcement
+<a href="http://android-developers.blogspot.com/2014/05/google-play-services-5.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Analytics</strong> - The Enhanced Ecommerce API allows your app
+to send product related information and actions to Google Analytics. Use this
+API to measure impressions of products seen by users, checkout steps, and
+products purchased. This information can be analyzed for the effectiveness of
+marketing and merchandising efforts, including the impact of internal
+promotions, coupons, and affiliate marketing programs.
+  <ul>
+    <li><a href="https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce.html" class="external-link">Enhanced Ecommerce developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/analytics/ecommerce/package-summary.html">Enhanced Ecommerce API reference</a></li>
+  </ul>
+  </li>
+
+  <li><strong>App Indexing</strong> - The App Indexing API provides a way
+for developers to notify Google about deep links in their native apps and
+allows the Google Search App, version 3.6 and above, to drive re-engagement
+through Google Search
+<a href="https://support.google.com/websearch/answer/106230"
+class="external-link">query autocompletions</a>, providing fast and easy access to
+inner pages in apps.
+  <ul>
+    <li><a href="https://developers.google.com/app-indexing/webmasters/appindexingapi.html"
+class="external-link">App Indexing developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/appindexing/package-summary.html">App
+Indexing API reference</a></li>
+  </ul>
+  </li>
+
+  <li><strong>Drive</strong> - The Query APIs now allow your app to retrieve
+Drive files by sorted order, according to a developer-specified sorting criteria.
+    <ul>
+      <li><a href="https://developers.google.com/drive/android/queries.html"
+class="external-link">Queries developer guide</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/drive/query/package-summary.html">Sortable
+queries API reference</a></li>
+    </ul>
+  </li>
+
+  <li><strong>Play Games</strong> - This release introduces the Quests and
+Saved Games services. The Quests service gives you the ability to issue
+time-bound in-game challenges based on Events data sent from your game, without
+republishing your game (for example:  Your game sends an event each time a
+“gem” is found by a player, and you create a quest to “Find 20 gems”). Players
+can complete a quest to earn rewards. Saved Games offers improved functionality
+for saving game state information and visually displaying player game progression.
+    <ul>
+    <li><a href="https://developers.google.com/games/services/android/quests.html"
+class="external-link">Events and Quests developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/event/package-summary.html">Events
+API reference</a></a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/quest/package-summary.html">Quests
+API reference</a></a></li>
+    <li><a href="https://developers.google.com/games/services/android/savedgames.html"
+class="external-link">Saved Games developer guide</a></li>
+    <li><a href="{@docRoot}reference/com/google/android/gms/games/snapshot/package-summary.html">Saved
+Games API reference</a></a></li>
+  </ul>
+  </li>
+
+  <li><strong>Security</strong> - The Security API allows you to easily
+install a dynamic security provider. New versions of Google Play Services will
+keep the security provider up-to-date with the latest security fixes as those
+become available.
+    <ul>
+      <li><a href="{@docRoot}reference/com/google/android/gms/security/package-summary.html">Security
+API reference</a></li>
+    </ul>
+  </li>
+
+    <li><strong>Wallet</strong> - The Save to Google API for Android lets users
+save Wallet Objects to their Google Wallet with the click of a button displayed
+in your Android app.
+    <ul>
+      <li><a href="https://developers.google.com/wallet/objects/savetowalletnative.html"
+class="external-link">Save to Google API for Android tutorial</a></li>
+    </ul>
+  </li>
+
+
+    <li><strong>Wearables</strong> - The Wearable Data Layer API provides a
+    communication channel between your handheld and wearable apps. The API
+    consists of a set of data objects that the system can send and synchronize
+    and listeners that notify your apps of important events from the other
+    device.
+    <ul>
+      <li><a href="{@docRoot}training/wearables/apps/index.html">Building
+Wearable Apps training class</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/wearable/package-summary.html">Wearables
+API reference</a></li>
+    </ul>
+  </li>
+
+</ul>
+</dd>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Google Play services, Version 4.4</a> <em>(May 2014)</em>
   </p>
 
