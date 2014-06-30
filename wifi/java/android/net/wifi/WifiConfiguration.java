@@ -49,6 +49,10 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final String hiddenSSIDVarName = "scan_ssid";
     /** {@hide} */
+    public static final String pmfVarName = "ieee80211w";
+    /** {@hide} */
+    public static final String updateIdentiferVarName = "update_identifier";
+    /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
     /**
      * Recognized key management schemes.
@@ -262,6 +266,18 @@ public class WifiConfiguration implements Parcelable {
      * SSID-specific probe request must be used for scans.
      */
     public boolean hiddenSSID;
+
+    /**
+     * This is a network that requries Protected Management Frames (PMF).
+     * @hide
+     */
+    public boolean requirePMF;
+
+    /**
+     * Update identifier, for Passpoint network.
+     * @hide
+     */
+    public String updateIdentifier;
 
     /**
      * The set of key management protocols supported by this configuration.
@@ -1155,6 +1171,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(wepTxKeyIndex);
         dest.writeInt(priority);
         dest.writeInt(hiddenSSID ? 1 : 0);
+        dest.writeInt(requirePMF ? 1 : 0);
+        dest.writeString(updateIdentifier);
 
         writeBitSet(dest, allowedKeyManagement);
         writeBitSet(dest, allowedProtocols);
@@ -1196,6 +1214,9 @@ public class WifiConfiguration implements Parcelable {
                 config.wepTxKeyIndex = in.readInt();
                 config.priority = in.readInt();
                 config.hiddenSSID = in.readInt() != 0;
+                config.requirePMF = in.readInt() != 0;
+                config.updateIdentifier = in.readString();
+
                 config.allowedKeyManagement   = readBitSet(in);
                 config.allowedProtocols       = readBitSet(in);
                 config.allowedAuthAlgorithms  = readBitSet(in);
