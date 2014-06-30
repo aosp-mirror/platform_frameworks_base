@@ -33,6 +33,7 @@ import android.util.Size;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static android.hardware.camera2.legacy.LegacyExceptionUtils.*;
@@ -271,6 +272,9 @@ public class LegacyCameraDevice implements AutoCloseable {
             return BAD_VALUE;
         }
 
+        List<Long> surfaceIds = (mConfiguredSurfaces == null) ? new ArrayList<Long>() :
+                getSurfaceIds(mConfiguredSurfaces);
+
         // Make sure that there all requests have at least 1 surface; all surfaces are non-null
         for (CaptureRequest request : requestList) {
             if (request.getTargets().isEmpty()) {
@@ -287,7 +291,7 @@ public class LegacyCameraDevice implements AutoCloseable {
                     Log.e(TAG, "submitRequestList - must configure " +
                             " device with valid surfaces before submitting requests");
                     return INVALID_OPERATION;
-                } else if (!mConfiguredSurfaces.contains(surface)) {
+                } else if (!containsSurfaceId(surface, surfaceIds)) {
                     Log.e(TAG, "submitRequestList - cannot use a surface that wasn't configured");
                     return BAD_VALUE;
                 }
@@ -430,6 +434,32 @@ public class LegacyCameraDevice implements AutoCloseable {
         LegacyExceptionUtils.throwOnError(nativeSetSurfaceDimens(surface, width, height));
     }
 
+    static long getSurfaceId(Surface surface) {
+        checkNotNull(surface);
+        return nativeGetSurfaceId(surface);
+    }
+
+    static List<Long> getSurfaceIds(Collection<Surface> surfaces) {
+        if (surfaces == null) {
+            throw new NullPointerException("Null argument surfaces");
+        }
+        List<Long> surfaceIds = new ArrayList<>();
+        for (Surface s : surfaces) {
+            long id = getSurfaceId(s);
+            if (id == 0) {
+                throw new IllegalStateException(
+                        "Configured surface had null native GraphicBufferProducer pointer!");
+            }
+            surfaceIds.add(id);
+        }
+        return surfaceIds;
+    }
+
+    static boolean containsSurfaceId(Surface s, List<Long> ids) {
+        long id = getSurfaceId(s);
+        return ids.contains(id);
+    }
+
     private static native int nativeDetectSurfaceType(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
@@ -445,4 +475,5 @@ public class LegacyCameraDevice implements AutoCloseable {
 
     private static native int nativeSetSurfaceDimens(Surface surface, int width, int height);
 
+    private static native long nativeGetSurfaceId(Surface surface);
 }

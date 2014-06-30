@@ -25,9 +25,14 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 
+#include <gui/Surface.h>
+#include <gui/IGraphicBufferProducer.h>
 #include <ui/GraphicBuffer.h>
 #include <system/window.h>
 #include <hardware/camera3.h>
+
+#include <stdint.h>
+#include <inttypes.h>
 
 using namespace android;
 
@@ -192,8 +197,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     switch(pixelFmt) {
         case HAL_PIXEL_FORMAT_YCrCb_420_SP: {
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %lld to small for given dimensions", __FUNCTION__,
-                        bufSize);
+                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                        __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
             uint8_t* img = NULL;
@@ -214,8 +219,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         }
         case HAL_PIXEL_FORMAT_YV12: {
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %lld to small for given dimensions", __FUNCTION__,
-                        bufSize);
+                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                        __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
 
@@ -251,8 +256,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
             // Software writes with YCbCr_420_888 format are unsupported
             // by the gralloc module for now
             if (bufSize < width * height * 4) {
-                ALOGE("%s: PixelBuffer size %lld to small for given dimensions", __FUNCTION__,
-                      bufSize);
+                ALOGE("%s: PixelBuffer size %" PRId32 " to small for given dimensions",
+                        __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
             android_ycbcr ycbcr = android_ycbcr();
@@ -269,7 +274,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         }
         case HAL_PIXEL_FORMAT_BLOB: {
             if (bufSize != width || height != 1) {
-                ALOGE("%s: Incorrect pixelBuffer size: %lld", __FUNCTION__, bufSize);
+                ALOGE("%s: Incorrect pixelBuffer size: %" PRId32, __FUNCTION__, bufSize);
                 return BAD_VALUE;
             }
             int8_t* img = NULL;
@@ -316,18 +321,37 @@ static sp<ANativeWindow> getNativeWindow(JNIEnv* env, jobject surface) {
     if (surface) {
         anw = android_view_Surface_getNativeWindow(env, surface);
         if (env->ExceptionCheck()) {
-            return anw;
+            return NULL;
         }
     } else {
         jniThrowNullPointerException(env, "surface");
-        return anw;
+        return NULL;
     }
     if (anw == NULL) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                 "Surface had no valid native window.");
-        return anw;
+        return NULL;
     }
     return anw;
+}
+
+static sp<Surface> getSurface(JNIEnv* env, jobject surface) {
+    sp<Surface> s;
+    if (surface) {
+        s = android_view_Surface_getSurface(env, surface);
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+    } else {
+        jniThrowNullPointerException(env, "surface");
+        return NULL;
+    }
+    if (s == NULL) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                "Surface had no valid native Surface.");
+        return NULL;
+    }
+    return s;
 }
 
 extern "C" {
@@ -456,6 +480,30 @@ static jint LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz,
     return NO_ERROR;
 }
 
+static jlong LegacyCameraDevice_nativeGetSurfaceId(JNIEnv* env, jobject thiz, jobject surface) {
+    ALOGV("nativeGetSurfaceId");
+    sp<Surface> s;
+    if ((s = getSurface(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native Surface from surface.", __FUNCTION__);
+        return 0;
+    }
+    sp<IGraphicBufferProducer> gbp = s->getIGraphicBufferProducer();
+    if (gbp == NULL) {
+        ALOGE("%s: Could not retrieve IGraphicBufferProducer from surface.", __FUNCTION__);
+        return 0;
+    }
+    sp<IBinder> b = gbp->asBinder();
+    if (b == NULL) {
+        ALOGE("%s: Could not retrieve IBinder from surface.", __FUNCTION__);
+        return 0;
+    }
+    /*
+     * FIXME: Use better unique ID for surfaces than native IBinder pointer.  Fix also in the camera
+     * service (CameraDeviceClient.h).
+     */
+    return reinterpret_cast<jlong>(b.get());
+}
+
 } // extern "C"
 
 static JNINativeMethod gCameraDeviceMethods[] = {
@@ -477,6 +525,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeSetSurfaceDimens",
     "(Landroid/view/Surface;II)I",
     (void *)LegacyCameraDevice_nativeSetSurfaceDimens },
+    { "nativeGetSurfaceId",
+    "(Landroid/view/Surface;)J",
+    (void *)LegacyCameraDevice_nativeGetSurfaceId },
 };
 
 // Get all the required offsets in java class and register native functions

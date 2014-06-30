@@ -492,19 +492,20 @@ public class SurfaceTextureRenderer {
                 && (mConversionSurfaces == null || mConversionSurfaces.size() == 0)) {
             return;
         }
+
         checkGlError("before updateTexImage");
         mSurfaceTexture.updateTexImage();
         if (targetSurfaces == null) return;
+        List<Long> targetSurfaceIds = LegacyCameraDevice.getSurfaceIds(targetSurfaces);
         for (EGLSurfaceHolder holder : mSurfaces) {
-            if (targetSurfaces.contains(holder.surface)) {
+            if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
                 drawFrame(mSurfaceTexture);
                 swapBuffers(holder.eglSurface);
             }
-
         }
         for (EGLSurfaceHolder holder : mConversionSurfaces) {
-            if (targetSurfaces.contains(holder.surface)) {
+            if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
                 drawFrame(mSurfaceTexture);
                 mPBufferPixels.clear();
