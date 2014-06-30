@@ -349,7 +349,7 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
-        
+
         <activity
                 android:name="GLTextureViewActivity"
                 android:label="TextureView/OpenGL">
@@ -358,7 +358,7 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
-        
+
         <activity
                 android:name="BitmapMeshActivity"
                 android:label="Bitmaps/Mesh">
@@ -906,6 +906,15 @@
         <activity
                 android:name=".ZOrderingActivity"
                 android:label="Reordering/Z Ordering">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="GLDepthTestActivity"
+                android:label="Reordering/OpenGL Depth Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
