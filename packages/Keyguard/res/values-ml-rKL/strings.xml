@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"കീഗാർഡ്"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"പിൻ കോഡ് ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"SIM PUK-യും പുതിയ PIN കോഡും ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK കോഡ്"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"പുതിയ SIM PIN കോഡ്"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"പാസ്‌വേഡ് ടൈപ്പുചെയ്യുന്നതിന് സ്‌പർശിക്കുക"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"അൺലോക്കുചെയ്യുന്നതിന് പാസ്‌വേഡ് ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"അൺലോക്കുചെയ്യുന്നതിന് പിൻ ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN കോഡ് തെറ്റാണ്."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"അൺലോക്ക് ചെയ്യുന്നതിന് മെനു, 0 എന്നിവ അമർത്തുക."</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ശ്രമങ്ങളുടെ പരമാവധി കഴിഞ്ഞു"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"ചാർജ്ജുചെയ്‌തു"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"നിങ്ങളുടെ ചാർജ്ജർ കണക്റ്റുചെയ്യുക."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM കാർഡൊന്നുമില്ല"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"ടാബ്‌ലെറ്റിൽ SIM കാർഡൊന്നുമില്ല."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"ഫോണിൽ SIM കാർഡൊന്നുമില്ല."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"ഒരു SIM കാർഡ് ചേർക്കുക."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM കാർഡ് കാണുന്നില്ല അല്ലെങ്കിൽ റീഡുചെയ്യാനായില്ല. ഒരു SIM കാർഡ് ചേർക്കുക."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"ഉപയോഗശൂന്യമായ SIM കാർഡ്."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"നിങ്ങളുടെ SIM കാർഡ് ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കി.\n മറ്റൊരു SIM കാർഡിനായി നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM കാർഡ് ലോക്കുചെയ്‌തു."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM കാർഡ് PUK-ലോക്ക് ചെയ്‌തതാണ്."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. വിജറ്റ് %2$d / %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"വിജറ്റ് ചേർക്കുക."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"ശൂന്യം"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"അൺലോക്ക് ഏരിയ വിപുലീകരിച്ചു."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"അൺലോക്ക് ഏരിയ ചുരുക്കി."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> വിജറ്റ്."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"ഉപയോക്തൃ സെലക്‌ടർ"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"നില"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"ക്യാമറ"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"മീഡിയ നിയന്ത്രണങ്ങൾ"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"വിജറ്റ് പുനഃക്രമീകരണം ആരംഭിച്ചു."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"വിജറ്റ് പുനഃക്രമീകരണം അവസാനിച്ചു."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"വിജറ്റ് <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ഇല്ലാതാക്കി."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"അൺലോക്ക് ഏരിയ വിപുലീകരിക്കുക."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"സ്ലൈഡ് അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"പാറ്റേൺ അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"പിൻ അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"പാസ്‌വേഡ് അൺലോക്ക്."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"പാറ്റേൺ ഏരിയ."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"സ്ലൈഡ് ഏരിയ."</string>
+    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"മുമ്പത്തെ ട്രാക്ക് ബട്ടൺ"</string>
+    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"പുതിയ ട്രാക്ക് ബട്ടൺ"</string>
+    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"താൽക്കാലികമായി നിർത്തുക ബട്ടൺ"</string>
+    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"പ്ലേ ബട്ടൺ"</string>
+    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"നിർത്തുക ബട്ടൺ"</string>
+    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"തംബ്‌സ് അപ്പ്"</string>
+    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"തംബ്‌സ് ഡൗൺ"</string>
+    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"ഹൃദയം"</string>
+    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"തുടരാൻ അൺലോക്കുചെയ്യുക"</string>
+    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"സമാരംഭിക്കൽ റദ്ദാക്കി."</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ഇല്ലാതാക്കാൻ ഡ്രോപ്പുചെയ്യുക."</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ഇല്ലാതാക്കില്ല."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"റദ്ദാക്കുക"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ഇല്ലാതാക്കുക"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"പൂർത്തിയായി"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"മോഡ് മാറ്റം"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"അണ്‍ലോക്ക് ചെയ്യുക"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"ക്യാമറ"</string>
+    <string name="description_target_silent" msgid="893551287746522182">"നിശബ്‌ദം"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"ശബ്ദം ഓണ്‍ ചെയ്യുക"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"തിരയൽ"</string>
+    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായ് താഴേക്ക് സ്ലൈഡുചെയ്യുക."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി വലത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
+    <string name="user_switched" msgid="3768006783166984410">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"അടിയന്തര കോൾ"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"പാറ്റേൺ മറന്നു"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"പാറ്റേൺ തെറ്റാണ്"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN തെറ്റാണ്"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN നൽകുക"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN നൽകുക"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"പാസ്‌വേഡ് നൽകുക"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"താൽപ്പര്യപ്പെട്ട PIN കോഡ് നൽകുക"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"താൽപ്പര്യപ്പെട്ട PIN കോഡ് സ്ഥിരീകരിക്കുക"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു PIN നൽകുക."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK കോഡിൽ 8 അല്ലെങ്കിൽ അതിലധികം സംഖ്യകൾ ഉണ്ടായിരിക്കണം."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ SIM ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ഉപയോക്തൃനാമം (ഇമെയിൽ)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"പാസ്‌വേഡ്"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"സൈൻ ഇൻ ചെയ്യുക"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ അസാധുവാണ്."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"നിങ്ങളുടെ ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ മറന്നുപോയോ?\n"<b>"google.com/accounts/recovery"</b>" സന്ദർശിക്കുക."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"അക്കൗണ്ട് പരിശോധിക്കുന്നു…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"നിങ്ങളുടെ PIN <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"നിങ്ങളുടെ പാസ്‌വേഡ് <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"നിങ്ങളുടെ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ടാബ്‌ലെറ്റ് ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഫോൺ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"നിങ്ങൾ ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. ടാബ്‌ലെറ്റ് ഇപ്പോൾ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനസജ്ജീകരിക്കും."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. ഫോൺ ഇപ്പോൾ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനസജ്ജീകരിക്കും."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"നീക്കംചെയ്യുക"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇപ്പോൾ നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"തെറ്റായ SIM PIN കോഡ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ സേവനദാതാവുമായി ബന്ധപ്പെടുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="other" msgid="2215723361575359486">"തെറ്റായ SIM PIN കോഡ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM ഉപയോഗശൂന്യമാണ്. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"തെറ്റായ SIM PUK കോഡ്, SIM ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമം കൂടി ബാക്കിയുണ്ട്."</item>
+    <item quantity="other" msgid="5477305226026342036">"തെറ്റായ SIM PUK കോഡ്, SIM ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ബാക്കിയുണ്ട്."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN പ്രവർത്തനം പരാജയപ്പെട്ടു!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK പ്രവർത്തനം പരാജയപ്പെട്ടു!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"കോഡ് അംഗികരിച്ചു!"</string>
+    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"മുമ്പത്തെ ട്രാക്ക് ബട്ടൺ"</string>
+    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"പുതിയ ട്രാക്ക് ബട്ടൺ"</string>
+    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"താൽക്കാലികമായി നിർത്തുക ബട്ടൺ"</string>
+    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"പ്ലേ ബട്ടൺ"</string>
+    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"നിർത്തുക ബട്ടൺ"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"സേവനമൊന്നുമില്ല."</string>
+</resources>
