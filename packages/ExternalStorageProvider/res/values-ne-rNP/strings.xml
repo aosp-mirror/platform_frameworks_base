@@ -18,4 +18,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7123375275748530234">"बाह्य भण्डारण"</string>
     <string name="root_internal_storage" msgid="827844243068584127">"आन्तरिक भण्डारण"</string>
+    <string name="root_documents" msgid="4051252304075469250">"कागजातहरू"</string>
 </resources>
