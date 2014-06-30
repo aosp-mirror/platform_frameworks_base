@@ -43,12 +43,6 @@ using namespace uirenderer;
 
 #ifdef USE_OPENGL_RENDERER
 
-static void android_view_HardwareLayer_onTextureDestroyed(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    layer->backingLayer()->clearTexture();
-}
-
 static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jint width, jint height, jboolean isOpaque) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
@@ -109,8 +103,6 @@ const char* const kClassPathName = "android/view/HardwareLayer";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-
-    { "nOnTextureDestroyed",     "(J)V",       (void*) android_view_HardwareLayer_onTextureDestroyed },
 
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
     { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },

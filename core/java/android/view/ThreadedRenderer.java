@@ -19,8 +19,6 @@ package android.view;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,9 +33,6 @@ import android.view.View.AttachInfo;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 
 /**
@@ -152,9 +147,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    boolean safelyRun(Runnable action) {
-        nRunWithGlContext(mNativeProxy, action);
-        return true;
+    void detachSurfaceTexture(long hardwareLayer) {
+        nDetachSurfaceTexture(mNativeProxy, hardwareLayer);
     }
 
     @Override
@@ -270,18 +264,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    SurfaceTexture createSurfaceTexture(final HardwareLayer layer) {
-        final SurfaceTexture[] ret = new SurfaceTexture[1];
-        nRunWithGlContext(mNativeProxy, new Runnable() {
-            @Override
-            public void run() {
-                ret[0] = layer.createSurfaceTexture();
-            }
-        });
-        return ret[0];
-    }
-
-    @Override
     boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
                 layer.getDeferredLayerUpdater(), bitmap.mNativeBitmap);
@@ -290,11 +272,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void pushLayerUpdate(HardwareLayer layer) {
         nPushLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
-    }
-
-    @Override
-    void flushLayerUpdates() {
-        // TODO: Figure out what this should do or remove it
     }
 
     @Override
@@ -415,7 +392,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy,
             long frameTimeNanos, long recordDuration, float density);
-    private static native void nRunWithGlContext(long nativeProxy, Runnable runnable);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
@@ -425,6 +401,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
     private static native void nPushLayerUpdate(long nativeProxy, long layer);
     private static native void nCancelLayerUpdate(long nativeProxy, long layer);
+    private static native void nDetachSurfaceTexture(long nativeProxy, long layer);
 
     private static native void nFlushCaches(long nativeProxy, int flushMode);
 

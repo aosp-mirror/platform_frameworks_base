@@ -301,6 +301,17 @@ void RenderProxy::cancelLayerUpdate(DeferredLayerUpdater* layer) {
     mDrawFrameTask.removeLayerUpdate(layer);
 }
 
+CREATE_BRIDGE1(detachSurfaceTexture, DeferredLayerUpdater* layer) {
+    args->layer->detachSurfaceTexture();
+    return NULL;
+}
+
+void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
+    SETUP_TASK(detachSurfaceTexture);
+    args->layer = layer;
+    postAndWait(task);
+}
+
 CREATE_BRIDGE2(flushCaches, CanvasContext* context, Caches::FlushMode flushMode) {
     args->context->flushCaches(args->flushMode);
     return NULL;

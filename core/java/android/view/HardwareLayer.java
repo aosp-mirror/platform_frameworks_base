@@ -122,16 +122,8 @@ final class HardwareLayer {
     /**
      * Indicates that this layer has lost its texture.
      */
-    public void detachSurfaceTexture(final SurfaceTexture surface) {
-        mRenderer.safelyRun(new Runnable() {
-            @Override
-            public void run() {
-                surface.detachFromGLContext();
-                // SurfaceTexture owns the texture name and detachFromGLContext
-                // should have deleted it
-                nOnTextureDestroyed(mFinalizer.get());
-            }
-        });
+    public void detachSurfaceTexture() {
+        mRenderer.detachSurfaceTexture(mFinalizer.get());
     }
 
     public long getLayer() {
@@ -148,20 +140,9 @@ final class HardwareLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    /**
-     * This should only be used by HardwareRenderer! Do not call directly
-     */
-    SurfaceTexture createSurfaceTexture() {
-        SurfaceTexture st = new SurfaceTexture(nGetTexName(mFinalizer.get()));
-        nSetSurfaceTexture(mFinalizer.get(), st, true);
-        return st;
-    }
-
     static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
         return new HardwareLayer(renderer, layer);
     }
-
-    private static native void nOnTextureDestroyed(long layerUpdater);
 
     private static native boolean nPrepare(long layerUpdater, int width, int height, boolean isOpaque);
     private static native void nSetLayerPaint(long layerUpdater, long paint);

@@ -122,8 +122,7 @@ public class TextureView extends View {
     private int mSaveCount;
 
     private final Object[] mNativeWindowLock = new Object[0];
-    // Used from native code, do not write!
-    @SuppressWarnings({"UnusedDeclaration"})
+    // Set by native code, do not write!
     private long mNativeWindow;
 
     /**
@@ -142,7 +141,6 @@ public class TextureView extends View {
      * @param context The context to associate this view with.
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
     public TextureView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -157,7 +155,6 @@ public class TextureView extends View {
      *        reference to a style resource that supplies default values for
      *        the view. Can be 0 to not look for defaults.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
     public TextureView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
@@ -176,7 +173,6 @@ public class TextureView extends View {
      *        defStyleAttr is 0 or can not be found in the theme. Can be 0
      *        to not look for defaults.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
     public TextureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -234,7 +230,7 @@ public class TextureView extends View {
 
     private void destroySurface() {
         if (mLayer != null) {
-            mLayer.detachSurfaceTexture(mSurface);
+            mLayer.detachSurfaceTexture();
 
             boolean shouldRelease = true;
             if (mListener != null) {
@@ -362,7 +358,8 @@ public class TextureView extends View {
             mLayer = mAttachInfo.mHardwareRenderer.createTextureLayer();
             if (!mUpdateSurface) {
                 // Create a new SurfaceTexture for the layer.
-                mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
+                mSurface = new SurfaceTexture(false);
+                mLayer.setSurfaceTexture(mSurface);
             }
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             nCreateNativeWindow(mSurface);

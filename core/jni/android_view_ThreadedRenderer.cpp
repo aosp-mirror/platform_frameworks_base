@@ -47,8 +47,6 @@ namespace android {
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 
-static jmethodID gRunnableMethod;
-
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -56,25 +54,6 @@ static JNIEnv* getenv(JavaVM* vm) {
     }
     return env;
 }
-
-class JavaTask : public RenderTask {
-public:
-    JavaTask(JNIEnv* env, jobject jrunnable) {
-        env->GetJavaVM(&mVm);
-        mRunnable = env->NewGlobalRef(jrunnable);
-    }
-
-    virtual void run() {
-        JNIEnv* env = getenv(mVm);
-        env->CallVoidMethod(mRunnable, gRunnableMethod);
-        env->DeleteGlobalRef(mRunnable);
-        delete this;
-    };
-
-private:
-    JavaVM* mVm;
-    jobject mRunnable;
-};
 
 class OnFinishedEvent {
 public:
@@ -276,13 +255,6 @@ static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject cla
     RenderProxy::invokeFunctor(functor, waitForCompletion);
 }
 
-static void android_view_ThreadedRenderer_runWithGlContext(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jrunnable) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    RenderTask* task = new JavaTask(env, jrunnable);
-    proxy->runWithGlContext(task);
-}
-
 static jlong android_view_ThreadedRenderer_createDisplayListLayer(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jint width, jint height) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -317,6 +289,13 @@ static void android_view_ThreadedRenderer_cancelLayerUpdate(JNIEnv* env, jobject
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     proxy->cancelLayerUpdate(layer);
+}
+
+static void android_view_ThreadedRenderer_detachSurfaceTexture(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong layerPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->detachSurfaceTexture(layer);
 }
 
 static void android_view_ThreadedRenderer_flushCaches(JNIEnv* env, jobject clazz,
@@ -380,12 +359,12 @@ static JNINativeMethod gMethods[] = {
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
-    { "nRunWithGlContext", "(JLjava/lang/Runnable;)V", (void*) android_view_ThreadedRenderer_runWithGlContext },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
     { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },
+    { "nDetachSurfaceTexture", "(JJ)V", (void*) android_view_ThreadedRenderer_detachSurfaceTexture },
     { "nFlushCaches", "(JI)V", (void*) android_view_ThreadedRenderer_flushCaches },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
@@ -396,11 +375,6 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
-#ifdef USE_OPENGL_RENDERER
-    jclass cls = env->FindClass("java/lang/Runnable");
-    gRunnableMethod = env->GetMethodID(cls, "run", "()V");
-    env->DeleteLocalRef(cls);
-#endif
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
