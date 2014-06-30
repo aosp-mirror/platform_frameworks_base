@@ -7165,8 +7165,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public List<IAppTask> getAppTasks() {
+        final PackageManager pm = mContext.getPackageManager();
         int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
+
+        // Compose the list of packages for this id to test against
+        HashSet<String> packages = new HashSet<String>();
+        String[] uidPackages = pm.getPackagesForUid(callingUid);
+        for (int i = 0; i < uidPackages.length; i++) {
+            packages.add(uidPackages[i]);
+        }
+
         synchronized(this) {
             ArrayList<IAppTask> list = new ArrayList<IAppTask>();
             try {
@@ -7176,7 +7185,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i = 0; i < N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
                     // Skip tasks that are not created by the caller
-                    if (tr.creatorUid == callingUid) {
+                    if (packages.contains(tr.getBaseIntent().getComponent().getPackageName())) {
                         ActivityManager.RecentTaskInfo taskInfo =
                                 createRecentTaskInfoFromTaskRecord(tr);
                         AppTaskImpl taskImpl = new AppTaskImpl(taskInfo.persistentId, callingUid);
