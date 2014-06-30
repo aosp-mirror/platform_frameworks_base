@@ -209,6 +209,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * specified in the original intent or NFC bump that started the provisioning process
      * (@see DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE).
      *
+     * <p>A device admin application which listens to this intent can find out if the device was
+     * provisioned for the device owner or profile owner case by calling respectively
+     * {@link android.app.admin.DevicePolicyManager#isDeviceOwnerApp} and
+     * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}.
+     *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
      */

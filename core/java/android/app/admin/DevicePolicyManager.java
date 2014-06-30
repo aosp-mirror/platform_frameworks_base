@@ -115,11 +115,10 @@ public class DevicePolicyManager {
      *
      * <p> When managed provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
-     * managed profile. The intent is sent to the {@link DeviceAdminReceiver} specified in the
-     * {@link #EXTRA_DEVICE_ADMIN} exclusively.
+     * managed profile.
      *
-     * If provisioning fails, the managedProfile is removed so the device returns to its previous
-     * state.
+     * <p> If provisioning fails, the managedProfile is removed so the device returns to its
+     * previous state.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -140,9 +139,15 @@ public class DevicePolicyManager {
         = "android.app.action.ACTION_PROVISIONING_USER_HAS_CONSENTED";
 
     /**
-     * A String extra holding the name of the package of the mobile device management application
-     * that starts the managed provisioning flow. This package will be set as the profile owner.
-     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     * A String extra holding the package name of the mobile device management application that
+     * will be set as the profile owner or device owner.
+     *
+     * <p>If an application starts provisioning directly via an intent with action
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} this package has to match the package name of the
+     * application that started provisioning. The package will be set as profile owner in that case.
+     *
+     * <p>This package is set as device owner when device owner provisioning is started by an Nfc
+     * message containing an Nfc record with MIME type {@link #PROVISIONING_NFC_MIME_TYPE}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
         = "android.app.extra.deviceAdminPackageName";
@@ -162,6 +167,7 @@ public class DevicePolicyManager {
     /**
      * A String extra holding the default name of the profile that is created during managed profile
      * provisioning.
+     *
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
      */
     public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
@@ -177,6 +183,182 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
         = "android.app.extra.ManagedProfileEmailAddress";
+
+    /**
+     * A String extra holding the time zone {@link android.app.AlarmManager} that the device
+     * will be set to.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_TIME_ZONE
+        = "android.app.extra.timeZone";
+
+    /**
+     * A Long extra holding the local time {@link android.app.AlarmManager} that the device
+     * will be set to.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_LOCAL_TIME
+        = "android.app.extra.localTime";
+
+    /**
+     * A String extra holding the {@link java.util.Locale} that the device will be set to.
+     * Format: xx_yy, where xx is the language code, and yy the country code.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_LOCALE
+        = "android.app.extra.locale";
+
+    /**
+     * A String extra holding the ssid of the wifi network that should be used during nfc device
+     * owner provisioning for downloading the mobile device management application.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_SSID
+        = "android.app.extra.wifiSsid";
+
+    /**
+     * A boolean extra indicating whether the wifi network in {@link #EXTRA_PROVISIONING_WIFI_SSID}
+     * is hidden or not.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_HIDDEN
+        = "android.app.extra.wifiHidden";
+
+    /**
+     * A String extra indicating the security type of the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE
+        = "android.app.extra.wifiSecurityType";
+
+    /**
+     * A String extra holding the password of the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_PASSWORD
+        = "android.app.extra.wifiPassword";
+
+    /**
+     * A String extra holding the proxy host for the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_PROXY_HOST
+        = "android.app.extra.wifiProxyHost";
+
+    /**
+     * An int extra holding the proxy port for the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_PROXY_PORT
+        = "android.app.extra.wifiProxyPort";
+
+    /**
+     * A String extra holding the proxy bypass for the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_PROXY_BYPASS
+        = "android.app.extra.wifiProxyBypassHosts";
+
+    /**
+     * A String extra holding the proxy auto-config (PAC) URL for the wifi network in
+     * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_WIFI_PAC_URL
+        = "android.app.extra.wifiPacUrl";
+
+    /**
+     * A String extra holding a url that specifies the download location of the device admin
+     * package. When not provided it is assumed that the device admin package is already installed.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION
+        = "android.app.extra.deviceAdminPackageDownloadLocation";
+
+    /**
+     * A String extra holding the SHA-1 checksum of the file at download location specified in
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}. If this doesn't match
+     * the file at the download location an error will be shown to the user and the user will be
+     * asked to factory reset the device.
+     *
+     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * provisioning via an Nfc bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
+        = "android.app.extra.deviceAdminPackageChecksum";
+
+    /**
+     * This MIME type is used for starting the Device Owner provisioning.
+     *
+     * <p>During device owner provisioning a device admin app is set as the owner of the device.
+     * A device owner has full control over the device. The device owner can not be modified by the
+     * user and the only way of resetting the device is if the device owner app calls a factory
+     * reset.
+     *
+     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p> The Nfc message should be send to an unprovisioned device.
+     *
+     * <p>The Nfc record must contain a serialized {@link java.util.Properties} object which
+     * contains the following properties:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOCALE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_SSID}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_HIDDEN} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_SECURITY_TYPE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PASSWORD}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li></ul>
+     *
+     * <p> When device owner provisioning has completed, an intent of the type
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
+     * device owner.
+     *
+     * <p>
+     * If provisioning fails, the device is factory reset.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing</p>
+     */
+    public static final String PROVISIONING_NFC_MIME_TYPE
+        = "application/com.android.managedprovisioning";
 
     /**
      * Activity action: ask the user to add a new device administrator to the system.
