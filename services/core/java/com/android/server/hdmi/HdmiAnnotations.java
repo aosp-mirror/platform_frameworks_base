@@ -31,7 +31,7 @@ public class HdmiAnnotations {
      * whether it's called from service thread.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Target({ElementType.METHOD, ElementType.FIELD})
     public @interface ServiceThreadOnly {
     }
 
@@ -41,7 +41,7 @@ public class HdmiAnnotations {
      * whether it's called from io thread.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Target({ElementType.METHOD, ElementType.FIELD})
     public @interface IoThreadOnly {
     }
 }

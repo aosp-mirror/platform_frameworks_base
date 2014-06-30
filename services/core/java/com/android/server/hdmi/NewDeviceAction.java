@@ -75,9 +75,7 @@ final class NewDeviceAction extends FeatureAction {
                 // TODO: Start system audio initiation action
             }
 
-            // If new device is connected through ARC enabled port,
-            // initiates ARC channel establishment.
-            if (tv().isConnectedToArcPort(mDevicePhysicalAddress)) {
+            if (shouldTryArcInitiation()) {
                 addAndStartAction(new RequestArcInitiationAction(localDevice(),
                                 mDeviceLogicalAddress));
             }
@@ -92,6 +90,10 @@ final class NewDeviceAction extends FeatureAction {
                 mDeviceLogicalAddress));
         addTimer(mState, TIMEOUT_MS);
         return true;
+    }
+
+    private boolean shouldTryArcInitiation() {
+         return tv().isConnectedToArcPort(mDevicePhysicalAddress) && tv().isArcFeatureEnabled();
     }
 
     @Override

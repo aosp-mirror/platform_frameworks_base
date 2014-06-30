@@ -40,9 +40,13 @@ import java.util.Locale;
 final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceTv";
 
-    // Whether ARC is "enabled" or not.
-    @GuardedBy("mLock")
-    private boolean mArcStatusEnabled = false;
+    // Whether ARC is available or not. "true" means that ARC is estabilished between TV and
+    // AVR as audio receiver.
+    @ServiceThreadOnly
+    private boolean mArcEstablished = false;
+
+    // Whether ARC feature is enabled or not.
+    private boolean mArcFeatureEnabled = false;
 
     // Whether SystemAudioMode is "On" or not.
     @GuardedBy("mLock")
@@ -462,9 +466,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         if (avrInfo != null) {
                             addAndStartAction(new SystemAudioAutoInitiationAction(
                                     HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
-                            if (isConnectedToArcPort(avrInfo.getPhysicalAddress())) {
-                                addAndStartAction(new RequestArcInitiationAction(
-                                        HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
+                            if (mArcEstablished) {
+                                startArcAction(true);
                             }
                         }
                     }
@@ -514,17 +517,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      *
      * @return {@code true} if ARC was in "Enabled" status
      */
+    @ServiceThreadOnly
     boolean setArcStatus(boolean enabled) {
-        synchronized (mLock) {
-            boolean oldStatus = mArcStatusEnabled;
-            // 1. Enable/disable ARC circuit.
-            mService.setAudioReturnChannel(enabled);
-            // 2. Notify arc status to audio service.
-            notifyArcStatusToAudioService(enabled);
-            // 3. Update arc status;
-            mArcStatusEnabled = enabled;
-            return oldStatus;
-        }
+        assertRunOnServiceThread();
+        boolean oldStatus = mArcEstablished;
+        // 1. Enable/disable ARC circuit.
+        mService.setAudioReturnChannel(enabled);
+        // 2. Notify arc status to audio service.
+        notifyArcStatusToAudioService(enabled);
+        // 3. Update arc status;
+        mArcEstablished = enabled;
+        return oldStatus;
     }
 
     private void notifyArcStatusToAudioService(boolean enabled) {
@@ -537,9 +540,58 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     /**
      * Returns whether ARC is enabled or not.
      */
-    boolean getArcStatus() {
-        synchronized (mLock) {
-            return mArcStatusEnabled;
+    @ServiceThreadOnly
+    boolean isArcEstabilished() {
+        assertRunOnServiceThread();
+        return mArcFeatureEnabled && mArcEstablished;
+    }
+
+    @ServiceThreadOnly
+    void changeArcFeatureEnabled(boolean enabled) {
+        assertRunOnServiceThread();
+
+        if (mArcFeatureEnabled != enabled) {
+            if (enabled) {
+                if (!mArcEstablished) {
+                    startArcAction(true);
+                }
+            } else {
+                if (mArcEstablished) {
+                    startArcAction(false);
+                }
+            }
+            mArcFeatureEnabled = enabled;
+        }
+    }
+
+    @ServiceThreadOnly
+    boolean isArcFeatureEnabled() {
+        assertRunOnServiceThread();
+        return mArcFeatureEnabled;
+    }
+
+    @ServiceThreadOnly
+    private void startArcAction(boolean enabled) {
+        assertRunOnServiceThread();
+        HdmiCecDeviceInfo info = getAvrDeviceInfo();
+        if (info == null) {
+            return;
+        }
+        if (!isConnectedToArcPort(info.getPhysicalAddress())) {
+            return;
+        }
+
+        // Terminate opposite action and start action if not exist.
+        if (enabled) {
+            removeAction(RequestArcTerminationAction.class);
+            if (!hasAction(RequestArcInitiationAction.class)) {
+                addAndStartAction(new RequestArcInitiationAction(this, info.getLogicalAddress()));
+            }
+        } else {
+            removeAction(RequestArcInitiationAction.class);
+            if (!hasAction(RequestArcTerminationAction.class)) {
+                addAndStartAction(new RequestArcTerminationAction(this, info.getLogicalAddress()));
+            }
         }
     }
 

@@ -745,6 +745,21 @@ public final class HdmiControlService extends SystemService {
                 }
             });
         }
+
+        @Override
+        public void setArcMode(final boolean enabled) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available to change arc mode.");
+                        return;
+                    }
+                }
+            });
+        }
     }
 
     @ServiceThreadOnly
