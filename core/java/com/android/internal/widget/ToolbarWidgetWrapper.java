@@ -133,11 +133,12 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
         }
 
         final int contentInsetStart = a.getDimensionPixelOffset(
-                R.styleable.ActionBar_contentInsetStart, 0);
+                R.styleable.ActionBar_contentInsetStart, -1);
         final int contentInsetEnd = a.getDimensionPixelOffset(
-                R.styleable.ActionBar_contentInsetEnd, 0);
-        if (contentInsetStart > 0 || contentInsetEnd > 0) {
-            mToolbar.setContentInsetsRelative(contentInsetStart, contentInsetEnd);
+                R.styleable.ActionBar_contentInsetEnd, -1);
+        if (contentInsetStart >= 0 || contentInsetEnd >= 0) {
+            mToolbar.setContentInsetsRelative(Math.max(contentInsetStart, 0),
+                    Math.max(contentInsetEnd, 0));
         }
 
         final int titleTextStyle = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
