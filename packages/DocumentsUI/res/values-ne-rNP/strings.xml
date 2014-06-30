@@ -29,6 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"सुरक्षित गर्नुहोस्"</string>
     <string name="menu_share" msgid="3075149983979628146">"साझेदारी गर्नुहोस्"</string>
     <string name="menu_delete" msgid="8138799623850614177">"मेटाउनुहोस्"</string>
+    <string name="menu_select" msgid="8711270657353563424">"चयनगर्नुहोस् \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> चयन गरियो"</string>
     <string name="sort_name" msgid="9183560467917256779">"नाम अनुसार"</string>
     <string name="sort_date" msgid="586080032956151448">"परिमार्जित मिति अनुसार"</string>
@@ -36,10 +37,11 @@
     <string name="drawer_open" msgid="4545466532430226949">"मूलहरू देखाउनुहोस्"</string>
     <string name="drawer_close" msgid="7602734368552123318">"मूलहरू लुकाउनुहोस्"</string>
     <string name="save_error" msgid="6167009778003223664">"कागजात सुरक्षित गर्न विफल भयो"</string>
+    <string name="create_error" msgid="3735649141335444215">"फोल्डर सिर्जना गर्न असफल भयो"</string>
+    <string name="query_error" msgid="1222448261663503501">"कागजातहरुको जिज्ञासा राख्न असफल भयो"</string>
     <string name="root_recent" msgid="4470053704320518133">"हालैको"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> खाली"</string>
-    <!-- no translation found for root_type_service (2178854894416775409) -->
-    <skip />
+    <string name="root_type_service" msgid="2178854894416775409">"भण्डारण सेवाहरू"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"सर्टकटहरू"</string>
     <string name="root_type_device" msgid="7121342474653483538">"उपकरणहरू"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"थप अनुप्रयोगहरू"</string>
