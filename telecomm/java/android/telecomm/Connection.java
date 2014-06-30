@@ -31,12 +31,14 @@ import java.util.Set;
  */
 public abstract class Connection {
 
+    /** @hide */
     public interface Listener {
         void onStateChanged(Connection c, int state);
         void onAudioStateChanged(Connection c, CallAudioState state);
         void onHandleChanged(Connection c, Uri newHandle);
         void onSignalChanged(Connection c, Bundle details);
         void onDisconnected(Connection c, int cause, String message);
+        void onPostDialWait(Connection c, String remaining);
         void onRequestingRingback(Connection c, boolean ringback);
         void onDestroyed(Connection c);
         void onConferenceCapableChanged(Connection c, boolean isConferenceCapable);
@@ -44,44 +46,38 @@ public abstract class Connection {
         void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
     }
 
+    /** @hide */
     public static class ListenerBase implements Listener {
-        /** {@inheritDoc} */
         @Override
         public void onStateChanged(Connection c, int state) {}
 
-        /** {@inheritDoc} */
          @Override
         public void onAudioStateChanged(Connection c, CallAudioState state) {}
 
-        /** {@inheritDoc} */
         @Override
         public void onHandleChanged(Connection c, Uri newHandle) {}
 
-        /** {@inheritDoc} */
         @Override
         public void onSignalChanged(Connection c, Bundle details) {}
 
-        /** {@inheritDoc} */
         @Override
         public void onDisconnected(Connection c, int cause, String message) {}
 
-        /** {@inheritDoc} */
         @Override
         public void onDestroyed(Connection c) {}
 
-        /** {@inheritDoc} */
+        @Override
+        public void onPostDialWait(Connection c, String remaining) {}
+
         @Override
         public void onRequestingRingback(Connection c, boolean ringback) {}
 
-        /** ${inheritDoc} */
         @Override
         public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {}
 
-        /** ${inheritDoc} */
         @Override
         public void onParentConnectionChanged(Connection c, Connection parent) {}
 
-        /** {@inheritDoc} */
         @Override
         public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {}
     }
@@ -383,7 +379,6 @@ public abstract class Connection {
      */
     public final void setHandle(Uri handle) {
         Log.d(this, "setHandle %s", handle);
-        // TODO: Enforce super called
         mHandle = handle;
         for (Listener l : mListeners) {
             l.onHandleChanged(this, handle);
@@ -431,10 +426,7 @@ public abstract class Connection {
     }
 
     /**
-     * Sets state to disconnected. This will first notify listeners with an
-     * {@link Listener#onStateChanged(Connection, int)} event, then will fire an
-     * {@link Listener#onDisconnected(Connection, int, String)} event with additional
-     * details.
+     * Sets state to disconnected.
      *
      * @param cause The reason for the disconnection, any of
      *         {@link android.telephony.DisconnectCause}.
@@ -445,6 +437,15 @@ public abstract class Connection {
         Log.d(this, "Disconnected with cause %d message %s", cause, message);
         for (Listener l : mListeners) {
             l.onDisconnected(this, cause, message);
+        }
+    }
+
+    /**
+     * TODO(santoscordon): Needs documentation.
+     */
+    public final void setPostDialWait(String remaining) {
+        for (Listener l : mListeners) {
+            l.onPostDialWait(this, remaining);
         }
     }
 

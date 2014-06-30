@@ -136,6 +136,13 @@ public abstract class ConnectionService extends CallService {
         }
 
         @Override
+        public final void onPostDialWait(Connection c, String remaining) {
+            String id = mIdByConnection.get(c);
+            Log.d(this, "Adapter onPostDialWait %s, %s", c, remaining);
+            getAdapter().onPostDialWait(id, remaining);
+        }
+
+        @Override
         public void onRequestingRingback(Connection c, boolean ringback) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter onRingback %b", ringback);
@@ -163,6 +170,7 @@ public abstract class ConnectionService extends CallService {
         }
     };
 
+    /** @hide */
     @Override
     public final void call(final CallInfo callInfo) {
         Log.d(this, "call %s", callInfo);
@@ -193,12 +201,14 @@ public abstract class ConnectionService extends CallService {
         );
     }
 
+    /** @hide */
     @Override
     public final void abort(String callId) {
         Log.d(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").abort();
     }
 
+    /** @hide */
     @Override
     public final void setIncomingCallId(final String callId, Bundle extras) {
         Log.d(this, "setIncomingCallId %s %s", callId, extras);
@@ -241,48 +251,56 @@ public abstract class ConnectionService extends CallService {
         );
     }
 
+    /** @hide */
     @Override
     public final void answer(String callId) {
         Log.d(this, "answer %s", callId);
         findConnectionForAction(callId, "answer").answer();
     }
 
+    /** @hide */
     @Override
     public final void reject(String callId) {
         Log.d(this, "reject %s", callId);
         findConnectionForAction(callId, "reject").reject();
     }
 
+    /** @hide */
     @Override
     public final void disconnect(String callId) {
         Log.d(this, "disconnect %s", callId);
         findConnectionForAction(callId, "disconnect").disconnect();
     }
 
+    /** @hide */
     @Override
     public final void hold(String callId) {
         Log.d(this, "hold %s", callId);
         findConnectionForAction(callId, "hold").hold();
     }
 
+    /** @hide */
     @Override
     public final void unhold(String callId) {
         Log.d(this, "unhold %s", callId);
         findConnectionForAction(callId, "unhold").unhold();
     }
 
+    /** @hide */
     @Override
     public final void playDtmfTone(String callId, char digit) {
         Log.d(this, "playDtmfTone %s %c", callId, digit);
         findConnectionForAction(callId, "playDtmfTone").playDtmfTone(digit);
     }
 
+    /** @hide */
     @Override
     public final void stopDtmfTone(String callId) {
         Log.d(this, "stopDtmfTone %s", callId);
         findConnectionForAction(callId, "stopDtmfTone").stopDtmfTone();
     }
 
+    /** @hide */
     @Override
     public final void onAudioStateChanged(String callId, CallAudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
@@ -338,6 +356,7 @@ public abstract class ConnectionService extends CallService {
         // TODO(santoscordon): Find existing conference call and invoke split(connection).
     }
 
+    /** @hide */
     @Override
     public final void onPostDialContinue(String callId, boolean proceed) {
         Log.d(this, "onPostDialContinue(%s)", callId);
@@ -350,18 +369,11 @@ public abstract class ConnectionService extends CallService {
         connection.onPostDialContinue(proceed);
     }
 
-    @Override
-    public final void onPostDialWait(Connection conn, String remaining) {
-        Log.d(this, "onPostDialWait(%s, %s)", conn, remaining);
-
-        getAdapter().onPostDialWait(mIdByConnection.get(conn), remaining);
-    }
-
     /**
      * @hide
      */
     @Override
-    protected void onAdapterAttached(CallServiceAdapter adapter) {
+    protected final void onAdapterAttached(CallServiceAdapter adapter) {
         if (mAreSubscriptionsInitialized) {
             // No need to query again if we already did it.
             return;
@@ -398,14 +410,14 @@ public abstract class ConnectionService extends CallService {
         });
     }
 
-    public void lookupRemoteSubscriptions(
+    public final void lookupRemoteSubscriptions(
             Uri handle, SimpleResponse<Uri, List<Subscription>> response) {
         mSubscriptionLookupResponse = response;
         mSubscriptionLookupHandle = handle;
         maybeRespondToSubscriptionLookup();
     }
 
-    public void maybeRespondToSubscriptionLookup() {
+    public final void maybeRespondToSubscriptionLookup() {
         if (mAreSubscriptionsInitialized && mSubscriptionLookupResponse != null) {
             mSubscriptionLookupResponse.onResult(
                     mSubscriptionLookupHandle,
@@ -416,7 +428,7 @@ public abstract class ConnectionService extends CallService {
         }
     }
 
-    public void createRemoteOutgoingConnection(
+    public final void createRemoteOutgoingConnection(
             ConnectionRequest request,
             OutgoingCallResponse<RemoteConnection> response) {
         mRemoteConnectionManager.createOutgoingConnection(request, response);
@@ -425,7 +437,7 @@ public abstract class ConnectionService extends CallService {
     /**
      * Returns all connections currently associated with this connection service.
      */
-    public Collection<Connection> getAllConnections() {
+    public final Collection<Connection> getAllConnections() {
         return mConnectionById.values();
     }
 
@@ -435,7 +447,7 @@ public abstract class ConnectionService extends CallService {
      * @param request Data encapsulating details of the desired Connection.
      * @param callback A callback for providing the result.
      */
-    public void onCreateConnections(
+    protected void onCreateConnections(
             ConnectionRequest request,
             OutgoingCallResponse<Connection> callback) {}
 
@@ -449,7 +461,7 @@ public abstract class ConnectionService extends CallService {
      * @param token The token to be passed into the response callback.
      * @param callback The callback for providing the potentially-new conference connection.
      */
-    public void onCreateConferenceConnection(
+    protected void onCreateConferenceConnection(
             String token,
             Connection connection,
             Response<String, Connection> callback) {}
@@ -465,7 +477,7 @@ public abstract class ConnectionService extends CallService {
      * @param request Data encapsulating details of the desired Connection.
      * @param callback A callback for providing the result.
      */
-    public void onCreateIncomingConnection(
+    protected void onCreateIncomingConnection(
             ConnectionRequest request,
             Response<ConnectionRequest, Connection> callback) {}
 
@@ -474,14 +486,14 @@ public abstract class ConnectionService extends CallService {
      *
      * @param connection The connection which was added.
      */
-    public void onConnectionAdded(Connection connection) {}
+    protected void onConnectionAdded(Connection connection) {}
 
     /**
      * Notified that a connection has been removed from this connection service.
      *
      * @param connection The connection which was removed.
      */
-    public void onConnectionRemoved(Connection connection) {}
+    protected void onConnectionRemoved(Connection connection) {}
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

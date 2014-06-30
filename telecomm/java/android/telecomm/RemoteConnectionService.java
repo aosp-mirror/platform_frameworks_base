@@ -37,8 +37,10 @@ import java.util.UUID;
 
 /**
  * Remote connection service which other connection services can use to place calls on their behalf.
+ *
+ * @hide
  */
-public class RemoteConnectionService implements DeathRecipient {
+public final class RemoteConnectionService implements DeathRecipient {
     private final ICallService mCallService;
     private final ComponentName mComponentName;
 
@@ -71,9 +73,7 @@ public class RemoteConnectionService implements DeathRecipient {
         public void handleFailedOutgoingCall(
                 ConnectionRequest request, int errorCode, String errorMessage) {
             if (isPendingConnection(request.getCallId())) {
-                // Use mPendingRequest instead of request so that we use the same object that was
-                // passed in to us.
-                mPendingOutgoingCallResponse.onFailure(mPendingRequest, errorCode, errorMessage);
+                mPendingOutgoingCallResponse.onFailure(request, errorCode, errorMessage);
                 mConnectionId = null;
                 clearPendingInformation();
             }
@@ -212,7 +212,7 @@ public class RemoteConnectionService implements DeathRecipient {
 
     /** ${inheritDoc} */
     @Override
-    public void binderDied() {
+    public final void binderDied() {
         if (mConnection != null) {
             destroyConnection();
         }
@@ -223,7 +223,7 @@ public class RemoteConnectionService implements DeathRecipient {
     /**
      * Places an outgoing call.
      */
-    public void createOutgoingConnection(
+    public final void createOutgoingConnection(
             ConnectionRequest request,
             ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
 
@@ -244,9 +244,9 @@ public class RemoteConnectionService implements DeathRecipient {
     }
 
     // TODO(santoscordon): Handle incoming connections
-    // public void handleIncomingConnection() {}
+    // public final void handleIncomingConnection() {}
 
-    public List<Subscription> lookupSubscriptions(Uri handle) {
+    public final List<Subscription> lookupSubscriptions(Uri handle) {
         // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
         // each time.
         List<Subscription> subscriptions = new LinkedList<>();

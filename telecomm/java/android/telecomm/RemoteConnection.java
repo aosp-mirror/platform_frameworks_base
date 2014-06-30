@@ -33,7 +33,6 @@ import java.util.Set;
 public final class RemoteConnection {
     public interface Listener {
         void onStateChanged(RemoteConnection connection, int state);
-        void onAudioStateChanged(RemoteConnection connection, CallAudioState state);
         void onDisconnected(RemoteConnection connection, int cause, String message);
         void onRequestingRingback(RemoteConnection connection, boolean ringback);
         void onPostDialWait(RemoteConnection connection, String remainingDigits);
@@ -74,6 +73,15 @@ public final class RemoteConnection {
 
     public String getDisconnectMessage() {
         return mDisconnectMessage;
+    }
+
+    public void abort() {
+        try {
+            if (mConnected) {
+                mCallService.abort(mConnectionId);
+            }
+        } catch (RemoteException ignored) {
+        }
     }
 
     public void answer() {
@@ -148,6 +156,15 @@ public final class RemoteConnection {
         }
     }
 
+    public void setAudioState(CallAudioState state) {
+        try {
+            if (mConnected) {
+                mCallService.onAudioStateChanged(mConnectionId, state);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
     /**
      * @hide
      */
@@ -157,15 +174,6 @@ public final class RemoteConnection {
             for (Listener l: mListeners) {
                 l.onStateChanged(this, state);
             }
-        }
-    }
-
-    /**
-     * @hide
-     */
-    void setAudioState(CallAudioState state) {
-        for (Listener l: mListeners) {
-            l.onAudioStateChanged(this, state);
         }
     }
 
