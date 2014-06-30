@@ -19,7 +19,6 @@ package android.widget;
 import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -42,7 +41,7 @@ import java.util.Locale;
 
 
 /**
- * Helper class for TextView. Bridge between the TextView and the Dictionnary service.
+ * Helper class for TextView. Bridge between the TextView and the Dictionary service.
  *
  * @hide
  */
@@ -83,7 +82,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     // The mLength first elements of the above arrays have been initialized
     private int mLength;
 
-    // Parsers on chunck of text, cutting text into words that will be checked
+    // Parsers on chunk of text, cutting text into words that will be checked
     private SpellParser[] mSpellParsers = new SpellParser[0];
 
     private int mSpanSequenceCounter = 0;
@@ -286,14 +285,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 isEditing = selectionEnd < start || selectionStart > end;
             }
             if (start >= 0 && end > start && isEditing) {
-                final String word = (editable instanceof SpannableStringBuilder) ?
-                        ((SpannableStringBuilder) editable).substring(start, end) :
-                        editable.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress(true);
-                textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
+                final TextInfo textInfo = new TextInfo(editable, start, end, mCookie, mIds[i]);
+                textInfos[textInfosCount++] = textInfo;
                 if (DBG) {
-                    Log.d(TAG, "create TextInfo: (" + i + "/" + mLength + ")" + word
-                            + ", cookie = " + mCookie + ", seq = "
+                    Log.d(TAG, "create TextInfo: (" + i + "/" + mLength + ") text = "
+                            + textInfo.getSequence() + ", cookie = " + mCookie + ", seq = "
                             + mIds[i] + ", sel start = " + selectionStart + ", sel end = "
                             + selectionEnd + ", start = " + start + ", end = " + end);
                 }

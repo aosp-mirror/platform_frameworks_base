@@ -35302,6 +35302,7 @@ package android.view.textservice {
   public final class TextInfo implements android.os.Parcelable {
     ctor public TextInfo(java.lang.String);
     ctor public TextInfo(java.lang.String, int, int);
+    ctor public TextInfo(java.lang.CharSequence, int, int, int, int);
     ctor public TextInfo(android.os.Parcel);
     method public int describeContents();
     method public int getCookie();
