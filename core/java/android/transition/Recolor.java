@@ -18,8 +18,10 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -39,6 +41,12 @@ public class Recolor extends Transition {
 
     private static final String PROPNAME_BACKGROUND = "android:recolor:background";
     private static final String PROPNAME_TEXT_COLOR = "android:recolor:textColor";
+
+    public Recolor() {}
+
+    public Recolor(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     private void captureValues(TransitionValues transitionValues) {
         transitionValues.values.put(PROPNAME_BACKGROUND, transitionValues.view.getBackground());

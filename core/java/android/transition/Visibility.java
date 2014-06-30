@@ -16,14 +16,18 @@
 
 package android.transition;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-
 /**
  * This transition tracks changes to the visibility of target views in the
  * start and end scenes. Visibility is determined not just by the
@@ -74,18 +78,42 @@ public abstract class Visibility extends Transition {
 
     private int mMode = IN | OUT;
 
+    public Visibility() {}
+
+    public Visibility(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.VisibilityTransition);
+        int mode = a.getInt(R.styleable.VisibilityTransition_visibilityMode, 0);
+        a.recycle();
+        if (mode != 0) {
+            setMode(mode);
+        }
+    }
+
     /**
      * Changes the transition to support appearing and/or disappearing Views, depending
      * on <code>mode</code>.
      *
      * @param mode The behavior supported by this transition, a combination of
      *             {@link #IN} and {@link #OUT}.
+     * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
      */
     public void setMode(int mode) {
         if ((mode & ~(IN | OUT)) != 0) {
             throw new IllegalArgumentException("Only IN and OUT flags are allowed");
         }
         mMode = mode;
+    }
+
+    /**
+     * Returns whether appearing and/or disappearing Views are supported.
+     *
+     * Returns whether appearing and/or disappearing Views are supported. A combination of
+     *         {@link #IN} and {@link #OUT}.
+     * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
+     */
+    public int getMode() {
+        return mMode;
     }
 
     @Override

@@ -16,9 +16,13 @@
 
 package android.transition;
 
+import com.android.internal.R;
+
 import android.animation.TimeInterpolator;
-import android.graphics.Rect;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AndroidRuntimeException;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -75,6 +79,15 @@ public class TransitionSet extends Transition {
      * child transitions will play {@link #ORDERING_TOGETHER together}.
      */
     public TransitionSet() {
+    }
+
+    public TransitionSet(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TransitionSet);
+        int ordering = a.getInt(R.styleable.TransitionSet_transitionOrdering,
+                TransitionSet.ORDERING_TOGETHER);
+        setOrdering(ordering);
+        a.recycle();
     }
 
     /**
@@ -270,6 +283,14 @@ public class TransitionSet extends Transition {
     @Override
     public TransitionSet removeListener(TransitionListener listener) {
         return (TransitionSet) super.removeListener(listener);
+    }
+
+    @Override
+    public void setPathMotion(PathMotion pathMotion) {
+        super.setPathMotion(pathMotion);
+        for (int i = 0; i < mTransitions.size(); i++) {
+            mTransitions.get(i).setPathMotion(pathMotion);
+        }
     }
 
     /**

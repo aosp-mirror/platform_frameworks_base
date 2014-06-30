@@ -17,11 +17,15 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import com.android.internal.R;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -38,6 +42,7 @@ public class Slide extends Visibility {
     private static final TimeInterpolator sAccelerate = new AccelerateInterpolator();
     private static final String PROPNAME_SCREEN_POSITION = "android:slide:screenPosition";
     private CalculateSlide mSlideCalculator = sCalculateBottom;
+    private int mSlideEdge = Gravity.BOTTOM;
 
     private interface CalculateSlide {
 
@@ -107,6 +112,14 @@ public class Slide extends Visibility {
         setSlideEdge(slideEdge);
     }
 
+    public Slide(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Slide);
+        int edge = a.getInt(R.styleable.Slide_slideEdge, Gravity.BOTTOM);
+        a.recycle();
+        setSlideEdge(edge);
+    }
+
     private void captureValues(TransitionValues transitionValues) {
         View view = transitionValues.view;
         int[] position = new int[2];
@@ -132,6 +145,7 @@ public class Slide extends Visibility {
      * @param slideEdge The edge of the scene to use for Views appearing and disappearing. One of
      *                  {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
      *                  {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
+     * @attr ref android.R.styleable#Slide_slideEdge
      */
     public void setSlideEdge(int slideEdge) {
         switch (slideEdge) {
@@ -150,9 +164,22 @@ public class Slide extends Visibility {
             default:
                 throw new IllegalArgumentException("Invalid slide direction");
         }
+        mSlideEdge = slideEdge;
         SidePropagation propagation = new SidePropagation();
         propagation.setSide(slideEdge);
         setPropagation(propagation);
+    }
+
+    /**
+     * Returns the edge that Views appear and disappear from.
+     *
+     * @return the edge of the scene to use for Views appearing and disappearing. One of
+     *         {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
+     *         {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
+     * @attr ref android.R.styleable#Slide_slideEdge
+     */
+    public int getSlideEdge() {
+        return mSlideEdge;
     }
 
     @Override

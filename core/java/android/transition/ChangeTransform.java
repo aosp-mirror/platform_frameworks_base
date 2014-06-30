@@ -18,6 +18,8 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.FloatArrayEvaluator;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
@@ -75,6 +77,12 @@ public class ChangeTransform extends Transition {
             }
         }
     };
+
+    public ChangeTransform() {}
+
+    public ChangeTransform(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     @Override
     public String[] getTransitionProperties() {

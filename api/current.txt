@@ -825,6 +825,7 @@ package android {
     field public static final int maxRows = 16843059; // 0x1010133
     field public static final int maxSdkVersion = 16843377; // 0x1010271
     field public static final int maxWidth = 16843039; // 0x101011f
+    field public static final int maximumAngle = 16843905; // 0x1010481
     field public static final int measureAllChildren = 16843018; // 0x101010a
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
@@ -840,6 +841,8 @@ package android {
     field public static final int minResizeWidth = 16843669; // 0x1010395
     field public static final int minSdkVersion = 16843276; // 0x101020c
     field public static final int minWidth = 16843071; // 0x101013f
+    field public static final int minimumHorizontalAngle = 16843903; // 0x101047f
+    field public static final int minimumVerticalAngle = 16843904; // 0x1010480
     field public static final int mipMap = 16843725; // 0x10103cd
     field public static final int mirrorForRtl = 16843726; // 0x10103ce
     field public static final int mode = 16843134; // 0x101017e
@@ -30450,12 +30453,26 @@ package android.text.util {
 
 package android.transition {
 
+  public class ArcMotion extends android.transition.PathMotion {
+    ctor public ArcMotion();
+    ctor public ArcMotion(android.content.Context, android.util.AttributeSet);
+    method public float getMaximumAngle();
+    method public float getMinimumHorizontalAngle();
+    method public float getMinimumVerticalAngle();
+    method public android.graphics.Path getPath(float, float, float, float);
+    method public void setMaximumAngle(float);
+    method public void setMinimumHorizontalAngle(float);
+    method public void setMinimumVerticalAngle(float);
+  }
+
   public class AutoTransition extends android.transition.TransitionSet {
     ctor public AutoTransition();
+    ctor public AutoTransition(android.content.Context, android.util.AttributeSet);
   }
 
   public class ChangeBounds extends android.transition.Transition {
     ctor public ChangeBounds();
+    ctor public ChangeBounds(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
     method public void setReparent(boolean);
@@ -30464,18 +30481,21 @@ package android.transition {
 
   public class ChangeClipBounds extends android.transition.Transition {
     ctor public ChangeClipBounds();
+    ctor public ChangeClipBounds(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
   }
 
   public class ChangeImageTransform extends android.transition.Transition {
     ctor public ChangeImageTransform();
+    ctor public ChangeImageTransform(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
   }
 
   public class ChangeTransform extends android.transition.Transition {
     ctor public ChangeTransform();
+    ctor public ChangeTransform(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
   }
@@ -30488,13 +30508,30 @@ package android.transition {
 
   public class Explode extends android.transition.Visibility {
     ctor public Explode();
+    ctor public Explode(android.content.Context, android.util.AttributeSet);
   }
 
   public class Fade extends android.transition.Visibility {
     ctor public Fade();
     ctor public Fade(int);
+    ctor public Fade(android.content.Context, android.util.AttributeSet);
     field public static final int IN = 1; // 0x1
     field public static final int OUT = 2; // 0x2
+  }
+
+  public abstract class PathMotion {
+    ctor public PathMotion();
+    ctor public PathMotion(android.content.Context, android.util.AttributeSet);
+    method public abstract android.graphics.Path getPath(float, float, float, float);
+  }
+
+  public class PatternMotion extends android.transition.PathMotion {
+    ctor public PatternMotion();
+    ctor public PatternMotion(android.content.Context, android.util.AttributeSet);
+    ctor public PatternMotion(android.graphics.Path);
+    method public android.graphics.Path getPath(float, float, float, float);
+    method public android.graphics.Path getPattern();
+    method public void setPattern(android.graphics.Path);
   }
 
   public final class Scene {
@@ -30519,11 +30556,14 @@ package android.transition {
   public class Slide extends android.transition.Visibility {
     ctor public Slide();
     ctor public Slide(int);
+    ctor public Slide(android.content.Context, android.util.AttributeSet);
+    method public int getSlideEdge();
     method public void setSlideEdge(int);
   }
 
   public abstract class Transition implements java.lang.Cloneable {
     ctor public Transition();
+    ctor public Transition(android.content.Context, android.util.AttributeSet);
     method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
     method public android.transition.Transition addTarget(int);
     method public android.transition.Transition addTarget(java.lang.String);
@@ -30546,6 +30586,7 @@ package android.transition {
     method public android.transition.Transition.EpicenterCallback getEpicenterCallback();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.lang.String getName();
+    method public android.transition.PathMotion getPathMotion();
     method public android.transition.TransitionPropagation getPropagation();
     method public long getStartDelay();
     method public java.util.List<java.lang.Integer> getTargetIds();
@@ -30563,6 +30604,7 @@ package android.transition {
     method public void setEpicenterCallback(android.transition.Transition.EpicenterCallback);
     method public android.transition.Transition setInterpolator(android.animation.TimeInterpolator);
     method public void setMatchOrder(int...);
+    method public void setPathMotion(android.transition.PathMotion);
     method public void setPropagation(android.transition.TransitionPropagation);
     method public android.transition.Transition setStartDelay(long);
     field public static final int MATCH_ID = 3; // 0x3
@@ -30610,6 +30652,7 @@ package android.transition {
 
   public class TransitionSet extends android.transition.Transition {
     ctor public TransitionSet();
+    ctor public TransitionSet(android.content.Context, android.util.AttributeSet);
     method public android.transition.TransitionSet addTransition(android.transition.Transition);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
@@ -30628,8 +30671,10 @@ package android.transition {
 
   public abstract class Visibility extends android.transition.Transition {
     ctor public Visibility();
+    ctor public Visibility(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
+    method public int getMode();
     method public boolean isVisible(android.transition.TransitionValues);
     method public android.animation.Animator onAppear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
     method public android.animation.Animator onAppear(android.view.ViewGroup, android.view.View, android.transition.TransitionValues, android.transition.TransitionValues);

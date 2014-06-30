@@ -15,6 +15,9 @@
  */
 package android.transition;
 
+import android.content.Context;
+import android.util.AttributeSet;
+
 /**
  * TO BE REMOVED.
  * Use ChangeImageTransform + ChangeBounds instead.
@@ -23,6 +26,15 @@ package android.transition;
 public class MoveImage extends TransitionSet {
 
     public MoveImage() {
+        init();
+    }
+
+    public MoveImage(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    private void init() {
         addTransition(new ChangeBounds());
         addTransition(new ChangeClipBounds());
         addTransition(new ChangeTransform());
