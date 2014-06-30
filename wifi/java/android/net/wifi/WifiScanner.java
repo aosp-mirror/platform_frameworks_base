@@ -771,7 +771,13 @@ public class WifiScanner {
             }
 
             Object listener = getListener(msg.arg2);
-            if (DBG) Log.d(TAG, "listener key = " + msg.arg2);
+
+            if (listener == null) {
+                if (DBG) Log.d(TAG, "invalid listener key = " + msg.arg2);
+                return;
+            } else {
+                if (DBG) Log.d(TAG, "listener key = " + msg.arg2);
+            }
 
             switch (msg.what) {
                     /* ActionListeners grouped together */
