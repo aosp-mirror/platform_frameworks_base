@@ -69,7 +69,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
-    FinishRecentsRunnable mFinishWithoutAnimationRunnable = new FinishRecentsRunnable(false);
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     /**
@@ -151,18 +150,21 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenOverlayView));
                 // Call our callback
                 onEnterAnimationTriggered();
-            } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
-                // Refresh the search widget
-                refreshSearchWidget();
             }
         }
     };
 
     // Broadcast receiver to handle messages from the system
-    final BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
+    final BroadcastReceiver mSystemBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mFinishWithoutAnimationRunnable.run();
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                mFinishLaunchHomeRunnable.run();
+            } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
+                // Refresh the search widget
+                refreshSearchWidget();
+            }
         }
     };
 
@@ -368,6 +370,15 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             onConfigurationChange();
         }
 
+        // Register the broadcast receiver to handle messages when the screen is turned off
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        registerReceiver(mSystemBroadcastReceiver, filter);
+
+        // Register any broadcast receivers for the task loader
+        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
+
         // Private API calls to make the shadows look better
         try {
             Utilities.setShadowProperty("ambientShadowStrength", String.valueOf(35f));
@@ -424,6 +435,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         super.onStart();
 
+        // Register the broadcast receiver to handle messages from our service
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(RecentsService.ACTION_START_ENTER_ANIMATION);
+        registerReceiver(mServiceBroadcastReceiver, filter);
+
+        // Start listening for widget package changes if there is one bound
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.startListening(this);
+        }
+
         mVisible = true;
     }
 
@@ -444,27 +467,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onAttachedToWindow();
-
-        // Register the broadcast receiver to handle messages from our service
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsService.ACTION_START_ENTER_ANIMATION);
-        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
-        registerReceiver(mServiceBroadcastReceiver, filter);
-
-        // Register the broadcast receiver to handle messages when the screen is turned off
-        filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(mScreenOffReceiver, filter);
-
-        // Register any broadcast receivers for the task loader
-        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
-
-        // Start listening for widget package changes if there is one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            mAppWidgetHost.startListening(this);
-        }
     }
 
     @Override
@@ -475,16 +477,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onDetachedFromWindow();
-
-        // Unregister any broadcast receivers we have registered
-        unregisterReceiver(mServiceBroadcastReceiver);
-        unregisterReceiver(mScreenOffReceiver);
-        RecentsTaskLoader.getInstance().unregisterReceivers();
-
-        // Stop listening for widget package changes if there was one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            mAppWidgetHost.stopListening();
-        }
     }
 
     @Override
@@ -504,6 +496,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         super.onStop();
 
+        // Unregister the RecentsService receiver
+        unregisterReceiver(mServiceBroadcastReceiver);
+
+        // Stop listening for widget package changes if there was one bound
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            mAppWidgetHost.stopListening();
+        }
+
         mVisible = false;
         mTaskLaunched = false;
     }
@@ -515,6 +515,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onDestroy();
+
+        // Unregister the screen off receiver
+        unregisterReceiver(mSystemBroadcastReceiver);
+        RecentsTaskLoader.getInstance().unregisterReceivers();
     }
 
     @Override
