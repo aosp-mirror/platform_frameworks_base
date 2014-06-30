@@ -1008,6 +1008,7 @@ java.io.DataInput
 java.io.DataInputStream
 java.io.DataOutput
 java.io.DataOutputStream
+java.io.Externalizable
 java.io.File
 java.io.FileDescriptor
 java.io.FileInputStream
