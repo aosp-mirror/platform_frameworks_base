@@ -57,6 +57,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsReadyForTransition;
     private Bundle mSharedElementsBundle;
     private boolean mWasOpaque;
+    private boolean mAreViewsReady;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning) {
@@ -81,18 +82,11 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void viewInstancesReady(ArrayList<String> accepted, ArrayList<View> localViews) {
-        if (mIsReadyForTransition) {
-            return;
-        }
-        viewsReady(mapSharedElements(accepted, localViews));
+        triggerViewsReady(mapSharedElements(accepted, localViews));
     }
 
     public void namedViewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
-        if (mIsReadyForTransition) {
-            return;
-        }
-
-        viewsReady(mapNamedElements(accepted, localNames));
+        triggerViewsReady(mapNamedElements(accepted, localNames));
     }
 
     @Override
@@ -115,6 +109,27 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         if (mSharedElementsBundle != null) {
             onTakeSharedElements();
+        }
+    }
+
+    private void triggerViewsReady(final ArrayMap<String, View> sharedElements) {
+        if (mAreViewsReady) {
+            return;
+        }
+        mAreViewsReady = true;
+        // Ensure the views have been laid out before capturing the views -- we need the epicenter.
+        if (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()) {
+            viewsReady(sharedElements);
+        } else {
+            sharedElements.valueAt(0).getViewTreeObserver()
+                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    sharedElements.valueAt(0).getViewTreeObserver().removeOnPreDrawListener(this);
+                    viewsReady(sharedElements);
+                    return true;
+                }
+            });
         }
     }
 
