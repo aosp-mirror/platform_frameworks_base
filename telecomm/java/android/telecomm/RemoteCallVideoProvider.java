@@ -18,9 +18,10 @@ package android.telecomm;
 
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.Surface;
 
+import com.android.internal.telecomm.ICallVideoClient;
 import com.android.internal.telecomm.ICallVideoProvider;
-
 
 public class RemoteCallVideoProvider implements IBinder.DeathRecipient {
     private final ICallVideoProvider mCallVideoProvider;
@@ -35,12 +36,47 @@ public class RemoteCallVideoProvider implements IBinder.DeathRecipient {
         mCallVideoProvider.asBinder().unlinkToDeath(this, 0);
     }
 
-    /**
-     * Sets the camera to be used for video recording in a video call, using the binder.
-     *
-     * @param cameraId The id of the camera.
-     */
+    public void setCallVideoClient(CallVideoClient callVideoClient) throws RemoteException {
+        mCallVideoProvider.setCallVideoClient(callVideoClient.getBinder());
+    }
+
     public void setCamera(String cameraId) throws RemoteException {
         mCallVideoProvider.setCamera(cameraId);
+    }
+
+    public void setPreviewSurface(Surface surface) throws RemoteException {
+        mCallVideoProvider.setPreviewSurface(surface);
+    }
+
+    public void setDisplaySurface(Surface surface) throws RemoteException {
+        mCallVideoProvider.setDisplaySurface(surface);
+    }
+
+    public void setDeviceOrientation(int rotation) throws RemoteException {
+        mCallVideoProvider.setDeviceOrientation(rotation);
+    }
+
+    public void setZoom(float value) throws RemoteException {
+        mCallVideoProvider.setZoom(value);
+    }
+
+    public void sendSessionModifyRequest(VideoCallProfile requestProfile) throws RemoteException {
+        mCallVideoProvider.sendSessionModifyRequest(requestProfile);
+    }
+
+    public void sendSessionModifyResponse(VideoCallProfile responseProfile) throws RemoteException {
+        mCallVideoProvider.sendSessionModifyResponse(responseProfile);
+    }
+
+    public void requestCameraCapabilities() throws RemoteException {
+        mCallVideoProvider.requestCameraCapabilities();
+    }
+
+    public void requestCallDataUsage() throws RemoteException {
+        mCallVideoProvider.requestCallDataUsage();
+    }
+
+    public void onSetPauseImage(String uri) throws RemoteException {
+        mCallVideoProvider.setPauseImage(uri);
     }
 }

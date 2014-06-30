@@ -27557,12 +27557,12 @@ package android.telecomm {
 
   public abstract class CallVideoClient {
     ctor protected CallVideoClient();
-    method public abstract void onCallSessionEvent(int);
-    method public abstract void onCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
+    method public abstract void onHandleCallSessionEvent(int);
+    method public abstract void onHandleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities);
     method public abstract void onReceiveSessionModifyRequest(android.telecomm.VideoCallProfile);
     method public abstract void onReceiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile);
     method public abstract void onUpdateCallDataUsage(int);
-    method public abstract void onUpdatedPeerDimensions(int, int);
+    method public abstract void onUpdatePeerDimensions(int, int);
     field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
     field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
     field public static final int SESSION_EVENT_TX_START = 3; // 0x3
@@ -27574,16 +27574,17 @@ package android.telecomm {
 
   public abstract class CallVideoProvider {
     ctor protected CallVideoProvider();
-    method public abstract void requestCallDataUsage();
-    method public abstract void requestCameraCapabilities();
-    method public abstract void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
-    method public abstract void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
-    method public abstract void setCamera(java.lang.String);
-    method public abstract void setDeviceOrientation(int);
-    method public abstract void setDisplaySurface(android.view.Surface);
-    method public abstract void setPauseImage(java.lang.String);
-    method public abstract void setPreviewSurface(android.view.Surface);
-    method public abstract void setZoom(float);
+    method public abstract void onRequestCallDataUsage();
+    method public abstract void onRequestCameraCapabilities();
+    method public abstract void onSendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public abstract void onSendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public abstract void onSetCallVideoClient(android.telecomm.RemoteCallVideoClient);
+    method public abstract void onSetCamera(java.lang.String);
+    method public abstract void onSetDeviceOrientation(int);
+    method public abstract void onSetDisplaySurface(android.view.Surface);
+    method public abstract void onSetPauseImage(java.lang.String);
+    method public abstract void onSetPreviewSurface(android.view.Surface);
+    method public abstract void onSetZoom(float);
   }
 
   public abstract class Connection {
@@ -27734,9 +27735,29 @@ package android.telecomm {
     method protected abstract void updateCall(android.telecomm.InCallCall);
   }
 
+  public class RemoteCallVideoClient implements android.os.IBinder.DeathRecipient {
+    method public void binderDied();
+    method public void handleCallSessionEvent(int) throws android.os.RemoteException;
+    method public void handleCameraCapabilitiesChange(android.telecomm.CallCameraCapabilities) throws android.os.RemoteException;
+    method public void receiveSessionModifyRequest(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void receiveSessionModifyResponse(int, android.telecomm.VideoCallProfile, android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void updateCallDataUsage(int) throws android.os.RemoteException;
+    method public void updatePeerDimensions(int, int) throws android.os.RemoteException;
+  }
+
   public class RemoteCallVideoProvider implements android.os.IBinder.DeathRecipient {
     method public void binderDied();
+    method public void onSetPauseImage(java.lang.String) throws android.os.RemoteException;
+    method public void requestCallDataUsage() throws android.os.RemoteException;
+    method public void requestCameraCapabilities() throws android.os.RemoteException;
+    method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
+    method public void setCallVideoClient(android.telecomm.CallVideoClient) throws android.os.RemoteException;
     method public void setCamera(java.lang.String) throws android.os.RemoteException;
+    method public void setDeviceOrientation(int) throws android.os.RemoteException;
+    method public void setDisplaySurface(android.view.Surface) throws android.os.RemoteException;
+    method public void setPreviewSurface(android.view.Surface) throws android.os.RemoteException;
+    method public void setZoom(float) throws android.os.RemoteException;
   }
 
   public final class RemoteConnection {

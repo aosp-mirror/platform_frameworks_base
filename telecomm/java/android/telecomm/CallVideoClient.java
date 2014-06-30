@@ -17,6 +17,7 @@
 package android.telecomm;
 
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 
@@ -66,22 +67,22 @@ public abstract class CallVideoClient {
      */
     public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
 
-    private static final int MSG_ON_RECEIVE_SESSION_MODIFY_REQUEST = 1;
-    private static final int MSG_ON_RECEIVE_SESSION_MODIFY_RESPONSE = 2;
-    private static final int MSG_ON_CALL_SESSION_EVENT = 3;
-    private static final int MSG_ON_UPDATED_PEER_DIMENSIONS = 4;
-    private static final int MSG_ON_UPDATE_CALL_DATA_USAGE = 5;
-    private static final int MSG_ON_CAMERA_CAPABILITIES_CHANGE = 6;
+    private static final int MSG_RECEIVE_SESSION_MODIFY_REQUEST = 1;
+    private static final int MSG_RECEIVE_SESSION_MODIFY_RESPONSE = 2;
+    private static final int MSG_HANDLE_CALL_SESSION_EVENT = 3;
+    private static final int MSG_UPDATE_PEER_DIMENSIONS = 4;
+    private static final int MSG_UPDATE_CALL_DATA_USAGE = 5;
+    private static final int MSG_HANDLE_CAMERA_CAPABILITIES_CHANGE = 6;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ON_RECEIVE_SESSION_MODIFY_REQUEST:
+                case MSG_RECEIVE_SESSION_MODIFY_REQUEST:
                     onReceiveSessionModifyRequest((VideoCallProfile) msg.obj);
                     break;
-                case MSG_ON_RECEIVE_SESSION_MODIFY_RESPONSE: {
+                case MSG_RECEIVE_SESSION_MODIFY_RESPONSE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         int status = (int) args.arg1;
@@ -95,25 +96,25 @@ public abstract class CallVideoClient {
                     }
                     break;
                 }
-                case MSG_ON_CALL_SESSION_EVENT:
-                    onCallSessionEvent((int) msg.obj);
+                case MSG_HANDLE_CALL_SESSION_EVENT:
+                    onHandleCallSessionEvent((int) msg.obj);
                     break;
-                case MSG_ON_UPDATED_PEER_DIMENSIONS: {
+                case MSG_UPDATE_PEER_DIMENSIONS: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         int width = (int) args.arg1;
                         int height = (int) args.arg2;
-                        onUpdatedPeerDimensions(width, height);
+                        onUpdatePeerDimensions(width, height);
                     } finally {
                         args.recycle();
                     }
                     break;
                 }
-                case MSG_ON_UPDATE_CALL_DATA_USAGE:
+                case MSG_UPDATE_CALL_DATA_USAGE:
                     onUpdateCallDataUsage(msg.arg1);
                     break;
-                case MSG_ON_CAMERA_CAPABILITIES_CHANGE:
-                    onCameraCapabilitiesChange((CallCameraCapabilities) msg.obj);
+                case MSG_HANDLE_CAMERA_CAPABILITIES_CHANGE:
+                    onHandleCameraCapabilitiesChange((CallCameraCapabilities) msg.obj);
                     break;
                 default:
                     break;
@@ -126,42 +127,42 @@ public abstract class CallVideoClient {
      */
     private final class CallVideoClientBinder extends ICallVideoClient.Stub {
         @Override
-        public void onReceiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
-            mHandler.obtainMessage(MSG_ON_RECEIVE_SESSION_MODIFY_REQUEST,
+        public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
+            mHandler.obtainMessage(MSG_RECEIVE_SESSION_MODIFY_REQUEST,
                     videoCallProfile).sendToTarget();
         }
 
         @Override
-        public void onReceiveSessionModifyResponse(int status,
+        public void receiveSessionModifyResponse(int status,
                 VideoCallProfile requestProfile, VideoCallProfile responseProfile) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = status;
             args.arg2 = requestProfile;
             args.arg3 = responseProfile;
-            mHandler.obtainMessage(MSG_ON_RECEIVE_SESSION_MODIFY_RESPONSE, args).sendToTarget();
+            mHandler.obtainMessage(MSG_RECEIVE_SESSION_MODIFY_RESPONSE, args).sendToTarget();
         }
 
         @Override
-        public void onCallSessionEvent(int event) {
-            mHandler.obtainMessage(MSG_ON_CALL_SESSION_EVENT, event).sendToTarget();
+        public void handleCallSessionEvent(int event) {
+            mHandler.obtainMessage(MSG_HANDLE_CALL_SESSION_EVENT, event).sendToTarget();
         }
 
         @Override
-        public void onUpdatedPeerDimensions(int width, int height) {
+        public void updatePeerDimensions(int width, int height) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = width;
             args.arg2 = height;
-            mHandler.obtainMessage(MSG_ON_UPDATED_PEER_DIMENSIONS, args).sendToTarget();
+            mHandler.obtainMessage(MSG_UPDATE_PEER_DIMENSIONS, args).sendToTarget();
         }
 
         @Override
-        public void onUpdateCallDataUsage(int dataUsage) {
-            mHandler.obtainMessage(MSG_ON_UPDATE_CALL_DATA_USAGE, dataUsage).sendToTarget();
+        public void updateCallDataUsage(int dataUsage) {
+            mHandler.obtainMessage(MSG_UPDATE_CALL_DATA_USAGE, dataUsage).sendToTarget();
         }
 
         @Override
-        public void onCameraCapabilitiesChange(CallCameraCapabilities cameraCapabilities) {
-            mHandler.obtainMessage(MSG_ON_CAMERA_CAPABILITIES_CHANGE,
+        public void handleCameraCapabilitiesChange(CallCameraCapabilities cameraCapabilities) {
+            mHandler.obtainMessage(MSG_HANDLE_CAMERA_CAPABILITIES_CHANGE,
                     cameraCapabilities).sendToTarget();
         }
     }
@@ -173,21 +174,19 @@ public abstract class CallVideoClient {
     }
 
     /**
-     * Retrieves the binder.
-     *
-     * @return The binder.
+     * Returns binder object which can be used across IPC methods.
      * @hide
      */
-    public final CallVideoClientBinder getBinder() {
+    public final IBinder getBinder() {
         return mBinder;
     }
 
     /**
      * Called when a session modification request is received from the remote device.
-     * The remote request is sent via {@link CallVideoProvider#sendSessionModifyRequest}.
+     * The remote request is sent via {@link CallVideoProvider#onSendSessionModifyRequest}.
      * The InCall UI is responsible for potentially prompting the user whether they wish to accept
      * the new call profile (e.g. prompt user if they wish to accept an upgrade from an audio to a
-     * video call) and should call {@link CallVideoProvider#sendSessionModifyResponse} to indicate
+     * video call) and should call {@link CallVideoProvider#onSendSessionModifyResponse} to indicate
      * the video settings the user has agreed to.
      *
      * @param videoCallProfile The requested video call profile.
@@ -197,7 +196,7 @@ public abstract class CallVideoClient {
     /**
      * Called when a response to a session modification request is received from the remote device.
      * The remote InCall UI sends the response using
-     * {@link CallVideoProvider#sendSessionModifyResponse}.
+     * {@link CallVideoProvider#onSendSessionModifyResponse}.
      *
      * @param status Status of the session modify request.  Valid values are
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_SUCCESS},
@@ -219,7 +218,7 @@ public abstract class CallVideoClient {
      *
      * @param event The event.
      */
-    public abstract void onCallSessionEvent(int event);
+    public abstract void onHandleCallSessionEvent(int event);
 
     /**
      * Handles a change to the video dimensions from the remote caller (peer).  This could happen
@@ -228,7 +227,7 @@ public abstract class CallVideoClient {
      * @param width  The updated peer video width.
      * @param height The updated peer video height.
      */
-    public abstract void onUpdatedPeerDimensions(int width, int height);
+    public abstract void onUpdatePeerDimensions(int width, int height);
 
     /**
      * Handles an update to the total data used for the current session.
@@ -242,6 +241,6 @@ public abstract class CallVideoClient {
      *
      * @param callCameraCapabilities The changed camera capabilities.
      */
-    public abstract void onCameraCapabilitiesChange(CallCameraCapabilities callCameraCapabilities);
+    public abstract void onHandleCameraCapabilitiesChange(CallCameraCapabilities callCameraCapabilities);
 }
 

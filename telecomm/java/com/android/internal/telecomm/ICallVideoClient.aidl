@@ -29,16 +29,16 @@ import android.telecomm.VideoCallProfile;
   */
  oneway interface ICallVideoClient {
 
-     void onReceiveSessionModifyRequest(in VideoCallProfile videoCallProfile);
+     void receiveSessionModifyRequest(in VideoCallProfile videoCallProfile);
 
-     void onReceiveSessionModifyResponse(int status, in VideoCallProfile requestedProfile,
+     void receiveSessionModifyResponse(int status, in VideoCallProfile requestedProfile,
             in VideoCallProfile responseProfile);
 
-     void onCallSessionEvent(int event);
+     void handleCallSessionEvent(int event);
 
-     void onUpdatedPeerDimensions(int width, int height);
+     void updatePeerDimensions(int width, int height);
 
-     void onUpdateCallDataUsage(int dataUsage);
+     void updateCallDataUsage(int dataUsage);
 
-     void onCameraCapabilitiesChange(in CallCameraCapabilities callCameraCapabilities);
+     void handleCameraCapabilitiesChange(in CallCameraCapabilities callCameraCapabilities);
  }

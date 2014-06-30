@@ -17,22 +17,26 @@
 package android.telecomm;
 
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.view.Surface;
 
+import com.android.internal.telecomm.ICallVideoClient;
 import com.android.internal.telecomm.ICallVideoProvider;
 
 public abstract class CallVideoProvider {
-    private static final int MSG_SET_CAMERA = 1;
-    private static final int MSG_SET_PREVIEW_SURFACE = 2;
-    private static final int MSG_SET_DISPLAY_SURFACE = 3;
-    private static final int MSG_SET_DEVICE_ORIENTATION = 4;
-    private static final int MSG_SET_ZOOM = 5;
-    private static final int MSG_SEND_SESSION_MODIFY_REQUEST = 6;
-    private static final int MSG_SEND_SESSION_MODIFY_RESPONSE = 7;
-    private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 8;
-    private static final int MSG_REQUEST_CALL_DATA_USAGE = 9;
-    private static final int MSG_SET_PAUSE_IMAGE = 10;
+    private static final int MSG_SET_CALL_VIDEO_CLIENT = 1;
+    private static final int MSG_SET_CAMERA = 2;
+    private static final int MSG_SET_PREVIEW_SURFACE = 3;
+    private static final int MSG_SET_DISPLAY_SURFACE = 4;
+    private static final int MSG_SET_DEVICE_ORIENTATION = 5;
+    private static final int MSG_SET_ZOOM = 6;
+    private static final int MSG_SEND_SESSION_MODIFY_REQUEST = 7;
+    private static final int MSG_SEND_SESSION_MODIFY_RESPONSE = 8;
+    private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
+    private static final int MSG_REQUEST_CALL_DATA_USAGE = 10;
+    private static final int MSG_SET_PAUSE_IMAGE = 11;
 
     /**
      * Default handler used to consolidate binder method calls onto a single thread.
@@ -41,35 +45,45 @@ public abstract class CallVideoProvider {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_SET_CALL_VIDEO_CLIENT:
+                    try {
+                        ICallVideoClient callVideoClient =
+                                ICallVideoClient.Stub.asInterface((IBinder) msg.obj);
+                        RemoteCallVideoClient remoteCallVideoClient =
+                                new RemoteCallVideoClient(callVideoClient);
+                        onSetCallVideoClient(remoteCallVideoClient);
+                    } catch (RemoteException ignored) {
+                    }
+                    break;
                 case MSG_SET_CAMERA:
-                    setCamera((String) msg.obj);
+                    onSetCamera((String) msg.obj);
                     break;
                 case MSG_SET_PREVIEW_SURFACE:
-                    setPreviewSurface((Surface) msg.obj);
+                    onSetPreviewSurface((Surface) msg.obj);
                     break;
                 case MSG_SET_DISPLAY_SURFACE:
-                    setDisplaySurface((Surface) msg.obj);
+                    onSetDisplaySurface((Surface) msg.obj);
                     break;
                 case MSG_SET_DEVICE_ORIENTATION:
-                    setDeviceOrientation(msg.arg1);
+                    onSetDeviceOrientation(msg.arg1);
                     break;
                 case MSG_SET_ZOOM:
-                    setZoom((Float) msg.obj);
+                    onSetZoom((Float) msg.obj);
                     break;
                 case MSG_SEND_SESSION_MODIFY_REQUEST:
-                    sendSessionModifyRequest((VideoCallProfile) msg.obj);
+                    onSendSessionModifyRequest((VideoCallProfile) msg.obj);
                     break;
                 case MSG_SEND_SESSION_MODIFY_RESPONSE:
-                    sendSessionModifyResponse((VideoCallProfile) msg.obj);
+                    onSendSessionModifyResponse((VideoCallProfile) msg.obj);
                     break;
                 case MSG_REQUEST_CAMERA_CAPABILITIES:
-                    requestCameraCapabilities();
+                    onRequestCameraCapabilities();
                     break;
                 case MSG_REQUEST_CALL_DATA_USAGE:
-                    requestCallDataUsage();
+                    onRequestCallDataUsage();
                     break;
                 case MSG_SET_PAUSE_IMAGE:
-                    setPauseImage((String) msg.obj);
+                    onSetPauseImage((String) msg.obj);
                     break;
                 default:
                     break;
@@ -81,6 +95,11 @@ public abstract class CallVideoProvider {
      * Default ICallVideoProvider implementation.
      */
     private final class CallVideoProviderBinder extends ICallVideoProvider.Stub {
+        public void setCallVideoClient(IBinder callVideoClientBinder) {
+            mMessageHandler.obtainMessage(
+                    MSG_SET_CALL_VIDEO_CLIENT, callVideoClientBinder).sendToTarget();
+        }
+
         public void setCamera(String cameraId) {
             mMessageHandler.obtainMessage(MSG_SET_CAMERA, cameraId).sendToTarget();
         }
@@ -102,13 +121,13 @@ public abstract class CallVideoProvider {
         }
 
         public void sendSessionModifyRequest(VideoCallProfile requestProfile) {
-            mMessageHandler.obtainMessage(MSG_SEND_SESSION_MODIFY_REQUEST,
-                    requestProfile).sendToTarget();
+            mMessageHandler.obtainMessage(
+                    MSG_SEND_SESSION_MODIFY_REQUEST, requestProfile).sendToTarget();
         }
 
         public void sendSessionModifyResponse(VideoCallProfile responseProfile) {
-            mMessageHandler.obtainMessage(MSG_SEND_SESSION_MODIFY_RESPONSE,
-                    responseProfile).sendToTarget();
+            mMessageHandler.obtainMessage(
+                    MSG_SEND_SESSION_MODIFY_RESPONSE, responseProfile).sendToTarget();
         }
 
         public void requestCameraCapabilities() {
@@ -140,11 +159,19 @@ public abstract class CallVideoProvider {
     }
 
     /**
+     * Sets a remote interface for invoking callback methods in the InCallUI after performing
+     * telephony actions.
+     *
+     * @param callVideoClient The call video client.
+     */
+    public abstract void onSetCallVideoClient(RemoteCallVideoClient callVideoClient);
+
+    /**
      * Sets the camera to be used for video recording in a video call.
      *
      * @param cameraId The id of the camera.
      */
-    public abstract void setCamera(String cameraId);
+    public abstract void onSetCamera(String cameraId);
 
     /**
      * Sets the surface to be used for displaying a preview of what the user's camera is
@@ -153,14 +180,14 @@ public abstract class CallVideoProvider {
      *
      * @param surface The surface.
      */
-    public abstract void setPreviewSurface(Surface surface);
+    public abstract void onSetPreviewSurface(Surface surface);
 
     /**
      * Sets the surface to be used for displaying the video received from the remote device.
      *
      * @param surface The surface.
      */
-    public abstract void setDisplaySurface(Surface surface);
+    public abstract void onSetDisplaySurface(Surface surface);
 
     /**
      * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of the
@@ -168,14 +195,14 @@ public abstract class CallVideoProvider {
      *
      * @param rotation The device orientation, in degrees.
      */
-    public abstract void setDeviceOrientation(int rotation);
+    public abstract void onSetDeviceOrientation(int rotation);
 
     /**
      * Sets camera zoom ratio.
      *
      * @param value The camera zoom ratio.
      */
-    public abstract void setZoom(float value);
+    public abstract void onSetZoom(float value);
 
     /**
      * Issues a request to modify the properties of the current session.  The request is sent to
@@ -186,7 +213,7 @@ public abstract class CallVideoProvider {
      *
      * @param requestProfile The requested call video properties.
      */
-    public abstract void sendSessionModifyRequest(VideoCallProfile requestProfile);
+    public abstract void onSendSessionModifyRequest(VideoCallProfile requestProfile);
 
     /**
      * Provides a response to a request to change the current call session video
@@ -198,21 +225,21 @@ public abstract class CallVideoProvider {
      *
      * @param responseProfile The response call video properties.
      */
-    public abstract void sendSessionModifyResponse(VideoCallProfile responseProfile);
+    public abstract void onSendSessionModifyResponse(VideoCallProfile responseProfile);
 
     /**
      * Issues a request to the video provider to retrieve the camera capabilities.
      * Camera capabilities are reported back to the caller via
-     * {@link CallVideoClient#onCameraCapabilitiesChange(CallCameraCapabilities)}.
+     * {@link CallVideoClient#onHandleCameraCapabilitiesChange(CallCameraCapabilities)}.
      */
-    public abstract void requestCameraCapabilities();
+    public abstract void onRequestCameraCapabilities();
 
     /**
      * Issues a request to the video telephony framework to retrieve the cumulative data usage for
      * the current call.  Data usage is reported back to the caller via
      * {@link CallVideoClient#onUpdateCallDataUsage}.
      */
-    public abstract void requestCallDataUsage();
+    public abstract void onRequestCallDataUsage();
 
     /**
      * Provides the video telephony framework with the URI of an image to be displayed to remote
@@ -220,5 +247,5 @@ public abstract class CallVideoProvider {
      *
      * @param uri URI of image to display.
      */
-    public abstract void setPauseImage(String uri);
+    public abstract void onSetPauseImage(String uri);
 }
