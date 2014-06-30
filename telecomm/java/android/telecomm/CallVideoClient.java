@@ -85,10 +85,10 @@ public abstract class CallVideoClient {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         int status = (int) args.arg1;
-                        VideoCallProfile requestedProfile = (VideoCallProfile) args.arg2;
+                        VideoCallProfile requestProfile = (VideoCallProfile) args.arg2;
                         VideoCallProfile responseProfile = (VideoCallProfile) args.arg3;
 
-                        onReceiveSessionModifyResponse(status, requestedProfile,
+                        onReceiveSessionModifyResponse(status, requestProfile,
                                 responseProfile);
                     } finally {
                         args.recycle();
@@ -133,10 +133,10 @@ public abstract class CallVideoClient {
 
         @Override
         public void onReceiveSessionModifyResponse(int status,
-                VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
+                VideoCallProfile requestProfile, VideoCallProfile responseProfile) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = status;
-            args.arg2 = requestedProfile;
+            args.arg2 = requestProfile;
             args.arg3 = responseProfile;
             mHandler.obtainMessage(MSG_ON_RECEIVE_SESSION_MODIFY_RESPONSE, args).sendToTarget();
         }
@@ -183,29 +183,31 @@ public abstract class CallVideoClient {
     }
 
     /**
-     * Called when an incoming request is received from a remote device to modify the current
-     * video call profile.  This could be, for example, a remote request to upgrade from an
-     * audio-only call to a video call.
+     * Called when a session modification request is received from the remote device.
+     * The remote request is sent via {@link CallVideoProvider#sendSessionModifyRequest}.
+     * The InCall UI is responsible for potentially prompting the user whether they wish to accept
+     * the new call profile (e.g. prompt user if they wish to accept an upgrade from an audio to a
+     * video call) and should call {@link CallVideoProvider#sendSessionModifyResponse} to indicate
+     * the video settings the user has agreed to.
      *
      * @param videoCallProfile The requested video call profile.
      */
     public abstract void onReceiveSessionModifyRequest(VideoCallProfile videoCallProfile);
 
     /**
-     * Called when a response is received to a previously sent request to modify the video call
-     * profile.  For example, if a request was previously sent to the other party to upgrade from an
-     * audio-only call to a video call, the other party responds to indicate which profile
-     * changes were accepted.
+     * Called when a response to a session modification request is received from the remote device.
+     * The remote InCall UI sends the response using
+     * {@link CallVideoProvider#sendSessionModifyResponse}.
      *
      * @param status Status of the session modify request.  Valid values are
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_SUCCESS},
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_FAIL},
      *               {@link CallVideoClient#SESSION_MODIFY_REQUEST_INVALID}
-     * @param requestedProfile The original request which was sent to the remote device.
+     * @param requestProfile The original request which was sent to the remote device.
      * @param responseProfile The actual profile changes made by the remote device.
      */
     public abstract void onReceiveSessionModifyResponse(int status,
-            VideoCallProfile requestedProfile, VideoCallProfile responseProfile);
+            VideoCallProfile requestProfile, VideoCallProfile responseProfile);
 
     /**
      * Handles events related to the current session which the client may wish to handle.  These
