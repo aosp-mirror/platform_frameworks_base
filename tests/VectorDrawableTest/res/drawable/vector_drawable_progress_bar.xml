@@ -39,7 +39,7 @@
                 android:name="pie1"
                 android:fill="#00000000"
                 android:pathData="M0, 0 m 0, -9.5 a 9.5,9.5 0 1,1 0,19 a 9.5,9.5 0 1,1 0,-19"
-                android:stroke="#89cff0"
+                android:stroke="?android:attr/colorControlActivated"
                 android:strokeLineCap="round"
                 android:strokeLineJoin="miter"
                 android:strokeWidth="2"

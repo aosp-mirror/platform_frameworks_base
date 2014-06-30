@@ -14,9 +14,11 @@
      limitations under the License.
 -->
 
-<material-progress xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorControlActivated"
-    android:width="16dp"
-    android:height="16dp"
-    android:thickness="1.3dp"
-    android:innerRadius="6.3dp" />
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vector_drawable_progress_bar_small" >
+
+    <target
+        android:name="progressBar"
+        android:animation="@anim/progress_indeterminate_material" />
+
+</animated-vector>

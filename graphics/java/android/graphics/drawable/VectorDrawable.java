@@ -166,7 +166,7 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public ConstantState getConstantState() {
-        return mVectorState;
+        return null;
     }
 
     @Override
