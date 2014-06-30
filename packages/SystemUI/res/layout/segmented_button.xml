@@ -14,13 +14,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/volume_panel_width"
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/qs_panel_background"
-    android:translationZ="@dimen/volume_panel_z"
-    android:layout_marginBottom="@dimen/volume_panel_z">
-
-        <include layout="@layout/volume_panel" />
-
-</FrameLayout>
+    android:layout_marginStart="@dimen/segmented_button_spacing"
+    android:layout_weight="1"
+    android:textColor="@color/segmented_button_text_selector"
+    android:background="@drawable/segmented_button"
+    android:textAppearance="@style/TextAppearance.QS.SegmentedButton"
+    android:minHeight="0dp"
+    android:padding="12dp" />

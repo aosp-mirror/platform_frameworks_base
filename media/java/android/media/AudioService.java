@@ -109,12 +109,12 @@ public class AudioService extends IAudioService.Stub {
     private static final String TAG = "AudioService";
 
     /** Debug remote control client/display feature */
-    protected static final boolean DEBUG_RC = false;
+    protected static final boolean DEBUG_RC = Log.isLoggable(TAG + ".RC", Log.DEBUG);
     /** Debug volumes */
-    protected static final boolean DEBUG_VOL = false;
+    protected static final boolean DEBUG_VOL = Log.isLoggable(TAG + ".VOL", Log.DEBUG);
 
     /** debug calls to media session apis */
-    private static final boolean DEBUG_SESSIONS = true;
+    private static final boolean DEBUG_SESSIONS = Log.isLoggable(TAG + ".SESSIONS", Log.DEBUG);
 
     /** Allow volume changes to set ringer mode to silent? */
     private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
@@ -841,7 +841,8 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage) {
-        if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
+        if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType
+                + ", flags=" + flags);
         int streamType;
         if (mVolumeControlStream != -1) {
             streamType = mVolumeControlStream;
@@ -871,7 +872,8 @@ public class AudioService extends IAudioService.Stub {
         if (mUseFixedVolume) {
             return;
         }
-        if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream="+streamType+", dir="+direction);
+        if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream="+streamType+", dir="+direction
+                + ", flags="+flags);
 
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);

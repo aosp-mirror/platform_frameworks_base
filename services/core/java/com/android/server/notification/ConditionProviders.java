@@ -264,7 +264,7 @@ public class ConditionProviders extends ManagedServices {
                         mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_OFF);
                     } else if (c.state == Condition.STATE_TRUE) {
                         Slog.d(TAG, "Enter zen: automatic condition true: " + c);
-                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_ON);
+                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
                     }
                 }
             }

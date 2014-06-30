@@ -147,9 +147,6 @@
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
 
-    <!-- Wait on the touch feedback this long before performing an action. -->
-    <integer name="feedback_start_delay">300</integer>
-
     <!-- Set to true to enable the classic notification ticker that scrolls
          Notification.tickerText across the status bar for what seems like an
          eternity. -->

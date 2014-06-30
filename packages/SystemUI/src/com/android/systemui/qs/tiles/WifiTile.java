@@ -266,7 +266,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                 final TextView summary = (TextView) item.findViewById(android.R.id.summary);
                 if (ap.isConnected) {
                     item.setMinimumHeight(mContext.getResources()
-                            .getDimensionPixelSize(R.dimen.qs_detail_item_height_connected));
+                            .getDimensionPixelSize(R.dimen.qs_detail_item_height_twoline));
                     summary.setText(R.string.quick_settings_connected);
                 } else {
                     summary.setVisibility(View.GONE);

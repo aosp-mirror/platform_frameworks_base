@@ -890,7 +890,7 @@ public class NotificationManagerService extends SystemService {
 
             // Grab our optional AudioService
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-
+            mZenModeHelper.setAudioManager(mAudioManager);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.

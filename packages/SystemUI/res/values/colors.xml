@@ -40,6 +40,7 @@
     <color name="system_error_color">#fff0592b</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_tile_text">#B3FFFFFF</color><!-- 70% white -->
+    <color name="qs_subhead">#66FFFFFF</color><!-- 40% white -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
@@ -85,4 +86,8 @@
     <color name="primary_color">#ff7fcac3</color>
     <color name="background_color_1">#ff384248</color>
     <color name="background_color_1_press">#ff54656e</color>
+
+    <color name="segmented_button_selected">#ff3d4549</color><!-- #33afbdc4 = 20% #afbdc4 = #ff3d4549 composite -->
+    <color name="segmented_button_background">#ff21272b</color>
+    <color name="segmented_button_text_inactive">#b3afbdc4</color><!-- 70% -->
 </resources>

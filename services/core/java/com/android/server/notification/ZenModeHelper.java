@@ -74,6 +74,8 @@ public class ZenModeHelper {
 
     private int mZenMode;
     private ZenModeConfig mConfig;
+    private AudioManager mAudioManager;
+    private int mPreviousRingerMode = -1;
 
     // temporary, until we update apps to provide metadata
     private static final Set<String> CALL_PACKAGES = new HashSet<String>(Arrays.asList(
@@ -129,13 +131,17 @@ public class ZenModeHelper {
         mCallbacks.add(callback);
     }
 
+    public void setAudioManager(AudioManager audioManager) {
+        mAudioManager = audioManager;
+    }
+
     public boolean shouldIntercept(NotificationRecord record) {
         if (mZenMode != Global.ZEN_MODE_OFF) {
             if (isSystem(record)) {
                 return false;
             }
             if (isAlarm(record)) {
-                return false;
+                return mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
             }
             // audience has veto power over all following rules
             if (!audienceMatches(record)) {
@@ -185,6 +191,34 @@ public class ZenModeHelper {
         mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.USE_DEFAULT_STREAM_TYPE,
                 zen ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
+
+        // alarm restrictions
+        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, AudioManager.STREAM_ALARM,
+                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
+                exceptionPackages);
+        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, AudioManager.STREAM_ALARM,
+                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
+                exceptionPackages);
+
+        // force ringer mode into compliance
+        if (mAudioManager != null) {
+            int ringerMode = mAudioManager.getRingerMode();
+            if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
+                    mPreviousRingerMode = ringerMode;
+                    Slog.d(TAG, "Silencing ringer");
+                    mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                }
+            } else {
+                if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                    Slog.d(TAG, "Unsilencing ringer");
+                    mAudioManager.setRingerMode(mPreviousRingerMode != -1 ? mPreviousRingerMode
+                            : AudioManager.RINGER_MODE_NORMAL);
+                    mPreviousRingerMode = -1;
+                }
+            }
+        }
         dispatchOnZenModeChanged();
     }
 
@@ -201,6 +235,7 @@ public class ZenModeHelper {
         pw.println(Global.zenModeToString(mZenMode));
         pw.print(prefix); pw.print("mConfig="); pw.println(mConfig);
         pw.print(prefix); pw.print("mDefaultConfig="); pw.println(mDefaultConfig);
+        pw.print(prefix); pw.print("mPreviousRingerMode="); pw.println(mPreviousRingerMode);
     }
 
     public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -308,16 +343,6 @@ public class ZenModeHelper {
         return new Date(time) + " (" + time + ")";
     }
 
-    public static boolean isWeekend(long time, int offsetDays) {
-        final Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
-        if (offsetDays != 0) {
-            c.add(Calendar.DATE, offsetDays);
-        }
-        final int day = c.get(Calendar.DAY_OF_WEEK);
-        return day == Calendar.SATURDAY || day == Calendar.SUNDAY;
-    }
-
     private class SettingsObserver extends ContentObserver {
         private final Uri ZEN_MODE = Global.getUriFor(Global.ZEN_MODE);
 
@@ -344,30 +369,44 @@ public class ZenModeHelper {
     }
 
     private class ZenBroadcastReceiver extends BroadcastReceiver {
+        private final Calendar mCalendar = Calendar.getInstance();
+
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_ENTER_ZEN.equals(intent.getAction())) {
-                setZenMode(intent, 1, Global.ZEN_MODE_ON);
+                setZenMode(intent, Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
             } else if (ACTION_EXIT_ZEN.equals(intent.getAction())) {
-                setZenMode(intent, 0, Global.ZEN_MODE_OFF);
+                setZenMode(intent, Global.ZEN_MODE_OFF);
             }
         }
 
-        private void setZenMode(Intent intent, int wkendOffsetDays, int zenModeValue) {
+        private void setZenMode(Intent intent, int zenModeValue) {
             final long schTime = intent.getLongExtra(EXTRA_TIME, 0);
             final long now = System.currentTimeMillis();
             Slog.d(TAG, String.format("%s scheduled for %s, fired at %s, delta=%s",
                     intent.getAction(), ts(schTime), ts(now), now - schTime));
 
-            final boolean skip = ZenModeConfig.SLEEP_MODE_WEEKNIGHTS.equals(mConfig.sleepMode) &&
-                    isWeekend(schTime, wkendOffsetDays);
-
-            if (skip) {
-                Slog.d(TAG, "Skipping zen mode update for the weekend");
+            final int[] days = ZenModeConfig.tryParseDays(mConfig.sleepMode);
+            if (days != null) {
+                final int day = getDayOfWeek(schTime);
+                for (int i = 0; i < days.length; i++) {
+                    if (days[i] == day) {
+                        Slog.d(TAG, "Enter downtime, day=" + day + " days=" + Arrays.asList(days));
+                        ZenModeHelper.this.setZenMode(zenModeValue);
+                        break;
+                    } else {
+                        Slog.d(TAG, "Skip downtime, day=" + day + " days=" + Arrays.asList(days));
+                    }
+                }
             } else {
-                ZenModeHelper.this.setZenMode(zenModeValue);
+                Slog.d(TAG, "Skip downtime, no days configured");
             }
             updateAlarms();
+        }
+
+        private int getDayOfWeek(long time) {
+            mCalendar.setTimeInMillis(time);
+            return mCalendar.get(Calendar.DAY_OF_WEEK);
         }
     }
 

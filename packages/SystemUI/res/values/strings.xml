@@ -583,8 +583,14 @@
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
-    <!-- Zen mode: Short title. [CHAR LIMIT=40] -->
-    <string name="zen_mode_title">Do not disturb</string>
+    <!-- Zen mode: Alarm warning. [CHAR LIMIT=40] -->
+    <string name="zen_alarm_warning">You won\'t hear your alarms</string>
+
+    <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
+    <string name="zen_no_interruptions">No interruptions</string>
+
+    <!-- Zen mode: Only important interruptions. [CHAR LIMIT=40] -->
+    <string name="zen_important_interruptions">Priority interruptions only</string>
 
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
     <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
@@ -607,7 +613,16 @@
     <string name="bugreport_tile_extended" translatable="false">%s\n%s (%s)</string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever">Until you turn this off</string>
+    <string name="zen_mode_forever">Indefinitely</string>
+
+    <!-- Interruption level: None. [CHAR LIMIT=20] -->
+    <string name="interruption_level_none">None</string>
+
+    <!-- Interruption level: Priority. [CHAR LIMIT=20] -->
+    <string name="interruption_level_priority">Priority</string>
+
+    <!-- Interruption level: All. [CHAR LIMIT=20] -->
+    <string name="interruption_level_all">All</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>

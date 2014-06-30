@@ -67,7 +67,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
-    private static final boolean KEYGUARD_MANAGES_VOLUME = true;
+    private static final boolean KEYGUARD_MANAGES_VOLUME = false;
     public static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardViewBase";
 

@@ -1,8 +1,8 @@
 package com.android.systemui.volume;
 
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
@@ -17,8 +17,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
@@ -80,17 +80,19 @@ public class VolumeUI extends SystemUI {
 
     private void initPanel() {
         mPanel = new VolumePanel(mContext, null, new ZenModeControllerImpl(mContext, mHandler));
-        final int delay = mContext.getResources().getInteger(R.integer.feedback_start_delay);
-        mPanel.setZenModePanelCallback(new ZenModePanel.Callback() {
+        mPanel.setCallback(new VolumePanel.Callback() {
             @Override
-            public void onMoreSettings() {
+            public void onZenSettings() {
                 mHandler.removeCallbacks(mStartZenSettings);
-                mHandler.postDelayed(mStartZenSettings, delay);
+                mHandler.post(mStartZenSettings);
             }
 
             @Override
             public void onInteraction() {
-                mDialogPanel.resetTimeout();
+                final KeyguardViewMediator kvm = getComponent(KeyguardViewMediator.class);
+                if (kvm != null) {
+                    kvm.userActivity();
+                }
             }
         });
         mDialogPanel = mPanel;
@@ -108,6 +110,11 @@ public class VolumeUI extends SystemUI {
         @Override
         public void run() {
             mDialogPanel.postDismiss();
+            try {
+                // Dismiss the lock screen when Settings starts.
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+            }
             final Intent intent = ZenModePanel.ZEN_SETTINGS;
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));

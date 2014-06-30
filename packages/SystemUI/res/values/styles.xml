@@ -179,6 +179,23 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="TextAppearance.QS.Subhead">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/qs_subhead</item>
+    </style>
+
+    <style name="TextAppearance.QS.Warning">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/qs_subhead</item>
+    </style>
+
+    <style name="TextAppearance.QS.SegmentedButton">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -239,10 +256,10 @@
         <item name="android:background">@drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
     </style>
-    <style name="BorderlessButton" parent="@android:style/Widget.Material.Button.Borderless" />
 
-    <style name="BorderlessButton.Tiny">
-        <item name="android:minHeight">12dip</item>
-        <item name="android:minWidth">12dip</item>
+    <!-- Window animations used for volume panel. -->
+    <style name="VolumePanelAnimation">
+        <item name="android:windowEnterAnimation">@*android:anim/dock_top_enter</item>
+        <item name="android:windowExitAnimation">@*android:anim/dock_top_exit</item>
     </style>
 </resources>

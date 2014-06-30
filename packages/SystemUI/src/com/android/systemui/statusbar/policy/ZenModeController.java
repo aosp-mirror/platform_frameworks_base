@@ -22,14 +22,15 @@ import android.service.notification.Condition;
 public interface ZenModeController {
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
-    void setZen(boolean zen);
-    boolean isZen();
+    void setZen(int zen);
+    int getZen();
     void requestConditions(boolean request);
     void setExitConditionId(Uri exitConditionId);
     Uri getExitConditionId();
+    boolean hasNextAlarm();
 
     public static class Callback {
-        public void onZenChanged(boolean zen) {}
+        public void onZenChanged(int zen) {}
         public void onExitConditionChanged(Uri exitConditionId) {}
         public void onConditionsChanged(Condition[] conditions) {}
     }

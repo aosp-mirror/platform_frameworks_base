@@ -738,6 +738,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mStatusBarView;
     }
 
+    @Override
+    protected void setZenMode(int mode) {
+        super.setZenMode(mode);
+        if (mIconPolicy != null) {
+            mIconPolicy.setZenMode(mode);
+        }
+    }
+
     private void startKeyguard() {
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,

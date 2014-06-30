@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -42,11 +43,17 @@ public class ZenModeConfig implements Parcelable {
 
     public static final String SLEEP_MODE_NIGHTS = "nights";
     public static final String SLEEP_MODE_WEEKNIGHTS = "weeknights";
+    public static final String SLEEP_MODE_DAYS_PREFIX = "days:";
 
     public static final int SOURCE_ANYONE = 0;
     public static final int SOURCE_CONTACT = 1;
     public static final int SOURCE_STAR = 2;
     public static final int MAX_SOURCE = SOURCE_STAR;
+
+    public static final int[] ALL_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
+            Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
+    public static final int[] WEEKNIGHT_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
+            Calendar.WEDNESDAY, Calendar.THURSDAY };
 
     private static final int XML_VERSION = 1;
     private static final String ZEN_TAG = "zen";
@@ -198,8 +205,39 @@ public class ZenModeConfig implements Parcelable {
     public boolean isValid() {
         return isValidHour(sleepStartHour) && isValidMinute(sleepStartMinute)
                 && isValidHour(sleepEndHour) && isValidMinute(sleepEndMinute)
-                && (sleepMode == null || sleepMode.equals(SLEEP_MODE_NIGHTS)
-                    || sleepMode.equals(SLEEP_MODE_WEEKNIGHTS));
+                && isValidSleepMode(sleepMode);
+    }
+
+    public static boolean isValidSleepMode(String sleepMode) {
+        return sleepMode == null || sleepMode.equals(SLEEP_MODE_NIGHTS)
+                || sleepMode.equals(SLEEP_MODE_WEEKNIGHTS) || tryParseDays(sleepMode) != null;
+    }
+
+    public static int[] tryParseDays(String sleepMode) {
+        if (sleepMode == null) return null;
+        sleepMode = sleepMode.trim();
+        if (SLEEP_MODE_NIGHTS.equals(sleepMode)) return ALL_DAYS;
+        if (SLEEP_MODE_WEEKNIGHTS.equals(sleepMode)) return WEEKNIGHT_DAYS;
+        if (!sleepMode.startsWith(SLEEP_MODE_DAYS_PREFIX)) return null;
+        if (sleepMode.equals(SLEEP_MODE_DAYS_PREFIX)) return null;
+        final String[] tokens = sleepMode.substring(SLEEP_MODE_DAYS_PREFIX.length()).split(",");
+        if (tokens.length == 0) return null;
+        final int[] rt = new int[tokens.length];
+        for (int i = 0; i < tokens.length; i++) {
+            final int day = tryParseInt(tokens[i], -1);
+            if (day == -1) return null;
+            rt[i] = day;
+        }
+        return rt;
+    }
+
+    private static int tryParseInt(String value, int defValue) {
+        if (TextUtils.isEmpty(value)) return defValue;
+        try {
+            return Integer.valueOf(value);
+        } catch (NumberFormatException e) {
+            return defValue;
+        }
     }
 
     public static ZenModeConfig readXml(XmlPullParser parser)
@@ -209,7 +247,7 @@ public class ZenModeConfig implements Parcelable {
         String tag = parser.getName();
         if (!ZEN_TAG.equals(tag)) return null;
         final ZenModeConfig rt = new ZenModeConfig();
-        final int version = Integer.parseInt(parser.getAttributeValue(null, ZEN_ATT_VERSION));
+        final int version = safeInt(parser, ZEN_ATT_VERSION, XML_VERSION);
         final ArrayList<ComponentName> conditionComponents = new ArrayList<ComponentName>();
         final ArrayList<Uri> conditionIds = new ArrayList<Uri>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -232,8 +270,7 @@ public class ZenModeConfig implements Parcelable {
                     }
                 } else if (SLEEP_TAG.equals(tag)) {
                     final String mode = parser.getAttributeValue(null, SLEEP_ATT_MODE);
-                    rt.sleepMode = (SLEEP_MODE_NIGHTS.equals(mode)
-                            || SLEEP_MODE_WEEKNIGHTS.equals(mode)) ? mode : null;
+                    rt.sleepMode = isValidSleepMode(mode)? mode : null;
                     final int startHour = safeInt(parser, SLEEP_ATT_START_HR, 0);
                     final int startMinute = safeInt(parser, SLEEP_ATT_START_MIN, 0);
                     final int endHour = safeInt(parser, SLEEP_ATT_END_HR, 0);
@@ -312,8 +349,7 @@ public class ZenModeConfig implements Parcelable {
 
     private static int safeInt(XmlPullParser parser, String att, int defValue) {
         final String val = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(val)) return defValue;
-        return Integer.valueOf(val);
+        return tryParseInt(val, defValue);
     }
 
     private static ComponentName safeComponentName(XmlPullParser parser, String att) {
