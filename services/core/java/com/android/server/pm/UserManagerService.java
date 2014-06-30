@@ -1108,6 +1108,12 @@ public class UserManagerService extends IUserManager.Stub {
      */
     public boolean removeUser(int userHandle) {
         checkManageUsersPermission("Only the system can remove users");
+        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
+                UserManager.DISALLOW_REMOVE_USER, false)) {
+            Log.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
+            return false;
+        }
+
         long ident = Binder.clearCallingIdentity();
         try {
             final UserInfo user;
