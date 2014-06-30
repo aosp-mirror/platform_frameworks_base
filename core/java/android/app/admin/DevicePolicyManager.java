@@ -2104,6 +2104,26 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Sets the name of the Managed profile. In the device owner case it sets the name of the user
+     * which it is called from. Only the profile owner or device owner can call this. If this is
+     * never called by the profile or device owner, the name will be set to default values.
+     *
+     * @see #isProfileOwnerApp
+     * @see #isDeviceOwnerApp
+     *
+     * @param profileName The name of the profile.
+     */
+    public void setProfileName(ComponentName who, String profileName) {
+        if (mService != null) {
+            try {
+            mService.setProfileName(who, profileName);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
+        }
+    }
+}
+
+    /**
      * Used to determine if a particular package is registered as the Profile Owner for the
      * current user. A profile owner is a special device admin that has additional privileges
      * within the managed profile.
