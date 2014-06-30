@@ -35305,6 +35305,7 @@ package android.view.textservice {
     ctor public TextInfo(java.lang.CharSequence, int, int, int, int);
     ctor public TextInfo(android.os.Parcel);
     method public int describeContents();
+    method public java.lang.CharSequence getCharSequence();
     method public int getCookie();
     method public int getSequence();
     method public java.lang.String getText();
