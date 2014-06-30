@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -193,6 +194,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     CastControllerImpl mCastController;
     VolumeComponent mVolumeComponent;
     KeyguardUserSwitcher mKeyguardUserSwitcher;
+    FlashlightController mFlashlightController;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -710,6 +712,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mBatteryController.setStatusBarHeaderView(mHeader);
+        mFlashlightController = new FlashlightController(mContext);
 
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
@@ -725,7 +728,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,
-                    mCastController, mVolumeComponent);
+                    mCastController, mVolumeComponent, mFlashlightController);
             for (QSTile<?> tile : qsh.getTiles()) {
                 mQSPanel.addTile(tile);
             }

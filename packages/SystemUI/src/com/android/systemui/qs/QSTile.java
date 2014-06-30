@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -221,6 +222,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         TetheringController getTetheringController();
         CastController getCastController();
         VolumeComponent getVolumeComponent();
+        FlashlightController getFlashlightController();
     }
 
     public static class State {

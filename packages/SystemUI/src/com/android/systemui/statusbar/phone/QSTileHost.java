@@ -29,6 +29,7 @@ import com.android.systemui.qs.tiles.BugreportTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NotificationsTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
@@ -37,6 +38,7 @@ import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -64,12 +66,13 @@ public class QSTileHost implements QSTile.Host {
     private final VolumeComponent mVolume;
     private final ArrayList<QSTile<?>> mTiles = new ArrayList<QSTile<?>>();
     private final int mFeedbackStartDelay;
+    private final FlashlightController mFlashlight;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
             ZenModeController zen, TetheringController tethering,
-            CastController cast, VolumeComponent volume) {
+            CastController cast, VolumeComponent volume, FlashlightController flashlight) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -80,6 +83,7 @@ public class QSTileHost implements QSTile.Host {
         mTethering = tethering;
         mCast = cast;
         mVolume = volume;
+        mFlashlight = flashlight;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName());
         ht.start();
@@ -95,6 +99,7 @@ public class QSTileHost implements QSTile.Host {
         mTiles.add(new LocationTile(this));
         mTiles.add(new CastTile(this));
         mTiles.add(new HotspotTile(this));
+        mTiles.add(new FlashlightTile(this));
 
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
@@ -176,5 +181,10 @@ public class QSTileHost implements QSTile.Host {
     @Override
     public VolumeComponent getVolumeComponent() {
         return mVolume;
+    }
+
+    @Override
+    public FlashlightController getFlashlightController() {
+        return mFlashlight;
     }
 }
