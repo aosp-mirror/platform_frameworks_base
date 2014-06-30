@@ -403,6 +403,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         if (avrInfo != null) {
                             addAndStartAction(new SystemAudioAutoInitiationAction(
                                     HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
+                            if (isConnectedToArcPort(avrInfo.getPhysicalAddress())) {
+                                addAndStartAction(new RequestArcInitiationAction(
+                                        HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
+                            }
                         }
                     }
                 });
