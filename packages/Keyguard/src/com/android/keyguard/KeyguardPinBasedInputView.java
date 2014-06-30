@@ -166,7 +166,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             mOkButton.setOnHoverListener(new LiftToActivateListener(getContext()));
         }
 
-        mDeleteButton = findViewById(R.id.delete_button);{
+        mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setVisibility(View.VISIBLE);
         mDeleteButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
