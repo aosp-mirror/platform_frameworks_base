@@ -39,14 +39,15 @@
             android:gravity="center_vertical|start"
             android:paddingStart="16dip"
             android:paddingEnd="16dip"
-            android:paddingTop="16dip">
+            android:paddingTop="16dip"
+            android:paddingBottom="8dip">
             <ImageView android:id="@+id/icon"
                 android:layout_width="32dip"
                 android:layout_height="32dip"
                 android:layout_marginEnd="8dip"
                 android:scaleType="fitCenter"
                 android:src="@null" />
-            <TextView android:id="@+id/alertTitle"
+            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?attr/windowTitleStyle"
                 android:singleLine="true"
                 android:ellipsize="end"
@@ -96,7 +97,7 @@
         android:padding="16dip">
         <LinearLayout
             style="?attr/buttonBarStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layoutDirection="locale">
             <Button android:id="@+id/button3"
@@ -105,6 +106,11 @@
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="invisible" />
             <Button android:id="@+id/button2"
                 style="?attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"

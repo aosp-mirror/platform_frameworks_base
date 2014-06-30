@@ -466,16 +466,16 @@ public class AlertController {
     }
 
     private void setupView() {
-        LinearLayout contentPanel = (LinearLayout) mWindow.findViewById(R.id.contentPanel);
+        final LinearLayout contentPanel = (LinearLayout) mWindow.findViewById(R.id.contentPanel);
         setupContent(contentPanel);
-        boolean hasButtons = setupButtons();
+        final boolean hasButtons = setupButtons();
         
-        LinearLayout topPanel = (LinearLayout) mWindow.findViewById(R.id.topPanel);
-        TypedArray a = mContext.obtainStyledAttributes(
-                null, com.android.internal.R.styleable.AlertDialog, com.android.internal.R.attr.alertDialogStyle, 0);
-        boolean hasTitle = setupTitle(topPanel);
+        final LinearLayout topPanel = (LinearLayout) mWindow.findViewById(R.id.topPanel);
+        final TypedArray a = mContext.obtainStyledAttributes(
+                null, R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
+        final boolean hasTitle = setupTitle(topPanel);
             
-        View buttonPanel = mWindow.findViewById(R.id.buttonPanel);
+        final View buttonPanel = mWindow.findViewById(R.id.buttonPanel);
         if (!hasButtons) {
             buttonPanel.setVisibility(View.GONE);
             mWindow.setCloseOnTouchOutsideIfNotSet(true);
