@@ -45,6 +45,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "EnterTransitionCoordinator";
 
     private static final long MAX_WAIT_MS = 1000;
+    private static final int MIN_ANIMATION_FRAMES = 2;
 
     private boolean mSharedElementTransitionStarted;
     private Activity mActivity;
@@ -280,9 +281,21 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         setOriginalImageViewState(originalImageViewState);
 
         if (mResultReceiver != null) {
-            mResultReceiver.send(MSG_HIDE_SHARED_ELEMENTS, null);
+            // We can't trust that the view will disappear on the same frame that the shared
+            // element appears here. Assure that we get at least 2 frames for double-buffering.
+            getDecor().postOnAnimation(new Runnable() {
+                int mAnimations;
+                @Override
+                public void run() {
+                    if (mAnimations++ < MIN_ANIMATION_FRAMES) {
+                        getDecor().postOnAnimation(this);
+                    } else {
+                        mResultReceiver.send(MSG_HIDE_SHARED_ELEMENTS, null);
+                        mResultReceiver = null; // all done sending messages.
+                    }
+                }
+            });
         }
-        mResultReceiver = null; // all done sending messages.
     }
 
     @Override
