@@ -145,7 +145,13 @@ public class PanelBar extends FrameLayout {
         }
     }
 
-    public void panelExpansionChanged(PanelView panel, float frac) {
+    /**
+     * @param panel the panel which changed its expansion state
+     * @param frac the fraction from the expansion in [0, 1]
+     * @param expanded whether the panel is currently expanded; this is independent from the
+     *                 fraction as the panel also might be expanded if the fraction is 0
+     */
+    public void panelExpansionChanged(PanelView panel, float frac, boolean expanded) {
         boolean fullyClosed = true;
         PanelView fullyOpenedPanel = null;
         if (DEBUG) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
@@ -154,7 +160,7 @@ public class PanelBar extends FrameLayout {
             boolean visible = pv.getExpandedHeight() > 0;
             pv.setVisibility(visible ? View.VISIBLE : View.GONE);
             // adjust any other panels that may be partially visible
-            if (pv.getExpandedHeight() > 0f) {
+            if (expanded) {
                 if (mState == STATE_CLOSED) {
                     go(STATE_OPENING);
                     onPanelPeeked();

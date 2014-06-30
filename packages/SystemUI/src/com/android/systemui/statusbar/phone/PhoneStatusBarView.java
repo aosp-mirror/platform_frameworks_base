@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
@@ -28,7 +27,6 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarState;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -171,8 +169,8 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void panelExpansionChanged(PanelView panel, float frac) {
-        super.panelExpansionChanged(panel, frac);
+    public void panelExpansionChanged(PanelView panel, float frac, boolean expanded) {
+        super.panelExpansionChanged(panel, frac, expanded);
         mScrimController.setPanelExpansion(frac);
         mBar.updateCarrierLabelVisibility(false);
         mBar.userActivity();
