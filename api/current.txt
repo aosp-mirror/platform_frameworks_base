@@ -27485,7 +27485,6 @@ package android.telecomm {
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onPostDialContinue(java.lang.String, boolean);
-    method public void onPostDialWait(android.telecomm.Connection, java.lang.String);
     method public abstract void playDtmfTone(java.lang.String, char);
     method public abstract void reject(java.lang.String);
     method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
@@ -27617,37 +27616,11 @@ package android.telecomm {
     method public final void setIsConferenceCapable(boolean);
     method public final void setOnHold();
     method public final void setParentConnection(android.telecomm.Connection);
+    method public final void setPostDialWait(java.lang.String);
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
     method public final void setSignal(android.os.Bundle);
     method public static java.lang.String stateToString(int);
-  }
-
-  public static abstract interface Connection.Listener {
-    method public abstract void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
-    method public abstract void onConferenceCapableChanged(android.telecomm.Connection, boolean);
-    method public abstract void onDestroyed(android.telecomm.Connection);
-    method public abstract void onDisconnected(android.telecomm.Connection, int, java.lang.String);
-    method public abstract void onHandleChanged(android.telecomm.Connection, android.net.Uri);
-    method public abstract void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
-    method public abstract void onRequestingRingback(android.telecomm.Connection, boolean);
-    method public abstract void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
-    method public abstract void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
-    method public abstract void onStateChanged(android.telecomm.Connection, int);
-  }
-
-  public static class Connection.ListenerBase implements android.telecomm.Connection.Listener {
-    ctor public Connection.ListenerBase();
-    method public void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
-    method public void onConferenceCapableChanged(android.telecomm.Connection, boolean);
-    method public void onDestroyed(android.telecomm.Connection);
-    method public void onDisconnected(android.telecomm.Connection, int, java.lang.String);
-    method public void onHandleChanged(android.telecomm.Connection, android.net.Uri);
-    method public void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
-    method public void onRequestingRingback(android.telecomm.Connection, boolean);
-    method public void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
-    method public void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
-    method public void onStateChanged(android.telecomm.Connection, int);
   }
 
   public final class Connection.State {
@@ -27677,20 +27650,18 @@ package android.telecomm {
     method public final void abort(java.lang.String);
     method public final void answer(java.lang.String);
     method public final void call(android.telecomm.CallInfo);
-    method public void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
+    method public final void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
     method public final void disconnect(java.lang.String);
-    method public java.util.Collection<android.telecomm.Connection> getAllConnections();
+    method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
-    method public void lookupRemoteSubscriptions(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.Subscription>>);
-    method public void maybeRespondToSubscriptionLookup();
+    method public final void lookupRemoteSubscriptions(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.Subscription>>);
+    method public final void maybeRespondToSubscriptionLookup();
     method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
-    method public void onConnectionAdded(android.telecomm.Connection);
-    method public void onConnectionRemoved(android.telecomm.Connection);
-    method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
-    method public void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.Connection>);
-    method public void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
-    method public final void onPostDialContinue(java.lang.String, boolean);
-    method public final void onPostDialWait(android.telecomm.Connection, java.lang.String);
+    method protected void onConnectionAdded(android.telecomm.Connection);
+    method protected void onConnectionRemoved(android.telecomm.Connection);
+    method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
+    method protected void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.Connection>);
+    method protected void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
     method public final void playDtmfTone(java.lang.String, char);
     method public final void reject(java.lang.String);
     method public final void setIncomingCallId(java.lang.String, android.os.Bundle);
@@ -27766,6 +27737,7 @@ package android.telecomm {
   }
 
   public final class RemoteConnection {
+    method public void abort();
     method public void addListener(android.telecomm.RemoteConnection.Listener);
     method public void answer();
     method public void disconnect();
@@ -27776,23 +27748,17 @@ package android.telecomm {
     method public void postDialContinue(boolean);
     method public void reject();
     method public void removeListener(android.telecomm.RemoteConnection.Listener);
+    method public void setAudioState(android.telecomm.CallAudioState);
     method public void stopDtmf();
     method public void unhold();
   }
 
   public static abstract interface RemoteConnection.Listener {
-    method public abstract void onAudioStateChanged(android.telecomm.RemoteConnection, android.telecomm.CallAudioState);
     method public abstract void onDestroyed(android.telecomm.RemoteConnection);
     method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
-  }
-
-  public class RemoteConnectionService implements android.os.IBinder.DeathRecipient {
-    method public void binderDied();
-    method public void createOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
-    method public java.util.List<android.telecomm.Subscription> lookupSubscriptions(android.net.Uri);
   }
 
   public abstract interface Response {

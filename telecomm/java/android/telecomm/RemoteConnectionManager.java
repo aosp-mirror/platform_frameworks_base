@@ -57,7 +57,7 @@ public class RemoteConnectionManager {
 
     public void createOutgoingConnection(
             ConnectionRequest request,
-            final ConnectionService.OutgoingCallResponse response) {
+            final ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
         Subscription subscription = request.getSubscription();
         if (subscription == null) {
             throw new IllegalArgumentException("subscription must be specified.");

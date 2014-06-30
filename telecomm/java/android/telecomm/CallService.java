@@ -408,5 +408,4 @@ public abstract class CallService extends Service {
     public abstract void splitFromConference(String callId);
 
     public void onPostDialContinue(String callId, boolean proceed) {}
-    public void onPostDialWait(Connection conn, String remaining) {}
 }
