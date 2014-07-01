@@ -254,6 +254,7 @@
     <protected-broadcast
             android:name="android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED" />
     <protected-broadcast android:name="android.net.scoring.SCORE_NETWORKS" />
+    <protected-broadcast android:name="android.net.scoring.SCORER_CHANGED" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />

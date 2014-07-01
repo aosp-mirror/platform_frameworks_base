@@ -18,10 +18,12 @@ package com.android.server;
 
 import android.Manifest.permission;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
+import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
@@ -133,7 +135,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         // as scores should never be compared across apps; in practice, Settings should only be
         // allowing valid apps to be set as scorers, so failure here should be rare.
         clearInternal();
-        return NetworkScorerAppManager.setActiveScorer(mContext, packageName);
+        boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
+        if (result) {
+            Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
+            intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
+            mContext.sendBroadcast(intent);
+        }
+        return result;
     }
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */

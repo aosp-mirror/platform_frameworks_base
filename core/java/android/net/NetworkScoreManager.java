@@ -81,6 +81,13 @@ public class NetworkScoreManager {
     public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
 
     /**
+     * Extra used with {@link #ACTION_SCORE_NETWORKS} to specify the networks to be scored, as an
+     * array of {@link NetworkKey}s. Can be obtained with
+     * {@link android.content.Intent#getParcelableArrayExtra(String)}}.
+     */
+    public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
+
+    /**
      * Activity action: launch a custom activity for configuring a scorer before enabling it.
      * Scorer applications may choose to specify an activity for this action, in which case the
      * framework will launch that activity which should return RESULT_OK if scoring was enabled.
@@ -92,11 +99,24 @@ public class NetworkScoreManager {
     public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
 
     /**
-     * Extra used with {@link #ACTION_SCORE_NETWORKS} to specify the networks to be scored, as an
-     * array of {@link NetworkKey}s. Can be obtained with
-     * {@link android.content.Intent#getParcelableArrayExtra(String)}}.
+     * Broadcast action: the active scorer has been changed. Scorer apps may listen to this to
+     * perform initialization once selected as the active scorer, or clean up unneeded resources
+     * if another scorer has been selected. Note that it is unnecessary to clear existing scores as
+     * this is handled by the system.
+     *
+     * <p>The new scorer will be specified in {@link #EXTRA_NEW_SCORER}.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
      */
-    public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
+
+    /**
+     * Extra used with {@link #ACTION_SCORER_CHANGED} to specify the newly selected scorer's package
+     * name. Will be null if scoring was disabled. Can be obtained with
+     * {@link android.content.Intent#getStringExtra(String)}.
+     */
+    public static final String EXTRA_NEW_SCORER = "newScorer";
 
     private final Context mContext;
     private final INetworkScoreService mService;
