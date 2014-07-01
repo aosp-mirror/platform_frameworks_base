@@ -148,7 +148,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void updateScrims() {
-        if (!mKeyguardShowing || mAnimateKeyguardFadingOut) {
+        if ((!mKeyguardShowing && !mBouncerShowing) || mAnimateKeyguardFadingOut) {
             updateScrimNormal();
             setScrimInFrontColor(0);
         } else {
