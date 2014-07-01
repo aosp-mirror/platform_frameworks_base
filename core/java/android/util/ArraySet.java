@@ -372,7 +372,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * Perform a {@link #add(Object)} of all values in <var>array</var>
      * @param array The array whose contents are to be retrieved.
      */
-    public void putAll(ArraySet<? extends E> array) {
+    public void addAll(ArraySet<? extends E> array) {
         final int N = array.mSize;
         ensureCapacity(mSize + N);
         if (mSize == 0) {

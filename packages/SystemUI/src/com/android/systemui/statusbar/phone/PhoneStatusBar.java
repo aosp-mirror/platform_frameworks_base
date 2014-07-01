@@ -3182,7 +3182,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             final boolean updates = !mVisibleNotifications.containsAll(mNewVisibleNotifications);
             mVisibleNotifications.clear();
-            mVisibleNotifications.putAll(mNewVisibleNotifications);
+            mVisibleNotifications.addAll(mNewVisibleNotifications);
 
             // We have new notifications
             if (updates && mDozeServiceHost != null) {

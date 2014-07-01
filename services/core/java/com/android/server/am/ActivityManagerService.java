@@ -15020,7 +15020,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         int schedGroup;
         int procState;
         boolean foregroundActivities = false;
-        boolean interesting = false;
         BroadcastQueue queue;
         if (app == TOP_APP) {
             // The last app on the list is the foreground app.
@@ -15028,14 +15027,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "top-activity";
             foregroundActivities = true;
-            interesting = true;
             procState = ActivityManager.PROCESS_STATE_TOP;
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
-            interesting = true;
             procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
         } else if ((queue = isReceivingBroadcast(app)) != null) {
             // An app that is currently receiving a broadcast also
@@ -15149,10 +15146,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.adjSource = app.forcingToForeground;
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
-        }
-
-        if (app.foregroundServices) {
-            interesting = true;
         }
 
         if (app == mHeavyWeightProcess) {
