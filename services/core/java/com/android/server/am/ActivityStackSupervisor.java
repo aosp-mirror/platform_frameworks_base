@@ -1894,11 +1894,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
                         newTaskIntent != null ? newTaskIntent : intent,
-                        voiceSession, voiceInteractor, true), null, true);
+                        voiceSession, voiceInteractor, true), true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
-                r.setTask(reuseTask, reuseTask, true);
+                r.setTask(reuseTask, true);
             }
             if (!movedHome) {
                 if ((launchFlags &
@@ -1959,7 +1959,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            r.setTask(sourceTask, sourceRecord.thumbHolder, false);
+            r.setTask(sourceTask, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task + " from source " + sourceRecord);
 
@@ -1970,9 +1970,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack = adjustStackFocus(r, newTask);
             targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
-            r.setTask(prev != null ? prev.task
-                    : targetStack.createTaskRecord(getNextTaskId(), r.info, intent, null, null, true),
-                    null, true);
+            r.setTask(prev != null ? prev.task : targetStack.createTaskRecord(getNextTaskId(),
+                            r.info, intent, null, null, true), true);
             mWindowManager.moveTaskToTop(r.task.taskId);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);

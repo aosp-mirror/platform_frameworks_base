@@ -72,7 +72,7 @@ public class ActivityTestMain extends Activity {
 
     private void addThumbnail(LinearLayout container, Bitmap bm,
             final ActivityManager.RecentTaskInfo task,
-            final ActivityManager.TaskThumbnails thumbs, final int subIndex) {
+            final ActivityManager.TaskThumbnail thumbs) {
         ImageView iv = new ImageView(this);
         if (bm != null) {
             iv.setImageBitmap(bm);
@@ -86,9 +86,6 @@ public class ActivityTestMain extends Activity {
             @Override
             public void onClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    if (subIndex < (thumbs.numSubThumbbails-1)) {
-                        mAm.removeSubTask(task.id, subIndex+1);
-                    }
                     mAm.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME);
                 } else {
                     try {
@@ -104,11 +101,7 @@ public class ActivityTestMain extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    if (subIndex < 0) {
-                        mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                    } else {
-                        mAm.removeSubTask(task.id, subIndex);
-                    }
+                    mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
                     buildUi();
                     return true;
                 }
@@ -333,7 +326,7 @@ public class ActivityTestMain extends Activity {
         if (recents != null) {
             for (int i=0; i<recents.size(); i++) {
                 ActivityManager.RecentTaskInfo r = recents.get(i);
-                ActivityManager.TaskThumbnails tt = mAm.getTaskThumbnails(r.persistentId);
+                ActivityManager.TaskThumbnail tt = mAm.getTaskThumbnail(r.persistentId);
                 TextView tv = new TextView(this);
                 tv.setText(r.baseIntent.getComponent().flattenToShortString());
                 top.addView(tv, new LinearLayout.LayoutParams(
@@ -341,10 +334,7 @@ public class ActivityTestMain extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT));
                 LinearLayout item = new LinearLayout(this);
                 item.setOrientation(LinearLayout.HORIZONTAL);
-                addThumbnail(item, tt != null ? tt.mainThumbnail : null, r, tt, -1);
-                for (int j=0; j<tt.numSubThumbbails; j++) {
-                    addThumbnail(item, tt.getSubThumbnail(j), r, tt, j);
-                }
+                addThumbnail(item, tt != null ? tt.mainThumbnail : null, r, tt);
                 top.addView(item, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));

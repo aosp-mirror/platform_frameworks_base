@@ -2063,7 +2063,6 @@ final class ActivityStack {
                 // bottom of the activity stack.  This also keeps it
                 // correctly ordered with any activities we previously
                 // moved.
-                final ThumbnailHolder newThumbHolder;
                 final TaskRecord targetTask;
                 final ActivityRecord bottom =
                         !mTaskHistory.isEmpty() && !mTaskHistory.get(0).mActivities.isEmpty() ?
@@ -2074,19 +2073,15 @@ final class ActivityStack {
                     // same task affinity as the one we are moving,
                     // then merge it into the same task.
                     targetTask = bottom.task;
-                    newThumbHolder = bottom.thumbHolder == null ? targetTask : bottom.thumbHolder;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to bottom task " + bottom.task);
                 } else {
                     targetTask = createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
                             null, null, null, false);
-                    newThumbHolder = targetTask;
                     targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                             + " out to new task " + target.task);
                 }
-
-                target.thumbHolder = newThumbHolder;
 
                 final int targetTaskId = targetTask.taskId;
                 mWindowManager.setAppGroupId(target.appToken, targetTaskId);
@@ -2099,7 +2094,6 @@ final class ActivityStack {
                         continue;
                     }
 
-                    ThumbnailHolder curThumbHolder = p.thumbHolder;
                     canMoveOptions = false;
                     if (noOptions && topOptions == null) {
                         topOptions = p.takeOptionsLocked();
@@ -2112,7 +2106,7 @@ final class ActivityStack {
                             + " Callers=" + Debug.getCallers(4));
                     if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
                             + " out to target's task " + target.task);
-                    p.setTask(targetTask, curThumbHolder, false);
+                    p.setTask(targetTask, false);
                     targetTask.addActivityAtBottom(p);
 
                     mWindowManager.setAppGroupId(p.appToken, targetTaskId);
@@ -2243,7 +2237,7 @@ final class ActivityStack {
                             + start + "-" + i + " to task=" + task + ":" + taskInsertionPoint);
                     for (int srcPos = start; srcPos >= i; --srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
-                        p.setTask(task, null, false);
+                        p.setTask(task, false);
                         task.addActivityAtIndex(taskInsertionPoint, p);
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
@@ -3626,8 +3620,8 @@ final class ActivityStack {
             ci.topActivity = top.intent.getComponent();
             ci.lastActiveTime = task.lastActiveTime;
 
-            if (top.thumbHolder != null) {
-                ci.description = top.thumbHolder.lastDescription;
+            if (top.task != null) {
+                ci.description = top.task.lastDescription;
             }
             ci.numActivities = numActivities;
             ci.numRunning = numRunning;

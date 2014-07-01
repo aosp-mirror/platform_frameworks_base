@@ -548,28 +548,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GET_TASK_THUMBNAILS_TRANSACTION: {
+        case GET_TASK_THUMBNAIL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int id = data.readInt();
-            ActivityManager.TaskThumbnails bm = getTaskThumbnails(id);
+            ActivityManager.TaskThumbnail taskThumbnail = getTaskThumbnail(id);
             reply.writeNoException();
-            if (bm != null) {
+            if (taskThumbnail != null) {
                 reply.writeInt(1);
-                bm.writeToParcel(reply, 0);
-            } else {
-                reply.writeInt(0);
-            }
-            return true;
-        }
-
-        case GET_TASK_TOP_THUMBNAIL_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            int id = data.readInt();
-            Bitmap bm = getTaskTopThumbnail(id);
-            reply.writeNoException();
-            if (bm != null) {
-                reply.writeInt(1);
-                bm.writeToParcel(reply, 0);
+                taskThumbnail.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             } else {
                 reply.writeInt(0);
             }
@@ -1799,17 +1785,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case REMOVE_SUB_TASK_TRANSACTION:
-        {
-            data.enforceInterface(IActivityManager.descriptor);
-            int taskId = data.readInt();
-            int subTaskIndex = data.readInt();
-            boolean result = removeSubTask(taskId, subTaskIndex);
-            reply.writeNoException();
-            reply.writeInt(result ? 1 : 0);
-            return true;
-        }
-
         case REMOVE_TASK_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -2773,35 +2748,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return list;
     }
-    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) throws RemoteException {
+    public ActivityManager.TaskThumbnail getTaskThumbnail(int id) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(id);
-        mRemote.transact(GET_TASK_THUMBNAILS_TRANSACTION, data, reply, 0);
+        mRemote.transact(GET_TASK_THUMBNAIL_TRANSACTION, data, reply, 0);
         reply.readException();
-        ActivityManager.TaskThumbnails bm = null;
+        ActivityManager.TaskThumbnail taskThumbnail = null;
         if (reply.readInt() != 0) {
-            bm = ActivityManager.TaskThumbnails.CREATOR.createFromParcel(reply);
+            taskThumbnail = ActivityManager.TaskThumbnail.CREATOR.createFromParcel(reply);
         }
         data.recycle();
         reply.recycle();
-        return bm;
-    }
-    public Bitmap getTaskTopThumbnail(int id) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(id);
-        mRemote.transact(GET_TASK_TOP_THUMBNAIL_TRANSACTION, data, reply, 0);
-        reply.readException();
-        Bitmap bm = null;
-        if (reply.readInt() != 0) {
-            bm = Bitmap.CREATOR.createFromParcel(reply);
-        }
-        data.recycle();
-        reply.recycle();
-        return bm;
+        return taskThumbnail;
     }
     public List getServices(int maxNum, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -4511,20 +4471,6 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(GET_RUNNING_USER_IDS_TRANSACTION, data, reply, 0);
         reply.readException();
         int[] result = reply.createIntArray();
-        reply.recycle();
-        data.recycle();
-        return result;
-    }
-
-    public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(taskId);
-        data.writeInt(subTaskIndex);
-        mRemote.transact(REMOVE_SUB_TASK_TRANSACTION, data, reply, 0);
-        reply.readException();
-        boolean result = reply.readInt() != 0;
         reply.recycle();
         data.recycle();
         return result;

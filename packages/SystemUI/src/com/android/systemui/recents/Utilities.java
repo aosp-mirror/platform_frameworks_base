@@ -16,10 +16,15 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.ParcelFileDescriptor;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -89,5 +94,22 @@ public class Utilities {
     public static void setShadowProperty(String property, String value)
             throws IllegalAccessException, InvocationTargetException {
         sPropertyMethod.invoke(null, property, value);
+    }
+
+    /** Retrieves a task thumbnail from the activity manager */
+    public static Bitmap getThumbnail(ActivityManager activityManager, int taskId) {
+        ActivityManager.TaskThumbnail taskThumbnail = activityManager.getTaskThumbnail(taskId);
+        Bitmap thumbnail = taskThumbnail.mainThumbnail;
+        final ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
+        if (thumbnail == null && descriptor != null) {
+            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor());
+        }
+        if (descriptor != null) {
+            try {
+                descriptor.close();
+            } catch (IOException e) {
+            }
+        }
+        return thumbnail;
     }
 }

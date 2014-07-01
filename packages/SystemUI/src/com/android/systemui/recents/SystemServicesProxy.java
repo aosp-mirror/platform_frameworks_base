@@ -208,7 +208,7 @@ public class SystemServicesProxy {
             return thumbnail;
         }
 
-        Bitmap thumbnail = mAm.getTaskTopThumbnail(taskId);
+        Bitmap thumbnail = Utilities.getThumbnail(mAm, taskId);
         if (thumbnail != null) {
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
