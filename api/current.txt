@@ -35383,6 +35383,7 @@ package android.webkit {
     method public abstract long getResources();
     method public abstract void grant(long);
     field public static final long RESOURCE_AUDIO_CAPTURE = 4L; // 0x4L
+    field public static final long RESOURCE_GEOLOCATION = 1L; // 0x1L
     field public static final long RESOURCE_PROTECTED_MEDIA_ID = 8L; // 0x8L
     field public static final long RESOURCE_VIDEO_CAPTURE = 2L; // 0x2L
   }

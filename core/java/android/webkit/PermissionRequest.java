@@ -28,7 +28,6 @@ import android.net.Uri;
 public interface PermissionRequest {
     /**
      * Resource belongs to geolocation service.
-     * @hide - see b/14668406
      */
     public final static long RESOURCE_GEOLOCATION = 1 << 0;
     /**
