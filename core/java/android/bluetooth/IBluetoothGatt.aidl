@@ -38,6 +38,7 @@ interface IBluetoothGatt {
     void startScanWithFilters(in int appIf, in boolean isServer,
                               in ScanSettings settings, in List<ScanFilter> filters);
     void stopScan(in int appIf, in boolean isServer);
+    void flushPendingBatchResults(in int appIf, in boolean isServer);
     void startMultiAdvertising(in int appIf,
                                in AdvertisementData advertiseData,
                                in AdvertisementData scanResponse,

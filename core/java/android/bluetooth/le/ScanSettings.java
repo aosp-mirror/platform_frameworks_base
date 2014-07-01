@@ -44,7 +44,6 @@ public final class ScanSettings implements Parcelable {
     public static final int CALLBACK_TYPE_ON_UPDATE = 0;
     /**
      * Callback when a bluetooth advertisement is found for the first time.
-     *
      * @hide
      */
     public static final int CALLBACK_TYPE_ON_FOUND = 1;
@@ -190,6 +189,7 @@ public final class ScanSettings implements Parcelable {
          *            {@link ScanSettings#SCAN_RESULT_TYPE_FULL} or
          *            {@link ScanSettings#SCAN_RESULT_TYPE_TRUNCATED}.
          * @throws IllegalArgumentException If the {@code scanResultType} is invalid.
+         *
          * @hide
          */
         public Builder setScanResultType(int scanResultType) {

@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -626,6 +627,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
+            }
+
+            @Override
+            public void onBatchScanResults(List<ScanResult> results) {
+                // no op
             }
         };
 
