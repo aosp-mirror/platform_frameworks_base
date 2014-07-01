@@ -27759,7 +27759,6 @@ package android.telecomm {
 
   public class RemoteCallVideoProvider implements android.os.IBinder.DeathRecipient {
     method public void binderDied();
-    method public void onSetPauseImage(java.lang.String) throws android.os.RemoteException;
     method public void requestCallDataUsage() throws android.os.RemoteException;
     method public void requestCameraCapabilities() throws android.os.RemoteException;
     method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
@@ -27768,6 +27767,7 @@ package android.telecomm {
     method public void setCamera(java.lang.String) throws android.os.RemoteException;
     method public void setDeviceOrientation(int) throws android.os.RemoteException;
     method public void setDisplaySurface(android.view.Surface) throws android.os.RemoteException;
+    method public void setPauseImage(java.lang.String) throws android.os.RemoteException;
     method public void setPreviewSurface(android.view.Surface) throws android.os.RemoteException;
     method public void setZoom(float) throws android.os.RemoteException;
   }
