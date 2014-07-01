@@ -40,6 +40,19 @@ public class TtsEnginesTests extends InstrumentationTestCase {
                 TtsEngines.toOldLocaleStringFormat(new Locale("foo")));
     }
 
+    public void testNormalizeLocale() {
+        assertEquals(Locale.UK,
+                TtsEngines.normalizeTTSLocale(new Locale("eng", "gbr")));
+        assertEquals(Locale.UK,
+                TtsEngines.normalizeTTSLocale(new Locale("eng", "GBR")));
+        assertEquals(Locale.GERMANY,
+                TtsEngines.normalizeTTSLocale(new Locale("deu", "deu")));
+        assertEquals(Locale.GERMAN,
+                TtsEngines.normalizeTTSLocale(new Locale("deu")));
+        assertEquals(new Locale("yyy", "DE"),
+                TtsEngines.normalizeTTSLocale(new Locale("yyy", "DE")));
+    }
+
     public void testGetLocalePrefForEngine() {
         assertEquals(new Locale("en", "US"),
                 mTtsHelper.getLocalePrefForEngine("foo","foo:en-US"));

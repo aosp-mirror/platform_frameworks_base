@@ -36,6 +36,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -102,6 +104,12 @@ public class TextToSpeech {
      * Denotes a failure caused by an invalid request.
      */
     public static final int ERROR_INVALID_REQUEST = -8;
+
+    /**
+     * Denotes a failure caused by an unfinished download of the voice data.
+     * @see Engine#KEY_FEATURE_NOT_INSTALLED
+     */
+    public static final int ERROR_NOT_INSTALLED_YET = -9;
 
     /**
      * Queue mode where all entries in the playback queue (media to be played
@@ -478,6 +486,11 @@ public class TextToSpeech {
         /**
          * @hide
          */
+        public static final String KEY_PARAM_VOICE_NAME = "voiceName";
+
+        /**
+         * @hide
+         */
         public static final String KEY_PARAM_LANGUAGE = "language";
 
         /**
@@ -550,7 +563,13 @@ public class TextToSpeech {
          * @see TextToSpeech#speak(String, int, java.util.HashMap)
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
+         *
+         * @deprecated Starting from API level 20, to select network synthesis, call
+         * ({@link TextToSpeech#getVoices()}, find a suitable network voice
+         * ({@link Voice#getRequiresNetworkConnection()}) and pass it
+         * to {@link TextToSpeech#setVoice(Voice)}).
          */
+        @Deprecated
         public static final String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
 
         /**
@@ -562,7 +581,13 @@ public class TextToSpeech {
          * @see TextToSpeech#speak(String, int, java.util.HashMap)
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
+
+         * @deprecated Starting from API level 20, to select embedded synthesis, call
+         * ({@link TextToSpeech#getVoices()}, find a suitable embedded voice
+         * ({@link Voice#getRequiresNetworkConnection()}) and pass it
+         * to {@link TextToSpeech#setVoice(Voice)}).
          */
+        @Deprecated
         public static final String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
 
         /**
@@ -575,6 +600,43 @@ public class TextToSpeech {
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_SESSION_ID = "sessionId";
+
+        /**
+         * Feature key that indicates that the voice may need to download additional data to be fully
+         * functional. The download will be triggered by calling
+         * {@link TextToSpeech#setVoice(Voice)} or {@link TextToSpeech#setLanguage(Locale)}.
+         * Until download is complete, each synthesis request will either report
+         * {@link TextToSpeech#ERROR_NOT_INSTALLED_YET} error, or use a different voice to synthesize
+         * the request. This feature should NOT be used as a key of a request parameter.
+         *
+         * @see TextToSpeech#getFeatures(java.util.Locale)
+         * @see Voice#getFeatures()
+         */
+        public static final String KEY_FEATURE_NOT_INSTALLED = "notInstalled";
+
+        /**
+         * Feature key that indicate that a network timeout can be set for the request. If set and
+         * supported as per {@link TextToSpeech#getFeatures(Locale)} or {@link Voice#getFeatures()},
+         * it can be used as request parameter to set the maximum allowed time for a single
+         * request attempt, in milliseconds, before synthesis fails. When used as a key of
+         * a request parameter, its value should be a string with an integer value.
+         *
+         * @see TextToSpeech#getFeatures(java.util.Locale)
+         * @see Voice#getFeatures()
+         */
+        public static final String KEY_FEATURE_NETWORK_TIMEOUT_MS = "networkTimeoutMs";
+
+        /**
+         * Feature key that indicates that network request retries count can be set for the request.
+         * If set and supported as per {@link TextToSpeech#getFeatures(Locale)} or
+         * {@link Voice#getFeatures()}, it can be used as a request parameter to set the
+         * number of network request retries that are attempted in case of failure. When used as
+         * a key of a request parameter, its value should be a string with an integer value.
+         *
+         * @see TextToSpeech#getFeatures(java.util.Locale)
+         * @see Voice#getFeatures()
+         */
+        public static final String KEY_FEATURE_NETWORK_RETRIES_COUNT = "networkRetriesCount";
     }
 
     private final Context mContext;
@@ -596,7 +658,6 @@ public class TextToSpeech {
     private final Map<CharSequence, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
-    private final String mPackageName;
     private volatile String mCurrentEngine = null;
 
     /**
@@ -648,11 +709,6 @@ public class TextToSpeech {
         mUtteranceProgressListener = null;
 
         mEnginesHelper = new TtsEngines(mContext);
-        if (packageName != null) {
-            mPackageName = packageName;
-        } else {
-            mPackageName = mContext.getPackageName();
-        }
         initTts();
     }
 
@@ -1186,12 +1242,16 @@ public class TextToSpeech {
      * {@link TextToSpeech#speak(String, int, java.util.HashMap)} and
      * {@link TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)}.
      *
-     * Features are boolean flags, and their values in the synthesis parameters
-     * must be behave as per {@link Boolean#parseBoolean(String)}.
+     * Features values are strings and their values must meet restrictions described in their
+     * documentation.
      *
      * @param locale The locale to query features for.
      * @return Set instance. May return {@code null} on error.
+     * @deprecated As of API level 20, please use voices. In order to query features of the voice,
+     * call {@link #getVoices()} to retrieve the list of available voices and
+     * {@link Voice#getFeatures()} to retrieve the set of features.
      */
+    @Deprecated
     public Set<String> getFeatures(final Locale locale) {
         return runAction(new Action<Set<String>>() {
             @Override
@@ -1308,9 +1368,15 @@ public class TextToSpeech {
      * Returns a Locale instance describing the language currently being used as the default
      * Text-to-speech language.
      *
+     * The locale object returned by this method is NOT a valid one. It has identical form to the
+     * one in {@link #getLanguage()}. Please refer to {@link #getLanguage()} for more information.
+     *
      * @return language, country (if any) and variant (if any) used by the client stored in a
      *     Locale instance, or {@code null} on error.
+     * @deprecated As of API Level 20, use <code>getDefaultVoice().getLocale()</code> ({@link
+     *   #getDefaultVoice()})
      */
+    @Deprecated
     public Locale getDefaultLanguage() {
         return runAction(new Action<Locale>() {
             @Override
@@ -1328,6 +1394,9 @@ public class TextToSpeech {
      * language as represented by the Locale, but there is no guarantee that the exact same Locale
      * will be used. Use {@link #isLanguageAvailable(Locale)} to check the level of support
      * before choosing the language to use for the next utterances.
+     *
+     * This method sets the current voice to the default one for the given Locale;
+     * {@link #getVoice()} can be used to retrieve it.
      *
      * @param loc The locale describing the language to be used.
      *
@@ -1359,12 +1428,12 @@ public class TextToSpeech {
 
                 String variant = loc.getVariant();
 
-                // Check if the language, country, variant are available, and cache
-                // the available parts.
-                // Note that the language is not actually set here, instead it is cached so it
-                // will be associated with all upcoming utterances.
+                // As of API level 20, setLanguage is implemented using setVoice.
+                // (which, in the default implementation, will call loadLanguage on the service
+                // interface).
 
-                int result = service.loadLanguage(getCallerIdentity(), language, country, variant);
+                // Sanitize locale using isLanguageAvailable.
+                int result = service.isLanguageAvailable( language, country, variant);
                 if (result >= LANG_AVAILABLE){
                     if (result < LANG_COUNTRY_VAR_AVAILABLE) {
                         variant = "";
@@ -1372,6 +1441,20 @@ public class TextToSpeech {
                             country = "";
                         }
                     }
+                    // Get the default voice for the locale.
+                    String voiceName = service.getDefaultVoiceNameFor(language, country, variant);
+                    if (TextUtils.isEmpty(voiceName)) {
+                        Log.w(TAG, "Couldn't find the default voice for " + language + "/" +
+                                country + "/" + variant);
+                        return LANG_NOT_SUPPORTED;
+                    }
+
+                    // Load it.
+                    if (service.loadVoice(getCallerIdentity(), voiceName) == TextToSpeech.ERROR) {
+                        return LANG_NOT_SUPPORTED;
+                    }
+
+                    mParams.putString(Engine.KEY_PARAM_VOICE_NAME, voiceName);
                     mParams.putString(Engine.KEY_PARAM_LANGUAGE, language);
                     mParams.putString(Engine.KEY_PARAM_COUNTRY, country);
                     mParams.putString(Engine.KEY_PARAM_VARIANT, variant);
@@ -1393,9 +1476,21 @@ public class TextToSpeech {
      * used for the synthesis requests sent from this client. That is the last language set
      * by a {@link TextToSpeech#setLanguage} call on this instance.
      *
+     * If a voice is set (by {@link #setVoice(Voice)}), getLanguage will return the language of
+     * the currently set voice.
+     *
+     * Please note that the Locale object returned by this method is NOT a valid Locale object. Its
+     * language field contains a three-letter ISO 639-2/T code (where a proper Locale would use
+     * a two-letter ISO 639-1 code), and the country field contains a three-letter ISO 3166 country
+     * code (where a proper Locale would use a two-letter ISO 3166-1 code).
+     *
      * @return language, country (if any) and variant (if any) used by the client stored in a
      *     Locale instance, or {@code null} on error.
+     *
+     * @deprecated As of API level 20, please use <code>getVoice().getLocale()</code>
+     * ({@link #getVoice()}).
      */
+    @Deprecated
     public Locale getLanguage() {
         return runAction(new Action<Locale>() {
             @Override
@@ -1409,6 +1504,178 @@ public class TextToSpeech {
             }
         }, null, "getLanguage");
     }
+
+    /**
+     * Query the engine about the set of available languages.
+     */
+    public Set<Locale> getAvailableLanguages() {
+        return runAction(new Action<Set<Locale>>() {
+            @Override
+            public Set<Locale> run(ITextToSpeechService service) throws RemoteException {
+                List<Voice> voices = service.getVoices();
+                if (voices != null) {
+                    return new TreeSet<Locale>();
+                }
+                TreeSet<Locale> locales = new TreeSet<Locale>();
+                for (Voice voice : voices) {
+                    locales.add(voice.getLocale());
+                }
+                return locales;
+            }
+        }, null, "getAvailableLanguages");
+    }
+
+    /**
+     * Query the engine about the set of available voices.
+     *
+     * Each TTS Engine can expose multiple voices for each locale, each with a different set of
+     * features.
+     *
+     * @see #setVoice(Voice)
+     * @see Voice
+     */
+    public Set<Voice> getVoices() {
+        return runAction(new Action<Set<Voice>>() {
+            @Override
+            public Set<Voice> run(ITextToSpeechService service) throws RemoteException {
+                List<Voice> voices = service.getVoices();
+                return (voices != null)  ? new TreeSet<Voice>(voices) : new TreeSet<Voice>();
+            }
+        }, null, "getVoices");
+    }
+
+    /**
+     * Sets the text-to-speech voice.
+     *
+     * @param voice One of objects returned by {@link #getVoices()}.
+     *
+     * @return {@link #ERROR} or {@link #SUCCESS}.
+     *
+     * @see #getVoices
+     * @see Voice
+     */
+    public int setVoice(final Voice voice) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                int result = service.loadVoice(getCallerIdentity(), voice.getName());
+                if (result == SUCCESS) {
+                    mParams.putString(Engine.KEY_PARAM_VOICE_NAME, voice.getName());
+
+                    // Set the language/country/variant, so #getLanguage will return the voice
+                    // locale when called.
+                    String language = "";
+                    try {
+                        language = voice.getLocale().getISO3Language();
+                    } catch (MissingResourceException e) {
+                        Log.w(TAG, "Couldn't retrieve ISO 639-2/T language code for locale: " +
+                                voice.getLocale(), e);
+                    }
+
+                    String country = "";
+                    try {
+                        country = voice.getLocale().getISO3Country();
+                    } catch (MissingResourceException e) {
+                        Log.w(TAG, "Couldn't retrieve ISO 3166 country code for locale: " +
+                                voice.getLocale(), e);
+                    }
+                    mParams.putString(Engine.KEY_PARAM_LANGUAGE, language);
+                    mParams.putString(Engine.KEY_PARAM_COUNTRY, country);
+                    mParams.putString(Engine.KEY_PARAM_VARIANT, voice.getLocale().getVariant());
+                }
+                return result;
+            }
+        }, LANG_NOT_SUPPORTED, "setVoice");
+    }
+
+    /**
+     * Returns a Voice instance describing the voice currently being used for synthesis
+     * requests sent to the TextToSpeech engine.
+     *
+     * @return Voice instance used by the client, or {@code null} if not set or on error.
+     *
+     * @see #getVoices
+     * @see #setVoice
+     * @see Voice
+     */
+    public Voice getVoice() {
+        return runAction(new Action<Voice>() {
+            @Override
+            public Voice run(ITextToSpeechService service) throws RemoteException {
+                String voiceName = mParams.getString(Engine.KEY_PARAM_VOICE_NAME, "");
+                if (TextUtils.isEmpty(voiceName)) {
+                    return null;
+                }
+                List<Voice> voices = service.getVoices();
+                if (voices == null) {
+                    return null;
+                }
+                for (Voice voice : voices) {
+                    if (voice.getName().equals(voiceName)) {
+                        return voice;
+                    }
+                }
+                return null;
+            }
+        }, null, "getVoice");
+    }
+
+    /**
+     * Returns a Voice instance that's the default voice for the default Text-to-speech language.
+     * @return The default voice instance for the default language, or {@code null} if not set or
+     *     on error.
+     */
+    public Voice getDefaultVoice() {
+        return runAction(new Action<Voice>() {
+            @Override
+            public Voice run(ITextToSpeechService service) throws RemoteException {
+
+                String[] defaultLanguage = service.getClientDefaultLanguage();
+
+                if (defaultLanguage == null || defaultLanguage.length == 0) {
+                    Log.e(TAG, "service.getClientDefaultLanguage() returned empty array");
+                    return null;
+                }
+                String language = defaultLanguage[0];
+                String country = (defaultLanguage.length > 1) ? defaultLanguage[1] : "";
+                String variant = (defaultLanguage.length > 2) ? defaultLanguage[2] : "";
+
+                // Sanitize the locale using isLanguageAvailable.
+                int result = service.isLanguageAvailable(language, country, variant);
+                if (result >= LANG_AVAILABLE){
+                    if (result < LANG_COUNTRY_VAR_AVAILABLE) {
+                        variant = "";
+                        if (result < LANG_COUNTRY_AVAILABLE) {
+                            country = "";
+                        }
+                    }
+                } else {
+                    // The default language is not supported.
+                    return null;
+                }
+
+                // Get the default voice name
+                String voiceName = service.getDefaultVoiceNameFor(language, country, variant);
+                if (TextUtils.isEmpty(voiceName)) {
+                    return null;
+                }
+
+                // Find it
+                List<Voice> voices = service.getVoices();
+                if (voices == null) {
+                    return null;
+                }
+                for (Voice voice : voices) {
+                    if (voice.getName().equals(voiceName)) {
+                        return voice;
+                    }
+                }
+                return null;
+            }
+        }, null, "getDefaultVoice");
+    }
+
+
 
     /**
      * Checks if the specified language as represented by the Locale is available and supported.
@@ -1538,6 +1805,8 @@ public class TextToSpeech {
             // Copy feature strings defined by the framework.
             copyStringParam(bundle, params, Engine.KEY_FEATURE_NETWORK_SYNTHESIS);
             copyStringParam(bundle, params, Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS);
+            copyIntParam(bundle, params, Engine.KEY_FEATURE_NETWORK_TIMEOUT_MS);
+            copyIntParam(bundle, params, Engine.KEY_FEATURE_NETWORK_RETRIES_COUNT);
 
             // Copy over all parameters that start with the name of the
             // engine that we are currently connected to. The engine is
@@ -1653,6 +1922,7 @@ public class TextToSpeech {
      * by the calling application. As of the Ice cream sandwich release,
      * user settings never forcibly override the app's settings.
      */
+    @Deprecated
     public boolean areDefaultsEnforced() {
         return false;
     }
