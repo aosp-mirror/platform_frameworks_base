@@ -111,6 +111,7 @@ import java.io.RandomAccessFile;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -129,6 +130,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
@@ -144,6 +146,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import libcore.io.IoUtils;
 
 public class BackupManagerService extends IBackupManager.Stub {
 
@@ -181,6 +185,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
+    static final String SETTINGS_PACKAGE = "com.android.providers.settings";
     static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
     static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
@@ -547,6 +552,26 @@ public class BackupManagerService extends IBackupManager.Stub {
         return token;
     }
 
+    // High level policy: apps are ineligible for backup if certain conditions apply
+    public static boolean appIsEligibleForBackup(ApplicationInfo app) {
+        // 1. their manifest states android:allowBackup="false"
+        if ((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+            return false;
+        }
+
+        // 2. they run as a system-level uid but do not supply their own backup agent
+        if ((app.uid < Process.FIRST_APPLICATION_UID) && (app.backupAgentName == null)) {
+            return false;
+        }
+
+        // 3. it is the special shared-storage backup package used for 'adb backup'
+        if (app.packageName.equals(BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE)) {
+            return false;
+        }
+
+        return true;
+    }
+
     // ----- Asynchronous backup/restore handler thread -----
 
     private class BackupHandler extends Handler {
@@ -676,9 +701,8 @@ public class BackupManagerService extends IBackupManager.Stub {
             {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
-                PerformRestoreTask task = new PerformRestoreTask(
-                        params.transport, params.dirName, params.observer,
-                        params.token, params.pkgInfo, params.pmToken,
+                BackupRestoreTask task = new PerformUnifiedRestoreTask(params.transport,
+                        params.observer, params.token, params.pkgInfo, params.pmToken,
                         params.isSystemRestore, params.filterSet);
                 Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
                 sendMessage(restoreMsg);
@@ -690,7 +714,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // TODO: refactor full restore to be a looper-based state machine
                 // similar to normal backup/restore.
                 FullRestoreParams params = (FullRestoreParams)msg.obj;
-                PerformFullRestoreTask task = new PerformFullRestoreTask(params.fd,
+                PerformAdbRestoreTask task = new PerformAdbRestoreTask(params.fd,
                         params.curPassword, params.encryptPassword,
                         params.observer, params.latch);
                 (new Thread(task, "adb-restore")).start();
@@ -1089,7 +1113,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void initPackageTracking() {
-        if (DEBUG) Slog.v(TAG, "Initializing package tracking");
+        if (MORE_DEBUG) Slog.v(TAG, "` tracking");
 
         // Remember our ancestral dataset
         mTokenFile = new File(mBaseStateDir, "ancestral");
@@ -1193,7 +1217,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     in = new RandomAccessFile(f, "r");
                     while (true) {
                         String packageName = in.readUTF();
-                        Slog.i(TAG, "  " + packageName);
+                        if (MORE_DEBUG) Slog.i(TAG, "  " + packageName);
                         dataChangedImpl(packageName);
                     }
                 } catch (EOFException e) {
@@ -1646,12 +1670,12 @@ public class BackupManagerService extends IBackupManager.Stub {
         // Look for apps that define the android:backupAgent attribute
         List<PackageInfo> targetApps = allAgentPackages();
         if (packageNames != null) {
-            if (DEBUG) Slog.v(TAG, "addPackageParticipantsLocked: #" + packageNames.length);
+            if (MORE_DEBUG) Slog.v(TAG, "addPackageParticipantsLocked: #" + packageNames.length);
             for (String packageName : packageNames) {
                 addPackageParticipantsLockedInner(packageName, targetApps);
             }
         } else {
-            if (DEBUG) Slog.v(TAG, "addPackageParticipantsLocked: all");
+            if (MORE_DEBUG) Slog.v(TAG, "addPackageParticipantsLocked: all");
             addPackageParticipantsLockedInner(null, targetApps);
         }
     }
@@ -1674,7 +1698,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (MORE_DEBUG) Slog.v(TAG, "Agent found; added");
 
                 // Schedule a backup for it on general principles
-                if (DEBUG) Slog.i(TAG, "Scheduling backup for new app " + pkg.packageName);
+                if (MORE_DEBUG) Slog.i(TAG, "Scheduling backup for new app " + pkg.packageName);
                 dataChangedImpl(pkg.packageName);
             }
         }
@@ -1687,7 +1711,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             return;
         }
 
-        if (DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: uid=" + oldUid
+        if (MORE_DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: uid=" + oldUid
                 + " #" + packageNames.length);
         for (String pkg : packageNames) {
             // Known previous UID, so we know which package set to check
@@ -1732,7 +1756,9 @@ public class BackupManagerService extends IBackupManager.Stub {
                     packages.remove(a);
                 }
                 else {
-                    // we will need the shared library path, so look that up and store it here
+                    // we will need the shared library path, so look that up and store it here.
+                    // This is used implicitly when we pass the PackageInfo object off to
+                    // the Activity Manager to launch the app for backup/restore purposes.
                     app = mPackageManager.getApplicationInfo(pkg.packageName,
                             PackageManager.GET_SHARED_LIBRARY_FILES);
                     pkg.applicationInfo.sharedLibraryFiles = app.sharedLibraryFiles;
@@ -2155,7 +2181,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // step even if we're selecting among various transports at run time.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
                     PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                            mPackageManager, allAgentPackages());
+                            mPackageManager);
                     mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
                             IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
                     addBackupTrace("PMBA invoke: " + mStatus);
@@ -2337,7 +2363,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             // Only once we're entirely finished do we release the wakelock
             clearBackupTrace();
-            Slog.i(TAG, "Backup pass finished.");
+            Slog.i(BackupManagerService.TAG, "Backup pass finished.");
             mWakelock.release();
         }
 
@@ -3262,23 +3288,13 @@ public class BackupManagerService extends IBackupManager.Stub {
                 addPackagesToSet(packagesToBackup, mPackages);
             }
 
-            // Now we cull any inapplicable / inappropriate packages from the set
+            // Now we cull any inapplicable / inappropriate packages from the set.  This
+            // includes the special shared-storage agent package; we handle that one
+            // explicitly at the end of the backup pass.
             Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
             while (iter.hasNext()) {
                 PackageInfo pkg = iter.next().getValue();
-                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
-                        || pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
-                    // Cull any packages that have indicated that backups are not permitted, as well
-                    // as any explicit mention of the 'special' shared-storage agent package (we
-                    // handle that one at the end).
-                    iter.remove();
-                } else if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
-                        && (pkg.applicationInfo.backupAgentName == null)) {
-                    // Cull any packages that run as system-domain uids but do not define their
-                    // own backup agents
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "... ignoring non-agent system package " + pkg.packageName);
-                    }
+                if (!appIsEligibleForBackup(pkg.applicationInfo)) {
                     iter.remove();
                 }
             }
@@ -3619,6 +3635,51 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // ----- Restore infrastructure -----
+
+    abstract class RestoreEngine {
+        static final String TAG = "RestoreEngine";
+
+        public static final int SUCCESS = 0;
+        public static final int TARGET_FAILURE = -2;
+        public static final int TRANSPORT_FAILURE = -3;
+
+        private AtomicBoolean mRunning = new AtomicBoolean(false);
+        private AtomicInteger mResult = new AtomicInteger(SUCCESS);
+
+        public boolean isRunning() {
+            return mRunning.get();
+        }
+
+        public void setRunning(boolean stillRunning) {
+            synchronized (mRunning) {
+                mRunning.set(stillRunning);
+                mRunning.notifyAll();
+            }
+        }
+
+        public int waitForResult() {
+            synchronized (mRunning) {
+                while (isRunning()) {
+                    try {
+                        mRunning.wait();
+                    } catch (InterruptedException e) {}
+                }
+            }
+            return getResult();
+        }
+
+        public int getResult() {
+            return mResult.get();
+        }
+
+        public void setResult(int result) {
+            mResult.set(result);
+        }
+
+        // TODO: abstract restore state and APIs
+    }
+
     // ----- Full restore from a file/socket -----
 
     // Description of a file in the restore datastream
@@ -3651,7 +3712,1149 @@ public class BackupManagerService extends IBackupManager.Stub {
         ACCEPT_IF_APK
     }
 
-    class PerformFullRestoreTask implements Runnable {
+    // Full restore engine, used by both adb restore and transport-based full restore
+    class FullRestoreEngine extends RestoreEngine {
+        // Dedicated observer, if any
+        IFullBackupRestoreObserver mObserver;
+
+        // Where we're delivering the file data as we go
+        IBackupAgent mAgent;
+
+        // Are we permitted to only deliver a specific package's metadata?
+        PackageInfo mOnlyPackage;
+
+        boolean mAllowApks;
+        boolean mAllowObbs;
+
+        // Which package are we currently handling data for?
+        String mAgentPackage;
+
+        // Info for working with the target app process
+        ApplicationInfo mTargetApp;
+
+        // Machinery for restoring OBBs
+        FullBackupObbConnection mObbConnection = null;
+
+        // possible handling states for a given package in the restore dataset
+        final HashMap<String, RestorePolicy> mPackagePolicies
+                = new HashMap<String, RestorePolicy>();
+
+        // installer package names for each encountered app, derived from the manifests
+        final HashMap<String, String> mPackageInstallers = new HashMap<String, String>();
+
+        // Signatures for a given package found in its manifest file
+        final HashMap<String, Signature[]> mManifestSignatures
+                = new HashMap<String, Signature[]>();
+
+        // Packages we've already wiped data on when restoring their first file
+        final HashSet<String> mClearedPackages = new HashSet<String>();
+
+        // How much data have we moved?
+        long mBytes;
+
+        // Working buffer
+        byte[] mBuffer;
+
+        // Pipes for moving data
+        ParcelFileDescriptor[] mPipes = null;
+
+        // Widget blob to be restored out-of-band
+        byte[] mWidgetData = null;
+
+        // Runner that can be placed in a separate thread to do in-process
+        // invocations of the full restore API asynchronously
+        class RestoreFileRunnable implements Runnable {
+            IBackupAgent mAgent;
+            FileMetadata mInfo;
+            ParcelFileDescriptor mSocket;
+            int mToken;
+
+            RestoreFileRunnable(IBackupAgent agent, FileMetadata info,
+                    ParcelFileDescriptor socket, int token) throws IOException {
+                mAgent = agent;
+                mInfo = info;
+                mToken = token;
+
+                // This class is used strictly for process-local binder invocations.  The
+                // semantics of ParcelFileDescriptor differ in this case; in particular, we
+                // do not automatically get a 'dup'ed descriptor that we can can continue
+                // to use asynchronously from the caller.  So, we make sure to dup it ourselves
+                // before proceeding to do the restore.
+                mSocket = ParcelFileDescriptor.dup(socket.getFileDescriptor());
+            }
+
+            @Override
+            public void run() {
+                try {
+                    mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
+                            mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
+                            mToken, mBackupManagerBinder);
+                } catch (RemoteException e) {
+                    // never happens; this is used strictly for local binder calls
+                }
+            }
+        }
+
+        public FullRestoreEngine(IFullBackupRestoreObserver observer, PackageInfo onlyPackage,
+                boolean allowApks, boolean allowObbs) {
+            mObserver = observer;
+            mOnlyPackage = onlyPackage;
+            mAllowApks = allowApks;
+            mAllowObbs = allowObbs;
+            mBuffer = new byte[32 * 1024];
+            mBytes = 0;
+        }
+
+        public boolean restoreOneFile(InputStream instream) {
+            if (!isRunning()) {
+                Slog.w(TAG, "Restore engine used after halting");
+                return false;
+            }
+
+            FileMetadata info;
+            try {
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "Reading tar header for restoring file");
+                }
+                info = readTarHeaders(instream);
+                if (info != null) {
+                    if (MORE_DEBUG) {
+                        dumpFileMetadata(info);
+                    }
+
+                    final String pkg = info.packageName;
+                    if (!pkg.equals(mAgentPackage)) {
+                        // In the single-package case, it's a semantic error to expect
+                        // one app's data but see a different app's on the wire
+                        if (mOnlyPackage != null) {
+                            if (!pkg.equals(mOnlyPackage.packageName)) {
+                                Slog.w(TAG, "Expected data for " + mOnlyPackage
+                                        + " but saw " + pkg);
+                                setResult(RestoreEngine.TRANSPORT_FAILURE);
+                                setRunning(false);
+                                return false;
+                            }
+                        }
+
+                        // okay, change in package; set up our various
+                        // bookkeeping if we haven't seen it yet
+                        if (!mPackagePolicies.containsKey(pkg)) {
+                            mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                        }
+
+                        // Clean up the previous agent relationship if necessary,
+                        // and let the observer know we're considering a new app.
+                        if (mAgent != null) {
+                            if (DEBUG) Slog.d(TAG, "Saw new package; finalizing old one");
+                            // Now we're really done
+                            tearDownPipes();
+                            tearDownAgent(mTargetApp);
+                            mTargetApp = null;
+                            mAgentPackage = null;
+                        }
+                    }
+
+                    if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                        mPackagePolicies.put(pkg, readAppManifest(info, instream));
+                        mPackageInstallers.put(pkg, info.installerPackageName);
+                        // We've read only the manifest content itself at this point,
+                        // so consume the footer before looping around to the next
+                        // input file
+                        skipTarPadding(info.size, instream);
+                        sendOnRestorePackage(pkg);
+                    } else if (info.path.equals(BACKUP_METADATA_FILENAME)) {
+                        // Metadata blobs!
+                        readMetadata(info, instream);
+                    } else {
+                        // Non-manifest, so it's actual file data.  Is this a package
+                        // we're ignoring?
+                        boolean okay = true;
+                        RestorePolicy policy = mPackagePolicies.get(pkg);
+                        switch (policy) {
+                            case IGNORE:
+                                okay = false;
+                                break;
+
+                            case ACCEPT_IF_APK:
+                                // If we're in accept-if-apk state, then the first file we
+                                // see MUST be the apk.
+                                if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "APK file; installing");
+                                    // Try to install the app.
+                                    String installerName = mPackageInstallers.get(pkg);
+                                    okay = installApk(info, installerName, instream);
+                                    // good to go; promote to ACCEPT
+                                    mPackagePolicies.put(pkg, (okay)
+                                            ? RestorePolicy.ACCEPT
+                                                    : RestorePolicy.IGNORE);
+                                    // At this point we've consumed this file entry
+                                    // ourselves, so just strip the tar footer and
+                                    // go on to the next file in the input stream
+                                    skipTarPadding(info.size, instream);
+                                    return true;
+                                } else {
+                                    // File data before (or without) the apk.  We can't
+                                    // handle it coherently in this case so ignore it.
+                                    mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                                    okay = false;
+                                }
+                                break;
+
+                            case ACCEPT:
+                                if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "apk present but ACCEPT");
+                                    // we can take the data without the apk, so we
+                                    // *want* to do so.  skip the apk by declaring this
+                                    // one file not-okay without changing the restore
+                                    // policy for the package.
+                                    okay = false;
+                                }
+                                break;
+
+                            default:
+                                // Something has gone dreadfully wrong when determining
+                                // the restore policy from the manifest.  Ignore the
+                                // rest of this package's data.
+                                Slog.e(TAG, "Invalid policy from manifest");
+                                okay = false;
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                                break;
+                        }
+
+                        // If the policy is satisfied, go ahead and set up to pipe the
+                        // data to the agent.
+                        if (DEBUG && okay && mAgent != null) {
+                            Slog.i(TAG, "Reusing existing agent instance");
+                        }
+                        if (okay && mAgent == null) {
+                            if (DEBUG) Slog.d(TAG, "Need to launch agent for " + pkg);
+
+                            try {
+                                mTargetApp = mPackageManager.getApplicationInfo(pkg, 0);
+
+                                // If we haven't sent any data to this app yet, we probably
+                                // need to clear it first.  Check that.
+                                if (!mClearedPackages.contains(pkg)) {
+                                    // apps with their own backup agents are
+                                    // responsible for coherently managing a full
+                                    // restore.
+                                    if (mTargetApp.backupAgentName == null) {
+                                        if (DEBUG) Slog.d(TAG, "Clearing app data preparatory to full restore");
+                                        clearApplicationDataSynchronous(pkg);
+                                    } else {
+                                        if (DEBUG) Slog.d(TAG, "backup agent ("
+                                                + mTargetApp.backupAgentName + ") => no clear");
+                                    }
+                                    mClearedPackages.add(pkg);
+                                } else {
+                                    if (DEBUG) Slog.d(TAG, "We've initialized this app already; no clear required");
+                                }
+
+                                // All set; now set up the IPC and launch the agent
+                                setUpPipes();
+                                mAgent = bindToAgentSynchronous(mTargetApp,
+                                        IApplicationThread.BACKUP_MODE_RESTORE_FULL);
+                                mAgentPackage = pkg;
+                            } catch (IOException e) {
+                                // fall through to error handling
+                            } catch (NameNotFoundException e) {
+                                // fall through to error handling
+                            }
+
+                            if (mAgent == null) {
+                                if (DEBUG) Slog.d(TAG, "Unable to create agent for " + pkg);
+                                okay = false;
+                                tearDownPipes();
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                            }
+                        }
+
+                        // Sanity check: make sure we never give data to the wrong app.  This
+                        // should never happen but a little paranoia here won't go amiss.
+                        if (okay && !pkg.equals(mAgentPackage)) {
+                            Slog.e(TAG, "Restoring data for " + pkg
+                                    + " but agent is for " + mAgentPackage);
+                            okay = false;
+                        }
+
+                        // At this point we have an agent ready to handle the full
+                        // restore data as well as a pipe for sending data to
+                        // that agent.  Tell the agent to start reading from the
+                        // pipe.
+                        if (okay) {
+                            boolean agentSuccess = true;
+                            long toCopy = info.size;
+                            final int token = generateToken();
+                            try {
+                                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null);
+                                if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
+                                            + " : " + info.path);
+                                    mObbConnection.restoreObbFile(pkg, mPipes[0],
+                                            info.size, info.type, info.path, info.mode,
+                                            info.mtime, token, mBackupManagerBinder);
+                                } else {
+                                    if (DEBUG) Slog.d(TAG, "Invoking agent to restore file "
+                                            + info.path);
+                                    // fire up the app's agent listening on the socket.  If
+                                    // the agent is running in the system process we can't
+                                    // just invoke it asynchronously, so we provide a thread
+                                    // for it here.
+                                    if (mTargetApp.processName.equals("system")) {
+                                        Slog.d(TAG, "system process agent - spinning a thread");
+                                        RestoreFileRunnable runner = new RestoreFileRunnable(
+                                                mAgent, info, mPipes[0], token);
+                                        new Thread(runner, "restore-sys-runner").start();
+                                    } else {
+                                        mAgent.doRestoreFile(mPipes[0], info.size, info.type,
+                                                info.domain, info.path, info.mode, info.mtime,
+                                                token, mBackupManagerBinder);
+                                    }
+                                }
+                            } catch (IOException e) {
+                                // couldn't dup the socket for a process-local restore
+                                Slog.d(TAG, "Couldn't establish restore");
+                                agentSuccess = false;
+                                okay = false;
+                            } catch (RemoteException e) {
+                                // whoops, remote entity went away.  We'll eat the content
+                                // ourselves, then, and not copy it over.
+                                Slog.e(TAG, "Agent crashed during full restore");
+                                agentSuccess = false;
+                                okay = false;
+                            }
+
+                            // Copy over the data if the agent is still good
+                            if (okay) {
+                                if (MORE_DEBUG) {
+                                    Slog.v(TAG, "  copying to restore agent: "
+                                            + toCopy + " bytes");
+                                }
+                                boolean pipeOkay = true;
+                                FileOutputStream pipe = new FileOutputStream(
+                                        mPipes[1].getFileDescriptor());
+                                while (toCopy > 0) {
+                                    int toRead = (toCopy > mBuffer.length)
+                                            ? mBuffer.length : (int)toCopy;
+                                    int nRead = instream.read(mBuffer, 0, toRead);
+                                    if (nRead >= 0) mBytes += nRead;
+                                    if (nRead <= 0) break;
+                                    toCopy -= nRead;
+
+                                    // send it to the output pipe as long as things
+                                    // are still good
+                                    if (pipeOkay) {
+                                        try {
+                                            pipe.write(mBuffer, 0, nRead);
+                                        } catch (IOException e) {
+                                            Slog.e(TAG, "Failed to write to restore pipe", e);
+                                            pipeOkay = false;
+                                        }
+                                    }
+                                }
+
+                                // done sending that file!  Now we just need to consume
+                                // the delta from info.size to the end of block.
+                                skipTarPadding(info.size, instream);
+
+                                // and now that we've sent it all, wait for the remote
+                                // side to acknowledge receipt
+                                agentSuccess = waitUntilOperationComplete(token);
+                            }
+
+                            // okay, if the remote end failed at any point, deal with
+                            // it by ignoring the rest of the restore on it
+                            if (!agentSuccess) {
+                                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                tearDownPipes();
+                                tearDownAgent(mTargetApp);
+                                mAgent = null;
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+
+                                // If this was a single-package restore, we halt immediately
+                                // with an agent error under these circumstances
+                                if (mOnlyPackage != null) {
+                                    setResult(RestoreEngine.TARGET_FAILURE);
+                                    setRunning(false);
+                                    return false;
+                                }
+                            }
+                        }
+
+                        // Problems setting up the agent communication, or an already-
+                        // ignored package: skip to the next tar stream entry by
+                        // reading and discarding this file.
+                        if (!okay) {
+                            if (DEBUG) Slog.d(TAG, "[discarding file content]");
+                            long bytesToConsume = (info.size + 511) & ~511;
+                            while (bytesToConsume > 0) {
+                                int toRead = (bytesToConsume > mBuffer.length)
+                                        ? mBuffer.length : (int)bytesToConsume;
+                                long nRead = instream.read(mBuffer, 0, toRead);
+                                if (nRead >= 0) mBytes += nRead;
+                                if (nRead <= 0) break;
+                                bytesToConsume -= nRead;
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                if (DEBUG) Slog.w(TAG, "io exception on restore socket read", e);
+                setResult(RestoreEngine.TRANSPORT_FAILURE);
+                info = null;
+            }
+
+            // If we got here we're either running smoothly or we've finished
+            if (info == null) {
+                setRunning(false);
+            }
+            return (info != null);
+        }
+
+        void setUpPipes() throws IOException {
+            mPipes = ParcelFileDescriptor.createPipe();
+        }
+
+        void tearDownPipes() {
+            if (mPipes != null) {
+                try {
+                    mPipes[0].close();
+                    mPipes[0] = null;
+                    mPipes[1].close();
+                    mPipes[1] = null;
+                } catch (IOException e) {
+                    Slog.w(TAG, "Couldn't close agent pipes", e);
+                }
+                mPipes = null;
+            }
+        }
+
+        void tearDownAgent(ApplicationInfo app) {
+            if (mAgent != null) {
+                try {
+                    // unbind and tidy up even on timeout or failure, just in case
+                    mActivityManager.unbindBackupAgent(app);
+
+                    // The agent was running with a stub Application object, so shut it down.
+                    // !!! We hardcode the confirmation UI's package name here rather than use a
+                    //     manifest flag!  TODO something less direct.
+                    if (app.uid != Process.SYSTEM_UID
+                            && !app.packageName.equals("com.android.backupconfirm")) {
+                        if (DEBUG) Slog.d(TAG, "Killing host process");
+                        mActivityManager.killApplicationProcess(app.processName, app.uid);
+                    } else {
+                        if (DEBUG) Slog.d(TAG, "Not killing after full restore");
+                    }
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Lost app trying to shut down");
+                }
+                mAgent = null;
+            }
+        }
+
+        class RestoreInstallObserver extends IPackageInstallObserver.Stub {
+            final AtomicBoolean mDone = new AtomicBoolean();
+            String mPackageName;
+            int mResult;
+
+            public void reset() {
+                synchronized (mDone) {
+                    mDone.set(false);
+                }
+            }
+
+            public void waitForCompletion() {
+                synchronized (mDone) {
+                    while (mDone.get() == false) {
+                        try {
+                            mDone.wait();
+                        } catch (InterruptedException e) { }
+                    }
+                }
+            }
+
+            int getResult() {
+                return mResult;
+            }
+
+            @Override
+            public void packageInstalled(String packageName, int returnCode)
+                    throws RemoteException {
+                synchronized (mDone) {
+                    mResult = returnCode;
+                    mPackageName = packageName;
+                    mDone.set(true);
+                    mDone.notifyAll();
+                }
+            }
+        }
+
+        class RestoreDeleteObserver extends IPackageDeleteObserver.Stub {
+            final AtomicBoolean mDone = new AtomicBoolean();
+            int mResult;
+
+            public void reset() {
+                synchronized (mDone) {
+                    mDone.set(false);
+                }
+            }
+
+            public void waitForCompletion() {
+                synchronized (mDone) {
+                    while (mDone.get() == false) {
+                        try {
+                            mDone.wait();
+                        } catch (InterruptedException e) { }
+                    }
+                }
+            }
+
+            @Override
+            public void packageDeleted(String packageName, int returnCode) throws RemoteException {
+                synchronized (mDone) {
+                    mResult = returnCode;
+                    mDone.set(true);
+                    mDone.notifyAll();
+                }
+            }
+        }
+
+        final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
+        final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
+
+        boolean installApk(FileMetadata info, String installerPackage, InputStream instream) {
+            boolean okay = true;
+
+            if (DEBUG) Slog.d(TAG, "Installing from backup: " + info.packageName);
+
+            // The file content is an .apk file.  Copy it out to a staging location and
+            // attempt to install it.
+            File apkFile = new File(mDataDir, info.packageName);
+            try {
+                FileOutputStream apkStream = new FileOutputStream(apkFile);
+                byte[] buffer = new byte[32 * 1024];
+                long size = info.size;
+                while (size > 0) {
+                    long toRead = (buffer.length < size) ? buffer.length : size;
+                    int didRead = instream.read(buffer, 0, (int)toRead);
+                    if (didRead >= 0) mBytes += didRead;
+                    apkStream.write(buffer, 0, didRead);
+                    size -= didRead;
+                }
+                apkStream.close();
+
+                // make sure the installer can read it
+                apkFile.setReadable(true, false);
+
+                // Now install it
+                Uri packageUri = Uri.fromFile(apkFile);
+                mInstallObserver.reset();
+                mPackageManager.installPackage(packageUri, mInstallObserver,
+                        PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
+                        installerPackage);
+                mInstallObserver.waitForCompletion();
+
+                if (mInstallObserver.getResult() != PackageManager.INSTALL_SUCCEEDED) {
+                    // The only time we continue to accept install of data even if the
+                    // apk install failed is if we had already determined that we could
+                    // accept the data regardless.
+                    if (mPackagePolicies.get(info.packageName) != RestorePolicy.ACCEPT) {
+                        okay = false;
+                    }
+                } else {
+                    // Okay, the install succeeded.  Make sure it was the right app.
+                    boolean uninstall = false;
+                    if (!mInstallObserver.mPackageName.equals(info.packageName)) {
+                        Slog.w(TAG, "Restore stream claimed to include apk for "
+                                + info.packageName + " but apk was really "
+                                + mInstallObserver.mPackageName);
+                        // delete the package we just put in place; it might be fraudulent
+                        okay = false;
+                        uninstall = true;
+                    } else {
+                        try {
+                            PackageInfo pkg = mPackageManager.getPackageInfo(info.packageName,
+                                    PackageManager.GET_SIGNATURES);
+                            if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                                Slog.w(TAG, "Restore stream contains apk of package "
+                                        + info.packageName + " but it disallows backup/restore");
+                                okay = false;
+                            } else {
+                                // So far so good -- do the signatures match the manifest?
+                                Signature[] sigs = mManifestSignatures.get(info.packageName);
+                                if (signaturesMatch(sigs, pkg)) {
+                                    // If this is a system-uid app without a declared backup agent,
+                                    // don't restore any of the file data.
+                                    if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                                            && (pkg.applicationInfo.backupAgentName == null)) {
+                                        Slog.w(TAG, "Installed app " + info.packageName
+                                                + " has restricted uid and no agent");
+                                        okay = false;
+                                    }
+                                } else {
+                                    Slog.w(TAG, "Installed app " + info.packageName
+                                            + " signatures do not match restore manifest");
+                                    okay = false;
+                                    uninstall = true;
+                                }
+                            }
+                        } catch (NameNotFoundException e) {
+                            Slog.w(TAG, "Install of package " + info.packageName
+                                    + " succeeded but now not found");
+                            okay = false;
+                        }
+                    }
+
+                    // If we're not okay at this point, we need to delete the package
+                    // that we just installed.
+                    if (uninstall) {
+                        mDeleteObserver.reset();
+                        mPackageManager.deletePackage(mInstallObserver.mPackageName,
+                                mDeleteObserver, 0);
+                        mDeleteObserver.waitForCompletion();
+                    }
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to transcribe restored apk for install");
+                okay = false;
+            } finally {
+                apkFile.delete();
+            }
+
+            return okay;
+        }
+
+        // Given an actual file content size, consume the post-content padding mandated
+        // by the tar format.
+        void skipTarPadding(long size, InputStream instream) throws IOException {
+            long partial = (size + 512) % 512;
+            if (partial > 0) {
+                final int needed = 512 - (int)partial;
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "Skipping tar padding: " + needed + " bytes");
+                }
+                byte[] buffer = new byte[needed];
+                if (readExactly(instream, buffer, 0, needed) == needed) {
+                    mBytes += needed;
+                } else throw new IOException("Unexpected EOF in padding");
+            }
+        }
+
+        // Read a widget metadata file, returning the restored blob
+        void readMetadata(FileMetadata info, InputStream instream) throws IOException {
+            // Fail on suspiciously large widget dump files
+            if (info.size > 64 * 1024) {
+                throw new IOException("Metadata too big; corrupt? size=" + info.size);
+            }
+
+            byte[] buffer = new byte[(int) info.size];
+            if (readExactly(instream, buffer, 0, (int)info.size) == info.size) {
+                mBytes += info.size;
+            } else throw new IOException("Unexpected EOF in widget data");
+
+            String[] str = new String[1];
+            int offset = extractLine(buffer, 0, str);
+            int version = Integer.parseInt(str[0]);
+            if (version == BACKUP_MANIFEST_VERSION) {
+                offset = extractLine(buffer, offset, str);
+                final String pkg = str[0];
+                if (info.packageName.equals(pkg)) {
+                    // Data checks out -- the rest of the buffer is a concatenation of
+                    // binary blobs as described in the comment at writeAppWidgetData()
+                    ByteArrayInputStream bin = new ByteArrayInputStream(buffer,
+                            offset, buffer.length - offset);
+                    DataInputStream in = new DataInputStream(bin);
+                    while (bin.available() > 0) {
+                        int token = in.readInt();
+                        int size = in.readInt();
+                        if (size > 64 * 1024) {
+                            throw new IOException("Datum "
+                                    + Integer.toHexString(token)
+                                    + " too big; corrupt? size=" + info.size);
+                        }
+                        switch (token) {
+                            case BACKUP_WIDGET_METADATA_TOKEN:
+                            {
+                                if (MORE_DEBUG) {
+                                    Slog.i(TAG, "Got widget metadata for " + info.packageName);
+                                }
+                                mWidgetData = new byte[size];
+                                in.read(mWidgetData);
+                                break;
+                            }
+                            default:
+                            {
+                                if (DEBUG) {
+                                    Slog.i(TAG, "Ignoring metadata blob "
+                                            + Integer.toHexString(token)
+                                            + " for " + info.packageName);
+                                }
+                                in.skipBytes(size);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    Slog.w(TAG, "Metadata mismatch: package " + info.packageName
+                            + " but widget data for " + pkg);
+                }
+            } else {
+                Slog.w(TAG, "Unsupported metadata version " + version);
+            }
+        }
+
+        // Returns a policy constant
+        RestorePolicy readAppManifest(FileMetadata info, InputStream instream)
+                throws IOException {
+            // Fail on suspiciously large manifest files
+            if (info.size > 64 * 1024) {
+                throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
+            }
+
+            byte[] buffer = new byte[(int) info.size];
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "   readAppManifest() looking for " + info.size + " bytes, "
+                        + mBytes + " already consumed");
+            }
+            if (readExactly(instream, buffer, 0, (int)info.size) == info.size) {
+                mBytes += info.size;
+            } else throw new IOException("Unexpected EOF in manifest");
+
+            RestorePolicy policy = RestorePolicy.IGNORE;
+            String[] str = new String[1];
+            int offset = 0;
+
+            try {
+                offset = extractLine(buffer, offset, str);
+                int version = Integer.parseInt(str[0]);
+                if (version == BACKUP_MANIFEST_VERSION) {
+                    offset = extractLine(buffer, offset, str);
+                    String manifestPackage = str[0];
+                    // TODO: handle <original-package>
+                    if (manifestPackage.equals(info.packageName)) {
+                        offset = extractLine(buffer, offset, str);
+                        version = Integer.parseInt(str[0]);  // app version
+                        offset = extractLine(buffer, offset, str);
+                        int platformVersion = Integer.parseInt(str[0]);
+                        offset = extractLine(buffer, offset, str);
+                        info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
+                        offset = extractLine(buffer, offset, str);
+                        boolean hasApk = str[0].equals("1");
+                        offset = extractLine(buffer, offset, str);
+                        int numSigs = Integer.parseInt(str[0]);
+                        if (numSigs > 0) {
+                            Signature[] sigs = new Signature[numSigs];
+                            for (int i = 0; i < numSigs; i++) {
+                                offset = extractLine(buffer, offset, str);
+                                sigs[i] = new Signature(str[0]);
+                            }
+                            mManifestSignatures.put(info.packageName, sigs);
+
+                            // Okay, got the manifest info we need...
+                            try {
+                                PackageInfo pkgInfo = mPackageManager.getPackageInfo(
+                                        info.packageName, PackageManager.GET_SIGNATURES);
+                                // Fall through to IGNORE if the app explicitly disallows backup
+                                final int flags = pkgInfo.applicationInfo.flags;
+                                if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
+                                    // Restore system-uid-space packages only if they have
+                                    // defined a custom backup agent
+                                    if ((pkgInfo.applicationInfo.uid >= Process.FIRST_APPLICATION_UID)
+                                            || (pkgInfo.applicationInfo.backupAgentName != null)) {
+                                        // Verify signatures against any installed version; if they
+                                        // don't match, then we fall though and ignore the data.  The
+                                        // signatureMatch() method explicitly ignores the signature
+                                        // check for packages installed on the system partition, because
+                                        // such packages are signed with the platform cert instead of
+                                        // the app developer's cert, so they're different on every
+                                        // device.
+                                        if (signaturesMatch(sigs, pkgInfo)) {
+                                            if (pkgInfo.versionCode >= version) {
+                                                Slog.i(TAG, "Sig + version match; taking data");
+                                                policy = RestorePolicy.ACCEPT;
+                                            } else {
+                                                // The data is from a newer version of the app than
+                                                // is presently installed.  That means we can only
+                                                // use it if the matching apk is also supplied.
+                                                if (mAllowApks) {
+                                                    Slog.i(TAG, "Data version " + version
+                                                            + " is newer than installed version "
+                                                            + pkgInfo.versionCode
+                                                            + " - requiring apk");
+                                                    policy = RestorePolicy.ACCEPT_IF_APK;
+                                                } else {
+                                                    Slog.i(TAG, "Data requires newer version "
+                                                            + version + "; ignoring");
+                                                    policy = RestorePolicy.IGNORE;
+                                                }
+                                            }
+                                        } else {
+                                            Slog.w(TAG, "Restore manifest signatures do not match "
+                                                    + "installed application for " + info.packageName);
+                                        }
+                                    } else {
+                                        Slog.w(TAG, "Package " + info.packageName
+                                                + " is system level with no agent");
+                                    }
+                                } else {
+                                    if (DEBUG) Slog.i(TAG, "Restore manifest from "
+                                            + info.packageName + " but allowBackup=false");
+                                }
+                            } catch (NameNotFoundException e) {
+                                // Okay, the target app isn't installed.  We can process
+                                // the restore properly only if the dataset provides the
+                                // apk file and we can successfully install it.
+                                if (mAllowApks) {
+                                    if (DEBUG) Slog.i(TAG, "Package " + info.packageName
+                                            + " not installed; requiring apk in dataset");
+                                    policy = RestorePolicy.ACCEPT_IF_APK;
+                                } else {
+                                    policy = RestorePolicy.IGNORE;
+                                }
+                            }
+
+                            if (policy == RestorePolicy.ACCEPT_IF_APK && !hasApk) {
+                                Slog.i(TAG, "Cannot restore package " + info.packageName
+                                        + " without the matching .apk");
+                            }
+                        } else {
+                            Slog.i(TAG, "Missing signature on backed-up package "
+                                    + info.packageName);
+                        }
+                    } else {
+                        Slog.i(TAG, "Expected package " + info.packageName
+                                + " but restore manifest claims " + manifestPackage);
+                    }
+                } else {
+                    Slog.i(TAG, "Unknown restore manifest version " + version
+                            + " for package " + info.packageName);
+                }
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Corrupt restore manifest for package " + info.packageName);
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, e.getMessage());
+            }
+
+            return policy;
+        }
+
+        // Builds a line from a byte buffer starting at 'offset', and returns
+        // the index of the next unconsumed data in the buffer.
+        int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
+            final int end = buffer.length;
+            if (offset >= end) throw new IOException("Incomplete data");
+
+            int pos;
+            for (pos = offset; pos < end; pos++) {
+                byte c = buffer[pos];
+                // at LF we declare end of line, and return the next char as the
+                // starting point for the next time through
+                if (c == '\n') {
+                    break;
+                }
+            }
+            outStr[0] = new String(buffer, offset, pos - offset);
+            pos++;  // may be pointing an extra byte past the end but that's okay
+            return pos;
+        }
+
+        void dumpFileMetadata(FileMetadata info) {
+            if (DEBUG) {
+                StringBuilder b = new StringBuilder(128);
+
+                // mode string
+                b.append((info.type == BackupAgent.TYPE_DIRECTORY) ? 'd' : '-');
+                b.append(((info.mode & 0400) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0200) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0100) != 0) ? 'x' : '-');
+                b.append(((info.mode & 0040) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0020) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0010) != 0) ? 'x' : '-');
+                b.append(((info.mode & 0004) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0002) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0001) != 0) ? 'x' : '-');
+                b.append(String.format(" %9d ", info.size));
+
+                Date stamp = new Date(info.mtime);
+                b.append(new SimpleDateFormat("MMM dd HH:mm:ss ").format(stamp));
+
+                b.append(info.packageName);
+                b.append(" :: ");
+                b.append(info.domain);
+                b.append(" :: ");
+                b.append(info.path);
+
+                Slog.i(TAG, b.toString());
+            }
+        }
+
+        // Consume a tar file header block [sequence] and accumulate the relevant metadata
+        FileMetadata readTarHeaders(InputStream instream) throws IOException {
+            byte[] block = new byte[512];
+            FileMetadata info = null;
+
+            boolean gotHeader = readTarHeader(instream, block);
+            if (gotHeader) {
+                try {
+                    // okay, presume we're okay, and extract the various metadata
+                    info = new FileMetadata();
+                    info.size = extractRadix(block, 124, 12, 8);
+                    info.mtime = extractRadix(block, 136, 12, 8);
+                    info.mode = extractRadix(block, 100, 8, 8);
+
+                    info.path = extractString(block, 345, 155); // prefix
+                    String path = extractString(block, 0, 100);
+                    if (path.length() > 0) {
+                        if (info.path.length() > 0) info.path += '/';
+                        info.path += path;
+                    }
+
+                    // tar link indicator field: 1 byte at offset 156 in the header.
+                    int typeChar = block[156];
+                    if (typeChar == 'x') {
+                        // pax extended header, so we need to read that
+                        gotHeader = readPaxExtendedHeader(instream, info);
+                        if (gotHeader) {
+                            // and after a pax extended header comes another real header -- read
+                            // that to find the real file type
+                            gotHeader = readTarHeader(instream, block);
+                        }
+                        if (!gotHeader) throw new IOException("Bad or missing pax header");
+
+                        typeChar = block[156];
+                    }
+
+                    switch (typeChar) {
+                        case '0': info.type = BackupAgent.TYPE_FILE; break;
+                        case '5': {
+                            info.type = BackupAgent.TYPE_DIRECTORY;
+                            if (info.size != 0) {
+                                Slog.w(TAG, "Directory entry with nonzero size in header");
+                                info.size = 0;
+                            }
+                            break;
+                        }
+                        case 0: {
+                            // presume EOF
+                            if (DEBUG) Slog.w(TAG, "Saw type=0 in tar header block, info=" + info);
+                            return null;
+                        }
+                        default: {
+                            Slog.e(TAG, "Unknown tar entity type: " + typeChar);
+                            throw new IOException("Unknown entity type " + typeChar);
+                        }
+                    }
+
+                    // Parse out the path
+                    //
+                    // first: apps/shared/unrecognized
+                    if (FullBackup.SHARED_PREFIX.regionMatches(0,
+                            info.path, 0, FullBackup.SHARED_PREFIX.length())) {
+                        // File in shared storage.  !!! TODO: implement this.
+                        info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
+                        info.packageName = SHARED_BACKUP_AGENT_PACKAGE;
+                        info.domain = FullBackup.SHARED_STORAGE_TOKEN;
+                        if (DEBUG) Slog.i(TAG, "File in shared storage: " + info.path);
+                    } else if (FullBackup.APPS_PREFIX.regionMatches(0,
+                            info.path, 0, FullBackup.APPS_PREFIX.length())) {
+                        // App content!  Parse out the package name and domain
+
+                        // strip the apps/ prefix
+                        info.path = info.path.substring(FullBackup.APPS_PREFIX.length());
+
+                        // extract the package name
+                        int slash = info.path.indexOf('/');
+                        if (slash < 0) throw new IOException("Illegal semantic path in " + info.path);
+                        info.packageName = info.path.substring(0, slash);
+                        info.path = info.path.substring(slash+1);
+
+                        // if it's a manifest we're done, otherwise parse out the domains
+                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                            slash = info.path.indexOf('/');
+                            if (slash < 0) {
+                                throw new IOException("Illegal semantic path in non-manifest "
+                                        + info.path);
+                            }
+                            info.domain = info.path.substring(0, slash);
+                            info.path = info.path.substring(slash + 1);
+                        }
+                    }
+                } catch (IOException e) {
+                    if (DEBUG) {
+                        Slog.e(TAG, "Parse error in header: " + e.getMessage());
+                        HEXLOG(block);
+                    }
+                    throw e;
+                }
+            }
+            return info;
+        }
+
+        private void HEXLOG(byte[] block) {
+            int offset = 0;
+            int todo = block.length;
+            StringBuilder buf = new StringBuilder(64);
+            while (todo > 0) {
+                buf.append(String.format("%04x   ", offset));
+                int numThisLine = (todo > 16) ? 16 : todo;
+                for (int i = 0; i < numThisLine; i++) {
+                    buf.append(String.format("%02x ", block[offset+i]));
+                }
+                Slog.i("hexdump", buf.toString());
+                buf.setLength(0);
+                todo -= numThisLine;
+                offset += numThisLine;
+            }
+        }
+
+        // Read exactly the given number of bytes into a buffer at the stated offset.
+        // Returns false if EOF is encountered before the requested number of bytes
+        // could be read.
+        int readExactly(InputStream in, byte[] buffer, int offset, int size)
+                throws IOException {
+            if (size <= 0) throw new IllegalArgumentException("size must be > 0");
+if (MORE_DEBUG) Slog.i(TAG, "  ... readExactly(" + size + ") called");
+            int soFar = 0;
+            while (soFar < size) {
+                int nRead = in.read(buffer, offset + soFar, size - soFar);
+                if (nRead <= 0) {
+                    if (MORE_DEBUG) Slog.w(TAG, "- wanted exactly " + size + " but got only " + soFar);
+                    break;
+                }
+                soFar += nRead;
+if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soFar));
+            }
+            return soFar;
+        }
+
+        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
+            final int got = readExactly(instream, block, 0, 512);
+            if (got == 0) return false;     // Clean EOF
+            if (got < 512) throw new IOException("Unable to read full block header");
+            mBytes += 512;
+            return true;
+        }
+
+        // overwrites 'info' fields based on the pax extended header
+        boolean readPaxExtendedHeader(InputStream instream, FileMetadata info)
+                throws IOException {
+            // We should never see a pax extended header larger than this
+            if (info.size > 32*1024) {
+                Slog.w(TAG, "Suspiciously large pax header size " + info.size
+                        + " - aborting");
+                throw new IOException("Sanity failure: pax header size " + info.size);
+            }
+
+            // read whole blocks, not just the content size
+            int numBlocks = (int)((info.size + 511) >> 9);
+            byte[] data = new byte[numBlocks * 512];
+            if (readExactly(instream, data, 0, data.length) < data.length) {
+                throw new IOException("Unable to read full pax header");
+            }
+            mBytes += data.length;
+
+            final int contentSize = (int) info.size;
+            int offset = 0;
+            do {
+                // extract the line at 'offset'
+                int eol = offset+1;
+                while (eol < contentSize && data[eol] != ' ') eol++;
+                if (eol >= contentSize) {
+                    // error: we just hit EOD looking for the end of the size field
+                    throw new IOException("Invalid pax data");
+                }
+                // eol points to the space between the count and the key
+                int linelen = (int) extractRadix(data, offset, eol - offset, 10);
+                int key = eol + 1;  // start of key=value
+                eol = offset + linelen - 1; // trailing LF
+                int value;
+                for (value = key+1; data[value] != '=' && value <= eol; value++);
+                if (value > eol) {
+                    throw new IOException("Invalid pax declaration");
+                }
+
+                // pax requires that key/value strings be in UTF-8
+                String keyStr = new String(data, key, value-key, "UTF-8");
+                // -1 to strip the trailing LF
+                String valStr = new String(data, value+1, eol-value-1, "UTF-8");
+
+                if ("path".equals(keyStr)) {
+                    info.path = valStr;
+                } else if ("size".equals(keyStr)) {
+                    info.size = Long.parseLong(valStr);
+                } else {
+                    if (DEBUG) Slog.i(TAG, "Unhandled pax key: " + key);
+                }
+
+                offset += linelen;
+            } while (offset < contentSize);
+
+            return true;
+        }
+
+        long extractRadix(byte[] data, int offset, int maxChars, int radix)
+                throws IOException {
+            long value = 0;
+            final int end = offset + maxChars;
+            for (int i = offset; i < end; i++) {
+                final byte b = data[i];
+                // Numeric fields in tar can terminate with either NUL or SPC
+                if (b == 0 || b == ' ') break;
+                if (b < '0' || b > ('0' + radix - 1)) {
+                    throw new IOException("Invalid number in header: '" + (char)b
+                            + "' for radix " + radix);
+                }
+                value = radix * value + (b - '0');
+            }
+            return value;
+        }
+
+        String extractString(byte[] data, int offset, int maxChars) throws IOException {
+            final int end = offset + maxChars;
+            int eos = offset;
+            // tar string fields terminate early with a NUL
+            while (eos < end && data[eos] != 0) eos++;
+            return new String(data, offset, eos-offset, "US-ASCII");
+        }
+
+        void sendStartRestore() {
+            if (mObserver != null) {
+                try {
+                    mObserver.onStartRestore();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: startRestore");
+                    mObserver = null;
+                }
+            }
+        }
+
+        void sendOnRestorePackage(String name) {
+            if (mObserver != null) {
+                try {
+                    // TODO: use a more user-friendly name string
+                    mObserver.onRestorePackage(name);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: restorePackage");
+                    mObserver = null;
+                }
+            }
+        }
+
+        void sendEndRestore() {
+            if (mObserver != null) {
+                try {
+                    mObserver.onEndRestore();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: endRestore");
+                    mObserver = null;
+                }
+            }
+        }
+    }
+
+    // ***** end new engine class ***
+
+    class PerformAdbRestoreTask implements Runnable {
         ParcelFileDescriptor mInputFile;
         String mCurrentPassword;
         String mDecryptPassword;
@@ -3680,7 +4883,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         // Packages we've already wiped data on when restoring their first file
         final HashSet<String> mClearedPackages = new HashSet<String>();
 
-        PerformFullRestoreTask(ParcelFileDescriptor fd, String curPassword, String decryptPassword,
+        PerformAdbRestoreTask(ParcelFileDescriptor fd, String curPassword, String decryptPassword,
                 IFullBackupRestoreObserver observer, AtomicBoolean latch) {
             mInputFile = fd;
             mCurrentPassword = curPassword;
@@ -3695,8 +4898,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // Which packages we've already wiped data on.  We prepopulate this
             // with a whitelist of packages known to be unclearable.
             mClearedPackages.add("android");
-            mClearedPackages.add("com.android.providers.settings");
-
+            mClearedPackages.add(SETTINGS_PACKAGE);
         }
 
         class RestoreFileRunnable implements Runnable {
@@ -4437,8 +5639,6 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         // Read a widget metadata file, returning the restored blob
         void readMetadata(FileMetadata info, InputStream instream) throws IOException {
-            byte[] data = null;
-
             // Fail on suspiciously large widget dump files
             if (info.size > 64 * 1024) {
                 throw new IOException("Metadata too big; corrupt? size=" + info.size);
@@ -4930,6 +6130,78 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Restore handling -----
 
+    // new style: we only store the SHA-1 hashes of each sig, not the full block
+    static boolean signaturesMatch(ArrayList<byte[]> storedSigHashes, PackageInfo target) {
+        if (target == null) {
+            return false;
+        }
+
+        // If the target resides on the system partition, we allow it to restore
+        // data from the like-named package in a restore set even if the signatures
+        // do not match.  (Unlike general applications, those flashed to the system
+        // partition will be signed with the device's platform certificate, so on
+        // different phones the same system app will have different signatures.)
+        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            if (DEBUG) Slog.v(TAG, "System app " + target.packageName + " - skipping sig check");
+            return true;
+        }
+
+        // Allow unsigned apps, but not signed on one device and unsigned on the other
+        // !!! TODO: is this the right policy?
+        Signature[] deviceSigs = target.signatures;
+        if (MORE_DEBUG) Slog.v(TAG, "signaturesMatch(): stored=" + storedSigHashes
+                + " device=" + deviceSigs);
+        if ((storedSigHashes == null || storedSigHashes.size() == 0)
+                && (deviceSigs == null || deviceSigs.length == 0)) {
+            return true;
+        }
+        if (storedSigHashes == null || deviceSigs == null) {
+            return false;
+        }
+
+        // !!! TODO: this demands that every stored signature match one
+        // that is present on device, and does not demand the converse.
+        // Is this this right policy?
+        final int nStored = storedSigHashes.size();
+        final int nDevice = deviceSigs.length;
+
+        // hash each on-device signature
+        ArrayList<byte[]> deviceHashes = new ArrayList<byte[]>(nDevice);
+        for (int i = 0; i < nDevice; i++) {
+            deviceHashes.add(hashSignature(deviceSigs[i]));
+        }
+
+        // now ensure that each stored sig (hash) matches an on-device sig (hash)
+        for (int n = 0; n < nStored; n++) {
+            boolean match = false;
+            final byte[] storedHash = storedSigHashes.get(n);
+            for (int i = 0; i < nDevice; i++) {
+                if (Arrays.equals(storedHash, deviceHashes.get(i))) {
+                    match = true;
+                    break;
+                }
+            }
+            // match is false when no on-device sig matched one of the stored ones
+            if (!match) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    static byte[] hashSignature(Signature sig) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(sig.toByteArray());
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            Slog.w(TAG, "No SHA-256 algorithm found!");
+        }
+        return null;
+    }
+
+    // Old style: directly match the stored vs on device signature blocks
     static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
@@ -4979,96 +6251,184 @@ public class BackupManagerService extends IBackupManager.Stub {
         return true;
     }
 
-    enum RestoreState {
+    // Used by both incremental and full restore
+    void restoreWidgetData(String packageName, byte[] widgetData) {
+        // Apply the restored widget state and generate the ID update for the app
+        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_OWNER);
+    }
+
+    // *****************************
+    // NEW UNIFIED RESTORE IMPLEMENTATION
+    // *****************************
+
+    // states of the unified-restore state machine
+    enum UnifiedRestoreState {
         INITIAL,
-        DOWNLOAD_DATA,
-        PM_METADATA,
         RUNNING_QUEUE,
+        RESTORE_KEYVALUE,
+        RESTORE_FULL,
         FINAL
     }
 
-    class PerformRestoreTask implements BackupRestoreTask {
+    class PerformUnifiedRestoreTask implements BackupRestoreTask {
+        // Transport we're working with to do the restore
         private IBackupTransport mTransport;
+
+        // Where per-transport saved state goes
+        File mStateDir;
+
+        // Restore observer; may be null
         private IRestoreObserver mObserver;
+
+        // Token identifying the dataset to the transport
         private long mToken;
-        private PackageInfo mTargetPackage;
-        private File mStateDir;
+
+        // When this is a restore-during-install, this is the token identifying the
+        // operation to the Package Manager, and we must ensure that we let it know
+        // when we're finished.
         private int mPmToken;
+
+        // Is this a whole-system restore, i.e. are we establishing a new ancestral
+        // dataset to base future restore-at-install operations from?
         private boolean mIsSystemRestore;
-        private HashSet<String> mFilterSet;
-        private long mStartRealtime;
+
+        // If this is a single-package restore, what package are we interested in?
+        private PackageInfo mTargetPackage;
+
+        // In all cases, the calculated list of packages that we are trying to restore
+        private List<PackageInfo> mAcceptSet;
+
+        // Our bookkeeping about the ancestral dataset
         private PackageManagerBackupAgent mPmAgent;
-        private List<PackageInfo> mAgentPackages;
-        private ArrayList<PackageInfo> mRestorePackages;
-        private RestoreState mCurrentState;
-        private int mCount;
-        private boolean mFinished;
-        private int mStatus;
-        private File mBackupDataName;
-        private File mStageName;
-        private File mNewStateName;
-        private File mSavedStateName;
-        private ParcelFileDescriptor mBackupData;
-        private ParcelFileDescriptor mNewState;
+
+        // What sort of restore we're doing now
+        private RestoreDescription mRestoreDescription;
+
+        // The package we're currently restoring
         private PackageInfo mCurrentPackage;
+
+        // Widget-related data handled as part of this restore operation
         private byte[] mWidgetData;
 
+        // Number of apps restored in this pass
+        private int mCount;
 
-        class RestoreRequest {
-            public PackageInfo app;
-            public int storedAppVersion;
+        // When did we start?
+        private long mStartRealtime;
 
-            RestoreRequest(PackageInfo _app, int _version) {
-                app = _app;
-                storedAppVersion = _version;
-            }
-        }
+        // State machine progress
+        private UnifiedRestoreState mState;
 
-        PerformRestoreTask(IBackupTransport transport, String dirName, IRestoreObserver observer,
+        // How are things going?
+        private int mStatus;
+
+        // Done?
+        private boolean mFinished;
+
+        // Key/value: bookkeeping about staged data and files for agent access
+        private File mBackupDataName;
+        private File mStageName;
+        private File mSavedStateName;
+        private File mNewStateName;
+        ParcelFileDescriptor mBackupData;
+        ParcelFileDescriptor mNewState;
+
+        // Invariant: mWakelock is already held, and this task is responsible for
+        // releasing it at the end of the restore operation.
+        PerformUnifiedRestoreTask(IBackupTransport transport, IRestoreObserver observer,
                 long restoreSetToken, PackageInfo targetPackage, int pmToken,
-                boolean isSystemRestore, String[] filterSet) {
-            mCurrentState = RestoreState.INITIAL;
-            mFinished = false;
-            mPmAgent = null;
+                boolean isFullSystemRestore, String[] filterSet) {
+            mState = UnifiedRestoreState.INITIAL;
+            mStartRealtime = SystemClock.elapsedRealtime();
 
             mTransport = transport;
             mObserver = observer;
             mToken = restoreSetToken;
-            mTargetPackage = targetPackage;
             mPmToken = pmToken;
-            mIsSystemRestore = isSystemRestore;
+            mTargetPackage = targetPackage;
+            mIsSystemRestore = isFullSystemRestore;
+            mFinished = false;
 
-            if (filterSet != null) {
-                mFilterSet = new HashSet<String>();
-                for (String pkg : filterSet) {
-                    mFilterSet.add(pkg);
+            if (filterSet == null) {
+                // We want everything and a pony
+                List<PackageInfo> apps
+                        = PackageManagerBackupAgent.getStorableApplications(mPackageManager);
+                filterSet = packagesToNames(apps);
+                if (DEBUG) {
+                    Slog.i(TAG, "Full restore; asking for " + filterSet.length + " apps");
                 }
-            } else {
-                mFilterSet = null;
             }
 
-            mStateDir = new File(mBaseStateDir, dirName);
+            mAcceptSet = new ArrayList<PackageInfo>(filterSet.length);
+
+            // Pro tem, we insist on moving the settings provider package to last place.
+            // Keep track of whether it's in the list, and bump it down if so.  We also
+            // want to do the system package itself first if it's called for.
+            boolean hasSystem = false;
+            boolean hasSettings = false;
+            for (int i = 0; i < filterSet.length; i++) {
+                try {
+                    PackageInfo info = mPackageManager.getPackageInfo(filterSet[i], 0);
+                    if ("android".equals(info.packageName)) {
+                        hasSystem = true;
+                        continue;
+                    }
+                    if (SETTINGS_PACKAGE.equals(info.packageName)) {
+                        hasSettings = true;
+                        continue;
+                    }
+
+                    if (appIsEligibleForBackup(info.applicationInfo)) {
+                        mAcceptSet.add(info);
+                    }
+                } catch (NameNotFoundException e) {
+                    // requested package name doesn't exist; ignore it
+                }
+            }
+            if (hasSystem) {
+                try {
+                    mAcceptSet.add(0, mPackageManager.getPackageInfo("android", 0));
+                } catch (NameNotFoundException e) {
+                    // won't happen; we know a priori that it's valid
+                }
+            }
+            if (hasSettings) {
+                try {
+                    mAcceptSet.add(mPackageManager.getPackageInfo(SETTINGS_PACKAGE, 0));
+                } catch (NameNotFoundException e) {
+                    // this one is always valid too
+                }
+            }
+        }
+
+        private String[] packagesToNames(List<PackageInfo> apps) {
+            final int N = apps.size();
+            String[] names = new String[N];
+            for (int i = 0; i < N; i++) {
+                names[i] = apps.get(i).packageName;
+            }
+            return names;
         }
 
         // Execute one tick of whatever state machine the task implements
         @Override
         public void execute() {
-            if (MORE_DEBUG) Slog.v(TAG, "*** Executing restore step: " + mCurrentState);
-            switch (mCurrentState) {
+            if (MORE_DEBUG) Slog.v(TAG, "*** Executing restore step " + mState);
+            switch (mState) {
                 case INITIAL:
-                    beginRestore();
-                    break;
-
-                case DOWNLOAD_DATA:
-                    downloadRestoreData();
-                    break;
-
-                case PM_METADATA:
-                    restorePmMetadata();
+                    startRestore();
                     break;
 
                 case RUNNING_QUEUE:
-                    restoreNextAgent();
+                    dispatchNextRestore();
+                    break;
+
+                case RESTORE_KEYVALUE:
+                    restoreKeyValue();
+                    break;
+
+                case RESTORE_FULL:
+                    restoreFull();
                     break;
 
                 case FINAL:
@@ -5081,346 +6441,309 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        // Initialize and set up for the PM metadata restore, which comes first
-        void beginRestore() {
-            // Don't account time doing the restore as inactivity of the app
-            // that has opened a restore session.
-            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+        /*
+         * SKETCH OF OPERATION
+         * 
+         * create one of these PerformUnifiedRestoreTask objects, telling it which
+         * dataset & transport to address, and then parameters within the restore
+         * operation: single target package vs many, etc.
+         *
+         * 1. transport.startRestore(token, list-of-packages).  If we need @pm@  it is
+         * always placed first and the settings provider always placed last [for now].
+         * 
+         * 1a [if we needed @pm@ then nextRestorePackage() and restore the PMBA inline]
+         * 
+         *   [ state change => RUNNING_QUEUE ]
+         * 
+         * NOW ITERATE:
+         * 
+         * { 3. t.nextRestorePackage()
+         *   4. does the metadata for this package allow us to restore it?
+         *      does the on-disk app permit us to restore it? [re-check allowBackup etc]
+         *   5. is this a key/value dataset?  => key/value agent restore
+         *       [ state change => RESTORE_KEYVALUE ]
+         *       5a. spin up agent
+         *       5b. t.getRestoreData() to stage it properly
+         *       5c. call into agent to perform restore
+         *       5d. tear down agent
+         *       [ state change => RUNNING_QUEUE ]
+         * 
+         *   6. else it's a stream dataset:
+         *       [ state change => RESTORE_FULL ]
+         *       6a. instantiate the engine for a stream restore: engine handles agent lifecycles
+         *       6b. spin off engine runner on separate thread
+         *       6c. ITERATE getNextFullRestoreDataChunk() and copy data to engine runner socket
+         *       [ state change => RUNNING_QUEUE ]
+         * }
+         * 
+         *   [ state change => FINAL ]
+         * 
+         * 7. t.finishRestore(), release wakelock, etc.
+         * 
+         * 
+         */
 
-            // Assume error until we successfully init everything
-            mStatus = BackupTransport.TRANSPORT_ERROR;
+        // state INITIAL : set up for the restore and read the metadata if necessary
+        private  void startRestore() {
+            sendStartRestore(mAcceptSet.size());
 
+            UnifiedRestoreState nextState = UnifiedRestoreState.RUNNING_QUEUE;
             try {
-                // TODO: Log this before getAvailableRestoreSets, somehow
-                EventLog.writeEvent(EventLogTags.RESTORE_START, mTransport.transportDirName(), mToken);
-
-                // Get the list of all packages which have backup enabled.
-                // (Include the Package Manager metadata pseudo-package first.)
-                mRestorePackages = new ArrayList<PackageInfo>();
-                PackageInfo omPackage = new PackageInfo();
-                omPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-                mRestorePackages.add(omPackage);
-
-                mAgentPackages = allAgentPackages();
-                if (mTargetPackage == null) {
-                    // if there's a filter set, strip out anything that isn't
-                    // present before proceeding
-                    if (mFilterSet != null) {
-                        for (int i = mAgentPackages.size() - 1; i >= 0; i--) {
-                            final PackageInfo pkg = mAgentPackages.get(i);
-                            if (! mFilterSet.contains(pkg.packageName)) {
-                                mAgentPackages.remove(i);
-                            }
-                        }
-                        if (MORE_DEBUG) {
-                            Slog.i(TAG, "Post-filter package set for restore:");
-                            for (PackageInfo p : mAgentPackages) {
-                                Slog.i(TAG, "    " + p);
-                            }
-                        }
-                    }
-                    mRestorePackages.addAll(mAgentPackages);
-                } else {
-                    // Just one package to attempt restore of
-                    mRestorePackages.add(mTargetPackage);
+                // If we don't yet have PM metadata for this token, synthesize an
+                // entry for the PM pseudopackage and make it the first to be
+                // restored.
+                String transportDir = mTransport.transportDirName();
+                mStateDir = new File(mBaseStateDir, transportDir);
+                File metadataDir = new File(mStateDir, "_metadata");
+                metadataDir.mkdirs();
+                File metadataFile = new File(metadataDir, Long.toHexString(mToken));
+                try {
+                    // PM info is cached in $BASE/transport/_metadata/$TOKEN
+                    mPmAgent = new PackageManagerBackupAgent(metadataFile);
+                } catch (IOException e) {
+                    // Nope, we need to get it via restore
+                    PackageInfo pmPackage = new PackageInfo();
+                    pmPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+                    mAcceptSet.add(0, pmPackage);
                 }
 
-                // let the observer know that we're running
-                if (mObserver != null) {
-                    try {
-                        // !!! TODO: get an actual count from the transport after
-                        // its startRestore() runs?
-                        mObserver.restoreStarting(mRestorePackages.size());
-                    } catch (RemoteException e) {
-                        Slog.d(TAG, "Restore observer died at restoreStarting");
-                        mObserver = null;
-                    }
-                }
-            } catch (RemoteException e) {
-                // Something has gone catastrophically wrong with the transport
-                Slog.e(TAG, "Error communicating with transport for restore");
-                executeNextState(RestoreState.FINAL);
-                return;
-            }
-
-            mStatus = BackupTransport.TRANSPORT_OK;
-            executeNextState(RestoreState.DOWNLOAD_DATA);
-        }
-
-        void downloadRestoreData() {
-            // Note that the download phase can be very time consuming, but we're executing
-            // it inline here on the looper.  This is "okay" because it is not calling out to
-            // third party code; the transport is "trusted," and so we assume it is being a
-            // good citizen and timing out etc when appropriate.
-            //
-            // TODO: when appropriate, move the download off the looper and rearrange the
-            //       error handling around that.
-            try {
-                mStatus = mTransport.startRestore(mToken,
-                        mRestorePackages.toArray(new PackageInfo[0]));
+                PackageInfo[] packages = mAcceptSet.toArray(new PackageInfo[0]);
+                mStatus = mTransport.startRestore(mToken, packages);
                 if (mStatus != BackupTransport.TRANSPORT_OK) {
-                    Slog.e(TAG, "Error starting restore operation");
-                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                    executeNextState(RestoreState.FINAL);
+                    Slog.e(TAG, "Transport error " + mStatus + "; no restore possible");
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
+                    nextState = UnifiedRestoreState.FINAL;
                     return;
+                }
+
+                if (mPmAgent == null) {
+                    if (DEBUG) {
+                        Slog.v(TAG, "Need to fetch metadata for token "
+                                + Long.toHexString(mToken));
+                    }
+                    RestoreDescription desc = mTransport.nextRestorePackage();
+                    if (desc == null) {
+                        Slog.e(TAG, "No restore metadata available; halting");
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
+                        nextState = UnifiedRestoreState.FINAL;
+                        return;
+                    }
+                    if (!PACKAGE_MANAGER_SENTINEL.equals(desc.getPackageName())) {
+                        Slog.e(TAG, "Required metadata but got " + desc.getPackageName());
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
+                        nextState = UnifiedRestoreState.FINAL;
+                        return;
+                    }
+
+                    // Pull the Package Manager metadata from the restore set first
+                    PackageInfo omPackage = new PackageInfo();
+                    omPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+                    mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
+                    initiateOneRestore(omPackage, 0,
+                            IBackupAgent.Stub.asInterface(mPmAgent.onBind()));
+                    // The PM agent called operationComplete() already, because our invocation
+                    // of it is process-local and therefore synchronous.  That means that a
+                    // RUNNING_QUEUE message is already enqueued.  Only if we're unable to
+                    // proceed with running the queue do we remove that pending message and
+                    // jump straight to the FINAL state.
+
+                    // Verify that the backup set includes metadata.  If not, we can't do
+                    // signature/version verification etc, so we simply do not proceed with
+                    // the restore operation.
+                    if (!mPmAgent.hasMetadata()) {
+                        Slog.e(TAG, "No restore metadata available, so not restoring settings");
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                                PACKAGE_MANAGER_SENTINEL,
+                                "Package manager restore metadata missing");
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
+                        mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
+                        nextState = UnifiedRestoreState.FINAL;
+                        return;
+                    }
+
+                    // Success; cache the metadata and continue as expected with the
+                    // RUNNING_QUEUE step already enqueued.
+                    if (DEBUG) {
+                        Slog.v(TAG, "Got metadata; caching and proceeding to restore");
+                    }
+                    try {
+                        mPmAgent.saveToDisk(metadataFile);
+                    } catch (IOException e) {
+                        // Something bad; we need to abort
+                        Slog.e(TAG, "Unable to write restored metadata");
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                                PACKAGE_MANAGER_SENTINEL,
+                                "Unable to write restored metadata");
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
+                        mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
+                        nextState = UnifiedRestoreState.FINAL;
+                        return;
+                    }
                 }
             } catch (RemoteException e) {
-                Slog.e(TAG, "Error communicating with transport for restore");
-                EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                mStatus = BackupTransport.TRANSPORT_ERROR;
-                executeNextState(RestoreState.FINAL);
-                return;
-            }
-
-            // Successful download of the data to be parceled out to the apps, so off we go.
-            executeNextState(RestoreState.PM_METADATA);
-        }
-
-        void restorePmMetadata() {
-            try {
-                RestoreDescription desc = mTransport.nextRestorePackage();
-                // TODO: handle full-data stream restore payloads
-                String packageName = desc.getPackageName();
-                if (packageName == null) {
-                    Slog.e(TAG, "Error getting first restore package");
-                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                    mStatus = BackupTransport.TRANSPORT_ERROR;
-                    executeNextState(RestoreState.FINAL);
-                    return;
-                } else if (packageName.equals("")) {
-                    Slog.i(TAG, "No restore data available");
-                    int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
-                    EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, 0, millis);
-                    mStatus = BackupTransport.TRANSPORT_OK;
-                    executeNextState(RestoreState.FINAL);
-                    return;
-                } else if (!packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
-                    Slog.e(TAG, "Expected restore data for \"" + PACKAGE_MANAGER_SENTINEL
-                            + "\", found only \"" + packageName + "\"");
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, PACKAGE_MANAGER_SENTINEL,
-                            "Package manager data missing");
-                    executeNextState(RestoreState.FINAL);
-                    return;
-                }
-
-                // Pull the Package Manager metadata from the restore set first
-                PackageInfo omPackage = new PackageInfo();
-                omPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-                mPmAgent = new PackageManagerBackupAgent(
-                        mPackageManager, mAgentPackages);
-                initiateOneRestore(omPackage, 0, IBackupAgent.Stub.asInterface(mPmAgent.onBind()));
-                // The PM agent called operationComplete() already, because our invocation
-                // of it is process-local and therefore synchronous.  That means that a
-                // RUNNING_QUEUE message is already enqueued.  Only if we're unable to
-                // proceed with running the queue do we remove that pending message and
-                // jump straight to the FINAL state.
-
-                // Verify that the backup set includes metadata.  If not, we can't do
-                // signature/version verification etc, so we simply do not proceed with
-                // the restore operation.
-                if (!mPmAgent.hasMetadata()) {
-                    Slog.e(TAG, "No restore metadata available, so not restoring settings");
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, PACKAGE_MANAGER_SENTINEL,
-                    "Package manager restore metadata missing");
-                    mStatus = BackupTransport.TRANSPORT_ERROR;
-                    mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
-                    executeNextState(RestoreState.FINAL);
-                    return;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error communicating with transport for restore");
-                EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+                // If we lost the transport at any time, halt
+                Slog.e(TAG, "Unable to contact transport for restore");
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
-                executeNextState(RestoreState.FINAL);
+                nextState = UnifiedRestoreState.FINAL;
                 return;
-            }
-
-            // Metadata is intact, so we can now run the restore queue.  If we get here,
-            // we have already enqueued the necessary next-step message on the looper.
-            // We've deferred telling the App Widget service that we might be replacing
-            // the widget environment with something else, but now we know we've got
-            // data coming, so we do it here.
-            if (mIsSystemRestore) {
-                AppWidgetBackupBridge.restoreStarting(UserHandle.USER_OWNER);
+            } finally {
+                executeNextState(nextState);
             }
         }
 
-        void restoreNextAgent() {
+        // state RUNNING_QUEUE : figure out what the next thing to be restored is,
+        // and fire the appropriate next step
+        private void dispatchNextRestore() {
+            UnifiedRestoreState nextState = UnifiedRestoreState.FINAL;
             try {
-                final RestoreDescription desc = mTransport.nextRestorePackage();
-                // TODO: handle full-data stream restore payloads
-                String packageName = desc.getPackageName();
-
-                if (packageName == null) {
-                    Slog.e(TAG, "Error getting next restore package");
+                mRestoreDescription = mTransport.nextRestorePackage();
+                final int type = mRestoreDescription.getDataType();
+                final String pkgName = mRestoreDescription.getPackageName();
+                if (pkgName == null) {
+                    Slog.e(TAG, "Failure getting next package name");
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                    executeNextState(RestoreState.FINAL);
+                    nextState = UnifiedRestoreState.FINAL;
                     return;
-                } else if (packageName.equals("")) {
-                    if (DEBUG) Slog.v(TAG, "No next package, finishing restore");
+                } else if (mRestoreDescription == RestoreDescription.NO_MORE_PACKAGES) {
+                    // Yay we've reached the end cleanly
+                    if (DEBUG) {
+                        Slog.v(TAG, "No more packages; finishing restore");
+                    }
                     int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
                     EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, mCount, millis);
-                    executeNextState(RestoreState.FINAL);
+                    nextState = UnifiedRestoreState.FINAL;
                     return;
                 }
 
-                if (mObserver != null) {
-                    try {
-                        mObserver.onUpdate(mCount, packageName);
-                    } catch (RemoteException e) {
-                        Slog.d(TAG, "Restore observer died in onUpdate");
-                        mObserver = null;
-                    }
+                if (DEBUG) {
+                    Slog.i(TAG, "Next restore package: " + mRestoreDescription);
                 }
+                sendOnRestorePackage(pkgName);
 
-                Metadata metaInfo = mPmAgent.getRestoredMetadata(packageName);
+                Metadata metaInfo = mPmAgent.getRestoredMetadata(pkgName);
                 if (metaInfo == null) {
-                    Slog.e(TAG, "Missing metadata for " + packageName);
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                    Slog.e(TAG, "No metadata for " + pkgName);
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName,
                             "Package metadata missing");
-                    executeNextState(RestoreState.RUNNING_QUEUE);
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
                     return;
                 }
 
-                PackageInfo packageInfo;
                 try {
-                    int flags = PackageManager.GET_SIGNATURES;
-                    packageInfo = mPackageManager.getPackageInfo(packageName, flags);
+                    mCurrentPackage = mPackageManager.getPackageInfo(
+                            pkgName, PackageManager.GET_SIGNATURES);
                 } catch (NameNotFoundException e) {
-                    Slog.e(TAG, "Invalid package restoring data", e);
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                    // Whoops, we thought we could restore this package but it
+                    // turns out not to be present.  Skip it.
+                    Slog.e(TAG, "Package not present: " + pkgName);
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName,
                             "Package missing on device");
-                    executeNextState(RestoreState.RUNNING_QUEUE);
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
                     return;
                 }
 
-                if (packageInfo.applicationInfo.backupAgentName == null
-                        || "".equals(packageInfo.applicationInfo.backupAgentName)) {
-                    if (DEBUG) {
-                        Slog.i(TAG, "Data exists for package " + packageName
-                                + " but app has no agent; skipping");
-                    }
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
-                            "Package has no agent");
-                    executeNextState(RestoreState.RUNNING_QUEUE);
-                    return;
-                }
-
-                if (metaInfo.versionCode > packageInfo.versionCode) {
+                if (metaInfo.versionCode > mCurrentPackage.versionCode) {
                     // Data is from a "newer" version of the app than we have currently
                     // installed.  If the app has not declared that it is prepared to
                     // handle this case, we do not attempt the restore.
-                    if ((packageInfo.applicationInfo.flags
+                    if ((mCurrentPackage.applicationInfo.flags
                             & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) == 0) {
                         String message = "Version " + metaInfo.versionCode
-                        + " > installed version " + packageInfo.versionCode;
-                        Slog.w(TAG, "Package " + packageName + ": " + message);
+                                + " > installed version " + mCurrentPackage.versionCode;
+                        Slog.w(TAG, "Package " + pkgName + ": " + message);
                         EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
-                                packageName, message);
-                        executeNextState(RestoreState.RUNNING_QUEUE);
+                                pkgName, message);
+                        nextState = UnifiedRestoreState.RUNNING_QUEUE;
                         return;
                     } else {
                         if (DEBUG) Slog.v(TAG, "Version " + metaInfo.versionCode
-                                + " > installed " + packageInfo.versionCode
+                                + " > installed " + mCurrentPackage.versionCode
                                 + " but restoreAnyVersion");
                     }
                 }
 
-                if (!signaturesMatch(metaInfo.signatures, packageInfo)) {
-                    Slog.w(TAG, "Signature mismatch restoring " + packageName);
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
-                            "Signature mismatch");
-                    executeNextState(RestoreState.RUNNING_QUEUE);
-                    return;
-                }
-
-                if (DEBUG) Slog.v(TAG, "Package " + packageName
+                if (DEBUG) Slog.v(TAG, "Package " + pkgName
                         + " restore version [" + metaInfo.versionCode
                         + "] is compatible with installed version ["
-                        + packageInfo.versionCode + "]");
+                        + mCurrentPackage.versionCode + "]");
 
-                // Then set up and bind the agent
-                IBackupAgent agent = bindToAgentSynchronous(
-                        packageInfo.applicationInfo,
-                        IApplicationThread.BACKUP_MODE_INCREMENTAL);
-                if (agent == null) {
-                    Slog.w(TAG, "Can't find backup agent for " + packageName);
-                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
-                            "Restore agent missing");
-                    executeNextState(RestoreState.RUNNING_QUEUE);
+                // Reset per-package preconditions and fire the appropriate next state
+                mWidgetData = null;
+                if (type == RestoreDescription.TYPE_KEY_VALUE) {
+                    nextState = UnifiedRestoreState.RESTORE_KEYVALUE;
+                } else if (type == RestoreDescription.TYPE_FULL_STREAM) {
+                    nextState = UnifiedRestoreState.RESTORE_FULL;
+                } else {
+                    // Unknown restore type; ignore this package and move on
+                    Slog.e(TAG, "Unrecognized restore type " + type);
+                    nextState = UnifiedRestoreState.RUNNING_QUEUE;
                     return;
                 }
-
-                // And then finally start the restore on this agent
-                try {
-                    initiateOneRestore(packageInfo, metaInfo.versionCode, agent);
-                    ++mCount;
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error when attempting restore: " + e.toString());
-                    agentErrorCleanup();
-                    executeNextState(RestoreState.RUNNING_QUEUE);
-                }
             } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to fetch restore data from transport");
-                mStatus = BackupTransport.TRANSPORT_ERROR;
-                executeNextState(RestoreState.FINAL);
+                Slog.e(TAG, "Can't get next target from transport; ending restore");
+                EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+                nextState = UnifiedRestoreState.FINAL;
+                return;
+            } finally {
+                executeNextState(nextState);
             }
         }
 
-        void finalizeRestore() {
-            if (MORE_DEBUG) Slog.d(TAG, "finishing restore mObserver=" + mObserver);
+        // state RESTORE_KEYVALUE : restore one package via key/value API set
+        private void restoreKeyValue() {
+            // Initiating the restore will pass responsibility for the state machine's
+            // progress to the agent callback, so we do not always execute the
+            // next state here.
+            final String packageName = mCurrentPackage.packageName;
+            // Validate some semantic requirements that apply in this way
+            // only to the key/value restore API flow
+            if (mCurrentPackage.applicationInfo.backupAgentName == null
+                    || "".equals(mCurrentPackage.applicationInfo.backupAgentName)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Data exists for package " + packageName
+                            + " but app has no agent; skipping");
+                }
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                        "Package has no agent");
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+                return;
+            }
 
+            Metadata metaInfo = mPmAgent.getRestoredMetadata(packageName);
+            if (!signaturesMatch(metaInfo.sigHashes, mCurrentPackage)) {
+                Slog.w(TAG, "Signature mismatch restoring " + packageName);
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                        "Signature mismatch");
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+                return;
+            }
+
+            // Good to go!  Set up and bind the agent...
+            IBackupAgent agent = bindToAgentSynchronous(
+                    mCurrentPackage.applicationInfo,
+                    IApplicationThread.BACKUP_MODE_INCREMENTAL);
+            if (agent == null) {
+                Slog.w(TAG, "Can't find backup agent for " + packageName);
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                        "Restore agent missing");
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+                return;
+            }
+
+            // And then finally start the restore on this agent
             try {
-                mTransport.finishRestore();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error finishing restore", e);
+                initiateOneRestore(mCurrentPackage, metaInfo.versionCode, agent);
+                ++mCount;
+            } catch (Exception e) {
+                Slog.e(TAG, "Error when attempting restore: " + e.toString());
+                keyValueAgentErrorCleanup();
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
             }
-
-            if (mObserver != null) {
-                try {
-                    mObserver.restoreFinished(mStatus);
-                } catch (RemoteException e) {
-                    Slog.d(TAG, "Restore observer died at restoreFinished");
-                }
-            }
-
-            // If this was a restoreAll operation, record that this was our
-            // ancestral dataset, as well as the set of apps that are possibly
-            // restoreable from the dataset
-            if (mTargetPackage == null && mPmAgent != null) {
-                mAncestralPackages = mPmAgent.getRestoredPackages();
-                mAncestralToken = mToken;
-                writeRestoreTokens();
-            }
-
-            // We must under all circumstances tell the Package Manager to
-            // proceed with install notifications if it's waiting for us.
-            if (mPmToken > 0) {
-                if (MORE_DEBUG) Slog.v(TAG, "finishing PM token " + mPmToken);
-                try {
-                    mPackageManagerBinder.finishPackageInstall(mPmToken);
-                } catch (RemoteException e) { /* can't happen */ }
-            }
-
-            // Furthermore we need to reset the session timeout clock
-            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
-            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
-                    TIMEOUT_RESTORE_INTERVAL);
-
-            // Kick off any work that may be needed regarding app widget restores
-            AppWidgetBackupBridge.restoreFinished(UserHandle.USER_OWNER);
-
-            // done; we can finally release the wakelock
-            Slog.i(TAG, "Restore complete.");
-            mWakelock.release();
         }
 
-        // Call asynchronously into the app, passing it the restore data.  The next step
-        // after this is always a callback, either operationComplete() or handleTimeout().
+        // Guts of a key/value restore operation
         void initiateOneRestore(PackageInfo app, int appVersionCode, IBackupAgent agent) {
-            mCurrentPackage = app;
-            mWidgetData = null;
             final String packageName = app.packageName;
 
             if (DEBUG) Slog.d(TAG, "initiateOneRestore packageName=" + packageName);
@@ -5443,9 +6766,9 @@ public class BackupManagerService extends IBackupManager.Stub {
             try {
                 // Run the transport's restore pass
                 stage = ParcelFileDescriptor.open(downloadFile,
-                            ParcelFileDescriptor.MODE_READ_WRITE |
-                            ParcelFileDescriptor.MODE_CREATE |
-                            ParcelFileDescriptor.MODE_TRUNCATE);
+                        ParcelFileDescriptor.MODE_READ_WRITE |
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE);
 
                 if (!SELinux.restorecon(mBackupDataName)) {
                     Slog.e(TAG, "SElinux restorecon failed for " + downloadFile);
@@ -5458,7 +6781,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     stage.close();
                     downloadFile.delete();
-                    executeNextState(RestoreState.FINAL);
+                    executeNextState(UnifiedRestoreState.FINAL);
                     return;
                 }
 
@@ -5505,38 +6828,281 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // Okay, we have the data.  Now have the agent do the restore.
                 stage.close();
                 mBackupData = ParcelFileDescriptor.open(mBackupDataName,
-                            ParcelFileDescriptor.MODE_READ_ONLY);
+                        ParcelFileDescriptor.MODE_READ_ONLY);
 
                 mNewState = ParcelFileDescriptor.open(mNewStateName,
-                            ParcelFileDescriptor.MODE_READ_WRITE |
-                            ParcelFileDescriptor.MODE_CREATE |
-                            ParcelFileDescriptor.MODE_TRUNCATE);
+                        ParcelFileDescriptor.MODE_READ_WRITE |
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE);
 
-                // Kick off the restore, checking for hung agents
+                // Kick off the restore, checking for hung agents.  The timeout or
+                // the operationComplete() callback will schedule the next step,
+                // so we do not do that here.
                 prepareOperationTimeout(token, TIMEOUT_RESTORE_INTERVAL, this);
                 agent.doRestore(mBackupData, appVersionCode, mNewState,
                         token, mBackupManagerBinder);
             } catch (Exception e) {
                 Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
-                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName, e.toString());
-                agentErrorCleanup();    // clears any pending timeout messages as well
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                        packageName, e.toString());
+                keyValueAgentErrorCleanup();    // clears any pending timeout messages as well
 
                 // After a restore failure we go back to running the queue.  If there
                 // are no more packages to be restored that will be handled by the
                 // next step.
-                executeNextState(RestoreState.RUNNING_QUEUE);
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
             }
         }
 
-        void agentErrorCleanup() {
+        // state RESTORE_FULL : restore one package via streaming engine
+        private void restoreFull() {
+            // None of this can run on the work looper here, so we spin asynchronous
+            // work like this:
+            //
+            //   StreamFeederThread: read data from mTransport.getNextFullRestoreDataChunk()
+            //                       write it into the pipe to the engine
+            //   EngineThread: FullRestoreEngine thread communicating with the target app
+            //
+            // When finished, StreamFeederThread executes next state as appropriate on the
+            // backup looper, and the overall unified restore task resumes
+            try {
+                StreamFeederThread feeder = new StreamFeederThread();
+                if (DEBUG) {
+                    Slog.i(TAG, "Spinning threads for stream restore of "
+                            + mCurrentPackage.packageName);
+                }
+                new Thread(feeder, "unified-stream-feeder").start();
+
+                // At this point the feeder is responsible for advancing the restore
+                // state, so we're done here.
+            } catch (IOException e) {
+                // Unable to instantiate the feeder thread -- we need to bail on the
+                // current target.  We haven't asked the transport for data yet, though,
+                // so we can do that simply by going back to running the restore queue.
+                Slog.e(TAG, "Unable to construct pipes for stream restore!");
+                executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+            }
+        }
+
+        class StreamFeederThread extends RestoreEngine implements Runnable {
+            final String TAG = "StreamFeederThread";
+            FullRestoreEngine mEngine;
+
+            // pipe through which we read data from the transport. [0] read, [1] write
+            ParcelFileDescriptor[] mTransportPipes;
+
+            // pipe through which the engine will read data.  [0] read, [1] write
+            ParcelFileDescriptor[] mEnginePipes;
+
+            public StreamFeederThread() throws IOException {
+                mTransportPipes = ParcelFileDescriptor.createPipe();
+                mEnginePipes = ParcelFileDescriptor.createPipe();
+                setRunning(true);
+            }
+
+            @Override
+            public void run() {
+                UnifiedRestoreState nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                int status = BackupTransport.TRANSPORT_OK;
+
+                mEngine = new FullRestoreEngine(null, mCurrentPackage, false, false);
+                EngineThread eThread = new EngineThread(mEngine, mEnginePipes[0]);
+
+                ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
+                ParcelFileDescriptor tReadEnd = mTransportPipes[0];
+                ParcelFileDescriptor tWriteEnd = mTransportPipes[1];
+
+                int bufferSize = 32 * 1024;
+                byte[] buffer = new byte[bufferSize];
+                FileOutputStream engineOut = new FileOutputStream(eWriteEnd.getFileDescriptor());
+                FileInputStream transportIn = new FileInputStream(tReadEnd.getFileDescriptor());
+
+                // spin up the engine and start moving data to it
+                new Thread(eThread, "unified-restore-engine").start();
+
+                try {
+                    while (status == BackupTransport.TRANSPORT_OK) {
+                        // have the transport write some of the restoring data to us
+                        int result = mTransport.getNextFullRestoreDataChunk(tWriteEnd);
+                        if (result > 0) {
+                            // The transport wrote this many bytes of restore data to the
+                            // pipe, so pass it along to the engine.
+                            if (MORE_DEBUG) {
+                                Slog.v(TAG, "  <- transport provided chunk size " + result);
+                            }
+                            if (result > bufferSize) {
+                                bufferSize = result;
+                                buffer = new byte[bufferSize];
+                            }
+                            int toCopy = result;
+                            while (toCopy > 0) {
+                                int n = transportIn.read(buffer, 0, toCopy);
+                                engineOut.write(buffer, 0, n);
+                                toCopy -= n;
+                                if (MORE_DEBUG) {
+                                    Slog.v(TAG, "  -> wrote " + n + " to engine, left=" + toCopy);
+                                }
+                            }
+                        } else if (result == BackupTransport.NO_MORE_DATA) {
+                            // Clean finish.  Wind up and we're done!
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Got clean full-restore EOF for "
+                                        + mCurrentPackage.packageName);
+                            }
+                            status = BackupTransport.TRANSPORT_OK;
+                            break;
+                        } else {
+                            // Transport reported some sort of failure; the fall-through
+                            // handling will deal properly with that.
+                            Slog.e(TAG, "Error " + result + " streaming restore for "
+                                    + mCurrentPackage.packageName);
+                        }
+                    }
+                    if (MORE_DEBUG) Slog.v(TAG, "Done copying to engine, falling through");
+                } catch (IOException e) {
+                    // We lost our ability to communicate via the pipes.  That's worrying
+                    // but potentially recoverable; abandon this package's restore but
+                    // carry on with the next restore target.
+                    Slog.e(TAG, "Unable to route data for restore");
+                    status = BackupTransport.AGENT_ERROR;
+                } catch (RemoteException e) {
+                    // The transport went away; terminate the whole operation.  Closing
+                    // the sockets will wake up the engine and it will then tidy up the
+                    // remote end.
+                    Slog.e(TAG, "Transport failed during restore");
+                    status = BackupTransport.TRANSPORT_ERROR;
+                } finally {
+                    // Close the transport pipes and *our* end of the engine pipe,
+                    // but leave the engine thread's end open so that it properly
+                    // hits EOF and winds up its operations.
+                    IoUtils.closeQuietly(mEnginePipes[1]);
+                    IoUtils.closeQuietly(mTransportPipes[0]);
+                    IoUtils.closeQuietly(mTransportPipes[1]);
+
+                    // Don't proceed until the engine has torn down the agent etc
+                    eThread.waitForResult();
+
+                    // Now we're really done with this one too
+                    IoUtils.closeQuietly(mEnginePipes[0]);
+
+                    // If we hit a transport-level error, we are done with everything;
+                    // if we hit an agent error we just go back to running the queue.
+                    if (status == BackupTransport.TRANSPORT_OK) {
+                        // Clean finish, so just carry on
+                        nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                    } else {
+                        // Something went wrong somewhere.  Whether it was at the transport
+                        // level is immaterial; we need to tell the transport to bail
+                        try {
+                            mTransport.abortFullRestore();
+                        } catch (RemoteException e) {
+                            // transport itself is dead; make sure we handle this as a
+                            // fatal error
+                            status = BackupTransport.TRANSPORT_ERROR;
+                        }
+
+                        // We also need to wipe the current target's data, as it's probably
+                        // in an incoherent state.
+                        clearApplicationDataSynchronous(mCurrentPackage.packageName);
+
+                        // Schedule the next state based on the nature of our failure
+                        if (status == BackupTransport.TRANSPORT_ERROR) {
+                            nextState = UnifiedRestoreState.FINAL;
+                        } else {
+                            nextState = UnifiedRestoreState.RUNNING_QUEUE;
+                        }
+                    }
+                    executeNextState(nextState);
+                    setRunning(false);
+                }
+            }
+
+        }
+
+        class EngineThread implements Runnable {
+            FullRestoreEngine mEngine;
+            FileInputStream mEngineStream;
+
+            EngineThread(FullRestoreEngine engine, ParcelFileDescriptor engineSocket) {
+                mEngine = engine;
+                engine.setRunning(true);
+                mEngineStream = new FileInputStream(engineSocket.getFileDescriptor());
+            }
+
+            public boolean isRunning() {
+                return mEngine.isRunning();
+            }
+
+            public int waitForResult() {
+                return mEngine.waitForResult();
+            }
+
+            @Override
+            public void run() {
+                while (mEngine.isRunning()) {
+                    mEngine.restoreOneFile(mEngineStream);
+                }
+            }
+        }
+
+        // state FINAL : tear everything down and we're done.
+        private void finalizeRestore() {
+            if (MORE_DEBUG) Slog.d(TAG, "finishing restore mObserver=" + mObserver);
+
+            try {
+                mTransport.finishRestore();
+            } catch (Exception e) {
+                Slog.e(TAG, "Error finishing restore", e);
+            }
+
+            // Tell the observer we're done
+            if (mObserver != null) {
+                try {
+                    mObserver.restoreFinished(mStatus);
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Restore observer died at restoreFinished");
+                }
+            }
+
+            // If we have a PM token, we must under all circumstances be sure to
+            // handshake when we've finished.
+            if (mPmToken > 0) {
+                if (MORE_DEBUG) Slog.v(TAG, "finishing PM token " + mPmToken);
+                try {
+                    mPackageManagerBinder.finishPackageInstall(mPmToken);
+                } catch (RemoteException e) { /* can't happen */ }
+            }
+
+            // Kick off any work that may be needed regarding app widget restores
+            AppWidgetBackupBridge.restoreFinished(UserHandle.USER_OWNER);
+
+            // If this was a full-system restore, record the ancestral
+            // dataset information
+            if (mIsSystemRestore) {
+                mAncestralPackages = mPmAgent.getRestoredPackages();
+                mAncestralToken = mToken;
+                writeRestoreTokens();
+            }
+
+            // Furthermore we need to reset the session timeout clock
+            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
+                    TIMEOUT_RESTORE_INTERVAL);
+
+            // done; we can finally release the wakelock and be legitimately done.
+            Slog.i(TAG, "Restore complete.");
+            mWakelock.release();
+        }
+
+        void keyValueAgentErrorCleanup() {
             // If the agent fails restore, it might have put the app's data
             // into an incoherent state.  For consistency we wipe its data
             // again in this case before continuing with normal teardown
             clearApplicationDataSynchronous(mCurrentPackage.packageName);
-            agentCleanup();
+            keyValueAgentCleanup();
         }
 
-        void agentCleanup() {
+        void keyValueAgentCleanup() {
             mBackupDataName.delete();
             mStageName.delete();
             try { if (mBackupData != null) mBackupData.close(); } catch (IOException e) {}
@@ -5545,7 +7111,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             // if everything went okay, remember the recorded state now
             //
-            // !!! TODO: the restored data should be migrated on the server
+            // !!! TODO: the restored data could be migrated on the server
             // side into the current dataset.  In that case the new state file
             // we just created would reflect the data already extant in the
             // backend, so there'd be nothing more to do.  Until that happens,
@@ -5592,14 +7158,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        // A call to agent.doRestore() has been positively acknowledged as complete
         @Override
         public void operationComplete() {
             int size = (int) mBackupDataName.length();
             EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE, mCurrentPackage.packageName, size);
 
             // Just go back to running the restore queue
-            agentCleanup();
+            keyValueAgentCleanup();
 
             // If there was widget state associated with this app, get the OS to
             // incorporate it into current bookeeping and then pass that along to
@@ -5608,7 +7173,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 restoreWidgetData(mCurrentPackage.packageName, mWidgetData);
             }
 
-            executeNextState(RestoreState.RUNNING_QUEUE);
+            executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
         }
 
         // A call to agent.doRestore() has timed out
@@ -5618,23 +7183,53 @@ public class BackupManagerService extends IBackupManager.Stub {
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                     mCurrentPackage.packageName, "restore timeout");
             // Handle like an agent that threw on invocation: wipe it and go on to the next
-            agentErrorCleanup();
-            executeNextState(RestoreState.RUNNING_QUEUE);
+            keyValueAgentErrorCleanup();
+            executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
         }
 
-        void executeNextState(RestoreState nextState) {
+        void executeNextState(UnifiedRestoreState nextState) {
             if (MORE_DEBUG) Slog.i(TAG, " => executing next step on "
                     + this + " nextState=" + nextState);
-            mCurrentState = nextState;
+            mState = nextState;
             Message msg = mBackupHandler.obtainMessage(MSG_BACKUP_RESTORE_STEP, this);
             mBackupHandler.sendMessage(msg);
         }
-    }
 
-    // Used by both incremental and full restore
-    void restoreWidgetData(String packageName, byte[] widgetData) {
-        // Apply the restored widget state and generate the ID update for the app
-        AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_OWNER);
+        // restore observer support
+        void sendStartRestore(int numPackages) {
+            if (mObserver != null) {
+                try {
+                    mObserver.restoreStarting(numPackages);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Restore observer went away: startRestore");
+                    mObserver = null;
+                }
+            }
+        }
+
+        void sendOnRestorePackage(String name) {
+            if (mObserver != null) {
+                if (mObserver != null) {
+                    try {
+                        mObserver.onUpdate(mCount, name);
+                    } catch (RemoteException e) {
+                        Slog.d(TAG, "Restore observer died in onUpdate");
+                        mObserver = null;
+                    }
+                }
+            }
+        }
+
+        void sendEndRestore() {
+            if (mObserver != null) {
+                try {
+                    mObserver.restoreFinished(mStatus);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Restore observer went away: endRestore");
+                    mObserver = null;
+                }
+            }
+        }
     }
 
     class PerformClearTask implements Runnable {
@@ -6845,9 +8440,32 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         long identityToken = Binder.clearCallingIdentity();
         try {
+            if (args != null) {
+                for (String arg : args) {
+                    if ("-h".equals(arg)) {
+                        pw.println("'dumpsys backup' optional arguments:");
+                        pw.println("  -h       : this help text");
+                        pw.println("  a[gents] : dump information about defined backup agents");
+                        return;
+                    } else if ("agents".startsWith(arg)) {
+                        dumpAgents(pw);
+                        return;
+                    }
+                }
+            }
             dumpInternal(pw);
         } finally {
             Binder.restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void dumpAgents(PrintWriter pw) {
+        List<PackageInfo> agentPackages = allAgentPackages();
+        pw.println("Defined backup agents:");
+        for (PackageInfo pkg : agentPackages) {
+            pw.print("  ");
+            pw.print(pkg.packageName); pw.println(':');
+            pw.print("      "); pw.println(pkg.applicationInfo.backupAgentName);
         }
     }
 

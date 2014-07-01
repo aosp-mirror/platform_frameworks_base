@@ -250,6 +250,14 @@ public class BackupTransport {
      * <p>If this method returns {@code null}, it means that a transport-level error has
      * occurred and the entire restore operation should be abandoned.
      *
+     * <p class="note">The OS may call {@link #nextRestorePackage()} multiple times
+     * before calling either {@link #getRestoreData(ParcelFileDescriptor) getRestoreData()}
+     * or {@link #getNextFullRestoreDataChunk(ParcelFileDescriptor) getNextFullRestoreDataChunk()}.
+     * It does this when it has determined that it needs to skip restore of one or more
+     * packages.  The transport should not actually transfer any restore data for
+     * the given package in response to {@link #nextRestorePackage()}, but rather wait
+     * for an explicit request before doing so.
+     *
      * @return A RestoreDescription object containing the name of one of the packages
      *   supplied to {@link #startRestore} plus an indicator of the data type of that
      *   restore data; or {@link RestoreDescription#NO_MORE_PACKAGES} to indicate that
