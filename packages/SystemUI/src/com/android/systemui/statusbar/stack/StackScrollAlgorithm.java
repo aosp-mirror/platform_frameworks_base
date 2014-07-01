@@ -176,14 +176,14 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackScrollState.ViewState state = resultState.getViewStateForView(child);
-            float newYTranslation = state.yTranslation;
-            int newHeight = state.height;
+            float newYTranslation = state.yTranslation + state.height * (1f - state.scale) / 2f;
+            float newHeight = state.height * state.scale;
             // apply clipping and shadow
             float newNotificationEnd = newYTranslation + newHeight;
 
             // In the unlocked shade we have to clip a little bit higher because of the rounded
             // corners of the notifications.
-            float clippingCorrection = state.dimmed ? 0 : mRoundedRectCornerRadius;
+            float clippingCorrection = state.dimmed ? 0 : mRoundedRectCornerRadius * state.scale;
 
             // When the previous notification is swiped, we don't clip the content to the
             // bottom of it.
@@ -192,12 +192,12 @@ public class StackScrollAlgorithm {
                     : newNotificationEnd - (previousNotificationEnd - clippingCorrection);
 
             updateChildClippingAndBackground(state, newHeight, clipHeight,
-                    (int) (newHeight - (previousNotificationStart - newYTranslation)));
+                    newHeight - (previousNotificationStart - newYTranslation));
 
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
-                previousNotificationStart = newYTranslation + state.clipTopAmount;
+                previousNotificationStart = newYTranslation + state.clipTopAmount * state.scale;
                 previousNotificationEnd = newNotificationEnd;
                 previousNotificationIsSwiped = child.getTranslationX() != 0;
             }
@@ -213,15 +213,17 @@ public class StackScrollAlgorithm {
      * @param backgroundHeight the desired background height. The shadows of the view will be
      *                         based on this height and the content will be clipped from the top
      */
-    private void updateChildClippingAndBackground(StackScrollState.ViewState state, int realHeight,
-            float clipHeight, int backgroundHeight) {
+    private void updateChildClippingAndBackground(StackScrollState.ViewState state,
+            float realHeight, float clipHeight, float backgroundHeight) {
         if (realHeight > clipHeight) {
-            state.topOverLap = (int) (realHeight - clipHeight);
+            // Rather overlap than create a hole.
+            state.topOverLap = (int) Math.floor((realHeight - clipHeight) / state.scale);
         } else {
             state.topOverLap = 0;
         }
         if (realHeight > backgroundHeight) {
-            state.clipTopAmount = (realHeight - backgroundHeight);
+            // Rather overlap than create a hole.
+            state.clipTopAmount = (int) Math.floor((realHeight - backgroundHeight) / state.scale);
         } else {
             state.clipTopAmount = 0;
         }

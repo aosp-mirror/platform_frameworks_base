@@ -154,16 +154,12 @@ public class StackScrollState {
                 // apply scrimming
                 child.setScrimAmount(state.scrimAmount);
 
+                // apply clipping
                 float oldClipTopAmount = child.getClipTopAmount();
                 if (oldClipTopAmount != state.clipTopAmount) {
                     child.setClipTopAmount(state.clipTopAmount);
                 }
-
-                if (state.topOverLap != 0) {
-                    updateChildClip(child, newHeight, state.topOverLap);
-                } else {
-                    child.setClipBounds(null);
-                }
+                updateChildClip(child, newHeight, state.topOverLap);
 
                 if(child instanceof SpeedBumpView) {
                     float lineEnd = newYTranslation + newHeight / 2;
