@@ -105,6 +105,15 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     }
 
     /**
+     * Return {@code true} if the device is of a type that can be an input source.
+     */
+    public boolean isSourceType() {
+        return mDeviceType == HdmiCec.DEVICE_PLAYBACK
+                || mDeviceType == HdmiCec.DEVICE_RECORDER
+                || mDeviceType == HdmiCec.DEVICE_TUNER;
+    }
+
+    /**
      * Return display (OSD) name of the device.
      */
     public String getDisplayName() {

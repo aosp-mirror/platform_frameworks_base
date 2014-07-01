@@ -21,6 +21,7 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioSystem;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -69,9 +70,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Copy of mDeviceInfos to guarantee thread-safety.
     @GuardedBy("mLock")
     private List<HdmiCecDeviceInfo> mSafeAllDeviceInfos = Collections.emptyList();
-    // All external cec device which excludes local devices.
+    // All external cec input(source) devices. Does not include system audio device.
     @GuardedBy("mLock")
-    private List<HdmiCecDeviceInfo> mSafeExternalDeviceInfos = Collections.emptyList();
+    private List<HdmiCecDeviceInfo> mSafeExternalInputs = Collections.emptyList();
 
     // Map-like container of all cec devices including local ones.
     // A logical address of device is used as key of container.
@@ -186,6 +187,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         setPrevPortId(portId);
         // TODO: Actually switch the physical port here. Handle PAP/PIP as well.
         //       Show OSD port change banner
+        mService.invokeInputChangeListener(getActiveSource());
     }
 
     @ServiceThreadOnly
@@ -807,17 +809,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     /**
-     * Return a list of  {@link HdmiCecDeviceInfo}.
-     *
-     * @param includeLocalDevice whether to include local device in result.
+     * Return external input devices.
      */
-    List<HdmiCecDeviceInfo> getSafeDeviceInfoList(boolean includeLocalDevice) {
+    List<HdmiCecDeviceInfo> getSafeExternalInputs() {
         synchronized (mLock) {
-            if (includeLocalDevice) {
-                return mSafeAllDeviceInfos;
-            } else {
-                return mSafeExternalDeviceInfos;
-            }
+            return mSafeExternalInputs;
         }
     }
 
@@ -825,11 +821,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void updateSafeDeviceInfoList() {
         assertRunOnServiceThread();
         List<HdmiCecDeviceInfo> copiedDevices = HdmiUtils.sparseArrayToList(mDeviceInfos);
-        List<HdmiCecDeviceInfo> externalDeviceInfos = getDeviceInfoList(false);
+        List<HdmiCecDeviceInfo> externalInputs = getInputDevices();
         synchronized (mLock) {
             mSafeAllDeviceInfos = copiedDevices;
-            mSafeExternalDeviceInfos = externalDeviceInfos;
+            mSafeExternalInputs = externalInputs;
         }
+    }
+
+    /**
+     * Return a list of external cec input (source) devices.
+     *
+     * <p>Note that this effectively excludes non-source devices like system audio,
+     * secondary TV.
+     */
+    private List<HdmiCecDeviceInfo> getInputDevices() {
+        ArrayList<HdmiCecDeviceInfo> infoList = new ArrayList<>();
+        for (int i = 0; i < mDeviceInfos.size(); ++i) {
+            HdmiCecDeviceInfo info = mDeviceInfos.valueAt(i);
+            if (isLocalDeviceAddress(i)) {
+                continue;
+            }
+            if (info.isSourceType()) {
+                infoList.add(info);
+            }
+        }
+        return infoList;
     }
 
     @ServiceThreadOnly
