@@ -31,7 +31,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
@@ -518,7 +517,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         Resources res = context.getResources();
 
         updateDisplaySize(); // populates mDisplayMetrics
-        loadDimens();
+        updateResources();
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
