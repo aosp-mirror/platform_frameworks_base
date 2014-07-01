@@ -195,7 +195,12 @@ public abstract class PanelView extends FrameLayout {
 
             case MotionEvent.ACTION_MOVE:
                 float h = y - mInitialTouchY;
-                if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
+
+                // If the panel was collapsed when touching, we only need to check for the
+                // y-component of the gesture, as we have no conflicting horizontal gesture.
+                if (Math.abs(h) > mTouchSlop
+                        && (Math.abs(h) > Math.abs(x - mInitialTouchX)
+                                || mInitialOffsetOnTouch == 0f)) {
                     mTouchSlopExceeded = true;
                     if (waitForTouchSlop && !mTracking) {
                         mInitialOffsetOnTouch = mExpandedHeight;
@@ -229,8 +234,15 @@ public abstract class PanelView extends FrameLayout {
                 trackMovement(event);
                 if ((mTracking && mTouchSlopExceeded)
                         || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    float vel = getCurrentVelocity();
-                    boolean expand = flingExpands(vel);
+                    float vel = 0f;
+                    float vectorVel = 0f;
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.computeCurrentVelocity(1000);
+                        vel = mVelocityTracker.getYVelocity();
+                        vectorVel = (float) Math.hypot(
+                                mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+                    }
+                    boolean expand = flingExpands(vel, vectorVel);
                     onTrackingStopped(expand);
                     fling(vel, expand);
                 } else {
@@ -257,16 +269,6 @@ public abstract class PanelView extends FrameLayout {
         mTracking = true;
         mBar.onTrackingStarted(PanelView.this);
         onExpandingStarted();
-    }
-
-    private float getCurrentVelocity() {
-
-        // the velocitytracker might be null if we got a bad input stream
-        if (mVelocityTracker == null) {
-            return 0;
-        }
-        mVelocityTracker.computeCurrentVelocity(1000);
-        return mVelocityTracker.getYVelocity();
     }
 
     @Override
@@ -368,11 +370,12 @@ public abstract class PanelView extends FrameLayout {
     }
 
     /**
-     * @param vel the current velocity of the motion
+     * @param vel the current vertical velocity of the motion
+     * @param vectorVel the length of the vectorial velocity
      * @return whether a fling should expands the panel; contracts otherwise
      */
-    private boolean flingExpands(float vel) {
-        if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+    private boolean flingExpands(float vel, float vectorVel) {
+        if (Math.abs(vectorVel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return getExpandedFraction() > 0.5f;
         } else {
             return vel > 0;
