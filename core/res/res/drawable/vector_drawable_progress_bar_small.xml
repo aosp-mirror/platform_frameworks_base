@@ -25,8 +25,6 @@
 
     <group
         android:name="root"
-        android:scaleX="1.0"
-        android:scaleY="1.0"
         android:translateX="24.0"
         android:translateY="24.0" >
         <path

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+ Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,15 +15,11 @@
      limitations under the License.
 -->
 
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable_progress_bar_large" >
-
-    <target
-        android:name="progressBar"
-        android:animation="@anim/progress_indeterminate_material" />
-
-    <target
-        android:name="root"
-        android:animation="@anim/progress_indeterminate_rotation_material" />
-
-</animated-vector>
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="6665"
+    android:interpolator="@android:anim/linear_interpolator"
+    android:propertyName="rotation"
+    android:repeatCount="-1"
+    android:valueFrom="0"
+    android:valueTo="720"
+    android:valueType="floatType" />
