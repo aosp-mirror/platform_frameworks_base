@@ -672,6 +672,19 @@ public final class TvContract {
         public static final String COLUMN_SEARCHABLE = "searchable";
 
         /**
+         * The flag indicating whether this TV channel is scrambled by conditional access or not.
+         * <p>
+         * This is used for indicating that this channel is protected by a conditional access
+         * system. A value of 1 indicates the channel is scrambled and the user is required
+         * to contact the service provider to watch this channel. A value of 0 indicates the channel
+         * is not scrambled. If not specified, this value is set to 0 (not scrambled) by default.
+         * </p><p>
+         * Type: INTEGER (boolean)
+         * </p>
+         */
+        public static final String COLUMN_CONDITIONAL_ACCESS = "conditional_access";
+
+        /**
          * The flag indicating whether this TV channel is locked or not.
          * <p>
          * This is primarily used for alternative parental control to prevent unauthorized users
