@@ -2062,6 +2062,37 @@ public class DevicePolicyManager {
 
     /**
      * @hide
+     * @SystemApi
+     * Sets the given component as an active admin and registers the package as the profile
+     * owner for this user. The package must already be installed and there shouldn't be
+     * an existing profile owner registered for this user. Also, this method must be called
+     * before the user setup has been completed.
+     * <p>
+     * This method can only be called by system apps that hold MANAGE_USERS permission and
+     * MANAGE_DEVICE_ADMINS permission.
+     * @param admin The component to register as an active admin and profile owner.
+     * @param ownerName The user-visible name of the entity that is managing this user.
+     * @return whether the admin was successfully registered as the profile owner.
+     * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
+     *         the user has already been set up.
+     */
+    public boolean setActiveProfileOwner(ComponentName admin, String ownerName)
+            throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                final int myUserId = UserHandle.myUserId();
+                mService.setActiveAdmin(admin, false, myUserId);
+                return mService.setProfileOwner(admin.getPackageName(), ownerName, myUserId);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to set profile owner " + re);
+                throw new IllegalArgumentException("Couldn't set profile owner.", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @hide
      * Sets the given package as the profile owner of the given user profile. The package must
      * already be installed and there shouldn't be an existing profile owner registered for this
      * user. Also, this method must be called before the user has been used for the first time.
