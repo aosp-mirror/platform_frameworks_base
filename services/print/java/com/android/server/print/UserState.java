@@ -126,7 +126,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mSpooler = new RemotePrintSpooler(context, userId, this);
         mHandler = new UserStateHandler(context.getMainLooper());
         synchronized (mLock) {
-            enableSystemPrintServicesOnFirstBootLocked();
+            enableSystemPrintServicesLocked();
+            onConfigurationChangedLocked();
         }
     }
 
@@ -727,7 +728,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    private void enableSystemPrintServicesOnFirstBootLocked() {
+    private void enableSystemPrintServicesLocked() {
         // Load enabled and installed services.
         readEnabledPrintServicesLocked();
         readInstalledPrintServicesLocked();
@@ -1159,6 +1160,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 Log.w(LOG_TAG, "Not destroying - session destroyed");
                 return;
             }
+            mIsDestroyed = true;
             // Make sure printer tracking is stopped.
             final int printerCount = mStateTrackedPrinters.size();
             for (int i = 0; i < printerCount; i++) {

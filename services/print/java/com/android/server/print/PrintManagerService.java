@@ -119,7 +119,6 @@ public final class PrintManagerService extends SystemService {
                     final UserState userState;
                     synchronized (mLock) {
                         userState = getCurrentUserStateLocked();
-                        userState.updateIfNeededLocked();
                     }
                     // This is the first time we switch to this user after boot, so
                     // now is the time to remove obsolete print jobs since they
