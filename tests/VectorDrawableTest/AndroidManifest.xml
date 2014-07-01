@@ -99,7 +99,7 @@
         </activity>
         <activity
             android:name="VectorCheckbox"
-            android:label="On a Checkbox" >
+            android:label="Basic static vector drawables" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -109,6 +109,15 @@
         <activity
             android:name="VectorPathChecking"
             android:label="Path Checking graphics" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="ScaleDrawableTests"
+            android:label="Scale Type Test" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
