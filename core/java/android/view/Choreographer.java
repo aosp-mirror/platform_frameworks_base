@@ -431,7 +431,7 @@ public final class Choreographer {
     /**
      * Gets the time when the current frame started.
      * <p>
-     * This method provides the time in nanoseconds when the frame started being rendered.
+     * This method provides the time in milliseconds when the frame started being rendered.
      * The frame time provides a stable time base for synchronizing animations
      * and drawing.  It should be used instead of {@link SystemClock#uptimeMillis()}
      * or {@link System#nanoTime()} for animations and drawing in the UI.  Using the frame

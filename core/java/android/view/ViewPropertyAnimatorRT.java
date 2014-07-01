@@ -73,21 +73,14 @@ class ViewPropertyAnimatorRT {
             int property = RenderNodeAnimator.mapViewPropertyToRenderProperty(holder.mNameConstant);
 
             final float finalValue = holder.mFromValue + holder.mDeltaValue;
-            RenderNodeAnimator animator = new RenderNodeAnimator(property, finalValue);
+            RenderNodeAnimator animator = new RenderNodeAnimatorCompat(property, finalValue);
             animator.setStartDelay(startDelay);
             animator.setDuration(duration);
             animator.setInterpolator(interpolator);
             animator.setTarget(mView);
             animator.start();
 
-            // Alpha is a special snowflake that has the canonical value stored
-            // in mTransformationInfo instead of in RenderNode, so we need to update
-            // it with the final value here.
-            if (property == RenderNodeAnimator.ALPHA) {
-                // Don't need null check because ViewPropertyAnimator's
-                // ctor calls ensureTransformationInfo()
-                parent.mView.mTransformationInfo.mAlpha = finalValue;
-            }
+            mAnimators[property] = animator;
         }
 
         parent.mPendingAnimations.clear();

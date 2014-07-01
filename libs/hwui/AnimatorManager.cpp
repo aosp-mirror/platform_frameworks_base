@@ -25,6 +25,7 @@ namespace uirenderer {
 using namespace std;
 
 static void unref(BaseRenderNodeAnimator* animator) {
+    animator->detach();
     animator->decStrong(0);
 }
 
@@ -39,7 +40,7 @@ AnimatorManager::~AnimatorManager() {
 
 void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
     animator->incStrong(0);
-    animator->onAttached(&mParent);
+    animator->attach(&mParent);
     mNewAnimators.push_back(animator.get());
 }
 
@@ -58,7 +59,7 @@ void AnimatorManager::pushStaging(TreeInfo& info) {
         move_all(mNewAnimators, mAnimators);
     }
     for (vector<BaseRenderNodeAnimator*>::iterator it = mAnimators.begin(); it != mAnimators.end(); it++) {
-        (*it)->pushStaging(&mParent, info);
+        (*it)->pushStaging(info);
     }
 }
 
@@ -68,7 +69,7 @@ public:
             : mTarget(target), mInfo(info) {}
 
     bool operator() (BaseRenderNodeAnimator* animator) {
-        bool remove = animator->animate(&mTarget, mInfo);
+        bool remove = animator->animate(mInfo);
         if (remove) {
             animator->decStrong(0);
         }

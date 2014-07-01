@@ -149,6 +149,11 @@ static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong
     animator->setInterpolator(interpolator);
 }
 
+static void start(JNIEnv* env, jobject clazz, jlong animatorPtr) {
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
+    animator->start();
+}
+
 static void cancel(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     animator->cancel();
@@ -173,6 +178,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },
     { "nGetStartDelay", "(J)J", (void*) getStartDelay },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
+    { "nStart", "(J)V", (void*) start },
     { "nCancel", "(J)V", (void*) cancel },
 #endif
 };
