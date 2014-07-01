@@ -95,6 +95,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_PARTIAL = "partial";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
+    private static final String TAG_GUEST_RESTRICTIONS = "guestRestrictions";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
     private static final String TAG_RESTRICTIONS = "restrictions";
@@ -129,6 +130,7 @@ public class UserManagerService extends IUserManager.Stub {
     // BACKOFF_INC_INTERVAL times.
     private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
 
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final Object mInstallLock;
@@ -142,6 +144,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
     private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
+    private final Bundle mGuestRestrictions = new Bundle();
 
     class RestrictionsPinState {
         long salt;
@@ -445,6 +448,24 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public Bundle getDefaultGuestRestrictions() {
+        checkManageUsersPermission("getDefaultGuestRestrictions");
+        synchronized (mPackagesLock) {
+            return new Bundle(mGuestRestrictions);
+        }
+    }
+
+    @Override
+    public void setDefaultGuestRestrictions(Bundle restrictions) {
+        checkManageUsersPermission("setDefaultGuestRestrictions");
+        synchronized (mPackagesLock) {
+            mGuestRestrictions.clear();
+            mGuestRestrictions.putAll(restrictions);
+            writeUserListLocked();
+        }
+    }
+
+    @Override
     public Bundle getUserRestrictions(int userId) {
         // checkManageUsersPermission("getUserRestrictions");
 
@@ -584,15 +605,21 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
-                    String id = parser.getAttributeValue(null, ATTR_ID);
-                    UserInfo user = readUserLocked(Integer.parseInt(id));
+                if (type == XmlPullParser.START_TAG) {
+                    final String name = parser.getName();
+                    if (name.equals(TAG_USER)) {
+                        String id = parser.getAttributeValue(null, ATTR_ID);
+                        UserInfo user = readUserLocked(Integer.parseInt(id));
 
-                    if (user != null) {
-                        mUsers.put(user.id, user);
-                        if (mNextSerialNumber < 0 || mNextSerialNumber <= user.id) {
-                            mNextSerialNumber = user.id + 1;
+                        if (user != null) {
+                            mUsers.put(user.id, user);
+                            if (mNextSerialNumber < 0 || mNextSerialNumber <= user.id) {
+                                mNextSerialNumber = user.id + 1;
+                            }
                         }
+                    } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
+                        mGuestRestrictions.clear();
+                        readRestrictionsLocked(parser, mGuestRestrictions);
                     }
                 }
             }
@@ -725,35 +752,9 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
             serializer.endTag(null, TAG_NAME);
-
             Bundle restrictions = mUserRestrictions.get(userInfo.id);
             if (restrictions != null) {
-                serializer.startTag(null, TAG_RESTRICTIONS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_INSTALL_APPS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
-                writeBoolean(serializer, restrictions,
-                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_VPN);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_FACTORY_RESET);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADD_USER);
-                writeBoolean(serializer, restrictions, UserManager.ENSURE_VERIFY_APPS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_APPS_CONTROL);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_TELEPHONY);
-                serializer.endTag(null, TAG_RESTRICTIONS);
+                writeRestrictionsLocked(serializer, restrictions);
             }
             serializer.endTag(null, TAG_USER);
 
@@ -790,6 +791,9 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
             serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
 
+            serializer.startTag(null,  TAG_GUEST_RESTRICTIONS);
+            writeRestrictionsLocked(serializer, mGuestRestrictions);
+            serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             for (int i = 0; i < mUsers.size(); i++) {
                 UserInfo user = mUsers.valueAt(i);
                 serializer.startTag(null, TAG_USER);
@@ -805,6 +809,36 @@ public class UserManagerService extends IUserManager.Stub {
             userListFile.failWrite(fos);
             Slog.e(LOG_TAG, "Error writing user list");
         }
+    }
+
+    private void writeRestrictionsLocked(XmlSerializer serializer, Bundle restrictions) 
+            throws IOException {
+        serializer.startTag(null, TAG_RESTRICTIONS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_INSTALL_APPS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
+        writeBoolean(serializer, restrictions,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_VPN);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_FACTORY_RESET);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADD_USER);
+        writeBoolean(serializer, restrictions, UserManager.ENSURE_VERIFY_APPS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_APPS_CONTROL);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_TELEPHONY);
+        serializer.endTag(null, TAG_RESTRICTIONS);
     }
 
     private UserInfo readUserLocked(int id) {
@@ -881,31 +915,7 @@ public class UserManagerService extends IUserManager.Stub {
                             name = parser.getText();
                         }
                     } else if (TAG_RESTRICTIONS.equals(tag)) {
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_INSTALL_APPS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
-                        readBoolean(parser, restrictions,
-                                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_VPN);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_FACTORY_RESET);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_ADD_USER);
-                        readBoolean(parser, restrictions, UserManager.ENSURE_VERIFY_APPS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_APPS_CONTROL);
-                        readBoolean(parser, restrictions,
-                                UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_TELEPHONY);
+                        readRestrictionsLocked(parser, restrictions);
                     }
                 }
             }
@@ -941,6 +951,35 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return null;
+    }
+
+    private void readRestrictionsLocked(XmlPullParser parser, Bundle restrictions)
+            throws IOException {
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_MODIFY_ACCOUNTS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_INSTALL_APPS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_UNINSTALL_APPS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_SHARE_LOCATION);
+        readBoolean(parser, restrictions,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_BLUETOOTH);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_VPN);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_FACTORY_RESET);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_ADD_USER);
+        readBoolean(parser, restrictions, UserManager.ENSURE_VERIFY_APPS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_APPS_CONTROL);
+        readBoolean(parser, restrictions,
+                UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_TELEPHONY);
     }
 
     private void readBoolean(XmlPullParser parser, Bundle restrictions,
