@@ -18,15 +18,36 @@
         <set>
             <objectAnimator android:propertyName="translationZ"
                             android:duration="@integer/button_pressed_animation_duration"
-                            android:valueTo="@dimen/button_pressed_z"
+                            android:valueTo="@dimen/button_pressed_z_material"
+                            android:valueType="floatType"/>
+            <objectAnimator android:propertyName="elevation"
+                            android:duration="0"
+                            android:valueTo="@dimen/button_elevation_material"
                             android:valueType="floatType"/>
         </set>
     </item>
     <!-- base state -->
-    <item>
+    <item android:state_enabled="true">
         <set>
             <objectAnimator android:propertyName="translationZ"
                             android:duration="@integer/button_pressed_animation_duration"
+                            android:valueTo="0"
+                            android:startDelay="@integer/button_pressed_animation_delay"
+                            android:valueType="floatType"/>
+            <objectAnimator android:propertyName="elevation"
+                            android:duration="0"
+                            android:valueTo="@dimen/button_elevation_material"
+                            android:valueType="floatType" />
+        </set>
+    </item>
+    <item>
+        <set>
+            <objectAnimator android:propertyName="translationZ"
+                            android:duration="0"
+                            android:valueTo="0"
+                            android:valueType="floatType"/>
+            <objectAnimator android:propertyName="elevation"
+                            android:duration="0"
                             android:valueTo="0"
                             android:valueType="floatType"/>
         </set>

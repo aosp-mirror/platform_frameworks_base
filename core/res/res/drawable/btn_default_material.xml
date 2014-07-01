@@ -14,10 +14,12 @@
      limitations under the License.
 -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorControlHighlight">
-    <item>
-        <nine-patch android:src="@drawable/btn_mtrl_alpha"
-            android:tint="?attr/colorButtonNormal" />
-    </item>
-</ripple>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+       android:insetLeft="@dimen/control_inset_material"
+       android:insetTop="@dimen/control_inset_material"
+       android:insetBottom="@dimen/control_inset_material"
+       android:insetRight="@dimen/control_inset_material">
+    <ripple android:color="?attr/colorControlHighlight">
+        <item android:drawable="@drawable/btn_default_mtrl_shape" />
+    </ripple>
+</inset>

@@ -355,35 +355,35 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.StatusBar.Material" />
 
     <style name="TextAppearance.StatusBar.Material.EventContent">
-        <item name="android:textColor">#90000000</item>
-        <item name="android:textSize">@dimen/notification_text_size</item>
+        <item name="textColor">#90000000</item>
+        <item name="textSize">@dimen/notification_text_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Title">
-        <item name="android:textColor">#DD000000</item>
-        <item name="android:textSize">@dimen/notification_title_text_size</item>
+        <item name="textColor">#DD000000</item>
+        <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Line2">
-        <item name="android:textSize">@dimen/notification_subtext_size</item>
+        <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Info">
-        <item name="android:textSize">@dimen/notification_subtext_size</item>
+        <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Time">
-        <item name="android:textSize">@dimen/notification_subtext_size</item>
+        <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Emphasis">
-        <item name="android:textColor">#66000000</item>
+        <item name="textColor">#66000000</item>
     </style>
 
     <style name="Widget.StatusBar.Material.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
     <style name="Widget.StatusBar.Material.ProgressBar.Media">
-        <item name="android:progressDrawable">@drawable/notification_material_media_progress</item>
+        <item name="progressDrawable">@drawable/notification_material_media_progress</item>
     </style>
 
     <!-- Widget Styles -->
@@ -399,9 +399,7 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">88dip</item>
-
-        <!-- TODO: Turn this back on when we support inset drawable outlines. -->
-        <!-- <item name="stateListAnimator">@anim/button_state_list_anim_material</item> -->
+        <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
     </style>
 
     <!-- Small bordered ink button -->
@@ -430,7 +428,6 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/btn_toggle_material</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="minHeight">48dip</item>
     </style>
 
     <style name="Widget.Material.ButtonBar">
@@ -515,7 +512,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.GestureOverlayView" parent="Widget.GestureOverlayView"/>
 
     <style name="Widget.Material.GridView" parent="Widget.GridView">
-        <item name="android:listSelector">?attr/selectableItemBackground</item>
+        <item name="listSelector">?attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Material.CalendarView" parent="Widget.CalendarView">
@@ -687,11 +684,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Toolbar" parent="Widget.Toolbar">
-        <item name="android:navigationButtonStyle">@android:style/Widget.Material.Toolbar.Button.Navigation</item>
+        <item name="navigationButtonStyle">@android:style/Widget.Material.Toolbar.Button.Navigation</item>
     </style>
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
-        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>

@@ -335,7 +335,6 @@
        <item>@drawable/btn_check_to_on_mtrl_013</item>
        <item>@drawable/btn_check_to_on_mtrl_014</item>
        <item>@drawable/btn_check_to_on_mtrl_015</item>
-       <item>@drawable/btn_mtrl_alpha</item>
        <item>@drawable/btn_radio_to_off_mtrl_000</item>
        <item>@drawable/btn_radio_to_off_mtrl_001</item>
        <item>@drawable/btn_radio_to_off_mtrl_002</item>
@@ -402,7 +401,6 @@
        <item>@drawable/btn_switch_to_on_mtrl_013</item>
        <item>@drawable/btn_switch_to_on_mtrl_014</item>
        <item>@drawable/btn_toggle_indicator_mtrl_alpha</item>
-       <item>@drawable/btn_toggle_mtrl_alpha</item>
        <item>@drawable/expander_close_mtrl_alpha</item>
        <item>@drawable/expander_open_mtrl_alpha</item>
        <item>@drawable/fastscroll_thumb_mtrl_alpha</item>

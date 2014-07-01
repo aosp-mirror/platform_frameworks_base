@@ -14,13 +14,13 @@
      limitations under the License.
 -->
 
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:insetLeft="@dimen/control_inset_material"
-       android:insetTop="@dimen/control_inset_material"
-       android:insetBottom="@dimen/control_inset_material"
-       android:insetRight="@dimen/control_inset_material">
-    <ripple android:color="?attr/colorControlHighlight">
-        <item android:id="@id/mask"
-              android:drawable="@drawable/btn_default_mtrl_shape" />
-    </ripple>
-</inset>
+<!-- Used as the canonical button shape. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <corners android:radius="@dimen/control_corner_material" />
+    <solid android:color="?attr/colorButtonNormal" />
+    <padding android:top="@dimen/control_padding_material"
+             android:bottom="@dimen/control_padding_material"
+             android:left="@dimen/control_padding_material"
+             android:right="@dimen/control_padding_material" />
+</shape>
