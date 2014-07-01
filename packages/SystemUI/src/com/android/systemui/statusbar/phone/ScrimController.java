@@ -94,8 +94,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     public void setPanelExpansion(float fraction) {
-        mFraction = fraction;
-        scheduleUpdate();
+        if (mFraction != fraction) {
+            mFraction = fraction;
+            scheduleUpdate();
+        }
     }
 
     public void setBouncerShowing(boolean showing) {
