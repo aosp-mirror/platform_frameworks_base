@@ -36,6 +36,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -171,13 +172,16 @@ public final class ContactsContract {
      * A key to a boolean in the "extras" bundle of the cursor.
      * The boolean indicates that the provider did not create a snippet and that the client asking
      * for the snippet should do it (true means the snippeting was deferred to the client).
+     *
+     * @see SearchSnippets
      */
     public static final String DEFERRED_SNIPPETING = "deferred_snippeting";
 
     /**
-     * Key to retrieve the original query on the client side.
+     * Key to retrieve the original deferred snippeting from the cursor on the client side.
      *
-     * @hide
+     * @see SearchSnippets
+     * @see #DEFERRED_SNIPPETING
      */
     public static final String DEFERRED_SNIPPETING_QUERY = "deferred_snippeting_query";
 
@@ -5089,42 +5093,75 @@ public final class ContactsContract {
     /**
      * Additional column returned by
      * {@link ContactsContract.Contacts#CONTENT_FILTER_URI Contacts.CONTENT_FILTER_URI} explaining
-     * why the filter matched the contact.  Specifically, it contains the data elements that
-     * matched the query.  The overall number of words in the snippet can be capped.
+     * why the filter matched the contact. This column will contain extracts from the contact's
+     * constituent {@link Data Data} items, formatted in a way that indicates the section of the
+     * snippet that matched the filter.
+     *
+     * <p>
+     * The following example searches for all contacts that match the query "presi" and requests
+     * the snippet column as well.
+     * <pre>
+     * Builder builder = Contacts.CONTENT_FILTER_URI.buildUpon();
+     * builder.appendPath("presi");
+     * // Defer snippeting to the client side if possible, for performance reasons.
+     * builder.appendQueryParameter(SearchSnippets.DEFERRED_SNIPPETING_KEY,"1");
+     *
+     * Cursor cursor = getContentResolver().query(builder.build());
+     *
+     * Bundle extras = cursor.getExtras();
+     * if (extras.getBoolean(ContactsContract.DEFERRED_SNIPPETING)) {
+     *     // Do our own snippet formatting.
+     *     // For a contact with the email address (president@organization.com), the snippet
+     *     // column will contain the string "president@organization.com".
+     * } else {
+     *     // The snippet has already been pre-formatted, we can display it as is.
+     *     // For a contact with the email address (president@organization.com), the snippet
+     *     // column will contain the string "[presi]dent@organization.com".
+     * }
+     * </pre>
+     * </p>
      */
-    public static class SearchSnippetColumns {
+    public static class SearchSnippets {
 
         /**
-         * The search snippet constructed according to the SQLite rules, see
-         * http://www.sqlite.org/fts3.html#snippet
+         * The search snippet constructed by SQLite snippeting functionality.
          * <p>
-         * The snippet may contain (parts of) several data elements comprising
-         * the contact.
+         * The snippet may contain (parts of) several data elements belonging to the contact,
+         * with the matching parts optionally surrounded by special characters that indicate the
+         * start and end of matching text.
+         *
+         * For example, if a contact has an address "123 Main Street", using a filter "mai" would
+         * return the formatted snippet "123 [Mai]n street".
+         *
+         * @see <a href="http://www.sqlite.org/fts3.html#snippet">
+         *         http://www.sqlite.org/fts3.html#snippet</a>
          */
         public static final String SNIPPET = "snippet";
-
 
         /**
          * Comma-separated parameters for the generation of the snippet:
          * <ul>
-         * <li>The "start match" text. Default is &lt;b&gt;</li>
-         * <li>The "end match" text. Default is &lt;/b&gt;</li>
-         * <li>The "ellipsis" text. Default is &lt;b&gt;...&lt;/b&gt;</li>
+         * <li>The "start match" text. Default is '['</li>
+         * <li>The "end match" text. Default is ']'</li>
+         * <li>The "ellipsis" text. Default is "..."</li>
          * <li>Maximum number of tokens to include in the snippet. Can be either
          * a positive or a negative number: A positive number indicates how many
          * tokens can be returned in total. A negative number indicates how many
          * tokens can be returned per occurrence of the search terms.</li>
          * </ul>
+         *
+         * @hide
          */
         public static final String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
 
         /**
-         * A key to ask the provider to defer the snippeting to the client if possible.
-         * Value of 1 implies true, 0 implies false when 0 is the default.
+         * The key to ask the provider to defer the formatting of the snippet to the client if
+         * possible, for performance reasons.
+         * A value of 1 indicates true, 0 indicates false. False is the default.
          * When a cursor is returned to the client, it should check for an extra with the name
          * {@link ContactsContract#DEFERRED_SNIPPETING} in the cursor. If it exists, the client
-         * should do its own snippeting. If it doesn't exist, the snippet column in the cursor
-         * should already contain a snippetized string.
+         * should do its own formatting of the snippet. If it doesn't exist, the snippet column
+         * in the cursor should already contain a formatted snippet.
          */
         public static final String DEFERRED_SNIPPETING_KEY = "deferred_snippeting";
     }
