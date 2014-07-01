@@ -38,9 +38,13 @@ public class ViewAnimation {
         int stackViewCount;
         // Whether this is the front most task view
         boolean isFrontMost;
+        // A trigger to run some logic when all the animations complete.  This works around the fact
+        // that it is difficult to coordinate ViewPropertyAnimators
+        ReferenceCountedTrigger postAnimationTrigger;
 
-        public TaskViewEnterContext(FullscreenTransitionOverlayView fss) {
+        public TaskViewEnterContext(FullscreenTransitionOverlayView fss, ReferenceCountedTrigger t) {
             fullScreenshot = fss;
+            postAnimationTrigger = t;
         }
     }
 

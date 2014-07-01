@@ -747,9 +747,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Mark that we have completely the first layout
             mAwaitingFirstLayout = false;
 
-            // Start dozing
-            mUIDozeTrigger.startDozing();
-
             // Prepare the first view for its enter animation
             int offsetTopAlign = -mStackAlgorithm.mTaskRect.top;
             int offscreenY = mStackAlgorithm.mRect.bottom -
@@ -770,7 +767,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // Update the focused task index to be the next item to the top task
             if (mConfig.launchedWithAltTab) {
+                // When alt-tabbing, we focus the next previous task
                 focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+            } else {
+                // Normally we just focus the front task
+                focusTask(Math.max(0, mStack.getTaskCount() - 1), false);
             }
         }
     }
@@ -799,6 +800,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mStack.indexOfTask(tv.getTask()), getStackScroll());
             tv.startEnterRecentsAnimation(ctx);
         }
+
+        // Add a runnable to the post animation ref counter to clear all the views
+        ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                // Start dozing
+                mUIDozeTrigger.startDozing();
+            }
+        });
     }
 
     /** Requests this task stacks to start it's exit-recents animation. */

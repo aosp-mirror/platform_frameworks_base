@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
@@ -296,7 +298,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     }
 
     /** Animates this task view as it enters recents */
-    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
+    public void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
         TaskViewTransform transform = ctx.transform;
 
         if (mConfig.launchedFromAppWithScreenshot) {
@@ -308,6 +310,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         // Animate the task bar of the first task view
                         mBarView.startEnterRecentsAnimation(0, mEnableThumbnailClip);
                         setVisibility(View.VISIBLE);
+                        // Decrement the post animation trigger
+                        ctx.postAnimationTrigger.decrement();
                     }
                 });
             } else {
@@ -321,9 +325,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                         .setInterpolator(mConfig.linearOutSlowInInterpolator)
                         .setDuration(475)
                         .withLayer()
-                        .withEndAction(mEnableThumbnailClip)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                mEnableThumbnailClip.run();
+                                // Decrement the post animation trigger
+                                ctx.postAnimationTrigger.decrement();
+                            }
+                        })
                         .start();
             }
+            ctx.postAnimationTrigger.increment();
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (ctx.isFrontMost) {
@@ -335,7 +347,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                 anim.setStartDelay(mConfig.taskBarEnterAnimDelay);
                 anim.setDuration(mConfig.taskBarEnterAnimDuration);
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        // Decrement the post animation trigger
+                        ctx.postAnimationTrigger.decrement();
+                    }
+                });
                 anim.start();
+                ctx.postAnimationTrigger.increment();
             } else {
                 mEnableThumbnailClip.run();
             }
@@ -355,8 +375,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .setDuration(mConfig.taskViewEnterFromHomeDuration)
                     .withLayer()
-                    .withEndAction(mEnableThumbnailClip)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEnableThumbnailClip.run();
+                            // Decrement the post animation trigger
+                            ctx.postAnimationTrigger.decrement();
+                        }
+                    })
                     .start();
+            ctx.postAnimationTrigger.increment();
         }
     }
 
@@ -518,7 +546,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
      */
     public void setFocusedTask() {
         mIsFocused = true;
+        // Workaround, we don't always want it focusable in touch mode, but we want the first task
+        // to be focused after the enter-recents animation, which can be triggered from either touch
+        // or keyboard
+        setFocusableInTouchMode(true);
         requestFocus();
+        setFocusableInTouchMode(false);
         invalidate();
         mCb.onTaskFocused(this);
     }

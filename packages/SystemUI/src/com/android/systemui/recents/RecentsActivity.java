@@ -147,7 +147,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             } else if (action.equals(RecentsService.ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
-                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenOverlayView));
+                ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
+                mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
+                        mFullScreenOverlayView, t));
                 // Call our callback
                 onEnterAnimationTriggered();
             }
@@ -392,7 +394,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     void onConfigurationChange() {
         // Try and start the enter animation (or restart it on configuration changed)
-        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(mFullScreenOverlayView));
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
+                mFullScreenOverlayView, t));
         // Call our callback
         onEnterAnimationTriggered();
     }
@@ -535,6 +539,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             // Focus the next task in the stack
             final boolean backward = event.isShiftPressed();
             mRecentsView.focusNextTask(!backward);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            mRecentsView.focusNextTask(true);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            mRecentsView.focusNextTask(false);
             return true;
         }
         // Pass through the debug trigger

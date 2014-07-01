@@ -2380,9 +2380,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
             if (mRecentAppsHeldModifiers == 0 && !keyguardOn) {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
-                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)
-                        || KeyEvent.metaStateHasModifiers(
-                                shiftlessModifiers, KeyEvent.META_META_ON)) {
+                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                     mRecentAppsHeldModifiers = shiftlessModifiers;
                     showRecentApps(true);
                     return -1;

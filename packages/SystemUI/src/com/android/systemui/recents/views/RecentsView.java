@@ -186,6 +186,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Requests all task stacks to start their enter-recents animation */
     public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
+        // Handle the case when there are no views by incrementing and decrementing after all
+        // animations are started.
+        ctx.postAnimationTrigger.increment();
+
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -194,6 +198,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 stackView.startEnterRecentsAnimation(ctx);
             }
         }
+
+        // Handle the case when there are no views by incrementing and decrementing after all
+        // animations are started.
+        ctx.postAnimationTrigger.decrement();
     }
 
     /** Requests all task stacks to start their exit-recents animation */
