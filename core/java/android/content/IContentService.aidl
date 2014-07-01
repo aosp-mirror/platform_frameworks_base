@@ -82,6 +82,8 @@ interface IContentService {
      * @param sync true if the provider should be synced when tickles are received for it
      */
     void setSyncAutomatically(in Account account, String providerName, boolean sync);
+    void setSyncAutomaticallyAsUser(in Account account, String providerName, boolean sync,
+            int userId);
 
     /**
      * Get a list of periodic operations for a specified authority, or service.
@@ -170,6 +172,8 @@ interface IContentService {
      * non-null.
      */
     boolean isSyncPending(in Account account, String authority, in ComponentName cname);
+    boolean isSyncPendingAsUser(in Account account, String authority, in ComponentName cname,
+            int userId);
 
     void addStatusChangeListener(int mask, ISyncStatusObserver callback);
 

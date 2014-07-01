@@ -1926,8 +1926,17 @@ public abstract class ContentResolver {
      * @param sync true if the provider should be synced when tickles are received for it
      */
     public static void setSyncAutomatically(Account account, String authority, boolean sync) {
+        setSyncAutomaticallyAsUser(account, authority, sync, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * @see #setSyncAutomatically(Account, String, boolean)
+     * @hide
+     */
+    public static void setSyncAutomaticallyAsUser(Account account, String authority, boolean sync,
+            int userId) {
         try {
-            getContentService().setSyncAutomatically(account, authority, sync);
+            getContentService().setSyncAutomaticallyAsUser(account, authority, sync, userId);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
@@ -2268,8 +2277,16 @@ public abstract class ContentResolver {
      * @return true if there is a pending sync with the matching account and authority
      */
     public static boolean isSyncPending(Account account, String authority) {
+        return isSyncPendingAsUser(account, authority, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * @see #requestSync(Account, String, Bundle)
+     * @hide
+     */
+    public static boolean isSyncPendingAsUser(Account account, String authority, int userId) {
         try {
-            return getContentService().isSyncPending(account, authority, null);
+            return getContentService().isSyncPendingAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
