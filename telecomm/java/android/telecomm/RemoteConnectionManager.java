@@ -18,7 +18,6 @@ package android.telecomm;
 
 import android.content.ComponentName;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.telecomm.ICallService;
@@ -45,27 +44,27 @@ public class RemoteConnectionManager {
         }
     }
 
-    List<Subscription> getSubscriptions(Uri handle) {
-        List<Subscription> subscriptions = new LinkedList<>();
-        Log.d(this, "Getting subscriptions: " + mRemoteConnectionServices.keySet());
+    List<PhoneAccount> getAccounts(Uri handle) {
+        List<PhoneAccount> accounts = new LinkedList<>();
+        Log.d(this, "Getting accounts: " + mRemoteConnectionServices.keySet());
         for (RemoteConnectionService remoteService : mRemoteConnectionServices.values()) {
             // TODO(santoscordon): Eventually this will be async.
-            subscriptions.addAll(remoteService.lookupSubscriptions(handle));
+            accounts.addAll(remoteService.lookupAccounts(handle));
         }
-        return subscriptions;
+        return accounts;
     }
 
     public void createOutgoingConnection(
             ConnectionRequest request,
-            final ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
-        Subscription subscription = request.getSubscription();
-        if (subscription == null) {
-            throw new IllegalArgumentException("subscription must be specified.");
+            final ConnectionService.OutgoingCallResponse response) {
+        PhoneAccount account = request.getAccount();
+        if (account == null) {
+            throw new IllegalArgumentException("account must be specified.");
         }
 
-        ComponentName componentName = request.getSubscription().getComponentName();
+        ComponentName componentName = request.getAccount().getComponentName();
         if (!mRemoteConnectionServices.containsKey(componentName)) {
-            throw new UnsupportedOperationException("subscription not supported: " + componentName);
+            throw new UnsupportedOperationException("account not supported: " + componentName);
         } else {
             RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
             remoteService.createOutgoingConnection(request, response);

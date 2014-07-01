@@ -17,7 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.content.ComponentName;
-import android.telecomm.Subscription;
+import android.telecomm.PhoneAccount;
 
 /**
  * Interface used to interact with Telecomm. Mostly this is used by TelephonyManager for passing
@@ -33,19 +33,19 @@ interface ITelecommService {
     void showCallScreen(boolean showDialpad);
 
     /**
-     * Gets a list of Subscriptions.
+     * Gets a list of accounts.
      */
-    List<Subscription> getSubscriptions();
+    List<PhoneAccount> getAccounts();
 
     /**
-     * Sets the enabled state of a given Subscription.
+     * Sets the enabled state of a given account.
      */
-    void setEnabled(in Subscription subscription, boolean enabled);
+    void setEnabled(in PhoneAccount account, boolean enabled);
 
     /**
-     * Sets a given Subscription as the system default.
+     * Sets a given account as the system default.
      */
-    void setSystemDefault(in Subscription subscription);
+    void setSystemDefault(in PhoneAccount account);
 
     /**
      * Returns the component name of the default phone application.

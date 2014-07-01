@@ -29,8 +29,6 @@ import com.android.internal.telecomm.ICallServiceAdapter;
 import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -252,20 +250,19 @@ public final class RemoteConnectionService implements DeathRecipient {
     // TODO(santoscordon): Handle incoming connections
     // public final void handleIncomingConnection() {}
 
-    public final List<Subscription> lookupSubscriptions(Uri handle) {
+    public final List<PhoneAccount> lookupAccounts(Uri handle) {
         // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
         // each time.
-        List<Subscription> subscriptions = new LinkedList<>();
-        subscriptions.add(new Subscription(
+        List<PhoneAccount> accounts = new LinkedList<>();
+        accounts.add(new PhoneAccount(
                 mComponentName,
                 null /* id */,
                 null /* handle */,
-                0 /* labelResId */,
-                0 /* shortDescriptionResId */,
-                0 /* iconResId */,
+                "" /* label */,
+                "" /* shortDescription */,
                 true /* isEnabled */,
                 false /* isSystemDefault */));
-        return subscriptions;
+        return accounts;
     }
 
     /**

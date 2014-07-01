@@ -33,7 +33,7 @@ public final class ConnectionRequest implements Parcelable {
     private final String mCallId;
     private final Uri mHandle;
     private final Bundle mExtras;
-    private final Subscription mSubscription;
+    private final PhoneAccount mAccount;
 
     public ConnectionRequest(Uri handle, Bundle extras) {
         this(null, handle, extras);
@@ -43,17 +43,17 @@ public final class ConnectionRequest implements Parcelable {
         this(null, callId, handle, extras);
     }
 
-    public ConnectionRequest(Subscription subscription, String callId, Uri handle, Bundle extras) {
+    public ConnectionRequest(PhoneAccount account, String callId, Uri handle, Bundle extras) {
         mCallId = callId;
         mHandle = handle;
         mExtras = extras;
-        mSubscription = subscription;
+        mAccount = account;
     }
 
     /**
-     * The subscription which should be used to place the call.
+     * The account which should be used to place the call.
      */
-    public Subscription getSubscription() { return mSubscription; }
+    public PhoneAccount getAccount() { return mAccount; }
 
     /**
      * An identifier for this call.

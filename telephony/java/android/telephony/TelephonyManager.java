@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telecomm.Subscription;
+import android.telecomm.PhoneAccount;
 import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
@@ -299,14 +299,14 @@ public class TelephonyManager {
 
     /**
      * The lookup key used with an {@link android.content.Intent#ACTION_CALL} or
-     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} for a {@link Subscription}
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} for a {@link PhoneAccount}
      * object indicating a preference when making a phone connection.
      *
      * <p class="note">
      * Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_SUBSCRIPTION = "subscription";
+    public static final String EXTRA_ACCOUNT = "account";
 
     /**
      * Broadcast intent action indicating that a precise call state
@@ -3118,26 +3118,26 @@ public class TelephonyManager {
     }
 
     /**
-     * Return a list of Subscriptions that can be used to indicate a preference when making
+     * Return a list of Accounts that can be used to indicate a preference when making
      * a phone call.
      *
-     * @see #EXTRA_SUBSCRIPTION
-     * @return A list of {@code Subscription} objects.
+     * @see #EXTRA_ACCOUNT
+     * @return A list of {@code Accouint} objects.
      */
-    public List<Subscription> getSubscriptions() {
+    public List<PhoneAccount> getAccounts() {
         try {
-            return getTelecommService().getSubscriptions();
+            return getTelecommService().getAccounts();
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getSubscriptions", e);
+            Log.e(TAG, "Error calling ITelephony#getAccounts", e);
         }
         return null;
     }
 
     /** @hide */
     @SystemApi
-    public void setEnabled(Subscription subscription, boolean enabled) {
+    public void setEnabled(PhoneAccount account, boolean enabled) {
         try {
-            getTelecommService().setEnabled(subscription, enabled);
+            getTelecommService().setEnabled(account, enabled);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setEnabled", e);
         }
@@ -3145,9 +3145,9 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public void setSystemDefault(Subscription subscription) {
+    public void setSystemDefault(PhoneAccount account) {
         try {
-            getTelecommService().setSystemDefault(subscription);
+            getTelecommService().setSystemDefault(account);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setSystemDefault", e);
         }

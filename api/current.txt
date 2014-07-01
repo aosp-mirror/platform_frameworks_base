@@ -22886,6 +22886,8 @@ package android.provider {
   public static class CallLog.Calls implements android.provider.BaseColumns {
     ctor public CallLog.Calls();
     method public static java.lang.String getLastOutgoingCall(android.content.Context);
+    field public static final java.lang.String ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+    field public static final java.lang.String ACCOUNT_ID = "subscription_id";
     field public static final java.lang.String CACHED_FORMATTED_NUMBER = "formatted_number";
     field public static final java.lang.String CACHED_LOOKUP_URI = "lookup_uri";
     field public static final java.lang.String CACHED_MATCHED_NUMBER = "matched_number";
@@ -22917,8 +22919,6 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
-    field public static final java.lang.String SUBSCRIPTION_COMPONENT_NAME = "subscription_component_name";
-    field public static final java.lang.String SUBSCRIPTION_ID = "subscription_id";
     field public static final java.lang.String TYPE = "type";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
     field public static final java.lang.String VOICEMAIL_URI = "voicemail_uri";
@@ -27471,6 +27471,7 @@ package android.telecomm {
   public final class CallInfo implements android.os.Parcelable {
     ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
+    method public android.telecomm.PhoneAccount getAccount();
     method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
     method public android.os.Bundle getExtras();
     method public android.telecomm.GatewayInfo getGatewayInfo();
@@ -27478,7 +27479,6 @@ package android.telecomm {
     method public java.lang.String getId();
     method public android.net.Uri getOriginalHandle();
     method public android.telecomm.CallState getState();
-    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27661,12 +27661,12 @@ package android.telecomm {
   public final class ConnectionRequest implements android.os.Parcelable {
     ctor public ConnectionRequest(android.net.Uri, android.os.Bundle);
     ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle);
-    ctor public ConnectionRequest(android.telecomm.Subscription, java.lang.String, android.net.Uri, android.os.Bundle);
+    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, android.os.Bundle);
     method public int describeContents();
+    method public android.telecomm.PhoneAccount getAccount();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
-    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27680,8 +27680,8 @@ package android.telecomm {
     method public final void disconnect(java.lang.String);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void hold(java.lang.String);
-    method public final void lookupRemoteSubscriptions(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.Subscription>>);
-    method public final void maybeRespondToSubscriptionLookup();
+    method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccount>>);
+    method public final void maybeRespondToAccountLookup();
     method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method protected void onConnectionAdded(android.telecomm.Connection);
     method protected void onConnectionRemoved(android.telecomm.Connection);
@@ -27728,6 +27728,7 @@ package android.telecomm {
 
   public final class InCallCall implements android.os.Parcelable {
     method public int describeContents();
+    method public android.telecomm.PhoneAccount getAccount();
     method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider() throws android.os.RemoteException;
     method public java.util.List<java.lang.String> getCannedSmsResponses();
     method public int getCapabilities();
@@ -27741,7 +27742,6 @@ package android.telecomm {
     method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
-    method public android.telecomm.Subscription getSubscription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27757,6 +27757,22 @@ package android.telecomm {
     method protected abstract void setPostDial(java.lang.String, java.lang.String);
     method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
     method protected abstract void updateCall(android.telecomm.InCallCall);
+  }
+
+  public class PhoneAccount implements android.os.Parcelable {
+    ctor public PhoneAccount(android.content.ComponentName, java.lang.String, android.net.Uri, java.lang.String, java.lang.String, boolean, boolean);
+    method public int describeContents();
+    method public android.content.ComponentName getComponentName();
+    method public android.net.Uri getHandle();
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context, int);
+    method public java.lang.String getId();
+    method public java.lang.String getLabel(android.content.Context);
+    method public java.lang.String getShortDescription(android.content.Context);
+    method public boolean isEnabled();
+    method public boolean isSystemDefault();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class RemoteCallVideoClient implements android.os.IBinder.DeathRecipient {
@@ -27818,22 +27834,6 @@ package android.telecomm {
   public abstract interface SimpleResponse {
     method public abstract void onError(IN);
     method public abstract void onResult(IN, OUT);
-  }
-
-  public class Subscription implements android.os.Parcelable {
-    ctor public Subscription(android.content.ComponentName, java.lang.String, android.net.Uri, int, int, int, boolean, boolean);
-    method public int describeContents();
-    method public android.content.ComponentName getComponentName();
-    method public android.net.Uri getHandle();
-    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
-    method public android.graphics.drawable.Drawable getIcon(android.content.Context, int);
-    method public java.lang.String getId();
-    method public java.lang.String getLabel(android.content.Context);
-    method public java.lang.String getShortDescription(android.content.Context);
-    method public boolean isEnabled();
-    method public boolean isSystemDefault();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class TelecommConstants {
@@ -28287,6 +28287,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public java.util.List<android.telecomm.PhoneAccount> getAccounts();
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
@@ -28310,7 +28311,6 @@ package android.telephony {
     method public java.lang.String getSimSerialNumber();
     method public int getSimState();
     method public java.lang.String getSubscriberId();
-    method public java.util.List<android.telecomm.Subscription> getSubscriptions();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
     method public boolean hasIccCard();
@@ -28330,12 +28330,12 @@ package android.telephony {
     field public static final int DATA_CONNECTING = 1; // 0x1
     field public static final int DATA_DISCONNECTED = 0; // 0x0
     field public static final int DATA_SUSPENDED = 3; // 0x3
+    field public static final java.lang.String EXTRA_ACCOUNT = "account";
     field public static final java.lang.String EXTRA_INCOMING_NUMBER = "incoming_number";
     field public static final java.lang.String EXTRA_STATE = "state";
     field public static final java.lang.String EXTRA_STATE_IDLE;
     field public static final java.lang.String EXTRA_STATE_OFFHOOK;
     field public static final java.lang.String EXTRA_STATE_RINGING;
-    field public static final java.lang.String EXTRA_SUBSCRIPTION = "subscription";
     field public static final int NETWORK_TYPE_1xRTT = 7; // 0x7
     field public static final int NETWORK_TYPE_CDMA = 4; // 0x4
     field public static final int NETWORK_TYPE_EDGE = 2; // 0x2
