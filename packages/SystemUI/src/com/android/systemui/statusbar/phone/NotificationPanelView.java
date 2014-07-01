@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -61,7 +62,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardPageSwipeHelper mPageSwiper;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
-    private View mQsPanel;
+    private QSPanel mQsPanel;
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private TextView mClockView;
@@ -136,7 +137,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setOverlayParent(this);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mQsContainer = findViewById(R.id.quick_settings_container);
-        mQsPanel = findViewById(R.id.quick_settings_panel);
+        mQsPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
         mClockView = (TextView) findViewById(R.id.clock_view);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
@@ -873,6 +874,20 @@ public class NotificationPanelView extends PanelView implements
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
         mIsExpanding = false;
+        if (mExpandedHeight == 0f) {
+            mHeader.setListening(false);
+            mQsPanel.setListening(false);
+        } else {
+            mHeader.setListening(true);
+            mQsPanel.setListening(true);
+        }
+    }
+
+    @Override
+    public void instantExpand() {
+        super.instantExpand();
+        mHeader.setListening(true);
+        mQsPanel.setListening(true);
     }
 
     @Override

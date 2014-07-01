@@ -45,6 +45,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private static final float EXPANSION_RUBBERBAND_FACTOR = 0.35f;
 
     private boolean mExpanded;
+    private boolean mListening;
     private boolean mOverscrolled;
     private boolean mKeyguardShowing;
 
@@ -145,6 +146,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         return mExpandedHeight;
     }
 
+    public void setListening(boolean listening) {
+        if (listening == mListening) {
+            return;
+        }
+        mListening = listening;
+        updateBrightnessControllerState();
+    }
+
     public void setExpanded(boolean expanded, boolean overscrolled) {
         boolean changed = expanded != mExpanded;
         boolean overscrollChanged = overscrolled != mOverscrolled;
@@ -154,7 +163,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateHeights();
             updateVisibilities();
             updateSystemIconsLayoutParams();
-            updateBrightnessControllerState();
             updateZTranslation();
             updateClickTargets();
             updateWidth();
@@ -254,7 +262,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void updateBrightnessControllerState() {
-        if (mExpanded) {
+        if (mListening) {
             mBrightnessController.registerCallbacks();
         } else {
             mBrightnessController.unregisterCallbacks();
