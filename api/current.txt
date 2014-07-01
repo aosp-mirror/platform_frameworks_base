@@ -23217,6 +23217,7 @@ package android.provider {
     field public static final android.net.Uri AUTHORITY_URI;
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
     field public static final java.lang.String DEFERRED_SNIPPETING = "deferred_snippeting";
+    field public static final java.lang.String DEFERRED_SNIPPETING_QUERY = "deferred_snippeting_query";
     field public static final java.lang.String DIRECTORY_PARAM_KEY = "directory";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
     field public static final java.lang.String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
@@ -23882,11 +23883,10 @@ package android.provider {
     field public static final android.net.Uri PROFILE_CONTENT_URI;
   }
 
-  public static class ContactsContract.SearchSnippetColumns {
-    ctor public ContactsContract.SearchSnippetColumns();
+  public static class ContactsContract.SearchSnippets {
+    ctor public ContactsContract.SearchSnippets();
     field public static final java.lang.String DEFERRED_SNIPPETING_KEY = "deferred_snippeting";
     field public static final java.lang.String SNIPPET = "snippet";
-    field public static final java.lang.String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
