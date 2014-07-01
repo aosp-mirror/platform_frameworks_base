@@ -1043,7 +1043,7 @@ public class NotificationPanelView extends PanelView implements
         if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
             return mNotificationStackScroller.getPeekHeight();
         } else {
-            return mQsMinExpansionHeight;
+            return mQsMinExpansionHeight * HEADER_RUBBERBAND_FACTOR;
         }
     }
 }
