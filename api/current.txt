@@ -15945,6 +15945,7 @@ package android.media.tv {
     field public static final java.lang.String COLUMN_DISPLAY_NAME = "display_name";
     field public static final java.lang.String COLUMN_DISPLAY_NUMBER = "display_number";
     field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
+    field public static final java.lang.String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
     field public static final java.lang.String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
     field public static final java.lang.String COLUMN_SEARCHABLE = "searchable";
     field public static final java.lang.String COLUMN_SERVICE_ID = "service_id";
