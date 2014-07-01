@@ -404,6 +404,9 @@ public final class SystemServer {
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
+            Slog.i(TAG, "Reading configuration...");
+            SystemConfig.getInstance();
+
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
 
