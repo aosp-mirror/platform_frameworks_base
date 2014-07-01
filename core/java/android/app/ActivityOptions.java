@@ -124,6 +124,8 @@ public class ActivityOptions {
     public static final int ANIM_THUMBNAIL_SCALE_DOWN = 4;
     /** @hide */
     public static final int ANIM_SCENE_TRANSITION = 5;
+    /** @hide */
+    public static final int ANIM_DEFAULT = 6;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -344,10 +346,9 @@ public class ActivityOptions {
      * enabled on the calling Activity to cause an exit transition. The same must be in
      * the called Activity to get an entering transition.</p>
      * @param activity The Activity whose window contains the shared elements.
-     * @param sharedElement The View to transition to the started Activity. sharedElement must
-     *                      have a non-null sharedElementName.
-     * @param sharedElementName The shared element name as used in the target Activity. This may
-     *                          be null if it has the same name as sharedElement.
+     * @param sharedElement The View to transition to the started Activity.
+     * @param sharedElementName The shared element name as used in the target Activity. This
+     *                          must not be null.
      * @return Returns a new ActivityOptions object that you can use to
      *         supply these options as the options Bundle when starting an activity.
      * @see android.transition.Transition#setEpicenterCallback(
@@ -374,16 +375,16 @@ public class ActivityOptions {
      *                       a unique shared element name.
      * @return Returns a new ActivityOptions object that you can use to
      *         supply these options as the options Bundle when starting an activity.
-     *         Returns null if the Window does not have {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
-        if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
-            return null;
-        }
         ActivityOptions opts = new ActivityOptions();
+        if (!activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)) {
+            opts.mAnimationType = ANIM_DEFAULT;
+            return opts;
+        }
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
 
         ArrayList<String> names = new ArrayList<String>();
@@ -642,6 +643,9 @@ public class ActivityOptions {
      * methods that take an options Bundle.
      */
     public Bundle toBundle() {
+        if (mAnimationType == ANIM_DEFAULT) {
+            return null;
+        }
         Bundle b = new Bundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
