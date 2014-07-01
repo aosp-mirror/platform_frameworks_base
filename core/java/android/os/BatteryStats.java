@@ -614,6 +614,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_VIDEO_ON_FLAG = 1<<30;
         public static final int STATE2_WIFI_RUNNING_FLAG = 1<<29;
         public static final int STATE2_WIFI_ON_FLAG = 1<<28;
+        public static final int STATE2_FLASHLIGHT_FLAG = 1<<27;
 
         public static final int MOST_INTERESTING_STATES2 =
             STATE2_LOW_POWER_FLAG | STATE2_WIFI_ON_FLAG;
@@ -1235,6 +1236,7 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
         new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
         new BitDescription(HistoryItem.STATE2_WIFI_ON_FLAG, "wifi", "W"),
+        new BitDescription(HistoryItem.STATE2_FLASHLIGHT_FLAG, "flashlight", "fl"),
         new BitDescription(HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK,
                 HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT, "wifi_signal_strength", "Wss",
                 new String[] { "0", "1", "2", "3", "4" },
@@ -1369,6 +1371,22 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract int getBluetoothStateCount(int bluetoothState, int which);
+
+    /**
+     * Returns the time in microseconds that the flashlight has been on while the device was
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getFlashlightOnTime(long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the number of times that the flashlight has been turned on while the device was
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getFlashlightOnCount(int which);
 
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
@@ -1964,6 +1982,9 @@ public abstract class BatteryStats implements Parcelable {
                         break;
                     case SCREEN:
                         label="scrn";
+                        break;
+                    case FLASHLIGHT:
+                        label="flashlight";
                         break;
                     case APP:
                         uid = bs.uidObj.getUid();
@@ -2635,6 +2656,10 @@ public abstract class BatteryStats implements Parcelable {
                         break;
                     case SCREEN:
                         pw.print(prefix); pw.print("    Screen: "); printmAh(pw, bs.value);
+                        pw.println();
+                        break;
+                    case FLASHLIGHT:
+                        pw.print(prefix); pw.print("    Flashlight: "); printmAh(pw, bs.value);
                         pw.println();
                         break;
                     case APP:

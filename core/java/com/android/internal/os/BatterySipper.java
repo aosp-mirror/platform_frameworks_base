@@ -54,6 +54,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
         PHONE,
         WIFI,
         BLUETOOTH,
+        FLASHLIGHT,
         SCREEN,
         APP,
         USER,

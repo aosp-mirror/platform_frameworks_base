@@ -89,7 +89,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 107 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 108 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -259,6 +259,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     boolean mVideoOn;
     StopwatchTimer mVideoOnTimer;
+
+    boolean mFlashlightOn;
+    StopwatchTimer mFlashlightOnTimer;
 
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
@@ -3177,6 +3180,32 @@ public final class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteVibratorOffLocked();
     }
 
+    public void noteFlashlightOnLocked() {
+        if (!mFlashlightOn) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHistoryCur.states2 |= HistoryItem.STATE2_FLASHLIGHT_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Flashlight on to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mFlashlightOn = true;
+            mFlashlightOnTimer.startRunningLocked(elapsedRealtime);
+        }
+    }
+
+    public void noteFlashlightOffLocked() {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (mFlashlightOn) {
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_FLASHLIGHT_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Flashlight off to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mFlashlightOn = false;
+            mFlashlightOnTimer.stopRunningLocked(elapsedRealtime);
+        }
+    }
+
     public void noteWifiRunningLocked(WorkSource ws) {
         if (!mGlobalWifiRunning) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -3680,6 +3709,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getBluetoothStateCount(int bluetoothState, int which) {
         return mBluetoothStateTimer[bluetoothState].getCountLocked(which);
+    }
+
+    @Override public long getFlashlightOnTime(long elapsedRealtimeUs, int which) {
+        return mFlashlightOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    }
+
+    @Override public long getFlashlightOnCount(int which) {
+        return mFlashlightOnTimer.getCountLocked(which);
     }
 
     @Override
@@ -5681,6 +5718,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
+        mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
@@ -5930,6 +5968,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneOnTimer.reset(false);
         mAudioOnTimer.reset(false);
         mVideoOnTimer.reset(false);
+        mFlashlightOnTimer.reset(false);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].reset(false);
         }
@@ -7124,6 +7163,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].readSummaryFromParcelLocked(in);
         }
+        mFlashlightOn = false;
+        mFlashlightOnTimer.readSummaryFromParcelLocked(in);
 
         int NKW = in.readInt();
         if (NKW > 10000) {
@@ -7381,6 +7422,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
+        mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -7667,6 +7709,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOn = false;
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
+        mFlashlightOn = false;
+        mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
@@ -7798,6 +7842,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
         }
+        mFlashlightOnTimer.writeToParcel(out, uSecRealtime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
@@ -7931,6 +7976,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 pr.println("*** Bluetooth active type #" + i + ":");
                 mBluetoothStateTimer[i].logState(pr, "  ");
             }
+            pr.println("*** Flashlight timer:");
+            mFlashlightOnTimer.logState(pr, "  ");
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);
     }
