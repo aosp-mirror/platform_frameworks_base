@@ -577,11 +577,16 @@ public abstract class CameraMetadata<TKey> {
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
 
     /**
-     * <p>This camera device is capable of supporting advanced imaging
-     * applications.</p>
+     * <p>This camera device is capable of supporting advanced imaging applications.</p>
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
+
+    /**
+     * <p>This camera device is running in backward compatibility mode.</p>
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2;
 
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
