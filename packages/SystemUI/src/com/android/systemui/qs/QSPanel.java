@@ -50,6 +50,7 @@ public class QSPanel extends ViewGroup {
     private int mPanelPaddingBottom;
     private int mDualTileUnderlap;
     private boolean mExpanded;
+    private boolean mListening;
 
     private TileRecord mDetailRecord;
     private Callback mCallback;
@@ -100,9 +101,14 @@ public class QSPanel extends ViewGroup {
         if (!mExpanded) {
             showDetail(false /*show*/, mDetailRecord);
         }
+    }
+
+    public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
         for (TileRecord r : mRecords) {
-            r.tile.setListening(mExpanded);
-            if (mExpanded) {
+            r.tile.setListening(mListening);
+            if (mListening) {
                 r.tile.refreshState();
             }
         }
