@@ -3212,7 +3212,6 @@ package android.app {
     ctor public ActionBar.LayoutParams(int);
     ctor public ActionBar.LayoutParams(android.app.ActionBar.LayoutParams);
     ctor public ActionBar.LayoutParams(android.view.ViewGroup.LayoutParams);
-    ctor public ActionBar.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
     field public int gravity;
   }
 

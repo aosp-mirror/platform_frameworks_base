@@ -1585,6 +1585,10 @@ public class Toolbar extends ViewGroup {
     /**
      * Layout information for child views of Toolbars.
      *
+     * <p>Toolbar.LayoutParams extends ActionBar.LayoutParams for compatibility with existing
+     * ActionBar API. See {@link android.app.Activity#setActionBar(Toolbar) Activity.setActionBar}
+     * for more info on how to use a Toolbar as your Activity's ActionBar.</p>
+     *
      * @attr ref android.R.styleable#Toolbar_LayoutParams_layout_gravity
      */
     public static class LayoutParams extends ActionBar.LayoutParams {
@@ -1624,6 +1628,9 @@ public class Toolbar extends ViewGroup {
 
         public LayoutParams(MarginLayoutParams source) {
             super(source);
+            // ActionBar.LayoutParams doesn't have a MarginLayoutParams constructor.
+            // Fake it here and copy over the relevant data.
+            copyMarginsFrom(source);
         }
 
         public LayoutParams(ViewGroup.LayoutParams source) {

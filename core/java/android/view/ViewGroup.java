@@ -6476,6 +6476,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
+         * @hide Used internally.
+         */
+        public final void copyMarginsFrom(MarginLayoutParams source) {
+            this.leftMargin = source.leftMargin;
+            this.topMargin = source.topMargin;
+            this.rightMargin = source.rightMargin;
+            this.bottomMargin = source.bottomMargin;
+            this.startMargin = source.startMargin;
+            this.endMargin = source.endMargin;
+
+            this.mMarginFlags = source.mMarginFlags;
+        }
+
+        /**
          * Sets the margins, in pixels. A call to {@link android.view.View#requestLayout()} needs
          * to be done so that the new margins are taken into account. Left and right margins may be
          * overriden by {@link android.view.View#requestLayout()} depending on layout direction.
