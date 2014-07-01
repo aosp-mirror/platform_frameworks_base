@@ -108,6 +108,14 @@ public abstract class ConnectionService extends CallService {
             }
         }
 
+        /** {@inheritDoc} */
+        @Override
+        public void onFeaturesChanged(Connection c, int features) {
+            String id = mIdByConnection.get(c);
+            Log.d(this, "Adapter set features %d", features);
+            getAdapter().setFeatures(id, features);
+        }
+
         @Override
         public void onDisconnected(Connection c, int cause, String message) {
             String id = mIdByConnection.get(c);
@@ -560,5 +568,19 @@ public abstract class ConnectionService extends CallService {
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
         return NULL_CONNECTION;
+    }
+
+    /**
+     * Handles changes to the features of a connection.
+     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
+     * bit-mask.
+     *
+     * @param callId The call to set the features for.
+     * @param features The new features of the call.
+     */
+    @Override
+    public final void onFeaturesChanged(String callId, int features) {
+        Log.d(this, "onFeaturesChanged %s %d", callId, features);
+        findConnectionForAction(callId, "onFeaturesChanged").setFeatures(features);
     }
 }

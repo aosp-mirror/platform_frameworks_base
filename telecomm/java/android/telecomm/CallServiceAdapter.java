@@ -354,4 +354,22 @@ public final class CallServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+    * Set the features associated with the given call.
+    * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
+    * bit-mask.
+    *
+    * @param callId The unique ID of the call to set features for.
+    * @param features The features.
+    */
+    public void setFeatures(String callId, int features) {
+        Log.v(this, "setFeatures: %d", features);
+        for (ICallServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setFeatures(callId, features);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }
