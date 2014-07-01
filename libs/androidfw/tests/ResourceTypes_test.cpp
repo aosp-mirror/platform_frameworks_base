@@ -75,6 +75,30 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguage) {
      EXPECT_EQ(0, out[3]);
 }
 
+TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguageAtOffset16) {
+     ResTable_config config;
+     config.packLanguage("tgp");
+
+     // We had a bug where we would accidentally mask
+     // the 5th bit of both bytes
+     //
+     // packed[0] = 1011 1100
+     // packed[1] = 1101 0011
+     //
+     // which is equivalent to:
+     // 1  [0]   [1]   [2]
+     // 1-01111-00110-10011
+     EXPECT_EQ(0xbc, config.language[0]);
+     EXPECT_EQ(0xd3, config.language[1]);
+
+     char out[4] = { 1, 1, 1, 1};
+     config.unpackLanguage(out);
+     EXPECT_EQ('t', out[0]);
+     EXPECT_EQ('g', out[1]);
+     EXPECT_EQ('p', out[2]);
+     EXPECT_EQ(0, out[3]);
+}
+
 TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterRegion) {
      ResTable_config config;
      config.packRegion("419");
