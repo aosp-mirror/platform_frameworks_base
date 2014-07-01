@@ -995,7 +995,7 @@ public abstract class Transition implements Cloneable {
      */
     public Transition addTarget(String targetName) {
         if (targetName != null) {
-            if (mTargetNames != null) {
+            if (mTargetNames == null) {
                 mTargetNames = new ArrayList<String>();
             }
             mTargetNames.add(targetName);
