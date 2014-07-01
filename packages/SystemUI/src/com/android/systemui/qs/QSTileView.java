@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +49,7 @@ public class QSTileView extends ViewGroup {
     private final int mTileSpacingPx;
     private final int mTilePaddingTopPx;
     private final int mTilePaddingBelowIconPx;
-    private final int mDualTilePaddingBelowDividerPx;
+    private final int mDualTileVerticalPaddingPx;
 
     private TextView mLabel;
     private QSDualTileLabel mDualLabel;
@@ -68,8 +67,8 @@ public class QSTileView extends ViewGroup {
         mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
         mTilePaddingTopPx = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);
         mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
-        mDualTilePaddingBelowDividerPx =
-                res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_below_divider);
+        mDualTileVerticalPaddingPx =
+                res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
         recreateLabel();
         setClipChildren(false);
 
@@ -100,12 +99,12 @@ public class QSTileView extends ViewGroup {
         }
         final Resources res = mContext.getResources();
         if (mDual) {
-            final Context c = new ContextThemeWrapper(mContext, R.style.BorderlessButton_Tiny);
-            mDualLabel = new QSDualTileLabel(c);
+            mDualLabel = new QSDualTileLabel(mContext);
             mDualLabel.setId(android.R.id.title);
-            mDualLabel.setFirstLineBackground(res.getDrawable(R.drawable.qs_dual_tile_caret));
+            mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
+            mDualLabel.setFirstLineCaret(res.getDrawable(R.drawable.qs_dual_tile_caret));
             mDualLabel.setTextColor(res.getColor(R.color.qs_tile_text));
-            mDualLabel.setPadding(0, mDualTilePaddingBelowDividerPx, 0, 0);
+            mDualLabel.setPadding(0, mDualTileVerticalPaddingPx, 0, mDualTileVerticalPaddingPx);
             mDualLabel.setTypeface(CONDENSED);
             mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
