@@ -1719,9 +1719,9 @@ void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
       out[0] = in[0];
       out[1] = in[1];
   } else {
-      uint8_t first = (in[0] - base) & 0x00ef;
-      uint8_t second = (in[1] - base) & 0x00ef;
-      uint8_t third = (in[2] - base) & 0x00ef;
+      uint8_t first = (in[0] - base) & 0x007f;
+      uint8_t second = (in[1] - base) & 0x007f;
+      uint8_t third = (in[2] - base) & 0x007f;
 
       out[0] = (0x80 | (third << 2) | (second >> 3));
       out[1] = ((second << 5) | first);
