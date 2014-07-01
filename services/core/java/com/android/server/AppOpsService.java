@@ -368,7 +368,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
-        verifyIncomingUid(uid);
+        if (Binder.getCallingPid() == Process.myPid()) {
+            return;
+        }
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
         verifyIncomingOp(code);
         ArrayList<Callback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
