@@ -18,6 +18,7 @@ package android.nfc;
 
 import android.app.PendingIntent;
 import android.content.IntentFilter;
+import android.nfc.BeamShareData;
 import android.nfc.NdefMessage;
 import android.nfc.Tag;
 import android.nfc.TechListParcel;
@@ -47,7 +48,8 @@ interface INfcAdapter
     void setForegroundDispatch(in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
     void setAppCallback(in IAppCallback callback);
-    void invokeBeam();
+    oneway void invokeBeam();
+    oneway void invokeBeamInternal(in BeamShareData shareData);
 
     void dispatch(in Tag tag);
 

@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.nfc.BeamShareData;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -1265,6 +1266,21 @@ public final class NfcAdapter {
         enforceResumed(activity);
         try {
             sService.invokeBeam();
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "invokeBeam: NFC process has died.");
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean invokeBeam(BeamShareData shareData) {
+        try {
+            Log.e(TAG, "invokeBeamInternal()");
+            sService.invokeBeamInternal(shareData);
             return true;
         } catch (RemoteException e) {
             Log.e(TAG, "invokeBeam: NFC process has died.");
