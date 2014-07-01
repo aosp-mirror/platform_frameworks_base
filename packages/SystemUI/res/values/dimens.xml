@@ -160,8 +160,9 @@
     <dimen name="qs_tile_text_size">12sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
-    <dimen name="qs_dual_tile_height">104dp</dimen>
-    <dimen name="qs_dual_tile_padding_below_divider">4dp</dimen>
+    <dimen name="qs_dual_tile_height">112dp</dimen>
+    <dimen name="qs_dual_tile_padding_vertical">8dp</dimen>
+    <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
     <dimen name="qs_tile_padding_top">16dp</dimen>
     <dimen name="qs_tile_padding_below_icon">12dp</dimen>
     <dimen name="qs_tile_padding_bottom">16dp</dimen>

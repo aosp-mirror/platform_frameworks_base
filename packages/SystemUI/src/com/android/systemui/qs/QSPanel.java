@@ -48,6 +48,7 @@ public class QSPanel extends ViewGroup {
     private int mLargeCellWidth;
     private int mLargeCellHeight;
     private int mPanelPaddingBottom;
+    private int mDualTileUnderlap;
     private boolean mExpanded;
 
     private TileRecord mDetailRecord;
@@ -82,6 +83,7 @@ public class QSPanel extends ViewGroup {
         mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
         mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
         mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
+        mDualTileUnderlap = res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
         if (mColumns != columns) {
             mColumns = columns;
             postInvalidate();
@@ -243,7 +245,7 @@ public class QSPanel extends ViewGroup {
 
     private int getRowTop(int row) {
         if (row <= 0) return 0;
-        return mLargeCellHeight + (row - 1) * mCellHeight;
+        return mLargeCellHeight - mDualTileUnderlap + (row - 1) * mCellHeight;
     }
 
     private int getColumnCount(int row) {
