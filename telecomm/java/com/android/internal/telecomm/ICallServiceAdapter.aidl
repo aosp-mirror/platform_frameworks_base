@@ -65,4 +65,6 @@ oneway interface ICallServiceAdapter {
     void queryRemoteConnectionServices(RemoteServiceCallback callback);
 
     void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);
+
+    void setFeatures(String callId, int features);
 }

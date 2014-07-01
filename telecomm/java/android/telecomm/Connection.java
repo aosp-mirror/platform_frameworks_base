@@ -34,6 +34,7 @@ public abstract class Connection {
     /** @hide */
     public interface Listener {
         void onStateChanged(Connection c, int state);
+        void onFeaturesChanged(Connection c, int features);
         void onAudioStateChanged(Connection c, CallAudioState state);
         void onHandleChanged(Connection c, Uri newHandle);
         void onSignalChanged(Connection c, Bundle details);
@@ -51,6 +52,11 @@ public abstract class Connection {
         @Override
         public void onStateChanged(Connection c, int state) {}
 
+        /** {@inheritDoc} */
+        @Override
+        public void onFeaturesChanged(Connection c, int features) {}
+
+        /** {@inheritDoc} */
          @Override
         public void onAudioStateChanged(Connection c, CallAudioState state) {}
 
@@ -97,6 +103,7 @@ public abstract class Connection {
     private final List<Connection> mChildConnections = new ArrayList<>();
 
     private int mState = State.NEW;
+    private int mFeatures = CallFeatures.NONE;
     private CallAudioState mCallAudioState;
     private Uri mHandle;
     private boolean mRequestingRingback = false;
@@ -129,6 +136,12 @@ public abstract class Connection {
     public final int getState() {
         return mState;
     }
+
+    /**
+     * @return The features of the call.  These are items for which the InCall UI may wish to
+     *         display a visual indicator.
+     */
+    public final int getFeatures() { return mFeatures; }
 
     /**
      * @return The audio state of the call, describing how its audio is currently
@@ -281,6 +294,22 @@ public abstract class Connection {
     public final void conference() {
         Log.d(this, "conference");
         onConference();
+    }
+
+    /**
+     * Set the features applicable to the connection.  These are items for which the InCall UI may
+     * wish to display a visual indicator.
+     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
+     * bit-mask.
+     *
+     * @param features The features active.
+     */
+    public final void setFeatures(int features) {
+        Log.d(this, "setFeatures %d", features);
+        this.mFeatures = features;
+        for (Listener l : mListeners) {
+            l.onFeaturesChanged(this, mFeatures);
+        }
     }
 
     /**

@@ -27451,6 +27451,12 @@ package android.telecomm {
     field public static final int SWAP_CALLS = 8; // 0x8
   }
 
+  public final class CallFeatures {
+    field public static final int NONE = 0; // 0x0
+    field public static final int VoLTE = 1; // 0x1
+    field public static final int VoWIFI = 2; // 0x2
+  }
+
   public final class CallInfo implements android.os.Parcelable {
     ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
     method public int describeContents();
@@ -27487,6 +27493,7 @@ package android.telecomm {
     method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
     method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onFeaturesChanged(java.lang.String, int);
     method public void onPostDialContinue(java.lang.String, boolean);
     method public abstract void playDtmfTone(java.lang.String, char);
     method public abstract void reject(java.lang.String);
@@ -27508,6 +27515,7 @@ package android.telecomm {
     method public void setCallVideoProvider(java.lang.String, android.telecomm.CallVideoProvider);
     method public void setDialing(java.lang.String);
     method public void setDisconnected(java.lang.String, int, java.lang.String);
+    method public void setFeatures(java.lang.String, int);
     method public void setOnHold(java.lang.String);
     method public void setRequestingRingback(java.lang.String, boolean);
     method public void setRinging(java.lang.String);
@@ -27591,6 +27599,7 @@ package android.telecomm {
     ctor protected Connection();
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
+    method public final int getFeatures();
     method public final android.net.Uri getHandle();
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
@@ -27616,6 +27625,7 @@ package android.telecomm {
     method public final void setDestroyed();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
+    method public final void setFeatures(int);
     method public final void setHandle(android.net.Uri);
     method public final void setIsConferenceCapable(boolean);
     method public final void setOnHold();
@@ -27625,6 +27635,35 @@ package android.telecomm {
     method public final void setRinging();
     method public final void setSignal(android.os.Bundle);
     method public static java.lang.String stateToString(int);
+  }
+
+  public static abstract interface Connection.Listener {
+    method public abstract void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
+    method public abstract void onConferenceCapableChanged(android.telecomm.Connection, boolean);
+    method public abstract void onDestroyed(android.telecomm.Connection);
+    method public abstract void onDisconnected(android.telecomm.Connection, int, java.lang.String);
+    method public abstract void onFeaturesChanged(android.telecomm.Connection, int);
+    method public abstract void onHandleChanged(android.telecomm.Connection, android.net.Uri);
+    method public abstract void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
+    method public abstract void onRequestingRingback(android.telecomm.Connection, boolean);
+    method public abstract void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
+    method public abstract void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
+    method public abstract void onStateChanged(android.telecomm.Connection, int);
+  }
+
+  public static class Connection.ListenerBase implements android.telecomm.Connection.Listener {
+    ctor public Connection.ListenerBase();
+    method public void onAudioStateChanged(android.telecomm.Connection, android.telecomm.CallAudioState);
+    method public void onConferenceCapableChanged(android.telecomm.Connection, boolean);
+    method public void onDestroyed(android.telecomm.Connection);
+    method public void onDisconnected(android.telecomm.Connection, int, java.lang.String);
+    method public void onFeaturesChanged(android.telecomm.Connection, int);
+    method public void onHandleChanged(android.telecomm.Connection, android.net.Uri);
+    method public void onParentConnectionChanged(android.telecomm.Connection, android.telecomm.Connection);
+    method public void onRequestingRingback(android.telecomm.Connection, boolean);
+    method public void onSetCallVideoProvider(android.telecomm.Connection, android.telecomm.CallVideoProvider);
+    method public void onSignalChanged(android.telecomm.Connection, android.os.Bundle);
+    method public void onStateChanged(android.telecomm.Connection, int);
   }
 
   public final class Connection.State {
@@ -27666,6 +27705,9 @@ package android.telecomm {
     method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method protected void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.Connection>);
     method protected void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
+    method public final void onFeaturesChanged(java.lang.String, int);
+    method public final void onPostDialContinue(java.lang.String, boolean);
+    method public final void onPostDialWait(android.telecomm.Connection, java.lang.String);
     method public final void playDtmfTone(java.lang.String, char);
     method public final void reject(java.lang.String);
     method public final void setIncomingCallId(java.lang.String, android.os.Bundle);
@@ -27712,6 +27754,7 @@ package android.telecomm {
     method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
     method public int getDisconnectCauseCode();
     method public java.lang.String getDisconnectCauseMsg();
+    method public int getFeatures();
     method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
     method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();

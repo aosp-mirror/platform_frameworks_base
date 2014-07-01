@@ -193,6 +193,12 @@ public final class RemoteConnectionService implements DeathRecipient {
             } catch (RemoteException e) {
             }
         }
+
+        /** ${inheritDoc} */
+        @Override
+        public void setFeatures(String connectionId, int features) {
+            // not supported for remote connections.
+        }
     };
 
     RemoteConnectionService(ComponentName componentName, ICallService callService)

@@ -408,4 +408,16 @@ public abstract class CallService extends Service {
     public abstract void splitFromConference(String callId);
 
     public void onPostDialContinue(String callId, boolean proceed) {}
+
+    public void onPostDialWait(Connection conn, String remaining) {}
+
+    /**
+     * Called when changes to the features of a call occurs. Features are defined in
+     * {@link android.telecomm.CallFeatures}.  The active features for the call are represented as
+     * bits in the features bit-mask.
+     *
+     * @param callId The call to set the features for.
+     * @param features The new features of the call.
+     */
+    public abstract void onFeaturesChanged(String callId, int features);
 }
