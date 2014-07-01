@@ -130,7 +130,20 @@ public abstract class Window {
     public static final int PROGRESS_SECONDARY_START = 20000;
     /** Highest possible value for the secondary progress */
     public static final int PROGRESS_SECONDARY_END = 30000;
-    
+
+    /**
+     * The transitionName for the status bar background View when a custom background is used.
+     * @see android.view.Window#setStatusBarColor(int)
+     */
+    public static final String STATUS_BAR_BACKGROUND_TRANSITION_NAME = "android:status:background";
+
+    /**
+     * The transitionName for the navigation bar background View when a custom background is used.
+     * @see android.view.Window#setNavigationBarColor(int)
+     */
+    public static final String NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME =
+            "android:navigation:background";
+
     /** The default features enabled */
     @SuppressWarnings({"PointlessBitwiseExpression"})
     protected static final int DEFAULT_FEATURES = (1 << FEATURE_OPTIONS_PANEL) |
@@ -1554,6 +1567,9 @@ public abstract class Window {
      * If {@param color} is not opaque, consider setting
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+     * <p>
+     * The transitionName for the view background will be "android:status:background".
+     * </p>
      */
     public abstract void setStatusBarColor(int color);
 
@@ -1573,6 +1589,9 @@ public abstract class Window {
      * If {@param color} is not opaque, consider setting
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+     * <p>
+     * The transitionName for the view background will be "android:navigation:background".
+     * </p>
      */
     public abstract void setNavigationBarColor(int color);
 

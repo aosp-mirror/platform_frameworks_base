@@ -32,20 +32,15 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
-import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
-import com.android.internal.widget.ActionBarOverlayLayout;
-import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.DecorContentParent;
 import com.android.internal.widget.SwipeDismissLayout;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -2658,10 +2653,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 mStatusColorView = updateColorViewInt(mStatusColorView,
                         SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
-                        mStatusBarColor, mLastTopInset, Gravity.TOP);
+                        mStatusBarColor, mLastTopInset, Gravity.TOP,
+                        STATUS_BAR_BACKGROUND_TRANSITION_NAME);
                 mNavigationColorView = updateColorViewInt(mNavigationColorView,
                         SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
-                        mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM);
+                        mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM,
+                        NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
             }
             if (insets != null) {
                 insets = insets.consumeStableInsets();
@@ -2670,7 +2667,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,
-                int color, int height, int verticalGravity) {
+                int color, int height, int verticalGravity, String transitionName) {
             boolean show = height > 0 && (mLastSystemUiVisibility & systemUiHideFlag) == 0
                     && (getAttributes().flags & translucentFlag) == 0
                     && (color & Color.BLACK) != 0
@@ -2680,6 +2677,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (show) {
                     view = new View(mContext);
                     view.setBackgroundColor(color);
+                    view.setTransitionName(transitionName);
                     addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, height,
                             Gravity.START | verticalGravity));
                 }
