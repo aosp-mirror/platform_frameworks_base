@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.EGL14;
+import android.opengl.EGLDisplay;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
@@ -29,7 +31,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-
+import android.view.MotionEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +56,8 @@ public class GLDepthTestActivity extends Activity {
             // 2.0-compatible
             // context, and set an OpenGL ES 2.0-compatible renderer.
             mGLSurfaceView.setEGLContextClientVersion(2);
-            mGLSurfaceView.setRenderer(new GLES20TriangleRenderer(this));
+            mRenderer = new GLES20TriangleRenderer(this);
+            mGLSurfaceView.setRenderer(mRenderer);
         } else {
             throw new IllegalStateException("Can't find OGL ES2.0 context");
         }
@@ -84,7 +87,17 @@ public class GLDepthTestActivity extends Activity {
         mGLSurfaceView.onPause();
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.i("motion", event.toString());
+        if (event.getActionMasked() ==  MotionEvent.ACTION_DOWN) {
+            mRenderer.toggleDepthTest();
+        }
+        return true;
+    }
+
     private GLSurfaceView mGLSurfaceView;
+    private GLES20TriangleRenderer mRenderer;
 
     /*
      * Copyright (C) 2009 The Android Open Source Project Licensed under the
@@ -99,7 +112,9 @@ public class GLDepthTestActivity extends Activity {
      */
 
     class GLES20TriangleRenderer implements GLSurfaceView.Renderer {
-
+        private final static int REPEAT_RECTANGLES = 10;
+        private boolean mDepthTestEnabled = true;
+        private final static int FRAME_REPEAT_TIMES = 1;
         public GLES20TriangleRenderer(Context context) {
             mContext = context;
             mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
@@ -107,39 +122,60 @@ public class GLDepthTestActivity extends Activity {
             mTriangleVertices.put(mTriangleVerticesData).position(0);
         }
 
+
+        public void toggleDepthTest() {
+            mDepthTestEnabled = !mDepthTestEnabled;
+            Log.v(TAG, "mDepthTestEnabled is " + mDepthTestEnabled);
+        }
+
         public void onDrawFrame(GL10 glUnused) {
-            // Ignore the passed-in GL10 interface, and use the GLES20
-            // class's static methods instead.
-            GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
-            GLES20.glUseProgram(mProgram);
-            checkGlError("glUseProgram");
+            for (int j = 0 ; j < FRAME_REPEAT_TIMES; j ++) {
+                // Ignore the passed-in GL10 interface, and use the GLES20
+                // class's static methods instead.
+                GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+                if (mDepthTestEnabled) {
+                    GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+                } else {
+                    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+                }
+                GLES20.glUseProgram(mProgram);
+                if (mDepthTestEnabled) {
+                    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+                } else {
+                    GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+                }
+                checkGlError("glUseProgram");
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureID);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureID);
 
-            mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-            GLES20.glVertexAttribPointer(maPositionHandle, 3, GLES20.GL_FLOAT, false,
-                    TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
-            checkGlError("glVertexAttribPointer maPosition");
-            mTriangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-            GLES20.glEnableVertexAttribArray(maPositionHandle);
-            checkGlError("glEnableVertexAttribArray maPositionHandle");
-            GLES20.glVertexAttribPointer(maTextureHandle, 2, GLES20.GL_FLOAT, false,
-                    TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
-            checkGlError("glVertexAttribPointer maTextureHandle");
-            GLES20.glEnableVertexAttribArray(maTextureHandle);
-            checkGlError("glEnableVertexAttribArray maTextureHandle");
+                mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+                GLES20.glVertexAttribPointer(maPositionHandle, 3, GLES20.GL_FLOAT, false,
+                        TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                checkGlError("glVertexAttribPointer maPosition");
+                mTriangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+                GLES20.glEnableVertexAttribArray(maPositionHandle);
+                checkGlError("glEnableVertexAttribArray maPositionHandle");
+                GLES20.glVertexAttribPointer(maTextureHandle, 2, GLES20.GL_FLOAT, false,
+                        TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                checkGlError("glVertexAttribPointer maTextureHandle");
+                GLES20.glEnableVertexAttribArray(maTextureHandle);
+                checkGlError("glEnableVertexAttribArray maTextureHandle");
 
-            long time = SystemClock.uptimeMillis() % 4000L;
-            float angle = 0.090f * ((int) time);
-            Matrix.setRotateM(mMMatrix, 0, angle, 0, 0, 1.0f);
-            Matrix.multiplyMM(mMVPMatrix, 0, mVMatrix, 0, mMMatrix, 0);
-            Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
+                for (int i = 0 ; i < REPEAT_RECTANGLES; i ++) {
+                    float step = ((float)i) / REPEAT_RECTANGLES;
+                    Matrix.setIdentityM(mMMatrix, 0);
+                    Matrix.translateM(mMMatrix, 0, 0, step, step / 2);
+                    Matrix.scaleM(mMMatrix, 0, 2.0f, 1.0f, 1.0f);
+                    Matrix.multiplyMM(mMVPMatrix, 0, mVMatrix, 0, mMMatrix, 0);
+                    Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
 
-            GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
-            checkGlError("glDrawArrays");
+                    GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+                    GLES20.glUniform4f(muOverlayHandle, step , step, step , step);
+                    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+                    checkGlError("glDrawArrays");
+                }
+            }
         }
 
         public void onSurfaceChanged(GL10 glUnused, int width, int height) {
@@ -172,6 +208,12 @@ public class GLDepthTestActivity extends Activity {
             checkGlError("glGetUniformLocation uMVPMatrix");
             if (muMVPMatrixHandle == -1) {
                 throw new RuntimeException("Could not get attrib location for uMVPMatrix");
+            }
+
+            muOverlayHandle = GLES20.glGetUniformLocation(mProgram, "uOverlay");
+            checkGlError("glGetUniformLocation uOverlay");
+            if (muOverlayHandle == -1) {
+                throw new RuntimeException("Could not get attrib location for muOverlayHandle");
             }
 
             /*
@@ -213,6 +255,10 @@ public class GLDepthTestActivity extends Activity {
             bitmap.recycle();
 
             Matrix.setLookAtM(mVMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+            EGLDisplay display = EGL14.eglGetCurrentDisplay();
+            EGL14.eglSwapInterval(display, 0);
+
         }
 
         private int loadShader(int shaderType, String source) {
@@ -276,9 +322,10 @@ public class GLDepthTestActivity extends Activity {
         private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
         private final float[] mTriangleVerticesData = {
                                 // X, Y, Z, U, V
-                -1.0f, -0.5f, 0, -0.5f, 0.0f,
-                1.0f, -0.5f, 0, 1.5f, -0.0f,
-                0.0f, 1.11803399f, 0, 0.5f, 1.61803399f };
+                -1.0f, -1.0f, 0, 0.0f, 0.0f,
+                -1.0f, 1.0f, 0, 0.0f, 1.0f,
+                1.0f, -1.0f, 0, 1.0f, 0.0f,
+                1.0f, 1.0f, 0, 1.0f, 1.0f, };
 
         private FloatBuffer mTriangleVertices;
 
@@ -296,8 +343,9 @@ public class GLDepthTestActivity extends Activity {
                 "precision mediump float;\n" +
                         "varying vec2 vTextureCoord;\n" +
                         "uniform sampler2D sTexture;\n" +
+                        "uniform vec4 uOverlay;\n" +
                         "void main() {\n" +
-                        "  gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
+                        "  gl_FragColor = texture2D(sTexture, vTextureCoord) * uOverlay;\n" +
                         "}\n";
 
         private float[] mMVPMatrix = new float[16];
@@ -310,6 +358,7 @@ public class GLDepthTestActivity extends Activity {
         private int muMVPMatrixHandle;
         private int maPositionHandle;
         private int maTextureHandle;
+        private int muOverlayHandle;
 
         private Context mContext;
         private static final String TAG = "GLES20TriangleRenderer";
