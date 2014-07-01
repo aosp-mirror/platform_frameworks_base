@@ -20,7 +20,6 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
-import android.opengl.ManagedEGLContext;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -114,7 +113,6 @@ public final class WindowManagerGlobal {
     private final ArrayList<WindowManager.LayoutParams> mParams =
             new ArrayList<WindowManager.LayoutParams>();
     private final ArraySet<View> mDyingViews = new ArraySet<View>();
-    private boolean mNeedsEglTerminate;
 
     private Runnable mSystemPropertyUpdater;
 
@@ -377,13 +375,22 @@ public final class WindowManagerGlobal {
         return index;
     }
 
-    public void startTrimMemory(int level) {
+    public static boolean shouldDestroyEglContext(int trimLevel) {
+        // On low-end gfx devices we trim when memory is moderate;
+        // on high-end devices we do this when low.
+        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
+            return true;
+        }
+        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
+                && !ActivityManager.isHighEndGfx()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void trimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
-            // On low-end gfx devices we trim when memory is moderate;
-            // on high-end devices we do this when low.
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
-                    || (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
-                            && !ActivityManager.isHighEndGfx())) {
+            if (shouldDestroyEglContext(level)) {
                 // Destroy all hardware surfaces and resources associated to
                 // known windows
                 synchronized (mLock) {
@@ -392,29 +399,10 @@ public final class WindowManagerGlobal {
                     }
                 }
                 // Force a full memory flush
-                mNeedsEglTerminate = true;
-                HardwareRenderer.startTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-                return;
+                level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             }
 
-            HardwareRenderer.startTrimMemory(level);
-        }
-    }
-
-    public void endTrimMemory() {
-        HardwareRenderer.endTrimMemory();
-
-        if (mNeedsEglTerminate) {
-            ManagedEGLContext.doTerminate();
-            mNeedsEglTerminate = false;
-        }
-    }
-
-    public void trimLocalMemory() {
-        synchronized (mLock) {
-            for (int i = mRoots.size() - 1; i >= 0; --i) {
-                mRoots.get(i).destroyHardwareLayers();
-            }
+            HardwareRenderer.trimMemory(level);
         }
     }
 

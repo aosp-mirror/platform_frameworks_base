@@ -13628,7 +13628,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void destroyHardwareResources() {
-        resetDisplayList();
+        // Intentionally empty. RenderNode's lifecycle is now fully managed
+        // by the hardware renderer.
+        // However some subclasses (eg, WebView, TextureView) still need this signal
     }
 
     /**

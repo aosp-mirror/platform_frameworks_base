@@ -18,8 +18,6 @@ package android.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.util.DisplayMetrics;
 import android.view.Surface.OutOfResourcesException;
 
@@ -200,10 +198,8 @@ public abstract class HardwareRenderer {
 
     /**
      * Destroys the hardware rendering context.
-     *
-     * @param full If true, destroys all associated resources.
      */
-    abstract void destroy(boolean full);
+    abstract void destroy();
 
     /**
      * Initializes the hardware renderer for the specified surface.
@@ -435,28 +431,7 @@ public abstract class HardwareRenderer {
      *              see {@link android.content.ComponentCallbacks}
      */
     static void trimMemory(int level) {
-        startTrimMemory(level);
-        endTrimMemory();
-    }
-
-    /**
-     * Starts the process of trimming memory. Usually this call will setup
-     * hardware rendering context and reclaim memory.Extra cleanup might
-     * be required by calling {@link #endTrimMemory()}.
-     *
-     * @param level Hint about the amount of memory that should be trimmed,
-     *              see {@link android.content.ComponentCallbacks}
-     */
-    static void startTrimMemory(int level) {
-        ThreadedRenderer.startTrimMemory(level);
-    }
-
-    /**
-     * Finishes the process of trimming memory. This method will usually
-     * cleanup special resources used by the memory trimming process.
-     */
-    static void endTrimMemory() {
-        ThreadedRenderer.endTrimMemory();
+        ThreadedRenderer.trimMemory(level);
     }
 
     /**
@@ -503,8 +478,15 @@ public abstract class HardwareRenderer {
     abstract void fence();
 
     /**
+     * Prevents any further drawing until draw() is called. This is a signal
+     * that the contents of the RenderNode tree are no longer safe to play back.
+     * In practice this usually means that there are Functor pointers in the
+     * display list that are no longer valid.
+     */
+    abstract void stopDrawing();
+
+    /**
      * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
      */
-    public void notifyFramePending() {
-    }
+    abstract void notifyFramePending();
 }

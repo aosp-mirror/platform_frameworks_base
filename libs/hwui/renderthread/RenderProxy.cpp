@@ -312,16 +312,28 @@ void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(flushCaches, CanvasContext* context, Caches::FlushMode flushMode) {
-    args->context->flushCaches(args->flushMode);
+CREATE_BRIDGE1(destroyHardwareResources, CanvasContext* context) {
+    args->context->destroyHardwareResources();
     return NULL;
 }
 
-void RenderProxy::flushCaches(Caches::FlushMode flushMode) {
-    SETUP_TASK(flushCaches);
+void RenderProxy::destroyHardwareResources() {
+    SETUP_TASK(destroyHardwareResources);
     args->context = mContext;
-    args->flushMode = flushMode;
     post(task);
+}
+
+CREATE_BRIDGE2(timMemory, RenderThread* thread, int level) {
+    CanvasContext::trimMemory(*args->thread, args->level);
+    return NULL;
+}
+
+void RenderProxy::trimMemory(int level) {
+    RenderThread& thread = RenderThread::getInstance();
+    SETUP_TASK(timMemory);
+    args->thread = &thread;
+    args->level = level;
+    thread.queue(task);
 }
 
 CREATE_BRIDGE0(fence) {
@@ -331,6 +343,17 @@ CREATE_BRIDGE0(fence) {
 
 void RenderProxy::fence() {
     SETUP_TASK(fence);
+    postAndWait(task);
+}
+
+CREATE_BRIDGE1(stopDrawing, CanvasContext* context) {
+    args->context->stopDrawing();
+    return NULL;
+}
+
+void RenderProxy::stopDrawing() {
+    SETUP_TASK(stopDrawing);
+    args->context = mContext;
     postAndWait(task);
 }
 

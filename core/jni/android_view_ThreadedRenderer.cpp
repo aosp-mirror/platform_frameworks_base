@@ -298,16 +298,27 @@ static void android_view_ThreadedRenderer_detachSurfaceTexture(JNIEnv* env, jobj
     proxy->detachSurfaceTexture(layer);
 }
 
-static void android_view_ThreadedRenderer_flushCaches(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jint flushMode) {
+static void android_view_ThreadedRenderer_destroyHardwareResources(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->flushCaches(static_cast<Caches::FlushMode>(flushMode));
+    proxy->destroyHardwareResources();
+}
+
+static void android_view_ThreadedRenderer_trimMemory(JNIEnv* env, jobject clazz,
+        jint level) {
+    RenderProxy::trimMemory(level);
 }
 
 static void android_view_ThreadedRenderer_fence(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->fence();
+}
+
+static void android_view_ThreadedRenderer_stopDrawing(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->stopDrawing();
 }
 
 static void android_view_ThreadedRenderer_notifyFramePending(JNIEnv* env, jobject clazz,
@@ -365,8 +376,10 @@ static JNINativeMethod gMethods[] = {
     { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
     { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },
     { "nDetachSurfaceTexture", "(JJ)V", (void*) android_view_ThreadedRenderer_detachSurfaceTexture },
-    { "nFlushCaches", "(JI)V", (void*) android_view_ThreadedRenderer_flushCaches },
+    { "nDestroyHardwareResources", "(J)V", (void*) android_view_ThreadedRenderer_destroyHardwareResources },
+    { "nTrimMemory", "(I)V", (void*) android_view_ThreadedRenderer_trimMemory },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
+    { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
 #endif

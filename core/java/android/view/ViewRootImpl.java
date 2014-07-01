@@ -632,12 +632,8 @@ public final class ViewRootImpl implements ViewParent,
     void destroyHardwareResources() {
         if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
-            mAttachInfo.mHardwareRenderer.destroy(false);
+            mAttachInfo.mHardwareRenderer.destroy();
         }
-    }
-
-    void destroyHardwareLayers() {
-        // TODO Implement
     }
 
     public void detachFunctor(long functor) {
@@ -646,7 +642,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mHardwareRenderer != null) {
             // Fence so that any pending invokeFunctor() messages will be processed
             // before we return from detachFunctor.
-            mAttachInfo.mHardwareRenderer.fence();
+            mAttachInfo.mHardwareRenderer.stopDrawing();
         }
     }
 
@@ -696,7 +692,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!HardwareRenderer.sRendererDisabled || (HardwareRenderer.sSystemRendererDisabled
                     && forceHwAccelerated)) {
                 if (mAttachInfo.mHardwareRenderer != null) {
-                    mAttachInfo.mHardwareRenderer.destroy(true);
+                    mAttachInfo.mHardwareRenderer.destroy();
                 }
 
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
@@ -1613,7 +1609,7 @@ public final class ViewRootImpl implements ViewParent,
                     // Our surface is gone
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled()) {
-                        mAttachInfo.mHardwareRenderer.destroy(true);
+                        mAttachInfo.mHardwareRenderer.destroy();
                     }
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
@@ -5436,7 +5432,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mView != null) {
                 hardwareRenderer.destroyHardwareResources(mView);
             }
-            hardwareRenderer.destroy(true);
+            hardwareRenderer.destroy();
             hardwareRenderer.setRequested(false);
 
             attachInfo.mHardwareRenderer = null;

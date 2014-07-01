@@ -65,7 +65,8 @@ public:
         // but don't evaluate animators and such as if it isn't detached as a
         // MODE_FULL will follow shortly.
         MODE_MAYBE_DETACHING,
-        // TODO: TRIM_MEMORY?
+        // Destroy all hardware resources, including DisplayListData, in the tree.
+        MODE_DESTROY_RESOURCES,
     };
 
     explicit TreeInfo(TraversalMode mode, RenderState& renderState)

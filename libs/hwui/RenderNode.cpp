@@ -195,17 +195,28 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
 void RenderNode::prepareTreeImpl(TreeInfo& info) {
     info.damageAccumulator->pushTransform(this);
-    if (info.mode == TreeInfo::MODE_FULL) {
+
+    switch (info.mode) {
+    case TreeInfo::MODE_FULL:
         pushStagingPropertiesChanges(info);
         mAnimatorManager.animate(info);
-    } else if (info.mode == TreeInfo::MODE_MAYBE_DETACHING) {
+        break;
+    case TreeInfo::MODE_MAYBE_DETACHING:
         pushStagingPropertiesChanges(info);
-    } else if (info.mode == TreeInfo::MODE_RT_ONLY) {
+        break;
+    case TreeInfo::MODE_RT_ONLY:
         mAnimatorManager.animate(info);
+        break;
+    case TreeInfo::MODE_DESTROY_RESOURCES:
+        // This will also release the hardware layer if we have one as
+        // isRenderable() will return false, thus causing pushLayerUpdate
+        // to recycle the hardware layer
+        setStagingDisplayList(NULL);
+        break;
     }
 
     prepareLayer(info);
-    if (info.mode == TreeInfo::MODE_FULL) {
+    if (info.mode == TreeInfo::MODE_FULL || info.mode == TreeInfo::MODE_DESTROY_RESOURCES) {
         pushStagingDisplayListChanges(info);
     }
     prepareSubTree(info, mDisplayListData);

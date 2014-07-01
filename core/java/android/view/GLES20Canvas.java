@@ -203,31 +203,6 @@ class GLES20Canvas extends HardwareCanvas {
     private static native int nCallDrawGLFunction(long renderer, long drawGLFunction);
 
     ///////////////////////////////////////////////////////////////////////////
-    // Memory
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Must match Caches::FlushMode values
-     *
-     * @see #flushCaches(int)
-     */
-    static final int FLUSH_CACHES_LAYERS = 0;
-
-    /**
-     * Must match Caches::FlushMode values
-     *
-     * @see #flushCaches(int)
-     */
-    static final int FLUSH_CACHES_MODERATE = 1;
-
-    /**
-     * Must match Caches::FlushMode values
-     *
-     * @see #flushCaches(int)
-     */
-    static final int FLUSH_CACHES_FULL = 2;
-
-    ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
 
