@@ -606,6 +606,15 @@ interface ITelephony {
     boolean setPreferredNetworkType(int networkType);
 
     /**
+     * Set the CDMA subscription source.
+     * Used for device supporting both NV and RUIM for CDMA.
+     *
+     * @param subscriptionType the subscription type, 0 for RUIM, 1 for NV.
+     * @return true on success; false on any failure.
+     */
+    boolean setCdmaSubscription(int subscriptionType);
+
+    /**
      * User enable/disable Mobile Data.
      *
      * @param enable true to turn on, else false

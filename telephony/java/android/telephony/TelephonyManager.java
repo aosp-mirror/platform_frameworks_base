@@ -2793,6 +2793,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Set the CDMA subscription source.
+     * Used for device supporting both NV and RUIM for CDMA.
+     *
+     * @param subscriptionType the subscription type, 0 for RUIM, 1 for NV.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    public boolean setCdmaSubscription(int subscriptionType) {
+        try {
+            return getITelephony().setCdmaSubscription(subscriptionType);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setCdmaSubscription RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setCdmaSubscription NPE", ex);
+        }
+        return false;
+    }
+
+    /**
      * Expose the rest of ITelephony to @SystemApi
      */
 
