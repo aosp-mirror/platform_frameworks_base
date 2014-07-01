@@ -77,6 +77,12 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsTracking;
 
     /**
+     * If set, the ongoing touch gesture might both trigger the expansion in {@link PanelView} and
+     * the expansion for quick settings.
+     */
+    private boolean mConflictingQsExpansionGesture;
+
+    /**
      * Whether we are currently handling a motion gesture in #onInterceptTouchEvent, but haven't
      * intercepted yet.
      */
@@ -423,11 +429,21 @@ public class NotificationPanelView extends PanelView implements
 
     private void flingQsWithCurrentVelocity() {
         float vel = getCurrentVelocity();
-
-        // TODO: Better logic whether we should expand or not.
-        flingSettings(vel, vel > 0);
+        flingSettings(vel, flingExpandsQs(vel));
     }
 
+    private boolean flingExpandsQs(float vel) {
+        if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+            return getQsExpansionFraction() > 0.5f;
+        } else {
+            return vel > 0;
+        }
+    }
+
+    private float getQsExpansionFraction() {
+        return (mQsExpansionHeight - mQsMinExpansionHeight)
+                / (mQsMaxExpansionHeight - mQsMinExpansionHeight);
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mBlockTouches) {
@@ -443,12 +459,40 @@ public class NotificationPanelView extends PanelView implements
                 return true;
             }
         }
-        if (mQsTracking || mQsExpanded) {
-            return onQsTouch(event);
-        }
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
+                && mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
 
+            // Down in the empty area while fully expanded - go to QS.
+            mQsTracking = true;
+            mConflictingQsExpansionGesture = true;
+            onQsExpansionStarted();
+            mInitialHeightOnTouch = mQsExpansionHeight;
+            mInitialTouchY = event.getX();
+            mInitialTouchX = event.getY();
+        }
+        if (mQsTracking || mQsExpanded) {
+            onQsTouch(event);
+            if (!mConflictingQsExpansionGesture) {
+                return true;
+            }
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
+                || event.getActionMasked() == MotionEvent.ACTION_UP) {
+            mConflictingQsExpansionGesture = false;
+        }
         super.onTouchEvent(event);
         return true;
+    }
+
+    @Override
+    protected boolean flingExpands(float vel, float vectorVel) {
+        boolean expands = super.flingExpands(vel, vectorVel);
+
+        // If we are already running a QS expansion, make sure that we keep the panel open.
+        if (mQsExpansionAnimator != null) {
+            expands = true;
+        }
+        return expands;
     }
 
     @Override
@@ -456,7 +500,7 @@ public class NotificationPanelView extends PanelView implements
         return mStatusBar.getBarState() != StatusBarState.SHADE;
     }
 
-    private boolean onQsTouch(MotionEvent event) {
+    private void onQsTouch(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
@@ -501,14 +545,17 @@ public class NotificationPanelView extends PanelView implements
                 mQsTracking = false;
                 mTrackingPointer = -1;
                 trackMovement(event);
-                flingQsWithCurrentVelocity();
+                float fraction = getQsExpansionFraction();
+                if ((fraction != 0f || y >= mInitialTouchY)
+                        && (fraction != 1f || y <= mInitialTouchY)) {
+                    flingQsWithCurrentVelocity();
+                }
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
                 break;
         }
-        return true;
     }
 
     @Override
@@ -894,6 +941,9 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void setOverExpansion(float overExpansion, boolean isPixels) {
+        if (mConflictingQsExpansionGesture) {
+            return;
+        }
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
             mNotificationStackScroller.setOnHeightChangedListener(null);
             if (isPixels) {
