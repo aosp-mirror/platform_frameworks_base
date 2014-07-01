@@ -65,7 +65,6 @@ public class QSTileHost implements QSTile.Host {
     private final CurrentUserTracker mUserTracker;
     private final VolumeComponent mVolume;
     private final ArrayList<QSTile<?>> mTiles = new ArrayList<QSTile<?>>();
-    private final int mFeedbackStartDelay;
     private final FlashlightController mFlashlight;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
@@ -110,7 +109,6 @@ public class QSTileHost implements QSTile.Host {
             }
         };
         mUserTracker.startTracking();
-        mFeedbackStartDelay = mContext.getResources().getInteger(R.integer.feedback_start_delay);
     }
 
     @Override
@@ -120,7 +118,7 @@ public class QSTileHost implements QSTile.Host {
 
     @Override
     public void startSettingsActivity(final Intent intent) {
-        mStatusBar.postStartSettingsActivity(intent, mFeedbackStartDelay);
+        mStatusBar.postStartSettingsActivity(intent, 0);
     }
 
     @Override

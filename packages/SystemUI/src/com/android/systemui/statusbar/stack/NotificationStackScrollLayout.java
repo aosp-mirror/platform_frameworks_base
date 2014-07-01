@@ -150,7 +150,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mMinTopOverScrollToEscape;
     private int mIntrinsicPadding;
     private int mNotificationTopPadding;
-    private int mMinStackHeight;
+    private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
 
     /**
@@ -258,7 +258,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.min_top_overscroll_to_qs);
         mNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notifications_top_padding);
-        mMinStackHeight = getResources().getDimensionPixelSize(R.dimen.collapsed_stack_height);
     }
 
     private void updatePadding(boolean dimmed) {
@@ -421,7 +420,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int minStackHeight = itemHeight + bottomStackPeekSize;
         int stackHeight;
         if (newStackHeight - mTopPadding >= minStackHeight || getNotGoneChildCount() == 0) {
-            setTranslationY(0);
+            setTranslationY(mTopPaddingOverflow);
             stackHeight = newStackHeight;
         } else {
 
@@ -1195,7 +1194,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return view.getHeight();
     }
 
-    private int getContentHeight() {
+    public int getContentHeight() {
         return mContentHeight;
     }
 
@@ -1271,15 +1270,30 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void updateTopPadding(float qsHeight, int scrollY, boolean animate) {
         float start = qsHeight - scrollY + mNotificationTopPadding;
         float stackHeight = getHeight() - start;
-        if (stackHeight <= mMinStackHeight) {
-            float overflow = mMinStackHeight - stackHeight;
-            stackHeight = mMinStackHeight;
+        int minStackHeight = getMinStackHeight();
+        if (stackHeight <= minStackHeight) {
+            float overflow = minStackHeight - stackHeight;
+            stackHeight = minStackHeight;
             start = getHeight() - stackHeight;
             setTranslationY(overflow);
+            mTopPaddingOverflow = overflow;
         } else {
             setTranslationY(0);
+            mTopPaddingOverflow = 0;
         }
         setTopPadding(clampPadding((int) start), animate);
+    }
+
+    public int getNotificationTopPadding() {
+        return mNotificationTopPadding;
+    }
+
+    public int getMinStackHeight() {
+        return mCollapsedSize + mBottomStackPeekSize;
+    }
+
+    public float getTopPaddingOverflow() {
+        return mTopPaddingOverflow;
     }
 
     public int getPeekHeight() {
@@ -1852,6 +1866,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setIntrinsicPadding(int intrinsicPadding) {
         mIntrinsicPadding = intrinsicPadding;
+    }
+
+    public int getIntrinsicPadding() {
+        return mIntrinsicPadding;
     }
 
     /**

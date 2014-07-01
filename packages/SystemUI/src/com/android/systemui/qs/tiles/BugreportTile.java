@@ -58,7 +58,7 @@ public class BugreportTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
-        postAfterFeedback(new Runnable() {
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 mHost.collapsePanels();

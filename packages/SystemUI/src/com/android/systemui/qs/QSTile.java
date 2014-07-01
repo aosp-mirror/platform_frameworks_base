@@ -26,7 +26,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -57,7 +56,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
     protected final Context mContext;
     protected final H mHandler;
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
-    private final int mFeedbackStartDelay;
 
     private Callback mCallback;
     protected final TState mState = newTileState();
@@ -71,7 +69,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHost = host;
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
-        mFeedbackStartDelay = mContext.getResources().getInteger(R.integer.feedback_start_delay);
     }
 
     public boolean supportsDualTargets() {
@@ -118,10 +115,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId).sendToTarget();
-    }
-
-    protected void postAfterFeedback(Runnable runnable) {
-        mHandler.postDelayed(runnable, mFeedbackStartDelay);
     }
 
     // call only on tile worker looper

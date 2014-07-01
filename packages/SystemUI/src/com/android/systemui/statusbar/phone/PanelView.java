@@ -289,7 +289,7 @@ public abstract class PanelView extends FrameLayout {
                     }
                     mJustPeeked = false;
                 }
-                if (!mJustPeeked && (!waitForTouchSlop || mTracking)) {
+                if (!mJustPeeked && (!waitForTouchSlop || mTracking) && !isTrackingBlocked()) {
                     setExpandedHeightInternal(newHeight);
                 }
 
@@ -475,7 +475,8 @@ public abstract class PanelView extends FrameLayout {
 
             // Make it shorter if we run a canned animation
             if (vel == 0) {
-                animator.setDuration((long) (animator.getDuration() / 1.75f));
+                animator.setDuration((long)
+                        (animator.getDuration() * getCannedFlingDurationFactor()));
             }
         }
         animator.addListener(new AnimatorListenerAdapter() {
@@ -546,9 +547,12 @@ public abstract class PanelView extends FrameLayout {
         float currentMaxPanelHeight = getMaxPanelHeight();
 
         // If the user isn't actively poking us, let's update the height
-        if (!mTracking && mHeightAnimator == null
-                && mExpandedHeight > 0 && currentMaxPanelHeight != mExpandedHeight
-                && !mPeekPending && mPeekAnimator == null) {
+        if ((!mTracking || isTrackingBlocked())
+                && mHeightAnimator == null
+                && mExpandedHeight > 0
+                && currentMaxPanelHeight != mExpandedHeight
+                && !mPeekPending
+                && mPeekAnimator == null) {
             setExpandedHeight(currentMaxPanelHeight);
         }
     }
@@ -575,6 +579,12 @@ public abstract class PanelView extends FrameLayout {
                 : mExpandedHeight / fhWithoutOverExpansion);
         notifyBarPanelExpansionChanged();
     }
+
+    /**
+     * @return true if the panel tracking should be temporarily blocked; this is used when a
+     *         conflicting gesture (opening QS) is happening
+     */
+    protected abstract boolean isTrackingBlocked();
 
     protected abstract void setOverExpansion(float overExpansion, boolean isPixels);
 
@@ -866,4 +876,6 @@ public abstract class PanelView extends FrameLayout {
     public abstract void resetViews();
 
     protected abstract float getPeekHeight();
+
+    protected abstract float getCannedFlingDurationFactor();
 }

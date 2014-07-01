@@ -248,9 +248,6 @@
     <!-- The height of the speed bump view. -->
     <dimen name="speed_bump_height">16dp</dimen>
 
-    <!-- The total height of the stack in its collapsed size (i.e. when quick settings is open) -->
-    <dimen name="collapsed_stack_height">94dp</dimen>
-
     <!-- Width of the zen mode interstitial dialog. -->
     <dimen name="zen_mode_dialog_width">320dp</dimen>
 

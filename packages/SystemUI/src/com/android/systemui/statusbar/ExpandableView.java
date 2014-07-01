@@ -241,6 +241,11 @@ public abstract class ExpandableView extends FrameLayout {
      * A listener notifying when {@link #getActualHeight} changes.
      */
     public interface OnHeightChangedListener {
+
+        /**
+         * @param view the view for which the height changed, or {@code null} if just the top
+         *             padding or the padding between the elements changed
+         */
         void onHeightChanged(ExpandableView view);
     }
 }

@@ -1687,9 +1687,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapseAllPanels(true);
-            if (isFlippedToSettings()) {
-                flipToNotifications(true /*animate*/);
-            }
         }
     }
 
@@ -1747,16 +1744,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mNotificationPanel.expand();
-        if (mStackScroller.getVisibility() != View.VISIBLE) {
-            flipToNotifications(true /*animate*/);
-        }
 
         if (false) postStartTracing();
-    }
-
-    public void flipToNotifications(boolean animate) {
-        // TODO: Animation
-        mNotificationPanel.closeQs();
     }
 
     @Override
@@ -1773,13 +1762,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.openQs();
 
         if (false) postStartTracing();
-    }
-
-    public boolean isFlippedToSettings() {
-        if (mNotificationPanel != null) {
-            return mNotificationPanel.isQsExpanded();
-        }
-        return false;
     }
 
     public void animateCollapseQuickSettings() {
