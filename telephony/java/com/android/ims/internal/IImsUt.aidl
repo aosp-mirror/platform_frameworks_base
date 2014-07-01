@@ -47,6 +47,26 @@ interface IImsUt {
     int queryCallWaiting();
 
     /**
+     * Retrieves the default CLIR setting.
+     */
+    int queryCLIR();
+
+    /**
+     * Retrieves the CLIP call setting.
+     */
+    int queryCLIP();
+
+    /**
+     * Retrieves the COLR call setting.
+     */
+    int queryCOLR();
+
+    /**
+     * Retrieves the COLP call setting.
+     */
+    int queryCOLP();
+
+    /**
      * Updates or retrieves the supplementary service configuration.
      */
     int transact(in Bundle ssInfo);
@@ -65,6 +85,26 @@ interface IImsUt {
      * Updates the configuration of the call waiting.
      */
     int updateCallWaiting(boolean enable);
+
+    /**
+     * Updates the configuration of the CLIR supplementary service.
+     */
+    int updateCLIR(int clirMode);
+
+    /**
+     * Updates the configuration of the CLIP supplementary service.
+     */
+    int updateCLIP(boolean enable);
+
+    /**
+     * Updates the configuration of the COLR supplementary service.
+     */
+    int updateCOLR(int presentation);
+
+    /**
+     * Updates the configuration of the COLP supplementary service.
+     */
+    int updateCOLP(boolean enable);
 
     /**
      * Sets the listener.
