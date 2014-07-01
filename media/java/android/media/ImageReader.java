@@ -477,6 +477,7 @@ public class ImageReader implements AutoCloseable {
             case ImageFormat.Y8:
             case ImageFormat.Y16:
             case ImageFormat.RAW_SENSOR:
+            case ImageFormat.RAW10:
                 return 1;
             default:
                 throw new UnsupportedOperationException(

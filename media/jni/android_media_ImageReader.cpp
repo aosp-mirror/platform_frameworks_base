@@ -267,7 +267,7 @@ static void Image_setBuffer(JNIEnv* env, jobject thiz,
 // graphics.h, need convert to the one defined in graphics.h here.
 static int Image_getPixelFormat(JNIEnv* env, int format)
 {
-    int jpegFormat, rawSensorFormat;
+    int jpegFormat;
     jfieldID fid;
 
     ALOGV("%s: format = 0x%x", __FUNCTION__, format);
@@ -413,6 +413,16 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             pData = buffer->data;
             dataSize = buffer->stride * buffer->height * bytesPerPixel;
             break;
+        case HAL_PIXEL_FORMAT_RAW10:
+            // Single plane 10bpp bayer data.
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            LOG_ALWAYS_FATAL_IF(buffer->width % 4,
+                                "Width is not multiple of 4 %d", buffer->width);
+            LOG_ALWAYS_FATAL_IF(buffer->height % 2,
+                                "Height is not even %d", buffer->height);
+            pData = buffer->data;
+            dataSize = buffer->width * buffer->height * 10 / 8;
+            break;
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
             // Single plane, 32bpp.
@@ -470,7 +480,9 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             pixelStride = 1;
             break;
         case HAL_PIXEL_FORMAT_BLOB:
-            // Used for JPEG data, single plane, row and pixel strides are 0
+        case HAL_PIXEL_FORMAT_RAW10:
+            // Blob is used for JPEG data, RAW10 is used for 10-bit raw data, they are
+            // single plane, row and pixel strides are 0.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             pixelStride = 0;
             break;
@@ -523,7 +535,9 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
             rowStride = (idx == 0) ? buffer->stride : ALIGN(buffer->stride / 2, 16);
             break;
         case HAL_PIXEL_FORMAT_BLOB:
-            // Used for JPEG data, single plane, row and pixel strides are 0
+        case HAL_PIXEL_FORMAT_RAW10:
+            // Blob is used for JPEG data, RAW10 is used for 10-bit raw data, they are
+            // single plane, row and pixel strides are 0.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             rowStride = 0;
             break;

@@ -211,6 +211,127 @@ public class ImageFormat {
     public static final int RAW_SENSOR = 0x20;
 
     /**
+     * <p>
+     * Android 10-bit raw format
+     * </p>
+     * <p>
+     * This is a single-plane, 10-bit per pixel, densely packed, unprocessed
+     * format, usually representing raw Bayer-pattern images coming from an image
+     * sensor.
+     * </p>
+     * <p>
+     * In an image buffer with this format, starting from the first pixel, each
+     * 4 consecutive pixels are packed into 5 bytes (40 bits). Each one of the
+     * first 4 bytes contains the top 8 bits of each pixel, The fifth byte
+     * contains the 2 least significant bits of the 4 pixels, the exact layout
+     * data for each 4 consecutive pixels is illustrated below (Pi[j] stands for
+     * the jth bit of the ith pixel):
+     * </p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center"></th>
+     * <th align="center">bit 7</th>
+     * <th align="center">bit 6</th>
+     * <th align="center">bit 5</th>
+     * <th align="center">bit 4</th>
+     * <th align="center">bit 3</th>
+     * <th align="center">bit 2</th>
+     * <th align="center">bit 1</th>
+     * <th align="center">bit 0</th>
+     * </tr>
+     * </thead> <tbody>
+     * <tr>
+     * <td align="center">Byte 0:</td>
+     * <td align="center">P0[9]</td>
+     * <td align="center">P0[8]</td>
+     * <td align="center">P0[7]</td>
+     * <td align="center">P0[6]</td>
+     * <td align="center">P0[5]</td>
+     * <td align="center">P0[4]</td>
+     * <td align="center">P0[3]</td>
+     * <td align="center">P0[2]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 1:</td>
+     * <td align="center">P1[9]</td>
+     * <td align="center">P1[8]</td>
+     * <td align="center">P1[7]</td>
+     * <td align="center">P1[6]</td>
+     * <td align="center">P1[5]</td>
+     * <td align="center">P1[4]</td>
+     * <td align="center">P1[3]</td>
+     * <td align="center">P1[2]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 2:</td>
+     * <td align="center">P2[9]</td>
+     * <td align="center">P2[8]</td>
+     * <td align="center">P2[7]</td>
+     * <td align="center">P2[6]</td>
+     * <td align="center">P2[5]</td>
+     * <td align="center">P2[4]</td>
+     * <td align="center">P2[3]</td>
+     * <td align="center">P2[2]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 3:</td>
+     * <td align="center">P3[9]</td>
+     * <td align="center">P3[8]</td>
+     * <td align="center">P3[7]</td>
+     * <td align="center">P3[6]</td>
+     * <td align="center">P3[5]</td>
+     * <td align="center">P3[4]</td>
+     * <td align="center">P3[3]</td>
+     * <td align="center">P3[2]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 4:</td>
+     * <td align="center">P3[1]</td>
+     * <td align="center">P3[0]</td>
+     * <td align="center">P2[1]</td>
+     * <td align="center">P2[0]</td>
+     * <td align="center">P1[1]</td>
+     * <td align="center">P1[0]</td>
+     * <td align="center">P0[1]</td>
+     * <td align="center">P0[0]</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>
+     * This format assumes
+     * <ul>
+     * <li>a width multiple of 4 pixels</li>
+     * <li>an even height</li>
+     * </ul>
+     * </p>
+     *
+     * <pre>
+     * size = width * height * 10 / 8
+     * </pre>
+     * <p>
+     * Since this is a densely packed format, the pixel and row stride are always
+     * 0. The application must use the pixel data layout defined in above table
+     * to access data.
+     * </p>
+     *
+     * <p>
+     * For example, the {@link android.media.Image} object can provide data in
+     * this format from a {@link android.hardware.camera2.CameraDevice} (if supported)
+     * through a {@link android.media.ImageReader} object. The
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} will return a
+     * single plane containing the pixel data. The pixel stride and row stride
+     * are always 0 in {@link android.media.Image.Plane#getPixelStride()} and
+     * {@link android.media.Image.Plane#getRowStride()} respectively.
+     * </p>
+     *
+     * @see android.media.Image
+     * @see android.media.ImageReader
+     * @see android.hardware.camera2.CameraDevice
+     */
+    public static final int RAW10 = 0x25;
+
+    /**
      * Raw bayer format used for images, which is 10 bit precision samples
      * stored in 16 bit words. The filter pattern is RGGB. Whether this format
      * is supported by the camera hardware can be determined by
@@ -250,6 +371,8 @@ public class ImageFormat {
                 return 16;
             case BAYER_RGGB:
                 return 16;
+            case RAW10:
+                return 10;
         }
         return -1;
     }
@@ -276,6 +399,7 @@ public class ImageFormat {
             case NV21:
             case YUV_420_888:
             case RAW_SENSOR:
+            case RAW10:
                 return true;
         }
 
