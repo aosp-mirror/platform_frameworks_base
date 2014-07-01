@@ -329,7 +329,7 @@ public class Vpn extends BaseNetworkStateTracker {
         try {
             // Restricted users are not allowed to create VPNs, they are tied to Owner
             UserInfo user = mgr.getUserInfo(mUserId);
-            if (user.isRestricted()) {
+            if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN)) {
                 throw new SecurityException("Restricted users cannot establish VPNs");
             }
 
@@ -721,6 +721,11 @@ public class Vpn extends BaseNetworkStateTracker {
         enforceControlPermission();
         if (!keyStore.isUnlocked()) {
             throw new IllegalStateException("KeyStore isn't unlocked");
+        }
+        UserManager mgr = UserManager.get(mContext);
+        UserInfo user = mgr.getUserInfo(mUserId);
+        if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN)) {
+            throw new SecurityException("Restricted users cannot establish VPNs");
         }
 
         final RouteInfo ipv4DefaultRoute = findIPv4DefaultRoute(egress);
