@@ -79,9 +79,9 @@ pinch-zoom or perform a single-finger glide in order to toggle between compact a
  image) for you to re-use in your application. The following images show you how they look on
  handhelds and wearables.</p>
 
-<img style="margin-top:50px" src="{@docRoot}preview/images/notifications/expandedtext_combo.png"
+<img style="margin-top:30px" src="{@docRoot}preview/images/notifications/expandedtext_combo.png"
   alt="" width="700px" height;="284px" />
-<img style="margin-top:50px" src="{@docRoot}preview/images/notifications/stack_combo.png"
+<img style="margin-top:30px" src="{@docRoot}preview/images/notifications/stack_combo.png"
   alt="" width="700px" height;="284px" />
 <img style="margin-top:30px" src="{@docRoot}preview/images/notifications/ExpandedImage.png"
     alt="" width="311px" height;="450px" />
