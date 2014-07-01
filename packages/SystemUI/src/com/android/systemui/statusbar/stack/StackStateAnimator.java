@@ -174,7 +174,7 @@ public class StackStateAnimator {
         }
 
         // start dimmed animation
-        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
+        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed && !wasAdded);
 
         // start dark animation
         child.setDark(viewState.dark, mAnimationFilter.animateDark);
