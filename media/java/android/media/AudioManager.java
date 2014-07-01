@@ -25,6 +25,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RemoteController.OnClientUpdateListener;
+import android.media.audiopolicy.AudioPolicy;
+import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Handler;
@@ -2449,6 +2451,52 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Register the given {@link AudioPolicy}.
+     * This call is synchronous and blocks until the registration process successfully completed
+     * or failed to complete.
+     * @param policy the {@link AudioPolicy} to register.
+     * @return {@link #ERROR} if there was an error communicating with the registration service
+     *    or if the user doesn't have the required
+     *    {@link android.Manifest.permission#MODIFY_AUDIO_ROUTING} permission,
+     *    {@link #SUCCESS} otherwise.
+     */
+    public int registerAudioPolicy(AudioPolicy policy) {
+        if (policy == null) {
+            throw new IllegalArgumentException("Illegal null AudioPolicy argument");
+        }
+        IAudioService service = getService();
+        try {
+            if (!service.registerAudioPolicy(policy.getConfig(), policy.token())) {
+                return ERROR;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerAudioPolicyAsync()", e);
+            return ERROR;
+        }
+        return SUCCESS;
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @param policy the {@link AudioPolicy} to unregister.
+     */
+    public void unregisterAudioPolicyAsync(AudioPolicy policy) {
+        if (policy == null) {
+            throw new IllegalArgumentException("Illegal null AudioPolicy argument");
+        }
+        IAudioService service = getService();
+        try {
+            service.unregisterAudioPolicyAsync(policy.token());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
+        }
+    }
+
+
+    /**
      *  @hide
      *  Reload audio settings. This method is called by Settings backup
      *  agent when audio settings are restored and causes the AudioService
@@ -2912,6 +2960,7 @@ public class AudioManager {
      */
 
     /** @hide
+     * CANDIDATE FOR PUBLIC API
      */
     public static final int SUCCESS = AudioSystem.SUCCESS;
     /**
@@ -2919,6 +2968,7 @@ public class AudioManager {
      */
     public static final int ERROR = AudioSystem.ERROR;
     /** @hide
+     * CANDIDATE FOR PUBLIC API
      */
     public static final int ERROR_BAD_VALUE = AudioSystem.BAD_VALUE;
     /** @hide
