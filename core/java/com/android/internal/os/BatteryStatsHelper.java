@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * A helper class for retrieving the power usage information for all applications and services.
@@ -82,7 +83,6 @@ public class BatteryStatsHelper {
     private final List<BatterySipper> mMobilemsppList = new ArrayList<BatterySipper>();
 
     private int mStatsType = BatteryStats.STATS_SINCE_CHARGED;
-    private int mAsUser = 0;
 
     long mRawRealtime;
     long mRawUptime;
@@ -176,11 +176,34 @@ public class BatteryStatsHelper {
      * Refreshes the power usage list.
      */
     public void refreshStats(int statsType, int asUser) {
-        refreshStats(statsType, asUser, SystemClock.elapsedRealtime() * 1000,
+        SparseArray<UserHandle> users = new SparseArray<UserHandle>(1);
+        users.put(asUser, new UserHandle(asUser));
+        refreshStats(statsType, users);
+    }
+
+    /**
+     * Refreshes the power usage list.
+     */
+    public void refreshStats(int statsType, List<UserHandle> asUsers) {
+        final int n = asUsers.size();
+        SparseArray<UserHandle> users = new SparseArray<UserHandle>(n);
+        for (int i = 0; i < n; ++i) {
+            UserHandle userHandle = asUsers.get(i);
+            users.put(userHandle.getIdentifier(), userHandle);
+        }
+        refreshStats(statsType, users);
+    }
+
+    /**
+     * Refreshes the power usage list.
+     */
+    public void refreshStats(int statsType, SparseArray<UserHandle> asUsers) {
+        refreshStats(statsType, asUsers, SystemClock.elapsedRealtime() * 1000,
                 SystemClock.uptimeMillis() * 1000);
     }
 
-    public void refreshStats(int statsType, int asUser, long rawRealtimeUs, long rawUptimeUs) {
+    public void refreshStats(int statsType, SparseArray<UserHandle> asUsers, long rawRealtimeUs,
+            long rawUptimeUs) {
         // Initialize mStats if necessary.
         getStats();
 
@@ -204,7 +227,6 @@ public class BatteryStatsHelper {
         }
 
         mStatsType = statsType;
-        mAsUser = asUser;
         mRawUptime = rawUptimeUs;
         mRawRealtime = rawRealtimeUs;
         mBatteryUptime = mStats.getBatteryUptime(rawUptimeUs);
@@ -227,7 +249,7 @@ public class BatteryStatsHelper {
         mMaxDrainedPower = (mStats.getHighDischargeAmountSinceCharge()
                 * mPowerProfile.getBatteryCapacity()) / 100;
 
-        processAppUsage();
+        processAppUsage(asUsers);
 
         // Before aggregating apps in to users, collect all apps to sort by their ms per packet.
         for (int i=0; i<mUsageList.size(); i++) {
@@ -280,7 +302,8 @@ public class BatteryStatsHelper {
         Collections.sort(mUsageList);
     }
 
-    private void processAppUsage() {
+    private void processAppUsage(SparseArray<UserHandle> asUsers) {
+        final boolean forAllUsers = (asUsers.get(UserHandle.USER_ALL) != null);
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                 Context.SENSOR_SERVICE);
         final int which = mStatsType;
@@ -499,7 +522,7 @@ public class BatteryStatsHelper {
                 } else if (u.getUid() == Process.BLUETOOTH_UID) {
                     mBluetoothSippers.add(app);
                     mBluetoothPower += power;
-                } else if (mAsUser != UserHandle.USER_ALL && userId != mAsUser
+                } else if (!forAllUsers && asUsers.get(userId) == null
                         && UserHandle.getAppId(u.getUid()) >= Process.FIRST_APPLICATION_UID) {
                     List<BatterySipper> list = mUserSippers.get(userId);
                     if (list == null) {
