@@ -27,7 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.media.session.MediaSessionToken;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Bundle;
@@ -777,7 +777,7 @@ public class Notification implements Parcelable
 
     /**
      * {@link #extras} key: A
-     * {@link android.media.session.MediaSessionToken} associated with a
+     * {@link android.media.session.MediaSession.Token} associated with a
      * {@link android.app.Notification.MediaStyle} notification.
      */
     public static final String EXTRA_MEDIA_SESSION = "android.mediaSession";
@@ -3230,8 +3230,8 @@ public class Notification implements Parcelable
      * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
      * in the standard view alongside the usual content.
      *
-     * Finally, if you attach a {@link android.media.session.MediaSessionToken} using
-     * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSessionToken)},
+     * Finally, if you attach a {@link android.media.session.MediaSession.Token} using
+     * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSession.Token)},
      * the System UI can identify this as a notification representing an active media session
      * and respond accordingly (by showing album artwork in the lockscreen, for example).
      *
@@ -3255,7 +3255,7 @@ public class Notification implements Parcelable
         static final int MAX_MEDIA_BUTTONS = 5;
 
         private int[] mActionsToShowInCompact = null;
-        private MediaSessionToken mToken;
+        private MediaSession.Token mToken;
 
         public MediaStyle() {
         }
@@ -3274,10 +3274,10 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Attach a {@link android.media.session.MediaSessionToken} to this Notification to provide
-         * additional playback information and control to the SystemUI.
+         * Attach a {@link android.media.session.MediaSession.Token} to this Notification
+         * to provide additional playback information and control to the SystemUI.
          */
-        public MediaStyle setMediaSession(MediaSessionToken token) {
+        public MediaStyle setMediaSession(MediaSession.Token token) {
             mToken = token;
             return this;
         }

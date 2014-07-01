@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
@@ -136,7 +138,7 @@ public final class MediaSession {
 
     private final Object mLock = new Object();
 
-    private final MediaSessionToken mSessionToken;
+    private final MediaSession.Token mSessionToken;
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
@@ -165,7 +167,7 @@ public final class MediaSession {
         } catch (RemoteException e) {
             throw new RuntimeException("Dead object in MediaSessionController constructor: ", e);
         }
-        mSessionToken = new MediaSessionToken(controllerBinder);
+        mSessionToken = new Token(controllerBinder);
     }
 
     /**
@@ -370,7 +372,7 @@ public final class MediaSession {
      * @return A token that can be used to create a MediaController for this
      *         session
      */
-    public @NonNull MediaSessionToken getSessionToken() {
+    public @NonNull Token getSessionToken() {
         return mSessionToken;
     }
 
@@ -694,6 +696,49 @@ public final class MediaSession {
                 }
             }
         }
+    }
+
+    /**
+     * Represents an ongoing session. This may be passed to apps by the session
+     * owner to allow them to create a {@link MediaController} to communicate with
+     * the session.
+     */
+    public static final class Token implements Parcelable {
+        private ISessionController mBinder;
+
+        /**
+         * @hide
+         */
+        public Token(ISessionController binder) {
+            mBinder = binder;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeStrongBinder(mBinder.asBinder());
+        }
+
+        ISessionController getBinder() {
+            return mBinder;
+        }
+
+        public static final Parcelable.Creator<Token> CREATOR
+                = new Parcelable.Creator<Token>() {
+            @Override
+            public Token createFromParcel(Parcel in) {
+                return new Token(ISessionController.Stub.asInterface(in.readStrongBinder()));
+            }
+
+            @Override
+            public Token[] newArray(int size) {
+                return new Token[size];
+            }
+        };
     }
 
     /**

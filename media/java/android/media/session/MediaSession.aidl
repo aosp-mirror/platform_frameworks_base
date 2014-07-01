@@ -15,4 +15,4 @@
 
 package android.media.session;
 
-parcelable MediaSessionToken;
+parcelable MediaSession.Token;

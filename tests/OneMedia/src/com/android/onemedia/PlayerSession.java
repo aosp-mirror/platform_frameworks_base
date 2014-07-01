@@ -23,7 +23,6 @@ import android.media.session.RouteOptions;
 import android.media.session.RoutePlaybackControls;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.MediaSessionToken;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.util.Log;
@@ -103,7 +102,7 @@ public class PlayerSession {
         mListener = listener;
     }
 
-    public MediaSessionToken getSessionToken() {
+    public MediaSession.Token getSessionToken() {
         return mSession.getSessionToken();
     }
 
