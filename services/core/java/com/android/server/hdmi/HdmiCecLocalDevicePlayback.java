@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -28,6 +29,8 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
  */
 final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
+
+    private boolean mIsActiveSource = false;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiCec.DEVICE_PLAYBACK);
@@ -93,7 +96,57 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
-        // TODO: clear devices connected to the given port id.
         mCecMessageCache.flushAll();
+        mIsActiveSource = false;
+        if (connected && mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+    }
+
+    @ServiceThreadOnly
+    void markActiveSource() {
+        assertRunOnServiceThread();
+        mIsActiveSource = true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            mIsActiveSource = false;
+            if (mService.isPowerOnOrTransient()) {
+                mService.standby();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetStreamPath(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        if (physicalAddress == mService.getPhysicalAddress()) {
+            if (mService.isPowerStandbyOrTransient()) {
+                mService.wakeUp();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void onTransitionToStandby(boolean initiatedByCec) {
+        assertRunOnServiceThread();
+        if (!initiatedByCec && mIsActiveSource) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
+                    mAddress, mService.getPhysicalAddress()));
+        }
+        mIsActiveSource = false;
+        checkIfPendingActionsCleared();
     }
 }

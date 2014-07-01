@@ -155,6 +155,18 @@ abstract class HdmiCecLocalDevice {
                 return handleSystemAudioModeStatus(message);
             case HdmiCec.MESSAGE_REPORT_AUDIO_STATUS:
                 return handleReportAudioStatus(message);
+            case HdmiCec.MESSAGE_STANDBY:
+                return handleStandby(message);
+            case HdmiCec.MESSAGE_TEXT_VIEW_ON:
+                return handleTextViewOn(message);
+            case HdmiCec.MESSAGE_IMAGE_VIEW_ON:
+                return handleImageViewOn(message);
+            case HdmiCec.MESSAGE_USER_CONTROL_PRESSED:
+                return handleUserControlPressed(message);
+            case HdmiCec.MESSAGE_SET_STREAM_PATH:
+                return handleSetStreamPath(message);
+            case HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS:
+                return handleGiveDevicePowerStatus(message);
             default:
                 return false;
         }
@@ -276,6 +288,67 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
+    protected boolean handleStandby(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Seq #12
+        if (mService.isControlEnabled() && !isInPresetInstallationMode()
+                && mService.isPowerOnOrTransient()) {
+            mService.standby();
+            return true;
+        }
+        return false;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleUserControlPressed(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        final int opCode = message.getOpcode();
+        final byte[] params = message.getParams();
+        if (mService.isPowerOnOrTransient() && isPowerOffOrToggleCommand(message)) {
+            mService.standby();
+            return true;
+        } else if (mService.isPowerStandbyOrTransient() && isPowerOnOrToggleCommand(message)) {
+            mService.wakeUp();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
+                && (params[0] == HdmiConstants.UI_COMMAND_POWER
+                        || params[0] == HdmiConstants.UI_COMMAND_POWER_ON_FUNCTION
+                        || params[0] == HdmiConstants.UI_COMMAND_POWER_TOGGLE_FUNCTION);
+    }
+
+    private static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
+                && (params[0] == HdmiConstants.UI_COMMAND_POWER
+                        || params[0] == HdmiConstants.UI_COMMAND_POWER_OFF_FUNCTION
+                        || params[0] == HdmiConstants.UI_COMMAND_POWER_TOGGLE_FUNCTION);
+    }
+
+    protected boolean handleTextViewOn(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleImageViewOn(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleSetStreamPath(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleGiveDevicePowerStatus(HdmiCecMessage message) {
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPowerStatus(
+                mAddress, message.getSource(), mService.getPowerStatus()));
+        return true;
+    }
+
+    @ServiceThreadOnly
     final void handleAddressAllocated(int logicalAddress) {
         assertRunOnServiceThread();
         mAddress = mPreferredAddress = logicalAddress;
@@ -323,6 +396,10 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void addAndStartAction(final FeatureAction action) {
         assertRunOnServiceThread();
+        if (mService.isPowerStandbyOrTransient()) {
+            Slog.w(TAG, "Skip the action during Standby: " + action);
+            return;
+        }
         mActions.add(action);
         action.start();
     }
@@ -361,6 +438,7 @@ abstract class HdmiCecLocalDevice {
     void removeAction(final FeatureAction action) {
         assertRunOnServiceThread();
         mActions.remove(action);
+        checkIfPendingActionsCleared();
     }
 
     // Remove all actions matched with the given Class type.
@@ -383,8 +461,14 @@ abstract class HdmiCecLocalDevice {
                 mActions.remove(action);
             }
         }
+        checkIfPendingActionsCleared();
     }
 
+    protected void checkIfPendingActionsCleared() {
+        if (mActions.isEmpty()) {
+            mService.onPendingActionsCleared();
+        }
+    }
     protected void assertRunOnServiceThread() {
         if (Looper.myLooper() != mService.getServiceLooper()) {
             throw new IllegalStateException("Should run on service thread.");
@@ -488,4 +572,23 @@ abstract class HdmiCecLocalDevice {
         assertRunOnServiceThread();
         return mService.pathToPortId(newPath);
     }
+
+    /**
+     * Called when the system started transition to standby mode.
+     *
+     * @param initiatedByCec true if this power sequence is initiated
+     *         by the reception the CEC messages like <StandBy>
+     */
+    protected void onTransitionToStandby(boolean initiatedByCec) {
+        // If there are no outstanding actions, we'll go to STANDBY state.
+        checkIfPendingActionsCleared();
+    }
+
+    /**
+     * Called when the system goes to standby mode.
+     *
+     * @param initiatedByCec true if this power sequence is initiated
+     *         by the reception the CEC messages like <StandBy>
+     */
+    protected void onStandBy(boolean initiatedByCec) {}
 }

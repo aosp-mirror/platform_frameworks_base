@@ -45,6 +45,8 @@ final class HdmiConstants {
     static final int UI_COMMAND_MUTE = 0x43;
     static final int UI_COMMAND_MUTE_FUNCTION = 0x65;
     static final int UI_COMMAND_RESTORE_VOLUME_FUNCTION = 0x66;
+    static final int UI_COMMAND_POWER_TOGGLE_FUNCTION = 0x6B;
+    static final int UI_COMMAND_POWER_OFF_FUNCTION = 0x6C;
     static final int UI_COMMAND_POWER_ON_FUNCTION = 0x6D;
 
     // Bit mask used to get the routing path of the top level device.

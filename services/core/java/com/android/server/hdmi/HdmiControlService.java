@@ -17,7 +17,10 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiCecMessage;
@@ -34,8 +37,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
-import android.util.Log;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -84,6 +88,24 @@ public final class HdmiControlService extends SystemService {
          * @param ackedAddress a list of logical addresses of available devices
          */
         void onPollingFinished(List<Integer> ackedAddress);
+    }
+
+    private class PowerStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case Intent.ACTION_SCREEN_OFF:
+                    if (isPowerOnOrTransient()) {
+                        onStandby();
+                    }
+                    break;
+                case Intent.ACTION_SCREEN_ON:
+                    if (isPowerStandbyOrTransient()) {
+                        onWakeUp();
+                    }
+                    break;
+            }
+        }
     }
 
     // A thread to handle synchronous IO of CEC and MHL control service.
@@ -143,6 +165,14 @@ public final class HdmiControlService extends SystemService {
     // from being modified.
     private List<HdmiPortInfo> mPortInfo;
 
+    private final PowerStateReceiver mPowerStateReceiver = new PowerStateReceiver();
+
+    @ServiceThreadOnly
+    private int mPowerStatus = HdmiCec.POWER_STATUS_STANDBY;
+
+    @ServiceThreadOnly
+    private boolean mStandbyMessageReceived = false;
+
     public HdmiControlService(Context context) {
         super(context);
         mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
@@ -152,9 +182,11 @@ public final class HdmiControlService extends SystemService {
     @Override
     public void onStart() {
         mIoThread.start();
+        mPowerStatus = HdmiCec.POWER_STATUS_TRANSIENT_TO_ON;
         mCecController = HdmiCecController.create(this);
 
         if (mCecController != null) {
+            mCecController.setOption(HdmiCec.OPTION_CEC_SERVICE_CONTROL, HdmiCec.DISABLED);
             initializeLocalDevices(mLocalDevices);
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
@@ -166,6 +198,14 @@ public final class HdmiControlService extends SystemService {
         }
         mPortInfo = initPortInfo();
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
+
+        // Register broadcast receiver for power state change.
+        if (mCecController != null || mMhlController != null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            getContext().registerReceiver(mPowerStateReceiver, filter);
+        }
 
         // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
@@ -199,6 +239,9 @@ public final class HdmiControlService extends SystemService {
 
                     // Address allocation completed for all devices. Notify each device.
                     if (deviceTypes.size() == finished.size()) {
+                        if (mPowerStatus == HdmiCec.POWER_STATUS_TRANSIENT_TO_ON) {
+                            mPowerStatus = HdmiCec.POWER_STATUS_ON;
+                        }
                         notifyAddressAllocated(devices);
                     }
                 }
@@ -531,7 +574,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     private final class SystemAudioModeChangeListenerRecord implements IBinder.DeathRecipient {
-        private IHdmiSystemAudioModeChangeListener mListener;
+        private final IHdmiSystemAudioModeChangeListener mListener;
 
         public SystemAudioModeChangeListenerRecord(IHdmiSystemAudioModeChangeListener listener) {
             mListener = listener;
@@ -795,7 +838,7 @@ public final class HdmiControlService extends SystemService {
                 public void run() {
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
-                        Log.w(TAG, "Local tv device not available to change arc mode.");
+                        Slog.w(TAG, "Local tv device not available to change arc mode.");
                         return;
                     }
                 }
@@ -991,5 +1034,83 @@ public final class HdmiControlService extends SystemService {
         synchronized (mLock) {
             return mHdmiControlEnabled;
         }
+    }
+
+    int getPowerStatus() {
+        return mPowerStatus;
+    }
+
+    boolean isPowerOnOrTransient() {
+        return mPowerStatus == HdmiCec.POWER_STATUS_ON
+                || mPowerStatus == HdmiCec.POWER_STATUS_TRANSIENT_TO_ON;
+    }
+
+    boolean isPowerStandbyOrTransient() {
+        return mPowerStatus == HdmiCec.POWER_STATUS_STANDBY
+                || mPowerStatus == HdmiCec.POWER_STATUS_TRANSIENT_TO_STANDBY;
+    }
+
+    boolean isPowerStandby() {
+        return mPowerStatus == HdmiCec.POWER_STATUS_STANDBY;
+    }
+
+    @ServiceThreadOnly
+    void wakeUp() {
+        assertRunOnServiceThread();
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        pm.wakeUp(SystemClock.uptimeMillis());
+        // PowerManger will send the broadcast Intent.ACTION_SCREEN_ON and after this gets
+        // the intent, the sequence will continue at onWakeUp().
+    }
+
+    @ServiceThreadOnly
+    void standby() {
+        assertRunOnServiceThread();
+        mStandbyMessageReceived = true;
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        pm.goToSleep(SystemClock.uptimeMillis());
+        // PowerManger will send the broadcast Intent.ACTION_SCREEN_OFF and after this gets
+        // the intent, the sequence will continue at onStandby().
+    }
+
+    @ServiceThreadOnly
+    private void onWakeUp() {
+        assertRunOnServiceThread();
+        mPowerStatus = HdmiCec.POWER_STATUS_TRANSIENT_TO_ON;
+        if (mCecController != null) {
+            mCecController.setOption(HdmiCec.OPTION_CEC_SERVICE_CONTROL, HdmiCec.ENABLED);
+            initializeLocalDevices(mLocalDevices);
+        } else {
+            Slog.i(TAG, "Device does not support HDMI-CEC.");
+        }
+        // TODO: Initialize MHL local devices.
+    }
+
+    @ServiceThreadOnly
+    private void onStandby() {
+        assertRunOnServiceThread();
+        mPowerStatus = HdmiCec.POWER_STATUS_TRANSIENT_TO_STANDBY;
+        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+            device.onTransitionToStandby(mStandbyMessageReceived);
+        }
+    }
+
+    /**
+     * Called when there are the outstanding actions in the local devices.
+     * This callback is used to wait for when the action queue is empty
+     * during the power state transition to standby.
+     */
+    @ServiceThreadOnly
+    void onPendingActionsCleared() {
+        assertRunOnServiceThread();
+        if (mPowerStatus != HdmiCec.POWER_STATUS_TRANSIENT_TO_STANDBY) {
+            return;
+        }
+        mPowerStatus = HdmiCec.POWER_STATUS_STANDBY;
+        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+            device.onStandBy(mStandbyMessageReceived);
+        }
+        mStandbyMessageReceived = false;
+        mCecController.setOption(HdmiCec.OPTION_CEC_SERVICE_CONTROL, HdmiCec.DISABLED);
     }
 }

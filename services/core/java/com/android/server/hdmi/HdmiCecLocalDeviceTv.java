@@ -441,6 +441,26 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleTextViewOn(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        if (mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+        // TODO: Connect to Hardware input manager to invoke TV App with the appropriate channel
+        //       that represents the source device.
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleImageViewOn(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Currently, it's the same as <Text View On>.
+        return handleTextViewOn(message);
+    }
+
     @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
@@ -984,5 +1004,43 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void setAutoDeviceOff(boolean enabled) {
         assertRunOnServiceThread();
         mAutoDeviceOff = enabled;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void onTransitionToStandby(boolean initiatedByCec) {
+        assertRunOnServiceThread();
+        // Remove any repeated working actions.
+        // HotplugDetectionAction will be reinstated during the wake up process.
+        // HdmiControlService.onWakeUp() -> initializeLocalDevices() ->
+        //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
+        removeAction(HotplugDetectionAction.class);
+        checkIfPendingActionsCleared();
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void onStandBy(boolean initiatedByCec) {
+        assertRunOnServiceThread();
+        // Seq #11
+        if (!mService.isControlEnabled()) {
+            return;
+        }
+        if (!initiatedByCec) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(
+                    mAddress, HdmiCec.ADDR_BROADCAST));
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleStandby(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // Seq #12
+        // Tv accepts directly addressed <Standby> only.
+        if (message.getDestination() == mAddress) {
+            super.handleStandby(message);
+        }
+        return false;
     }
 }
