@@ -50,4 +50,5 @@ interface IHdmiControlService {
     void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
     void setControlEnabled(boolean enabled);
     void setArcMode(boolean enabled);
+    void setOption(int option, int value);
 }

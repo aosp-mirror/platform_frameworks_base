@@ -104,7 +104,6 @@ public final class HdmiCec {
     /** Logical address used to indicate the source comes from internal device. */
     public static final int ADDR_INTERNAL = 0xFFFF;
 
-    // TODO: Complete the list of CEC messages definition.
     public static final int MESSAGE_FEATURE_ABORT = 0x00;
     public static final int MESSAGE_IMAGE_VIEW_ON = 0x04;
     public static final int MESSAGE_TUNER_STEP_INCREMENT = 0x05;
@@ -189,6 +188,55 @@ public final class HdmiCec {
     public static final int RESULT_ALREADY_IN_PROGRESS = 4;
     public static final int RESULT_EXCEPTION = 5;
     public static final int RESULT_INCORRECT_MODE = 6;
+
+    // Definitions used for setOption(). These should be in sync with the definition
+    // in hardware/libhardware/include/hardware/{hdmi_cec.h,mhl.h}.
+
+    /**
+     * TV gets turned on by incoming &lt;Text/Image View On&gt;. {@code ENABLED} by default.
+     * If set to {@code DISABLED}, TV won't turn on automatically.
+     */
+    public static final int OPTION_CEC_AUTO_WAKEUP = 1;
+
+    /**
+     * If set to {@code DISABLED}, all CEC commands are discarded.
+     *
+     * <p> This option is for internal use only, not supposed to be used by other components.
+     * @hide
+     */
+    public static final int OPTION_CEC_ENABLE = 2;
+
+    /**
+     * If set to {@code DISABLED}, system service yields control of CEC to sub-microcontroller.
+     * If {@code ENABLED}, it take the control back.
+     *
+     * <p> This option is for internal use only, not supposed to be used by other components.
+     * @hide
+     */
+    public static final int OPTION_CEC_SERVICE_CONTROL = 3;
+
+    /**
+     * Put other devices to standby when TV goes to standby. {@code ENABLED} by default.
+     * If set to {@code DISABLED}, TV doesn't send &lt;Standby&gt; to other devices.
+     */
+    public static final int OPTION_CEC_AUTO_DEVICE_OFF = 4;
+
+    /** If set to {@code DISABLED}, TV does not switch ports when mobile device is connected. */
+    public static final int OPTION_MHL_INPUT_SWITCHING = 101;
+
+    /** If set to {@code ENABLED}, TV disables power charging for mobile device. */
+    public static final int OPTION_MHL_POWER_CHARGE = 102;
+
+    /**
+     * If set to {@code DISABLED}, all MHL commands are discarded.
+     *
+     * <p> This option is for internal use only, not supposed to be used by other components.
+     * @hide
+     */
+    public static final int OPTION_MHL_ENABLE = 103;
+
+    public static final int DISABLED = 0;
+    public static final int ENABLED = 1;
 
     private static final int[] ADDRESS_TO_TYPE = {
         DEVICE_TV,  // ADDR_TV

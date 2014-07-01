@@ -318,9 +318,9 @@ final class HdmiCecController {
      *
      * @param flag a key of option. For more details, look at
      *        {@link HdmiConstants#FLAG_HDMI_OPTION_WAKEUP} to
-     *        {@link HdmiConstants#FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL}
-     * @param value a value of option. Actual value varies flag. For more
-     *        details, look at description of flags
+     *        {@link HdmiConstants#FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL}.
+     * @param value a value of option. Actual value varies from flag to flag. For more
+     *        details, look at description of flags.
      */
     @ServiceThreadOnly
     void setOption(int flag, int value) {

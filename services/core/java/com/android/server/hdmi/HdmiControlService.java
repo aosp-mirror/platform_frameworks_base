@@ -724,7 +724,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void setControlEnabled(boolean enabled) {
+        public void setControlEnabled(final boolean enabled) {
             enforceAccessPermission();
             synchronized (mLock) {
                 mHdmiControlEnabled = enabled;
@@ -740,6 +740,11 @@ public final class HdmiControlService extends SystemService {
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
                         return;
+                    }
+                    int value = enabled ? HdmiCec.ENABLED : HdmiCec.DISABLED;
+                    mCecController.setOption(HdmiCec.OPTION_CEC_ENABLE, value);
+                    if (mMhlController != null) {
+                        mMhlController.setOption(HdmiCec.OPTION_MHL_ENABLE, value);
                     }
                     tv.routingAtEnableTime();
                 }
@@ -759,6 +764,32 @@ public final class HdmiControlService extends SystemService {
                     }
                 }
             });
+        }
+
+        @Override
+        public void setOption(final int key, final int value) {
+            if (!isTvDevice()) {
+                return;
+            }
+            switch (key) {
+                case HdmiCec.OPTION_CEC_AUTO_WAKEUP:
+                    mCecController.setOption(key, value);
+                    break;
+                case HdmiCec.OPTION_CEC_AUTO_DEVICE_OFF:
+                    // No need to pass this option to HAL.
+                    tv().setAutoDeviceOff(value == HdmiCec.ENABLED);
+                    break;
+                case HdmiCec.OPTION_MHL_INPUT_SWITCHING:  // Fall through
+                case HdmiCec.OPTION_MHL_POWER_CHARGE:
+                    if (mMhlController != null) {
+                        mMhlController.setOption(key, value);
+                    }
+                    break;
+            }
+        }
+
+        private boolean isTvDevice() {
+            return tv() != null;
         }
     }
 

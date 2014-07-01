@@ -78,6 +78,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // This is not thread-safe. For external purpose use mSafeDeviceInfos.
     private final SparseArray<HdmiCecDeviceInfo> mDeviceInfos = new SparseArray<>();
 
+    // If true, TV going to standby mode puts other devices also to standby.
+    private boolean mAutoDeviceOff;
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCec.DEVICE_TV);
         mPrevPortId = HdmiConstants.INVALID_PORT_ID;
@@ -975,5 +978,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // "pollAllDevicesNow" cleans up timer and start poll action immediately.
             hotplugActions.get(0).pollAllDevicesNow();
         }
+    }
+
+    @ServiceThreadOnly
+    void setAutoDeviceOff(boolean enabled) {
+        assertRunOnServiceThread();
+        mAutoDeviceOff = enabled;
     }
 }
