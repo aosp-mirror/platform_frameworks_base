@@ -496,6 +496,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 new SystemAudioActionFromTv(this, avr.getLogicalAddress(), enabled, callback));
     }
 
+    // # Seq 25
     void setSystemAudioMode(boolean on) {
         synchronized (mLock) {
             if (on != mSystemAudioMode) {

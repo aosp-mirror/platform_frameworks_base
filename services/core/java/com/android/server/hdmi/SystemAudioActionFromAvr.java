@@ -22,6 +22,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 /**
  * Feature action that handles System Audio initiated by AVR devices.
  */
+// # Seq 33
 final class SystemAudioActionFromAvr extends SystemAudioAction {
     /**
      * Constructor
@@ -58,7 +59,9 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
             sendSystemAudioModeRequest();
             return;
         }
-        // TODO: Stop the action for System Audio Mode initialization if it is running.
+
+        removeAction(SystemAudioAutoInitiationAction.class);
+
         if (mTargetAudioStatus) {
             setSystemAudioMode(true);
             startAudioStatusAction();
