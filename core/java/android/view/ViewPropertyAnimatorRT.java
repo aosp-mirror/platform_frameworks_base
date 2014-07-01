@@ -18,6 +18,8 @@ package android.view;
 
 import android.animation.TimeInterpolator;
 import android.view.ViewPropertyAnimator.NameValuesHolder;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.android.internal.view.animation.FallbackLUTInterpolator;
 
@@ -28,6 +30,8 @@ import java.util.ArrayList;
  * This is a RenderThread driven backend for ViewPropertyAnimator.
  */
 class ViewPropertyAnimatorRT {
+
+    private static final Interpolator sLinearInterpolator = new LinearInterpolator();
 
     private final View mView;
 
@@ -65,6 +69,10 @@ class ViewPropertyAnimatorRT {
         long startDelay = parent.getStartDelay();
         long duration = parent.getDuration();
         TimeInterpolator interpolator = parent.getInterpolator();
+        if (interpolator == null) {
+            // Documented to be LinearInterpolator in ValueAnimator.setInterpolator
+            interpolator = sLinearInterpolator;
+        }
         if (!RenderNodeAnimator.isNativeInterpolator(interpolator)) {
             interpolator = new FallbackLUTInterpolator(interpolator, duration);
         }

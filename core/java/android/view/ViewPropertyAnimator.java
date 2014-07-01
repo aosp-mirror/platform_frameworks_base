@@ -338,7 +338,8 @@ public class ViewPropertyAnimator {
      * By default, the animator uses the default interpolator for ValueAnimator. Calling this method
      * will cause the declared object to be used instead.
      * 
-     * @param interpolator The TimeInterpolator to be used for ensuing property animations.
+     * @param interpolator The TimeInterpolator to be used for ensuing property animations. A value
+     * of <code>null</code> will result in linear interpolation.
      * @return This object, allowing calls to methods in this class to be chained.
      */
     public ViewPropertyAnimator setInterpolator(TimeInterpolator interpolator) {
