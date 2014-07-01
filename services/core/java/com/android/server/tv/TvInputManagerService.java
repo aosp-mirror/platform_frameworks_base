@@ -63,12 +63,15 @@ import android.view.Surface;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -986,6 +989,136 @@ public final class TvInputManagerService extends SystemService {
                         deviceId, hardware, callingUid, resolvedUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
+            final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump TvInputManager " +
+                        "from from pid=" + Binder.getCallingPid() + ", uid=" +
+                        Binder.getCallingUid());
+                return;
+            }
+
+            synchronized (mLock) {
+                pw.println("User Ids (Current user: " + mCurrentUserId + "):");
+                pw.increaseIndent();
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    pw.println(Integer.valueOf(userId));
+                }
+                pw.decreaseIndent();
+
+                for (int i = 0; i < mUserStates.size(); i++) {
+                    int userId = mUserStates.keyAt(i);
+                    UserState userState = getUserStateLocked(userId);
+
+                    pw.println("UserState (" + userId + "):");
+                    pw.increaseIndent();
+
+                    pw.println("inputMap: inputId -> TvInputInfo");
+                    pw.increaseIndent();
+                    for (TvInputInfo info : userState.inputMap.values()) {
+                        pw.println(info.toString());
+                    }
+                    pw.decreaseIndent();
+
+                    pw.println("packageList:");
+                    pw.increaseIndent();
+                    for (String packageName : userState.packageList) {
+                        pw.println(packageName);
+                    }
+                    pw.decreaseIndent();
+
+                    pw.println("clientStateMap: ITvInputClient -> ClientState");
+                    pw.increaseIndent();
+                    for (Map.Entry<IBinder, ClientState> entry :
+                            userState.clientStateMap.entrySet()) {
+                        ClientState client = entry.getValue();
+                        pw.println(entry.getKey() + ": " + client);
+
+                        pw.increaseIndent();
+
+                        pw.println("mInputIds:");
+                        pw.increaseIndent();
+                        for (String inputId : client.mInputIds) {
+                            pw.println(inputId);
+                        }
+                        pw.decreaseIndent();
+
+                        pw.println("mSessionTokens:");
+                        pw.increaseIndent();
+                        for (IBinder token : client.mSessionTokens) {
+                            pw.println("" + token);
+                        }
+                        pw.decreaseIndent();
+
+                        pw.println("mClientTokens: " + client.mClientToken);
+                        pw.println("mUserId: " + client.mUserId);
+
+                        pw.decreaseIndent();
+                    }
+                    pw.decreaseIndent();
+
+                    pw.println("serviceStateMap: inputId -> ServiceState");
+                    pw.increaseIndent();
+                    for (Map.Entry<String, ServiceState> entry :
+                            userState.serviceStateMap.entrySet()) {
+                        ServiceState service = entry.getValue();
+                        pw.println(entry.getKey() + ": " + service);
+
+                        pw.increaseIndent();
+
+                        pw.println("mClientTokens:");
+                        pw.increaseIndent();
+                        for (IBinder token : service.mClientTokens) {
+                            pw.println("" + token);
+                        }
+                        pw.decreaseIndent();
+
+                        pw.println("mSessionTokens:");
+                        pw.increaseIndent();
+                        for (IBinder token : service.mSessionTokens) {
+                            pw.println("" + token);
+                        }
+                        pw.decreaseIndent();
+
+                        pw.println("mService: " + service.mService);
+                        pw.println("mCallback: " + service.mCallback);
+                        pw.println("mBound: " + service.mBound);
+                        pw.println("mAvailable: " + service.mAvailable);
+                        pw.println("mReconnecting: " + service.mReconnecting);
+
+                        pw.decreaseIndent();
+                    }
+                    pw.decreaseIndent();
+
+                    pw.println("sessionStateMap: ITvInputSession -> SessionState");
+                    pw.increaseIndent();
+                    for (Map.Entry<IBinder, SessionState> entry :
+                            userState.sessionStateMap.entrySet()) {
+                        SessionState session = entry.getValue();
+                        pw.println(entry.getKey() + ": " + session);
+
+                        pw.increaseIndent();
+                        pw.println("mInputId: " + session.mInputId);
+                        pw.println("mClient: " + session.mClient);
+                        pw.println("mSeq: " + session.mSeq);
+                        pw.println("mCallingUid: " + session.mCallingUid);
+                        pw.println("mUserId: " + session.mUserId);
+                        pw.println("mSessionToken: " + session.mSessionToken);
+                        pw.println("mSession: " + session.mSession);
+                        pw.println("mLogUri: " + session.mLogUri);
+                        pw.decreaseIndent();
+                    }
+                    pw.decreaseIndent();
+
+                    pw.decreaseIndent();
+                }
             }
         }
     }
