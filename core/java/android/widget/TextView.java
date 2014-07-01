@@ -37,8 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -97,6 +95,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.ActionMode;
+import android.view.Choreographer;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -9088,26 +9087,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private static final class Marquee extends Handler {
+    private static final class Marquee {
         // TODO: Add an option to configure this
         private static final float MARQUEE_DELTA_MAX = 0.07f;
         private static final int MARQUEE_DELAY = 1200;
         private static final int MARQUEE_RESTART_DELAY = 1200;
-        private static final int MARQUEE_RESOLUTION = 1000 / 30;
-        private static final int MARQUEE_PIXELS_PER_SECOND = 30;
+        private static final int MARQUEE_DP_PER_SECOND = 30;
 
         private static final byte MARQUEE_STOPPED = 0x0;
         private static final byte MARQUEE_STARTING = 0x1;
         private static final byte MARQUEE_RUNNING = 0x2;
 
-        private static final int MESSAGE_START = 0x1;
-        private static final int MESSAGE_TICK = 0x2;
-        private static final int MESSAGE_RESTART = 0x3;
-
         private final WeakReference<TextView> mView;
+        private final Choreographer mChoreographer;
 
         private byte mStatus = MARQUEE_STOPPED;
-        private final float mScrollUnit;
+        private final float mPixelsPerSecond;
         private float mMaxScroll;
         private float mMaxFadeScroll;
         private float mGhostStart;
@@ -9116,49 +9111,62 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mRepeatLimit;
 
         private float mScroll;
+        private long mLastAnimationMs;
 
         Marquee(TextView v) {
             final float density = v.getContext().getResources().getDisplayMetrics().density;
-            mScrollUnit = (MARQUEE_PIXELS_PER_SECOND * density) / MARQUEE_RESOLUTION;
+            mPixelsPerSecond = MARQUEE_DP_PER_SECOND * density;
             mView = new WeakReference<TextView>(v);
+            mChoreographer = Choreographer.getInstance();
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_START:
-                    mStatus = MARQUEE_RUNNING;
-                    tick();
-                    break;
-                case MESSAGE_TICK:
-                    tick();
-                    break;
-                case MESSAGE_RESTART:
-                    if (mStatus == MARQUEE_RUNNING) {
-                        if (mRepeatLimit >= 0) {
-                            mRepeatLimit--;
-                        }
-                        start(mRepeatLimit);
-                    }
-                    break;
+        private Choreographer.FrameCallback mTickCallback = new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                tick();
             }
-        }
+        };
+
+        private Choreographer.FrameCallback mStartCallback = new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                mStatus = MARQUEE_RUNNING;
+                mLastAnimationMs = mChoreographer.getFrameTime();
+                tick();
+            }
+        };
+
+        private Choreographer.FrameCallback mRestartCallback = new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                if (mStatus == MARQUEE_RUNNING) {
+                    if (mRepeatLimit >= 0) {
+                        mRepeatLimit--;
+                    }
+                    start(mRepeatLimit);
+                }
+            }
+        };
 
         void tick() {
             if (mStatus != MARQUEE_RUNNING) {
                 return;
             }
 
-            removeMessages(MESSAGE_TICK);
+            mChoreographer.removeFrameCallback(mTickCallback);
 
             final TextView textView = mView.get();
             if (textView != null && (textView.isFocused() || textView.isSelected())) {
-                mScroll += mScrollUnit;
+                long currentMs = mChoreographer.getFrameTime();
+                long deltaMs = currentMs - mLastAnimationMs;
+                mLastAnimationMs = currentMs;
+                float deltaPx = deltaMs / 1000f * mPixelsPerSecond;
+                mScroll += deltaPx;
                 if (mScroll > mMaxScroll) {
                     mScroll = mMaxScroll;
-                    sendEmptyMessageDelayed(MESSAGE_RESTART, MARQUEE_RESTART_DELAY);
+                    mChoreographer.postFrameCallbackDelayed(mRestartCallback, MARQUEE_DELAY);
                 } else {
-                    sendEmptyMessageDelayed(MESSAGE_TICK, MARQUEE_RESOLUTION);
+                    mChoreographer.postFrameCallback(mTickCallback);
                 }
                 textView.invalidate();
             }
@@ -9166,9 +9174,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         void stop() {
             mStatus = MARQUEE_STOPPED;
-            removeMessages(MESSAGE_START);
-            removeMessages(MESSAGE_RESTART);
-            removeMessages(MESSAGE_TICK);
+            mChoreographer.removeFrameCallback(mStartCallback);
+            mChoreographer.removeFrameCallback(mRestartCallback);
+            mChoreographer.removeFrameCallback(mTickCallback);
             resetScroll();
         }
 
@@ -9199,7 +9207,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mMaxFadeScroll = mGhostStart + lineWidth + lineWidth;
 
                 textView.invalidate();
-                sendEmptyMessageDelayed(MESSAGE_START, MARQUEE_DELAY);
+                mChoreographer.postFrameCallback(mStartCallback);
             }
         }
 
