@@ -988,34 +988,50 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
             boolean cancelAnimators) {
+        setOverScrollAmount(amount, onTop, animate, cancelAnimators, isRubberbanded(onTop));
+    }
+
+    /**
+     * Set the effective overScroll amount which will be directly reflected in the layout.
+     *
+     * @param amount The amount to overScroll by.
+     * @param onTop Should the effect be applied on top of the scroller.
+     * @param animate Should an animation be performed.
+     * @param cancelAnimators Should running animations be cancelled.
+     * @param isRubberbanded The value which will be passed to
+     *                     {@link OnOverscrollTopChangedListener#onOverscrollTopChanged}
+     */
+    public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
+            boolean cancelAnimators, boolean isRubberbanded) {
         if (cancelAnimators) {
             mStateAnimator.cancelOverScrollAnimators(onTop);
         }
-        setOverScrollAmountInternal(amount, onTop, animate);
+        setOverScrollAmountInternal(amount, onTop, animate, isRubberbanded);
     }
 
-    private void setOverScrollAmountInternal(float amount, boolean onTop, boolean animate) {
+    private void setOverScrollAmountInternal(float amount, boolean onTop, boolean animate,
+            boolean isRubberbanded) {
         amount = Math.max(0, amount);
         if (animate) {
-            mStateAnimator.animateOverScrollToAmount(amount, onTop);
+            mStateAnimator.animateOverScrollToAmount(amount, onTop, isRubberbanded);
         } else {
             setOverScrolledPixels(amount / getRubberBandFactor(onTop), onTop);
             mAmbientState.setOverScrollAmount(amount, onTop);
             if (onTop) {
-                notifyOverscrollTopListener(amount);
+                notifyOverscrollTopListener(amount, isRubberbanded);
             }
             requestChildrenUpdate();
         }
     }
 
-    private void notifyOverscrollTopListener(float amount) {
+    private void notifyOverscrollTopListener(float amount, boolean isRubberbanded) {
         mExpandHelper.onlyObserveMovements(amount > 1.0f);
         if (mDontReportNextOverScroll) {
             mDontReportNextOverScroll = false;
             return;
         }
         if (mOverscrollTopChangedListener != null) {
-            mOverscrollTopChangedListener.onOverscrollTopChanged(amount);
+            mOverscrollTopChangedListener.onOverscrollTopChanged(amount, isRubberbanded);
         }
     }
 
@@ -1061,9 +1077,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 updateChildren();
                 float overScrollTop = getCurrentOverScrollAmount(true);
                 if (mOwnScrollY < 0) {
-                    notifyOverscrollTopListener(-mOwnScrollY);
+                    notifyOverscrollTopListener(-mOwnScrollY, isRubberbanded(true));
                 } else {
-                    notifyOverscrollTopListener(overScrollTop);
+                    notifyOverscrollTopListener(overScrollTop, isRubberbanded(true));
                 }
             }
         } else {
@@ -1286,6 +1302,16 @@ public class NotificationStackScrollLayout extends ViewGroup
             return 1.0f;
         }
         return RUBBER_BAND_FACTOR_NORMAL;
+    }
+
+    /**
+     * Accompanying function for {@link #getRubberBandFactor}: Returns true if the overscroll is
+     * rubberbanded, false if it is technically an overscroll but rather a motion to expand the
+     * overscroll view (e.g. expand QS).
+     */
+    private boolean isRubberbanded(boolean onTop) {
+        return !onTop || mExpandedInThisMotion || mIsExpansionChanging
+                || !mScrolledToTopOnFirstDown;
     }
 
     private void endDrag() {
@@ -1880,7 +1906,16 @@ public class NotificationStackScrollLayout extends ViewGroup
      * A listener that gets notified when the overscroll at the top has changed.
      */
     public interface OnOverscrollTopChangedListener {
-        public void onOverscrollTopChanged(float amount);
+
+        /**
+         * Notifies a listener that the overscroll has changed.
+         *
+         * @param amount the amount of overscroll, in pixels
+         * @param isRubberbanded if true, this is a rubberbanded overscroll; if false, this is an
+         *                     unrubberbanded motion to directly expand overscroll view (e.g expand
+         *                     QS)
+         */
+        public void onOverscrollTopChanged(float amount, boolean isRubberbanded);
 
         /**
          * Notify a listener that the scroller wants to escape from the scrolling motion and
