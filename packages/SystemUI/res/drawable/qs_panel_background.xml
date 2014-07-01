@@ -16,5 +16,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/system_primary_color" />
     <corners
-        android:radius="@*android:dimen/notification_material_rounded_rect_radius"/>
+        android:topLeftRadius="0dp"
+        android:topRightRadius="0dp"
+        android:bottomLeftRadius="@*android:dimen/notification_material_rounded_rect_radius"
+        android:bottomRightRadius="@*android:dimen/notification_material_rounded_rect_radius"/>
 </shape>
