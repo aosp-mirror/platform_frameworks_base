@@ -578,9 +578,9 @@ public class ActivityOptions {
         mResultData = null;
         mResultCode = 0;
         mExitCoordinatorIndex = 0;
+        mAnimationType = otherOptions.mAnimationType;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
-                mAnimationType = otherOptions.mAnimationType;
                 mCustomEnterResId = otherOptions.mCustomEnterResId;
                 mCustomExitResId = otherOptions.mCustomExitResId;
                 mThumbnail = null;
@@ -593,7 +593,6 @@ public class ActivityOptions {
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCALE_UP:
-                mAnimationType = otherOptions.mAnimationType;
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
                 mStartWidth = otherOptions.mStartWidth;
@@ -608,7 +607,6 @@ public class ActivityOptions {
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
-                mAnimationType = otherOptions.mAnimationType;
                 mThumbnail = otherOptions.mThumbnail;
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
@@ -621,7 +619,6 @@ public class ActivityOptions {
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCENE_TRANSITION:
-                mAnimationType = otherOptions.mAnimationType;
                 mTransitionReceiver = otherOptions.mTransitionReceiver;
                 mSharedElementNames = otherOptions.mSharedElementNames;
                 mIsReturning = otherOptions.mIsReturning;

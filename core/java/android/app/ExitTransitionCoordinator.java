@@ -123,6 +123,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     startSharedElementExit();
                 }
             });
+        } else {
+            sharedElementTransitionComplete();
         }
     }
 
