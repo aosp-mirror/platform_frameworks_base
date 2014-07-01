@@ -346,31 +346,21 @@ public final class SELinuxMMAC {
      */
     public static boolean assignSeinfoValue(PackageParser.Package pkg) {
 
-        /*
-         * Non system installed apps should be treated the same. This
-         * means that any post-loaded apk will be assigned the default
-         * tag, if one exists in the policy, else null, without respect
-         * to the signing key.
-         */
-        if (((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ||
-            ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+        // We just want one of the signatures to match.
+        for (Signature s : pkg.mSignatures) {
+            if (s == null)
+                continue;
 
-            // We just want one of the signatures to match.
-            for (Signature s : pkg.mSignatures) {
-                if (s == null)
-                    continue;
+            Policy policy = sSigSeinfo.get(s);
+            if (policy != null) {
+                String seinfo = policy.checkPolicy(pkg.packageName);
+                if (seinfo != null) {
+                    pkg.applicationInfo.seinfo = seinfo;
+                    if (DEBUG_POLICY_INSTALL)
+                        Slog.i(TAG, "package (" + pkg.packageName +
+                               ") labeled with seinfo=" + seinfo);
 
-                Policy policy = sSigSeinfo.get(s);
-                if (policy != null) {
-                    String seinfo = policy.checkPolicy(pkg.packageName);
-                    if (seinfo != null) {
-                        pkg.applicationInfo.seinfo = seinfo;
-                        if (DEBUG_POLICY_INSTALL)
-                            Slog.i(TAG, "package (" + pkg.packageName +
-                                   ") labeled with seinfo=" + seinfo);
-
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
