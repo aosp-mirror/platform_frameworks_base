@@ -1071,7 +1071,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row = row;
         entry.row.setHeightRange(mRowMinHeight, maxHeight);
         entry.row.setOnActivatedListener(this);
-        entry.row.setIsBelowSpeedBump(isBelowSpeedBump(entry.notification));
         entry.expanded = contentViewLocal;
         entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
@@ -1548,17 +1547,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.row.setOnClickListener(null);
         }
-        boolean wasBelow = entry.row.isBelowSpeedBump();
-        boolean nowBelow = isBelowSpeedBump(notification);
-        if (wasBelow != nowBelow) {
-            entry.row.setIsBelowSpeedBump(nowBelow);
-        }
         entry.row.notifyContentUpdated();
-    }
-
-    private boolean isBelowSpeedBump(StatusBarNotification notification) {
-        return notification.getNotification().priority ==
-                Notification.PRIORITY_MIN;
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {

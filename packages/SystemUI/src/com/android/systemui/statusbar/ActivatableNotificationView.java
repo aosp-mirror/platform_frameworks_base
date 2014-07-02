@@ -132,6 +132,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mShowingLegacyBackground;
     private final int mLegacyColor;
     private final int mNormalColor;
+    private final int mLowPriorityColor;
+    private boolean mIsBelowSpeedBump;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -150,6 +152,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.dimen.notification_material_rounded_rect_radius);
         mLegacyColor = getResources().getColor(R.color.notification_legacy_background_color);
         mNormalColor = getResources().getColor(R.color.notification_material_background_color);
+        mLowPriorityColor = getResources().getColor(
+                R.color.notification_material_background_low_priority_color);
     }
 
     @Override
@@ -162,6 +166,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateBackground();
         updateBackgroundTint();
         mScrimView = (NotificationScrimView) findViewById(R.id.scrim_view);
+        setScrimAmount(0);
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -340,6 +345,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
         updateBackgroundTint();
+    }
+
+    @Override
+    public void setBelowSpeedBump(boolean below) {
+        super.setBelowSpeedBump(below);
+        if (below != mIsBelowSpeedBump) {
+            mIsBelowSpeedBump = below;
+            updateBackgroundTint();
+        }
     }
 
     /**
@@ -589,6 +603,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return mBgTint;
         } else if (mShowingLegacyBackground) {
             return mLegacyColor;
+        } else if (mIsBelowSpeedBump) {
+            return mLowPriorityColor;
         } else {
             return mNormalColor;
         }

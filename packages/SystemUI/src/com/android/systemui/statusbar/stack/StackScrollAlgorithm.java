@@ -155,6 +155,17 @@ public class StackScrollAlgorithm {
         updateDimmedActivated(ambientState, resultState, algorithmState);
         updateClipping(resultState, algorithmState);
         updateScrimAmount(resultState, algorithmState, ambientState.getScrimAmount());
+        updateSpeedBumpState(resultState, algorithmState, ambientState.getSpeedBumpIndex());
+    }
+
+    private void updateSpeedBumpState(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState, int speedBumpIndex) {
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            StackScrollState.ViewState childViewState = resultState.getViewStateForView(child);
+            childViewState.belowSpeedBump = speedBumpIndex != -1 && i > speedBumpIndex;
+        }
     }
 
     private void updateScrimAmount(StackScrollState resultState,

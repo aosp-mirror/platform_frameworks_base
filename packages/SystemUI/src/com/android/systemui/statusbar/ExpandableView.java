@@ -234,6 +234,9 @@ public abstract class ExpandableView extends FrameLayout {
 
     public abstract void setScrimAmount(float scrimAmount);
 
+    public void setBelowSpeedBump(boolean below) {
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

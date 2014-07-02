@@ -179,6 +179,9 @@ public class StackStateAnimator {
         // start dark animation
         child.setDark(viewState.dark, mAnimationFilter.animateDark);
 
+        // apply speed bump state
+        child.setBelowSpeedBump(viewState.belowSpeedBump);
+
         // apply scrimming
         child.setScrimAmount(viewState.scrimAmount);
 
