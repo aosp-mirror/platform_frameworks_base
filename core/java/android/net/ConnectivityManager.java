@@ -2208,15 +2208,15 @@ public class ConnectivityManager {
         if (need == null) throw new IllegalArgumentException("null NetworkCapabilities");
         try {
             incCallbackHandlerRefCount();
-            if (action == LISTEN) {
-                networkCallback.networkRequest = mService.listenForNetwork(need,
-                        new Messenger(sCallbackHandler), new Binder());
-            } else {
-                networkCallback.networkRequest = mService.requestNetwork(need,
-                        new Messenger(sCallbackHandler), timeoutSec, new Binder(), legacyType);
-            }
-            if (networkCallback.networkRequest != null) {
-                synchronized(sNetworkCallback) {
+            synchronized(sNetworkCallback) {
+                if (action == LISTEN) {
+                    networkCallback.networkRequest = mService.listenForNetwork(need,
+                            new Messenger(sCallbackHandler), new Binder());
+                } else {
+                    networkCallback.networkRequest = mService.requestNetwork(need,
+                            new Messenger(sCallbackHandler), timeoutSec, new Binder(), legacyType);
+                }
+                if (networkCallback.networkRequest != null) {
                     sNetworkCallback.put(networkCallback.networkRequest, networkCallback);
                 }
             }
