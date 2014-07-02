@@ -673,6 +673,7 @@ public final class UiAutomation {
             canvas.translate(- screenshotWidth / 2, - screenshotHeight / 2);
             canvas.drawBitmap(screenShot, 0, 0, null);
             canvas.setBitmap(null);
+            screenShot.recycle();
             screenShot = unrotatedScreenShot;
         }
 
