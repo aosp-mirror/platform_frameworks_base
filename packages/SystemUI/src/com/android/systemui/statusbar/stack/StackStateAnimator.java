@@ -719,7 +719,8 @@ public class StackStateAnimator {
         }
     }
 
-    public void animateOverScrollToAmount(float targetAmount, final boolean onTop) {
+    public void animateOverScrollToAmount(float targetAmount, final boolean onTop,
+            final boolean isRubberbanded) {
         final float startOverScrollAmount = mHostLayout.getCurrentOverScrollAmount(onTop);
         if (targetAmount == startOverScrollAmount) {
             return;
@@ -733,7 +734,8 @@ public class StackStateAnimator {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentOverScroll = (float) animation.getAnimatedValue();
                 mHostLayout.setOverScrollAmount(
-                        currentOverScroll, onTop, false /* animate */, false /* cancelAnimators */);
+                        currentOverScroll, onTop, false /* animate */, false /* cancelAnimators */,
+                        isRubberbanded);
             }
         });
         overScrollAnimator.setInterpolator(mFastOutSlowInInterpolator);

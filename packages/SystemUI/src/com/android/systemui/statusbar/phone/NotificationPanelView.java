@@ -95,6 +95,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
     private boolean mStackScrollerOverscrolling;
+    private boolean mQsExpansionFromOverscroll;
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -524,19 +525,25 @@ public class NotificationPanelView extends PanelView implements
 
 
     @Override
-    public void onOverscrollTopChanged(float amount) {
+    public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
         cancelAnimation();
         float rounded = amount >= 1f ? amount : 0f;
-        mStackScrollerOverscrolling = rounded != 0f;
+        mStackScrollerOverscrolling = rounded != 0f && isRubberbanded;
+        mQsExpansionFromOverscroll = rounded != 0f;
         setQsExpansion(mQsMinExpansionHeight + rounded);
         updateQsState();
     }
 
     @Override
     public void flingTopOverscroll(float velocity, boolean open) {
-        mStackScrollerOverscrolling = false;
         setQsExpansion(mQsExpansionHeight);
-        flingSettings(velocity, open);
+        flingSettings(velocity, open, new Runnable() {
+            @Override
+            public void run() {
+                mStackScrollerOverscrolling = false;
+                mQsExpansionFromOverscroll = false;
+            }
+        });
     }
 
     private void onQsExpansionStarted() {
@@ -572,13 +579,12 @@ public class NotificationPanelView extends PanelView implements
     private void updateQsState() {
         boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling;
         mHeader.setExpanded(expandVisually, mStackScrollerOverscrolling);
-        mNotificationStackScroller.setEnabled(!mQsExpanded);
+        mNotificationStackScroller.setEnabled(!mQsExpanded || mQsExpansionFromOverscroll);
         mQsPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-        mQsContainer.setVisibility(mKeyguardShowing && !expandVisually
-                ? View.INVISIBLE
-                : View.VISIBLE);
+        mQsContainer.setVisibility(
+                mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
         mScrollView.setTouchEnabled(mQsExpanded);
-        mNotificationStackScroller.setTouchEnabled(!mQsExpanded);
+        mNotificationStackScroller.setTouchEnabled(!mQsExpanded || mQsExpansionFromOverscroll);
     }
 
     private void setQsExpansion(float height) {
@@ -641,9 +647,17 @@ public class NotificationPanelView extends PanelView implements
             mQsExpansionAnimator.cancel();
         }
     }
+
     private void flingSettings(float vel, boolean expand) {
+        flingSettings(vel, expand, null);
+    }
+
+    private void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable) {
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
         if (target == mQsExpansionHeight) {
+            if (onFinishRunnable != null) {
+                onFinishRunnable.run();
+            }
             return;
         }
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
@@ -658,6 +672,9 @@ public class NotificationPanelView extends PanelView implements
             @Override
             public void onAnimationEnd(Animator animation) {
                 mQsExpansionAnimator = null;
+                if (onFinishRunnable != null) {
+                    onFinishRunnable.run();
+                }
             }
         });
         animator.start();
