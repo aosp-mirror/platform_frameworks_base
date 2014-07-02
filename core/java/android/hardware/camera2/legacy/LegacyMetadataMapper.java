@@ -154,16 +154,6 @@ public class LegacyMetadataMapper {
     private static void mapCharacteristicsFromParameters(CameraMetadataNative m,
             Camera.Parameters p) {
         /*
-         * info.supportedHardwareLevel
-         */
-        m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
-
-        /*
-         * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
-         */
-        mapScalerStreamConfigs(m, p);
-
-        /*
          * control.ae*
          */
         mapControlAe(m, p);
@@ -205,6 +195,17 @@ public class LegacyMetadataMapper {
          * sync.*
          */
         mapSync(m, p);
+
+        /*
+         * info.supportedHardwareLevel
+         */
+        m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
+
+        /*
+         * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
+         */
+        mapScalerStreamConfigs(m, p);
+
     }
 
     private static void mapScalerStreamConfigs(CameraMetadataNative m, Camera.Parameters p) {

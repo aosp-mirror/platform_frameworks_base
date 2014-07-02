@@ -533,6 +533,20 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             handler = checkHandler(handler);
         }
 
+        // Make sure that there all requests have at least 1 surface; all surfaces are non-null
+        for (CaptureRequest request : requestList) {
+            if (request.getTargets().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Each request must have at least one Surface target");
+            }
+
+            for (Surface surface : request.getTargets()) {
+                if (surface == null) {
+                    throw new IllegalArgumentException("Null Surface targets are not allowed");
+                }
+            }
+        }
+
         try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
             checkIfCameraClosedOrInError();
             int requestId;

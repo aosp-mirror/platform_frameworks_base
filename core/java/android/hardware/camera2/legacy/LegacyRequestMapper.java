@@ -176,8 +176,23 @@ public class LegacyRequestMapper {
         Range<Integer> aeFpsRange = request.get(CONTROL_AE_TARGET_FPS_RANGE);
         if (aeFpsRange != null) {
             int[] legacyFps = convertAeFpsRangeToLegacy(aeFpsRange);
-            params.setPreviewFpsRange(legacyFps[Parameters.PREVIEW_FPS_MIN_INDEX],
-                    legacyFps[Parameters.PREVIEW_FPS_MAX_INDEX]);
+
+            // TODO - Should we enforce that all HAL1 devices must include (30, 30) FPS range?
+            boolean supported = false;
+            for(int[] range : params.getSupportedPreviewFpsRange()) {
+                if (legacyFps[0] == range[0] && legacyFps[1] == range[1]) {
+                    supported = true;
+                    break;
+                }
+            }
+            if (supported) {
+                params.setPreviewFpsRange(legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                        legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+                params.setRecordingHint(false);
+            } else {
+                Log.w(TAG, "Unsupported FPS range set [" + legacyFps[0] + "," + legacyFps[1] + "]");
+                params.setRecordingHint(true);
+            }
         }
 
         /*

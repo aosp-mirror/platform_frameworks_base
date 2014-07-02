@@ -78,8 +78,8 @@ public class RequestThreadManager {
     private volatile RequestHolder mInFlightPreview;
     private volatile RequestHolder mInFlightJpeg;
 
-    private final List<Surface> mPreviewOutputs = new ArrayList<Surface>();
-    private final List<Surface> mCallbackOutputs = new ArrayList<Surface>();
+    private final List<Surface> mPreviewOutputs = new ArrayList<>();
+    private final List<Surface> mCallbackOutputs = new ArrayList<>();
     private GLThreadManager mGLThreadManager;
     private SurfaceTexture mPreviewTexture;
     private Camera.Parameters mParams;
@@ -274,18 +274,6 @@ public class RequestThreadManager {
         mPreviewTexture.setDefaultBufferSize(mIntermediateBufferSize.getWidth(),
                 mIntermediateBufferSize.getHeight());
         mCamera.setPreviewTexture(mPreviewTexture);
-        Camera.Parameters params = mCamera.getParameters();
-        List<int[]> supportedFpsRanges = params.getSupportedPreviewFpsRange();
-        int[] bestRange = getPhotoPreviewFpsRange(supportedFpsRanges);
-        if (DEBUG) {
-            Log.d(TAG, "doPreviewCapture - Selected range [" +
-                    bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + "," +
-                    bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] + "]");
-        }
-        params.setPreviewFpsRange(bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-        params.setRecordingHint(true);
-        mCamera.setParameters(params);
 
         startPreview();
     }
@@ -322,6 +310,18 @@ public class RequestThreadManager {
             }
         }
         mParams = mCamera.getParameters();
+
+        List<int[]> supportedFpsRanges = mParams.getSupportedPreviewFpsRange();
+        int[] bestRange = getPhotoPreviewFpsRange(supportedFpsRanges);
+        if (DEBUG) {
+            Log.d(TAG, "doPreviewCapture - Selected range [" +
+                    bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + "," +
+                    bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] + "]");
+        }
+        mParams.setPreviewFpsRange(bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+        mParams.setRecordingHint(true);
+
         if (mPreviewOutputs.size() > 0) {
             List<Size> outputSizes = new ArrayList<>(outputs.size());
             for (Surface s : mPreviewOutputs) {
