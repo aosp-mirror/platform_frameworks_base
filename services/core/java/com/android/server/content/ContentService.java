@@ -537,19 +537,26 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
+        setSyncAutomaticallyAsUser(account, providerName, sync, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public void setSyncAutomaticallyAsUser(Account account, String providerName, boolean sync,
+            int userId) {
         if (TextUtils.isEmpty(providerName)) {
             throw new IllegalArgumentException("Authority must be non-empty");
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
+        enforceCrossUserPermission(userId,
+                "no permission to modify the sync settings for user " + userId);
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.getSyncStorageEngine()
-                .setSyncAutomatically(account, userId, providerName, sync);
+                syncManager.getSyncStorageEngine().setSyncAutomatically(account, userId,
+                        providerName, sync);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -806,11 +813,17 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public boolean isSyncPending(Account account, String authority, ComponentName cname) {
+        return isSyncPendingAsUser(account, authority, cname, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public boolean isSyncPendingAsUser(Account account, String authority, ComponentName cname,
+            int userId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-
+        enforceCrossUserPermission(userId,
+                "no permission to retrieve the sync settings for user " + userId);
         int callerUid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return false;
