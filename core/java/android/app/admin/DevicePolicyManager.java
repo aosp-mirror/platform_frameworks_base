@@ -449,9 +449,17 @@ public class DevicePolicyManager {
      * active (enabled) in the system.
      */
     public boolean isAdminActive(ComponentName who) {
+        return isAdminActiveAsUser(who, UserHandle.myUserId());
+    }
+
+    /**
+     * @see #isAdminActive(ComponentName)
+     * @hide
+     */
+    public boolean isAdminActiveAsUser(ComponentName who, int userId) {
         if (mService != null) {
             try {
-                return mService.isAdminActive(who, UserHandle.myUserId());
+                return mService.isAdminActive(who, userId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -465,9 +473,17 @@ public class DevicePolicyManager {
      * returned.
      */
     public List<ComponentName> getActiveAdmins() {
+        return getActiveAdminsAsUser(UserHandle.myUserId());
+    }
+
+    /**
+     * @see #getActiveAdmins()
+     * @hide
+     */
+    public List<ComponentName> getActiveAdminsAsUser(int userId) {
         if (mService != null) {
             try {
-                return mService.getActiveAdmins(UserHandle.myUserId());
+                return mService.getActiveAdmins(userId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2314,9 +2330,17 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the userId is invalid.
      */
     public ComponentName getProfileOwner() throws IllegalArgumentException {
+        return getProfileOwnerAsUser(Process.myUserHandle().getIdentifier());
+    }
+
+    /**
+     * @see #getProfileOwner()
+     * @hide
+     */
+    public ComponentName getProfileOwnerAsUser(final int userId) throws IllegalArgumentException {
         if (mService != null) {
             try {
-                return mService.getProfileOwner(Process.myUserHandle().getIdentifier());
+                return mService.getProfileOwner(userId);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get profile owner");
                 throw new IllegalArgumentException(
@@ -2856,7 +2880,7 @@ public class DevicePolicyManager {
      * @see #setAccountManagementDisabled
      */
     public String[] getAccountTypesWithManagementDisabled() {
-        return getAccountTypesWithManagementDisabledAsUser(UserHandle.getCallingUserId());
+        return getAccountTypesWithManagementDisabledAsUser(UserHandle.myUserId());
     }
 
     /**
