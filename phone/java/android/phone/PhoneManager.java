@@ -62,6 +62,20 @@ public final class PhoneManager {
         return false;
     }
 
+    /**
+     * Removes the missed-call notification if one is present.
+     * <p>
+     * Requires that the caller be set at the system dialer app.
+     * </p>
+     */
+    public void cancelMissedCallsNotification() {
+        try {
+            mService.cancelMissedCallsNotification();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#cancelMissedCallNotification", e);
+        }
+    }
+
     private ITelephony getITelephony() {
         return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
     }

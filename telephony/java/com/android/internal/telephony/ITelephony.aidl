@@ -152,11 +152,6 @@ interface ITelephony {
     boolean isSimPinEnabled();
 
     /**
-     * Cancels the missed calls notification.
-     */
-    void cancelMissedCallsNotification();
-
-    /**
      * Supply a pin to unlock the SIM.  Blocks until a result is determined.
      * @param pin The pin to check.
      * @return whether the operation was a success.

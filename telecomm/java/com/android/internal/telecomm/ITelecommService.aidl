@@ -80,4 +80,9 @@ interface ITelecommService {
      * @see TelecommManager#acceptRingingCall
      */
     void acceptRingingCall();
+
+    /**
+     * @see PhoneManager#cancelMissedCallsNotification
+     */
+    void cancelMissedCallsNotification();
 }

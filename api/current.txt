@@ -21781,6 +21781,7 @@ package android.os.storage {
 package android.phone {
 
   public final class PhoneManager {
+    method public void cancelMissedCallsNotification();
     method public boolean handlePinMmi(java.lang.String);
   }
 
