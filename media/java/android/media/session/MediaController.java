@@ -22,6 +22,7 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
+import android.media.routing.MediaRouter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -63,11 +64,11 @@ public final class MediaController {
     private boolean mCbRegistered = false;
     private MediaSessionInfo mInfo;
 
-    private TransportControls mTransportController;
+    private final TransportControls mTransportControls;
 
     private MediaController(ISessionController sessionBinder) {
         mSessionBinder = sessionBinder;
-        mTransportController = new TransportControls();
+        mTransportControls = new TransportControls();
     }
 
     /**
@@ -90,12 +91,24 @@ public final class MediaController {
     }
 
     /**
-     * Get a {@link TransportControls} instance for this session.
+     * Get a {@link TransportControls} instance to send transport actions to
+     * the associated session.
      *
-     * @return A controls instance
+     * @return A transport controls instance.
      */
     public @NonNull TransportControls getTransportControls() {
-        return mTransportController;
+        return mTransportControls;
+    }
+
+    /**
+     * Creates a media router delegate through which the destination of the media
+     * router may be observed and controlled.
+     *
+     * @return The media router delegate, or null if the media session does
+     * not support media routing.
+     */
+    public @Nullable MediaRouter.Delegate createMediaRouterDelegate() {
+        return new MediaRouter.Delegate();
     }
 
     /**

@@ -19,6 +19,9 @@ package com.android.server.media;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.routing.IMediaRouter;
+import android.media.routing.IMediaRouterDelegate;
+import android.media.routing.IMediaRouterStateCallback;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ISession;
@@ -90,6 +93,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             new ArrayList<ISessionControllerCallback>();
 
     private long mFlags;
+    private IMediaRouter mMediaRouter;
     private ComponentName mMediaButtonReceiver;
 
     // TransportPerformer fields
@@ -573,6 +577,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void setMediaRouter(IMediaRouter router) {
+            mMediaRouter = router;
+            mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
+        }
+
+        @Override
         public void setMediaButtonReceiver(ComponentName mbr) {
             mMediaButtonReceiver = mbr;
         }
@@ -908,6 +918,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public boolean isTransportControlEnabled() {
             return MediaSessionRecord.this.isTransportControlEnabled();
+        }
+
+        @Override
+        public IMediaRouterDelegate createMediaRouterDelegate(
+                IMediaRouterStateCallback callback) {
+            // todo
+            return null;
         }
     }
 

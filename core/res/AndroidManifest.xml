@@ -2720,6 +2720,13 @@
         android:description="@string/permdesc_bindConditionProviderService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.media.routing.MediaRouteService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_MEDIA_ROUTE_SERVICE"
+        android:label="@string/permlab_bindMediaRouteService"
+        android:description="@string/permdesc_bindMediaRouteService"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an {@link android.service.dreams.DreamService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_DREAM_SERVICE"

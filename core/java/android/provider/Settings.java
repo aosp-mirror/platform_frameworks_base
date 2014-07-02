@@ -266,6 +266,21 @@ public final class Settings {
             "android.settings.WIFI_DISPLAY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of
+     * {@link android.media.routing.MediaRouteService media route providers}.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CAST_SETTINGS =
+            "android.settings.CAST_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of date and time.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you

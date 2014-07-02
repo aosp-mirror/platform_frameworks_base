@@ -18,6 +18,8 @@ package android.media.session;
 import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.routing.IMediaRouterDelegate;
+import android.media.routing.IMediaRouterStateCallback;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaSessionInfo;
 import android.media.session.ParcelableVolumeInfo;
@@ -42,7 +44,9 @@ interface ISessionController {
     void adjustVolumeBy(int delta, int flags);
     void setVolumeTo(int value, int flags);
 
-    // These commands are for the TransportController
+    IMediaRouterDelegate createMediaRouterDelegate(IMediaRouterStateCallback callback);
+
+    // These commands are for the TransportControls
     void play();
     void pause();
     void stop();

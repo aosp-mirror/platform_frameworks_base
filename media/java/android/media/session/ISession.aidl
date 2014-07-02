@@ -17,6 +17,7 @@ package android.media.session;
 
 import android.content.ComponentName;
 import android.media.MediaMetadata;
+import android.media.routing.IMediaRouter;
 import android.media.session.ISessionController;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ interface ISession {
     ISessionController getController();
     void setFlags(int flags);
     void setActive(boolean active);
+    void setMediaRouter(in IMediaRouter router);
     void setMediaButtonReceiver(in ComponentName mbr);
     void destroy();
 
