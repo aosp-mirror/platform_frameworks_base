@@ -103,7 +103,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * Use the same handler as the device's StateListener for all the internal coming events
          *
          * This ensures total ordering between CameraDevice.StateListener and
-         * CameraDevice.CaptureListener events.
+         * CameraDeviceImpl.CaptureListener events.
          */
         mSequenceDrainer = new TaskDrainer<>(mDeviceHandler, new SequenceDrainListener(),
                 /*name*/"seq");
@@ -347,7 +347,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     /**
      * Forward callbacks from
-     * CameraDevice.CaptureListener to the CameraCaptureSession.CaptureListener.
+     * CameraDeviceImpl.CaptureListener to the CameraCaptureSession.CaptureListener.
      *
      * <p>In particular, all calls are automatically split to go both to our own
      * internal listener, and to the user-specified listener (by transparently posting
@@ -356,9 +356,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * <p>When a capture sequence finishes, update the pending checked sequences set.</p>
      */
     @SuppressWarnings("deprecation")
-    private CameraDevice.CaptureListener createCaptureListenerProxy(
+    private CameraDeviceImpl.CaptureListener createCaptureListenerProxy(
             Handler handler, CaptureListener listener) {
-        CameraDevice.CaptureListener localListener = new CameraDevice.CaptureListener() {
+        CameraDeviceImpl.CaptureListener localListener = new CameraDeviceImpl.CaptureListener() {
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
@@ -386,23 +386,23 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             return localListener;
         }
 
-        InvokeDispatcher<CameraDevice.CaptureListener> localSink =
+        InvokeDispatcher<CameraDeviceImpl.CaptureListener> localSink =
                 new InvokeDispatcher<>(localListener);
 
         InvokeDispatcher<CaptureListener> userListenerSink =
                 new InvokeDispatcher<>(listener);
         HandlerDispatcher<CaptureListener> handlerPassthrough =
                 new HandlerDispatcher<>(userListenerSink, handler);
-        DuckTypingDispatcher<CameraDevice.CaptureListener, CaptureListener> duckToSession
+        DuckTypingDispatcher<CameraDeviceImpl.CaptureListener, CaptureListener> duckToSession
                 = new DuckTypingDispatcher<>(handlerPassthrough, CaptureListener.class);
-        ArgumentReplacingDispatcher<CameraDevice.CaptureListener, CameraCaptureSessionImpl>
-            replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
-                    /*argumentIndex*/0, this);
+        ArgumentReplacingDispatcher<CameraDeviceImpl.CaptureListener, CameraCaptureSessionImpl>
+                replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
+                        /*argumentIndex*/0, this);
 
-        BroadcastDispatcher<CameraDevice.CaptureListener> broadcaster =
-                new BroadcastDispatcher<CameraDevice.CaptureListener>(
-                        replaceDeviceWithSession,
-                        localSink);
+        BroadcastDispatcher<CameraDeviceImpl.CaptureListener> broadcaster =
+                new BroadcastDispatcher<CameraDeviceImpl.CaptureListener>(
+                    replaceDeviceWithSession,
+                    localSink);
 
         return new ListenerProxies.DeviceCaptureListenerProxy(broadcaster);
     }
@@ -418,10 +418,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * </ul>
      * </p>
      * */
-    CameraDevice.StateListener getDeviceStateListener() {
+    CameraDeviceImpl.StateListenerKK getDeviceStateListener() {
         final CameraCaptureSession session = this;
 
-        return new CameraDevice.StateListener() {
+        return new CameraDeviceImpl.StateListenerKK() {
             private boolean mBusy = false;
             private boolean mActive = false;
 

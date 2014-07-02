@@ -130,15 +130,6 @@ public abstract class CameraDevice implements AutoCloseable {
     public abstract String getId();
 
     /**
-     * <p>Set up a new output set of Surfaces for the camera device.</p>
-     *
-     * @deprecated Use {@link #createCaptureSession} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract void configureOutputs(List<Surface> outputs) throws CameraAccessException;
-
-    /**
      * <p>Create a new camera capture session by providing the target output set of Surfaces to the
      * camera device.</p>
      *
@@ -276,68 +267,6 @@ public abstract class CameraDevice implements AutoCloseable {
             throws CameraAccessException;
 
     /**
-     * <p>Submit a request for an image to be captured by this CameraDevice.</p>
-     *
-     * @deprecated Use {@link CameraCaptureSession#capture} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract int capture(CaptureRequest request, CaptureListener listener, Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * Submit a list of requests to be captured in sequence as a burst.
-     *
-     * @deprecated Use {@link CameraCaptureSession#captureBurst} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
-            Handler handler) throws CameraAccessException;
-
-    /**
-     * Request endlessly repeating capture of images by this CameraDevice.
-     *
-     * @deprecated Use {@link CameraCaptureSession#setRepeatingRequest} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
-            Handler handler) throws CameraAccessException;
-
-    /**
-     * <p>Request endlessly repeating capture of a sequence of images by this
-     * CameraDevice.</p>
-     *
-     * @deprecated Use {@link CameraCaptureSession#setRepeatingBurst} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
-            Handler handler) throws CameraAccessException;
-
-    /**
-     * <p>Cancel any ongoing repeating capture set by either
-     * {@link #setRepeatingRequest setRepeatingRequest} or
-     * {@link #setRepeatingBurst}.
-     *
-     * @deprecated Use {@link CameraCaptureSession#stopRepeating} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract void stopRepeating() throws CameraAccessException;
-
-    /**
-     * Flush all captures currently pending and in-progress as fast as
-     * possible.
-     *
-     * @deprecated Use {@link CameraCaptureSession#abortCaptures} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract void flush() throws CameraAccessException;
-
-    /**
      * Close the connection to this camera device as quickly as possible.
      *
      * <p>Immediately after this call, all calls to the camera device or active session interface
@@ -354,96 +283,6 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     @Override
     public abstract void close();
-
-    /**
-     * <p>A listener for tracking the progress of a {@link CaptureRequest}
-     * submitted to the camera device.</p>
-     *
-     * @deprecated Use {@link CameraCaptureSession.CaptureListener} instead
-     * @hide
-     */
-    @Deprecated
-    public static abstract class CaptureListener {
-
-        /**
-         * This constant is used to indicate that no images were captured for
-         * the request.
-         *
-         * @hide
-         */
-        public static final int NO_FRAMES_CAPTURED = -1;
-
-        /**
-         * This method is called when the camera device has started capturing
-         * the output image for the request, at the beginning of image exposure.
-         *
-         * @see android.media.MediaActionSound
-         */
-        public void onCaptureStarted(CameraDevice camera,
-                CaptureRequest request, long timestamp) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called when some results from an image capture are
-         * available.
-         *
-         * @hide
-         */
-        public void onCapturePartial(CameraDevice camera,
-                CaptureRequest request, CaptureResult result) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called when an image capture makes partial forward progress; some
-         * (but not all) results from an image capture are available.
-         *
-         */
-        public void onCaptureProgressed(CameraDevice camera,
-                CaptureRequest request, CaptureResult partialResult) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called when an image capture has fully completed and all the
-         * result metadata is available.
-         */
-        public void onCaptureCompleted(CameraDevice camera,
-                CaptureRequest request, TotalCaptureResult result) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called instead of {@link #onCaptureCompleted} when the
-         * camera device failed to produce a {@link CaptureResult} for the
-         * request.
-         */
-        public void onCaptureFailed(CameraDevice camera,
-                CaptureRequest request, CaptureFailure failure) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called independently of the others in CaptureListener,
-         * when a capture sequence finishes and all {@link CaptureResult}
-         * or {@link CaptureFailure} for it have been returned via this listener.
-         */
-        public void onCaptureSequenceCompleted(CameraDevice camera,
-                int sequenceId, long frameNumber) {
-            // default empty implementation
-        }
-
-        /**
-         * This method is called independently of the others in CaptureListener,
-         * when a capture sequence aborts before any {@link CaptureResult}
-         * or {@link CaptureFailure} for it have been returned via this listener.
-         */
-        public void onCaptureSequenceAborted(CameraDevice camera,
-                int sequenceId) {
-            // default empty implementation
-        }
-    }
 
     /**
      * A listener for notifications about the state of a camera
@@ -542,40 +381,6 @@ public abstract class CameraDevice implements AutoCloseable {
         public abstract void onOpened(CameraDevice camera); // Must implement
 
         /**
-         * The method called when a camera device has no outputs configured.
-         *
-         * @deprecated Use {@link #onOpened} instead.
-         * @hide
-         */
-        @Deprecated
-        public void onUnconfigured(CameraDevice camera) {
-            // Default empty implementation
-        }
-
-        /**
-         * The method called when a camera device begins processing
-         * {@link CaptureRequest capture requests}.
-         *
-         * @deprecated Use {@link CameraCaptureSession.StateListener#onActive} instead.
-         * @hide
-         */
-        @Deprecated
-        public void onActive(CameraDevice camera) {
-            // Default empty implementation
-        }
-
-        /**
-         * The method called when a camera device is busy.
-         *
-         * @deprecated Use {@link CameraCaptureSession.StateListener#onConfigured} instead.
-         * @hide
-         */
-        @Deprecated
-        public void onBusy(CameraDevice camera) {
-            // Default empty implementation
-        }
-
-        /**
          * The method called when a camera device has been closed with
          * {@link CameraDevice#close}.
          *
@@ -587,18 +392,6 @@ public abstract class CameraDevice implements AutoCloseable {
          * @param camera the camera device that has become closed
          */
         public void onClosed(CameraDevice camera) {
-            // Default empty implementation
-        }
-
-        /**
-         * The method called when a camera device has finished processing all
-         * submitted capture requests and has reached an idle state.
-         *
-         * @deprecated Use {@link CameraCaptureSession.StateListener#onReady} instead.
-         * @hide
-         */
-        @Deprecated
-        public void onIdle(CameraDevice camera) {
             // Default empty implementation
         }
 
