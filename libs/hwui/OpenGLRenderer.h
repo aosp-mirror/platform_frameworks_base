@@ -316,10 +316,12 @@ public:
     }
 
     /**
-     * Return the best transform to use to rasterize text given a full
-     * transform matrix.
+     * Build the best transform to use to rasterize text given a full
+     * transform matrix, and whether filteration is needed.
+     *
+     * Returns whether filtration is needed
      */
-    mat4 findBestFontTransform(const mat4& transform) const;
+    bool findBestFontTransform(const mat4& transform, SkMatrix* outMatrix) const;
 
 #if DEBUG_MERGE_BEHAVIOR
     void drawScreenSpaceColorRect(float left, float top, float right, float bottom, int color) {

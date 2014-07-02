@@ -45,7 +45,8 @@ Font::Font(FontRenderer* state, const Font::FontDescription& desc) :
     mDeviceProperties = SkDeviceProperties::Make(SkDeviceProperties::Geometry::MakeDefault(), 1.0f);
 }
 
-Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix) {
+Font::FontDescription::FontDescription(const SkPaint* paint, const SkMatrix& rasterMatrix)
+        : mLookupTransform(rasterMatrix) {
     mFontId = SkTypeface::UniqueID(paint->getTypeface());
     mFontSize = paint->getTextSize();
     mFlags = 0;
@@ -58,9 +59,6 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mStrokeWidth = paint->getStrokeWidth();
     mAntiAliasing = paint->isAntiAlias();
     mHinting = paint->getHinting();
-    mLookupTransform.reset();
-    mLookupTransform[SkMatrix::kMScaleX] = roundf(fmaxf(1.0f, matrix[mat4::kScaleX]));
-    mLookupTransform[SkMatrix::kMScaleY] = roundf(fmaxf(1.0f, matrix[mat4::kScaleY]));
     if (!mLookupTransform.invert(&mInverseLookupTransform)) {
         ALOGW("Could not query the inverse lookup transform for this font");
     }
@@ -486,7 +484,7 @@ CachedGlyphInfo* Font::cacheGlyph(const SkPaint* paint, glyph_t glyph, bool prec
     return newGlyph;
 }
 
-Font* Font::create(FontRenderer* state, const SkPaint* paint, const mat4& matrix) {
+Font* Font::create(FontRenderer* state, const SkPaint* paint, const SkMatrix& matrix) {
     FontDescription description(paint, matrix);
     Font* font = state->mActiveFonts.get(description);
 

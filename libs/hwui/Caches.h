@@ -21,6 +21,8 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+#include <vector>
+
 #include <GLES3/gl3.h>
 
 #include <utils/KeyedVector.h>
@@ -366,7 +368,7 @@ public:
     float propertyAmbientRatio;
     int propertyAmbientShadowStrength;
     int propertySpotShadowStrength;
-
+    std::vector<float> propertyExtraRasterBuckets;
 private:
     enum OverdrawColorSet {
         kColorSet_Default = 0,

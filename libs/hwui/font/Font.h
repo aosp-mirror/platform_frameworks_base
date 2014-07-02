@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_FONT_H
 #define ANDROID_HWUI_FONT_H
 
+#include <vector>
+
 #include <utils/KeyedVector.h>
 
 #include <SkScalar.h>
@@ -50,7 +52,7 @@ public:
     };
 
     struct FontDescription {
-        FontDescription(const SkPaint* paint, const mat4& matrix);
+        FontDescription(const SkPaint* paint, const SkMatrix& matrix);
 
         static int compare(const FontDescription& lhs, const FontDescription& rhs);
 
@@ -92,7 +94,7 @@ public:
     /**
      * Creates a new font associated with the specified font state.
      */
-    static Font* create(FontRenderer* state, const SkPaint* paint, const mat4& matrix);
+    static Font* create(FontRenderer* state, const SkPaint* paint, const SkMatrix& matrix);
 
 private:
     friend class FontRenderer;

@@ -724,13 +724,17 @@ void Caches::setTempProperty(const char* name, const char* value) {
         propertyLightDiameter = fmin(fmax(atof(value), 0.0), 3000.0);
         ALOGD("lightDiameter = %.2f", propertyLightDiameter);
         return;
-    }  else if (!strcmp(name, "lightPosY")) {
+    } else if (!strcmp(name, "lightPosY")) {
         propertyLightPosY = fmin(fmax(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Y = %.2f", propertyLightPosY);
         return;
-    }  else if (!strcmp(name, "lightPosZ")) {
+    } else if (!strcmp(name, "lightPosZ")) {
         propertyLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Z = %.2f", propertyLightPosZ);
+        return;
+    } else if (!strcmp(name, "extraRasterBucket")) {
+        float bucket = atof(value);
+        propertyExtraRasterBuckets.push_back(bucket);
         return;
     }
     ALOGD("    failed");

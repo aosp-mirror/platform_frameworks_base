@@ -1313,7 +1313,7 @@ public:
             const DeferredDisplayState& state) {
         const SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
-        fontRenderer.precache(paint, mText, mCount, mat4::identity());
+        fontRenderer.precache(paint, mText, mCount, SkMatrix::I());
 
         deferInfo.batchId = mPaint->getColor() == 0xff000000 ?
                 DeferredDisplayList::kOpBatch_Text :
@@ -1372,14 +1372,15 @@ public:
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds)
             : DrawBoundedOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
-        memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
+        mPrecacheTransform = SkMatrix::InvalidMatrix();
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         const SkPaint* paint = getPaint(renderer);
         FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(paint);
-        const mat4& transform = renderer.findBestFontTransform(state.mMatrix);
+        SkMatrix transform;
+        renderer.findBestFontTransform(state.mMatrix, &transform);
         if (mPrecacheTransform != transform) {
             fontRenderer.precache(paint, mText, mCount, transform);
             mPrecacheTransform = transform;
@@ -1436,7 +1437,7 @@ private:
     float mY;
     const float* mPositions;
     float mTotalAdvance;
-    mat4 mPrecacheTransform;
+    SkMatrix mPrecacheTransform;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

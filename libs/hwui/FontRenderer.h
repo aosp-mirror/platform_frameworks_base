@@ -95,9 +95,9 @@ public:
         mGammaTable = gammaTable;
     }
 
-    void setFont(const SkPaint* paint, const mat4& matrix);
+    void setFont(const SkPaint* paint, const SkMatrix& matrix);
 
-    void precache(const SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix);
+    void precache(const SkPaint* paint, const char* text, int numGlyphs, const SkMatrix& matrix);
     void endPrecaching();
 
     // bounds is an out parameter

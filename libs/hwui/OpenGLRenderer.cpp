@@ -2699,7 +2699,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, mat4::identity());
+    fontRenderer.setFont(paint, SkMatrix::I());
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2736,20 +2736,41 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     return DrawGlInfo::kStatusDrew;
 }
 
-mat4 OpenGLRenderer::findBestFontTransform(const mat4& transform) const {
-    mat4 fontTransform;
+bool OpenGLRenderer::findBestFontTransform(const mat4& transform, SkMatrix* outMatrix) const {
     if (CC_LIKELY(transform.isPureTranslate())) {
-        fontTransform = mat4::identity();
-    } else {
-        if (CC_UNLIKELY(transform.isPerspective())) {
-            fontTransform = mat4::identity();
-        } else {
-            float sx, sy;
-            currentTransform()->decomposeScale(sx, sy);
-            fontTransform.loadScale(sx, sy, 1.0f);
-        }
+        outMatrix->setIdentity();
+        return false;
+    } else if (CC_UNLIKELY(transform.isPerspective())) {
+        outMatrix->setIdentity();
+        return true;
     }
-    return fontTransform;
+
+    /**
+     * Input is a non-perspective, scaling transform. Generate a scale-only transform, based upon
+     * bucketed scale values. Special case for 'extra raster buckets' - disable filtration in the
+     * case of an exact match, and isSimple() transform
+     */
+    float sx, sy;
+    transform.decomposeScale(sx, sy);
+
+    float bestSx = roundf(fmaxf(1.0f, sx));
+    float bestSy = roundf(fmaxf(1.0f, sy));
+    bool filter = true;
+
+    for (unsigned int i = 0; i < mCaches.propertyExtraRasterBuckets.size(); i++) {
+        float bucket = mCaches.propertyExtraRasterBuckets[i];
+        if (sx == bucket && sy == bucket) {
+            bestSx = bestSy = bucket;
+            filter = !transform.isSimple(); // disable filter, if simple
+            break;
+        }
+
+        if (fabs(bucket - sx) < fabs(bestSx - sx)) bestSx = sx;
+        if (fabs(bucket - sy) < fabs(bestSy - sy)) bestSy = sy;
+    }
+
+    outMatrix->setScale(bestSx, bestSy);
+    return filter;
 }
 
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
@@ -2783,7 +2804,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
 
     if (CC_UNLIKELY(hasTextShadow(paint))) {
-        fontRenderer.setFont(paint, mat4::identity());
+        fontRenderer.setFont(paint, SkMatrix::I());
         drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
                 alpha, oldX, oldY);
     }
@@ -2801,11 +2822,11 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     // Applying the full matrix in the shader is the easiest way to handle
     // rotation and perspective and allows us to always generated quads in the
     // font renderer which greatly simplifies the code, clipping in particular.
-    mat4 fontTransform = findBestFontTransform(transform);
+    SkMatrix fontTransform;
+    bool linearFilter = findBestFontTransform(transform, &fontTransform)
+            || fabs(y - (int) y) > 0.0f
+            || fabs(x - (int) x) > 0.0f;
     fontRenderer.setFont(paint, fontTransform);
-
-    // Pick the appropriate texture filtering
-    bool linearFilter = !pureTranslate || fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     fontRenderer.setTextureFiltering(linearFilter);
 
     // TODO: Implement better clipping for scaled/rotated text
@@ -2849,7 +2870,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     mCaches.enableScissor();
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, mat4::identity());
+    fontRenderer.setFont(paint, SkMatrix::I());
     fontRenderer.setTextureFiltering(true);
 
     int alpha;

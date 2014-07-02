@@ -587,7 +587,7 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
     }
 }
 
-void FontRenderer::setFont(const SkPaint* paint, const mat4& matrix) {
+void FontRenderer::setFont(const SkPaint* paint, const SkMatrix& matrix) {
     mCurrentFont = Font::create(this, paint, matrix);
 }
 
@@ -678,7 +678,7 @@ void FontRenderer::finishRender() {
 }
 
 void FontRenderer::precache(const SkPaint* paint, const char* text, int numGlyphs,
-        const mat4& matrix) {
+        const SkMatrix& matrix) {
     Font* font = Font::create(this, paint, matrix);
     font->precache(paint, text, numGlyphs);
 }
