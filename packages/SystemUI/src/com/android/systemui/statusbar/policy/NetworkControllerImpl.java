@@ -169,6 +169,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
+    private final WifiAccessPointController mAccessPoints;
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -237,6 +239,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateAirplaneMode();
 
         mLastLocale = mContext.getResources().getConfiguration().locale;
+        mAccessPoints = new WifiAccessPointController(mContext);
     }
 
     public boolean hasMobileDataFeature() {
@@ -279,6 +282,26 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     public void removeNetworkSignalChangedCallback(NetworkSignalChangedCallback cb) {
         mSignalsChangedCallbacks.remove(cb);
+    }
+
+    @Override
+    public void addAccessPointCallback(AccessPointCallback callback) {
+        mAccessPoints.addCallback(callback);
+    }
+
+    @Override
+    public void removeAccessPointCallback(AccessPointCallback callback) {
+        mAccessPoints.removeCallback(callback);
+    }
+
+    @Override
+    public void scanForAccessPoints() {
+        mAccessPoints.scan();
+    }
+
+    @Override
+    public void connect(AccessPoint ap) {
+        mAccessPoints.connect(ap);
     }
 
     @Override

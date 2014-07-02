@@ -32,7 +32,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
-import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -78,7 +77,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
@@ -101,7 +99,6 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.qs.CircularClipper;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -717,14 +714,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Set up the quick settings tile panel
         mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
         if (mQSPanel != null) {
-            mQSPanel.setUtils(new CircularClipper.Utils() {
-                @Override
-                public ValueAnimator createRevealAnimator(View v, int centerX, int centerY,
-                        float startRadius, float endRadius) {
-                    return ViewAnimationUtils.createCircularReveal(v, centerX, centerY,
-                            startRadius, endRadius);
-                }
-            });
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, null /*tethering*/,

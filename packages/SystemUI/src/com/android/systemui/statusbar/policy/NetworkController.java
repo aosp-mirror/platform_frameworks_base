@@ -33,4 +33,23 @@ public interface NetworkController {
                 String dataTypeContentDescriptionId, String description, boolean noSim);
         void onAirplaneModeChanged(boolean enabled);
     }
+
+    void addAccessPointCallback(AccessPointCallback callback);
+    void removeAccessPointCallback(AccessPointCallback callback);
+    void scanForAccessPoints();
+    void connect(AccessPoint ap);
+
+    public interface AccessPointCallback {
+        void onAccessPointsChanged(AccessPoint[] accessPoints);
+    }
+
+    public static class AccessPoint {
+        public static final int NO_NETWORK = -1;  // see WifiManager
+
+        public int networkId;
+        public int iconId;
+        public String ssid;
+        public boolean isConnected;
+        public int level;  // 0 - 5
+    }
 }

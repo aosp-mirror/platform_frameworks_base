@@ -21,21 +21,17 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 
 /** Helper for view-level circular clip animations. **/
 public class CircularClipper {
 
     private final View mTarget;
 
-    private Utils mUtils;
     private ValueAnimator mAnimator;
 
     public CircularClipper(View target) {
         mTarget = target;
-    }
-
-    public void setUtils(Utils utils) {
-        mUtils = utils;
     }
 
     public void animateCircularClip(int x, int y, boolean in, AnimatorListener listener) {
@@ -49,14 +45,7 @@ public class CircularClipper {
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + h * h)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(x * x + h * h)));
 
-        if (mUtils == null) {
-                mTarget.setVisibility(in ? View.VISIBLE : View.GONE);
-            if (listener != null) {
-                listener.onAnimationEnd(null);
-            }
-            return;
-        }
-        mAnimator = mUtils.createRevealAnimator(mTarget, x, y, 0, r);
+        mAnimator = ViewAnimationUtils.createCircularReveal(mTarget, x, y, 0, r);
         mAnimator.removeAllListeners();
         if (listener != null) {
             mAnimator.addListener(listener);
@@ -83,9 +72,4 @@ public class CircularClipper {
             mTarget.setVisibility(View.GONE);
         };
     };
-
-    public interface Utils {
-        ValueAnimator createRevealAnimator(View v, int centerX,  int centerY,
-                float startRadius, float endRadius);
-    }
 }

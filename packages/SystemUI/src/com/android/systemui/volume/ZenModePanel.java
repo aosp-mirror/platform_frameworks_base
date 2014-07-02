@@ -67,6 +67,7 @@ public class ZenModePanel extends LinearLayout {
     private char mLogTag = '?';
     private String mTag;
     private LinearLayout mConditions;
+    private View mMoreSettings;
     private Callback mCallback;
     private ZenModeController mController;
     private boolean mRequestingConditions;
@@ -91,7 +92,8 @@ public class ZenModePanel extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mConditions = (LinearLayout) findViewById(android.R.id.content);
-        findViewById(android.R.id.button2).setOnClickListener(new View.OnClickListener() {
+        mMoreSettings = findViewById(android.R.id.button2);
+        mMoreSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fireMoreSettings();
@@ -154,12 +156,13 @@ public class ZenModePanel extends LinearLayout {
         }
     }
 
-    public void init(ZenModeController controller, char logTag) {
+    public void init(ZenModeController controller, char logTag, boolean moreSettings) {
         mController = controller;
         mLogTag = logTag;
         updateTag();
         mExitConditionId = mController.getExitConditionId();
         if (DEBUG) Log.d(mTag, "init mExitConditionId=" + mExitConditionId);
+        mMoreSettings.setVisibility(moreSettings ? VISIBLE : GONE);
         mConditions.removeAllViews();
         mController.addCallback(mZenCallback);
         if (mShowing) {

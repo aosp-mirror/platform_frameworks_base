@@ -20,15 +20,17 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSTile.DetailAdapter;
 
 import java.util.ArrayList;
 
@@ -38,7 +40,10 @@ public class QSPanel extends ViewGroup {
 
     private final Context mContext;
     private final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
-    private final FrameLayout mDetail;
+    private final View mDetail;
+    private final ViewGroup mDetailContent;
+    private final View mDetailSettingsButton;
+    private final View mDetailDoneButton;
     private final CircularClipper mClipper;
     private final H mHandler = new H();
 
@@ -63,8 +68,10 @@ public class QSPanel extends ViewGroup {
         super(context, attrs);
         mContext = context;
 
-        mDetail = new FrameLayout(mContext);
-        mDetail.setBackgroundColor(mContext.getResources().getColor(R.color.system_primary_color));
+        mDetail = LayoutInflater.from(context).inflate(R.layout.qs_detail, this, false);
+        mDetailContent = (ViewGroup) mDetail.findViewById(android.R.id.content);
+        mDetailSettingsButton = mDetail.findViewById(android.R.id.button2);
+        mDetailDoneButton = mDetail.findViewById(android.R.id.button1);
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
         addView(mDetail);
@@ -89,10 +96,6 @@ public class QSPanel extends ViewGroup {
             mColumns = columns;
             postInvalidate();
         }
-    }
-
-    public void setUtils(CircularClipper.Utils utils) {
-        mClipper.setUtils(utils);
     }
 
     public void setExpanded(boolean expanded) {
@@ -141,6 +144,12 @@ public class QSPanel extends ViewGroup {
             public void onShowDetail(boolean show) {
                 QSPanel.this.showDetail(show, r);
             }
+            @Override
+            public void onToggleStateChanged(boolean state) {
+                if (mDetailRecord == r) {
+                    fireToggleStateChanged(state);
+                }
+            }
         });
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
@@ -165,20 +174,34 @@ public class QSPanel extends ViewGroup {
         if (r == null) return;
         AnimatorListener listener = null;
         if (show) {
-            if (mDetailRecord != null) return;
-            if (r.detailView == null) {
-                r.detailView = r.tile.createDetailView(mContext, mDetail);
-            }
-            if (r.detailView == null) return;
+            if (mDetailRecord != null) return;  // already showing something in detail
+            r.detailAdapter = r.tile.getDetailAdapter();
+            if (r.detailAdapter == null) return;
+            r.detailView = r.detailAdapter.createDetailView(mContext, r.detailView, mDetailContent);
+            if (r.detailView == null) throw new IllegalStateException("Must return detail view");
+            mDetailDoneButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showDetail(false, mDetailRecord);
+                }
+            });
+            final Intent settingsIntent = r.detailAdapter.getSettingsIntent();
+            mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
+            mDetailSettingsButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDetailRecord.tile.mHost.startSettingsActivity(settingsIntent);
+                }
+            });
             mDetailRecord = r;
-            mDetail.removeAllViews();
+            mDetailContent.removeAllViews();
             mDetail.bringToFront();
-            mDetail.addView(r.detailView);
+            mDetailContent.addView(r.detailView);
         } else {
             if (mDetailRecord == null) return;
             listener = mTeardownDetailWhenDone;
         }
-        fireShowingDetail(show);
+        fireShowingDetail(show ? r.detailAdapter : null);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
         int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
         mClipper.animateCircularClip(x, y, show, listener);
@@ -215,20 +238,12 @@ public class QSPanel extends ViewGroup {
             record.tileView.measure(exactly(cw), exactly(ch));
         }
         int h = rows == 0 ? 0 : (getRowTop(rows) + mPanelPaddingBottom);
-        mDetail.measure(exactly(width), unspecified());
-        if (mDetail.getVisibility() == VISIBLE && mDetail.getChildCount() > 0) {
-            final int dmh = mDetail.getMeasuredHeight();
-            if (dmh > 0) h = Math.max(h, dmh);
-        }
+        mDetail.measure(exactly(width), exactly(h));
         setMeasuredDimension(width, h);
     }
 
     private static int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
-    }
-
-    private static int unspecified() {
-        return MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
     }
 
     @Override
@@ -263,9 +278,15 @@ public class QSPanel extends ViewGroup {
         return cols;
     }
 
-    private void fireShowingDetail(boolean showingDetail) {
+    private void fireShowingDetail(QSTile.DetailAdapter detail) {
         if (mCallback != null) {
-            mCallback.onShowingDetail(showingDetail);
+            mCallback.onShowingDetail(detail);
+        }
+    }
+
+    private void fireToggleStateChanged(boolean state) {
+        if (mCallback != null) {
+            mCallback.onToggleStateChanged(state);
         }
     }
 
@@ -286,18 +307,20 @@ public class QSPanel extends ViewGroup {
         QSTile<?> tile;
         QSTileView tileView;
         View detailView;
+        DetailAdapter detailAdapter;
         int row;
         int col;
     }
 
     private final AnimatorListenerAdapter mTeardownDetailWhenDone = new AnimatorListenerAdapter() {
         public void onAnimationEnd(Animator animation) {
-            mDetail.removeAllViews();
+            mDetailContent.removeAllViews();
             mDetailRecord = null;
         };
     };
 
     public interface Callback {
-        void onShowingDetail(boolean showingDetail);
+        void onShowingDetail(QSTile.DetailAdapter detail);
+        void onToggleStateChanged(boolean state);
     }
 }
