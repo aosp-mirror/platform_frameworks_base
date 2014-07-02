@@ -51,6 +51,7 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
+import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
 import java.io.File;
@@ -449,8 +450,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         for (File file : files) {
-            final NativeLibraryHelper.ApkHandle handle = new NativeLibraryHelper.ApkHandle(file);
+            NativeLibraryHelper.ApkHandle handle = null;
             try {
+                handle = NativeLibraryHelper.ApkHandle.create(file);
                 final int abiIndex = NativeLibraryHelper.findSupportedAbi(handle,
                         Build.SUPPORTED_ABIS);
                 if (abiIndex >= 0) {
@@ -464,8 +466,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new InstallFailedException(abiIndex,
                             "Failed to copy native libraries for " + file);
                 }
+            } catch (IOException ioe) {
+                throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Failed to create handle for " + file);
             } finally {
-                handle.close();
+                IoUtils.closeQuietly(handle);
             }
         }
     }

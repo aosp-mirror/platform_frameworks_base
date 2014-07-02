@@ -19,6 +19,7 @@ package com.android.internal.content;
 import android.content.pm.PackageManager;
 import android.util.Slog;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
@@ -39,20 +40,29 @@ public class NativeLibraryHelper {
      *
      * @hide
      */
-    public static class ApkHandle {
+    public static class ApkHandle implements Closeable {
         final String apkPath;
         final long apkHandle;
 
-        public ApkHandle(String path) {
-            apkPath = path;
-            apkHandle = nativeOpenApk(apkPath);
+        public static ApkHandle create(String path) throws IOException {
+            final long handle = nativeOpenApk(path);
+            if (handle == 0) {
+                throw new IOException("Unable to open APK: " + path);
+            }
+
+            return new ApkHandle(path, handle);
         }
 
-        public ApkHandle(File apkFile) {
-            apkPath = apkFile.getPath();
-            apkHandle = nativeOpenApk(apkPath);
+        public static ApkHandle create(File path) throws IOException {
+            return create(path.getAbsolutePath());
         }
 
+        private ApkHandle(String apkPath, long apkHandle) {
+            this.apkPath = apkPath;
+            this.apkHandle = apkHandle;
+        }
+
+        @Override
         public void close() {
             nativeClose(apkHandle);
         }
