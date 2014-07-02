@@ -302,7 +302,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@style/Widget.Material.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@style/Widget.Material.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Material.ActionButton.Overflow</item>
-        <item name="actionOverflowMenuStyle">@android:style/Widget.Material.PopupMenu.Overflow</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Material.PopupMenu.Overflow</item>
         <item name="actionModeBackground">?attr/colorPrimaryDark</item>
         <item name="actionModeSplitBackground">?attr/colorPrimaryDark</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
@@ -335,15 +335,7 @@ please see themes_device_defaults.xml.
         <item name="segmentedButtonStyle">@style/Widget.Material.SegmentedButton</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">?attr/colorBackground</item>
-        <item name="searchViewTextField">@drawable/textfield_search_material</item>
-        <item name="searchViewTextFieldRight">@drawable/textfield_search_material</item>
-        <item name="searchViewCloseIcon">@android:drawable/ic_clear_material</item>
-        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_material</item>
-        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_material</item>
-        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_material</item>
-        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_material</item>
-
+        <item name="searchViewStyle">@style/Widget.Material.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.Material.SearchBar</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -659,7 +651,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@style/Widget.Material.Light.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@style/Widget.Material.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Material.Light.ActionButton.Overflow</item>
-        <item name="actionOverflowMenuStyle">@android:style/Widget.Material.Light.PopupMenu.Overflow</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Material.Light.PopupMenu.Overflow</item>
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
@@ -692,15 +684,7 @@ please see themes_device_defaults.xml.
         <item name="segmentedButtonStyle">@style/Widget.Material.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">?attr/colorBackground</item>
-        <item name="searchViewTextField">@drawable/textfield_search_material</item>
-        <item name="searchViewTextFieldRight">@drawable/textfield_search_material</item>
-        <item name="searchViewCloseIcon">@android:drawable/ic_clear_material</item>
-        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_material</item>
-        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_material</item>
-        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_material</item>
-        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_material</item>
-
+        <item name="searchViewStyle">@style/Widget.Material.Light.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.Material.Light.SearchBar</item>
 
         <!-- NumberPicker style-->

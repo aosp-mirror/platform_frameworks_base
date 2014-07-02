@@ -229,7 +229,6 @@
   <java-symbol type="attr" name="pointerStyle" />
   <java-symbol type="attr" name="preferenceFrameLayoutStyle" />
   <java-symbol type="attr" name="searchDialogTheme" />
-  <java-symbol type="attr" name="searchViewSearchIcon" />
   <java-symbol type="attr" name="textAppearanceAutoCorrectionSuggestion" />
   <java-symbol type="attr" name="textAppearanceEasyCorrectSuggestion" />
   <java-symbol type="attr" name="textAppearanceMisspelledSuggestion" />

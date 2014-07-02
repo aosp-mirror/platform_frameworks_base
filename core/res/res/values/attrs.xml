@@ -894,6 +894,9 @@
         <!-- Style for buttons within button bars -->
         <attr name="buttonBarButtonStyle" format="reference" />
 
+        <!-- Style for the search query widget. -->
+        <attr name="searchViewStyle" format="reference" />
+
         <!-- Style for segmented buttons - a container that houses several buttons
              with the appearance of a singel button broken into segments. -->
         <attr name="segmentedButtonStyle" format="reference" />
@@ -909,29 +912,6 @@
 
         <!-- Background to use for toasts -->
         <attr name="toastFrameBackground" format="reference" />
-
-        <!-- ============================ -->
-        <!-- SearchView styles and assets -->
-        <!-- ============================ -->
-        <eat-comment />
-        <!-- SearchView dropdown background -->
-        <attr name="searchDropdownBackground" format="reference" />
-        <!-- SearchView close button icon -->
-        <attr name="searchViewCloseIcon" format="reference" />
-        <!-- SearchView Go button icon -->
-        <attr name="searchViewGoIcon" format="reference" />
-        <!-- SearchView Search icon -->
-        <attr name="searchViewSearchIcon" format="reference" />
-        <!-- SearchView Voice button icon -->
-        <attr name="searchViewVoiceIcon" format="reference" />
-        <!-- SearchView query refinement icon -->
-        <attr name="searchViewEditQuery" format="reference" />
-        <!-- SearchView query refinement icon background -->
-        <attr name="searchViewEditQueryBackground" format="reference" />
-        <!-- SearchView text field background for the left section -->
-        <attr name="searchViewTextField" format="reference" />
-        <!-- SearchView text field background for the right section -->
-        <attr name="searchViewTextFieldRight" format="reference" />
 
         <!-- Theme to use for Search Dialogs -->
         <attr name="searchDialogTheme" format="reference" />
@@ -6799,9 +6779,11 @@
     </declare-styleable>
 
     <declare-styleable name="SearchView">
+        <!-- The layout to use for the search view. -->
+        <attr name="layout" />
         <!-- The default state of the SearchView. If true, it will be iconified when not in
              use and expanded when clicked. -->
-        <attr name="iconifiedByDefault" format="boolean"/>
+        <attr name="iconifiedByDefault" format="boolean" />
         <!-- An optional maximum width of the SearchView. -->
         <attr name="maxWidth" />
         <!-- An optional query hint string to be displayed in the empty query field. -->
@@ -6810,6 +6792,22 @@
         <attr name="imeOptions" />
         <!-- The input type to set on the query text field. -->
         <attr name="inputType" />
+        <!-- Close button icon -->
+        <attr name="closeIcon" format="reference" />
+        <!-- Go button icon -->
+        <attr name="goIcon" format="reference" />
+        <!-- Search icon -->
+        <attr name="searchIcon" format="reference" />
+        <!-- Voice button icon -->
+        <attr name="voiceIcon" format="reference" />
+        <!-- Commit icon shown in the query suggestion row -->
+        <attr name="commitIcon" format="reference" />
+        <!-- Layout for query suggestion rows -->
+        <attr name="suggestionRowLayout" format="reference" />
+        <!-- Background for the section containing the search query -->
+        <attr name="queryBackground" format="reference" />
+        <!-- Background for the section containing the action (e.g. voice search) -->
+        <attr name="submitBackground" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="Switch">

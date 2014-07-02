@@ -1641,6 +1641,18 @@ please see styles_device_defaults.xml.
         <item name="android:minHeight">48dip</item>
     </style>
 
+    <style name="Widget.Holo.SearchView">
+        <item name="layout">@layout/search_view</item>
+        <item name="queryBackground">@drawable/textfield_searchview_holo_dark</item>
+        <item name="submitBackground">@drawable/textfield_searchview_right_holo_dark</item>
+        <item name="closeIcon">@drawable/ic_clear_holo_dark</item>
+        <item name="searchIcon">@drawable/ic_search_api_holo_dark</item>
+        <item name="goIcon">@drawable/ic_go_search_api_holo_dark</item>
+        <item name="voiceIcon">@drawable/ic_voice_search_api_holo_dark</item>
+        <item name="commitIcon">@drawable/ic_commit_search_api_holo_dark</item>
+        <item name="suggestionRowLayout">@layout/search_dropdown_item_icons_2line</item>
+    </style>
+
     <style name="Widget.Holo.StackView">
         <item name="android:resOutColor">@android:color/holo_blue_light</item>
         <item name="android:clickColor">@android:color/holo_blue_light</item>
@@ -2098,6 +2110,18 @@ please see styles_device_defaults.xml.
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minHeight">48dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.SearchView">
+        <item name="layout">@layout/search_view</item>
+        <item name="queryBackground">@drawable/textfield_searchview_holo_light</item>
+        <item name="submitBackground">@drawable/textfield_searchview_right_holo_light</item>
+        <item name="closeIcon">@drawable/ic_clear_holo_light</item>
+        <item name="searchIcon">@drawable/ic_search_api_holo_light</item>
+        <item name="goIcon">@drawable/ic_go_search_api_holo_light</item>
+        <item name="voiceIcon">@drawable/ic_voice_search_api_holo_light</item>
+        <item name="commitIcon">@drawable/ic_commit_search_api_holo_light</item>
+        <item name="suggestionRowLayout">@layout/search_dropdown_item_icons_2line</item>
     </style>
 
     <style name="Widget.Holo.Light.StackView">

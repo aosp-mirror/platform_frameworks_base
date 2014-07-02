@@ -377,16 +377,7 @@ please see themes_device_defaults.xml.
         <item name="segmentedButtonStyle">@android:style/SegmentedButton</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@android:drawable/spinner_dropdown_background</item>
-        <item name="searchViewTextField">@drawable/textfield_searchview_holo_dark</item>
-        <item name="searchViewTextFieldRight">@drawable/textfield_searchview_right_holo_dark</item>
-        <item name="searchViewCloseIcon">@android:drawable/ic_clear</item>
-        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_holo_dark</item>
-        <item name="searchViewGoIcon">@android:drawable/ic_go</item>
-        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_holo_dark</item>
-        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_dark</item>
-        <item name="searchViewEditQueryBackground">?attr/selectableItemBackground</item>
-
+        <item name="searchViewStyle">@style/Widget.Holo.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.SearchBar</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -511,16 +502,7 @@ please see themes_device_defaults.xml.
         <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
 
-        <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
-        <item name="searchViewTextField">@drawable/textfield_searchview_holo_light</item>
-        <item name="searchViewTextFieldRight">@drawable/textfield_searchview_right_holo_light</item>
-        <item name="searchViewCloseIcon">@android:drawable/ic_clear_holo_light</item>
-        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_holo_light</item>
-        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_holo_light</item>
-        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_holo_light</item>
-        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_light</item>
-
+        <item name="searchViewStyle">@style/Widget.Holo.Light.SearchView</item>
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
 
         <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.Light.MediaRouteButton</item>
@@ -1248,9 +1230,7 @@ please see themes_device_defaults.xml.
         <item name="buttonBarButtonStyle">?android:attr/borderlessButtonStyle</item>
         <item name="segmentedButtonStyle">@android:style/Holo.SegmentedButton</item>
 
-        <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
-
+        <item name="searchViewStyle">@style/Widget.Holo.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.Holo.SearchBar</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -1591,9 +1571,7 @@ please see themes_device_defaults.xml.
         <item name="buttonBarButtonStyle">?android:attr/borderlessButtonStyle</item>
         <item name="segmentedButtonStyle">@android:style/Holo.Light.SegmentedButton</item>
 
-        <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
-
+        <item name="searchViewStyle">@style/Widget.Holo.Light.SearchView</item>
         <item name="searchDialogTheme">@style/Theme.Holo.Light.SearchBar</item>
 
         <!-- NumberPicker style-->

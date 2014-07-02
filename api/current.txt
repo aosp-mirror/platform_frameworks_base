@@ -391,6 +391,7 @@ package android {
     field public static final int clipOrientation = 16843274; // 0x101020a
     field public static final int clipToPadding = 16842987; // 0x10100eb
     field public static final int clipToPath = 16843817; // 0x1010429
+    field public static final int closeIcon = 16843907; // 0x1010483
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
     field public static final int color = 16843173; // 0x10101a5
@@ -414,6 +415,7 @@ package android {
     field public static final int columnDelay = 16843215; // 0x10101cf
     field public static final int columnOrderPreserved = 16843640; // 0x1010378
     field public static final int columnWidth = 16843031; // 0x1010117
+    field public static final int commitIcon = 16843911; // 0x1010487
     field public static final int compatibleWidthLimitDp = 16843621; // 0x1010365
     field public static final int completionHint = 16843122; // 0x1010172
     field public static final int completionHintView = 16843123; // 0x1010173
@@ -598,6 +600,7 @@ package android {
     field public static final int gestureStrokeType = 16843385; // 0x1010279
     field public static final int gestureStrokeWidth = 16843380; // 0x1010274
     field public static final int glEsVersion = 16843393; // 0x1010281
+    field public static final int goIcon = 16843908; // 0x1010484
     field public static final int gradientRadius = 16843172; // 0x10101a4
     field public static final int grantUriPermissions = 16842779; // 0x101001b
     field public static final int gravity = 16842927; // 0x10100af
@@ -951,6 +954,7 @@ package android {
     field public static final int publicKey = 16843686; // 0x10103a6
     field public static final int queryActionMsg = 16843227; // 0x10101db
     field public static final int queryAfterZeroResults = 16843394; // 0x1010282
+    field public static final int queryBackground = 16843913; // 0x1010489
     field public static final int queryHint = 16843608; // 0x1010358
     field public static final int quickContactBadgeStyleSmallWindowLarge = 16843443; // 0x10102b3
     field public static final int quickContactBadgeStyleSmallWindowMedium = 16843442; // 0x10102b2
@@ -1026,6 +1030,7 @@ package android {
     field public static final int scrollbars = 16842974; // 0x10100de
     field public static final int scrollingCache = 16843006; // 0x10100fe
     field public static final deprecated int searchButtonText = 16843269; // 0x1010205
+    field public static final int searchIcon = 16843909; // 0x1010485
     field public static final int searchKeyphrase = 16843873; // 0x1010461
     field public static final int searchKeyphraseId = 16843872; // 0x1010460
     field public static final int searchKeyphraseSupportedLocales = 16843874; // 0x1010462
@@ -1037,6 +1042,7 @@ package android {
     field public static final int searchSuggestPath = 16843223; // 0x10101d7
     field public static final int searchSuggestSelection = 16843224; // 0x10101d8
     field public static final int searchSuggestThreshold = 16843373; // 0x101026d
+    field public static final int searchViewStyle = 16843906; // 0x1010482
     field public static final int secondaryProgress = 16843064; // 0x1010138
     field public static final int secondaryProgressTint = 16843881; // 0x1010469
     field public static final int secondaryProgressTintMode = 16843882; // 0x101046a
@@ -1130,6 +1136,7 @@ package android {
     field public static final int strokeLineJoin = 16843816; // 0x1010428
     field public static final int strokeOpacity = 16843810; // 0x1010422
     field public static final int strokeWidth = 16843811; // 0x1010423
+    field public static final int submitBackground = 16843914; // 0x101048a
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextAppearance = 16843825; // 0x1010431
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
@@ -1138,6 +1145,7 @@ package android {
     field public static final int subtypeLocale = 16843673; // 0x1010399
     field public static final int suggestActionMsg = 16843228; // 0x10101dc
     field public static final int suggestActionMsgColumn = 16843229; // 0x10101dd
+    field public static final int suggestionRowLayout = 16843912; // 0x1010488
     field public static final int summary = 16843241; // 0x10101e9
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
@@ -1317,6 +1325,7 @@ package android {
     field public static final int visibilityMode = 16843902; // 0x101047e
     field public static final int visible = 16843156; // 0x1010194
     field public static final int vmSafeMode = 16843448; // 0x10102b8
+    field public static final int voiceIcon = 16843910; // 0x1010486
     field public static final int voiceLanguage = 16843349; // 0x1010255
     field public static final int voiceLanguageModel = 16843347; // 0x1010253
     field public static final int voiceMaxResults = 16843350; // 0x1010256
