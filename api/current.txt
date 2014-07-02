@@ -26660,6 +26660,7 @@ package android.speech.tts {
     field public static final java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
     field public static final java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
     field public static final java.lang.String KEY_PARAM_PAN = "pan";
+    field public static final java.lang.String KEY_PARAM_SESSION_ID = "sessionId";
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
     field public static final java.lang.String KEY_PARAM_UTTERANCE_ID = "utteranceId";
     field public static final java.lang.String KEY_PARAM_VOLUME = "volume";

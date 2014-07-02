@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
@@ -28,23 +29,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     private static final int MIN_AUDIO_BUFFER_SIZE = 8192;
 
-    /**
-     * Audio stream type. Must be one of the STREAM_ contants defined in
-     * {@link android.media.AudioManager}.
-     */
-    private final int mStreamType;
-
-    /**
-     * Volume, in the range [0.0f, 1.0f]. The default value is
-     * {@link TextToSpeech.Engine#DEFAULT_VOLUME} (1.0f).
-     */
-    private final float mVolume;
-
-    /**
-     * Left/right position of the audio, in the range [-1.0f, 1.0f].
-     * The default value is {@link TextToSpeech.Engine#DEFAULT_PAN} (0.0f).
-     */
-    private final float mPan;
+    private final AudioOutputParams mAudioParams;
 
     /**
      * Guards {@link #mAudioTrackHandler}, {@link #mItem} and {@link #mStopped}.
@@ -65,13 +50,11 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
     private final Object mCallerIdentity;
     private final AbstractEventLogger mLogger;
 
-    PlaybackSynthesisCallback(int streamType, float volume, float pan,
-            AudioPlaybackHandler audioTrackHandler, UtteranceProgressDispatcher dispatcher,
-            Object callerIdentity, AbstractEventLogger logger, boolean clientIsUsingV2) {
+    PlaybackSynthesisCallback(AudioOutputParams audioParams, AudioPlaybackHandler audioTrackHandler,
+            UtteranceProgressDispatcher dispatcher, Object callerIdentity,
+            AbstractEventLogger logger, boolean clientIsUsingV2) {
         super(clientIsUsingV2);
-        mStreamType = streamType;
-        mVolume = volume;
-        mPan = pan;
+        mAudioParams = audioParams;
         mAudioTrackHandler = audioTrackHandler;
         mDispatcher = dispatcher;
         mCallerIdentity = callerIdentity;
@@ -161,7 +144,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 return TextToSpeech.ERROR;
             }
             SynthesisPlaybackQueueItem item = new SynthesisPlaybackQueueItem(
-                    mStreamType, sampleRateInHz, audioFormat, channelCount, mVolume, mPan,
+                    mAudioParams, sampleRateInHz, audioFormat, channelCount,
                     mDispatcher, mCallerIdentity, mLogger);
             mAudioTrackHandler.enqueue(item);
             mItem = item;

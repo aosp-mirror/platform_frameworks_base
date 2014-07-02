@@ -564,6 +564,17 @@ public class TextToSpeech {
          * @see TextToSpeech#getFeatures(java.util.Locale)
          */
         public static final String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
+
+        /**
+         * Parameter key to specify an audio session identifier (obtained from
+         * {@link AudioManager#allocateAudioSessionId()}) that will be used by the request audio
+         * output. It can be used to associate one of the {@link android.media.audiofx.AudioEffect}
+         * objects with the synthesis (or earcon) output.
+         *
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
+         */
+        public static final String KEY_PARAM_SESSION_ID = "sessionId";
     }
 
     private final Context mContext;
@@ -1336,6 +1347,7 @@ public class TextToSpeech {
         if (params != null && !params.isEmpty()) {
             Bundle bundle = new Bundle(mParams);
             copyIntParam(bundle, params, Engine.KEY_PARAM_STREAM);
+            copyIntParam(bundle, params, Engine.KEY_PARAM_SESSION_ID);
             copyStringParam(bundle, params, Engine.KEY_PARAM_UTTERANCE_ID);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_VOLUME);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_PAN);

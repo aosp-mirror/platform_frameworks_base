@@ -17,6 +17,8 @@ package android.speech.tts;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -419,6 +421,73 @@ public abstract class TextToSpeechService extends Service {
         public void dispatchOnError(int errorCode);
     }
 
+
+    /** Set of parameters affecting audio output. */
+    static class AudioOutputParams {
+        /**
+         * Audio session identifier. May be used to associate audio playback with one of the
+         * {@link android.media.audiofx.AudioEffect} objects. If not specified by client,
+         * it should be equal to {@link AudioSystem#AUDIO_SESSION_ALLOCATE}.
+         */
+        public final int mSessionId;
+
+        /**
+         * Audio stream type. Must be one of the STREAM_ contants defined in
+         * {@link android.media.AudioManager}.
+         */
+        public final int mStreamType;
+
+        /**
+         * Volume, in the range [0.0f, 1.0f]. The default value is
+         * {@link TextToSpeech.Engine#DEFAULT_VOLUME} (1.0f).
+         */
+        public final float mVolume;
+
+        /**
+         * Left/right position of the audio, in the range [-1.0f, 1.0f].
+         * The default value is {@link TextToSpeech.Engine#DEFAULT_PAN} (0.0f).
+         */
+        public final float mPan;
+
+        /** Create AudioOutputParams with default values */
+        AudioOutputParams() {
+            mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
+            mStreamType = Engine.DEFAULT_STREAM;
+            mVolume = Engine.DEFAULT_VOLUME;
+            mPan = Engine.DEFAULT_PAN;
+        }
+
+        AudioOutputParams(int sessionId, int streamType, float volume, float pan) {
+            mSessionId = sessionId;
+            mStreamType = streamType;
+            mVolume = volume;
+            mPan = pan;
+        }
+
+        /** Create AudioOutputParams from A {@link SynthesisRequest#getParams()} bundle */
+        static AudioOutputParams createFromV1ParamsBundle(Bundle paramsBundle) {
+            if (paramsBundle == null) {
+                return new AudioOutputParams();
+            }
+
+            return new AudioOutputParams(
+                    paramsBundle.getInt(
+                            Engine.KEY_PARAM_SESSION_ID,
+                            AudioSystem.AUDIO_SESSION_ALLOCATE),
+                    paramsBundle.getInt(
+                            Engine.KEY_PARAM_STREAM,
+                            Engine.DEFAULT_STREAM),
+                    paramsBundle.getFloat(
+                            Engine.KEY_PARAM_VOLUME,
+                            Engine.DEFAULT_VOLUME),
+                    paramsBundle.getFloat(
+                            Engine.KEY_PARAM_PAN,
+                            Engine.DEFAULT_PAN));
+        }
+
+    }
+
+
     /**
      * An item in the synth thread queue.
      */
@@ -592,16 +661,8 @@ public abstract class TextToSpeechService extends Service {
             return getStringParam(mParams, Engine.KEY_PARAM_UTTERANCE_ID, null);
         }
 
-        int getStreamType() {
-            return getIntParam(mParams, Engine.KEY_PARAM_STREAM, Engine.DEFAULT_STREAM);
-        }
-
-        float getVolume() {
-            return getFloatParam(mParams, Engine.KEY_PARAM_VOLUME, Engine.DEFAULT_VOLUME);
-        }
-
-        float getPan() {
-            return getFloatParam(mParams, Engine.KEY_PARAM_PAN, Engine.DEFAULT_PAN);
+        AudioOutputParams getAudioParams() {
+            return AudioOutputParams.createFromV1ParamsBundle(mParams);
         }
     }
 
@@ -668,7 +729,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         protected AbstractSynthesisCallback createSynthesisCallback() {
-            return new PlaybackSynthesisCallback(getStreamType(), getVolume(), getPan(),
+            return new PlaybackSynthesisCallback(getAudioParams(),
                     mAudioPlaybackHandler, this, getCallerIdentity(), mEventLogger, false);
         }
 
@@ -743,7 +804,7 @@ public abstract class TextToSpeechService extends Service {
                 Bundle params, Uri uri) {
             super(callerIdentity, callerUid, callerPid, params);
             mItem = new AudioPlaybackQueueItem(this, getCallerIdentity(),
-                    TextToSpeechService.this, uri, getStreamType());
+                    TextToSpeechService.this, uri, getAudioParams());
         }
 
         @Override

@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
@@ -62,9 +63,8 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem {
     private final BlockingAudioTrack mAudioTrack;
     private final AbstractEventLogger mLogger;
 
-    SynthesisPlaybackQueueItem(int streamType, int sampleRate,
-            int audioFormat, int channelCount,
-            float volume, float pan, UtteranceProgressDispatcher dispatcher,
+    SynthesisPlaybackQueueItem(AudioOutputParams audioParams, int sampleRate,
+            int audioFormat, int channelCount, UtteranceProgressDispatcher dispatcher,
             Object callerIdentity, AbstractEventLogger logger) {
         super(dispatcher, callerIdentity);
 
@@ -74,8 +74,7 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem {
         mDone = false;
         mStatusCode = TextToSpeech.SUCCESS;
 
-        mAudioTrack = new BlockingAudioTrack(streamType, sampleRate, audioFormat,
-                channelCount, volume, pan);
+        mAudioTrack = new BlockingAudioTrack(audioParams, sampleRate, audioFormat, channelCount);
         mLogger = logger;
     }
 
