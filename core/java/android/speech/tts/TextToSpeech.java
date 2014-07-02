@@ -1039,7 +1039,8 @@ public class TextToSpeech {
      */
     @Deprecated
     public int speak(final String text, final int queueMode, final HashMap<String, String> params) {
-        return speak(text, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+        return speak(text, queueMode, params,
+                     params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
     /**
@@ -1109,7 +1110,8 @@ public class TextToSpeech {
     @Deprecated
     public int playEarcon(final String earcon, final int queueMode,
             final HashMap<String, String> params) {
-        return playEarcon(earcon, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+        return playEarcon(earcon, queueMode, params,
+                          params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
     /**
@@ -1138,7 +1140,8 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.playSilence(getCallerIdentity(), durationInMs, queueMode, utteranceId);
+                return service.playSilence(getCallerIdentity(), durationInMs,
+                                           queueMode, utteranceId);
             }
         }, ERROR, "playSilence");
     }
@@ -1165,12 +1168,13 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #playEarcon(String, int, HashMap, String)}.
+     *         {@link #playSilence(String, int, HashMap, String)}.
      */
     @Deprecated
     public int playSilence(final long durationInMs, final int queueMode,
             final HashMap<String, String> params) {
-        return playSilence(durationInMs, queueMode, params, params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+        return playSilence(durationInMs, queueMode, params,
+                           params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
     /**

@@ -26613,7 +26613,7 @@ package android.speech.tts {
     method public int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     method public deprecated int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
-    method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
+    method public deprecated int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public deprecated int setEngineByPackageName(java.lang.String);
     method public int setLanguage(java.util.Locale);
     method public deprecated int setOnUtteranceCompletedListener(android.speech.tts.TextToSpeech.OnUtteranceCompletedListener);
@@ -26624,8 +26624,8 @@ package android.speech.tts {
     method public int speak(java.lang.CharSequence, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     method public deprecated int speak(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public int stop();
-    method public deprecated int synthesizeToFile(java.lang.String, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     method public int synthesizeToFile(java.lang.CharSequence, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String, java.lang.String);
+    method public deprecated int synthesizeToFile(java.lang.String, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     field public static final java.lang.String ACTION_TTS_QUEUE_PROCESSING_COMPLETED = "android.speech.tts.TTS_QUEUE_PROCESSING_COMPLETED";
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_INVALID_REQUEST = -8; // 0xfffffff8
