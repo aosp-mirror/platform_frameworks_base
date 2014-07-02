@@ -3642,5 +3642,5 @@ public abstract class PackageManager {
     /**
      * @hide
      */
-    public abstract Bitmap getUserIcon(int userId);
+    public abstract Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
 }
