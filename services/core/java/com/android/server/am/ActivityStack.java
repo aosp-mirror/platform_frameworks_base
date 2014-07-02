@@ -2497,6 +2497,27 @@ final class ActivityStack {
         }
     }
 
+    final void finishVoiceTask(IVoiceInteractionSession session) {
+        IBinder sessionBinder = session.asBinder();
+        boolean didOne = false;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            TaskRecord tr = mTaskHistory.get(taskNdx);
+            if (tr.voiceSession != null && tr.voiceSession.asBinder() == sessionBinder) {
+                for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+                    ActivityRecord r = tr.mActivities.get(activityNdx);
+                    if (!r.finishing) {
+                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, "finish-voice",
+                                false);
+                        didOne = true;
+                    }
+                }
+            }
+        }
+        if (didOne) {
+            mService.updateOomAdjLocked();
+        }
+    }
+
     final boolean finishActivityAffinityLocked(ActivityRecord r) {
         ArrayList<ActivityRecord> activities = r.task.mActivities;
         for (int index = activities.indexOf(r); index >= 0; --index) {

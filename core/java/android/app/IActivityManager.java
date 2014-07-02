@@ -90,6 +90,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
     public boolean finishActivityAffinity(IBinder token) throws RemoteException;
+    public void finishVoiceTask(IVoiceInteractionSession session) throws RemoteException;
     public boolean willActivityBeVisible(IBinder token) throws RemoteException;
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter,
@@ -749,4 +750,5 @@ public interface IActivityManager extends IInterface {
     int GET_APP_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+220;
     int START_LOCK_TASK_BY_CURRENT = IBinder.FIRST_CALL_TRANSACTION+221;
     int STOP_LOCK_TASK_BY_CURRENT = IBinder.FIRST_CALL_TRANSACTION+222;
+    int FINISH_VOICE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+223;
 }

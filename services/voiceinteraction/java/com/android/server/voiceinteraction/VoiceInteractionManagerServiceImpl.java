@@ -150,6 +150,12 @@ class VoiceInteractionManagerServiceImpl {
                         Slog.w(TAG, "Voice interation session already dead");
                     }
                 }
+                if (mSession != null) {
+                    try {
+                        mAm.finishVoiceTask(mSession);
+                    } catch (RemoteException e) {
+                    }
+                }
                 mContext.unbindService(this);
                 try {
                     mIWindowManager.removeWindowToken(mToken);

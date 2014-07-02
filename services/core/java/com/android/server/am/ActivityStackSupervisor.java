@@ -2256,6 +2256,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    void finishVoiceTask(IVoiceInteractionSession session) {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            final int numStacks = stacks.size();
+            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+                final ActivityStack stack = stacks.get(stackNdx);
+                stack.finishVoiceTask(session);
+            }
+        }
+    }
+
     void findTaskToMoveToFrontLocked(TaskRecord task, int flags, Bundle options) {
         if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
             mUserLeaving = true;
