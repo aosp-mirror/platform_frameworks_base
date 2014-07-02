@@ -2219,6 +2219,15 @@
   <public type="attr" name="minimumHorizontalAngle" />
   <public type="attr" name="minimumVerticalAngle" />
   <public type="attr" name="maximumAngle" />
+  <public type="attr" name="searchViewStyle" />
+  <public type="attr" name="closeIcon" />
+  <public type="attr" name="goIcon" />
+  <public type="attr" name="searchIcon" />
+  <public type="attr" name="voiceIcon" />
+  <public type="attr" name="commitIcon" />
+  <public type="attr" name="suggestionRowLayout" />
+  <public type="attr" name="queryBackground" />
+  <public type="attr" name="submitBackground" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

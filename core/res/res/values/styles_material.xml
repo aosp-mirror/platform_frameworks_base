@@ -438,6 +438,18 @@ please see styles_device_defaults.xml.
         <item name="background">@null</item>
     </style>
 
+    <style name="Widget.Material.SearchView">
+        <item name="layout">@layout/search_view</item>
+        <item name="queryBackground">@drawable/textfield_search_material</item>
+        <item name="submitBackground">@drawable/textfield_search_material</item>
+        <item name="closeIcon">@drawable/ic_clear_material</item>
+        <item name="searchIcon">@drawable/ic_search_api_material</item>
+        <item name="goIcon">@drawable/ic_go_search_api_material</item>
+        <item name="voiceIcon">@drawable/ic_voice_search_api_material</item>
+        <item name="commitIcon">@drawable/ic_commit_search_api_material</item>
+        <item name="suggestionRowLayout">@layout/search_dropdown_item_icons_2line</item>
+    </style>
+
     <style name="Widget.Material.SegmentedButton" parent="SegmentedButton">
         <item name="background">@drawable/btn_group_holo_dark</item>
     </style>
@@ -684,7 +696,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Toolbar" parent="Widget.Toolbar">
-        <item name="navigationButtonStyle">@android:style/Widget.Material.Toolbar.Button.Navigation</item>
+        <item name="navigationButtonStyle">@style/Widget.Material.Toolbar.Button.Navigation</item>
     </style>
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
@@ -829,6 +841,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.Button.Toggle" parent="Widget.Material.Button.Toggle" />
     <style name="Widget.Material.Light.ButtonBar" parent="Widget.Material.ButtonBar"/>
     <style name="Widget.Material.Light.ButtonBar.AlertDialog" parent="Widget.Material.ButtonBar.AlertDialog"/>
+    <style name="Widget.Material.Light.SearchView" parent="Widget.Material.SearchView"/>
 
     <style name="Widget.Material.Light.SegmentedButton" parent="Widget.Material.SegmentedButton">
         <item name="background">@drawable/btn_group_holo_light</item>

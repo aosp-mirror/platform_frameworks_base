@@ -99,6 +99,26 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     private static final String IME_OPTION_NO_MICROPHONE = "nm";
 
+    private final SearchAutoComplete mQueryTextView;
+    private final View mSearchEditFrame;
+    private final View mSearchPlate;
+    private final View mSubmitArea;
+    private final ImageView mSearchButton;
+    private final ImageView mSubmitButton;
+    private final ImageView mCloseButton;
+    private final ImageView mVoiceButton;
+    private final ImageView mSearchHintIcon;
+    private final View mDropDownAnchor;
+    private final int mSearchIconResId;
+
+    // Resources used by SuggestionsAdapter to display suggestions.
+    private final int mSuggestionRowLayout;
+    private final int mSuggestionCommitIconResId;
+
+    // Intents used for voice searching.
+    private final Intent mVoiceWebSearchIntent;
+    private final Intent mVoiceAppSearchIntent;
+
     private OnQueryTextListener mOnQueryChangeListener;
     private OnCloseListener mOnCloseListener;
     private OnFocusChangeListener mOnQueryTextFocusChangeListener;
@@ -108,16 +128,6 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private boolean mIconifiedByDefault;
     private boolean mIconified;
     private CursorAdapter mSuggestionsAdapter;
-    private View mSearchButton;
-    private View mSubmitButton;
-    private View mSearchPlate;
-    private View mSubmitArea;
-    private ImageView mCloseButton;
-    private View mSearchEditFrame;
-    private View mVoiceButton;
-    private SearchAutoComplete mQueryTextView;
-    private View mDropDownAnchor;
-    private ImageView mSearchHintIcon;
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
     private boolean mQueryRefinement;
@@ -160,10 +170,6 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             }
         }
     };
-
-    // For voice searching
-    private final Intent mVoiceWebSearchIntent;
-    private final Intent mVoiceAppSearchIntent;
 
     // A weak map of drawables we've gotten from other packages, so we don't load them
     // more than once.
@@ -242,7 +248,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     public SearchView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.searchViewStyle);
     }
 
     public SearchView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -252,21 +258,38 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     public SearchView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.search_view, this, true);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.SearchView, defStyleAttr, defStyleRes);
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        final int layoutResId = a.getResourceId(R.styleable.SearchView_layout, 0);
+        inflater.inflate(layoutResId, this, true);
 
-        mSearchButton = findViewById(R.id.search_button);
         mQueryTextView = (SearchAutoComplete) findViewById(R.id.search_src_text);
         mQueryTextView.setSearchView(this);
 
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
         mSearchPlate = findViewById(R.id.search_plate);
         mSubmitArea = findViewById(R.id.submit_area);
-        mSubmitButton = findViewById(R.id.search_go_btn);
+        mSearchButton = (ImageView) findViewById(R.id.search_button);
+        mSubmitButton = (ImageView) findViewById(R.id.search_go_btn);
         mCloseButton = (ImageView) findViewById(R.id.search_close_btn);
-        mVoiceButton = findViewById(R.id.search_voice_btn);
+        mVoiceButton = (ImageView) findViewById(R.id.search_voice_btn);
         mSearchHintIcon = (ImageView) findViewById(R.id.search_mag_icon);
+
+        // Set up icons and backgrounds.
+        mSearchPlate.setBackground(a.getDrawable(R.styleable.SearchView_queryBackground));
+        mSubmitArea.setBackground(a.getDrawable(R.styleable.SearchView_submitBackground));
+        mSearchIconResId = a.getResourceId(R.styleable.SearchView_searchIcon, 0);
+        mSearchButton.setImageResource(mSearchIconResId);
+        mSubmitButton.setImageDrawable(a.getDrawable(R.styleable.SearchView_goIcon));
+        mCloseButton.setImageDrawable(a.getDrawable(R.styleable.SearchView_closeIcon));
+        mVoiceButton.setImageDrawable(a.getDrawable(R.styleable.SearchView_voiceIcon));
+        mSearchHintIcon.setImageDrawable(a.getDrawable(R.styleable.SearchView_searchIcon));
+
+        // Extract dropdown layout resource IDs for later use.
+        mSuggestionRowLayout = a.getResourceId(R.styleable.SearchView_suggestionRowLayout, 0);
+        mSuggestionCommitIconResId = a.getResourceId(R.styleable.SearchView_commitIcon, 0);
 
         mSearchButton.setOnClickListener(mOnClickListener);
         mCloseButton.setOnClickListener(mOnClickListener);
@@ -279,6 +302,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
         mQueryTextView.setOnItemSelectedListener(mOnItemSelectedListener);
         mQueryTextView.setOnKeyListener(mTextKeyListener);
+
         // Inform any listener of focus changes
         mQueryTextView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
@@ -288,35 +312,29 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 }
             }
         });
-
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.SearchView, defStyleAttr, defStyleRes);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
-        int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
+
+        final int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
         if (maxWidth != -1) {
             setMaxWidth(maxWidth);
         }
-        CharSequence queryHint = a.getText(R.styleable.SearchView_queryHint);
+
+        final CharSequence queryHint = a.getText(R.styleable.SearchView_queryHint);
         if (!TextUtils.isEmpty(queryHint)) {
             setQueryHint(queryHint);
         }
-        int imeOptions = a.getInt(R.styleable.SearchView_imeOptions, -1);
+
+        final int imeOptions = a.getInt(R.styleable.SearchView_imeOptions, -1);
         if (imeOptions != -1) {
             setImeOptions(imeOptions);
         }
-        int inputType = a.getInt(R.styleable.SearchView_inputType, -1);
+
+        final int inputType = a.getInt(R.styleable.SearchView_inputType, -1);
         if (inputType != -1) {
             setInputType(inputType);
         }
 
         a.recycle();
-
-        boolean focusable = true;
-
-        a = context.obtainStyledAttributes(attrs, R.styleable.View, defStyleAttr, defStyleRes);
-        focusable = a.getBoolean(R.styleable.View_focusable, focusable);
-        a.recycle();
-        setFocusable(focusable);
 
         // Save voice intent for later queries/launching
         mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
@@ -340,6 +358,14 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
         updateViewsVisibility(mIconifiedByDefault);
         updateQueryHint();
+    }
+
+    int getSuggestionRowLayout() {
+        return mSuggestionRowLayout;
+    }
+
+    int getSuggestionCommitIconResId() {
+        return mSuggestionCommitIconResId;
     }
 
     /**
@@ -1046,22 +1072,18 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         return result;
     }
 
-    private int getSearchIconId() {
-        TypedValue outValue = new TypedValue();
-        getContext().getTheme().resolveAttribute(com.android.internal.R.attr.searchViewSearchIcon,
-                outValue, true);
-        return outValue.resourceId;
-    }
-
     private CharSequence getDecoratedHint(CharSequence hintText) {
         // If the field is always expanded, then don't add the search icon to the hint
-        if (!mIconifiedByDefault) return hintText;
+        if (!mIconifiedByDefault) {
+            return hintText;
+        }
 
-        SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
-        ssb.append(hintText);
-        Drawable searchIcon = getContext().getDrawable(getSearchIconId());
-        int textSize = (int) (mQueryTextView.getTextSize() * 1.25);
+        final Drawable searchIcon = getContext().getDrawable(mSearchIconResId);
+        final int textSize = (int) (mQueryTextView.getTextSize() * 1.25);
         searchIcon.setBounds(0, 0, textSize, textSize);
+
+        final SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
+        ssb.append(hintText);
         ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return ssb;
     }
@@ -1362,11 +1384,6 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 Log.d(LOG_TAG, "onNothingSelected()");
         }
     };
-
-    @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        mQueryTextView.setLayoutDirection(layoutDirection);
-    }
 
     /**
      * Query rewriting.

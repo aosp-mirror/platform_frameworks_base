@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!-- Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-          android:autoMirrored="true">
-    <item android:state_focused="true"
-          android:drawable="@drawable/textfield_search_right_selected_holo_light" />
-    <item android:drawable="@drawable/textfield_search_right_default_holo_light" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+        android:drawable="@drawable/ic_clear_search_api_disabled_holo_dark" />
+    <item
+         android:drawable="@drawable/ic_clear_search_api_holo_dark" />
 </selector>
