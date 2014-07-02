@@ -209,7 +209,7 @@ final class ActivityStack {
     // Activity.onTranslucentConversionComplete(false). If a timeout occurs prior to the last
     // background activity being drawn then the same call will be made with a true value.
     ActivityRecord mTranslucentActivityWaiting = null;
-    ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
+    private ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
             new ArrayList<ActivityRecord>();
     // Options passed from the caller of the convertToTranslucent to the activity that will
     // appear below it.
@@ -1203,7 +1203,17 @@ final class ActivityStack {
                         // else to do here.
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Skipping: already visible at " + r);
                         r.stopFreezingScreenLocked(false);
-
+                        try {
+                            if (mReturningActivityOptions != null) {
+                                if (activityNdx > 0) {
+                                    ActivityRecord under = activities.get(activityNdx - 1);
+                                    under.app.thread.scheduleOnNewActivityOptions(under.appToken,
+                                            mReturningActivityOptions);
+                                }
+                                mReturningActivityOptions = null;
+                            }
+                        } catch(RemoteException e) {
+                        }
                     } else if (onlyThisProcess == null) {
                         // This activity is not currently visible, but is running.
                         // Tell it to become visible.
@@ -1290,6 +1300,12 @@ final class ActivityStack {
                     }
                 }
             }
+        }
+
+        if (mTranslucentActivityWaiting != null &&
+                mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
+            // Nothing is getting drawn or everything was already visible, don't wait for timeout.
+            notifyActivityDrawnLocked(null);
         }
     }
 

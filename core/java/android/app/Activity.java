@@ -5284,6 +5284,14 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /** @hide */
+    public void onNewActivityOptions(ActivityOptions options) {
+        mActivityTransitionState.setEnterActivityOptions(this, options);
+        if (!mStopped) {
+            mActivityTransitionState.enterReady(this);
+        }
+    }
+
     /**
      * Retrieve the ActivityOptions passed in from the launching activity or passed back
      * from an activity launched by this activity in its call to {@link
