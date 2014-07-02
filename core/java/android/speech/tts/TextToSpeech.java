@@ -1168,7 +1168,7 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #playSilence(String, int, HashMap, String)}.
+     *         {@link #playSilence(long, int, HashMap, String)}.
      */
     @Deprecated
     public int playSilence(final long durationInMs, final int queueMode,
