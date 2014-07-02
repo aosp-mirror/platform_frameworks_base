@@ -37,6 +37,8 @@ import android.widget.TextView;
 
 import java.text.Collator;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.ArrayList;
 
@@ -108,8 +110,9 @@ public class LocalePicker extends ListFragment {
             final int layoutId, final int fieldId, final boolean isInDeveloperMode) {
         final Resources resources = context.getResources();
 
-        ArrayList<String> localeList = new ArrayList<String>(Arrays.asList(
-                Resources.getSystem().getAssets().getLocales()));
+        String[] locales = Resources.getSystem().getAssets().getLocales();
+        List<String> localeList = new ArrayList<String>(locales.length);
+        Collections.addAll(localeList, locales);
         if (isInDeveloperMode) {
             if (!localeList.contains("zz_ZZ")) {
                 localeList.add("zz_ZZ");
@@ -120,78 +123,61 @@ public class LocalePicker extends ListFragment {
          *	}
          */
         }
-        String[] locales = new String[localeList.size()];
-        locales = localeList.toArray(locales);
 
+        Collections.sort(localeList);
         final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
         final String[] specialLocaleNames = resources.getStringArray(R.array.special_locale_names);
-        Arrays.sort(locales);
-        final int origSize = locales.length;
-        final LocaleInfo[] preprocess = new LocaleInfo[origSize];
-        int finalSize = 0;
-        for (int i = 0 ; i < origSize; i++ ) {
-            final String s = locales[i];
-            final int len = s.length();
-            if (len == 5) {
-                String language = s.substring(0, 2);
-                String country = s.substring(3, 5);
-                final Locale l = new Locale(language, country);
 
-                if (finalSize == 0) {
+        final ArrayList<LocaleInfo> localeInfos = new ArrayList<LocaleInfo>(localeList.size());
+        for (String locale : localeList) {
+            final Locale l = Locale.forLanguageTag(locale.replace('_', '-'));
+            if (l == null || "und".equals(l.getLanguage())) {
+                continue;
+            }
+
+            if (localeInfos.isEmpty()) {
+                if (DEBUG) {
+                    Log.v(TAG, "adding initial "+ toTitleCase(l.getDisplayLanguage(l)));
+                }
+                localeInfos.add(new LocaleInfo(toTitleCase(l.getDisplayLanguage(l)), l));
+            } else {
+                // check previous entry:
+                //  same lang and a country -> upgrade to full name and
+                //    insert ours with full name
+                //  diff lang -> insert ours with lang-only name
+                final LocaleInfo previous = localeInfos.get(localeInfos.size() - 1);
+                if (previous.locale.getLanguage().equals(l.getLanguage()) &&
+                        !previous.locale.getLanguage().equals("zz")) {
                     if (DEBUG) {
-                        Log.v(TAG, "adding initial "+ toTitleCase(l.getDisplayLanguage(l)));
+                        Log.v(TAG, "backing up and fixing " + previous.label + " to " +
+                                getDisplayName(previous.locale, specialLocaleCodes, specialLocaleNames));
                     }
-                    preprocess[finalSize++] =
-                            new LocaleInfo(toTitleCase(l.getDisplayLanguage(l)), l);
+                    previous.label = toTitleCase(getDisplayName(
+                            previous.locale, specialLocaleCodes, specialLocaleNames));
+                    if (DEBUG) {
+                        Log.v(TAG, "  and adding "+ toTitleCase(
+                                getDisplayName(l, specialLocaleCodes, specialLocaleNames)));
+                    }
+                    localeInfos.add(new LocaleInfo(toTitleCase(
+                            getDisplayName(l, specialLocaleCodes, specialLocaleNames)), l));
                 } else {
-                    // check previous entry:
-                    //  same lang and a country -> upgrade to full name and
-                    //    insert ours with full name
-                    //  diff lang -> insert ours with lang-only name
-                    if (preprocess[finalSize-1].locale.getLanguage().equals(
-                            language) &&
-                            !preprocess[finalSize-1].locale.getLanguage().equals("zz")) {
-                        if (DEBUG) {
-                            Log.v(TAG, "backing up and fixing "+
-                                    preprocess[finalSize-1].label+" to "+
-                                    getDisplayName(preprocess[finalSize-1].locale,
-                                            specialLocaleCodes, specialLocaleNames));
-                        }
-                        preprocess[finalSize-1].label = toTitleCase(
-                                getDisplayName(preprocess[finalSize-1].locale,
-                                        specialLocaleCodes, specialLocaleNames));
-                        if (DEBUG) {
-                            Log.v(TAG, "  and adding "+ toTitleCase(
-                                    getDisplayName(l, specialLocaleCodes, specialLocaleNames)));
-                        }
-                        preprocess[finalSize++] =
-                                new LocaleInfo(toTitleCase(
-                                        getDisplayName(
-                                                l, specialLocaleCodes, specialLocaleNames)), l);
+                    String displayName;
+                    if (locale.equals("zz_ZZ")) {
+                        displayName = "[Developer] Accented English";
+                    } else if (locale.equals("zz_ZY")) {
+                        displayName = "[Developer] Fake Bi-Directional";
                     } else {
-                        String displayName;
-                        if (s.equals("zz_ZZ")) {
-                            displayName = "[Developer] Accented English";
-                        } else if (s.equals("zz_ZY")) {
-                            displayName = "[Developer] Fake Bi-Directional";
-                        } else {
-                            displayName = toTitleCase(l.getDisplayLanguage(l));
-                        }
-                        if (DEBUG) {
-                            Log.v(TAG, "adding "+displayName);
-                        }
-                        preprocess[finalSize++] = new LocaleInfo(displayName, l);
+                        displayName = toTitleCase(l.getDisplayLanguage(l));
                     }
+                    if (DEBUG) {
+                        Log.v(TAG, "adding "+displayName);
+                    }
+                    localeInfos.add(new LocaleInfo(displayName, l));
                 }
             }
         }
 
-        final LocaleInfo[] localeInfos = new LocaleInfo[finalSize];
-        for (int i = 0; i < finalSize; i++) {
-            localeInfos[i] = preprocess[i];
-        }
-        Arrays.sort(localeInfos);
-
+        Collections.sort(localeInfos);
         final LayoutInflater inflater =
                 (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         return new ArrayAdapter<LocaleInfo>(context, layoutId, fieldId, localeInfos) {
