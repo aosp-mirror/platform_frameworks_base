@@ -130,38 +130,55 @@ public final class AidGroup implements Parcelable {
     };
 
     static public AidGroup createFromXml(XmlPullParser parser) throws XmlPullParserException, IOException {
-        String category = parser.getAttributeValue(null, "category");
+        String category = null;
         ArrayList<String> aids = new ArrayList<String>();
+        AidGroup group = null;
+        boolean inGroup = false;
+
         int eventType = parser.getEventType();
         int minDepth = parser.getDepth();
         while (eventType != XmlPullParser.END_DOCUMENT && parser.getDepth() >= minDepth) {
+            String tagName = parser.getName();
             if (eventType == XmlPullParser.START_TAG) {
-                String tagName = parser.getName();
                 if (tagName.equals("aid")) {
-                    String aid = parser.getAttributeValue(null, "value");
-                    if (aid != null) {
-                        aids.add(aid);
+                    if (inGroup) {
+                        String aid = parser.getAttributeValue(null, "value");
+                        if (aid != null) {
+                            aids.add(aid);
+                        }
+                    } else {
+                        Log.d(TAG, "Ignoring <aid> tag while not in group");
                     }
+                } else if (tagName.equals("aid-group")) {
+                    category = parser.getAttributeValue(null, "category");
+                    if (category == null) {
+                        Log.e(TAG, "<aid-group> tag without valid category");
+                        return null;
+                    }
+                    inGroup = true;
                 } else {
-                    Log.d(TAG, "Ignorning unexpected tag: " + tagName);
+                    Log.d(TAG, "Ignoring unexpected tag: " + tagName);
+                }
+            } else if (eventType == XmlPullParser.END_TAG) {
+                if (tagName.equals("aid-group") && inGroup && aids.size() > 0) {
+                    group = new AidGroup(aids, category);
+                    break;
                 }
             }
             eventType = parser.next();
         }
-        if (category != null && aids.size() > 0) {
-            return new AidGroup(aids, category);
-        } else {
-            return null;
-        }
+        return group;
     }
 
     public void writeAsXml(XmlSerializer out) throws IOException {
+        out.startTag(null, "aid-group");
         out.attribute(null, "category", category);
         for (String aid : aids) {
             out.startTag(null, "aid");
             out.attribute(null, "value", aid);
             out.endTag(null, "aid");
         }
+        out.endTag(null, "aid-group");
     }
 
     static boolean isValidCategory(String category) {
