@@ -1797,6 +1797,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>A LIMITED device may have some or none of the above characteristics.
      * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>A LEGACY device does not support per-frame control, manual sensor control, manual
+     * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC
@@ -1806,6 +1808,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
      */
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
             new Key<Integer>("android.info.supportedHardwareLevel", int.class);
