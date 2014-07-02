@@ -255,8 +255,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Get the request associated with this result.
      *
      * <p>Whenever a request has been fully or partially captured, with
-     * {@link CameraDevice.CaptureListener#onCaptureCompleted} or
-     * {@link CameraDevice.CaptureListener#onCaptureProgressed}, the {@code result}'s
+     * {@link CameraCaptureSession.CaptureListener#onCaptureCompleted} or
+     * {@link CameraCaptureSession.CaptureListener#onCaptureProgressed}, the {@code result}'s
      * {@code getRequest()} will return that {@code request}.
      * </p>
      *
@@ -295,7 +295,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     /**
      * The sequence ID for this failure that was returned by the
-     * {@link CameraDevice#capture} family of functions.
+     * {@link CameraCaptureSession#capture} family of functions.
      *
      * <p>The sequence ID is a unique monotonically increasing value starting from 0,
      * incremented every time a new group of requests is submitted to the CameraDevice.</p>

@@ -22,6 +22,7 @@ import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
@@ -37,6 +38,7 @@ import android.util.Log;
 import android.view.Surface;
 import com.android.ex.camera2.blocking.BlockingCameraManager;
 import com.android.ex.camera2.blocking.BlockingCameraManager.BlockingOpenException;
+import com.android.ex.camera2.blocking.BlockingSessionListener;
 import androidx.media.filterfw.Filter;
 import androidx.media.filterfw.Frame;
 import androidx.media.filterfw.FrameImage2D;
@@ -56,6 +58,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
     private static final String TAG = "Camera2Source";
     private CameraManager mCameraManager;
     private CameraDevice mCamera;
+    private CameraCaptureSession mCameraSession;
     private RenderScript mRS;
     private Surface mSurface;
     private CameraCharacteristics mProperties;
@@ -66,6 +69,8 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
     private ScriptIntrinsicYuvToRGB rgbConverter;
     private Allocation mAllocationOut;
     private Bitmap mBitmap;
+
+    private static final long SESSION_TIMEOUT_MS = 2000;
 
     class MyCameraListener extends CameraManager.AvailabilityListener {
 
@@ -83,10 +88,10 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
     }
 
-    class MyCaptureListener extends CameraDevice.CaptureListener {
+    class MyCaptureListener extends CameraCaptureSession.CaptureListener {
 
         @Override
-        public void onCaptureCompleted(CameraDevice camera, CaptureRequest request,
+        public void onCaptureCompleted(CameraCaptureSession camera, CaptureRequest request,
                 TotalCaptureResult result) {
             // TODO Auto-generated method stub
             Log.v(TAG, "in onCaptureComplete");
@@ -94,7 +99,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         }
 
         @Override
-        public void onCaptureFailed(CameraDevice camera, CaptureRequest request,
+        public void onCaptureFailed(CameraCaptureSession camera, CaptureRequest request,
                 CaptureFailure failure) {
             // TODO Auto-generated method stub
             Log.v(TAG, "onCaptureFailed is being called");
@@ -184,16 +189,21 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         surfaces.add(mSurface);
         CaptureRequest.Builder mCaptureRequest = null;
         try {
-            mCamera.configureOutputs(surfaces);
+            BlockingSessionListener blkSession = new BlockingSessionListener();
+
+            mCamera.createCaptureSession(surfaces, blkSession, mHandler);
             mCaptureRequest = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mCaptureRequest.addTarget(mSurface);
+
+            mCameraSession = blkSession.waitAndGetSession(SESSION_TIMEOUT_MS);
+
         } catch (CameraAccessException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
 
         try {
-            mCamera.setRepeatingRequest(mCaptureRequest.build(), new MyCaptureListener(),
+            mCameraSession.setRepeatingRequest(mCaptureRequest.build(), new MyCaptureListener(),
                     mHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();

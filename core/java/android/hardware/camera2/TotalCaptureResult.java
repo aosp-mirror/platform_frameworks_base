@@ -73,7 +73,7 @@ public final class TotalCaptureResult extends CaptureResult {
      *
      * <p>The list size will be inclusive between {@code 1} and
      * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT}, in ascending order
-     * of when {@link CameraDevice.CaptureListener#onCaptureProgressed} was invoked.</p>
+     * of when {@link CameraCaptureSession.CaptureListener#onCaptureProgressed} was invoked.</p>
      *
      * @return unmodifiable list of partial results
      */

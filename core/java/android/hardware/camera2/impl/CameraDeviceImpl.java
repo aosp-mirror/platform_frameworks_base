@@ -299,7 +299,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return mCameraId;
     }
 
-    @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
@@ -435,7 +434,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
@@ -446,7 +444,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/false);
     }
 
-    @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -585,7 +582,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         List<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
@@ -593,7 +589,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/true);
     }
 
-    @Override
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -602,7 +597,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requests, listener, handler, /*streaming*/true);
     }
 
-    @Override
     public void stopRepeating() throws CameraAccessException {
 
         try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
@@ -655,7 +649,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public void flush() throws CameraAccessException {
         try (ScopedLock scopedLock = mCloseLock.acquireExclusiveLock()) {
             checkIfCameraClosedOrInError();
