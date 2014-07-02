@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.impl;
+package com.android.layoutlib.bridge.bars;
 
 /**
  * Various helper methods to simulate older versions of platform.
  */
 public class Config {
+
+    public static final String DEFAULT_RESOURCE_DIR = "/bars/v21/";
 
     public static boolean showOnScreenNavBar(int platformVersion) {
         // return true if ICS or later.
@@ -29,5 +31,16 @@ public class Config {
     public static int getStatusBarColor(int platformVersion) {
         // return white for froyo and earlier; black otherwise.
         return platformVersion >= 9 || platformVersion == 0 ? 0xFF000000 : 0xFFFFFFFF;
+    }
+
+    public static boolean usesCustomResourceDir(int platformVersion) {
+        return platformVersion > 10 && platformVersion < 21;
+    }
+
+    public static String getResourceDir(int platformVersion) {
+        if (usesCustomResourceDir(platformVersion)) {
+            return "/bars/v11/";
+        }
+        return DEFAULT_RESOURCE_DIR;
     }
 }
