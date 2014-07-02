@@ -62,6 +62,14 @@
             android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/close_handle_underlap"/>
 
+        <ViewStub
+                android:id="@+id/keyguard_user_switcher"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
+                android:layout_gravity="end"
+                android:layout="@layout/keyguard_user_switcher" />
+
         <com.android.systemui.statusbar.phone.ObservableScrollView
             android:id="@+id/scroll_view"
             android:layout_width="match_parent"
@@ -91,14 +99,6 @@
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
     <include layout="@layout/status_bar_expanded_header" />
-
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
-        android:layout_gravity="end"
-        android:layout="@layout/keyguard_user_switcher" />
 
     <include
         layout="@layout/keyguard_bottom_area"
