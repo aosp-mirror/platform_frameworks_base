@@ -135,6 +135,7 @@ public final class SystemServer {
             "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
+    private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
@@ -572,6 +573,10 @@ public final class SystemServer {
                     ServiceManager.addService("lock_settings", lockSettings);
                 } catch (Throwable e) {
                     reportWtf("starting LockSettingsService service", e);
+                }
+
+                if (!SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("")) {
+                    mSystemServiceManager.startService(PersistentDataBlockService.class);
                 }
 
                 // Always start the Device Policy Manager, so that the API is compatible with
