@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import com.android.layoutlib.bridge.impl.Config;
 import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
