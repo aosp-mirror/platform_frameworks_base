@@ -109,6 +109,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
@@ -481,6 +482,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private SettingsObserver mSettingsObserver;
 
     private AppOpsManager mAppOpsManager;
+
+    private UserManager mUserManager;
 
     NetworkConfig[] mNetConfigs;
     int mNetworksDefined;
@@ -884,6 +887,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext.registerReceiver(mProvisioningReceiver, filter);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     private synchronized int nextNetworkRequestId() {
@@ -3607,7 +3612,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceTetherAccessPermission();
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.TETHER_SUPPORTED, defaultVal) != 0);
+                Settings.Global.TETHER_SUPPORTED, defaultVal) != 0)
+                && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
         return tetherEnabledInSettings && ((mTethering.getTetherableUsbRegexs().length != 0 ||
                 mTethering.getTetherableWifiRegexs().length != 0 ||
                 mTethering.getTetherableBluetoothRegexs().length != 0) &&
