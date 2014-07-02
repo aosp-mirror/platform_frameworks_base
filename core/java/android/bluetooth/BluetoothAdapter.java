@@ -1039,6 +1039,54 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Return true if the multi advertisement is supported by the chipset
+     *
+     * @hide
+     * @return true if Multiple Advertisement feature is supported
+     */
+    public boolean isMultipleAdvertisementSupported() {
+        if (getState() != STATE_ON) return false;
+        try {
+            return mService.isMultiAdvertisementSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isMultipleAdvertisementSupported, error: ", e);
+        }
+        return false;
+    }
+
+    /**
+     * Return true if offloaded filters are supported
+     *
+     * @hide
+     * @return true if chipset supports on-chip filtering
+     */
+    public boolean isOffloadedFilteringSupported() {
+        if (getState() != STATE_ON) return false;
+        try {
+            return mService.isOffloadedFilteringSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isOffloadedFilteringSupported, error: ", e);
+        }
+        return false;
+    }
+
+    /**
+     * Return true if offloaded scan batching is supported
+     *
+     * @hide
+     * @return true if chipset supports on-chip scan batching
+     */
+    public boolean isOffloadedScanBatchingSupported() {
+        if (getState() != STATE_ON) return false;
+        try {
+            return mService.isOffloadedScanBatchingSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get isOffloadedScanBatchingSupported, error: ", e);
+        }
+        return false;
+    }
+
+    /**
      * Returns whether BLE is currently advertising.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
