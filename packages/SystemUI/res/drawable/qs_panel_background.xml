@@ -18,6 +18,6 @@
     <corners
         android:topLeftRadius="0dp"
         android:topRightRadius="0dp"
-        android:bottomLeftRadius="@*android:dimen/notification_material_rounded_rect_radius"
-        android:bottomRightRadius="@*android:dimen/notification_material_rounded_rect_radius"/>
+        android:bottomLeftRadius="@dimen/notification_material_rounded_rect_radius"
+        android:bottomRightRadius="@dimen/notification_material_rounded_rect_radius"/>
 </shape>

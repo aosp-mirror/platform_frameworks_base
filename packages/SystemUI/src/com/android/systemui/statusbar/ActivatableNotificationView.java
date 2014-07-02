@@ -94,11 +94,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDark;
     private final Paint mDarkPaint = createDarkPaint();
 
-    private int mBgResId = com.android.internal.R.drawable.notification_material_bg;
-    private int mDimmedBgResId = com.android.internal.R.drawable.notification_material_bg_dim;
-
     private int mBgTint = 0;
-    private int mDimmedBgTint = 0;
     private final int mRoundedRectCornerRadius;
 
     /**
@@ -133,6 +129,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private ValueAnimator mAppearAnimator;
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
+    private boolean mShowingLegacyBackground;
+    private final int mLegacyColor;
+    private final int mNormalColor;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -148,7 +147,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setClipToPadding(false);
         mAppearAnimationFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
         mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_material_rounded_rect_radius);
+                R.dimen.notification_material_rounded_rect_radius);
+        mLegacyColor = getResources().getColor(R.color.notification_legacy_background_color);
+        mNormalColor = getResources().getColor(R.color.notification_material_background_color);
     }
 
     @Override
@@ -156,8 +157,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.onFinishInflate();
         mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
+        mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
+        mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
         updateBackground();
-        updateBackgroundResources();
+        updateBackgroundTint();
         mScrimView = (NotificationScrimView) findViewById(R.id.scrim_view);
     }
 
@@ -174,6 +177,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return handleTouchEventDimmed(event);
         } else {
             return super.onTouchEvent(event);
+        }
+    }
+
+    @Override
+    public void drawableHotspotChanged(float x, float y) {
+        if (!mDimmed){
+            mBackgroundNormal.drawableHotspotChanged(x, y);
         }
     }
 
@@ -327,22 +337,27 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return p;
     }
 
-    /**
-     * Sets the resource id for the background of this notification.
-     *
-     * @param bgResId The background resource to use in normal state.
-     * @param dimmedBgResId The background resource to use in dimmed state.
-     */
-    public void setBackgroundResourceIds(int bgResId, int bgTint, int dimmedBgResId, int dimmedTint) {
-        mBgResId = bgResId;
-        mBgTint = bgTint;
-        mDimmedBgResId = dimmedBgResId;
-        mDimmedBgTint = dimmedTint;
-        updateBackgroundResources();
+    public void setShowingLegacyBackground(boolean showing) {
+        mShowingLegacyBackground = showing;
+        updateBackgroundTint();
     }
 
-    public void setBackgroundResourceIds(int bgResId, int dimmedBgResId) {
-        setBackgroundResourceIds(bgResId, 0, dimmedBgResId, 0);
+    /**
+     * Sets the tint color of the background
+     */
+    public void setTintColor(int color) {
+        mBgTint = color;
+        updateBackgroundTint();
+    }
+
+    private void updateBackgroundTint() {
+        int color = getBackgroundColor();
+        if (color == mNormalColor) {
+            // We don't need to tint a normal notification
+            color = 0;
+        }
+        mBackgroundDimmed.setTint(color);
+        mBackgroundNormal.setTint(color);
     }
 
     private void fadeBackground() {
@@ -394,11 +409,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundNormal.setAlpha(1f);
             removeCallbacks(mTapTimeoutRunnable);
         }
-    }
-
-    private void updateBackgroundResources() {
-        mBackgroundDimmed.setCustomBackground(mDimmedBgResId, mDimmedBgTint);
-        mBackgroundNormal.setCustomBackground(mBgResId, mBgTint);
     }
 
     @Override
@@ -575,8 +585,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private int getBackgroundColor() {
-        // TODO: get real color
-        return 0xfffafafa;
+        if (mBgTint != 0) {
+            return mBgTint;
+        } else if (mShowingLegacyBackground) {
+            return mLegacyColor;
+        } else {
+            return mNormalColor;
+        }
     }
 
     /**

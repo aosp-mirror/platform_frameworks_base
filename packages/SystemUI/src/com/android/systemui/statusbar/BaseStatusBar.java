@@ -562,20 +562,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
             // Using custom RemoteViews
             if (version >= Build.VERSION_CODES.GINGERBREAD && version < Build.VERSION_CODES.L) {
-                entry.row.setBackgroundResourceIds(
-                        com.android.internal.R.drawable.notification_bg,
-                        com.android.internal.R.drawable.notification_bg_dim);
+                entry.row.setShowingLegacyBackground(true);
                 entry.legacy = true;
             }
         } else {
             // Using platform templates
             final int color = sbn.getNotification().color;
             if (isMediaNotification(entry)) {
-                entry.row.setBackgroundResourceIds(
-                        com.android.internal.R.drawable.notification_material_bg,
-                        color,
-                        com.android.internal.R.drawable.notification_material_bg_dim,
-                        color);
+                entry.row.setTintColor(color);
             }
         }
     }

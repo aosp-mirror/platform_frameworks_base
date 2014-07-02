@@ -113,7 +113,7 @@ public class StackScrollAlgorithm {
         mBottomStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
         mRoundedRectCornerRadius = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_material_rounded_rect_radius);
+                R.dimen.notification_material_rounded_rect_radius);
     }
 
 

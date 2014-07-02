@@ -17,11 +17,15 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import com.android.systemui.R;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
@@ -31,9 +35,15 @@ public class NotificationBackgroundView extends View {
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
+    private final int mTintedRippleColor;
+    private final int mNormalRippleColor;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mTintedRippleColor = context.getResources().getColor(
+                R.color.notification_ripple_tinted_color);
+        mNormalRippleColor = context.getResources().getColor(
+                R.color.notification_ripple_untinted_color);
     }
 
     @Override
@@ -64,6 +74,13 @@ public class NotificationBackgroundView extends View {
         }
     }
 
+    @Override
+    public void drawableHotspotChanged(float x, float y) {
+        if (mBackground != null) {
+            mBackground.setHotspot(x, y);
+        }
+    }
+
     /**
      * Sets a background drawable. As we need to change our bounds independently of layout, we need
      * the notion of a background independently of the regular View background..
@@ -80,12 +97,25 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    public void setCustomBackground(int drawableResId, int tintColor) {
-        final Drawable d = getResources().getDrawable(drawableResId);
-        if (tintColor != 0) {
-            d.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
-        }
+    public void setCustomBackground(int drawableResId) {
+        final Drawable d = mContext.getDrawable(drawableResId);
         setCustomBackground(d);
+    }
+
+    public void setTint(int tintColor) {
+        int rippleColor;
+        if (tintColor != 0) {
+            mBackground.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
+            rippleColor = mTintedRippleColor;
+        } else {
+            mBackground.clearColorFilter();
+            rippleColor = mNormalRippleColor;
+        }
+        if (mBackground instanceof RippleDrawable) {
+            RippleDrawable ripple = (RippleDrawable) mBackground;
+            ripple.setColor(ColorStateList.valueOf(rippleColor));
+        }
+        invalidate();
     }
 
     public void setActualHeight(int actualHeight) {

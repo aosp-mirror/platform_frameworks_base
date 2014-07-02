@@ -1181,13 +1181,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 ent.row.setShowingPublic(showingPublic);
                 if (ent.autoRedacted && ent.legacy) {
                     if (showingPublic) {
-                        ent.row.setBackgroundResourceIds(
-                                com.android.internal.R.drawable.notification_material_bg,
-                                com.android.internal.R.drawable.notification_material_bg_dim);
+                        ent.row.setShowingLegacyBackground(false);
                     } else {
-                        ent.row.setBackgroundResourceIds(
-                                com.android.internal.R.drawable.notification_bg,
-                                com.android.internal.R.drawable.notification_bg_dim);
+                        ent.row.setShowingLegacyBackground(true);
                     }
                 }
                 toShow.add(ent.row);
