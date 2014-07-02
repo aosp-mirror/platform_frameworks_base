@@ -243,7 +243,7 @@ final class Notifier {
     /**
      * Notifies that the device is changing interactive state.
      */
-    public void onInteractiveStateChangeStarted(boolean interactive, int reason) {
+    public void onInteractiveStateChangeStarted(boolean interactive, final int reason) {
         if (DEBUG) {
             Slog.d(TAG, "onInteractiveChangeStarted: interactive=" + interactive
                     + ", reason=" + reason);
@@ -259,6 +259,14 @@ final class Notifier {
                         mScreenOnBlockerAcquired = true;
                         mScreenOnBlocker.acquire();
                     }
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
+                            mPolicy.wakingUp(mScreenOnListener);
+                            mActivityManagerInternal.wakingUp();
+                        }
+                    });
                     updatePendingBroadcastLocked();
                 }
             } else {
@@ -298,6 +306,23 @@ final class Notifier {
                         mUserActivityPending = false;
                         mHandler.removeMessages(MSG_USER_ACTIVITY);
                     }
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            int why = WindowManagerPolicy.OFF_BECAUSE_OF_USER;
+                            switch (mLastGoToSleepReason) {
+                                case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
+                                    why = WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN;
+                                    break;
+                                case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+                                    why = WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
+                                    break;
+                            }
+                            EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
+                            mPolicy.goingToSleep(why);
+                            mActivityManagerInternal.goingToSleep();
+                        }
+                    });
                     updatePendingBroadcastLocked();
                 }
             }
@@ -409,7 +434,6 @@ final class Notifier {
 
             mBroadcastStartTime = SystemClock.uptimeMillis();
             powerState = mBroadcastedPowerState;
-            goToSleepReason = mLastGoToSleepReason;
         }
 
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_SEND, 1);
@@ -417,7 +441,7 @@ final class Notifier {
         if (powerState == POWER_STATE_AWAKE) {
             sendWakeUpBroadcast();
         } else {
-            sendGoToSleepBroadcast(goToSleepReason);
+            sendGoToSleepBroadcast();
         }
     }
 
@@ -425,11 +449,6 @@ final class Notifier {
         if (DEBUG) {
             Slog.d(TAG, "Sending wake up broadcast.");
         }
-
-        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
-
-        mPolicy.wakingUp(mScreenOnListener);
-        mActivityManagerInternal.wakingUp();
 
         if (ActivityManagerNative.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
@@ -462,25 +481,10 @@ final class Notifier {
         }
     };
 
-    private void sendGoToSleepBroadcast(int reason) {
+    private void sendGoToSleepBroadcast() {
         if (DEBUG) {
             Slog.d(TAG, "Sending go to sleep broadcast.");
         }
-
-        int why = WindowManagerPolicy.OFF_BECAUSE_OF_USER;
-        switch (reason) {
-            case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
-                why = WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN;
-                break;
-            case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
-                why = WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
-                break;
-        }
-
-        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
-
-        mPolicy.goingToSleep(why);
-        mActivityManagerInternal.goingToSleep();
 
         if (ActivityManagerNative.isSystemReady()) {
             mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
