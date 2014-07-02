@@ -3620,12 +3620,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mTethering.getUpstreamIfaceTypes().length != 0);
     }
 
-    // An API NetworkStateTrackers can call when they lose their network.
-    // This will automatically be cleared after X seconds or a network becomes CONNECTED,
-    // whichever happens first.  The timer is started by the first caller and not
-    // restarted by subsequent callers.
-    public void requestNetworkTransitionWakelock(String forWhom) {
-        enforceConnectivityInternalPermission();
+    // Called when we lose the default network and have no replacement yet.
+    // This will automatically be cleared after X seconds or a new default network
+    // becomes CONNECTED, whichever happens first.  The timer is started by the
+    // first caller and not restarted by subsequent callers.
+    private void requestNetworkTransitionWakelock(String forWhom) {
         int serialNum = 0;
         synchronized (this) {
             if (mNetTransitionWakeLock.isHeld()) return;
