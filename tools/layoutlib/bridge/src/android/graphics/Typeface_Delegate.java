@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
@@ -27,6 +29,7 @@ import android.graphics.FontFamily_Delegate.FontVariant;
 import java.awt.Font;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -55,8 +58,12 @@ public final class Typeface_Delegate {
 
     // ---- delegate data ----
 
+    @Nullable
     private final FontFamily_Delegate[] mFontFamilies;  // the reference to FontFamily_Delegate.
-    private int mStyle;
+    @Nullable
+    private final Font mFont;
+    /** @see FontFamily_Delegate.FontInfo#mStyle */
+    private final int mStyle;
 
     private static long sDefaultTypeface;
 
@@ -77,8 +84,14 @@ public final class Typeface_Delegate {
      * @param variant The variant preferred. Can only be {@link FontVariant#COMPACT} or
      *                {@link FontVariant#ELEGANT}
      */
+    @NonNull
     public List<Font> getFonts(FontVariant variant) {
         assert variant != FontVariant.NONE;
+        if (mFontFamilies == null) {
+            // We don't care about the variant here, since the Typeface was created with a single
+            // Font File. So, we simply return that Font.
+            return getFontAsList();
+        }
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
         for (int i = 0; i < mFontFamilies.length; i++) {
             FontFamily_Delegate ffd = mFontFamilies[i];
@@ -144,9 +157,13 @@ public final class Typeface_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static synchronized long nativeCreateFromFile(String path) {
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Typeface.createFromFile() is not supported.,", null, null);
-        return 0;
+        if (!path.startsWith(SYSTEM_FONTS)) {
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                    "Typeface.createFromFile() can only work with platform fonts located in " +
+                            SYSTEM_FONTS, null, null);
+            return 0;
+        }
+        return sManager.addNewDelegate(new Typeface_Delegate(path));
     }
 
     @LayoutlibDelegate
@@ -188,6 +205,20 @@ public final class Typeface_Delegate {
 
     private Typeface_Delegate(FontFamily_Delegate[] fontFamilies, int style) {
         mFontFamilies = fontFamilies;
+        mFont = null;
         mStyle = style;
+    }
+
+    private Typeface_Delegate(String path) {
+        mFont = FontFamily_Delegate.loadFont(path);
+        mFontFamilies = null;
+        mStyle = FontFamily_Delegate.getFontStyle(path);
+    }
+
+    private List<Font> getFontAsList() {
+        if (mFont != null) {
+            return Collections.singletonList(mFont);
+        }
+        return Collections.emptyList();
     }
 }

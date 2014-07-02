@@ -83,6 +83,13 @@ public class FontFamily_Delegate {
     private List<String> mPath = new ArrayList<String>();
 
 
+    // ---- Public helper class ----
+
+    public enum FontVariant {
+        // The order needs to be kept in sync with android.graphics.FontFamily.
+        NONE, COMPACT, ELEGANT
+    }
+
     // ---- Public Helper methods ----
 
     public static FontFamily_Delegate getDelegate(long nativeFontFamily) {
@@ -122,6 +129,40 @@ public class FontFamily_Delegate {
 
     public FontVariant getVariant() {
         return mVariant;
+    }
+
+    /*package*/ static int getFontStyle(String path) {
+        int style = Font.PLAIN;
+        String fontName = path.substring(path.lastIndexOf('/'));
+        if (fontName.endsWith(FONT_SUFFIX_BOLDITALIC)) {
+            style = Font.BOLD | Font.ITALIC;
+        } else if (fontName.endsWith(FONT_SUFFIX_BOLD)) {
+            style = Font.BOLD;
+        } else if (fontName.endsWith(FONT_SUFFIX_ITALIC)) {
+            style = Font.ITALIC;
+        }
+        return style;
+    }
+
+    /*package*/ static Font loadFont(String path) {
+        if (path.startsWith(SYSTEM_FONTS) ) {
+            String relativePath = path.substring(SYSTEM_FONTS.length());
+            File f = new File(sFontLocation, relativePath);
+
+            try {
+                return Font.createFont(Font.TRUETYPE_FONT, f);
+            } catch (Exception e) {
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
+                        String.format("Unable to load font %1$s", relativePath),
+                        e /*throwable*/, null /*data*/);
+            }
+        } else {
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                    "Only platform fonts located in " + SYSTEM_FONTS + "can be loaded.",
+                    null /*throwable*/, null /*data*/);
+        }
+
+        return null;
     }
 
 
@@ -169,6 +210,9 @@ public class FontFamily_Delegate {
         return false;
     }
 
+
+    // ---- private helper methods ----
+
     private void init() {
         for (String path : mPath) {
             addFont(path);
@@ -183,51 +227,9 @@ public class FontFamily_Delegate {
         }
         FontInfo fontInfo = new FontInfo();
         fontInfo.mFont = font;
-        addFontMetadata(fontInfo, path);
+        fontInfo.mStyle = getFontStyle(path);
         // TODO ensure that mFonts doesn't have the font with this style already.
         mFonts.add(fontInfo);
         return true;
-    }
-
-    private static void addFontMetadata(FontInfo fontInfo, String path) {
-        int style = Font.PLAIN;
-        String fontName = path.substring(path.lastIndexOf('/'), path.length());
-        if (fontName.endsWith(FONT_SUFFIX_BOLDITALIC)) {
-            style = Font.BOLD | Font.ITALIC;
-        } else if (fontName.endsWith(FONT_SUFFIX_BOLD)) {
-            style = Font.BOLD;
-        } else if (fontName.endsWith(FONT_SUFFIX_ITALIC)) {
-            style = Font.ITALIC;
-        }
-        fontInfo.mStyle = style;
-    }
-
-    private static Font loadFont(String path) {
-        if (path.startsWith(SYSTEM_FONTS) ) {
-            String relativePath = path.substring(SYSTEM_FONTS.length());
-            File f = new File(sFontLocation, relativePath);
-
-            try {
-                return Font.createFont(Font.TRUETYPE_FONT, f);
-            } catch (Exception e) {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
-                        String.format("Unable to load font %1$s", relativePath),
-                        e /*throwable*/, null /*data*/);
-            }
-        } else {
-            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                    "Only platform fonts located in " + SYSTEM_FONTS + "can be loaded.",
-                    null /*throwable*/, null /*data*/);
-        }
-
-        return null;
-    }
-
-
-    // ---- Public helper class ----
-
-    public enum FontVariant {
-        // The order needs to be kept in sync with android.graphics.FontFamily.
-        NONE, COMPACT, ELEGANT
     }
 }
