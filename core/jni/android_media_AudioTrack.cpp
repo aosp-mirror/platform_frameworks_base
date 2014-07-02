@@ -205,7 +205,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
 
-    uint32_t channelCount = popcount(nativeChannelMask);
+    uint32_t channelCount = audio_channel_count_from_out_mask(nativeChannelMask);
 
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
