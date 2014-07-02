@@ -8051,10 +8051,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      *
      * @return true if verification should be performed
      */
-    private boolean isVerificationEnabled(int flags) {
+    private boolean isVerificationEnabled(int userId, int flags) {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }
+
+        boolean ensureVerifyAppsEnabled = isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS);
 
         // Check if installing from ADB
         if ((flags & PackageManager.INSTALL_FROM_ADB) != 0) {
@@ -8062,11 +8064,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ActivityManager.isRunningInTestHarness()) {
                 return false;
             }
+            if (ensureVerifyAppsEnabled) {
+                return true;
+            }
             // Check if the developer does not want package verification for ADB installs
             if (android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                     android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) == 0) {
                 return false;
             }
+        }
+
+        if (ensureVerifyAppsEnabled) {
+            return true;
         }
 
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
@@ -8639,7 +8648,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  */
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage, userIdentifier);
-                if (requiredUid != -1 && isVerificationEnabled(flags)) {
+                if (requiredUid != -1 && isVerificationEnabled(userIdentifier, flags)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                     verification.setDataAndType(getPackageUri(), PACKAGE_MIME_TYPE);
