@@ -391,8 +391,8 @@ static void readLocale(char* language, char* region)
         property_get("ro.product.locale.language", propLang, "en");
         property_get("ro.product.locale.region", propRegn, "US");
     }
-    strncat(language, propLang, 2);
-    strncat(region, propRegn, 2);
+    strncat(language, propLang, 3);
+    strncat(region, propRegn, 3);
     //ALOGD("language=%s region=%s\n", language, region);
 }
 
