@@ -76,7 +76,7 @@ public class RemoteCallVideoProvider implements IBinder.DeathRecipient {
         mCallVideoProvider.requestCallDataUsage();
     }
 
-    public void onSetPauseImage(String uri) throws RemoteException {
+    public void setPauseImage(String uri) throws RemoteException {
         mCallVideoProvider.setPauseImage(uri);
     }
 }
