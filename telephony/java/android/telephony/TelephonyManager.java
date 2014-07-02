@@ -2947,16 +2947,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public void cancelMissedCallsNotification() {
-        try {
-            getITelephony().cancelMissedCallsNotification();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#cancelMissedCallsNotification", e);
-        }
-    }
-
-    /** @hide */
-    @SystemApi
     public boolean supplyPin(String pin) {
         try {
             return getITelephony().supplyPin(pin);
