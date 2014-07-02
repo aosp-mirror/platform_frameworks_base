@@ -397,8 +397,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             // TODO Augment the scenes/transitions API to support this.
-            throw new UnsupportedOperationException(
-                    "addContentView does not support content transitions");
+            Log.v(TAG, "addContentView does not support content transitions");
         }
         mContentParent.addView(view, params);
         final Callback cb = getCallback();
