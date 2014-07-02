@@ -617,6 +617,18 @@ public final class TvContract {
         public static final String COLUMN_DISPLAY_NAME = "display_name";
 
         /**
+         * The network affiliation for this TV channel.
+         * <p>
+         * This is used to identify a channel that is commonly called by its network affiliation
+         * instead of the display name. Examples include ABC for the channel KGO-HD, FOX for the
+         * channel KTVU-HD and NBC for the channel KNTV-HD. Can be empty if not applicable.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
+
+        /**
          * The description of this TV channel.
          * <p>
          * Can be empty initially.
