@@ -244,7 +244,7 @@ final class Settings {
 
     private final File mSystemDir;
 
-    public final KeySetManager mKeySetManager = new KeySetManager(mPackages);
+    public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
 
     // A mapping of (sourceUserId, targetUserId, packageNames) for forwarding the intents of a
     // package.
@@ -1721,7 +1721,7 @@ final class Settings {
                 }
             }
             
-            mKeySetManager.writeKeySetManagerLPr(serializer);
+            mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
             serializer.endTag(null, "packages");
 
@@ -1936,6 +1936,7 @@ final class Settings {
         }
 
         writeSigningKeySetsLPr(serializer, pkg.keySetData);
+        writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
 
         serializer.endTag(null, "package");
@@ -1943,10 +1944,23 @@ final class Settings {
 
     void writeSigningKeySetsLPr(XmlSerializer serializer,
             PackageKeySetData data) throws IOException {
-        for (long id : data.getSigningKeySets()) {
-            serializer.startTag(null, "signing-keyset");
-            serializer.attribute(null, "identifier", Long.toString(id));
-            serializer.endTag(null, "signing-keyset");
+        if (data.getSigningKeySets() != null) {
+            for (long id : data.getSigningKeySets()) {
+                serializer.startTag(null, "signing-keyset");
+                serializer.attribute(null, "identifier", Long.toString(id));
+                serializer.endTag(null, "signing-keyset");
+            }
+        }
+    }
+
+    void writeUpgradeKeySetsLPr(XmlSerializer serializer,
+            PackageKeySetData data) throws IOException {
+        if (data.isUsingUpgradeKeySets()) {
+            for (long id : data.getUpgradeKeySets()) {
+                serializer.startTag(null, "upgrade-keyset");
+                serializer.attribute(null, "identifier", Long.toString(id));
+                serializer.endTag(null, "upgrade-keyset");
+            }
         }
     }
 
@@ -2157,7 +2171,7 @@ final class Settings {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
                     mReadExternalStorageEnforced = "1".equals(enforcement);
                 } else if (tagName.equals("keyset-settings")) {
-                    mKeySetManager.readKeySetsLPw(parser);
+                    mKeySetManagerService.readKeySetsLPw(parser);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -2893,8 +2907,9 @@ final class Settings {
                 } else if (tagName.equals("signing-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     packageSetting.keySetData.addSigningKeySet(id);
-                    if (false) Slog.d(TAG, "Adding signing keyset " + Long.toString(id)
-                            + " to " + name);
+                } else if (tagName.equals("upgrade-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    packageSetting.keySetData.addUpgradeKeySetById(id);
                 } else if (tagName.equals("defined-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     String alias = parser.getAttributeValue(null, "alias");

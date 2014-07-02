@@ -828,8 +828,8 @@ public class PackageParser {
                 if (pkg.mCertificates == null) {
                     pkg.mCertificates = entryCerts;
                     pkg.mSignatures = convertToSignatures(entryCerts);
-                    pkg.mSigningKeys = new ArraySet<>();
-                    for (int i = 0; i < entryCerts.length; i++) {
+                    pkg.mSigningKeys = new ArraySet<PublicKey>();
+                    for (int i=0; i < entryCerts.length; i++) {
                         pkg.mSigningKeys.add(entryCerts[i][0].getPublicKey());
                     }
                 } else {
@@ -1222,6 +1222,17 @@ public class PackageParser {
                 if (parsePermissionTree(pkg, res, parser, attrs, outError) == null) {
                     return null;
                 }
+            } else if (tagName.equals("upgrade-keyset")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet);
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestUpgradeKeySet_name);
+                sa.recycle();
+                if (pkg.mUpgradeKeySets == null) {
+                    pkg.mUpgradeKeySets = new ArraySet<String>();
+                }
+                pkg.mUpgradeKeySets.add(name);
+                XmlUtils.skipCurrentTag(parser);
             } else if (tagName.equals("uses-permission")) {
                 if (!parseUsesPermission(pkg, res, parser, attrs, outError)) {
                     return null;
@@ -1795,7 +1806,7 @@ public class PackageParser {
             }
         }
 
-        owner.mKeySetMapping = new ArrayMap<String, ArraySet<PublicKey>>();
+        owner.mKeySetMapping = new ArrayMap<String, Set<PublicKey>>();
         for (Map.Entry<PublicKey, Set<String>> e : definedKeySets.entrySet()) {
             PublicKey key = e.getKey();
             Set<String> keySetNames = e.getValue();
@@ -1803,7 +1814,7 @@ public class PackageParser {
                 if (owner.mKeySetMapping.containsKey(alias)) {
                     owner.mKeySetMapping.get(alias).add(key);
                 } else {
-                    ArraySet<PublicKey> keys = new ArraySet<PublicKey>();
+                    Set<PublicKey> keys = new ArraySet<PublicKey>();
                     keys.add(key);
                     owner.mKeySetMapping.put(alias, keys);
                 }
@@ -3795,8 +3806,9 @@ public class PackageParser {
         /**
          * Data used to feed the KeySetManager
          */
-        public ArraySet<PublicKey> mSigningKeys;
-        public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping;
+        public Set<PublicKey> mSigningKeys;
+        public Set<String> mUpgradeKeySets;
+        public Map<String, Set<PublicKey>> mKeySetMapping;
 
         public Package(String packageName) {
             this.packageName = packageName;

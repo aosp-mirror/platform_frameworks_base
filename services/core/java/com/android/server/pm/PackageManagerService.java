@@ -2814,7 +2814,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Migrate the old signatures to the new scheme.
             existingSigs.assignSignatures(scannedPkg.mSignatures);
             // The new KeySets will be re-added later in the scanning process.
-            mSettings.mKeySetManager.removeAppKeySetData(scannedPkg.packageName);
+            mSettings.mKeySetManagerService.removeAppKeySetData(scannedPkg.packageName);
             return PackageManager.SIGNATURE_MATCH;
         }
         return PackageManager.SIGNATURE_NO_MATCH;
@@ -4136,11 +4136,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 && ps.codePath.equals(srcFile)
                 && ps.timeStamp == srcFile.lastModified()
                 && !isCompatSignatureUpdateNeeded(pkg)) {
+            long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
             if (ps.signatures.mSignatures != null
-                    && ps.signatures.mSignatures.length != 0) {
+                    && ps.signatures.mSignatures.length != 0
+                    && mSigningKeySetId != PackageKeySetData.KEYSET_UNASSIGNED) {
                 // Optimization: reuse the existing cached certificates
                 // if the package appears to be unchanged.
                 pkg.mSignatures = ps.signatures.mSignatures;
+                KeySetManagerService ksms = mSettings.mKeySetManagerService;
+                pkg.mSigningKeys = ksms.getPublicKeysFromKeySet(mSigningKeySetId);
                 return true;
             }
 
@@ -4411,6 +4415,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
         }
+
         // Check for shared user signatures
         if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
             // Already existing package. Make sure signatures match
@@ -5103,33 +5108,43 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             pkg.applicationInfo.uid = pkgSetting.appId;
             pkg.mExtras = pkgSetting;
-
-            if (!verifySignaturesLP(pkgSetting, pkg)) {
-                if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                    return null;
-                }
-                // The signature has changed, but this package is in the system
-                // image...  let's recover!
-                pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                // However...  if this package is part of a shared user, but it
-                // doesn't match the signature of the shared user, let's fail.
-                // What this means is that you can't change the signatures
-                // associated with an overall shared user, which doesn't seem all
-                // that unreasonable.
-                if (pkgSetting.sharedUser != null) {
-                    if (compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                            pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
-                        Log.w(TAG, "Signature mismatch for shared user : " + pkgSetting.sharedUser);
-                        mLastScanError = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+            if (!pkgSetting.keySetData.isUsingUpgradeKeySets() || pkgSetting.sharedUser != null) {
+                if (!verifySignaturesLP(pkgSetting, pkg)) {
+                    if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                         return null;
                     }
-                }
-                // File a report about this.
-                String msg = "System package " + pkg.packageName
+                    // The signature has changed, but this package is in the system
+                    // image...  let's recover!
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                    // However...  if this package is part of a shared user, but it
+                    // doesn't match the signature of the shared user, let's fail.
+                    // What this means is that you can't change the signatures
+                    // associated with an overall shared user, which doesn't seem all
+                    // that unreasonable.
+                    if (pkgSetting.sharedUser != null) {
+                        if (compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
+                                              pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+                            Log.w(TAG, "Signature mismatch for shared user : " + pkgSetting.sharedUser);
+                            mLastScanError = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                            return null;
+                        }
+                    }
+                    // File a report about this.
+                    String msg = "System package " + pkg.packageName
                         + " signature changed; retaining data.";
-                reportSettingsProblem(Log.WARN, msg);
+                    reportSettingsProblem(Log.WARN, msg);
+                }
+            } else {
+                if (!checkUpgradeKeySetLP(pkgSetting, pkg)) {
+                    Slog.e(TAG, "Package " + pkg.packageName
+                           + " upgrade keys do not match the previously installed version; ");
+                    mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+                    return null;
+                } else {
+                    // signatures may have changed as result of upgrade
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                }
             }
-
             // Verify that this new package doesn't have any content providers
             // that conflict with existing packages.  Only do this if the
             // package isn't already installed, since we don't want to break
@@ -5636,16 +5651,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            // Add the package's KeySets to the global KeySetManager
-            KeySetManager ksm = mSettings.mKeySetManager;
+            // Add the package's KeySets to the global KeySetManagerService
+            KeySetManagerService ksms = mSettings.mKeySetManagerService;
             try {
-                ksm.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
+                // Old KeySetData no longer valid.
+                ksms.removeAppKeySetData(pkg.packageName);
+                ksms.addSigningKeySetToPackage(pkg.packageName, pkg.mSigningKeys);
                 if (pkg.mKeySetMapping != null) {
-                    for (Map.Entry<String, ArraySet<PublicKey>> entry :
+                    for (Map.Entry<String, Set<PublicKey>> entry :
                             pkg.mKeySetMapping.entrySet()) {
                         if (entry.getValue() != null) {
-                            ksm.addDefinedKeySetToPackage(pkg.packageName,
-                                entry.getValue(), entry.getKey());
+                            ksms.addDefinedKeySetToPackage(pkg.packageName,
+                                                          entry.getValue(), entry.getKey());
+                        }
+                    }
+                    if (pkg.mUpgradeKeySets != null
+                            && pkg.mKeySetMapping.keySet().containsAll(pkg.mUpgradeKeySets)) {
+                        for (String upgradeAlias : pkg.mUpgradeKeySets) {
+                            ksms.addUpgradeKeySetToPackage(pkg.packageName, upgradeAlias);
                         }
                     }
                 }
@@ -9861,10 +9884,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private boolean checkUpgradeKeySetLP(PackageSetting oldPS, PackageParser.Package newPkg) {
+        // Upgrade keysets are being used.  Determine if new package has a superset of the
+        // required keys.
+        long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();
+        KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        Set<Long> newSigningKeyIds = new ArraySet<Long>();
+        for (PublicKey pk : newPkg.mSigningKeys) {
+            newSigningKeyIds.add(ksms.getIdForPublicKey(pk));
+        }
+        //remove PUBLIC_KEY_NOT_FOUND, although not necessary
+        newSigningKeyIds.remove(ksms.PUBLIC_KEY_NOT_FOUND);
+        for (int i = 0; i < upgradeKeySets.length; i++) {
+            if (newSigningKeyIds.containsAll(ksms.mKeySetMapping.get(upgradeKeySets[i]))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void replacePackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, UserHandle user,
             String installerPackageName, PackageInstalledInfo res, String abiOverride) {
-
         PackageParser.Package oldPackage;
         String pkgName = pkg.packageName;
         int[] allUsers;
@@ -9874,15 +9915,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
             if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
-            if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
+            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            if (ps == null || !ps.keySetData.isUsingUpgradeKeySets() || ps.sharedUser != null) {
+                // default to original signature matching
+                if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
-                Slog.w(TAG, "New package has a different signature: " + pkgName);
-                res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-                return;
+                    Slog.w(TAG, "New package has a different signature: " + pkgName);
+                    res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                    return;
+                }
+            } else {
+                if(!checkUpgradeKeySetLP(ps, pkg)) {
+                    Slog.w(TAG, "New package not signed by keys specified by upgrade-keysets: "
+                           + pkgName);
+                    res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+                    return;
+                }
             }
 
             // In case of rollback, remember per-user/profile install state
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
             allUsers = sUserManager.getUserIds();
             perUserInstalled = new boolean[allUsers.length];
             for (int i = 0; i < allUsers.length; i++) {
@@ -10636,6 +10687,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (deletedPs != null) {
                 if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
                     if (outInfo != null) {
+                        mSettings.mKeySetManagerService.removeAppKeySetData(packageName);
                         outInfo.removedAppId = mSettings.removePackageLPw(packageName);
                     }
                     if (deletedPs != null) {
@@ -10890,7 +10942,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean ret = false;
-        mSettings.mKeySetManager.removeAppKeySetData(packageName);
         if (isSystemApp(ps)) {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package:" + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
@@ -12271,7 +12322,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
-                mSettings.mKeySetManager.dump(pw, packageName, dumpState);
+                mSettings.mKeySetManagerService.dump(pw, packageName, dumpState);
             }
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
