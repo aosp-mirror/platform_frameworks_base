@@ -301,6 +301,8 @@ public abstract class PanelView extends FrameLayout {
                 mTrackingPointer = -1;
                 trackMovement(event);
                 if ((mTracking && mTouchSlopExceeded)
+                        || Math.abs(x - mInitialTouchX) > mTouchSlop
+                        || Math.abs(y - mInitialTouchY) > mTouchSlop
                         || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     float vel = 0f;
                     float vectorVel = 0f;
@@ -317,6 +319,7 @@ public abstract class PanelView extends FrameLayout {
                     boolean expands = onEmptySpaceClick(mInitialTouchX);
                     onTrackingStopped(expands);
                 }
+
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -447,7 +450,7 @@ public abstract class PanelView extends FrameLayout {
      * @param vectorVel the length of the vectorial velocity
      * @return whether a fling should expands the panel; contracts otherwise
      */
-    private boolean flingExpands(float vel, float vectorVel) {
+    protected boolean flingExpands(float vel, float vectorVel) {
         if (Math.abs(vectorVel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return getExpandedFraction() > 0.5f;
         } else {
