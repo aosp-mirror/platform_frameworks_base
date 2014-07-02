@@ -2756,6 +2756,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the calculated preferred network type.
+     * Used for debugging incorrect network type.
+     *
+     * @return the preferred network type, defined in RILConstants.java or -1 if
+     *         none available.
+     * @hide
+     */
+    public int getCalculatedPreferredNetworkType() {
+        try {
+            return getITelephony().getCalculatedPreferredNetworkType();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCalculatedPreferredNetworkType RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCalculatedPreferredNetworkType NPE", ex);
+        }
+        return -1;
+    }
+
+    /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      *

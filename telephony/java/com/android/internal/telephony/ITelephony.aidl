@@ -589,6 +589,14 @@ interface ITelephony {
     boolean nvResetConfig(int resetType);
 
     /*
+     * Get the calculated preferred network type.
+     * Used for device configuration by some CDMA operators.
+     *
+     * @return the calculated preferred network type, defined in RILConstants.java.
+     */
+    int getCalculatedPreferredNetworkType();
+
+    /*
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
