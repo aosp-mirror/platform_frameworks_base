@@ -505,6 +505,21 @@ public final class CardEmulation {
     }
 
     /**
+     * Some devices may allow an application to register all
+     * AIDs that starts with a certain prefix, e.g.
+     * "A000000004*" to register all MasterCard AIDs.
+     *
+     * Use this method to determine whether this device
+     * supports registering AID prefixes.
+     *
+     * @return whether AID prefix registering is supported on this device.
+     */
+    public boolean supportsAidPrefixRegistration() {
+        // TODO
+        return false;
+    }
+
+    /**
      * @hide
      */
     public boolean setDefaultServiceForCategory(ComponentName service, String category) {

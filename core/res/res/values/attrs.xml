@@ -2921,6 +2921,14 @@
         <attr name="name" />
     </declare-styleable>
 
+    <!-- Specify one or more <code>aid-prefix-filter</code> elements inside a
+         <code>aid-group</code> element to specify an ISO7816 Application ID (AID)
+         prefix your service can handle. -->
+    <declare-styleable name="AidPrefixFilter">
+        <!-- The ISO7816 Application ID. This attribute is mandatory. -->
+        <attr name="name" />
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>
