@@ -1842,6 +1842,27 @@ public class Camera {
     }
 
     /**
+     * Returns a copied {@link Parameters}; for shim use only.
+     *
+     * @param parameters a non-{@code null} parameters
+     * @return a Parameter object, with all the parameters copied from {@code parameters}.
+     *
+     * @throws NullPointerException if {@code parameters} was {@code null}
+     * @hide
+     */
+    public static Parameters getParametersCopy(Camera.Parameters parameters) {
+        if (parameters == null) {
+            throw new NullPointerException("parameters must not be null");
+        }
+
+        Camera camera = parameters.getOuter();
+        Parameters p = camera.new Parameters();
+        p.copyFrom(parameters);
+
+        return p;
+    }
+
+    /**
      * Image size (width and height dimensions).
      */
     public class Size {
@@ -2329,6 +2350,25 @@ public class Camera {
 
         private Parameters() {
             mMap = new LinkedHashMap<String, String>(/*initialCapacity*/64);
+        }
+
+        /**
+         * Overwrite existing parameters with a copy of the ones from {@code other}.
+         *
+         * <b>For use by the legacy shim only.</b>
+         *
+         * @hide
+         */
+        public void copyFrom(Parameters other) {
+            if (other == null) {
+                throw new NullPointerException("other must not be null");
+            }
+
+            mMap.putAll(other.mMap);
+        }
+
+        private Camera getOuter() {
+            return Camera.this;
         }
 
         /**
