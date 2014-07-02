@@ -3332,6 +3332,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         if (bestNetwork != null) {
             if (VDBG) log("using " + bestNetwork.name());
+            if (nri.isRequest && bestNetwork.networkInfo.isConnected()) {
+                // Cancel any lingering so the linger timeout doesn't teardown this network
+                // even though we have a request for it.
+                bestNetwork.networkLingered.clear();
+                bestNetwork.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
+            }
             bestNetwork.addRequest(nri.request);
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             int legacyType = nri.request.legacyType;
