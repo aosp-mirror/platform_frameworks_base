@@ -1233,7 +1233,7 @@ public class Toolbar extends ViewGroup {
         }
         if (layoutSubtitle) {
             final LayoutParams lp = (LayoutParams) mSubtitleTextView.getLayoutParams();
-            titleHeight += lp.bottomMargin + mTitleTextView.getMeasuredHeight() + lp.bottomMargin;
+            titleHeight += lp.topMargin + mSubtitleTextView.getMeasuredHeight() + lp.bottomMargin;
         }
 
         if (layoutTitle || layoutSubtitle) {
