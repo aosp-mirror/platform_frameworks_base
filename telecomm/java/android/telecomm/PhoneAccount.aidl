@@ -19,4 +19,4 @@ package android.telecomm;
 /**
  * {@hide}
   */
-parcelable Subscription;
+parcelable PhoneAccount;

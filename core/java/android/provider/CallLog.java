@@ -25,7 +25,7 @@ import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.DataUsageFeedback;
-import android.telecomm.Subscription;
+import android.telecomm.PhoneAccount;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.CallerInfo;
@@ -276,17 +276,20 @@ public class CallLog {
          */
         public static final String CACHED_FORMATTED_NUMBER = "formatted_number";
 
-        /**
-         * The component name of the subscription in string form.
-         * <P>Type: TEXT</P>
-         */
-        public static final String SUBSCRIPTION_COMPONENT_NAME = "subscription_component_name";
+        // Note: PHONE_ACCOUNT_* constant values are "subscription_*" due to a historic naming
+        // that was encoded into call log databases.
 
         /**
-         * The identifier of a subscription that is unique to a specified component.
+         * The component name of the account in string form.
          * <P>Type: TEXT</P>
          */
-        public static final String SUBSCRIPTION_ID = "subscription_id";
+        public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+
+        /**
+         * The identifier of a account that is unique to a specified component.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
          * Adds a call to the call log.
@@ -299,14 +302,14 @@ public class CallLog {
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
-         * @param subscription The subscription object describing the provider of the call
+         * @param account The account object describing the provider of the call
          * @param start time stamp for the call in milliseconds
          * @param duration call duration in seconds
          *
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, Subscription subscription, long start, int duration) {
+                int presentation, int callType, PhoneAccount account, long start, int duration) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -330,12 +333,12 @@ public class CallLog {
                 }
             }
 
-            // subscription information
-            String subscriptionComponentString = null;
-            String subscriptionId = null;
-            if (subscription != null) {
-                subscriptionComponentString = subscription.getComponentName().flattenToString();
-                subscriptionId = subscription.getId();
+            // account information
+            String accountComponentString = null;
+            String accountId = null;
+            if (account != null) {
+                accountComponentString = account.getComponentName().flattenToString();
+                accountId = account.getId();
             }
 
             ContentValues values = new ContentValues(6);
@@ -345,8 +348,8 @@ public class CallLog {
             values.put(TYPE, Integer.valueOf(callType));
             values.put(DATE, Long.valueOf(start));
             values.put(DURATION, Long.valueOf(duration));
-            values.put(SUBSCRIPTION_COMPONENT_NAME, subscriptionComponentString);
-            values.put(SUBSCRIPTION_ID, subscriptionId);
+            values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
+            values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(NEW, Integer.valueOf(1));
             if (callType == MISSED_TYPE) {
                 values.put(IS_READ, Integer.valueOf(0));

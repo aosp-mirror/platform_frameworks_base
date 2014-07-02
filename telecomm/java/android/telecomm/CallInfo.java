@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Date;
-
 /**
  * A parcelable holder class of Call information data. This class is intended for transferring call
  * information from Telecomm to call services and thus is read-only.
@@ -52,9 +50,9 @@ public final class CallInfo implements Parcelable {
     private final GatewayInfo mGatewayInfo;
 
     /**
-     * Subscription information for the call.
+     * Account information for the call.
      */
-    private final Subscription mSubscription;
+    private final PhoneAccount mAccount;
 
     /**
      * Additional information that can be persisted.
@@ -75,7 +73,7 @@ public final class CallInfo implements Parcelable {
      * @param state The state of the call.
      * @param handle The handle to the other party in this call.
      * @param gatewayInfo Gateway information pertaining to this call.
-     * @param subscription Subscription information pertaining to this call.
+     * @param account Account information pertaining to this call.
      * @param extras Additional information that can be persisted.
      * @param currentCallServiceDescriptor The descriptor for the call service currently routing
      *         this call.
@@ -87,14 +85,14 @@ public final class CallInfo implements Parcelable {
             CallState state,
             Uri handle,
             GatewayInfo gatewayInfo,
-            Subscription subscription,
+            PhoneAccount account,
             Bundle extras,
             CallServiceDescriptor currentCallServiceDescriptor) {
         mId = id;
         mState = state;
         mHandle = handle;
         mGatewayInfo = gatewayInfo;
-        mSubscription = subscription;
+        mAccount = account;
         mExtras = extras;
         mCurrentCallServiceDescriptor = currentCallServiceDescriptor;
     }
@@ -127,8 +125,8 @@ public final class CallInfo implements Parcelable {
         return mGatewayInfo;
     }
 
-    public Subscription getSubscription() {
-        return mSubscription;
+    public PhoneAccount getAccount() {
+        return mAccount;
     }
 
     public Bundle getExtras() {
@@ -150,12 +148,12 @@ public final class CallInfo implements Parcelable {
             Uri handle = Uri.CREATOR.createFromParcel(source);
 
             GatewayInfo gatewayInfo = readProviderInfoIfExists(source, GatewayInfo.CREATOR);
-            Subscription subscription = readProviderInfoIfExists(source, Subscription.CREATOR);
+            PhoneAccount account = readProviderInfoIfExists(source, PhoneAccount.CREATOR);
 
             ClassLoader classLoader = CallInfo.class.getClassLoader();
             Bundle extras = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
-            return new CallInfo(id, state, handle, gatewayInfo, subscription, extras, descriptor);
+            return new CallInfo(id, state, handle, gatewayInfo, account, extras, descriptor);
         }
 
         @Override
@@ -182,14 +180,14 @@ public final class CallInfo implements Parcelable {
         mHandle.writeToParcel(destination, 0);
 
         writeProviderInfoIfExists(destination, mGatewayInfo);
-        writeProviderInfoIfExists(destination, mSubscription);
+        writeProviderInfoIfExists(destination, mAccount);
 
         destination.writeParcelable(mExtras, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
     }
 
     /**
-     * Helper function to write provider information (either GatewayInfo or Subscription) to
+     * Helper function to write provider information (either GatewayInfo or Account) to
      * parcel. Will write a false byte if the information does not exist.
      */
     private void writeProviderInfoIfExists(Parcel destination, Parcelable provider) {
@@ -202,7 +200,7 @@ public final class CallInfo implements Parcelable {
     }
 
     /**
-     * Helper function to read provider information (either GatewayInfo or Subscription) from
+     * Helper function to read provider information (either GatewayInfo or Account) from
      * parcel.
      */
     private static <T> T readProviderInfoIfExists(Parcel source,

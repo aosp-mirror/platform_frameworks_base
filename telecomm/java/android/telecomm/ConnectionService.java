@@ -48,9 +48,9 @@ public abstract class ConnectionService extends CallService {
     private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    private SimpleResponse<Uri, List<Subscription>> mSubscriptionLookupResponse;
-    private Uri mSubscriptionLookupHandle;
-    private boolean mAreSubscriptionsInitialized = false;
+    private SimpleResponse<Uri, List<PhoneAccount>> mAccountLookupResponse;
+    private Uri mAccountLookupHandle;
+    private boolean mAreAccountsInitialized = false;
 
     /**
      * A callback for providing the resuilt of creating a connection.
@@ -382,7 +382,7 @@ public abstract class ConnectionService extends CallService {
      */
     @Override
     protected final void onAdapterAttached(CallServiceAdapter adapter) {
-        if (mAreSubscriptionsInitialized) {
+        if (mAreAccountsInitialized) {
             // No need to query again if we already did it.
             return;
         }
@@ -399,9 +399,9 @@ public abstract class ConnectionService extends CallService {
                                     componentNames.get(i),
                                     ICallService.Stub.asInterface(callServices.get(i)));
                         }
-                        mAreSubscriptionsInitialized = true;
+                        mAreAccountsInitialized = true;
                         Log.d(this, "remote call services found: " + callServices);
-                        maybeRespondToSubscriptionLookup();
+                        maybeRespondToAccountLookup();
                     }
                 });
             }
@@ -410,29 +410,29 @@ public abstract class ConnectionService extends CallService {
             public void onError() {
                 mHandler.post(new Runnable() {
                     @Override public void run() {
-                        mAreSubscriptionsInitialized = true;
-                        maybeRespondToSubscriptionLookup();
+                        mAreAccountsInitialized = true;
+                        maybeRespondToAccountLookup();
                     }
                 });
             }
         });
     }
 
-    public final void lookupRemoteSubscriptions(
-            Uri handle, SimpleResponse<Uri, List<Subscription>> response) {
-        mSubscriptionLookupResponse = response;
-        mSubscriptionLookupHandle = handle;
-        maybeRespondToSubscriptionLookup();
+    public final void lookupRemoteAccounts(
+            Uri handle, SimpleResponse<Uri, List<PhoneAccount>> response) {
+        mAccountLookupResponse = response;
+        mAccountLookupHandle = handle;
+        maybeRespondToAccountLookup();
     }
 
-    public final void maybeRespondToSubscriptionLookup() {
-        if (mAreSubscriptionsInitialized && mSubscriptionLookupResponse != null) {
-            mSubscriptionLookupResponse.onResult(
-                    mSubscriptionLookupHandle,
-                    mRemoteConnectionManager.getSubscriptions(mSubscriptionLookupHandle));
+    public final void maybeRespondToAccountLookup() {
+        if (mAreAccountsInitialized && mAccountLookupResponse != null) {
+            mAccountLookupResponse.onResult(
+                    mAccountLookupHandle,
+                    mRemoteConnectionManager.getAccounts(mAccountLookupHandle));
 
-            mSubscriptionLookupHandle = null;
-            mSubscriptionLookupResponse = null;
+            mAccountLookupHandle = null;
+            mAccountLookupResponse = null;
         }
     }
 

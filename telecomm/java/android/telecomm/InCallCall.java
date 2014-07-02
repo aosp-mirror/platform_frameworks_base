@@ -41,7 +41,7 @@ public final class InCallCall implements Parcelable {
     private final long mConnectTimeMillis;
     private final Uri mHandle;
     private final GatewayInfo mGatewayInfo;
-    private final Subscription mSubscription;
+    private final PhoneAccount mAccount;
     private final CallServiceDescriptor mCurrentCallServiceDescriptor;
     private final CallServiceDescriptor mHandoffCallServiceDescriptor;
     private final ICallVideoProvider mCallVideoProvider;
@@ -61,7 +61,7 @@ public final class InCallCall implements Parcelable {
             long connectTimeMillis,
             Uri handle,
             GatewayInfo gatewayInfo,
-            Subscription subscription,
+            PhoneAccount subscription,
             CallServiceDescriptor descriptor,
             CallServiceDescriptor handoffDescriptor,
             ICallVideoProvider callVideoProvider,
@@ -77,7 +77,7 @@ public final class InCallCall implements Parcelable {
         mConnectTimeMillis = connectTimeMillis;
         mHandle = handle;
         mGatewayInfo = gatewayInfo;
-        mSubscription = subscription;
+        mAccount = subscription;
         mCurrentCallServiceDescriptor = descriptor;
         mHandoffCallServiceDescriptor = handoffDescriptor;
         mCallVideoProvider = callVideoProvider;
@@ -139,9 +139,9 @@ public final class InCallCall implements Parcelable {
         return mGatewayInfo;
     }
 
-    /** Subscription information for the call. */
-    public Subscription getSubscription() {
-        return mSubscription;
+    /** PhoneAccount information for the call. */
+    public PhoneAccount getAccount() {
+        return mAccount;
     }
 
     /** The descriptor for the call service currently routing this call. */
@@ -215,7 +215,7 @@ public final class InCallCall implements Parcelable {
             long connectTimeMillis = source.readLong();
             Uri handle = source.readParcelable(classLoader);
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
-            Subscription subscription = source.readParcelable(classLoader);
+            PhoneAccount account = source.readParcelable(classLoader);
             CallServiceDescriptor descriptor = source.readParcelable(classLoader);
             CallServiceDescriptor handoffDescriptor = source.readParcelable(classLoader);
             ICallVideoProvider callVideoProvider =
@@ -226,7 +226,7 @@ public final class InCallCall implements Parcelable {
             int features = source.readInt();
             return new InCallCall(id, state, disconnectCauseCode, disconnectCauseMsg,
                     cannedSmsResponses, capabilities, connectTimeMillis, handle, gatewayInfo,
-                    subscription, descriptor, handoffDescriptor, callVideoProvider, parentCallId,
+                    account, descriptor, handoffDescriptor, callVideoProvider, parentCallId,
                     childCallIds, features);
         }
 
@@ -254,7 +254,7 @@ public final class InCallCall implements Parcelable {
         destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mHandle, 0);
         destination.writeParcelable(mGatewayInfo, 0);
-        destination.writeParcelable(mSubscription, 0);
+        destination.writeParcelable(mAccount, 0);
         destination.writeParcelable(mCurrentCallServiceDescriptor, 0);
         destination.writeParcelable(mHandoffCallServiceDescriptor, 0);
         destination.writeStrongBinder(
