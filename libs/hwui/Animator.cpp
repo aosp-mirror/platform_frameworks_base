@@ -32,7 +32,8 @@ namespace uirenderer {
  ************************************************************/
 
 BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
-        : mFinalValue(finalValue)
+        : mTarget(NULL)
+        , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
         , mInterpolator(0)
@@ -81,9 +82,14 @@ void BaseRenderNodeAnimator::setStartDelay(nsecs_t startDelay) {
     mStartDelay = startDelay;
 }
 
-void BaseRenderNodeAnimator::pushStaging(RenderNode* target, TreeInfo& info) {
+void BaseRenderNodeAnimator::attach(RenderNode* target) {
+    mTarget = target;
+    onAttached();
+}
+
+void BaseRenderNodeAnimator::pushStaging(TreeInfo& info) {
     if (!mHasStartValue) {
-        doSetStartValue(getValue(target));
+        doSetStartValue(getValue(mTarget));
     }
     if (mStagingPlayState > mPlayState) {
         mPlayState = mStagingPlayState;
@@ -109,20 +115,25 @@ void BaseRenderNodeAnimator::transitionToRunning(TreeInfo& info) {
     }
     // No interpolator was set, use the default
     if (!mInterpolator) {
-        setInterpolator(Interpolator::createDefaultInterpolator());
+        mInterpolator = Interpolator::createDefaultInterpolator();
     }
     if (mDuration < 0 || mDuration > 50000) {
         ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);
     }
 }
 
-bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
+bool BaseRenderNodeAnimator::animate(TreeInfo& info) {
     if (mPlayState < RUNNING) {
         return false;
     }
 
+    // If BaseRenderNodeAnimator is handling the delay (not typical), then
+    // because the staging properties reflect the final value, we always need
+    // to call setValue even if the animation isn't yet running or is still
+    // being delayed as we need to override the staging value
     if (mStartTime > info.frameTimeMs) {
         info.out.hasAnimations |= true;
+        setValue(mTarget, mFromValue);
         return false;
     }
 
@@ -136,7 +147,7 @@ bool BaseRenderNodeAnimator::animate(RenderNode* target, TreeInfo& info) {
     }
 
     fraction = mInterpolator->interpolate(fraction);
-    setValue(target, mFromValue + (mDeltaValue * fraction));
+    setValue(mTarget, mFromValue + (mDeltaValue * fraction));
 
     if (mPlayState == FINISHED) {
         callOnFinishedListener(info);
@@ -188,12 +199,17 @@ RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property, float fi
         , mPropertyAccess(&(PROPERTY_ACCESSOR_LUT[property])) {
 }
 
-void RenderPropertyAnimator::onAttached(RenderNode* target) {
+void RenderPropertyAnimator::onAttached() {
     if (!mHasStartValue
-            && target->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
-        setStartValue((target->stagingProperties().*mPropertyAccess->getter)());
+            && mTarget->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
+        setStartValue((mTarget->stagingProperties().*mPropertyAccess->getter)());
     }
-    (target->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
+}
+
+void RenderPropertyAnimator::onStagingPlayStateChanged() {
+    if (mStagingPlayState == RUNNING) {
+        (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
+    }
 }
 
 uint32_t RenderPropertyAnimator::dirtyMask() {

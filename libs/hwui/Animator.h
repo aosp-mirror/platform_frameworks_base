@@ -50,12 +50,14 @@ public:
     ANDROID_API void setListener(AnimationListener* listener) {
         mListener = listener;
     }
-    ANDROID_API void start() { mStagingPlayState = RUNNING; }
-    ANDROID_API void cancel() { mStagingPlayState = FINISHED; }
+    ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
+    ANDROID_API void cancel() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
 
-    virtual void onAttached(RenderNode* target) {}
-    virtual void pushStaging(RenderNode* target, TreeInfo& info);
-    bool animate(RenderNode* target, TreeInfo& info);
+    void attach(RenderNode* target);
+    virtual void onAttached() {}
+    void detach() { mTarget = 0; }
+    void pushStaging(TreeInfo& info);
+    bool animate(TreeInfo& info);
 
     bool isFinished() { return mPlayState == FINISHED; }
     float finalValue() { return mFinalValue; }
@@ -68,14 +70,19 @@ protected:
 
     virtual float getValue(RenderNode* target) const = 0;
     virtual void setValue(RenderNode* target, float value) = 0;
+    RenderNode* target() { return mTarget; }
 
     void callOnFinishedListener(TreeInfo& info);
+
+    virtual void onStagingPlayStateChanged() {}
 
     enum PlayState {
         NOT_STARTED,
         RUNNING,
         FINISHED,
     };
+
+    RenderNode* mTarget;
 
     float mFinalValue;
     float mDeltaValue;
@@ -92,9 +99,9 @@ protected:
     sp<AnimationListener> mListener;
 
 private:
-    void doSetStartValue(float value);
     inline void checkMutable();
-    void transitionToRunning(TreeInfo& info);
+    virtual void transitionToRunning(TreeInfo& info);
+    void doSetStartValue(float value);
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
@@ -116,13 +123,13 @@ public:
 
     ANDROID_API RenderPropertyAnimator(RenderProperty property, float finalValue);
 
-    virtual void onAttached(RenderNode* target);
-
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
     virtual float getValue(RenderNode* target) const;
     virtual void setValue(RenderNode* target, float value);
+    virtual void onAttached();
+    virtual void onStagingPlayStateChanged();
 
 private:
     typedef bool (RenderProperties::*SetFloatProperty)(float value);

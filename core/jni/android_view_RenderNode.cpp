@@ -456,7 +456,6 @@ static void android_view_RenderNode_addAnimator(JNIEnv* env, jobject clazz,
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
     renderNode->addAnimator(animator);
-    animator->start();
 }
 
 #endif // USE_OPENGL_RENDERER

@@ -18,6 +18,7 @@ package android.view;
 
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 /**
  * @hide
  */
-public final class RenderNodeAnimator extends Animator {
+public class RenderNodeAnimator extends Animator {
     // Keep in sync with enum RenderProperty in Animator.h
     public static final int TRANSLATION_X = 0;
     public static final int TRANSLATION_Y = 1;
@@ -83,16 +84,23 @@ public final class RenderNodeAnimator extends Animator {
 
     private RenderNode mTarget;
     private View mViewTarget;
+    private int mRenderProperty = -1;
+    private float mFinalValue;
     private TimeInterpolator mInterpolator;
 
     private boolean mStarted = false;
     private boolean mFinished = false;
+
+    private long mUnscaledDuration = 300;
+    private long mUnscaledStartDelay = 0;
 
     public static int mapViewPropertyToRenderProperty(int viewProperty) {
         return sViewPropertyAnimatorMap.get(viewProperty);
     }
 
     public RenderNodeAnimator(int property, float finalValue) {
+        mRenderProperty = property;
+        mFinalValue = finalValue;
         init(nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
                 property, finalValue));
     }
@@ -156,7 +164,16 @@ public final class RenderNodeAnimator extends Animator {
 
         mStarted = true;
         applyInterpolator();
-        mTarget.addAnimator(this);
+        nStart(mNativePtr.get());
+
+        // Alpha is a special snowflake that has the canonical value stored
+        // in mTransformationInfo instead of in RenderNode, so we need to update
+        // it with the final value here.
+        if (mRenderProperty == RenderNodeAnimator.ALPHA) {
+            // Don't need null check because ViewPropertyAnimator's
+            // ctor calls ensureTransformationInfo()
+            mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
+        }
 
         final ArrayList<AnimatorListener> listeners = getListeners();
         final int numListeners = listeners == null ? 0 : listeners.size();
@@ -201,6 +218,7 @@ public final class RenderNodeAnimator extends Animator {
     public void setTarget(View view) {
         mViewTarget = view;
         mTarget = view.mRenderNode;
+        mTarget.addAnimator(this);
     }
 
     public void setTarget(Canvas canvas) {
@@ -213,12 +231,12 @@ public final class RenderNodeAnimator extends Animator {
     }
 
     public void setTarget(RenderNode node) {
+        if (mTarget != null) {
+            throw new IllegalStateException("Target already set!");
+        }
         mViewTarget = null;
         mTarget = node;
-    }
-
-    public RenderNode getTarget() {
-        return mTarget;
+        mTarget.addAnimator(this);
     }
 
     public void setStartValue(float startValue) {
@@ -232,12 +250,13 @@ public final class RenderNodeAnimator extends Animator {
         if (startDelay < 0) {
             throw new IllegalArgumentException("startDelay must be positive; " + startDelay);
         }
-        nSetStartDelay(mNativePtr.get(), startDelay);
+        mUnscaledStartDelay = startDelay;
+        nSetStartDelay(mNativePtr.get(), (long) (startDelay * ValueAnimator.getDurationScale()));
     }
 
     @Override
     public long getStartDelay() {
-        return nGetStartDelay(mNativePtr.get());
+        return mUnscaledStartDelay;
     }
 
     @Override
@@ -246,13 +265,14 @@ public final class RenderNodeAnimator extends Animator {
         if (duration < 0) {
             throw new IllegalArgumentException("duration must be positive; " + duration);
         }
-        nSetDuration(mNativePtr.get(), duration);
+        mUnscaledDuration = duration;
+        nSetDuration(mNativePtr.get(), (long) (duration * ValueAnimator.getDurationScale()));
         return this;
     }
 
     @Override
     public long getDuration() {
-        return nGetDuration(mNativePtr.get());
+        return mUnscaledDuration;
     }
 
     @Override
@@ -307,5 +327,6 @@ public final class RenderNodeAnimator extends Animator {
     private static native long nGetStartDelay(long nativePtr);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
 
+    private static native void nStart(long animPtr);
     private static native void nCancel(long animPtr);
 }
