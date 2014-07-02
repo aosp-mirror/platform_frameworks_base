@@ -348,6 +348,7 @@ public class MediaSessionLegacyHelper {
         private void sendKeyEvent(int keyCode) {
             KeyEvent ke = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
             Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
             intent.putExtra(Intent.EXTRA_KEY_EVENT, ke);
             MediaSessionLegacyHelper.sendKeyEvent(mPendingIntent, mContext, intent);
