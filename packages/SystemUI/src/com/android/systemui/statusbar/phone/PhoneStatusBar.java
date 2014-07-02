@@ -2841,14 +2841,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mHeader.setKeyguardShowing(true);
-            mNotificationPanel.setKeyguardShowing(true);
             mScrimController.setKeyguardShowing(true);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
             mHeader.setKeyguardShowing(false);
-            mNotificationPanel.setKeyguardShowing(false);
             mScrimController.setKeyguardShowing(false);
         }
+        mNotificationPanel.setBarState(mState);
         updateDozingState();
         updateStackScrollerState();
         updatePublicMode();
@@ -2883,7 +2882,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setDimmed(onKeyguard, false /* animate */);
         mStackScroller.setVisibility(!mShowLockscreenNotifications && onKeyguard
                 ? View.INVISIBLE : View.VISIBLE);
-        mStackScroller.setScrollingEnabled(!onKeyguard);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
         mStackScroller.setActivatedChild(null);

@@ -31,6 +31,7 @@ public class ObservableScrollView extends ScrollView {
     private int mLastOverscrollAmount;
     private boolean mDispatchingTouchEvent;
     private boolean mTouchEnabled = true;
+    private boolean mInTouchEvent;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,7 +50,7 @@ public class ObservableScrollView extends ScrollView {
     }
 
     public boolean isDispatchingTouchEvent() {
-        return mDispatchingTouchEvent;
+        return mDispatchingTouchEvent || mInTouchEvent;
     }
 
     private int getMaxScrollY() {
@@ -60,6 +61,22 @@ public class ObservableScrollView extends ScrollView {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        mInTouchEvent = true;
+        boolean result = super.onTouchEvent(ev);
+        mInTouchEvent = false;
+        return result;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        mInTouchEvent = true;
+        boolean result = super.onInterceptTouchEvent(ev);
+        mInTouchEvent = false;
+        return result;
     }
 
     @Override

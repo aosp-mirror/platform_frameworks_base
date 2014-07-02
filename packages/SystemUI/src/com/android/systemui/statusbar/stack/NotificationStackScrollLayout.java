@@ -30,6 +30,8 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.OverScroller;
+import android.widget.ScrollView;
+
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
@@ -166,7 +168,10 @@ public class NotificationStackScrollLayout extends ViewGroup
      * animating.
      */
     private boolean mOnlyScrollingInThisMotion;
-    private boolean mTouchEnabled = true;
+    private ViewGroup mScrollView;
+    private boolean mInterceptDelegateEnabled;
+    private boolean mDelegateToScrollView;
+
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -465,6 +470,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLongClickListener = listener;
     }
 
+    public void setScrollView(ViewGroup scrollView) {
+        mScrollView = scrollView;
+    }
+
+    public void setInterceptDelegateEnabled(boolean interceptDelegateEnabled) {
+        mInterceptDelegateEnabled = interceptDelegateEnabled;
+    }
+
     public void onChildDismissed(View v) {
         if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
         final View veto = v.findViewById(R.id.veto);
@@ -535,7 +548,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             float childTop = slidingChild.getTranslationY();
             float top = childTop + slidingChild.getClipTopAmount();
-            float bottom = childTop + slidingChild.getActualHeight();
+            float bottom = top + slidingChild.getActualHeight();
             int left = slidingChild.getLeft();
             int right = slidingChild.getRight();
 
@@ -618,11 +631,15 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (!isEnabled()) {
-            return false;
-        }
         boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || ev.getActionMasked()== MotionEvent.ACTION_UP;
+        if (mDelegateToScrollView) {
+            if (isCancelOrUp) {
+                mDelegateToScrollView = false;
+            }
+            transformTouchEvent(ev, this, mScrollView);
+            return mScrollView.onTouchEvent(ev);
+        }
         boolean expandWantsIt = false;
         if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
             if (isCancelOrUp) {
@@ -1341,8 +1358,22 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    private void transformTouchEvent(MotionEvent ev, View sourceView, View targetView) {
+        ev.offsetLocation(sourceView.getX(), sourceView.getY());
+        ev.offsetLocation(-targetView.getX(), -targetView.getY());
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mInterceptDelegateEnabled) {
+            transformTouchEvent(ev, this, mScrollView);
+            if (mScrollView.onInterceptTouchEvent(ev)) {
+                mDelegateToScrollView = true;
+                removeLongPressCallback();
+                return true;
+            }
+            transformTouchEvent(ev, mScrollView, this);
+        }
         initDownStates(ev);
         boolean expandWantsIt = false;
         if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
@@ -1877,18 +1908,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public float getNotificationsTopY() {
         return mTopPadding + getTranslationY();
-    }
-
-    public void setTouchEnabled(boolean touchEnabled) {
-        mTouchEnabled = touchEnabled;
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (!mTouchEnabled) {
-            return false;
-        }
-        return super.dispatchTouchEvent(ev);
     }
 
     @Override

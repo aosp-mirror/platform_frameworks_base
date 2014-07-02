@@ -56,12 +56,6 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
-            android:id="@+id/notification_stack_scroller"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/close_handle_underlap"/>
-
         <ViewStub
                 android:id="@+id/keyguard_user_switcher"
                 android:layout_height="wrap_content"
@@ -93,9 +87,17 @@
                 <!-- Layout height: notification_min_height + bottom_stack_peek_amount -->
                 <View
                     android:layout_height="76dp"
-                    android:layout_width="match_parent"/>
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/notifications_top_padding"
+                    android:layout_marginBottom="@dimen/notification_side_padding"/>
             </LinearLayout>
         </com.android.systemui.statusbar.phone.ObservableScrollView>
+
+        <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
+            android:id="@+id/notification_stack_scroller"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/close_handle_underlap"/>
 
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
