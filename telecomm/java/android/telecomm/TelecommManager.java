@@ -25,6 +25,8 @@ import com.android.internal.telecomm.ITelecommService;
 
 /**
  * Provides access to Telecomm-related functionality.
+ * TODO(santoscordon): Move this all into PhoneManager.
+ * @hide
  */
 public class TelecommManager {
     private static final String TAG = "TelecommManager";

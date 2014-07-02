@@ -7099,13 +7099,13 @@ package android.content {
     field public static final java.lang.String NFC_SERVICE = "nfc";
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
+    field public static final java.lang.String PHONE_SERVICE = "phone_service";
     field public static final java.lang.String POWER_SERVICE = "power";
     field public static final java.lang.String PRINT_SERVICE = "print";
     field public static final java.lang.String RESTRICTIONS_SERVICE = "restrictions";
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
-    field public static final java.lang.String TELECOMM_SERVICE = "telecomm";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
@@ -21768,6 +21768,14 @@ package android.os.storage {
 
 }
 
+package android.phone {
+
+  public final class PhoneManager {
+    method public boolean handlePinMmi(java.lang.String);
+  }
+
+}
+
 package android.preference {
 
   public class CheckBoxPreference extends android.preference.TwoStatePreference {
@@ -27849,9 +27857,6 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
-  }
-
-  public class TelecommManager {
   }
 
   public class VideoCallProfile implements android.os.Parcelable {
