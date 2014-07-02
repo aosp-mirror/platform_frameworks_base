@@ -91,6 +91,11 @@ public class TvView extends ViewGroup {
     private final AttributeSet mAttrs;
     private final int mDefStyleAttr;
     private int mWindowZOrder;
+    private boolean mUseRequestedSurfaceLayout;
+    private int mSurfaceViewLeft;
+    private int mSurfaceViewRight;
+    private int mSurfaceViewTop;
+    private int mSurfaceViewBottom;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -535,7 +540,16 @@ public class TvView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mSurfaceView.layout(0, 0, right - left, bottom - top);
+        if (DEBUG) {
+            Log.d(TAG, "onLayout (left=" + left + ", top=" + top + ", right=" + right
+                    + ", bottom=" + bottom + ",)");
+        }
+        if (mUseRequestedSurfaceLayout) {
+            mSurfaceView.layout(mSurfaceViewLeft, mSurfaceViewTop, mSurfaceViewRight,
+                    mSurfaceViewBottom);
+        } else {
+            mSurfaceView.layout(0, 0, right - left, bottom - top);
+        }
     }
 
     @Override
@@ -583,6 +597,7 @@ public class TvView extends ViewGroup {
     private void release() {
         setSessionSurface(null);
         removeSessionOverlayView();
+        mUseRequestedSurfaceLayout = false;
         mSession.release();
         mSession = null;
         mSessionCallback = null;
@@ -916,6 +931,20 @@ public class TvView extends ViewGroup {
             if (mListener != null) {
                 mListener.onContentBlocked(mInputId, rating);
             }
+        }
+
+        @Override
+        public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+            if (DEBUG) {
+                Log.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top + ", right="
+                        + right + ", bottom=" + bottom + ",)");
+            }
+            mSurfaceViewLeft = left;
+            mSurfaceViewTop = top;
+            mSurfaceViewRight = right;
+            mSurfaceViewBottom = bottom;
+            mUseRequestedSurfaceLayout = true;
+            requestLayout();
         }
 
         @Override

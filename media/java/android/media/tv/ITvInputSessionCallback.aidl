@@ -36,4 +36,5 @@ oneway interface ITvInputSessionCallback {
     void onVideoUnavailable(int reason);
     void onContentAllowed();
     void onContentBlocked(in String rating);
+    void onLayoutSurface(int left, int top, int right, int bottom);
 }
