@@ -51,7 +51,7 @@ public final class AidGroup implements Parcelable {
             throw new IllegalArgumentException("Too many AIDs in AID group.");
         }
         for (String aid : aids) {
-            if (!ApduServiceInfo.isValidAid(aid)) {
+            if (!CardEmulation.isValidAid(aid)) {
                 throw new IllegalArgumentException("AID " + aid + " is not a valid AID.");
             }
         }

@@ -571,8 +571,45 @@ public final class CardEmulation {
         }
     }
 
+    /**
+     * A valid AID according to ISO/IEC 7816-4:
+     * <ul>
+     * <li>Has >= 5 bytes and <=16 bytes (>=10 hex chars and <= 32 hex chars)
+     * <li>Consist of only hex characters
+     * <li>Additionally, we allow an asterisk at the end, to indicate
+     *     a prefix
+     * </ul>
+     *
+     * @hide
+     */
+    public static boolean isValidAid(String aid) {
+        if (aid == null)
+            return false;
+
+        // If a prefix AID, the total length must be odd (even # of AID chars + '*')
+        if (aid.endsWith("*") && ((aid.length() % 2) == 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // If not a prefix AID, the total length must be even (even # of AID chars)
+        if (!aid.endsWith("*") && ((aid.length() % 2) != 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // Verify hex characters
+        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?")) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        return true;
+    }
+
     void recoverService() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         sService = adapter.getCardEmulationService();
     }
+
 }
