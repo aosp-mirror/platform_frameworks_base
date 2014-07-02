@@ -293,6 +293,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
 
     private boolean mPreDrawRegistered;
+    private boolean mPreDrawListenerDetached;
 
     // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
     // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
@@ -4719,6 +4720,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private void unregisterForPreDraw() {
+        getViewTreeObserver().removeOnPreDrawListener(this);
+        mPreDrawRegistered = false;
+        mPreDrawListenerDetached = false;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -4770,8 +4777,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEditor.startSelectionActionMode();
         }
 
-        getViewTreeObserver().removeOnPreDrawListener(this);
-        mPreDrawRegistered = false;
+        unregisterForPreDraw();
 
         return true;
     }
@@ -4783,6 +4789,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTemporaryDetach = false;
 
         if (mEditor != null) mEditor.onAttachedToWindow();
+
+        if (mPreDrawListenerDetached) {
+            getViewTreeObserver().addOnPreDrawListener(this);
+            mPreDrawListenerDetached = false;
+        }
     }
 
     /** @hide */
@@ -4790,7 +4801,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onDetachedFromWindowInternal() {
         if (mPreDrawRegistered) {
             getViewTreeObserver().removeOnPreDrawListener(this);
-            mPreDrawRegistered = false;
+            mPreDrawListenerDetached = true;
         }
 
         resetResolvedDrawables();
