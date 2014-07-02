@@ -33884,6 +33884,7 @@ package android.view {
     field public static final int FEATURE_RIGHT_ICON = 4; // 0x4
     field public static final int FEATURE_SWIPE_TO_DISMISS = 11; // 0xb
     field public static final int ID_ANDROID_CONTENT = 16908290; // 0x1020002
+    field public static final java.lang.String NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME = "android:navigation:background";
     field public static final int PROGRESS_END = 10000; // 0x2710
     field public static final int PROGRESS_INDETERMINATE_OFF = -4; // 0xfffffffc
     field public static final int PROGRESS_INDETERMINATE_ON = -3; // 0xfffffffd
@@ -33892,6 +33893,7 @@ package android.view {
     field public static final int PROGRESS_START = 0; // 0x0
     field public static final int PROGRESS_VISIBILITY_OFF = -2; // 0xfffffffe
     field public static final int PROGRESS_VISIBILITY_ON = -1; // 0xffffffff
+    field public static final java.lang.String STATUS_BAR_BACKGROUND_TRANSITION_NAME = "android:status:background";
   }
 
   public static abstract interface Window.Callback {
