@@ -150,7 +150,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
         return (jint) AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    uint32_t channelCount = popcount(channelMask);
+    uint32_t channelCount = audio_channel_count_from_in_mask(channelMask);
 
     // compare the format against the Java constants
     audio_format_t format = audioFormatToNative(audioFormat);
