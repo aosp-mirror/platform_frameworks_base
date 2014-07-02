@@ -22886,8 +22886,6 @@ package android.provider {
   public static class CallLog.Calls implements android.provider.BaseColumns {
     ctor public CallLog.Calls();
     method public static java.lang.String getLastOutgoingCall(android.content.Context);
-    field public static final java.lang.String ACCOUNT_COMPONENT_NAME = "subscription_component_name";
-    field public static final java.lang.String ACCOUNT_ID = "subscription_id";
     field public static final java.lang.String CACHED_FORMATTED_NUMBER = "formatted_number";
     field public static final java.lang.String CACHED_LOOKUP_URI = "lookup_uri";
     field public static final java.lang.String CACHED_MATCHED_NUMBER = "matched_number";
@@ -22915,6 +22913,8 @@ package android.provider {
     field public static final java.lang.String NUMBER_PRESENTATION = "presentation";
     field public static final java.lang.String OFFSET_PARAM_KEY = "offset";
     field public static final int OUTGOING_TYPE = 2; // 0x2
+    field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+    field public static final java.lang.String PHONE_ACCOUNT_ID = "subscription_id";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
