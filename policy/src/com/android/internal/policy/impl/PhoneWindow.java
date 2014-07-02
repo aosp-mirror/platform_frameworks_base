@@ -122,6 +122,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
 
+    private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
+            (1 << FEATURE_CUSTOM_TITLE) |
+            (1 << FEATURE_CONTENT_TRANSITIONS) |
+            (1 << FEATURE_ACTION_MODE_OVERLAY);
+
     /**
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
@@ -275,16 +280,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             throw new AndroidRuntimeException("requestFeature() must be called before adding content");
         }
         final int features = getFeatures();
-        if ((features != DEFAULT_FEATURES) && (featureId == FEATURE_CUSTOM_TITLE)) {
-
-            /* Another feature is enabled and the user is trying to enable the custom title feature */
-            throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
-        }
-        if (((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) &&
-                (featureId != FEATURE_CUSTOM_TITLE) && (featureId != FEATURE_ACTION_MODE_OVERLAY)) {
-
-            /* Custom title feature is enabled and the user is trying to enable another feature */
-            throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
+        final int newFeatures = features | (1 << featureId);
+        if ((newFeatures & (1 << FEATURE_CUSTOM_TITLE)) != 0 &&
+                (newFeatures & ~CUSTOM_TITLE_COMPATIBLE_FEATURES) != 0) {
+            // Another feature is enabled and the user is trying to enable the custom title feature
+            // or custom title feature is enabled and the user is trying to enable another feature
+            throw new AndroidRuntimeException(
+                    "You cannot combine custom titles with other title features");
         }
         if ((features & (1 << FEATURE_NO_TITLE)) != 0 && featureId == FEATURE_ACTION_BAR) {
             return false; // Ignore. No title dominates.
@@ -395,7 +397,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
             // TODO Augment the scenes/transitions API to support this.
-            Log.v(TAG, "addContentView does not support content transitions");
+            throw new UnsupportedOperationException(
+                    "addContentView does not support content transitions");
         }
         mContentParent.addView(view, params);
         final Callback cb = getCallback();
