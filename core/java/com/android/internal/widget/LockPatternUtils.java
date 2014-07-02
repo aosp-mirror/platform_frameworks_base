@@ -689,7 +689,7 @@ public class LockPatternUtils {
         try {
             getLockSettings().setLockPassword(password, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
-            if (password != null) {
+            if (!TextUtils.isEmpty(password)) {
                 int computedQuality = computePasswordQuality(password);
 
                 if (userHandle == UserHandle.USER_OWNER) {
@@ -764,9 +764,10 @@ public class LockPatternUtils {
                 }
                 setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
             } else {
+                // Empty password
                 if (userHandle == UserHandle.USER_OWNER) {
-                    // Update the encryption password.
-                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, password);
+                    // Set the encryption password to default.
+                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
                 }
 
                 dpm.setActivePasswordState(
