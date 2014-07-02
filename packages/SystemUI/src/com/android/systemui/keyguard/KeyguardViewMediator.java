@@ -881,8 +881,7 @@ public class KeyguardViewMediator extends SystemUI {
             return;
         }
 
-        if (!mUserManager.isUserSwitcherEnabled()
-                && mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
+        if (mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
             return;
         }
