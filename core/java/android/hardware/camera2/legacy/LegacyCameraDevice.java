@@ -18,6 +18,7 @@ package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -202,9 +203,11 @@ public class LegacyCameraDevice implements AutoCloseable {
      *
      * @param cameraId the id of the camera.
      * @param camera an open {@link Camera} device.
+     * @param characteristics the static camera characteristics for this camera device
      * @param callbacks {@link ICameraDeviceCallbacks} callbacks to call for Camera2 API operations.
      */
-    public LegacyCameraDevice(int cameraId, Camera camera, ICameraDeviceCallbacks callbacks) {
+    public LegacyCameraDevice(int cameraId, Camera camera, CameraCharacteristics characteristics,
+            ICameraDeviceCallbacks callbacks) {
         mCameraId = cameraId;
         mDeviceCallbacks = callbacks;
         TAG = String.format("CameraDevice-%d-LE", mCameraId);
@@ -215,7 +218,7 @@ public class LegacyCameraDevice implements AutoCloseable {
         mCallbackHandler = new Handler(mCallbackHandlerThread.getLooper());
         mDeviceState.setCameraDeviceCallbacks(mCallbackHandler, mStateListener);
         mRequestThreadManager =
-                new RequestThreadManager(cameraId, camera, mDeviceState);
+                new RequestThreadManager(cameraId, camera, characteristics, mDeviceState);
         mRequestThreadManager.start();
     }
 

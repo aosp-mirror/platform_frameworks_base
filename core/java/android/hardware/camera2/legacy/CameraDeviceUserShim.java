@@ -199,7 +199,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
         CameraCharacteristics characteristics =
                 LegacyMetadataMapper.createCharacteristics(legacyCamera.getParameters(), info);
-        LegacyCameraDevice device = new LegacyCameraDevice(cameraId, legacyCamera, callbacks);
+        LegacyCameraDevice device = new LegacyCameraDevice(
+                cameraId, legacyCamera, characteristics, callbacks);
         return new CameraDeviceUserShim(cameraId, device, characteristics, init);
     }
 

@@ -17,28 +17,31 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
-import android.hardware.Camera.Size;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
+import android.hardware.camera2.utils.ArrayUtils;
+import android.hardware.camera2.utils.ListUtils;
+import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
 import android.util.Range;
+import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CameraCharacteristics.*;
+import static android.hardware.camera2.legacy.ParameterUtils.*;
 
 /**
  * Provide legacy-specific implementations of camera2 metadata for legacy devices, such as the
@@ -81,10 +84,9 @@ public class LegacyMetadataMapper {
      * TODO: Remove these constants and strip out any code that previously relied on them
      * being set to true.
      */
-    private static final boolean LIE_ABOUT_FLASH = true;
-    private static final boolean LIE_ABOUT_AE = true;
-    private static final boolean LIE_ABOUT_AF = true;
-    private static final boolean LIE_ABOUT_AWB = true;
+    static final boolean LIE_ABOUT_AE_STATE = true;
+    static final boolean LIE_ABOUT_AF = true;
+    static final boolean LIE_ABOUT_AWB = true;
 
     /**
      * Create characteristics for a legacy device by mapping the {@code parameters}
@@ -155,7 +157,12 @@ public class LegacyMetadataMapper {
          * info.supportedHardwareLevel
          */
         m.set(INFO_SUPPORTED_HARDWARE_LEVEL, INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
-        mapStreamConfigs(m, p);
+
+        /*
+         * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
+         */
+        mapScalerStreamConfigs(m, p);
+
         /*
          * control.ae*
          */
@@ -185,12 +192,22 @@ public class LegacyMetadataMapper {
         // TODO: map other fields
 
         /*
+         * scaler.*
+         */
+        mapScaler(m, p);
+
+        /*
+         * sensor.*
+         */
+        mapSensor(m, p);
+
+        /*
          * sync.*
          */
         mapSync(m, p);
     }
 
-    private static void mapStreamConfigs(CameraMetadataNative m, Camera.Parameters p) {
+    private static void mapScalerStreamConfigs(CameraMetadataNative m, Camera.Parameters p) {
 
         ArrayList<StreamConfiguration> availableStreamConfigs = new ArrayList<>();
         /*
@@ -202,7 +219,7 @@ public class LegacyMetadataMapper {
          * Use platform-internal format constants here, since StreamConfigurationMap does the
          * remapping to public format constants.
          */
-        List<Size> previewSizes = p.getSupportedPreviewSizes();
+        List<Camera.Size> previewSizes = p.getSupportedPreviewSizes();
         appendStreamConfig(availableStreamConfigs,
                 HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, previewSizes);
         appendStreamConfig(availableStreamConfigs,
@@ -262,32 +279,11 @@ public class LegacyMetadataMapper {
     @SuppressWarnings({"unchecked"})
     private static void mapControlAe(CameraMetadataNative m, Camera.Parameters p) {
         /*
-         * control.aeAvailableTargetFpsRanges
-         */
-        List<int[]> fpsRanges = p.getSupportedPreviewFpsRange();
-        if (fpsRanges == null) {
-            throw new AssertionError("Supported FPS ranges cannot be null.");
-        }
-        int rangesSize = fpsRanges.size();
-        if (rangesSize <= 0) {
-            throw new AssertionError("At least one FPS range must be supported.");
-        }
-        Range<Integer>[] ranges = new Range[rangesSize];
-        int i = 0;
-        for (int[] r : fpsRanges) {
-            ranges[i++] = Range.create(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                    r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-        }
-        m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
-
-        /*
          * control.aeAvailableAntiBandingModes
          */
-
         List<String> antiBandingModes = p.getSupportedAntibanding();
-        int antiBandingModesSize = antiBandingModes.size();
-        if (antiBandingModesSize > 0) {
-            int[] modes = new int[antiBandingModesSize];
+        if (antiBandingModes != null && antiBandingModes.size() > 0) { // antibanding is optional
+            int[] modes = new int[antiBandingModes.size()];
             int j = 0;
             for (String mode : antiBandingModes) {
                 int convertedMode = convertAntiBandingMode(mode);
@@ -299,44 +295,63 @@ public class LegacyMetadataMapper {
                 }
             }
             m.set(CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, Arrays.copyOf(modes, j));
+        } else {
+            m.set(CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, new int[0]);
+        }
+
+        /*
+         * control.aeAvailableTargetFpsRanges
+         */
+        {
+            List<int[]> fpsRanges = p.getSupportedPreviewFpsRange();
+            if (fpsRanges == null) {
+                throw new AssertionError("Supported FPS ranges cannot be null.");
+            }
+            int rangesSize = fpsRanges.size();
+            if (rangesSize <= 0) {
+                throw new AssertionError("At least one FPS range must be supported.");
+            }
+            Range<Integer>[] ranges = new Range[rangesSize];
+            int i = 0;
+            for (int[] r : fpsRanges) {
+                ranges[i++] = Range.create(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                        r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+            }
+            m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
         }
 
         /*
          * control.aeAvailableModes
          */
-        List<String> flashModes = p.getSupportedFlashModes();
+        {
+            List<String> flashModes = p.getSupportedFlashModes();
 
-        String[] flashModeStrings = new String[] {
-                Camera.Parameters.FLASH_MODE_AUTO,
-                Camera.Parameters.FLASH_MODE_ON,
-                Camera.Parameters.FLASH_MODE_RED_EYE,
-                // Map these manually
-                Camera.Parameters.FLASH_MODE_TORCH,
-                Camera.Parameters.FLASH_MODE_OFF,
-        };
-        int[] flashModeInts = new int[] {
-                CONTROL_AE_MODE_ON,
-                CONTROL_AE_MODE_ON_AUTO_FLASH,
-                CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
-        };
-        int[] aeAvail = convertStringListToIntArray(flashModes, flashModeStrings, flashModeInts);
-
-        // No flash control -> AE is always on
-        if (aeAvail == null || aeAvail.length == 0) {
-            aeAvail = new int[] {
-                    CONTROL_AE_MODE_ON
+            String[] flashModeStrings = new String[] {
+                    Camera.Parameters.FLASH_MODE_AUTO,
+                    Camera.Parameters.FLASH_MODE_ON,
+                    Camera.Parameters.FLASH_MODE_RED_EYE,
+                    // Map these manually
+                    Camera.Parameters.FLASH_MODE_TORCH,
+                    Camera.Parameters.FLASH_MODE_OFF,
             };
-        }
-
-        if (LIE_ABOUT_FLASH) {
-            // TODO: Remove this branch
-            Log.w(TAG, "mapControlAe - lying; saying we only support CONTROL_AE_MODE_ON");
-            aeAvail = new int[] {
-                    CONTROL_AE_MODE_ON
+            int[] flashModeInts = new int[] {
+                    CONTROL_AE_MODE_ON,
+                    CONTROL_AE_MODE_ON_AUTO_FLASH,
+                    CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
             };
-        }
+            int[] aeAvail = ArrayUtils.convertStringListToIntArray(
+                    flashModes, flashModeStrings, flashModeInts);
 
-        m.set(CONTROL_AE_AVAILABLE_MODES, aeAvail);
+            // No flash control -> AE is always on
+            if (aeAvail == null || aeAvail.length == 0) {
+                aeAvail = new int[] {
+                        CONTROL_AE_MODE_ON
+                };
+            }
+
+            // Note that AE_MODE_OFF is never available.
+            m.set(CONTROL_AE_AVAILABLE_MODES, aeAvail);
+        }
     }
 
     private static void mapControlAwb(CameraMetadataNative m, Camera.Parameters p) {
@@ -373,18 +388,11 @@ public class LegacyMetadataMapper {
     private static void mapFlash(CameraMetadataNative m, Camera.Parameters p) {
         boolean flashAvailable = false;
         List<String> supportedFlashModes = p.getSupportedFlashModes();
+
         if (supportedFlashModes != null) {
             // If only 'OFF' is available, we don't really have flash support
-            if (!(supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_OFF) &&
-                    supportedFlashModes.size() == 1)) {
-                flashAvailable = true;
-            }
-        }
-
-        if (LIE_ABOUT_FLASH && flashAvailable) {
-            // TODO: remove this branch
-            Log.w(TAG, "mapFlash - lying; saying we never support flash");
-            flashAvailable = false;
+            flashAvailable = !ListUtils.listElementsEqualTo(
+                    supportedFlashModes, Camera.Parameters.FLASH_MODE_OFF);
         }
 
         /*
@@ -425,6 +433,35 @@ public class LegacyMetadataMapper {
                 (byte)(REQUEST_PIPELINE_MAX_DEPTH_HAL1 + REQUEST_PIPELINE_MAX_DEPTH_OURS));
     }
 
+    private static void mapScaler(CameraMetadataNative m, Parameters p) {
+        /*
+         * scaler.availableMaxDigitalZoom
+         */
+        m.set(SCALER_AVAILABLE_MAX_DIGITAL_ZOOM, ParameterUtils.getMaxZoomRatio(p));
+
+        /*
+         * scaler.croppingType = CENTER_ONLY
+         */
+        m.set(SCALER_CROPPING_TYPE, SCALER_CROPPING_TYPE_CENTER_ONLY);
+    }
+
+    private static void mapSensor(CameraMetadataNative m, Parameters p) {
+        // Use the largest jpeg size (by area) for both active array and pixel array
+        Size largestJpegSize = getLargestSupportedJpegSizeByArea(p);
+        /*
+         * sensor.info.activeArraySize
+         */
+        {
+            Rect activeArrayRect = ParamsUtils.createRect(largestJpegSize);
+            m.set(SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArrayRect);
+        }
+
+        /*
+         * sensor.info.pixelArraySize
+         */
+        m.set(SENSOR_INFO_PIXEL_ARRAY_SIZE, largestJpegSize);
+    }
+
     private static void mapSync(CameraMetadataNative m, Parameters p) {
         /*
          * sync.maxLatency
@@ -442,13 +479,18 @@ public class LegacyMetadataMapper {
     }
 
     /**
-     * Returns -1 if the anti-banding mode string is null, or not supported.
+     * Convert the ae antibanding mode from api1 into api2.
+     *
+     * @param mode the api1 mode, {@code null} is allowed and will return {@code -1}.
+     *
+     * @return The api2 value, or {@code -1} by default if conversion failed
      */
-    private static int convertAntiBandingMode(final String mode) {
+    private static int convertAntiBandingMode(String mode) {
         if (mode == null) {
             return -1;
         }
-        switch(mode) {
+
+        switch (mode) {
             case Camera.Parameters.ANTIBANDING_OFF: {
                 return CONTROL_AE_ANTIBANDING_MODE_OFF;
             }
@@ -462,34 +504,27 @@ public class LegacyMetadataMapper {
                 return CONTROL_AE_ANTIBANDING_MODE_AUTO;
             }
             default: {
+                Log.w(TAG, "convertAntiBandingMode - Unknown antibanding mode " + mode);
                 return -1;
             }
         }
     }
 
     /**
-     * Returns null if the anti-banding mode enum is not supported.
+     * Convert the ae antibanding mode from api1 into api2.
+     *
+     * @param mode the api1 mode, {@code null} is allowed and will return {@code MODE_OFF}.
+     *
+     * @return The api2 value, or {@code MODE_OFF} by default if conversion failed
      */
-    private static String convertAntiBandingModeToLegacy(int mode) {
-        switch(mode) {
-            case CONTROL_AE_ANTIBANDING_MODE_OFF: {
-                return Camera.Parameters.ANTIBANDING_OFF;
-            }
-            case CONTROL_AE_ANTIBANDING_MODE_50HZ: {
-                return Camera.Parameters.ANTIBANDING_50HZ;
-            }
-            case CONTROL_AE_ANTIBANDING_MODE_60HZ: {
-                return Camera.Parameters.ANTIBANDING_60HZ;
-            }
-            case CONTROL_AE_ANTIBANDING_MODE_AUTO: {
-                return Camera.Parameters.ANTIBANDING_AUTO;
-            }
-            default: {
-                return null;
-            }
+    static int convertAntiBandingModeOrDefault(String mode) {
+        int antiBandingMode = convertAntiBandingMode(mode);
+        if (antiBandingMode == -1) {
+            return CONTROL_AE_ANTIBANDING_MODE_OFF;
         }
-    }
 
+        return antiBandingMode;
+    }
 
     private static int[] convertAeFpsRangeToLegacy(Range<Integer> fpsRange) {
         int[] legacyFps = new int[2];
@@ -512,164 +547,15 @@ public class LegacyMetadataMapper {
     }
 
     /**
-     * Generate capture result metadata from legacy camera parameters.
+     * Set the legacy parameters using the {@link LegacyRequest legacy request}.
      *
-     * @param params a {@link Camera.Parameters} object to generate metadata from.
-     * @param request the {@link CaptureRequest} used for this result.
-     * @param timestamp the timestamp to use for this result in nanoseconds.
-     * @return a {@link CameraMetadataNative} object containing result metadata.
+     * <p>The legacy request's parameters are changed as a side effect of calling this
+     * method.</p>
+     *
+     * @param request a non-{@code null} legacy request
      */
-    public static CameraMetadataNative convertResultMetadata(Camera.Parameters params,
-                                                      CaptureRequest request,
-                                                      long timestamp) {
-        CameraMetadataNative result = new CameraMetadataNative();
-
-        /*
-         * control
-         */
-        // control.afState
-        if (LIE_ABOUT_AF) {
-            // TODO: Implement autofocus state machine
-            result.set(CaptureResult.CONTROL_AF_MODE, request.get(CaptureRequest.CONTROL_AF_MODE));
-        }
-
-        // control.aeState
-        if (LIE_ABOUT_AE) {
-            // Lie to pass CTS temporarily.
-            // TODO: Implement precapture trigger, after which we can report CONVERGED ourselves
-            result.set(CaptureResult.CONTROL_AE_STATE,
-                    CONTROL_AE_STATE_CONVERGED);
-
-            result.set(CaptureResult.CONTROL_AE_MODE,
-                    request.get(CaptureRequest.CONTROL_AE_MODE));
-        }
-
-        // control.awbLock
-        result.set(CaptureResult.CONTROL_AWB_LOCK, params.getAutoWhiteBalanceLock());
-
-        // control.awbState
-        if (LIE_ABOUT_AWB) {
-            // Lie to pass CTS temporarily.
-            // TODO: CTS needs to be updated not to query this value
-            // for LIMITED devices unless its guaranteed to be available.
-            result.set(CaptureResult.CONTROL_AWB_STATE,
-                    CameraMetadata.CONTROL_AWB_STATE_CONVERGED);
-            // TODO: Read the awb mode from parameters instead
-            result.set(CaptureResult.CONTROL_AWB_MODE,
-                    request.get(CaptureRequest.CONTROL_AWB_MODE));
-        }
-
-        /*
-         * lens
-         */
-        // lens.focalLength
-        result.set(CaptureResult.LENS_FOCAL_LENGTH, params.getFocalLength());
-
-        /*
-         * sensor
-         */
-        // sensor.timestamp
-        result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
-
-        // TODO: Remaining result metadata tags conversions.
-        return result;
-    }
-
-    /**
-     * Set the legacy parameters using the request metadata.
-     *
-     * @param request a {@link CaptureRequest} object to generate parameters from.
-     * @param params the a {@link Camera.Parameters} to set parameters in.
-     */
-    public static void convertRequestMetadata(CaptureRequest request,
-            /*out*/Camera.Parameters params) {
-
-        /*
-         * control.ae*
-         */
-        // control.aeAntibandingMode
-        Integer antiBandingMode = request.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE);
-        if (antiBandingMode != null) {
-            String legacyMode = convertAntiBandingModeToLegacy(antiBandingMode);
-            if (legacyMode != null) params.setAntibanding(legacyMode);
-        }
-
-        // control.aeTargetFpsRange
-        Range<Integer> aeFpsRange = request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
-        if (aeFpsRange != null) {
-            int[] legacyFps = convertAeFpsRangeToLegacy(aeFpsRange);
-            params.setPreviewFpsRange(legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                    legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-        }
-
-        /*
-         * control
-         */
-        // control.awbLock
-        Boolean awbLock = request.get(CaptureRequest.CONTROL_AWB_LOCK);
-        params.setAutoWhiteBalanceLock(awbLock == null ? false : awbLock);
-    }
-
-    /**
-     * Create an int[] from the List<> by using {@code convertFrom} and {@code convertTo}
-     * as a one-to-one map (via the index).
-     *
-     * <p>Strings not appearing in {@code convertFrom} are ignored (with a warning);
-     * strings appearing in {@code convertFrom} but not {@code convertTo} are silently
-     * dropped.</p>
-     *
-     * @param list Source list of strings
-     * @param convertFrom Conversion list of strings
-     * @param convertTo Conversion list of ints
-     * @return An array of ints where the values correspond to the ones in {@code convertTo}
-     *         or {@code null} if {@code list} was {@code null}
-     */
-    private static int[] convertStringListToIntArray(
-            List<String> list, String[] convertFrom, int[] convertTo) {
-        if (list == null) {
-            return null;
-        }
-
-        List<Integer> convertedList = new ArrayList<>(list.size());
-
-        for (String str : list) {
-            int strIndex = getArrayIndex(convertFrom, str);
-
-            // Guard against bad API1 values
-            if (strIndex < 0) {
-                Log.w(TAG, "Ignoring invalid parameter " + str);
-                continue;
-            }
-
-            // Ignore values we can't map into (intentional)
-            if (strIndex < convertTo.length) {
-                convertedList.add(convertTo[strIndex]);
-            }
-        }
-
-        int[] returnArray = new int[convertedList.size()];
-        for (int i = 0; i < returnArray.length; ++i) {
-            returnArray[i] = convertedList.get(i);
-        }
-
-        return returnArray;
-    }
-
-    /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
-    private static <T> int getArrayIndex(T[] array, T needle) {
-        if (needle == null) {
-            return -1;
-        }
-
-        int index = 0;
-        for (T elem : array) {
-            if (Objects.equals(elem, needle)) {
-                return index;
-            }
-            index++;
-        }
-
-        return -1;
+    public static void convertRequestMetadata(LegacyRequest request) {
+        LegacyRequestMapper.convertRequestMetadata(request);
     }
 
     /**

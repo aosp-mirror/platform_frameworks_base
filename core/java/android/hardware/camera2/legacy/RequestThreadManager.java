@@ -18,8 +18,10 @@ package android.hardware.camera2.legacy;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SizeAreaComparator;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.os.ConditionVariable;
 import android.os.Handler;
@@ -35,8 +37,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+
+import static com.android.internal.util.Preconditions.*;
 
 /**
  * This class executes requests to the {@link Camera}.
@@ -56,6 +59,7 @@ public class RequestThreadManager {
 
     private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
     private final Camera mCamera;
+    private final CameraCharacteristics mCharacteristics;
 
     private final CameraDeviceState mDeviceState;
 
@@ -83,7 +87,7 @@ public class RequestThreadManager {
     private Size mIntermediateBufferSize;
 
     private final RequestQueue mRequestQueue = new RequestQueue();
-    private CaptureRequest mLastRequest = null;
+    private LegacyRequest mLastRequest = null;
     private SurfaceTexture mDummyTexture;
     private Surface mDummySurface;
 
@@ -100,31 +104,6 @@ public class RequestThreadManager {
         public ConfigureHolder(ConditionVariable condition, Collection<Surface> surfaces) {
             this.condition = condition;
             this.surfaces = surfaces;
-        }
-    }
-
-
-    /**
-     * Comparator for {@link Size} objects by the area.
-     *
-     * <p>This comparator totally orders by rectangle area. Tiebreaks on width.</p>
-     */
-    private static class SizeAreaComparator implements Comparator<Size> {
-        @Override
-        public int compare(Size size, Size size2) {
-            if (size == null || size2 == null) {
-                throw new NullPointerException("Null argument passed to compare");
-            }
-            if (size.equals(size2)) return 0;
-            long width = size.getWidth();
-            long width2 = size2.getWidth();
-            long area = width * size.getHeight();
-            long area2 = width2 * size2.getHeight();
-            if (area == area2) {
-                return (width > width2) ? 1 : -1;
-            }
-            return (area > area2) ? 1 : -1;
-
         }
     }
 
@@ -354,19 +333,19 @@ public class RequestThreadManager {
                 }
             }
 
-            Size largestOutput = findLargestByArea(outputSizes);
+            Size largestOutput = SizeAreaComparator.findLargestByArea(outputSizes);
 
             // Find largest jpeg dimension - assume to have the same aspect ratio as sensor.
-            List<Size> supportedJpegSizes = convertSizeList(mParams.getSupportedPictureSizes());
-            Size largestJpegDimen = findLargestByArea(supportedJpegSizes);
+            Size largestJpegDimen = ParameterUtils.getLargestSupportedJpegSizeByArea(mParams);
 
-            List<Size> supportedPreviewSizes = convertSizeList(mParams.getSupportedPreviewSizes());
+            List<Size> supportedPreviewSizes = ParameterUtils.convertSizeList(
+                    mParams.getSupportedPreviewSizes());
 
             // Use smallest preview dimension with same aspect ratio as sensor that is >= than all
             // of the configured output dimensions.  If none exists, fall back to using the largest
             // supported preview size.
             long largestOutputArea = largestOutput.getHeight() * (long) largestOutput.getWidth();
-            Size bestPreviewDimen = findLargestByArea(supportedPreviewSizes);
+            Size bestPreviewDimen = SizeAreaComparator.findLargestByArea(supportedPreviewSizes);
             for (Size s : supportedPreviewSizes) {
                 long currArea = s.getWidth() * s.getHeight();
                 long bestArea = bestPreviewDimen.getWidth() * bestPreviewDimen.getHeight();
@@ -476,7 +455,8 @@ public class RequestThreadManager {
             }
             Size smallestBoundJpegSize = new Size(maxConfiguredJpegWidth, maxConfiguredJpegHeight);
 
-            List<Size> supportedJpegSizes = convertSizeList(params.getSupportedPictureSizes());
+            List<Size> supportedJpegSizes = ParameterUtils.convertSizeList(
+                    params.getSupportedPictureSizes());
 
             /*
              * Find the smallest supported JPEG size that can fit the smallest bounding
@@ -513,23 +493,11 @@ public class RequestThreadManager {
         return null;
     }
 
-    private static Size findLargestByArea(List<Size> sizes) {
-        return Collections.max(sizes, new SizeAreaComparator());
-    }
-
     private static boolean checkAspectRatiosMatch(Size a, Size b) {
         float aAspect = a.getWidth() / (float) a.getHeight();
         float bAspect = b.getWidth() / (float) b.getHeight();
 
         return Math.abs(aAspect - bAspect) < ASPECT_RATIO_TOLERANCE;
-    }
-
-    private static List<Size> convertSizeList(List<Camera.Size> sizeList) {
-        List<Size> sizes = new ArrayList<>(sizeList.size());
-        for (Camera.Size s : sizeList) {
-            sizes.add(new Size(s.width, s.height));
-        }
-        return sizes;
     }
 
     // Calculate the highest FPS range supported
@@ -560,7 +528,6 @@ public class RequestThreadManager {
     private final Handler.Callback mRequestHandlerCb = new Handler.Callback() {
         private boolean mCleanup = false;
 
-        @SuppressWarnings("unchecked")
         @Override
         public boolean handleMessage(Message msg) {
             if (mCleanup) {
@@ -603,10 +570,21 @@ public class RequestThreadManager {
                             nextBurst.first.produceRequestHolders(nextBurst.second);
                     for (RequestHolder holder : requests) {
                         CaptureRequest request = holder.getRequest();
-                        if (mLastRequest == null || mLastRequest != request) {
-                            mLastRequest = request;
-                            LegacyMetadataMapper.convertRequestMetadata(mLastRequest,
-                                /*out*/mParams);
+                        if (mLastRequest == null || mLastRequest.captureRequest != request) {
+
+                            // The intermediate buffer is sometimes null, but we always need
+                            // the camera1's configured preview size
+                            Size previewSize = ParameterUtils.convertSize(mParams.getPreviewSize());
+
+                            LegacyRequest legacyRequest = new LegacyRequest(
+                                    mCharacteristics, request, previewSize,
+                                    mParams); // params are copied
+
+                            mLastRequest = legacyRequest;
+                            // Parameters are mutated as a side-effect
+                            LegacyMetadataMapper.convertRequestMetadata(/*inout*/legacyRequest);
+
+                            mParams = legacyRequest.parameters;
                             mCamera.setParameters(mParams);
                         }
                         mDeviceState.setCaptureStart(holder);
@@ -638,8 +616,10 @@ public class RequestThreadManager {
                         if (timestamp == 0) {
                             timestamp = SystemClock.elapsedRealtimeNanos();
                         }
-                        CameraMetadataNative result = LegacyMetadataMapper.convertResultMetadata(mParams,
-                                request, timestamp);
+                        // Update parameters to the latest that we think the camera is using
+                        mLastRequest.setParameters(mCamera.getParameters());
+                        CameraMetadataNative result =
+                                LegacyResultMapper.convertResultMetadata(mLastRequest, timestamp);
                         mDeviceState.setCaptureResult(holder, result);
                     }
                     if (DEBUG) {
@@ -669,15 +649,17 @@ public class RequestThreadManager {
      * @param cameraId the id of the camera to use.
      * @param camera an open camera object.  The RequestThreadManager takes ownership of this camera
      *               object, and is responsible for closing it.
+     * @param characteristics the static camera characteristics corresponding to this camera device
      * @param deviceState a {@link CameraDeviceState} state machine.
      */
-    public RequestThreadManager(int cameraId, Camera camera,
+    public RequestThreadManager(int cameraId, Camera camera, CameraCharacteristics characteristics,
                                 CameraDeviceState deviceState) {
-        mCamera = camera;
+        mCamera = checkNotNull(camera, "camera must not be null");
         mCameraId = cameraId;
+        mCharacteristics = checkNotNull(characteristics, "characteristics must not be null");
         String name = String.format("RequestThread-%d", cameraId);
         TAG = name;
-        mDeviceState = deviceState;
+        mDeviceState = checkNotNull(deviceState, "deviceState must not be null");
         mRequestThread = new RequestHandlerThread(name, mRequestHandlerCb);
     }
 
