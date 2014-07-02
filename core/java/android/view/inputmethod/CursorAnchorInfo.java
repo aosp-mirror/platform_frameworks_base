@@ -291,15 +291,30 @@ public final class CursorAnchorInfo implements Parcelable {
          */
         public Builder setMatrix(final Matrix matrix) {
             mMatrix.set(matrix != null ? matrix : Matrix.IDENTITY_MATRIX);
+            mMatrixInitialized = true;
             return this;
         }
         private final Matrix mMatrix = new Matrix(Matrix.IDENTITY_MATRIX);
+        private boolean mMatrixInitialized = false;
 
         /**
-         * @return {@link CursorAnchorInfo} using parameters in this
-         * {@link Builder}.
+         * @return {@link CursorAnchorInfo} using parameters in this {@link Builder}.
+         * @throws IllegalArgumentException if one or more positional parameters are specified but
+         * the coordinate transformation matrix is not provided via {@link #setMatrix(Matrix)}.
          */
         public CursorAnchorInfo build() {
+            if (!mMatrixInitialized) {
+                // Coordinate transformation matrix is mandatory when positional parameters are
+                // specified.
+                if ((mCharacterRectBuilder != null && !mCharacterRectBuilder.isEmpty()) ||
+                        !Float.isNaN(mInsertionMarkerHorizontal) ||
+                        !Float.isNaN(mInsertionMarkerTop) ||
+                        !Float.isNaN(mInsertionMarkerBaseline) ||
+                        !Float.isNaN(mInsertionMarkerBottom)) {
+                    throw new IllegalArgumentException("Coordinate transformation matrix is " +
+                            "required when positional parameters are specified.");
+                }
+            }
             return new CursorAnchorInfo(this);
         }
 
@@ -317,6 +332,7 @@ public final class CursorAnchorInfo implements Parcelable {
             mInsertionMarkerBaseline = Float.NaN;
             mInsertionMarkerBottom = Float.NaN;
             mMatrix.set(Matrix.IDENTITY_MATRIX);
+            mMatrixInitialized = false;
             if (mCharacterRectBuilder != null) {
                 mCharacterRectBuilder.reset();
             }

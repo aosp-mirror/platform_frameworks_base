@@ -59,9 +59,6 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final float INSERTION_MARKER_TOP = 100.1f;
         final float INSERTION_MARKER_BASELINE = 110.4f;
         final float INSERTION_MARKER_BOTOM = 111.0f;
-        final int CHAR_INDEX = 32;
-        final char CHAR_VALUE = 'X';
-        final char DEFAULT_CHAR_VALUE = '!';
         Matrix TRANSFORM_MATRIX = new Matrix(Matrix.IDENTITY_MATRIX);
         TRANSFORM_MATRIX.setScale(10.0f, 20.0f);
 
@@ -138,6 +135,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerTop());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBottom());
+        assertEquals(Matrix.IDENTITY_MATRIX, uninitializedInfo.getMatrix());
     }
 
     @SmallTest
@@ -166,6 +164,54 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         matrix.set(MATRIX3);
         assertEquals(MATRIX1, firstInstance.getMatrix());
         assertEquals(MATRIX2, secondInstance.getMatrix());
+    }
+
+    @SmallTest
+    public void testMatrixIsRequired() throws Exception {
+        final int SELECTION_START = 30;
+        final int SELECTION_END = 40;
+        final int COMPOSING_TEXT_START = 32;
+        final String COMPOSING_TEXT = "test";
+        final float INSERTION_MARKER_HORIZONTAL = 10.5f;
+        final float INSERTION_MARKER_TOP = 100.1f;
+        final float INSERTION_MARKER_BASELINE = 110.4f;
+        final float INSERTION_MARKER_BOTOM = 111.0f;
+        Matrix TRANSFORM_MATRIX = new Matrix(Matrix.IDENTITY_MATRIX);
+        TRANSFORM_MATRIX.setScale(10.0f, 20.0f);
+
+        final Builder builder = new Builder();
+        // Check twice to make sure if Builder#reset() works as expected.
+        for (int repeatCount = 0; repeatCount < 2; ++repeatCount) {
+            builder.setSelectionRange(SELECTION_START, SELECTION_END)
+                    .setComposingText(COMPOSING_TEXT_START, COMPOSING_TEXT);
+            try {
+                // Should succeed as coordinate transformation matrix is not required if no
+                // positional information is specified.
+                new Builder().build();
+            } catch (IllegalArgumentException ex) {
+                assertTrue(false);
+            }
+
+            builder.setInsertionMarkerLocation(INSERTION_MARKER_HORIZONTAL, INSERTION_MARKER_TOP,
+                    INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM);
+            try {
+                // Coordinate transformation matrix is required if no positional information is
+                // specified.
+                new Builder().build();
+            } catch (IllegalArgumentException ex) {
+                assertTrue(true);
+            }
+
+            builder.setMatrix(TRANSFORM_MATRIX);
+            try {
+                // Should succeed as coordinate transformation matrix is required.
+                new Builder().build();
+            } catch (IllegalArgumentException ex) {
+                assertTrue(false);
+            }
+
+            builder.reset();
+        }
     }
 
     @SmallTest
