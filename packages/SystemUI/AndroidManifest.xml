@@ -106,6 +106,8 @@
     <!-- Wifi Display -->
     <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
