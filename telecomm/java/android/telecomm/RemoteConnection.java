@@ -43,7 +43,7 @@ public final class RemoteConnection {
     private final String mConnectionId;
     private final Set<Listener> mListeners = new HashSet<>();
 
-    private int mState;
+    private int mState = Connection.State.NEW;
     private int mDisconnectCause = DisconnectCause.NOT_VALID;
     private String mDisconnectMessage;
     private boolean mRequestingRingback;
@@ -65,6 +65,10 @@ public final class RemoteConnection {
 
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
+    }
+
+    public int getState() {
+        return mState;
     }
 
     public int getDisconnectCause() {

@@ -27780,6 +27780,7 @@ package android.telecomm {
     method public void disconnect();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
+    method public int getState();
     method public void hold();
     method public void playDtmf(char);
     method public void postDialContinue(boolean);
