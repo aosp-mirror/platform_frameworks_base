@@ -44,6 +44,8 @@ import android.view.WindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
+import java.util.List;
+
 /**
  * The TvInputService class represents a TV input or source such as HDMI or built-in tuner which
  * provides pass-through video or broadcast TV programs.
@@ -220,72 +222,6 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the change on the format of the video stream. This is expected to be called at the
-         * beginning of the playback and later when the format has been changed.
-         *
-         * @param width The width of the video.
-         * @param height The height of the video.
-         * @param interlaced Whether the video is interlaced mode or planer mode.
-         * @hide
-         */
-        public void dispatchVideoStreamChanged(final int width, final int height,
-                final boolean interlaced) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "dispatchVideoSizeChanged");
-                        mSessionCallback.onVideoStreamChanged(width, height, interlaced);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchVideoSizeChanged");
-                    }
-                }
-            });
-        }
-
-        /**
-         * Sends the change on the format of the audio stream. This is expected to be called at the
-         * beginning of the playback and later when the format has been changed.
-         *
-         * @param channelNumber The number of channels in the audio stream.
-         * @hide
-         */
-        public void dispatchAudioStreamChanged(final int channelNumber) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "dispatchAudioStreamChanged");
-                        mSessionCallback.onAudioStreamChanged(channelNumber);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchAudioStreamChanged");
-                    }
-                }
-            });
-        }
-
-        /**
-         * Sends the change on the closed caption stream. This is expected to be called at the
-         * beginning of the playback and later when the stream has been changed.
-         *
-         * @param hasClosedCaption Whether the stream has closed caption or not.
-         * @hide
-         */
-        public void dispatchClosedCaptionStreamChanged(final boolean hasClosedCaption) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "dispatchClosedCaptionStreamChanged");
-                        mSessionCallback.onClosedCaptionStreamChanged(hasClosedCaption);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in dispatchClosedCaptionStreamChanged");
-                    }
-                }
-            });
-        }
-
-        /**
          * Notifies the channel of the session is retuned by TV input.
          *
          * @param channelUri The URI of a channel.
@@ -299,6 +235,30 @@ public abstract class TvInputService extends Service {
                         mSessionCallback.onChannelRetuned(channelUri);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in dispatchChannelRetuned");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the change on the track information. This is expected to be called whenever a
+         * track is added/removed and the metadata of a track is modified.
+         *
+         * @param tracks A list which includes track information.
+         */
+        public void dispatchTrackInfoChanged(final List<TvTrackInfo> tracks) {
+            if (!TvTrackInfo.checkSanity(tracks)) {
+                throw new IllegalArgumentException(
+                        "Two or more selected tracks for a track type.");
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchTrackInfoChanged");
+                        mSessionCallback.onTrackInfoChanged(tracks);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchTrackInfoChanged");
                     }
                 }
             });
@@ -333,6 +293,38 @@ public abstract class TvInputService extends Service {
          * @return {@code true} the tuning was successful, {@code false} otherwise.
          */
         public abstract boolean onTune(Uri channelUri);
+
+        /**
+         * Selects a given track.
+         * <p>
+         * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
+         * track selected previously should be unselected in the implementation of this method.
+         * Also, if the select operation was successful, the implementation should call
+         * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
+         * </p>
+         * @param track The track to be selected.
+         * @return {@code true} if the select operation was successful, {@code false} otherwise.
+         * @see #dispatchTrackInfoChanged(TvTrackInfo[])
+         * @see TvTrackInfo#KEY_IS_SELECTED
+         */
+        public boolean onSelectTrack(TvTrackInfo track) {
+            return false;
+        }
+
+        /**
+         * Unselects a given track.
+         * <p>
+         * If the unselect operation was successful, the implementation should call
+         * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
+         * </p>
+         * @param track The track to be unselected.
+         * @return {@code true} if the unselect operation was successful, {@code false} otherwise.
+         * @see #dispatchTrackInfoChanged(TvTrackInfo[])
+         * @see TvTrackInfo#KEY_IS_SELECTED
+         */
+        public boolean onUnselectTrack(TvTrackInfo track) {
+            return false;
+        }
 
         /**
          * Called when an application requests to create an overlay view. Each session
@@ -496,6 +488,22 @@ public abstract class TvInputService extends Service {
          */
         void tune(Uri channelUri) {
             onTune(channelUri);
+            // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onSelectTrack}.
+         */
+        void selectTrack(TvTrackInfo track) {
+            onSelectTrack(track);
+            // TODO: Handle failure.
+        }
+
+        /**
+         * Calls {@link #onUnselectTrack}.
+         */
+        void unselectTrack(TvTrackInfo track) {
+            onUnselectTrack(track);
             // TODO: Handle failure.
         }
 

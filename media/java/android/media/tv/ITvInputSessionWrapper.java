@@ -44,9 +44,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_SURFACE = 2;
     private static final int DO_SET_VOLUME = 3;
     private static final int DO_TUNE = 4;
-    private static final int DO_CREATE_OVERLAY_VIEW = 5;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 6;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 7;
+    private static final int DO_SELECT_TRACK = 5;
+    private static final int DO_UNSELECT_TRACK = 6;
+    private static final int DO_CREATE_OVERLAY_VIEW = 7;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 8;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 9;
 
     private final HandlerCaller mCaller;
 
@@ -96,6 +98,14 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.tune((Uri) msg.obj);
                 return;
             }
+            case DO_SELECT_TRACK: {
+                mTvInputSessionImpl.selectTrack((TvTrackInfo) msg.obj);
+                return;
+            }
+            case DO_UNSELECT_TRACK: {
+                mTvInputSessionImpl.unselectTrack((TvTrackInfo) msg.obj);
+                return;
+            }
             case DO_CREATE_OVERLAY_VIEW: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
@@ -135,6 +145,16 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void tune(Uri channelUri) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TUNE, channelUri));
+    }
+
+    @Override
+    public void selectTrack(TvTrackInfo track) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SELECT_TRACK, track));
+    }
+
+    @Override
+    public void unselectTrack(TvTrackInfo track) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_UNSELECT_TRACK, track));
     }
 
     @Override

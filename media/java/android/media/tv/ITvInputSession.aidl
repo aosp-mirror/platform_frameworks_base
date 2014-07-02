@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.graphics.Rect;
+import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.view.Surface;
 
@@ -32,6 +33,8 @@ oneway interface ITvInputSession {
     // is to introduce some new concepts that will solve a number of problems in audio policy today.
     void setVolume(float volume);
     void tune(in Uri channelUri);
+    void selectTrack(in TvTrackInfo track);
+    void unselectTrack(in TvTrackInfo track);
 
     void createOverlayView(in IBinder windowToken, in Rect frame);
     void relayoutOverlayView(in Rect frame);

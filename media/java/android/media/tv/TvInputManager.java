@@ -35,6 +35,7 @@ import android.view.Surface;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -89,42 +90,6 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called at the beginning of the playback of a channel and later when the format of
-         * the video stream has been changed.
-         *
-         * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param width The width of the video.
-         * @param height The height of the video.
-         * @param interlaced whether the video is interlaced mode or planer mode.
-         * @hide
-         */
-        public void onVideoStreamChanged(Session session, int width, int height,
-                boolean interlaced) {
-        }
-
-        /**
-         * This is called at the beginning of the playback of a channel and later when the format of
-         * the audio stream has been changed.
-         *
-         * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param channelCount The number of channels in the audio stream.
-         * @hide
-         */
-        public void onAudioStreamChanged(Session session, int channelCount) {
-        }
-
-        /**
-         * This is called at the beginning of the playback of a channel and later when the closed
-         * caption stream has been changed.
-         *
-         * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param hasClosedCaption Whether the stream has closed caption or not.
-         * @hide
-         */
-        public void onClosedCaptionStreamChanged(Session session, boolean hasClosedCaption) {
-        }
-
-        /**
          * This is called when the channel of this session is changed by the underlying TV input
          * with out any {@link TvInputManager.Session#tune(Uri)} request.
          *
@@ -132,6 +97,15 @@ public final class TvInputManager {
          * @param channelUri The URI of a channel.
          */
         public void onChannelRetuned(Session session, Uri channelUri) {
+        }
+
+        /**
+         * This is called when the track information of the session has been changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param tracks A list which includes track information.
+         */
+        public void onTrackInfoChanged(Session session, List<TvTrackInfo> tracks) {
         }
 
         /**
@@ -176,39 +150,21 @@ public final class TvInputManager {
             });
         }
 
-        public void postVideoStreamChanged(final int width, final int height,
-                final boolean interlaced) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSessionCallback.onVideoStreamChanged(mSession, width, height, interlaced);
-                }
-            });
-        }
-
-        public void postAudioStreamChanged(final int channelCount) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSessionCallback.onAudioStreamChanged(mSession, channelCount);
-                }
-            });
-        }
-
-        public void postClosedCaptionStreamChanged(final boolean hasClosedCaption) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSessionCallback.onClosedCaptionStreamChanged(mSession, hasClosedCaption);
-                }
-            });
-        }
-
         public void postChannelRetuned(final Uri channelUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mSessionCallback.onChannelRetuned(mSession, channelUri);
+                }
+            });
+        }
+
+        public void postTrackInfoChanged(final List<TvTrackInfo> tracks) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSession.setTracks(tracks);
+                    mSessionCallback.onTrackInfoChanged(mSession, tracks);
                 }
             });
         }
@@ -301,42 +257,6 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onVideoStreamChanged(int width, int height, boolean interlaced, int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postVideoStreamChanged(width, height, interlaced);
-                }
-            }
-
-            @Override
-            public void onAudioStreamChanged(int channelCount, int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postAudioStreamChanged(channelCount);
-                }
-            }
-
-            @Override
-            public void onClosedCaptionStreamChanged(boolean hasClosedCaption, int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postClosedCaptionStreamChanged(hasClosedCaption);
-                }
-            }
-
-            @Override
             public void onChannelRetuned(Uri channelUri, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -345,6 +265,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postChannelRetuned(channelUri);
+                }
+            }
+
+            @Override
+            public void onTrackInfoChanged(List<TvTrackInfo> tracks, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTrackInfoChanged(tracks);
                 }
             }
 
@@ -550,6 +482,7 @@ public final class TvInputManager {
         private IBinder mToken;
         private TvInputEventSender mSender;
         private InputChannel mChannel;
+        private List<TvTrackInfo> mTracks;
 
         /** @hide */
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
@@ -633,11 +566,71 @@ public final class TvInputManager {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
+            mTracks = null;
             try {
                 mService.tune(mToken, channelUri, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        /**
+         * Select a track.
+         *
+         * @param track the track to be selected.
+         * @see #getTracks()
+         */
+        public void selectTrack(TvTrackInfo track) {
+            if (track == null) {
+                throw new IllegalArgumentException("track cannot be null");
+            }
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.selectTrack(mToken, track, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Unselect a track.
+         *
+         * @param track the track to be selected.
+         * @see #getTracks()
+         */
+        public void unselectTrack(TvTrackInfo track) {
+            if (track == null) {
+                throw new IllegalArgumentException("track cannot be null");
+            }
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.unselectTrack(mToken, track, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Returns a list which includes track information. May return {@code null} if the
+         * information is not available.
+         * @see #selectTrack(TvTrackInfo)
+         * @see #unselectTrack(TvTrackInfo)
+         */
+        public List<TvTrackInfo> getTracks() {
+            if (mTracks == null) {
+                return null;
+            }
+            return new ArrayList<TvTrackInfo>(mTracks);
+        }
+
+        private void setTracks(List<TvTrackInfo> tracks) {
+            mTracks = tracks;
         }
 
         /**

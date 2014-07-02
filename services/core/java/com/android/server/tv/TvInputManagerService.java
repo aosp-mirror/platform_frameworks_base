@@ -46,6 +46,7 @@ import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputService;
+import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -432,59 +433,6 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
-            public void onVideoStreamChanged(int width, int height, boolean interlaced) {
-                synchronized (mLock) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "onVideoStreamChanged(" + width + ", " + height + ")");
-                    }
-                    if (sessionState.mSession == null || sessionState.mClient == null) {
-                        return;
-                    }
-                    try {
-                        sessionState.mClient.onVideoStreamChanged(width, height, interlaced,
-                                sessionState.mSeq);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onVideoStreamChanged");
-                    }
-                }
-            }
-
-            @Override
-            public void onAudioStreamChanged(int channelCount) {
-                synchronized (mLock) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "onAudioStreamChanged(" + channelCount + ")");
-                    }
-                    if (sessionState.mSession == null || sessionState.mClient == null) {
-                        return;
-                    }
-                    try {
-                        sessionState.mClient.onAudioStreamChanged(channelCount, sessionState.mSeq);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onAudioStreamChanged");
-                    }
-                }
-            }
-
-            @Override
-            public void onClosedCaptionStreamChanged(boolean hasClosedCaption) {
-                synchronized (mLock) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "onClosedCaptionStreamChanged(" + hasClosedCaption + ")");
-                    }
-                    if (sessionState.mSession == null || sessionState.mClient == null) {
-                        return;
-                    }
-                    try {
-                        sessionState.mClient.onClosedCaptionStreamChanged(hasClosedCaption,
-                                sessionState.mSeq);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onClosedCaptionStreamChanged");
-                    }
-                }
-            }
-
-            @Override
             public void onChannelRetuned(Uri channelUri) {
                 synchronized (mLock) {
                     if (DEBUG) {
@@ -501,6 +449,24 @@ public final class TvInputManagerService extends SystemService {
                         sessionState.mClient.onChannelRetuned(channelUri, sessionState.mSeq);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in onChannelRetuned");
+                    }
+                }
+            }
+
+            @Override
+            public void onTrackInfoChanged(List<TvTrackInfo> tracks) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onTrackInfoChanged(" + tracks + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onTrackInfoChanged(tracks,
+                                sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onTrackInfoChanged");
                     }
                 }
             }
@@ -887,6 +853,46 @@ public final class TvInputManagerService extends SystemService {
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in tune", e);
                         return;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void selectTrack(IBinder sessionToken, TvTrackInfo track, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "selectTrack");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).selectTrack(
+                                track);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in selectTrack", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void unselectTrack(IBinder sessionToken, TvTrackInfo track, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "unselectTrack");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).unselectTrack(
+                                track);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in unselectTrack", e);
                     }
                 }
             } finally {

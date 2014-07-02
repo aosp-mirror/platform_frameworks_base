@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.MediaPlayer.TrackInfo;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
@@ -36,6 +37,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+
+import java.util.List;
 
 /**
  * View playing TV
@@ -57,6 +60,8 @@ public class TvView extends ViewGroup {
      */
     public static final int ERROR_TV_INPUT_DISCONNECTED = 1;
 
+    private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
+
     private final Handler mHandler = new Handler();
     private TvInputManager.Session mSession;
     private final SurfaceView mSurfaceView;
@@ -69,6 +74,8 @@ public class TvView extends ViewGroup {
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
     private boolean mHasStreamVolume;
     private float mStreamVolume;
+    private int mVideoWidth = VIDEO_SIZE_VALUE_UNKNOWN;
+    private int mVideoHeight = VIDEO_SIZE_VALUE_UNKNOWN;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -206,6 +213,44 @@ public class TvView extends ViewGroup {
         if (mSession != null) {
             release();
         }
+    }
+
+    /**
+     * Select a track.
+     * <p>
+     * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the track
+     * selected in previous will be unselected.
+     * </p>
+     * @param track the track to be selected.
+     * @see #getTracks()
+     */
+    public void selectTrack(TvTrackInfo track) {
+        if (mSession != null) {
+            mSession.selectTrack(track);
+        }
+    }
+
+    /**
+     * Unselect a track.
+     *
+     * @param track the track to be unselected.
+     * @see #getTracks()
+     */
+    public void unselectTrack(TvTrackInfo track) {
+        if (mSession != null) {
+            mSession.unselectTrack(track);
+        }
+    }
+
+    /**
+     * Returns a list which includes of track information. May return {@code null} if the
+     * information is not available.
+     */
+    public List<TvTrackInfo> getTracks() {
+        if (mSession == null) {
+            return null;
+        }
+        return mSession.getTracks();
     }
 
     /**
@@ -401,6 +446,23 @@ public class TvView extends ViewGroup {
                 location[0] + getWidth(), location[1] + getHeight());
     }
 
+    private void updateVideoSize(List<TvTrackInfo> tracks) {
+        for (TvTrackInfo track : tracks) {
+            if (track.getBoolean(TvTrackInfo.KEY_IS_SELECTED)
+                    && track.getInt(TvTrackInfo.KEY_TYPE) == TvTrackInfo.VALUE_TYPE_VIDEO) {
+                int width = track.getInt(TvTrackInfo.KEY_WIDTH);
+                int height = track.getInt(TvTrackInfo.KEY_HEIGHT);
+                if (width != mVideoWidth || height != mVideoHeight) {
+                    mVideoWidth = width;
+                    mVideoHeight = height;
+                    if (mListener != null) {
+                        mListener.onVideoSizeChanged(mSessionCallback.mInputId, width, height);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Interface used to receive various status updates on the {@link TvView}.
      */
@@ -418,41 +480,13 @@ public class TvView extends ViewGroup {
 
         /**
          * This is invoked when the view is tuned to a specific channel and starts decoding video
-         * stream from there. It is also called later when the video format is changed.
+         * stream from there. It is also called later when the video size is changed.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param width The width of the video.
          * @param height The height of the video.
-         * @param interlaced {@code true} if the video is interlaced, {@code false} if the video is
-         *            progressive.
-         * @hide
          */
-        public void onVideoStreamChanged(String inputId, int width, int height,
-                boolean interlaced) {
-        }
-
-        /**
-         * This is invoked when the view is tuned to a specific channel and starts decoding audio
-         * stream from there. It is also called later when the audio format is changed.
-         *
-         * @param inputId The ID of the TV input bound to this view.
-         * @param channelCount The number of channels in the audio stream.
-         * @hide
-         */
-        public void onAudioStreamChanged(String inputId, int channelCount) {
-        }
-
-        /**
-         * This is invoked when the view is tuned to a specific channel and starts decoding data
-         * stream that includes subtitle information from the channel. It is also called later when
-         * the information disappears or appears.
-         *
-         * @param inputId The ID of the TV input bound to this view.
-         * @param hasClosedCaption {@code true} if the stream contains closed caption, {@code false}
-         *            otherwise.
-         * @hide
-         */
-        public void onClosedCaptionStreamChanged(String inputId, boolean hasClosedCaption) {
+        public void onVideoSizeChanged(String inputId, int width, int height) {
         }
 
         /**
@@ -463,6 +497,15 @@ public class TvView extends ViewGroup {
          * @param channelUri The URI of a channel.
          */
         public void onChannelRetuned(String inputId, Uri channelUri) {
+        }
+
+        /**
+         * This is called when the track information has been changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param tracks A list which includes track information.
+         */
+        public void onTrackInfoChanged(String inputId, List<TvTrackInfo> tracks) {
         }
 
         /**
@@ -533,41 +576,12 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onSessionReleased(Session session) {
+            if (this == mSessionCallback) {
+                mSessionCallback = null;
+            }
             mSession = null;
-            mSessionCallback = null;
             if (mListener != null) {
                 mListener.onError(mInputId, ERROR_TV_INPUT_DISCONNECTED);
-            }
-        }
-
-        @Override
-        public void onVideoStreamChanged(Session session, int width, int height,
-                boolean interlaced) {
-            if (DEBUG) {
-                Log.d(TAG, "onVideoSizeChanged(" + width + ", " + height + ")");
-            }
-            if (mListener != null) {
-                mListener.onVideoStreamChanged(mInputId, width, height, interlaced);
-            }
-        }
-
-        @Override
-        public void onAudioStreamChanged(Session session, int channelCount) {
-            if (DEBUG) {
-                Log.d(TAG, "onAudioStreamChanged(" + channelCount + ")");
-            }
-            if (mListener != null) {
-                mListener.onAudioStreamChanged(mInputId, channelCount);
-            }
-        }
-
-        @Override
-        public void onClosedCaptionStreamChanged(Session session, boolean hasClosedCaption) {
-            if (DEBUG) {
-                Log.d(TAG, "onClosedCaptionStreamChanged(" + hasClosedCaption + ")");
-            }
-            if (mListener != null) {
-                mListener.onClosedCaptionStreamChanged(mInputId, hasClosedCaption);
             }
         }
 
@@ -582,8 +596,25 @@ public class TvView extends ViewGroup {
         }
 
         @Override
+        public void onTrackInfoChanged(Session session, List<TvTrackInfo> tracks) {
+            if (this != mSessionCallback) {
+                return;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onTrackInfoChanged()");
+            }
+            updateVideoSize(tracks);
+            if (mListener != null) {
+                mListener.onTrackInfoChanged(mInputId, tracks);
+            }
+        }
+
+        @Override
         public void onSessionEvent(TvInputManager.Session session, String eventType,
                 Bundle eventArgs) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (mListener != null) {
                 mListener.onEvent(mInputId, eventType, eventArgs);
             }

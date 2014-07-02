@@ -16140,6 +16140,7 @@ package android.media.tv {
   public abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session();
     method public void dispatchChannelRetuned(android.net.Uri);
+    method public void dispatchTrackInfoChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -16147,12 +16148,44 @@ package android.media.tv {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onRelease();
+    method public boolean onSelectTrack(android.media.tv.TvTrackInfo);
     method public abstract void onSetStreamVolume(float);
     method public abstract boolean onSetSurface(android.view.Surface);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
+    method public boolean onUnselectTrack(android.media.tv.TvTrackInfo);
     method public void setOverlayViewEnabled(boolean);
+  }
+
+  public final class TvTrackInfo implements android.os.Parcelable {
+    method public boolean containsKey(java.lang.String);
+    method public int describeContents();
+    method public boolean getBoolean(java.lang.String);
+    method public int getInt(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
+    field public static final java.lang.String KEY_HEIGHT = "height";
+    field public static final java.lang.String KEY_IS_SELECTED = "is-selected";
+    field public static final java.lang.String KEY_LANGUAGE = "language";
+    field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
+    field public static final java.lang.String KEY_TAG = "tag";
+    field public static final java.lang.String KEY_TYPE = "type";
+    field public static final java.lang.String KEY_WIDTH = "width";
+    field public static final int VALUE_TYPE_AUDIO = 0; // 0x0
+    field public static final int VALUE_TYPE_SUBTITLE = 2; // 0x2
+    field public static final int VALUE_TYPE_VIDEO = 1; // 0x1
+  }
+
+  public static final class TvTrackInfo.Builder {
+    ctor public TvTrackInfo.Builder(int, java.lang.String, boolean);
+    ctor public TvTrackInfo.Builder(android.media.tv.TvTrackInfo);
+    method public android.media.tv.TvTrackInfo build();
+    method public android.media.tv.TvTrackInfo.Builder putBoolean(java.lang.String, boolean);
+    method public android.media.tv.TvTrackInfo.Builder putInt(java.lang.String, int);
+    method public android.media.tv.TvTrackInfo.Builder putString(java.lang.String, java.lang.String);
   }
 
   public class TvView extends android.view.ViewGroup {
@@ -16160,13 +16193,16 @@ package android.media.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method public java.util.List<android.media.tv.TvTrackInfo> getTracks();
     method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
+    method public void selectTrack(android.media.tv.TvTrackInfo);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
     method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
     method public void tune(java.lang.String, android.net.Uri);
+    method public void unselectTrack(android.media.tv.TvTrackInfo);
     field public static final int ERROR_BUSY = 0; // 0x0
     field public static final int ERROR_TV_INPUT_DISCONNECTED = 1; // 0x1
   }
@@ -16179,6 +16215,8 @@ package android.media.tv {
     ctor public TvView.TvInputListener();
     method public void onChannelRetuned(java.lang.String, android.net.Uri);
     method public void onError(java.lang.String, int);
+    method public void onTrackInfoChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
+    method public void onVideoSizeChanged(java.lang.String, int, int);
   }
 
 }

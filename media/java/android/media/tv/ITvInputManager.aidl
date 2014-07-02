@@ -23,6 +23,7 @@ import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.ITvInputClient;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
+import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.view.Surface;
 
@@ -44,6 +45,8 @@ interface ITvInputManager {
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void setVolume(in IBinder sessionToken, float volume, int userId);
     void tune(in IBinder sessionToken, in Uri channelUri, int userId);
+    void selectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
+    void unselectTrack(in IBinder sessionToken, in TvTrackInfo track, int userId);
 
     void createOverlayView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
             int userId);

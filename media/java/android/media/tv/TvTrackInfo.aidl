@@ -16,19 +16,4 @@
 
 package android.media.tv;
 
-import android.media.tv.ITvInputSession;
-import android.net.Uri;
-import android.media.tv.TvTrackInfo;
-import android.os.Bundle;
-
-/**
- * Helper interface for ITvInputSession to allow the TV input to notify the system service when a
- * new session has been created.
- * @hide
- */
-oneway interface ITvInputSessionCallback {
-    void onSessionCreated(ITvInputSession session);
-    void onSessionEvent(in String name, in Bundle args);
-    void onChannelRetuned(in Uri channelUri);
-    void onTrackInfoChanged(in List<TvTrackInfo> tracks);
-}
+parcelable TvTrackInfo;
