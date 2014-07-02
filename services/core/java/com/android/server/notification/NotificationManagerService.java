@@ -1551,7 +1551,15 @@ public class NotificationManagerService extends SystemService {
                         mNotificationsByKey.remove(old.sbn.getKey());
                         r.isUpdate = true;
                     }
+
                     mNotificationsByKey.put(n.getKey(), r);
+
+                    // Ensure if this is a foreground service that the proper additional
+                    // flags are set.
+                    if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                        notification.flags |= Notification.FLAG_ONGOING_EVENT
+                                | Notification.FLAG_NO_CLEAR;
+                    }
 
                     applyZenModeLocked(r);
 
@@ -1569,13 +1577,6 @@ public class NotificationManagerService extends SystemService {
                         // notifications
                         Slog.e(TAG, "WARNING: In a future release this will crash the app: "
                                 + n.getPackageName());
-                    }
-
-                    // Ensure if this is a foreground service that the proper additional
-                    // flags are set.
-                    if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-                        notification.flags |= Notification.FLAG_ONGOING_EVENT
-                                | Notification.FLAG_NO_CLEAR;
                     }
 
                     buzzBeepBlinkLocked(r);
