@@ -116,8 +116,7 @@ public interface IActivityManager extends IInterface {
     public List<RunningTaskInfo> getTasks(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
-    public ActivityManager.TaskThumbnails getTaskThumbnails(int taskId) throws RemoteException;
-    public Bitmap getTaskTopThumbnail(int taskId) throws RemoteException;
+    public ActivityManager.TaskThumbnail getTaskThumbnail(int taskId) throws RemoteException;
     public List<RunningServiceInfo> getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
@@ -359,8 +358,6 @@ public interface IActivityManager extends IInterface {
     public UserInfo getCurrentUser() throws RemoteException;
     public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException;
     public int[] getRunningUserIds() throws RemoteException;
-
-    public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
 
     public boolean removeTask(int taskId, int flags) throws RemoteException;
 
@@ -631,7 +628,7 @@ public interface IActivityManager extends IInterface {
     int FORCE_STOP_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+78;
     int KILL_PIDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
-    int GET_TASK_THUMBNAILS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
+    int GET_TASK_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
     int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;
     int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
@@ -644,7 +641,7 @@ public interface IActivityManager extends IInterface {
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
-    int GET_TASK_TOP_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
+    int ___AVAILABLE_2___ = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_APPID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
@@ -680,7 +677,7 @@ public interface IActivityManager extends IInterface {
     int GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
     int SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
     int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+129;
-    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+130;
+    int ___AVAILABLE_1___ = IBinder.FIRST_CALL_TRANSACTION+130;
     int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
     int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+132;
     int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+133;

@@ -80,7 +80,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/job/IJobCallback.aidl \
 	core/java/android/app/job/IJobScheduler.aidl \
 	core/java/android/app/job/IJobService.aidl \
-	core/java/android/app/IThumbnailRetriever.aidl \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IUiAutomationConnection.aidl \
 	core/java/android/app/IUiModeManager.aidl \

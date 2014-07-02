@@ -24,12 +24,13 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityOptions;
-import android.app.IThumbnailRetriever;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
@@ -39,12 +40,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-final class TaskRecord extends ThumbnailHolder {
-    private static final String TAG_TASK = "task";
+final class TaskRecord {
     private static final String ATTR_TASKID = "task_id";
     private static final String TAG_INTENT = "intent";
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
@@ -60,6 +61,8 @@ final class TaskRecord extends ThumbnailHolder {
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
+    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
+    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
     private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
@@ -72,7 +75,6 @@ final class TaskRecord extends ThumbnailHolder {
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
     ComponentName realActivity; // The actual activity component that started the task.
-    int numActivities;      // Current number of activities in this task.
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
@@ -123,11 +125,18 @@ final class TaskRecord extends ThumbnailHolder {
     // do not want to delete the stack when the task goes empty.
     boolean mReuseTask = false;
 
+    private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
+    private final File mLastThumbnailFile; // File containing last thubmnail.
+    private final String mFilename;
+    CharSequence lastDescription; // Last description captured for this item.
+
     final ActivityManagerService mService;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
+        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister.IMAGE_EXTENSION;
+        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
         taskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
@@ -142,6 +151,8 @@ final class TaskRecord extends ThumbnailHolder {
             long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription) {
         mService = service;
+        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister.IMAGE_EXTENSION;
+        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
         taskId = _taskId;
         intent = _intent;
         affinityIntent = _affinityIntent;
@@ -240,14 +251,36 @@ final class TaskRecord extends ThumbnailHolder {
         return mTaskToReturnTo;
     }
 
-    void disposeThumbnail() {
-        super.disposeThumbnail();
-        for (int i=mActivities.size()-1; i>=0; i--) {
-            ThumbnailHolder thumb = mActivities.get(i).thumbHolder;
-            if (thumb != this) {
-                thumb.disposeThumbnail();
+    void setLastThumbnail(Bitmap thumbnail) {
+        mLastThumbnail = thumbnail;
+        if (thumbnail == null) {
+            if (mLastThumbnailFile != null) {
+                mLastThumbnailFile.delete();
+            }
+        } else {
+            mService.mTaskPersister.saveImage(thumbnail, mFilename);
+        }
+    }
+
+    void getLastThumbnail(TaskThumbnail thumbs) {
+        thumbs.mainThumbnail = mLastThumbnail;
+        thumbs.thumbnailFileDescriptor = null;
+        if (mLastThumbnailFile.exists()) {
+            try {
+                thumbs.thumbnailFileDescriptor = ParcelFileDescriptor.open(mLastThumbnailFile,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+            } catch (IOException e) {
             }
         }
+    }
+
+    void freeLastThumbnail() {
+        mLastThumbnail = null;
+    }
+
+    void disposeThumbnail() {
+        mLastThumbnail = null;
+        lastDescription = null;
     }
 
     /** Returns the intent for the root activity for this task */
@@ -470,63 +503,22 @@ final class TaskRecord extends ThumbnailHolder {
         return null;
     }
 
-    public ActivityManager.TaskThumbnails getTaskThumbnailsLocked() {
-        TaskAccessInfo info = getTaskAccessInfoLocked();
-        final ActivityRecord resumedActivity = stack.mResumedActivity;
-        if (resumedActivity != null && resumedActivity.thumbHolder == this) {
-            info.mainThumbnail = stack.screenshotActivities(resumedActivity);
-        }
-        if (info.mainThumbnail == null) {
-            info.mainThumbnail = lastThumbnail;
-        }
-        return info;
-    }
-
-    public Bitmap getTaskTopThumbnailLocked() {
+    public TaskThumbnail getTaskThumbnailLocked() {
         if (stack != null) {
             final ActivityRecord resumedActivity = stack.mResumedActivity;
             if (resumedActivity != null && resumedActivity.task == this) {
-                // This task is the current resumed task, we just need to take
-                // a screenshot of it and return that.
-                return stack.screenshotActivities(resumedActivity);
+                final Bitmap thumbnail = stack.screenshotActivities(resumedActivity);
+                setLastThumbnail(thumbnail);
             }
         }
-        // Return the information about the task, to figure out the top
-        // thumbnail to return.
-        TaskAccessInfo info = getTaskAccessInfoLocked();
-        if (info.numSubThumbbails <= 0) {
-            return info.mainThumbnail != null ? info.mainThumbnail : lastThumbnail;
-        }
-        return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
+        final TaskThumbnail taskThumbnail = new TaskThumbnail();
+        getLastThumbnail(taskThumbnail);
+        return taskThumbnail;
     }
 
-    public ActivityRecord removeTaskActivitiesLocked(int subTaskIndex,
-            boolean taskRequired) {
-        TaskAccessInfo info = getTaskAccessInfoLocked();
-        if (info.root == null) {
-            if (taskRequired) {
-                Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
-            }
-            return null;
-        }
-
-        if (subTaskIndex < 0) {
-            // Just remove the entire task.
-            performClearTaskAtIndexLocked(info.rootIndex);
-            return info.root;
-        }
-
-        if (subTaskIndex >= info.subtasks.size()) {
-            if (taskRequired) {
-                Slog.w(TAG, "removeTaskLocked: unknown subTaskIndex " + subTaskIndex);
-            }
-            return null;
-        }
-
-        // Remove all of this task's activities starting at the sub task.
-        TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
-        performClearTaskAtIndexLocked(subtask.index);
-        return subtask.activity;
+    public void removeTaskActivitiesLocked() {
+        // Just remove the entire task.
+        performClearTaskAtIndexLocked(0);
     }
 
     boolean isHomeTask() {
@@ -539,68 +531,6 @@ final class TaskRecord extends ThumbnailHolder {
 
     boolean isOverHomeStack() {
         return mTaskToReturnTo == HOME_ACTIVITY_TYPE || mTaskToReturnTo == RECENTS_ACTIVITY_TYPE;
-    }
-
-    public TaskAccessInfo getTaskAccessInfoLocked() {
-        final TaskAccessInfo thumbs = new TaskAccessInfo();
-        // How many different sub-thumbnails?
-        final int NA = mActivities.size();
-        int j = 0;
-        ThumbnailHolder holder = null;
-        while (j < NA) {
-            ActivityRecord ar = mActivities.get(j);
-            if (!ar.finishing) {
-                thumbs.root = ar;
-                thumbs.rootIndex = j;
-                holder = ar.thumbHolder;
-                if (holder != null) {
-                    thumbs.mainThumbnail = holder.lastThumbnail;
-                }
-                j++;
-                break;
-            }
-            j++;
-        }
-
-        if (j >= NA) {
-            return thumbs;
-        }
-
-        ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
-        thumbs.subtasks = subtasks;
-        while (j < NA) {
-            ActivityRecord ar = mActivities.get(j);
-            j++;
-            if (ar.finishing) {
-                continue;
-            }
-            if (ar.thumbHolder != holder && holder != null) {
-                thumbs.numSubThumbbails++;
-                holder = ar.thumbHolder;
-                TaskAccessInfo.SubTask sub = new TaskAccessInfo.SubTask();
-                sub.holder = holder;
-                sub.activity = ar;
-                sub.index = j-1;
-                subtasks.add(sub);
-            }
-        }
-        if (thumbs.numSubThumbbails > 0) {
-            thumbs.retriever = new IThumbnailRetriever.Stub() {
-                @Override
-                public Bitmap getThumbnail(int index) {
-                    if (index < 0 || index >= thumbs.subtasks.size()) {
-                        return null;
-                    }
-                    TaskAccessInfo.SubTask sub = thumbs.subtasks.get(index);
-                    ActivityRecord resumedActivity = stack.mResumedActivity;
-                    if (resumedActivity != null && resumedActivity.thumbHolder == sub.holder) {
-                        return stack.screenshotActivities(resumedActivity);
-                    }
-                    return sub.holder.lastThumbnail;
-                }
-            };
-        }
-        return thumbs;
     }
 
     /**
@@ -691,6 +621,36 @@ final class TaskRecord extends ThumbnailHolder {
         setIntent(r.intent, r.info);
     }
 
+    void saveTaskDescription(ActivityManager.TaskDescription taskDescription,
+            String iconFilename, XmlSerializer out) throws IOException {
+        if (taskDescription != null) {
+            final String label = taskDescription.getLabel();
+            if (label != null) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
+            }
+            final int colorPrimary = taskDescription.getPrimaryColor();
+            if (colorPrimary != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
+            }
+            final Bitmap icon = taskDescription.getIcon();
+            if (icon != null) {
+                mService.mTaskPersister.saveImage(icon, iconFilename);
+            }
+        }
+    }
+
+    static boolean readTaskDescriptionAttribute(ActivityManager.TaskDescription taskDescription,
+            String attrName, String attrValue) {
+        if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
+            taskDescription.setLabel(attrValue);
+        } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+            taskDescription.setPrimaryColor((int) Long.parseLong(attrValue, 16));
+        } else {
+            return false;
+        }
+        return true;
+    }
+
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         Slog.i(TAG, "Saving task=" + this);
 
@@ -716,7 +676,7 @@ final class TaskRecord extends ThumbnailHolder {
         }
 
         if (lastTaskDescription != null) {
-            TaskPersister.saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
+            saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
                     LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime, out);
         }
 
@@ -743,11 +703,6 @@ final class TaskRecord extends ThumbnailHolder {
             out.startTag(null, TAG_ACTIVITY);
             r.saveToXml(out);
             out.endTag(null, TAG_ACTIVITY);
-        }
-
-        final Bitmap thumbnail = getTaskTopThumbnailLocked();
-        if (thumbnail != null) {
-            TaskPersister.saveImage(thumbnail, String.valueOf(taskId) + TASK_THUMBNAIL_SUFFIX);
         }
     }
 
@@ -800,8 +755,7 @@ final class TaskRecord extends ThumbnailHolder {
                 lastTimeOnTop = Long.valueOf(attrValue);
             } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
                 neverRelinquishIdentity = Boolean.valueOf(attrValue);
-            } else if (TaskPersister.readTaskDescriptionAttribute(taskDescription, attrName,
-                    attrValue)) {
+            } else if (readTaskDescriptionAttribute(taskDescription, attrName, attrValue)) {
                 // Completed in TaskPersister.readTaskDescriptionAttribute()
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
@@ -836,7 +790,7 @@ final class TaskRecord extends ThumbnailHolder {
 
         if (lastActiveTime >= 0) {
             taskDescription.setIcon(TaskPersister.restoreImage(String.valueOf(taskId) +
-                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime));
+                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime + TaskPersister.IMAGE_EXTENSION));
         }
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
@@ -845,11 +799,8 @@ final class TaskRecord extends ThumbnailHolder {
                 lastTimeOnTop, neverRelinquishIdentity, taskDescription);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
-            r.thumbHolder = r.task = task;
+            activities.get(activityNdx).task = task;
         }
-
-        task.lastThumbnail = TaskPersister.restoreImage(taskId + TASK_THUMBNAIL_SUFFIX);
 
         Slog.i(TAG, "Restored task=" + task);
         return task;
@@ -898,7 +849,8 @@ final class TaskRecord extends ThumbnailHolder {
         if (!askedCompatMode) {
             pw.print(prefix); pw.print("askedCompatMode="); pw.println(askedCompatMode);
         }
-        pw.print(prefix); pw.print("lastThumbnail="); pw.print(lastThumbnail);
+        pw.print(prefix); pw.print("lastThumbnail="); pw.print(mLastThumbnail);
+                pw.print(" lastThumbnailFile="); pw.print(mLastThumbnailFile);
                 pw.print(" lastDescription="); pw.println(lastDescription);
         pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
                 pw.print(" lastActiveTime="); pw.print(lastActiveTime);

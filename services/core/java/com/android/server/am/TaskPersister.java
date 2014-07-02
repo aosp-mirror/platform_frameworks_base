@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 
 public class TaskPersister {
     static final String TAG = "TaskPersister";
@@ -53,15 +54,12 @@ public class TaskPersister {
     private static final String TASKS_DIRNAME = "recent_tasks";
     private static final String TASK_EXTENSION = ".xml";
     private static final String IMAGES_DIRNAME = "recent_images";
-    private static final String IMAGE_EXTENSION = ".png";
+    static final String IMAGE_EXTENSION = ".png";
 
     private static final String TAG_TASK = "task";
 
-    private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
-    private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
-
-    private static File sImagesDir;
-    private static File sTasksDir;
+    static File sImagesDir;
+    static File sTasksDir;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -132,49 +130,8 @@ public class TaskPersister {
         return stringWriter;
     }
 
-    static void saveImage(Bitmap image, String filename) throws IOException {
-        if (DEBUG) Slog.d(TAG, "saveImage: filename=" + filename);
-        FileOutputStream imageFile = null;
-        try {
-            imageFile = new FileOutputStream(new File(sImagesDir, filename + IMAGE_EXTENSION));
-            image.compress(Bitmap.CompressFormat.PNG, 100, imageFile);
-        } catch (Exception e) {
-            Slog.e(TAG, "saveImage: unable to save " + filename, e);
-        } finally {
-            if (imageFile != null) {
-                imageFile.close();
-            }
-        }
-    }
-
-    static void saveTaskDescription(ActivityManager.TaskDescription taskDescription,
-            String iconFilename, XmlSerializer out) throws IOException {
-        if (taskDescription != null) {
-            final String label = taskDescription.getLabel();
-            if (label != null) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, label);
-            }
-            final int colorPrimary = taskDescription.getPrimaryColor();
-            if (colorPrimary != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(colorPrimary));
-            }
-            final Bitmap icon = taskDescription.getIcon();
-            if (icon != null) {
-                saveImage(icon, iconFilename);
-            }
-        }
-    }
-
-    static boolean readTaskDescriptionAttribute(ActivityManager.TaskDescription taskDescription,
-        String attrName, String attrValue) {
-        if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
-            taskDescription.setLabel(attrValue);
-            return true;
-        } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
-            taskDescription.setPrimaryColor((int) Long.parseLong(attrValue, 16));
-            return true;
-        }
-        return false;
+    void saveImage(Bitmap image, String filename) {
+        mLazyTaskWriterThread.saveImage(image, filename);
     }
 
     private String fileToString(File file) {
@@ -314,14 +271,31 @@ public class TaskPersister {
 
     static Bitmap restoreImage(String filename) {
         if (DEBUG) Slog.d(TAG, "restoreImage: restoring " + filename);
-        return BitmapFactory.decodeFile(sImagesDir + File.separator + filename + IMAGE_EXTENSION);
+        return BitmapFactory.decodeFile(sImagesDir + File.separator + filename);
     }
 
     private class LazyTaskWriterThread extends Thread {
         boolean mSlow = true;
+        LinkedList<BitmapQueueEntry> mSaveImagesQueue = new LinkedList<BitmapQueueEntry>();
 
         LazyTaskWriterThread(String name) {
             super(name);
+        }
+
+        class BitmapQueueEntry {
+            final Bitmap mImage;
+            final String mFilename;
+            BitmapQueueEntry(Bitmap image, String filename) {
+                mImage = image;
+                mFilename = filename;
+            }
+        }
+
+        void saveImage(Bitmap image, String filename) {
+            synchronized (mSaveImagesQueue) {
+                mSaveImagesQueue.add(new BitmapQueueEntry(image, filename));
+            }
+            TaskPersister.this.notify(null, false);
         }
 
         @Override
@@ -341,6 +315,32 @@ public class TaskPersister {
                         } catch (InterruptedException e) {
                         }
                         now = SystemClock.uptimeMillis();
+                    }
+                }
+
+                // Write out one bitmap that needs saving each time through.
+                BitmapQueueEntry entry;
+                synchronized (mSaveImagesQueue) {
+                    entry = mSaveImagesQueue.poll();
+                    // Are there any more after this one?
+                    mRecentsChanged |= !mSaveImagesQueue.isEmpty();
+                }
+                if (entry != null) {
+                    final String filename = entry.mFilename;
+                    if (DEBUG) Slog.d(TAG, "saveImage: filename=" + filename);
+                    FileOutputStream imageFile = null;
+                    try {
+                        imageFile = new FileOutputStream(new File(sImagesDir, filename));
+                        entry.mImage.compress(Bitmap.CompressFormat.PNG, 100, imageFile);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "saveImage: unable to save " + filename, e);
+                    } finally {
+                        if (imageFile != null) {
+                            try {
+                                imageFile.close();
+                            } catch (IOException e) {
+                            }
+                        }
                     }
                 }
 

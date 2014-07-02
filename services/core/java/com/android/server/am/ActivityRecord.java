@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.os.PersistableBundle;
 import android.os.Trace;
@@ -113,7 +114,6 @@ final class ActivityRecord {
     int realTheme;          // actual theme resource we will use, never 0.
     int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
-    ThumbnailHolder thumbHolder; // where our thumbnails should go.
     long createTime = System.currentTimeMillis();
     long displayStartTime;  // when we started launching this activity
     long fullyDrawnStartTime; // when we started launching this activity
@@ -262,13 +262,6 @@ final class ActivityRecord {
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(mActivityType));
-        pw.print(prefix); pw.print("thumbHolder: ");
-                pw.print(Integer.toHexString(System.identityHashCode(thumbHolder)));
-                if (thumbHolder != null) {
-                    pw.print(" bm="); pw.print(thumbHolder.lastThumbnail);
-                    pw.print(" desc="); pw.print(thumbHolder.lastDescription);
-                }
-                pw.println();
         if (displayStartTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("displayStartTime=");
                     if (displayStartTime == 0) pw.print("0");
@@ -497,7 +490,7 @@ final class ActivityRecord {
         }
     }
 
-    void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
+    void setTask(TaskRecord newTask, boolean isRoot) {
         if (task != null && task.removeActivity(this)) {
             if (task != newTask) {
                 task.stack.removeTask(task);
@@ -506,18 +499,7 @@ final class ActivityRecord {
                         (newTask == null ? null : newTask.stack));
             }
         }
-        if (newThumbHolder == null) {
-            newThumbHolder = newTask;
-        }
         task = newTask;
-        if (!isRoot && (intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
-            // This is the start of a new sub-task.
-            if (thumbHolder == null) {
-                thumbHolder = new ThumbnailHolder();
-            }
-        } else {
-            thumbHolder = newThumbHolder;
-        }
     }
 
     boolean changeWindowTranslucency(boolean toOpaque) {
@@ -764,18 +746,15 @@ final class ActivityRecord {
     }
 
     void updateThumbnail(Bitmap newThumbnail, CharSequence description) {
-        if (thumbHolder != null) {
-            if (newThumbnail != null) {
-                if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
-                        "Setting thumbnail of " + this + " holder " + thumbHolder
-                        + " to " + newThumbnail);
-                thumbHolder.lastThumbnail = newThumbnail;
-                if (isPersistable()) {
-                    mStackSupervisor.mService.notifyTaskPersisterLocked(task, false);
-                }
+        if (newThumbnail != null) {
+            if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
+                    "Setting thumbnail of " + this + " to " + newThumbnail);
+            task.setLastThumbnail(newThumbnail);
+            if (isPersistable()) {
+                mStackSupervisor.mService.notifyTaskPersisterLocked(task, false);
             }
-            thumbHolder.lastDescription = description;
         }
+        task.lastDescription = description;
     }
 
     void startLaunchTickingLocked() {
@@ -1051,6 +1030,11 @@ final class ActivityRecord {
         return null;
     }
 
+    private static String createImageFilename(ActivityRecord r) {
+        return String.valueOf(r.task.taskId) + ACTIVITY_ICON_SUFFIX + r.createTime +
+                TaskPersister.IMAGE_EXTENSION;
+    }
+
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         out.attribute(null, ATTR_ID, String.valueOf(createTime));
         out.attribute(null, ATTR_LAUNCHEDFROMUID, String.valueOf(launchedFromUid));
@@ -1064,8 +1048,7 @@ final class ActivityRecord {
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
 
         if (taskDescription != null) {
-            TaskPersister.saveTaskDescription(taskDescription, String.valueOf(task.taskId) +
-                    ACTIVITY_ICON_SUFFIX + createTime, out);
+            task.saveTaskDescription(taskDescription, createImageFilename(this), out);
         }
 
         out.startTag(null, TAG_INTENT);
@@ -1109,9 +1092,9 @@ final class ActivityRecord {
                 componentSpecified = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.valueOf(attrValue);
-            } else if (TaskPersister.readTaskDescriptionAttribute(taskDescription, attrName,
+            } else if (TaskRecord.readTaskDescriptionAttribute(taskDescription, attrName,
                     attrValue)) {
-                // Completed in TaskPersister.readTaskDescriptionAttribute()
+                // Completed in TaskRecord.readTaskDescriptionAttribute()
             } else {
                 Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
             }
@@ -1157,8 +1140,7 @@ final class ActivityRecord {
         r.persistentState = persistentState;
 
         if (createTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(String.valueOf(taskId) +
-                    ACTIVITY_ICON_SUFFIX + createTime));
+            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(r)));
         }
         r.taskDescription = taskDescription;
         r.createTime = createTime;

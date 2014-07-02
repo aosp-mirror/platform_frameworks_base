@@ -270,7 +270,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number of recent tasks that we can remember.
-    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 10 : 200;
+    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 100 : 200;
+
+    // Maximum number recent bitmaps to keep in memory.
+    static final int MAX_RECENT_BITMAPS = 5;
 
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
@@ -3600,6 +3603,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (task != tr) {
                 if (task.userId != tr.userId) {
                     continue;
+                }
+                if (i > MAX_RECENT_BITMAPS) {
+                    tr.freeLastThumbnail();
                 }
                 final Intent trIntent = tr.intent;
                 if ((task.affinity == null || !task.affinity.equals(tr.affinity)) &&
@@ -7348,26 +7354,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) {
+    public ActivityManager.TaskThumbnail getTaskThumbnail(int id) {
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
-                    "getTaskThumbnails()");
+                    "getTaskThumbnail()");
             TaskRecord tr = recentTaskForIdLocked(id);
             if (tr != null) {
-                return tr.getTaskThumbnailsLocked();
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Bitmap getTaskTopThumbnail(int id) {
-        synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
-                    "getTaskTopThumbnail()");
-            TaskRecord tr = recentTaskForIdLocked(id);
-            if (tr != null) {
-                return tr.getTaskTopThumbnailLocked();
+                return tr.getTaskThumbnailLocked();
             }
         }
         return null;
@@ -7380,24 +7373,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r != null) {
                 r.taskDescription = td;
                 r.task.updateTaskDescription();
-            }
-        }
-    }
-
-    @Override
-    public boolean removeSubTask(int taskId, int subTaskIndex) {
-        synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS,
-                    "removeSubTask()");
-            long ident = Binder.clearCallingIdentity();
-            try {
-                TaskRecord tr = recentTaskForIdLocked(taskId);
-                if (tr != null) {
-                    return tr.removeTaskActivitiesLocked(subTaskIndex, true) != null;
-                }
-                return false;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
     }
@@ -7473,7 +7448,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean removeTaskByIdLocked(int taskId, int flags) {
         TaskRecord tr = recentTaskForIdLocked(taskId);
         if (tr != null) {
-            tr.removeTaskActivitiesLocked(-1, false);
+            tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, flags);
             if (tr.isPersistable) {
                 notifyTaskPersisterLocked(tr, true);

@@ -18,6 +18,7 @@ package android.app;
 
 import android.os.BatteryStats;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import com.android.internal.app.IUsageStats;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.TransferPipe;
@@ -1018,28 +1019,6 @@ public class ActivityManager {
     }
 
     /**
-     * Remove some end of a task's activity stack that is not part of
-     * the main application.  The selected activities will be finished, so
-     * they are no longer part of the main task.
-     *
-     * @param taskId The identifier of the task.
-     * @param subTaskIndex The number of the sub-task; this corresponds
-     * to the index of the thumbnail returned by {@link #getTaskThumbnails(int)}.
-     * @return Returns true if the sub-task was found and was removed.
-     *
-     * @hide
-     */
-    public boolean removeSubTask(int taskId, int subTaskIndex)
-            throws SecurityException {
-        try {
-            return ActivityManagerNative.getDefault().removeSubTask(taskId, subTaskIndex);
-        } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return false;
-        }
-    }
-
-    /**
      * If set, the process of the root activity of the task will be killed
      * as part of removing the task.
      * @hide
@@ -1067,26 +1046,17 @@ public class ActivityManager {
     }
 
     /** @hide */
-    public static class TaskThumbnails implements Parcelable {
+    public static class TaskThumbnail implements Parcelable {
         public Bitmap mainThumbnail;
+        public ParcelFileDescriptor thumbnailFileDescriptor;
 
-        public int numSubThumbbails;
-
-        /** @hide */
-        public IThumbnailRetriever retriever;
-
-        public TaskThumbnails() {
-        }
-
-        public Bitmap getSubThumbnail(int index) {
-            try {
-                return retriever.getThumbnail(index);
-            } catch (RemoteException e) {
-                return null;
-            }
+        public TaskThumbnail() {
         }
 
         public int describeContents() {
+            if (thumbnailFileDescriptor != null) {
+                return thumbnailFileDescriptor.describeContents();
+            }
             return 0;
         }
 
@@ -1097,8 +1067,12 @@ public class ActivityManager {
             } else {
                 dest.writeInt(0);
             }
-            dest.writeInt(numSubThumbbails);
-            dest.writeStrongInterface(retriever);
+            if (thumbnailFileDescriptor != null) {
+                dest.writeInt(1);
+                thumbnailFileDescriptor.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -1107,38 +1081,31 @@ public class ActivityManager {
             } else {
                 mainThumbnail = null;
             }
-            numSubThumbbails = source.readInt();
-            retriever = IThumbnailRetriever.Stub.asInterface(source.readStrongBinder());
+            if (source.readInt() != 0) {
+                thumbnailFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(source);
+            } else {
+                thumbnailFileDescriptor = null;
+            }
         }
 
-        public static final Creator<TaskThumbnails> CREATOR = new Creator<TaskThumbnails>() {
-            public TaskThumbnails createFromParcel(Parcel source) {
-                return new TaskThumbnails(source);
+        public static final Creator<TaskThumbnail> CREATOR = new Creator<TaskThumbnail>() {
+            public TaskThumbnail createFromParcel(Parcel source) {
+                return new TaskThumbnail(source);
             }
-            public TaskThumbnails[] newArray(int size) {
-                return new TaskThumbnails[size];
+            public TaskThumbnail[] newArray(int size) {
+                return new TaskThumbnail[size];
             }
         };
 
-        private TaskThumbnails(Parcel source) {
+        private TaskThumbnail(Parcel source) {
             readFromParcel(source);
         }
     }
 
     /** @hide */
-    public TaskThumbnails getTaskThumbnails(int id) throws SecurityException {
+    public TaskThumbnail getTaskThumbnail(int id) throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getTaskThumbnails(id);
-        } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
-        }
-    }
-
-    /** @hide */
-    public Bitmap getTaskTopThumbnail(int id) throws SecurityException {
-        try {
-            return ActivityManagerNative.getDefault().getTaskTopThumbnail(id);
+            return ActivityManagerNative.getDefault().getTaskThumbnail(id);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
