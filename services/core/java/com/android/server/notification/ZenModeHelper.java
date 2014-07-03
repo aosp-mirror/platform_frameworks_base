@@ -129,12 +129,8 @@ public class ZenModeHelper {
         mCallbacks.add(callback);
     }
 
-    public boolean shouldIntercept(NotificationRecord record, boolean previouslySeen) {
+    public boolean shouldIntercept(NotificationRecord record) {
         if (mZenMode != Global.ZEN_MODE_OFF) {
-            if (previouslySeen && !record.isIntercepted()) {
-                // notifications never transition from not intercepted to intercepted
-                return false;
-            }
             if (isSystem(record)) {
                 return false;
             }

@@ -1873,10 +1873,9 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    // let zen mode evaluate this record and then make note of that for the future
+    // let zen mode evaluate this record
     private void applyZenModeLocked(NotificationRecord record) {
-        record.setIntercepted(mZenModeHelper.shouldIntercept(record, record.wasTouchedByZen()));
-        record.setTouchedByZen();
+        record.setIntercepted(mZenModeHelper.shouldIntercept(record));
     }
 
     // lock on mNotificationList
