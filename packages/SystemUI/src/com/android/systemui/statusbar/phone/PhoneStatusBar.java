@@ -2902,23 +2902,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean onBackPressed() {
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (mStatusBarKeyguardViewManager.onBackPressed()) {
-                return true;
-            }
-            if (mNotificationPanel.isQsExpanded()) {
-                mNotificationPanel.animateCloseQs();
-                return true;
-            }
-            return false;
-        } else {
-            if (mNotificationPanel.isQsExpanded()) {
-                mNotificationPanel.animateCloseQs();
-            } else {
-                animateCollapsePanels();
-            }
+        if (mStatusBarKeyguardViewManager.onBackPressed()) {
             return true;
         }
+        if (mNotificationPanel.isQsExpanded()) {
+            mNotificationPanel.animateCloseQs();
+            return true;
+        }
+        if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
+            animateCollapsePanels();
+            return true;
+        }
+        return false;
     }
 
     public boolean onSpacePressed() {

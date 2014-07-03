@@ -108,14 +108,14 @@ public class StatusBarKeyguardViewManager {
     }
 
     private void showBouncer() {
-        if (!mOccluded) {
+        if (mShowing) {
             mBouncer.show();
         }
         updateStates();
     }
 
     public void dismissWithAction(OnDismissAction r) {
-        if (!mOccluded) {
+        if (mShowing) {
             mBouncer.showWithDismissAction(r);
         }
         updateStates();

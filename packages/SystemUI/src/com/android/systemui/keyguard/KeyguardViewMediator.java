@@ -48,7 +48,8 @@ import android.view.IWindowManager;
 import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
-
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.telephony.IccCardConstants;
@@ -260,6 +261,12 @@ public class KeyguardViewMediator extends SystemUI {
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
+
+    /**
+     * The animation used for hiding keyguard. This is used to fetch the animation timings if
+     * WindowManager is not providing us with them.
+     */
+    private Animation mHideAnimation;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -482,6 +489,9 @@ public class KeyguardViewMediator extends SystemUI {
         int lockSoundDefaultAttenuation = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lockSoundVolumeDb);
         mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
+
+        mHideAnimation = AnimationUtils.loadAnimation(mContext,
+                com.android.internal.R.anim.lock_screen_behind_enter);
     }
 
     @Override
@@ -1192,7 +1202,7 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "handleHide");
             try {
                 mHiding = true;
-                if (mShowing) {
+                if (mShowing && !mOccluded) {
 
                     // Don't actually hide the Keyguard at the moment, wait for window manager until
                     // it tells us it's safe to do so with startKeyguardExitAnimation.
@@ -1201,7 +1211,9 @@ public class KeyguardViewMediator extends SystemUI {
 
                     // Don't try to rely on WindowManager - if Keyguard wasn't showing, window
                     // manager won't start the exit animation.
-                    handleStartKeyguardExitAnimation(0, 0);
+                    handleStartKeyguardExitAnimation(
+                            SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                            mHideAnimation.getDuration());
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error while calling WindowManager", e);
