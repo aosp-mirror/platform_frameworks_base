@@ -641,7 +641,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             return mScrollView.onTouchEvent(ev);
         }
         boolean expandWantsIt = false;
-        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
+        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
             if (isCancelOrUp) {
                 mExpandHelper.onlyObserveMovements(false);
             }
@@ -1376,7 +1376,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         initDownStates(ev);
         boolean expandWantsIt = false;
-        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
+        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
             expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
         }
         boolean scrollWantsIt = false;
