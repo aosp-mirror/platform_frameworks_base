@@ -203,8 +203,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         if (mConfig.launchedWithNoRecentTasks) {
             mEmptyView.setVisibility(View.VISIBLE);
+            mRecentsView.setSearchBarVisibility(View.GONE);
         } else {
             mEmptyView.setVisibility(View.GONE);
+            if (mRecentsView.hasSearchBar()) {
+                mRecentsView.setSearchBarVisibility(View.VISIBLE);
+            } else {
+                addSearchBarAppWidgetView();
+            }
         }
 
         // Show the scrim if we animate into Recents without window transitions
@@ -351,13 +357,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mFullscreenOverlayStub = (ViewStub) findViewById(R.id.fullscreen_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
 
-        // Update the recent tasks
-        updateRecentsTasks(getIntent());
-
         // Bind the search app widget when we first start up
         bindSearchBarAppWidget();
-        // Add the search bar layout
-        addSearchBarAppWidgetView();
+        // Update the recent tasks
+        updateRecentsTasks(getIntent());
 
         // Update if we are getting a configuration change
         if (savedInstanceState != null) {
