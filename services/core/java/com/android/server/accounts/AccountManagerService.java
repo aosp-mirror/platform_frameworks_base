@@ -871,15 +871,82 @@ public class AccountManagerService
         checkManageAccountsPermission();
         UserHandle user = Binder.getCallingUserHandle();
         UserAccounts accounts = getUserAccountsForCaller();
-        if (!canUserModifyAccounts(Binder.getCallingUid(), account.type)) {
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!canUserModifyAccounts(userId)) {
             try {
+                // TODO: This should be ERROR_CODE_USER_RESTRICTED instead. See http://b/16322768
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "User cannot modify accounts");
             } catch (RemoteException re) {
             }
             return;
         }
+        if (!canUserModifyAccountsForType(userId, account.type)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                        "User cannot modify accounts of this type (policy).");
+            } catch (RemoteException re) {
+            }
+            return;
+        }
 
+        long identityToken = clearCallingIdentity();
+
+        cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
+        synchronized (accounts.credentialsPermissionNotificationIds) {
+            for (Pair<Pair<Account, String>, Integer> pair:
+                accounts.credentialsPermissionNotificationIds.keySet()) {
+                if (account.equals(pair.first.first)) {
+                    int id = accounts.credentialsPermissionNotificationIds.get(pair);
+                    cancelNotification(id, user);
+                }
+            }
+        }
+
+        try {
+            new RemoveAccountSession(accounts, response, account).bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public void removeAccountAsUser(IAccountManagerResponse response, Account account,
+            int userId) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "removeAccount: " + account
+                    + ", response " + response
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid()
+                    + ", for user id " + userId);
+        }
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
+
+        // Only allow the system process to modify accounts of other users
+        enforceCrossUserPermission(userId, "User " + UserHandle.getCallingUserId()
+                    + " trying to remove account for " + userId);
+        checkManageAccountsPermission();
+
+        UserAccounts accounts = getUserAccounts(userId);
+        if (!canUserModifyAccounts(userId)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
+                        "User cannot modify accounts");
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+        if (!canUserModifyAccountsForType(userId, account.type)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                        "User cannot modify accounts of this type (policy).");
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+
+        UserHandle user = new UserHandle(userId);
         long identityToken = clearCallingIdentity();
 
         cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
@@ -1526,20 +1593,23 @@ public class AccountManagerService
         checkManageAccountsPermission();
 
         // Is user disallowed from modifying accounts?
-        if (!canUserModifyAccounts(Binder.getCallingUid(), accountType)) {
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!canUserModifyAccounts(userId)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
             } catch (RemoteException re) {
             }
-            Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
-            cantAddAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            long identityToken = clearCallingIdentity();
+            showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED);
+            return;
+        }
+        if (!canUserModifyAccountsForType(userId, accountType)) {
             try {
-                mContext.startActivityAsUser(cantAddAccount, UserHandle.CURRENT);
-            } finally {
-                restoreCallingIdentity(identityToken);
+                response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                        "User cannot modify accounts of this type (policy).");
+            } catch (RemoteException re) {
             }
+            showCantAddAccount(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE);
             return;
         }
 
@@ -1570,6 +1640,92 @@ public class AccountManagerService
                               : null);
                 }
             }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public void addAccountAsUser(final IAccountManagerResponse response, final String accountType,
+            final String authTokenType, final String[] requiredFeatures,
+            final boolean expectActivityLaunch, final Bundle optionsIn, int userId) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "addAccount: accountType " + accountType
+                    + ", response " + response
+                    + ", authTokenType " + authTokenType
+                    + ", requiredFeatures " + stringArrayToString(requiredFeatures)
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid()
+                    + ", for user id " + userId);
+        }
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        checkManageAccountsPermission();
+
+        // Only allow the system process to add accounts of other users
+        enforceCrossUserPermission(userId, "User " + UserHandle.getCallingUserId()
+                    + " trying to add account for " + userId);
+
+        // Is user disallowed from modifying accounts?
+        if (!canUserModifyAccounts(userId)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
+                        "User is not allowed to add an account!");
+            } catch (RemoteException re) {
+            }
+            showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED);
+            return;
+        }
+        if (!canUserModifyAccountsForType(userId, accountType)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                        "User cannot modify accounts of this type (policy).");
+            } catch (RemoteException re) {
+            }
+            showCantAddAccount(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE);
+            return;
+        }
+
+        UserAccounts accounts = getUserAccounts(userId);
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
+        options.putInt(AccountManager.KEY_CALLER_UID, uid);
+        options.putInt(AccountManager.KEY_CALLER_PID, pid);
+
+        long identityToken = clearCallingIdentity();
+        try {
+            new Session(accounts, response, accountType, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */) {
+                @Override
+                public void run() throws RemoteException {
+                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
+                            options);
+                }
+
+                @Override
+                protected String toDebugString(long now) {
+                    return super.toDebugString(now) + ", addAccount"
+                            + ", accountType " + accountType
+                            + ", requiredFeatures "
+                            + (requiredFeatures != null
+                              ? TextUtils.join(",", requiredFeatures)
+                              : null);
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void showCantAddAccount(int errorCode) {
+        Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
+        cantAddAccount.putExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, errorCode);
+        cantAddAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        long identityToken = clearCallingIdentity();
+        try {
+            mContext.startActivity(cantAddAccount);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2766,18 +2922,18 @@ public class AccountManagerService
                 Manifest.permission.USE_CREDENTIALS);
     }
 
-    private boolean canUserModifyAccounts(int callingUid, String accountType) {
-        if (callingUid != Process.myUid()) {
-            if (getUserManager().getUserRestrictions(
-                    new UserHandle(UserHandle.getUserId(callingUid)))
-                    .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
-                return false;
-            }
+    private boolean canUserModifyAccounts(int userId) {
+        if (getUserManager().getUserRestrictions(new UserHandle(userId))
+                .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
+            return false;
         }
+        return true;
+    }
 
+    private boolean canUserModifyAccountsForType(int userId, String accountType) {
         DevicePolicyManager dpm = (DevicePolicyManager) mContext
                 .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        String[] typesArray = dpm.getAccountTypesWithManagementDisabled();
+        String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
         for (String forbiddenType : typesArray) {
             if (forbiddenType.equals(accountType)) {
                 return false;

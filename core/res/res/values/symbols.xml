@@ -876,6 +876,7 @@
   <java-symbol type="string" name="config_customResolverActivity" />
   <java-symbol type="string" name="config_appsAuthorizedForSharedAccounts" />
   <java-symbol type="string" name="error_message_title" />
+  <java-symbol type="string" name="app_no_restricted_accounts" />
   <java-symbol type="string" name="action_bar_home_description_format" />
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
