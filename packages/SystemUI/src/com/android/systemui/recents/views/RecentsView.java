@@ -66,8 +66,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     // The space partitioning root of this container
     SpaceNode mBSP;
-    // Whether there are any tasks
-    boolean mHasTasks;
     // Search bar view
     View mSearchBar;
     // Recents view callbacks
@@ -110,13 +108,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Create and add all the stacks for this partition of space.
-        mHasTasks = false;
         ArrayList<TaskStack> stacks = mBSP.getStacks();
         for (TaskStack stack : stacks) {
             TaskStackView stackView = new TaskStackView(getContext(), stack);
             stackView.setCallbacks(this);
             addView(stackView);
-            mHasTasks |= (stack.getTaskCount() > 0);
         }
 
         // Enable debug mode drawing
@@ -246,7 +242,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // Add the new search bar
             if (searchBar != null) {
                 mSearchBar = searchBar;
-                mSearchBar.setVisibility(mHasTasks ? View.VISIBLE : View.GONE);
                 addView(mSearchBar);
 
                 if (Console.Enabled) {
@@ -255,6 +250,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             Console.AnsiBlue);
                 }
             }
+        }
+    }
+
+    /** Returns whether there is currently a search bar */
+    public boolean hasSearchBar() {
+        return mSearchBar != null;
+    }
+
+    /** Sets the visibility of the search bar */
+    public void setSearchBarVisibility(int visibility) {
+        if (mSearchBar != null) {
+            mSearchBar.setVisibility(visibility);
         }
     }
 
