@@ -227,6 +227,9 @@
     <!-- Space reserved for the cards behind the top card in the bottom stack -->
     <dimen name="bottom_stack_peek_amount">12dp</dimen>
 
+    <!-- bottom_stack_peek_amount + notification_min_height -->
+    <dimen name="min_stack_height">76dp</dimen>
+
     <!-- The height of the area before the bottom stack in which the notifications slow down -->
     <dimen name="bottom_stack_slow_down_length">12dp</dimen>
 

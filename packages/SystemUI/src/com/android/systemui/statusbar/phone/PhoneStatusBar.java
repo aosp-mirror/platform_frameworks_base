@@ -1315,6 +1315,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    @Override
+    protected void updateRowStates() {
+        super.updateRowStates();
+        mNotificationPanel.notifyVisibleChildrenChanged();
+    }
+
     protected void updateCarrierLabelVisibility(boolean force) {
         // TODO: Handle this for the notification stack scroller as well
         if (!mShowCarrierInPanel) return;

@@ -300,8 +300,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
-    public void setExpansion(float height) {
-        height = (height - mCollapsedHeight) * EXPANSION_RUBBERBAND_FACTOR + mCollapsedHeight;
+    public void setExpansion(float t) {
+        float height = mCollapsedHeight + t * (mExpandedHeight - mCollapsedHeight);
         if (height < mCollapsedHeight) {
             height = mCollapsedHeight;
         }
