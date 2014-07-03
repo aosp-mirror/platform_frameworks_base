@@ -421,7 +421,9 @@ public final class HdmiControlService extends SystemService {
             }
         }
 
-        Slog.w(TAG, "Unhandled cec command:" + message);
+        if (message.getDestination() != HdmiCec.ADDR_BROADCAST) {
+            Slog.w(TAG, "Unhandled cec command:" + message);
+        }
         return false;
     }
 
