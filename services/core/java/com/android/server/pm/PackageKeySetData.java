@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,19 +34,17 @@ public class PackageKeySetData {
 
     private long[] mDefinedKeySets;
 
-    private final Map<String, Long> mKeySetAliases;
+    private final Map<String, Long> mKeySetAliases = new HashMap<String, Long>();
 
     PackageKeySetData() {
         mProperSigningKeySet = KEYSET_UNASSIGNED;
-        mKeySetAliases = new HashMap<String, Long>();
     }
 
     PackageKeySetData(PackageKeySetData original) {
-        mSigningKeySets = original.getSigningKeySets().clone();
-        mUpgradeKeySets = original.getUpgradeKeySets().clone();
-        mDefinedKeySets = original.getDefinedKeySets().clone();
-        mKeySetAliases = new HashMap<String, Long>();
-        mKeySetAliases.putAll(original.getAliases());
+        mSigningKeySets = ArrayUtils.cloneOrNull(original.mSigningKeySets);
+        mUpgradeKeySets = ArrayUtils.cloneOrNull(original.mUpgradeKeySets);
+        mDefinedKeySets = ArrayUtils.cloneOrNull(original.mDefinedKeySets);
+        mKeySetAliases.putAll(original.mKeySetAliases);
     }
 
     protected void setProperSigningKeySet(long ks) {

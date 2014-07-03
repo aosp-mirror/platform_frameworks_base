@@ -384,16 +384,18 @@ public class FileUtils {
         return filePath.startsWith(dirPath);
     }
 
-    public static void deleteContents(File dir) {
+    public static boolean deleteContents(File dir) {
         File[] files = dir.listFiles();
+        boolean success = true;
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    deleteContents(file);
+                    success &= deleteContents(file);
                 }
-                file.delete();
+                success &= file.delete();
             }
         }
+        return success;
     }
 
     /**
@@ -410,5 +412,24 @@ public class FileUtils {
             }
         }
         return true;
+    }
+
+    public static String rewriteAfterRename(File beforeDir, File afterDir, String path) {
+        final File result = rewriteAfterRename(beforeDir, afterDir, new File(path));
+        return (result != null) ? result.getAbsolutePath() : null;
+    }
+
+    /**
+     * Given a path under the "before" directory, rewrite it to live under the
+     * "after" directory. For example, {@code /before/foo/bar.txt} would become
+     * {@code /after/foo/bar.txt}.
+     */
+    public static File rewriteAfterRename(File beforeDir, File afterDir, File file) {
+        if (contains(beforeDir, file)) {
+            final String splice = file.getAbsolutePath().substring(
+                    beforeDir.getAbsolutePath().length());
+            return new File(afterDir, splice);
+        }
+        return null;
     }
 }

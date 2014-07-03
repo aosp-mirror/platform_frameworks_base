@@ -45,6 +45,12 @@ class PackageSettingBase extends GrantedPermissions {
 
     final String name;
     final String realName;
+
+    /**
+     * Path where this package was found on disk. For monolithic packages
+     * this is path to single base APK file; for cluster packages this is
+     * path to the cluster directory.
+     */
     File codePath;
     String codePathString;
     File resourcePath;

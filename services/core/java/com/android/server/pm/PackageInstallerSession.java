@@ -41,6 +41,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -272,7 +273,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        mPm.installStage(mPackageName, this.sessionDir, localObserver, params.installFlags);
+        mPm.installStage(mPackageName, this.sessionDir, localObserver, params, installerPackageName,
+                installerUid, new UserHandle(userId));
     }
 
     /**
