@@ -132,6 +132,7 @@ public class NotificationPanelView extends PanelView implements
      * need to take this into account in our panel height calculation.
      */
     private int mScrollYOverride = -1;
+    private boolean mQsAnimatorExpand;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -306,6 +307,18 @@ public class NotificationPanelView extends PanelView implements
     public void closeQs() {
         cancelAnimation();
         setQsExpansion(mQsMinExpansionHeight);
+    }
+
+    public void animateCloseQs() {
+        if (mQsExpansionAnimator != null) {
+            if (!mQsAnimatorExpand) {
+                return;
+            }
+            float height = mQsExpansionHeight;
+            mQsExpansionAnimator.cancel();
+            setQsExpansion(height);
+        }
+        flingSettings(0 /* vel */, false);
     }
 
     public void openQs() {
@@ -738,6 +751,7 @@ public class NotificationPanelView extends PanelView implements
         });
         animator.start();
         mQsExpansionAnimator = animator;
+        mQsAnimatorExpand = expand;
     }
 
     /**
@@ -1227,5 +1241,9 @@ public class NotificationPanelView extends PanelView implements
         } else {
             mReserveNotificationSpace.setVisibility(View.GONE);
         }
+    }
+
+    public boolean isQsExpanded() {
+        return mQsExpanded;
     }
 }
