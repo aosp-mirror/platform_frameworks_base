@@ -51,6 +51,7 @@ interface IHdmiControlService {
     void setControlEnabled(boolean enabled);
     void setArcMode(boolean enabled);
     void setOption(int option, int value);
+    void setProhibitMode(boolean enabled);
     oneway void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex);
     oneway void setSystemAudioMute(boolean mute);
 }
