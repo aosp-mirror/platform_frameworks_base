@@ -51,8 +51,6 @@ public final class NotificationRecord {
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
-    // InterceptedNotifications needs to know if this has been previously evaluated.
-    private boolean mTouchedByZen;
 
     // The timestamp used for ranking.
     private long mRankingTimeMs;
@@ -71,7 +69,6 @@ public final class NotificationRecord {
     public void copyRankingInformation(NotificationRecord previous) {
         mContactAffinity = previous.mContactAffinity;
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
-        mTouchedByZen = previous.mTouchedByZen;
         mIntercept = previous.mIntercept;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
     }
@@ -202,14 +199,6 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
-    }
-
-    public boolean wasTouchedByZen() {
-        return mTouchedByZen;
-    }
-
-    public void setTouchedByZen() {
-        mTouchedByZen = true;
     }
 
     /**
