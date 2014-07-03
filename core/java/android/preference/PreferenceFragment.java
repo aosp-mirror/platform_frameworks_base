@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -110,6 +111,8 @@ public abstract class PreferenceFragment extends Fragment implements
     private boolean mHavePrefs;
     private boolean mInitDone;
 
+    private int mLayoutResId = com.android.internal.R.layout.preference_list_fragment;
+
     /**
      * The starting request code given out to preference framework.
      */
@@ -159,8 +162,18 @@ public abstract class PreferenceFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(com.android.internal.R.layout.preference_list_fragment, container,
-                false);
+
+        TypedArray a = getActivity().obtainStyledAttributes(null,
+                com.android.internal.R.styleable.PreferenceFragment,
+                com.android.internal.R.attr.preferenceFragmentStyle,
+                0);
+
+        mLayoutResId = a.getResourceId(com.android.internal.R.styleable.PreferenceFragment_layout,
+                mLayoutResId);
+
+        a.recycle();
+
+        return inflater.inflate(mLayoutResId, container, false);
     }
 
     @Override

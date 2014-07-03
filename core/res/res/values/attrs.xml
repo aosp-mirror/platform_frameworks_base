@@ -6905,6 +6905,12 @@
         <attr name="layout" />
     </declare-styleable>
 
+    <!-- Base attributes available to PreferenceFragment. -->
+    <declare-styleable name="PreferenceFragment">
+        <!-- The layout for the PreferenceFragment. This should rarely need to be changed -->
+        <attr name="layout" />
+    </declare-styleable>
+
     <!-- Use <code>tts-engine</code> as the root tag of the XML resource that
          describes a text to speech engine implemented as a subclass of
          {@link android.speech.tts.TextToSpeechService}.
