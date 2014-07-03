@@ -213,7 +213,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
         mService.sendCecCommand(routingChange);
-        addAndStartAction(new RoutingControlAction(this, newPath, callback));
+        addAndStartAction(new RoutingControlAction(this, newPath, false, callback));
     }
 
     /**
@@ -349,7 +349,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = mService.portIdToPath(getActivePortId());
             mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
                     mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), false, null));
         }
     }
 
@@ -395,7 +395,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
             setActivePath(newPath);
             removeAction(RoutingControlAction.class);
-            addAndStartAction(new RoutingControlAction(this, newPath, null));
+            addAndStartAction(new RoutingControlAction(this, newPath, true, null));
         }
         return true;
     }
@@ -941,7 +941,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = mService.portIdToPath(getActivePortId());
             mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
                     mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), true, null));
         }
     }
 
@@ -957,7 +957,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = mService.portIdToPath(getActivePortId());
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildRoutingChange(mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), null));
+            addAndStartAction(new RoutingControlAction(this, getActivePortId(), false, null));
         } else {
             int activePath = mService.getPhysicalAddress();
             setActivePath(activePath);

@@ -44,13 +44,13 @@ final class RoutingControlAction extends FeatureAction {
 
     // State in which we wait for <Routing Information> to arrive. If timed out, we use the
     // latest routing path to set the new active source.
-    private final static int STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
+    private static final int STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
 
     // State in which we wait for <Report Power Status> in response to <Give Device Power Status>
     // we have sent. If the response tells us the device power is on, we send <Set Stream Path>
     // to make it the active source. Otherwise we do not send <Set Stream Path>, and possibly
     // just show the blank screen.
-    private final static int STATE_WAIT_FOR_REPORT_POWER_STATUS = 2;
+    private static final int STATE_WAIT_FOR_REPORT_POWER_STATUS = 2;
 
     // Time out in millseconds used for <Routing Information>
     private static final int TIMEOUT_ROUTING_INFORMATION_MS = 1000;
@@ -58,15 +58,20 @@ final class RoutingControlAction extends FeatureAction {
     // Time out in milliseconds used for <Report Power Status>
     private static final int TIMEOUT_REPORT_POWER_STATUS_MS = 1000;
 
+    // true if <Give Power Status> should be sent once the new active routing path is determined.
+    private final boolean mQueryDevicePowerStatus;
+
     @Nullable private final IHdmiControlCallback mCallback;
 
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
 
-    RoutingControlAction(HdmiCecLocalDevice localDevice, int path, IHdmiControlCallback callback) {
+    RoutingControlAction(HdmiCecLocalDevice localDevice, int path, boolean queryDevicePowerStatus,
+            IHdmiControlCallback callback) {
         super(localDevice);
         mCallback = callback;
         mCurrentRoutingPath = path;
+        mQueryDevicePowerStatus = queryDevicePowerStatus;
     }
 
     @Override
@@ -138,13 +143,7 @@ final class RoutingControlAction extends FeatureAction {
         switch (timeoutState) {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
                 HdmiCecDeviceInfo device = tv().getDeviceInfoByPath(mCurrentRoutingPath);
-                if (device == null) {
-                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
-                } else {
-                    // TODO: Also check followings and then proceed:
-                    //       if routing change was neither triggered by TV at CEC enable time, nor
-                    //       at the detection of new device at the end of the active routing path, nor
-                    //       by TV power on with HDMI input as the active signal source.
+                if (device != null && mQueryDevicePowerStatus) {
                     int deviceLogicalAddress = device.getLogicalAddress();
                     queryDevicePowerStatus(deviceLogicalAddress, new SendMessageCallback() {
                         @Override
@@ -152,6 +151,8 @@ final class RoutingControlAction extends FeatureAction {
                             handlDevicePowerStatusAckResult(error == HdmiCec.RESULT_SUCCESS);
                         }
                     });
+                } else {
+                    tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
                 }
                 return;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:

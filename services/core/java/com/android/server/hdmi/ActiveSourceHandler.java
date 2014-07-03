@@ -92,7 +92,7 @@ final class ActiveSourceHandler {
                 HdmiCecMessage routingChange = HdmiCecMessageBuilder.buildRoutingChange(
                         getSourceAddress(), activePath, currentPath);
                 mService.sendCecCommand(routingChange);
-                tv.addAndStartAction(new RoutingControlAction(tv, currentPath, mCallback));
+                tv.addAndStartAction(new RoutingControlAction(tv, currentPath, true, mCallback));
             }
         }
     }
