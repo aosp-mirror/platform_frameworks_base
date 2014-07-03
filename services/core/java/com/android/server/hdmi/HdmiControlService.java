@@ -828,7 +828,7 @@ public final class HdmiControlService extends SystemService {
                     if (mMhlController != null) {
                         mMhlController.setOption(HdmiCec.OPTION_MHL_ENABLE, value);
                     }
-                    tv.routingAtEnableTime();
+                    tv.launchRoutingControl(false);
                 }
             });
         }

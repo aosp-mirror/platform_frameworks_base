@@ -98,9 +98,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
-
+        launchRoutingControl(true);
         launchDeviceDiscovery();
-        // TODO: Start routing control action
     }
 
     /**
@@ -945,24 +944,33 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    /**
+     * Launch routing control process.
+     *
+     * @param routingForBootup true if routing control is initiated due to One Touch Play
+     *        or TV power on
+     */
     @ServiceThreadOnly
-    void routingAtEnableTime() {
+    void launchRoutingControl(boolean routingForBootup) {
         assertRunOnServiceThread();
         // Seq #24
         if (getActivePortId() != HdmiConstants.INVALID_PORT_ID) {
-            // TODO: Check if TV was not powered on due to <Text/Image View On>,
-            //       TV is not in Preset Installation mode, not in initial setup mode, not
-            //       in Software updating mode, not in service mode, for following actions.
-            removeAction(RoutingControlAction.class);
-            int newPath = mService.portIdToPath(getActivePortId());
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildRoutingChange(mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), false, null));
+            if (!routingForBootup && !isProhibitMode()) {
+                removeAction(RoutingControlAction.class);
+                int newPath = mService.portIdToPath(getActivePortId());
+                setActivePath(newPath);
+                mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(mAddress,
+                        getActivePath(), newPath));
+                addAndStartAction(new RoutingControlAction(this, getActivePortId(),
+                        routingForBootup, null));
+            }
         } else {
             int activePath = mService.getPhysicalAddress();
             setActivePath(activePath);
-            // TODO: Do following only when TV was not powered on due to <Text/Image View On>.
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(mAddress, activePath));
+            if (!routingForBootup) {
+                mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(mAddress,
+                        activePath));
+            }
         }
     }
 
