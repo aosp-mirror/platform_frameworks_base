@@ -200,7 +200,8 @@ final class HdmiCecController {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != HdmiCec.ADDR_UNREGISTERED
                     && deviceType == HdmiCec.getTypeFromAddress(curAddress)) {
-                if (!sendPollMessage(curAddress, RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION)) {
+                if (!sendPollMessage(curAddress, curAddress,
+                        RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION)) {
                     logicalAddress = curAddress;
                     break;
                 }
@@ -358,16 +359,18 @@ final class HdmiCecController {
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
      *
      * @param callback an interface used to get a list of all remote devices' address
+     * @param sourceAddress a logical address of source device where sends polling message
      * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
      */
     @ServiceThreadOnly
-    void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
+    void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
+            int retryCount) {
         assertRunOnServiceThread();
 
         // Extract polling candidates. No need to poll against local devices.
         List<Integer> pollingCandidates = pickPollCandidates(pickStrategy);
-        runDevicePolling(pollingCandidates, retryCount, callback);
+        runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback);
     }
 
     /**
@@ -428,7 +431,8 @@ final class HdmiCecController {
     }
 
     @ServiceThreadOnly
-    private void runDevicePolling(final List<Integer> candidates, final int retryCount,
+    private void runDevicePolling(final int sourceAddress,
+            final List<Integer> candidates, final int retryCount,
             final DevicePollingCallback callback) {
         assertRunOnServiceThread();
         runOnIoThread(new Runnable() {
@@ -436,7 +440,7 @@ final class HdmiCecController {
             public void run() {
                 final ArrayList<Integer> allocated = new ArrayList<>();
                 for (Integer address : candidates) {
-                    if (sendPollMessage(address, retryCount)) {
+                    if (sendPollMessage(sourceAddress, address, retryCount)) {
                         allocated.add(address);
                     }
                 }
@@ -453,15 +457,14 @@ final class HdmiCecController {
     }
 
     @IoThreadOnly
-    private boolean sendPollMessage(int address, int retryCount) {
+    private boolean sendPollMessage(int sourceAddress, int destinationAddress, int retryCount) {
         assertRunOnIoThread();
         for (int i = 0; i < retryCount; ++i) {
-            // <Polling Message> is a message which has empty body and
-            // uses same address for both source and destination address.
+            // <Polling Message> is a message which has empty body.
             // If sending <Polling Message> failed (NAK), it becomes
             // new logical address for the device because no device uses
             // it as logical address of the device.
-            if (nativeSendCecCommand(mNativePtr, address, address, EMPTY_BODY)
+            if (nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY)
                     == HdmiConstants.SEND_RESULT_SUCCESS) {
                 return true;
             }

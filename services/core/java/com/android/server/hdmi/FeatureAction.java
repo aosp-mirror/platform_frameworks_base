@@ -207,7 +207,7 @@ abstract class FeatureAction {
 
     protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
             int retryCount) {
-        mService.pollDevices(callback, pickStrategy, retryCount);
+        mService.pollDevices(callback, getSourceAddress(), pickStrategy, retryCount);
     }
 
     /**
