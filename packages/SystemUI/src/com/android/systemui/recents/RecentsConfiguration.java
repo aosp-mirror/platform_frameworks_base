@@ -149,6 +149,9 @@ public class RecentsConfiguration {
 
         // Debug mode
         debugModeEnabled = settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false);
+        if (debugModeEnabled) {
+            Console.Enabled = true;
+        }
 
         // Animations
         animationPxMovementPerSecond =

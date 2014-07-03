@@ -92,7 +92,6 @@ class TaskBarView extends FrameLayout {
     public boolean onTouchEvent(MotionEvent event) {
         // We ignore taps on the task bar except on the filter and dismiss buttons
         if (!Constants.DebugFlags.App.EnableTaskBarTouchEvents) return true;
-        if (mConfig.debugModeEnabled) return true;
 
         return super.onTouchEvent(event);
     }

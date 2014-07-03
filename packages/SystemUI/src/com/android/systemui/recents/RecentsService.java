@@ -69,7 +69,7 @@ class SystemUIMessageHandler extends Handler {
                 // since that is done when we compute the animation itself in the Recents component
 
                 // Create a dummy task stack & compute the rect for the thumbnail to animate to
-                TaskStack stack = new TaskStack(context);
+                TaskStack stack = new TaskStack();
                 TaskStackView tsv = new TaskStackView(context, stack);
                 TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
                 Bundle replyData = new Bundle();

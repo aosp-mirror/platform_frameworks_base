@@ -43,7 +43,7 @@ public class Console {
     public static final String AnsiWhite = "\u001B[37m";
 
     // Console enabled state
-    public static final boolean Enabled = false;
+    public static boolean Enabled = false;
 
     /** Logs a key */
     public static void log(String key) {

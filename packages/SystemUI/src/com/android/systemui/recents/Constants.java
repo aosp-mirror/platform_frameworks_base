@@ -55,9 +55,9 @@ public class Constants {
             public static final String TimeRecentsStartupKey = "startup";
             public static final String TimeRecentsLaunchKey = "launchTask";
             public static final String TimeRecentsScreenshotTransitionKey = "screenshot";
-            public static final boolean TimeRecentsStartup = true;
-            public static final boolean TimeRecentsLaunchTask = true;
-            public static final boolean TimeRecentsScreenshotTransition = true;
+            public static final boolean TimeRecentsStartup = false;
+            public static final boolean TimeRecentsLaunchTask = false;
+            public static final boolean TimeRecentsScreenshotTransition = false;
 
 
             public static final boolean RecentsComponent = false;
