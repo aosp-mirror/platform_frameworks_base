@@ -58,6 +58,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super(context, attrs);
     }
 
+    /**
+     * Resets this view so it can be re-used for an updated notification.
+     */
+    public void reset() {
+        mRowMinHeight = 0;
+        mRowMaxHeight = 0;
+        mExpandable = false;
+        mHasUserChangedExpansion = false;
+        mUserLocked = false;
+        mShowingPublic = false;
+        mIsSystemExpanded = false;
+        mExpansionDisabled = false;
+        mPublicLayout.reset();
+        mPrivateLayout.reset();
+        mMaxExpandHeight = 0;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -110,6 +127,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param userExpanded whether the user wants this notification to be expanded
      */
     public void setUserExpanded(boolean userExpanded) {
+        if (userExpanded && !mExpandable) return;
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
     }

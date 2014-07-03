@@ -897,15 +897,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void onShowSearchPanel() {
     }
 
-    public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+    private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
             return inflateViews(entry, parent, false);
     }
 
-    public boolean inflateViewsForHeadsUp(NotificationData.Entry entry, ViewGroup parent) {
+    protected boolean inflateViewsForHeadsUp(NotificationData.Entry entry, ViewGroup parent) {
             return inflateViews(entry, parent, true);
     }
 
-    public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
+    private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
         int maxHeight = mRowMaxHeight;
         StatusBarNotification sbn = entry.notification;
         RemoteViews contentView = sbn.getNotification().contentView;
@@ -927,11 +927,30 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         Notification publicNotification = sbn.getNotification().publicVersion;
 
-        // create the row view
-        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-        ExpandableNotificationRow row = (ExpandableNotificationRow) inflater.inflate(
-                R.layout.status_bar_notification_row, parent, false);
+        ExpandableNotificationRow row;
+
+        // Stash away previous user expansion state so we can restore it at
+        // the end.
+        boolean hasUserChangedExpansion = false;
+        boolean userExpanded = false;
+        boolean userLocked = false;
+
+        if (entry.row != null) {
+            row = entry.row;
+            hasUserChangedExpansion = row.hasUserChangedExpansion();
+            userExpanded = row.isUserExpanded();
+            userLocked = row.isUserLocked();
+            row.reset();
+            if (hasUserChangedExpansion) {
+                row.setUserExpanded(userExpanded);
+            }
+        } else {
+            // create the row view
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            row = (ExpandableNotificationRow) inflater.inflate(R.layout.status_bar_notification_row,
+                    parent, false);
+        }
 
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.getPackageName());
@@ -1076,6 +1095,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.setBigContentView(bigContentViewLocal);
 
         applyLegacyRowBackground(sbn, entry);
+
+        // Restore previous flags.
+        if (hasUserChangedExpansion) {
+            // Note: setUserExpanded() conveniently ignores calls with
+            //       userExpanded=true if !isExpandable().
+            row.setUserExpanded(userExpanded);
+        }
+        row.setUserLocked(userLocked);
 
         return true;
     }
@@ -1317,12 +1344,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             RankingMap ranking);
     protected abstract void updateNotificationRanking(RankingMap ranking);
     public abstract void removeNotification(String key, RankingMap ranking);
+
     public void updateNotification(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
         boolean wasHeadsUp = isHeadsUp(key);
-        NotificationData.Entry oldEntry;
+        Entry oldEntry;
         if (wasHeadsUp) {
             oldEntry = mHeadsUpNotificationView.getEntry();
         } else {
@@ -1363,8 +1391,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + " publicView=" + publicContentView);
         }
 
-        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
-        // didn't change.
+        // Can we just reapply the RemoteViews in place?
 
         // 1U is never null
         boolean contentsUnchanged = oldEntry.expanded != null
@@ -1477,15 +1504,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                     addNotification(notification, ranking);  //this will pop the headsup
                 } else {
                     if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
-                    removeNotificationViews(key, ranking);
-                    addNotificationViews(notification, ranking);
-                    final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
-                    final boolean userChangedExpansion = oldEntry.row.hasUserChangedExpansion();
-                    if (userChangedExpansion) {
-                        boolean userExpanded = oldEntry.row.isUserExpanded();
-                        newEntry.row.setUserExpanded(userExpanded);
-                        newEntry.row.notifyHeightChanged();
-                    }
+                    oldEntry.notification = notification;
+                    inflateViews(oldEntry, mStackScroller, wasHeadsUp);
+                    updateNotifications();
                 }
             }
         }
