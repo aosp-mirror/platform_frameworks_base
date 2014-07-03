@@ -95,6 +95,10 @@ public class StatusBarWindowView extends FrameLayout {
                 if (!down) {
                     return mService.onMenuPressed();
                 }
+            case KeyEvent.KEYCODE_SPACE:
+                if (!down) {
+                    return mService.onSpacePressed();
+                }
         }
         if (mService.interceptMediaKey(event)) {
             return true;

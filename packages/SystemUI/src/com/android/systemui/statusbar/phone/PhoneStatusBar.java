@@ -1657,7 +1657,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapsePanels(int flags) {
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+        animateCollapsePanels(flags, false /* force */);
+    }
+
+    public void animateCollapsePanels(int flags, boolean force) {
+        if (!force &&
+                (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
             return;
         }
         if (SPEW) {
@@ -2906,6 +2911,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             animateCollapsePanels();
             return true;
         }
+    }
+
+    public boolean onSpacePressed() {
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+            animateCollapsePanels(0 /* flags */, true /* force */);
+            return true;
+        }
+        return false;
     }
 
     private void showBouncer() {
