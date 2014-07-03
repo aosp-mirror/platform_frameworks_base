@@ -2305,6 +2305,12 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_multiArch,
+                false)) {
+            ai.flags |= ApplicationInfo.FLAG_MULTIARCH;
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
