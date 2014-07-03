@@ -239,13 +239,14 @@ class TaskResourceLoader implements Runnable {
                                 }
                                 thumbnail.setHasAlpha(false);
                                 loadThumbnail = thumbnail;
-                                mThumbnailCache.put(t.key, thumbnail);
                             } else {
                                 loadThumbnail = mDefaultThumbnail;
                                 Console.logError(mContext,
                                         "Failed to load task top thumbnail for: " +
                                                 t.key.baseIntent.getComponent().getPackageName());
                             }
+                            // We put the default thumbnail in the cache anyways
+                            mThumbnailCache.put(t.key, loadThumbnail);
                         }
                     }
                     if (!mCancelled) {
@@ -321,6 +322,17 @@ public class RecentsTaskLoader {
                     " iconCache: " + iconCacheSize);
         }
 
+        // Create the default assets
+        Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        icon.eraseColor(0x00000000);
+        mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        mDefaultThumbnail.setHasAlpha(false);
+        mDefaultThumbnail.eraseColor(0xFFffffff);
+        mLoadingThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        mLoadingThumbnail.setHasAlpha(false);
+        mLoadingThumbnail.eraseColor(0xFFffffff);
+        mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
+
         // Initialize the proxy, cache and loaders
         mSystemServicesProxy = new SystemServicesProxy(context);
         mPackageMonitor = new RecentsPackageMonitor();
@@ -330,14 +342,6 @@ public class RecentsTaskLoader {
         mLoader = new TaskResourceLoader(mLoadQueue, mApplicationIconCache, mThumbnailCache,
                 mDefaultThumbnail);
 
-        // Create the default assets
-        Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        icon.eraseColor(0x00000000);
-        mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        mDefaultThumbnail.eraseColor(0xFFffffff);
-        mLoadingThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        mLoadingThumbnail.eraseColor(0x00000000);
-        mDefaultApplicationIcon = new BitmapDrawable(context.getResources(), icon);
         if (Console.Enabled) {
             Console.log(Constants.Log.App.TaskDataLoader,
                     "[RecentsTaskLoader|defaultBitmaps]",
@@ -392,7 +396,7 @@ public class RecentsTaskLoader {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         Resources res = context.getResources();
         ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
-        TaskStack stack = new TaskStack(context);
+        TaskStack stack = new TaskStack();
         SpaceNode root = new SpaceNode(context);
         root.setStack(stack);
 
@@ -416,7 +420,9 @@ public class RecentsTaskLoader {
                 activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
                 activityIcon = (av.getIcon() != null) ?
                         ssp.getBadgedIcon(new BitmapDrawable(res, av.getIcon()), t.userId) : null;
-                activityColor = av.getPrimaryColor();
+                if (av.getPrimaryColor() != 0) {
+                    activityColor = av.getPrimaryColor();
+                }
             } else {
                 activityLabel = ssp.getActivityLabel(info);
             }
@@ -464,10 +470,10 @@ public class RecentsTaskLoader {
                         task.thumbnail = ssp.getTaskThumbnail(task.key.id);
                         if (task.thumbnail != null) {
                             task.thumbnail.setHasAlpha(false);
-                            mThumbnailCache.put(task.key, task.thumbnail);
                         } else {
                             task.thumbnail = mDefaultThumbnail;
                         }
+                        mThumbnailCache.put(task.key, task.thumbnail);
                     } else {
                         // Either the task has updated, or we haven't cached any information for the
                         // task, so reload it

@@ -139,13 +139,10 @@ public class TaskStack {
         public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curTasks);
     }
 
-    Context mContext;
-
     FilteredTaskList mTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
-    public TaskStack(Context context) {
-        mContext = context;
+    public TaskStack() {
     }
 
     /** Sets the callbacks for this task stack */

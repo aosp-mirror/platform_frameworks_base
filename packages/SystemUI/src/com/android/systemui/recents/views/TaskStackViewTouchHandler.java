@@ -400,16 +400,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Re-enable clipping with the stack (we will reuse this view)
         tv.setClipViewInStack(true);
         // Remove the task view from the stack
-        mSv.onTaskDismissed(tv);
+        mSv.onTaskViewDismissed(tv);
     }
 
     @Override
     public void onSnapBackCompleted(View v) {
-        onDragCancelled(v);
-    }
-
-    @Override
-    public void onDragCancelled(View v) {
         TaskView tv = (TaskView) v;
         // Disable HW layers on that task
         if (mSv.mHwLayersTrigger.getCount() == 0) {
@@ -419,5 +414,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         mSv.setTouchOnTaskView(tv, true);
+    }
+
+    @Override
+    public void onDragCancelled(View v) {
+        // Do nothing
     }
 }

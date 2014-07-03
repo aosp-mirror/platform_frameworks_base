@@ -65,7 +65,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     AppWidgetHostView mSearchAppWidgetHostView;
 
     boolean mVisible;
-    boolean mTaskLaunched;
 
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishRunnable = new FinishRecentsRunnable(true);
@@ -198,9 +197,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
 
-        // Show the scrim if we animate into Recents without window transitions
-        mScrimViews.prepareEnterRecentsAnimation();
-
         // Add the default no-recents layout
         if (mEmptyView == null) {
             mEmptyView = mEmptyViewStub.inflate();
@@ -210,6 +206,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         } else {
             mEmptyView.setVisibility(View.GONE);
         }
+
+        // Show the scrim if we animate into Recents without window transitions
+        mScrimViews.prepareEnterRecentsAnimation();
     }
 
     /** Attempts to allocate and bind the search bar app widget */
@@ -355,13 +354,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Update the recent tasks
         updateRecentsTasks(getIntent());
 
-        // Prepare the screenshot transition if necessary
-        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            mFullScreenOverlayView = (FullscreenTransitionOverlayView) mFullscreenOverlayStub.inflate();
-            mFullScreenOverlayView.setCallbacks(this);
-            mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
-        }
-
         // Bind the search app widget when we first start up
         bindSearchBarAppWidget();
         // Add the search bar layout
@@ -390,6 +382,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        // Prepare the screenshot transition if necessary
+        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
+            mFullScreenOverlayView = (FullscreenTransitionOverlayView) mFullscreenOverlayStub.inflate();
+            mFullScreenOverlayView.setCallbacks(this);
+            mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
+        }
     }
 
     void onConfigurationChange() {
@@ -404,8 +403,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        // Reset the task launched flag if we encounter an onNewIntent() before onStop()
-        mTaskLaunched = false;
 
         if (Console.Enabled) {
             Console.logDivider(Constants.Log.App.SystemUIHandshake);
@@ -426,9 +423,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
             mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
         }
-
-        // Don't attempt to rebind the search bar widget, but just add the search bar layout
-        addSearchBarAppWidgetView();
     }
 
     @Override
@@ -509,7 +503,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         mVisible = false;
-        mTaskLaunched = false;
     }
 
     @Override
@@ -632,15 +625,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
-    public void onTaskLaunching() {
-        mTaskLaunched = true;
-
+    public void onTaskViewClicked() {
         // Mark recents as no longer visible
         AlternateRecentsComponent.notifyVisibilityChanged(false);
     }
 
     @Override
-    public void onLastTaskRemoved() {
+    public void onAllTaskViewsDismissed() {
         mFinishLaunchHomeRunnable.run();
     }
 

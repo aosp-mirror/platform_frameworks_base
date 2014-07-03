@@ -47,10 +47,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         View.OnLongClickListener {
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
-        public void onTaskIconClicked(TaskView tv);
-        public void onTaskAppInfoClicked(TaskView tv);
-        public void onTaskFocused(TaskView tv);
-        public void onTaskDismissed(TaskView tv);
+        public void onTaskViewAppIconClicked(TaskView tv);
+        public void onTaskViewAppInfoClicked(TaskView tv);
+        public void onTaskViewDismissed(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -63,8 +62,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     boolean mTaskDataLoaded;
     boolean mIsFocused;
     boolean mClipViewInStack;
-    Point mLastTouchDown = new Point();
-    Path mRoundedRectClipPath = new Path();
     Rect mTmpRect = new Rect();
     Paint mLayerPaint = new Paint();
 
@@ -110,6 +107,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         setWillNotDraw(false);
+        setClipToOutline(true);
         setDim(getDim());
     }
 
@@ -133,28 +131,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        // Update the rounded rect clip path
-        float radius = mConfig.taskViewRoundedCornerRadiusPx;
-        mRoundedRectClipPath.reset();
-        mRoundedRectClipPath.addRoundRect(new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight()),
-                radius, radius, Path.Direction.CW);
-
         // Update the outline
         Outline o = new Outline();
         o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight() -
-                mConfig.taskViewShadowOutlineBottomInsetPx, radius);
+                mConfig.taskViewShadowOutlineBottomInsetPx, mConfig.taskViewRoundedCornerRadiusPx);
         setOutline(o);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                mLastTouchDown.set((int) ev.getX(), (int) ev.getY());
-                break;
-        }
-        return super.onInterceptTouchEvent(ev);
     }
 
     /** Set callback */
@@ -291,7 +272,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         } else if (mConfig.launchedFromHome) {
             // Move the task view off screen (below) so we can animate it in
             setTranslationY(offscreenY);
-            setTranslationZ(0);
+            if (Constants.DebugFlags.App.EnableShadows) {
+                setTranslationZ(0);
+            }
             setScaleX(1f);
             setScaleY(1f);
         }
@@ -365,11 +348,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             int frontIndex = (ctx.stackViewCount - ctx.stackViewIndex - 1);
             int delay = mConfig.taskBarEnterAnimDelay +
                     frontIndex * mConfig.taskViewEnterFromHomeDelay;
+            if (Constants.DebugFlags.App.EnableShadows) {
+                animate().translationZ(transform.translationZ);
+            }
             animate()
                     .scaleX(transform.scale)
                     .scaleY(transform.scale)
                     .translationY(transform.translationY)
-                    .translationZ(transform.translationZ)
                     .setStartDelay(delay)
                     .setUpdateListener(null)
                     .setInterpolator(mConfig.quintOutInterpolator)
@@ -385,6 +370,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
                     })
                     .start();
             ctx.postAnimationTrigger.increment();
+        } else {
+            // Otherwise, just enable the thumbnail clip
+            mEnableThumbnailClip.run();
         }
     }
 
@@ -527,11 +515,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     @Override
     public void draw(Canvas canvas) {
-        int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-        // Apply the rounded rect clip path on the whole view
-        canvas.clipPath(mRoundedRectClipPath);
         super.draw(canvas);
-        canvas.restoreToCount(restoreCount);
 
         // Apply the dim if necessary
         if (mDim > 0) {
@@ -553,7 +537,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         requestFocus();
         setFocusableInTouchMode(false);
         invalidate();
-        mCb.onTaskFocused(this);
     }
 
     /**
@@ -626,13 +609,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             @Override
             public void run() {
                 if (v == mBarView.mApplicationIcon) {
-                    mCb.onTaskIconClicked(tv);
+                    mCb.onTaskViewAppIconClicked(tv);
                 } else if (v == mBarView.mDismissButton) {
                     // Animate out the view and call the callback
                     startDeleteTaskAnimation(new Runnable() {
                         @Override
                         public void run() {
-                            mCb.onTaskDismissed(tv);
+                            mCb.onTaskViewDismissed(tv);
                         }
                     });
                 }
@@ -643,7 +626,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     @Override
     public boolean onLongClick(View v) {
         if (v == mBarView.mApplicationIcon) {
-            mCb.onTaskAppInfoClicked(this);
+            mCb.onTaskViewAppInfoClicked(this);
             return true;
         }
         return false;
