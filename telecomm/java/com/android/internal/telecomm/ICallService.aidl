@@ -59,4 +59,6 @@ oneway interface ICallService {
     void splitFromConference(String callId);
 
     void onPostDialContinue(String callId, boolean proceed);
+
+    void onPhoneAccountClicked(String callId);
 }

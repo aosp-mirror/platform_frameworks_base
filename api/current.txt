@@ -27472,8 +27472,7 @@ package android.telecomm {
   public final class CallCapabilities {
     method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
-    field public static final int ALL = 511; // 0x1ff
-    field public static final int CONNECTION_HANDOFF = 256; // 0x100
+    field public static final int ALL = 255; // 0xff
     field public static final int GENERIC_CONFERENCE = 128; // 0x80
     field public static final int HOLD = 1; // 0x1
     field public static final int MERGE_CALLS = 4; // 0x4
@@ -27515,43 +27514,8 @@ package android.telecomm {
 
   public abstract class CallService extends android.app.Service {
     ctor public CallService();
-    method public abstract void abort(java.lang.String);
-    method public abstract void answer(java.lang.String);
-    method public abstract void call(android.telecomm.CallInfo);
-    method public abstract void disconnect(java.lang.String);
-    method protected final android.telecomm.CallServiceAdapter getAdapter();
     method public final android.os.IBinder getBinder();
-    method public abstract void hold(java.lang.String);
-    method protected void onAdapterAttached(android.telecomm.CallServiceAdapter);
-    method public abstract void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onFeaturesChanged(java.lang.String, int);
-    method public void onPostDialContinue(java.lang.String, boolean);
-    method public void onPostDialWait(android.telecomm.Connection, java.lang.String);
-    method public abstract void playDtmfTone(java.lang.String, char);
-    method public abstract void reject(java.lang.String);
-    method public abstract void setIncomingCallId(java.lang.String, android.os.Bundle);
-    method public abstract void stopDtmfTone(java.lang.String);
-    method public abstract void unhold(java.lang.String);
-  }
-
-  public final class CallServiceAdapter implements android.os.IBinder.DeathRecipient {
-    method public void addConferenceCall(java.lang.String);
-    method public void binderDied();
-    method public void cancelOutgoingCall(java.lang.String);
-    method public void handleFailedOutgoingCall(android.telecomm.ConnectionRequest, int, java.lang.String);
-    method public void handleSuccessfulOutgoingCall(java.lang.String);
-    method public void handoffCall(java.lang.String);
-    method public void notifyIncomingCall(android.telecomm.CallInfo);
-    method public void onPostDialWait(java.lang.String, java.lang.String);
-    method public void setActive(java.lang.String);
-    method public void setCallVideoProvider(java.lang.String, android.telecomm.CallVideoProvider);
-    method public void setDialing(java.lang.String);
-    method public void setDisconnected(java.lang.String, int, java.lang.String);
-    method public void setFeatures(java.lang.String, int);
-    method public void setOnHold(java.lang.String);
-    method public void setRequestingRingback(java.lang.String, boolean);
-    method public void setRinging(java.lang.String);
   }
 
   public final class CallServiceDescriptor implements android.os.Parcelable {
@@ -27645,6 +27609,7 @@ package android.telecomm {
     method protected void onConference();
     method protected void onDisconnect();
     method protected void onHold();
+    method protected void onPhoneAccountClicked();
     method protected void onPlayDtmfTone(char);
     method protected void onPostDialContinue(boolean);
     method protected void onReject();
@@ -27694,27 +27659,15 @@ package android.telecomm {
 
   public abstract class ConnectionService extends android.telecomm.CallService {
     ctor public ConnectionService();
-    method public final void abort(java.lang.String);
-    method public final void answer(java.lang.String);
-    method public final void call(android.telecomm.CallInfo);
     method public final void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
-    method public final void disconnect(java.lang.String);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
-    method public final void hold(java.lang.String);
     method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccount>>);
     method public final void maybeRespondToAccountLookup();
-    method public final void onAudioStateChanged(java.lang.String, android.telecomm.CallAudioState);
     method protected void onConnectionAdded(android.telecomm.Connection);
     method protected void onConnectionRemoved(android.telecomm.Connection);
     method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method protected void onCreateConnections(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.Connection>);
     method protected void onCreateIncomingConnection(android.telecomm.ConnectionRequest, android.telecomm.Response<android.telecomm.ConnectionRequest, android.telecomm.Connection>);
-    method public final void onFeaturesChanged(java.lang.String, int);
-    method public final void playDtmfTone(java.lang.String, char);
-    method public final void reject(java.lang.String);
-    method public final void setIncomingCallId(java.lang.String, android.os.Bundle);
-    method public final void stopDtmfTone(java.lang.String);
-    method public final void unhold(java.lang.String);
   }
 
   public static abstract interface ConnectionService.OutgoingCallResponse {
@@ -27736,9 +27689,9 @@ package android.telecomm {
   public final class InCallAdapter {
     method public void answerCall(java.lang.String);
     method public void disconnectCall(java.lang.String);
-    method public void handoffCall(java.lang.String);
     method public void holdCall(java.lang.String);
     method public void mute(boolean);
+    method public void phoneAccountClicked(java.lang.String);
     method public void playDtmfTone(java.lang.String, char);
     method public void postDialContinue(java.lang.String, boolean);
     method public void rejectCall(java.lang.String, boolean, java.lang.String);
@@ -27760,7 +27713,6 @@ package android.telecomm {
     method public int getFeatures();
     method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
-    method public android.telecomm.CallServiceDescriptor getHandoffCallServiceDescriptor();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
     method public void writeToParcel(android.os.Parcel, int);

@@ -60,8 +60,6 @@ oneway interface ICallServiceAdapter {
 
     void onPostDialWait(String callId, String remaining);
 
-    void handoffCall(String callId);
-
     void queryRemoteConnectionServices(RemoteServiceCallback callback);
 
     void setCallVideoProvider(String callId, ICallVideoProvider callVideoProvider);

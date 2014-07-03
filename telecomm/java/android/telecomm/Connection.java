@@ -611,6 +611,12 @@ public abstract class Connection {
      */
     protected void onChildrenChanged(List<Connection> children) {}
 
+    /**
+     * Called when the phone account UI was clicked.
+     */
+    protected void onPhoneAccountClicked() {}
+
+
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);
         mChildConnections.add(connection);

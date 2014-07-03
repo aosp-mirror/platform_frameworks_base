@@ -177,12 +177,6 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
-        public void handoffCall(String connectionId) {
-            // unnecessary.
-        }
-
-        /** ${inheritDoc} */
         @Override
         public void queryRemoteConnectionServices(RemoteServiceCallback callback) {
             try {

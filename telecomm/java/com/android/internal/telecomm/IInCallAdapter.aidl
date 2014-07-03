@@ -46,7 +46,7 @@ oneway interface IInCallAdapter {
 
     void postDialContinue(String callId, boolean proceed);
 
-    void handoffCall(String callId);
+    void phoneAccountClicked(String callId);
 
     void conference(String callId);
 

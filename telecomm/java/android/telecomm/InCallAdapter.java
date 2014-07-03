@@ -189,13 +189,13 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecomm to handoff the call to another call service.
+     * Instructs Telecomm that the phone account UI was clicked.
      *
-     * @param callId The identifier of the call to handoff.
+     * @param callId The identifier of the call.
      */
-    public void handoffCall(String callId) {
+    public void phoneAccountClicked(String callId) {
         try {
-            mAdapter.handoffCall(callId);
+            mAdapter.phoneAccountClicked(callId);
         } catch (RemoteException e) {
         }
     }

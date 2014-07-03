@@ -33,8 +33,9 @@ import java.util.Set;
 
 /**
  * Provides methods for ICallService implementations to interact with the system phone app.
- * TODO(santoscordon): Need final public-facing comments in this file.
  * TODO(santoscordon): Rename this to CallServiceAdapterDemultiplexer (or something).
+ *
+ * @hide
  */
 public final class CallServiceAdapter implements DeathRecipient {
     private final Set<ICallServiceAdapter> mAdapters = new HashSet<>();
@@ -293,20 +294,6 @@ public final class CallServiceAdapter implements DeathRecipient {
             try {
                 adapter.onPostDialWait(callId, remaining);
             } catch (RemoteException ignored) {
-            }
-        }
-    }
-
-    /**
-     * Instructs Telecomm to handoff the call to another call service.
-     *
-     * @param callId The identifier of the call to handoff.
-     */
-    public void handoffCall(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
-            try {
-                adapter.handoffCall(callId);
-            } catch (RemoteException e) {
             }
         }
     }

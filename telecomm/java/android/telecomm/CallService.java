@@ -31,11 +31,6 @@ import com.android.internal.telecomm.ICallServiceAdapter;
  * Base implementation of CallService which can be used to provide calls for the system
  * in-call UI. CallService is a one-way service from the framework's CallsManager to any app
  * that would like to provide calls managed by the default system in-call user interface.
- * When the service is bound by the framework, CallsManager will call setCallServiceAdapter
- * which will provide CallService with an instance of {@link CallServiceAdapter} to be used
- * for communicating back to CallsManager. Subsequently, more specific methods of the service
- * will be called to perform various call actions including making an outgoing call and
- * disconnected existing calls.
  * TODO(santoscordon): Needs more about AndroidManifest.xml service registrations before
  * we can unhide this API.
  *
@@ -61,6 +56,7 @@ public abstract class CallService extends Service {
     private static final int MSG_CONFERENCE = 13;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 14;
     private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
+    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
 
     /**
      * Default Handler used to consolidate binder method calls onto a single thread.
@@ -146,6 +142,9 @@ public abstract class CallService extends Service {
                 }
                 case MSG_SPLIT_FROM_CONFERENCE:
                     splitFromConference((String) msg.obj);
+                    break;
+                case MSG_ON_PHONE_ACCOUNT_CLICKED:
+                    onPhoneAccountClicked((String) msg.obj);
                     break;
                 default:
                     break;
@@ -244,6 +243,12 @@ public abstract class CallService extends Service {
             args.argi1 = proceed ? 1 : 0;
             mMessageHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
         }
+
+        @Override
+        public void onPhoneAccountClicked(String callId) {
+            mMessageHandler.obtainMessage(MSG_ON_PHONE_ACCOUNT_CLICKED, callId).sendToTarget();
+        }
+
     }
 
     /**
@@ -272,152 +277,59 @@ public abstract class CallService extends Service {
         return mBinder;
     }
 
-    /**
-     * @return The attached {@link CallServiceAdapter} if the service is bound, null otherwise.
-     */
+    /** @hide */
     protected final CallServiceAdapter getAdapter() {
         return mAdapter;
     }
 
-    /**
-     * Lifecycle callback which is called when this {@link CallService} has been attached to a
-     * {@link CallServiceAdapter}, indicating {@link #getAdapter()} is now safe to use.
-     *
-     * @param adapter The adapter now attached to this call service.
-     */
-    protected void onAdapterAttached(CallServiceAdapter adapter) {
-    }
+    /** @hide */
+    protected abstract void onAdapterAttached(CallServiceAdapter adapter);
 
-    /**
-     * Attempts to call the relevant party using the specified call's handle, be it a phone number,
-     * SIP address, or some other kind of user ID.  Note that the set of handle types is
-     * dynamically extensible since call providers should be able to implement arbitrary
-     * handle-calling systems.
-     *
-     * @param callInfo The details of the relevant call.
-     */
-    public abstract void call(CallInfo callInfo);
+    /** @hide */
+    protected abstract void call(CallInfo callInfo);
 
-    /**
-     * Aborts the outgoing call attempt. Invoked in the unlikely event that Telecomm decides to
-     * abort an attempt to place a call.  Only ever be invoked after {@link #call} invocations.
-     * After this is invoked, Telecomm does not expect any more updates about the call and will
-     * actively ignore any such update. This is different from {@link #disconnect} where Telecomm
-     * expects confirmation via CallServiceAdapter.markCallAsDisconnected.
-     *
-     * @param callId The identifier of the call to abort.
-     */
-    public abstract void abort(String callId);
+    /** @hide */
+    protected abstract void abort(String callId);
 
-    /**
-     * Receives a new call ID to use with an incoming call. Invoked by Telecomm after it is notified
-     * that this call service has a pending incoming call, see
-     * {@link TelecommConstants#ACTION_INCOMING_CALL}. The call service must first give Telecomm
-     * additional information about the call through {@link CallServiceAdapter#notifyIncomingCall}.
-     * Following that, the call service can update the call at will using the specified call ID.
-     *
-     * If a {@link Bundle} was passed (via {@link TelecommConstants#EXTRA_INCOMING_CALL_EXTRAS}) in
-     * with the {@link TelecommConstants#ACTION_INCOMING_CALL} intent, <code>extras</code> will be
-     * populated with this {@link Bundle}. Otherwise, an empty Bundle will be returned.
-     *
-     * @param callId The ID of the call.
-     * @param extras The optional extras which were passed in with the intent, or an empty Bundle.
-     */
-    public abstract void setIncomingCallId(String callId, Bundle extras);
+    /** @hide */
+    protected abstract void setIncomingCallId(String callId, Bundle extras);
 
-    /**
-     * Answers a ringing call identified by callId. Telecomm invokes this method as a result of the
-     * user hitting the "answer" button in the incoming call screen.
-     *
-     * @param callId The ID of the call.
-     */
-    public abstract void answer(String callId);
+    /** @hide */
+    protected abstract void answer(String callId);
 
-    /**
-     * Rejects a ringing call identified by callId. Telecomm invokes this method as a result of the
-     * user hitting the "reject" button in the incoming call screen.
-     *
-     * @param callId The ID of the call.
-     */
-    public abstract void reject(String callId);
+    /** @hide */
+    protected abstract void reject(String callId);
 
-    /**
-     * Disconnects the specified call.
-     *
-     * @param callId The ID of the call to disconnect.
-     */
-    public abstract void disconnect(String callId);
+    /** @hide */
+    protected abstract void disconnect(String callId);
 
-    /**
-     * Puts the specified call on hold.
-     *
-     * @param callId The ID of the call to put on hold.
-     */
-    public abstract void hold(String callId);
+    /** @hide */
+    protected abstract void hold(String callId);
 
-    /**
-     * Removes the specified call from hold.
-     *
-     * @param callId The ID of the call to unhold.
-     */
-    public abstract void unhold(String callId);
+    /** @hide */
+    protected abstract void unhold(String callId);
 
-    /**
-     * Plays a dual-tone multi-frequency signaling (DTMF) tone in a call.
-     *
-     * @param callId The unique ID of the call in which the tone will be played.
-     * @param digit A character representing the DTMF digit for which to play the tone. This
-     *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.
-     */
-    public abstract void playDtmfTone(String callId, char digit);
+    /** @hide */
+    protected abstract void playDtmfTone(String callId, char digit);
 
-    /**
-     * Stops any dual-tone multi-frequency sinaling (DTMF) tone currently playing.
-     *
-     * DTMF tones are played by calling {@link #playDtmfTone(String,char)}. If no DTMF tone is
-     * currently playing, this method will do nothing.
-     *
-     * @param callId The unique ID of the call in which any currently playing tone will be stopped.
-     */
-    public abstract void stopDtmfTone(String callId);
+    /** @hide */
+    protected abstract void stopDtmfTone(String callId);
 
-    /**
-     * Called when the audio state changes.
-     *
-     * @param activeCallId The identifier of the call that was active during the state change.
-     * @param audioState The new {@link CallAudioState}.
-     */
-    public abstract void onAudioStateChanged(String activeCallId, CallAudioState audioState);
+    /** @hide */
+    protected abstract void onAudioStateChanged(String activeCallId, CallAudioState audioState);
 
-    /**
-     * Conferences the specified call.
-     *
-     * @param conferenceCallId The unique ID of the conference call onto which the specified calls
-     *         should be added.
-     * @param callId The call to conference.
-     * @hide
-     */
-    public abstract void conference(String conferenceCallId, String callId);
+    /** @hide */
+    protected abstract void conference(String conferenceCallId, String callId);
 
-    /**
-     * Removes the specified call from a conference call.
-     *
-     * @param callId The call to remove from the conference call
-     * @hide
-     */
-    public abstract void splitFromConference(String callId);
+    /** @hide */
+    protected abstract void splitFromConference(String callId);
 
-    public void onPostDialContinue(String callId, boolean proceed) {}
+    /** @hide */
+    protected abstract void onPostDialContinue(String callId, boolean proceed);
 
-    public void onPostDialWait(Connection conn, String remaining) {}
+    /** @hide */
+    protected abstract void onFeaturesChanged(String callId, int features);
 
-    /**
-     * Called when changes to the features of a call occurs. Features are defined in
-     * {@link android.telecomm.CallFeatures}.  The active features for the call are represented as
-     * bits in the features bit-mask.
-     *
-     * @param callId The call to set the features for.
-     * @param features The new features of the call.
-     */
-    public abstract void onFeaturesChanged(String callId, int features);
+    /** @hide */
+    protected abstract void onPhoneAccountClicked(String callId);
 }

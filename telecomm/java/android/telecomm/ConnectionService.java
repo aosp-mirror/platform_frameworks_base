@@ -180,7 +180,7 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void call(final CallInfo callInfo) {
+    protected final void call(final CallInfo callInfo) {
         Log.d(this, "call %s", callInfo);
         onCreateConnections(
                 new ConnectionRequest(
@@ -211,14 +211,14 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void abort(String callId) {
+    protected final void abort(String callId) {
         Log.d(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").abort();
     }
 
     /** @hide */
     @Override
-    public final void setIncomingCallId(final String callId, Bundle extras) {
+    protected final void setIncomingCallId(final String callId, Bundle extras) {
         Log.d(this, "setIncomingCallId %s %s", callId, extras);
         onCreateIncomingConnection(
                 new ConnectionRequest(
@@ -261,63 +261,63 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void answer(String callId) {
+    protected final void answer(String callId) {
         Log.d(this, "answer %s", callId);
         findConnectionForAction(callId, "answer").answer();
     }
 
     /** @hide */
     @Override
-    public final void reject(String callId) {
+    protected final void reject(String callId) {
         Log.d(this, "reject %s", callId);
         findConnectionForAction(callId, "reject").reject();
     }
 
     /** @hide */
     @Override
-    public final void disconnect(String callId) {
+    protected final void disconnect(String callId) {
         Log.d(this, "disconnect %s", callId);
         findConnectionForAction(callId, "disconnect").disconnect();
     }
 
     /** @hide */
     @Override
-    public final void hold(String callId) {
+    protected final void hold(String callId) {
         Log.d(this, "hold %s", callId);
         findConnectionForAction(callId, "hold").hold();
     }
 
     /** @hide */
     @Override
-    public final void unhold(String callId) {
+    protected final void unhold(String callId) {
         Log.d(this, "unhold %s", callId);
         findConnectionForAction(callId, "unhold").unhold();
     }
 
     /** @hide */
     @Override
-    public final void playDtmfTone(String callId, char digit) {
+    protected final void playDtmfTone(String callId, char digit) {
         Log.d(this, "playDtmfTone %s %c", callId, digit);
         findConnectionForAction(callId, "playDtmfTone").playDtmfTone(digit);
     }
 
     /** @hide */
     @Override
-    public final void stopDtmfTone(String callId) {
+    protected final void stopDtmfTone(String callId) {
         Log.d(this, "stopDtmfTone %s", callId);
         findConnectionForAction(callId, "stopDtmfTone").stopDtmfTone();
     }
 
     /** @hide */
     @Override
-    public final void onAudioStateChanged(String callId, CallAudioState audioState) {
+    protected final void onAudioStateChanged(String callId, CallAudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
         findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
     }
 
     /** @hide */
     @Override
-    public final void conference(final String conferenceCallId, String callId) {
+    protected final void conference(final String conferenceCallId, String callId) {
         Log.d(this, "conference %s, %s", conferenceCallId, callId);
 
         Connection connection = findConnectionForAction(callId, "conference");
@@ -352,7 +352,7 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void splitFromConference(String callId) {
+    protected final void splitFromConference(String callId) {
         Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
@@ -366,7 +366,7 @@ public abstract class ConnectionService extends CallService {
 
     /** @hide */
     @Override
-    public final void onPostDialContinue(String callId, boolean proceed) {
+    protected final void onPostDialContinue(String callId, boolean proceed) {
         Log.d(this, "onPostDialContinue(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "onPostDialContinue");
@@ -377,9 +377,21 @@ public abstract class ConnectionService extends CallService {
         connection.onPostDialContinue(proceed);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
+    @Override
+    protected final void onFeaturesChanged(String callId, int features) {
+        Log.d(this, "onFeaturesChanged %s %d", callId, features);
+        findConnectionForAction(callId, "onFeaturesChanged").setFeatures(features);
+    }
+
+    /** @hide */
+    @Override
+    protected void onPhoneAccountClicked(String callId) {
+        Log.d(this, "onPhoneAccountClicked %s", callId);
+        findConnectionForAction(callId, "onPhoneAccountClicked").onPhoneAccountClicked();
+    }
+
+    /** @hide */
     @Override
     protected final void onAdapterAttached(CallServiceAdapter adapter) {
         if (mAreAccountsInitialized) {
@@ -568,19 +580,5 @@ public abstract class ConnectionService extends CallService {
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
         return NULL_CONNECTION;
-    }
-
-    /**
-     * Handles changes to the features of a connection.
-     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
-     * bit-mask.
-     *
-     * @param callId The call to set the features for.
-     * @param features The new features of the call.
-     */
-    @Override
-    public final void onFeaturesChanged(String callId, int features) {
-        Log.d(this, "onFeaturesChanged %s %d", callId, features);
-        findConnectionForAction(callId, "onFeaturesChanged").setFeatures(features);
     }
 }

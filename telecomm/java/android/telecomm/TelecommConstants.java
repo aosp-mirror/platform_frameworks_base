@@ -27,13 +27,13 @@ public final class TelecommConstants {
     /**
      * <p>Activity action: Starts the UI for handing an incoming call. This intent starts the
      * in-call UI by notifying the Telecomm system that an incoming call exists for a specific call
-     * service (see {@link android.telecomm.CallService}). Telecomm reads the Intent extras to find
-     * and bind to the appropriate {@link android.telecomm.CallService} which Telecomm will
-     * ultimately use to control and get information about the call.</p>
+     * service (see {@link android.telecomm.ConnectionService}). Telecomm reads the Intent extras
+     * to find and bind to the appropriate {@link android.telecomm.ConnectionService} which
+     * Telecomm will ultimately use to control and get information about the call.</p>
      *
      * <p>Input: get*Extra field {@link #EXTRA_CALL_SERVICE_DESCRIPTOR} contains the component name
-     * of the {@link android.telecomm.CallService} that Telecomm should bind to. Telecomm will then
-     * ask the call service for more information about the call prior to showing any UI.
+     * of the {@link android.telecomm.ConnectionService} that Telecomm should bind to. Telecomm
+     * will then ask the call service for more information about the call prior to showing any UI.
      *
      * TODO(santoscordon): Needs permissions.
      * TODO(santoscordon): Consider moving this into a simple method call on a system service.
@@ -46,7 +46,7 @@ public final class TelecommConstants {
     public static final String ACTION_CALL_SERVICE_PROVIDER = CallServiceProvider.class.getName();
 
     /**
-     * The service action used to bind to {@link CallService} implementations.
+     * The service action used to bind to {@link ConnectionService} implementations.
      */
     public static final String ACTION_CALL_SERVICE = CallService.class.getName();
 
@@ -73,8 +73,8 @@ public final class TelecommConstants {
 
     /**
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
-     * metadata about the call. This {@link Bundle} will be returned to the {@link CallService} as
-     * part of {@link CallService#setIncomingCallId(String,Bundle)}.
+     * metadata about the call. This {@link Bundle} will be returned to the
+     * {@link ConnectionService}.
      */
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
             "android.intent.extra.INCOMING_CALL_EXTRAS";

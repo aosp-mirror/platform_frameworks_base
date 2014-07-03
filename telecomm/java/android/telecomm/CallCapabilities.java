@@ -42,11 +42,8 @@ public final class CallCapabilities {
     /** Call supports generic conference mode. */
     public static final int GENERIC_CONFERENCE = 0x00000080;
 
-    /** Call currently supports switch between connections. */
-    public static final int CONNECTION_HANDOFF = 0x00000100;
-
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CALLS | SWAP_CALLS | ADD_CALL
-            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE | CONNECTION_HANDOFF;
+            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE;
 
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
@@ -74,9 +71,6 @@ public final class CallCapabilities {
         }
         if ((capabilities & GENERIC_CONFERENCE) != 0) {
             builder.append(" GENERIC_CONFERENCE");
-        }
-        if ((capabilities & CONNECTION_HANDOFF) != 0) {
-            builder.append(" HANDOFF");
         }
         builder.append("]");
         return builder.toString();
