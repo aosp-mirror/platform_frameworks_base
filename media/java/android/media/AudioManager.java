@@ -340,6 +340,12 @@ public class AudioManager {
     public static final int FLAG_SHOW_SILENT_HINT = 1 << 7;
 
     /**
+     * Indicates the volume call is for Hdmi Cec system audio volume
+     * @hide
+     */
+    public static final int FLAG_HDMI_SYSTEM_AUDIO_VOLUME = 1 << 8;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -2869,6 +2875,23 @@ public class AudioManager {
             getService().disableSafeMediaVolume();
         } catch (RemoteException e) {
             Log.w(TAG, "Error disabling safe media volume", e);
+        }
+    }
+
+    /**
+     * Set Hdmi Cec system audio mode.
+     *
+     * @param on whether to be on system audio mode
+     * @param device out device type to be used for system audio mode.
+     *               Ignored if {@code on} is {@code false}
+     * @param name name of system audio device
+     * @hide
+     */
+    public void setHdmiSystemAudioSupported(boolean on, int device, String name) {
+        try {
+            getService().setHdmiSystemAudioSupported(on, device, name);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error setting system audio mode", e);
         }
     }
 

@@ -69,6 +69,34 @@ public final class HdmiTvClient {
         }
     }
 
+    /**
+     * Set system audio volume
+     *
+     * @param oldIndex current volume index
+     * @param newIndex volume index to be set
+     * @param maxIndex maximum volume index
+     */
+    public void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex) {
+        try {
+            mService.setSystemAudioVolume(oldIndex, newIndex, maxIndex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to set volume: ", e);
+        }
+    }
+
+    /**
+     * Set system audio mute status
+     *
+     * @param mute {@code true} if muted; otherwise, {@code false}
+     */
+    public void setSystemAudioMute(boolean mute) {
+        try {
+            mService.setSystemAudioMute(mute);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to set mute: ", e);
+        }
+    }
+
     private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
         return new IHdmiControlCallback.Stub() {
             @Override

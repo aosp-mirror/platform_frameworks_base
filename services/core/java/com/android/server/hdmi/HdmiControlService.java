@@ -35,6 +35,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -754,6 +755,39 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void setSystemAudioVolume(final int oldIndex, final int newIndex,
+                final int maxIndex) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available");
+                        return;
+                    }
+                    tv.changeVolume(oldIndex, newIndex - oldIndex, maxIndex);
+                }
+            });
+        }
+
+        @Override
+        public void setSystemAudioMute(final boolean mute) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDeviceTv tv = tv();
+                    if (tv == null) {
+                        Slog.w(TAG, "Local tv device not available");
+                        return;
+                    }
+                    tv.changeMute(mute);
+                }
+            });
+        }
+
+        @Override
         public void setArcMode(final boolean enabled) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
@@ -761,7 +795,7 @@ public final class HdmiControlService extends SystemService {
                 public void run() {
                     HdmiCecLocalDeviceTv tv = tv();
                     if (tv == null) {
-                        Slog.w(TAG, "Local tv device not available to change arc mode.");
+                        Log.w(TAG, "Local tv device not available to change arc mode.");
                         return;
                     }
                 }

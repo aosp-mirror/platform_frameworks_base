@@ -43,6 +43,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -572,6 +574,11 @@ public class AudioService extends IAudioService.Stub {
             setRotationForAudioSystem();
         }
 
+        HdmiControlManager hdmiManager =
+                (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
+        // Null if device is not Tv.
+        mHdmiTvClient = hdmiManager.getTvClient();
+
         context.registerReceiver(mReceiver, intentFilter);
 
         mUseMasterVolume = context.getResources().getBoolean(
@@ -969,6 +976,21 @@ public class AudioService extends IAudioService.Stub {
                         streamState,
                         0);
             }
+
+            // Check if volume update should be send to Hdmi system audio.
+            int newIndex = mStreamStates[streamType].getIndex(device);
+            if (mHdmiTvClient != null &&
+                streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
+                oldIndex != newIndex) {
+                int maxIndex = getStreamMaxVolume(streamType);
+                synchronized (mHdmiTvClient) {
+                    if (mHdmiSystemAudioSupported) {
+                        mHdmiTvClient.setSystemAudioVolume(
+                                (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
+                    }
+                }
+            }
         }
         int index = mStreamStates[streamType].getIndex(device);
         sendVolumeUpdate(streamType, oldIndex, index, flags);
@@ -1065,6 +1087,19 @@ public class AudioService extends IAudioService.Stub {
                 synchronized (mA2dpAvrcpLock) {
                     if (mA2dp != null && mAvrcpAbsVolSupported) {
                         mA2dp.setAvrcpAbsoluteVolume(index / 10);
+                    }
+                }
+            }
+
+            if (mHdmiTvClient != null &&
+                streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
+                oldIndex != index) {
+                int maxIndex = getStreamMaxVolume(streamType);
+                synchronized (mHdmiTvClient) {
+                    if (mHdmiSystemAudioSupported) {
+                        mHdmiTvClient.setSystemAudioVolume(
+                                (oldIndex + 5) / 10, (index + 5) / 10, maxIndex);
                     }
                 }
             }
@@ -1292,6 +1327,13 @@ public class AudioService extends IAudioService.Stub {
         }
 
         if (isStreamAffectedByMute(streamType)) {
+            if (streamType == AudioSystem.STREAM_MUSIC && mHdmiTvClient != null) {
+                synchronized (mHdmiTvClient) {
+                    if (mHdmiSystemAudioSupported) {
+                        mHdmiTvClient.setSystemAudioMute(state);
+                    }
+                }
+            }
             mStreamStates[streamType].mute(cb, state);
         }
     }
@@ -4701,6 +4743,64 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    //==========================================================================================
+    // Hdmi Cec system audio mode.
+    // If Hdmi Cec's system audio mode is on, audio service should notify volume change
+    // to HdmiControlService so that audio recevier can handle volume change.
+    //==========================================================================================
+
+    // If HDMI-CEC system audio is supported
+    private boolean mHdmiSystemAudioSupported = false;
+    // Set only when device is tv.
+    private HdmiTvClient mHdmiTvClient;
+
+    @Override
+    public void setHdmiSystemAudioSupported(boolean on, int device, String name) {
+        if (mHdmiTvClient == null) {
+            Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
+            return;
+        }
+
+        if ((device & AudioSystem.DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO) == 0) {
+            Log.w(TAG, "Unsupported Hdmi-Cec system audio output:" + device);
+            return;
+        }
+
+        VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
+        int oldStreamDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+        int oldIndex = streamState.getIndex(oldStreamDevice);
+
+        synchronized (mHdmiTvClient) {
+            mHdmiSystemAudioSupported = on;
+
+            // TODO: call AudioSystem.setForceUse(FORCE_FOR_MEDIA,
+            //         on ? AudioSystem.FORCE_SYSTEM_AUDIO_XXX : AudioSystem.FORCE_NONE;
+        }
+
+        int newStreamDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+        boolean updateSpeakerVolume = false;
+        if (on) {
+            if ((oldStreamDevice & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
+                // Mute tv speaker. Note that set volume 0 instead of call mute() method because
+                // it's not possible to mute for a specific device.
+                streamState.setIndex(0, AudioSystem.DEVICE_OUT_SPEAKER);
+                updateSpeakerVolume = true;
+            }
+        } else {
+            if ((newStreamDevice & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
+                // Restore speaker volume if exists. As there is no way to mute a device here,
+                // load system audio's volume and set it to speaker.
+                streamState.setIndex(oldIndex, AudioSystem.DEVICE_OUT_SPEAKER);
+                updateSpeakerVolume = true;
+            }
+        }
+
+        if (updateSpeakerVolume) {
+            sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
+                    AudioSystem.DEVICE_OUT_SPEAKER, 0,
+                    streamState, 0);
+        }
+    }
 
     //==========================================================================================
     // Camera shutter sound policy.
