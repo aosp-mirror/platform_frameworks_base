@@ -86,10 +86,14 @@
                 <!-- A view to reserve space for the collapsed stack -->
                 <!-- Layout height: notification_min_height + bottom_stack_peek_amount -->
                 <View
-                    android:layout_height="76dp"
+                    android:id="@+id/reserve_notification_space"
+                    android:layout_height="@dimen/min_stack_height"
                     android:layout_width="match_parent"
-                    android:layout_marginTop="@dimen/notifications_top_padding"
-                    android:layout_marginBottom="@dimen/notification_side_padding"/>
+                    android:layout_marginTop="@dimen/notifications_top_padding" />
+
+                <View
+                    android:layout_height="@dimen/notification_side_padding"
+                    android:layout_width="match_parent" />
             </LinearLayout>
         </com.android.systemui.statusbar.phone.ObservableScrollView>
 

@@ -66,7 +66,7 @@ public class NotificationPanelView extends PanelView implements
     private View mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private TextView mClockView;
-
+    private View mReserveNotificationSpace;
     private MirrorView mSystemIconsCopy;
 
     private NotificationStackScrollLayout mNotificationStackScroller;
@@ -154,6 +154,7 @@ public class NotificationPanelView extends PanelView implements
         mClockView = (TextView) findViewById(R.id.clock_view);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         mScrollView.setListener(this);
+        mReserveNotificationSpace = findViewById(R.id.reserve_notification_space);
         mNotificationStackScroller = (NotificationStackScrollLayout)
                 findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
@@ -357,6 +358,13 @@ public class NotificationPanelView extends PanelView implements
                 if (shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
+                if (mQsExpansionAnimator != null) {
+                    onQsExpansionStarted();
+                    mInitialHeightOnTouch = mQsExpansionHeight;
+                    mQsTracking = true;
+                    mIntercepting = false;
+                    mNotificationStackScroller.removeLongPressCallback();
+                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
@@ -434,8 +442,9 @@ public class NotificationPanelView extends PanelView implements
 
     private float getQsExpansionFraction() {
         return (mQsExpansionHeight - mQsMinExpansionHeight)
-                / (mQsMaxExpansionHeight - mQsMinExpansionHeight);
+                / (getTempQsMaxExpansion() - mQsMinExpansionHeight);
     }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mBlockTouches) {
@@ -541,6 +550,8 @@ public class NotificationPanelView extends PanelView implements
                 if ((fraction != 0f || y >= mInitialTouchY)
                         && (fraction != 1f || y <= mInitialTouchY)) {
                     flingQsWithCurrentVelocity();
+                } else {
+                    mScrollYOverride = -1;
                 }
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
@@ -593,6 +604,9 @@ public class NotificationPanelView extends PanelView implements
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight - mScrollView.getScrollY() - overscrollAmount;
+        if (mScrollView.getScrollY() != 0) {
+            mScrollYOverride = mScrollView.getScrollY();
+        }
         mScrollView.scrollTo(0, 0);
         setQsExpansion(height);
     }
@@ -639,7 +653,7 @@ public class NotificationPanelView extends PanelView implements
             setQsExpanded(false);
         }
         mQsExpansionHeight = height;
-        mHeader.setExpansion(height - mQsPeekHeight);
+        mHeader.setExpansion(getQsExpansionFraction());
         setQsTranslation(height);
         requestScrollerTopPaddingUpdate(false /* animate */);
         updateNotificationScrim(height);
@@ -698,6 +712,7 @@ public class NotificationPanelView extends PanelView implements
     private void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable) {
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
         if (target == mQsExpansionHeight) {
+            mScrollYOverride = -1;
             if (onFinishRunnable != null) {
                 onFinishRunnable.run();
             }
@@ -714,6 +729,7 @@ public class NotificationPanelView extends PanelView implements
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mScrollYOverride = -1;
                 mQsExpansionAnimator = null;
                 if (onFinishRunnable != null) {
                     onFinishRunnable.run();
@@ -827,17 +843,26 @@ public class NotificationPanelView extends PanelView implements
             float panelHeightQsExpanded = calculatePanelHeightQsExpanded();
             float t = (expandedHeight - panelHeightQsCollapsed)
                     / (panelHeightQsExpanded - panelHeightQsCollapsed);
-            int qsTempMaxExpansion = mQsMaxExpansionHeight;
-            if (mScrollYOverride != -1) {
-                qsTempMaxExpansion -= mScrollYOverride;
-            }
+
             setQsExpansion(mQsMinExpansionHeight
-                    + t * (qsTempMaxExpansion - mQsMinExpansionHeight));
+                    + t * (getTempQsMaxExpansion() - mQsMinExpansionHeight));
         }
         mNotificationStackScroller.setStackHeight(expandedHeight);
         updateHeader();
         updateUnlockIcon();
         updateNotificationTranslucency();
+    }
+
+    /**
+     * @return a temporary override of {@link #mQsMaxExpansionHeight}, which is needed when
+     *         collapsing QS / the panel when QS was scrolled
+     */
+    private int getTempQsMaxExpansion() {
+        int qsTempMaxExpansion = mQsMaxExpansionHeight;
+        if (mScrollYOverride != -1) {
+            qsTempMaxExpansion -= mScrollYOverride;
+        }
+        return qsTempMaxExpansion;
     }
 
     private float calculatePanelHeightQsExpanded() {
@@ -974,7 +999,6 @@ public class NotificationPanelView extends PanelView implements
         mIsExpanding = true;
         mQsExpandedWhenExpandingStarted = mQsExpanded;
         if (mQsExpanded) {
-            mScrollYOverride = mScrollView.getScrollY();
             onQsExpansionStarted();
         }
     }
@@ -1195,5 +1219,13 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected boolean isTrackingBlocked() {
         return mConflictingQsExpansionGesture && mQsExpanded;
+    }
+
+    public void notifyVisibleChildrenChanged() {
+        if (mNotificationStackScroller.getNotGoneChildCount() != 0) {
+            mReserveNotificationSpace.setVisibility(View.VISIBLE);
+        } else {
+            mReserveNotificationSpace.setVisibility(View.GONE);
+        }
     }
 }
