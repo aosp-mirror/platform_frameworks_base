@@ -2057,7 +2057,9 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
         return status | deferredList.flush(*this, dirty);
     }
 
-    return DrawGlInfo::kStatusDone;
+    // Even if there is no drawing command(Ex: invisible),
+    // it still needs startFrame to clear buffer and start tiling.
+    return startFrame();
 }
 
 void OpenGLRenderer::outputDisplayList(DisplayList* displayList) {
