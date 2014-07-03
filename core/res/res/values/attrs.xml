@@ -2394,7 +2394,7 @@
              accessibility purposes. For example, a TextView before an EditText in
              the UI usually specifies what infomation is contained in the EditText.
              Hence, the TextView is a label for the EditText. -->
-        <attr name="labelFor" format="integer" />
+        <attr name="labelFor" format="reference" />
 
         <!-- Specifies a theme override for a view. When a theme override is set, the
              view will be inflated using a {@link android.content.Context} themed with

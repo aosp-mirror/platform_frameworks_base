@@ -432,7 +432,6 @@
        <item>@drawable/list_divider_mtrl_alpha</item>
        <item>@drawable/list_section_divider_mtrl_alpha</item>
        <item>@drawable/popup_background_mtrl_mult</item>
-       <item>@drawable/progress_primary_mtrl_alpha</item>
        <item>@drawable/progress_mtrl_alpha</item>
        <item>@drawable/scrollbar_handle_mtrl_alpha</item>
        <item>@drawable/scrubber_control_from_pressed_mtrl_000</item>
