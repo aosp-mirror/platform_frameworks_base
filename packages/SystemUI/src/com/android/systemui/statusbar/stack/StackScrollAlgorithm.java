@@ -399,6 +399,10 @@ public class StackScrollAlgorithm {
             if (i == 0) {
                 childViewState.alpha = 1.0f;
                 childViewState.yTranslation = Math.max(mCollapsedSize - algorithmState.scrollY, 0);
+                if (childViewState.yTranslation + childViewState.height > bottomPeekStart) {
+                    childViewState.height = (int) Math.max(
+                            bottomPeekStart - childViewState.yTranslation, mCollapsedSize);
+                }
                 childViewState.location = StackScrollState.ViewState.LOCATION_FIRST_CARD;
             }
             if (childViewState.location == StackScrollState.ViewState.LOCATION_UNKNOWN) {

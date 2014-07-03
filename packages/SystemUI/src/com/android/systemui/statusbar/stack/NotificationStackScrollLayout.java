@@ -1800,14 +1800,14 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onExpansionStopped() {
         mIsExpansionChanging = false;
         mStackScrollAlgorithm.onExpansionStopped();
+        if (!mIsExpanded) {
+            mOwnScrollY = 0;
+        }
     }
 
     private void setIsExpanded(boolean isExpanded) {
         mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
-        if (!isExpanded) {
-            mOwnScrollY = 0;
-        }
     }
 
     @Override
