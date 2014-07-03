@@ -775,7 +775,19 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     const int h = bm0->height();
     const size_t size = bm0->width() * bm0->bytesPerPixel();
     for (int y = 0; y < h; y++) {
-        if (memcmp(bm0->getAddr(0, y), bm1->getAddr(0, y), size) != 0) {
+        // SkBitmap::getAddr(int, int) may return NULL due to unrecognized config
+        // (ex: kRLE_Index8_Config). This will cause memcmp method to crash. Since bm0
+        // and bm1 both have pixel data() (have passed NULL == getPixels() check),
+        // those 2 bitmaps should be valid (only unrecognized), we return JNI_FALSE
+        // to warn user those 2 unrecognized config bitmaps may be different.
+        void *bm0Addr = bm0->getAddr(0, y);
+        void *bm1Addr = bm1->getAddr(0, y);
+
+        if(bm0Addr == NULL || bm1Addr == NULL) {
+            return JNI_FALSE;
+        }
+
+        if (memcmp(bm0Addr, bm1Addr, size) != 0) {
             return JNI_FALSE;
         }
     }
