@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Outline;
@@ -26,10 +28,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -60,6 +64,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mSignalCluster;
     private View mSettingsButton;
     private View mBrightnessContainer;
+    private View mQsDetailHeader;
     private View mEmergencyCallsOnly;
     private TextView mChargingInfo;
 
@@ -104,6 +109,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
+        mQsDetailHeader = findViewById(R.id.qs_detail_header);
+        mQsDetailHeader.setAlpha(0);
         mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
         mChargingInfo = (TextView) findViewById(R.id.header_charging_info);
         loadDimens();
@@ -219,6 +226,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
         mBrightnessContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
         if (mStatusIcons != null) {
             mStatusIcons.setVisibility(!mExpanded || mOverscrolled ? View.VISIBLE : View.GONE);
         }
@@ -375,13 +383,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
-    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
-        @Override
-        public void onShowingDetail(boolean showingDetail) {
-            mBrightnessContainer.animate().alpha(showingDetail ? 0 : 1).withLayer().start();
-        }
-    };
-
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
@@ -418,4 +419,69 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public boolean hasOverlappingRendering() {
         return !mKeyguardShowing || mExpanded;
     }
+
+    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+        @Override
+        public void onToggleStateChanged(final boolean state) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    handleToggleStateChanged(state);
+                }
+            });
+        }
+
+        @Override
+        public void onShowingDetail(final QSTile.DetailAdapter detail) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    handleShowingDetail(detail);
+                }
+            });
+        }
+
+        private void handleToggleStateChanged(boolean state) {
+            final Switch headerSwitch = (Switch)
+                    mQsDetailHeader.findViewById(android.R.id.toggle);
+            headerSwitch.setChecked(state);
+        }
+
+        private void handleShowingDetail(final QSTile.DetailAdapter detail) {
+            final boolean showingDetail = detail != null;
+            transition(mBrightnessContainer, !showingDetail);
+            transition(mQsDetailHeader, showingDetail);
+            if (showingDetail) {
+                final TextView headerTitle = (TextView)
+                        mQsDetailHeader.findViewById(android.R.id.title);
+                headerTitle.setText(detail.getTitle());
+                final Switch headerSwitch = (Switch)
+                        mQsDetailHeader.findViewById(android.R.id.toggle);
+                final Boolean toggleState = detail.getToggleState();
+                if (toggleState == null) {
+                    headerSwitch.setVisibility(INVISIBLE);
+                    mQsDetailHeader.setClickable(false);
+                } else {
+                    headerSwitch.setVisibility(VISIBLE);
+                    headerSwitch.setChecked(toggleState);
+                    mQsDetailHeader.setClickable(true);
+                    mQsDetailHeader.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            detail.setToggleState(!toggleState);
+                        }
+                    });
+                }
+            } else {
+                mQsDetailHeader.setClickable(false);
+            }
+        }
+
+        private void transition(final View v, final boolean in) {
+            if (in) {
+                v.bringToFront();
+            }
+            v.animate().alpha(in ? 1 : 0).withLayer().start();
+        }
+    };
 }

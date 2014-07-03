@@ -41,7 +41,7 @@
 
     <ImageView
         android:id="@android:id/button1"
-        style="@style/BorderlessButton"
+        style="@style/QSBorderlessButton"
         android:layout_width="@dimen/zen_mode_condition_height"
         android:layout_height="@dimen/zen_mode_condition_height"
         android:layout_alignParentEnd="true"
@@ -53,7 +53,7 @@
 
     <ImageView
         android:id="@android:id/button2"
-        style="@style/BorderlessButton"
+        style="@style/QSBorderlessButton"
         android:layout_width="@dimen/zen_mode_condition_height"
         android:layout_height="@dimen/zen_mode_condition_height"
         android:layout_alignParentEnd="true"

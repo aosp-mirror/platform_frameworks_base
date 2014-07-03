@@ -358,7 +358,7 @@ public class VolumePanel extends Handler {
             // embedded mode
             mDialog = null;
             mView = LayoutInflater.from(mContext).inflate(
-                    com.android.systemui.R.layout.volume_panel, parent, true);
+                    com.android.systemui.R.layout.volume_panel, parent, false);
         }
         mPanel = (ViewGroup) mView.findViewById(com.android.systemui.R.id.visible_panel);
         mSliderPanel = (ViewGroup) mView.findViewById(com.android.systemui.R.id.slider_panel);
@@ -382,6 +382,10 @@ public class VolumePanel extends Handler {
         mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
         listenToRingerMode();
+    }
+
+    public View getContentView() {
+        return mView;
     }
 
     private void setLayoutDirection(int layoutDirection) {
@@ -628,7 +632,8 @@ public class VolumePanel extends Handler {
         if (LOGD) Log.d(mTag, "expand mZenPanel=" + mZenPanel);
         if (mZenPanel == null) {
             mZenPanel = (ZenModePanel) mZenPanelStub.inflate();
-            mZenPanel.init(mZenController, mDialog != null ? 'D' : 'E');
+            final boolean isDialog = mDialog != null;
+            mZenPanel.init(mZenController, isDialog ? 'D' : 'E', isDialog);
             mZenPanel.setCallback(new ZenModePanel.Callback() {
                 @Override
                 public void onMoreSettings() {

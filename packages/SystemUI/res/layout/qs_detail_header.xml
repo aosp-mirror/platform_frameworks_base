@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!--
+     Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,25 +15,21 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     style="@style/BrightnessDialogContainer"
-    android:clickable="true">
+    android:background="@drawable/btn_borderless_rect" >
 
-    <ImageView
-        android:id="@+id/brightness_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_qs_brightness_auto_off"
-        android:contentDescription="@null" />
-
-    <com.android.systemui.settings.ToggleSlider
-        android:id="@+id/brightness_slider"
+    <TextView
+        android:id="@android:id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        systemui:text="@string/status_bar_settings_auto_brightness_label" />
+        android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+
+    <Switch
+        android:id="@android:id/toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
 
 </LinearLayout>

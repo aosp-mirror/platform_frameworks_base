@@ -135,13 +135,22 @@
         android:textColor="#ffffff"
         android:singleLine="true" />
 
-    <include
-        layout="@layout/quick_settings_brightness_dialog"
-        android:id="@+id/brightness_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        />
+
+        <include
+            android:id="@+id/qs_detail_header"
+            layout="@layout/qs_detail_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            />
+        <include
+            android:id="@+id/brightness_container"
+            layout="@layout/quick_settings_brightness_dialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            />
+
 
     <TextView
         android:id="@+id/header_debug_info"

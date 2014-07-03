@@ -168,6 +168,9 @@
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">8dp</dimen>
+    <dimen name="qs_detail_item_height">48dp</dimen>
+    <dimen name="qs_detail_item_height_connected">72dp</dimen>
+
 
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>

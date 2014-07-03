@@ -83,8 +83,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
         return new QSTileView(context);
     }
 
-    public View createDetailView(Context context, ViewGroup root) {
+    public DetailAdapter getDetailAdapter() {
         return null; // optional
+    }
+
+    public interface DetailAdapter {
+        int getTitle();
+        Boolean getToggleState();
+        View createDetailView(Context context, View convertView, ViewGroup parent);
+        Intent getSettingsIntent();
+        void setToggleState(boolean state);
     }
 
     // safe to call from any thread
@@ -115,6 +123,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId).sendToTarget();
+    }
+
+    public void fireToggleStateChanged(boolean state) {
+        mHandler.obtainMessage(H.TOGGLE_STATE_CHANGED, state ? 1 : 0, 0).sendToTarget();
     }
 
     // call only on tile worker looper
@@ -148,6 +160,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
     }
 
+    private void handleToggleStateChanged(boolean state) {
+        if (mCallback != null) {
+            mCallback.onToggleStateChanged(state);
+        }
+    }
+
     protected void handleUserSwitch(int newUserId) {
         handleRefreshState(null);
     }
@@ -159,6 +177,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int REFRESH_STATE = 4;
         private static final int SHOW_DETAIL = 5;
         private static final int USER_SWITCH = 6;
+        private static final int TOGGLE_STATE_CHANGED = 7;
 
         private H(Looper looper) {
             super(looper);
@@ -186,6 +205,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == USER_SWITCH) {
                     name = "handleUserSwitch";
                     handleUserSwitch(msg.arg1);
+                } else if (msg.what == TOGGLE_STATE_CHANGED) {
+                    name = "handleToggleStateChanged";
+                    handleToggleStateChanged(msg.arg1 != 0);
                 }
             } catch (Throwable t) {
                 final String error = "Error in " + name;
@@ -198,6 +220,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public interface Callback {
         void onStateChanged(State state);
         void onShowDetail(boolean show);
+        void onToggleStateChanged(boolean state);
     }
 
     public interface Host {

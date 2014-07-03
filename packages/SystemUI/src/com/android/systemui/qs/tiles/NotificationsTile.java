@@ -22,11 +22,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -47,45 +45,8 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
     }
 
     @Override
-    public View createDetailView(Context context, ViewGroup root) {
-        final View v = LayoutInflater.from(context).inflate(R.layout.qs_detail, root, false);
-        final TextView title = (TextView) v.findViewById(android.R.id.title);
-        title.setText(R.string.quick_settings_notifications_label);
-        final View close = v.findViewById(android.R.id.button1);
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDetail(false);
-            }
-        });
-        final ViewGroup content = (ViewGroup) v.findViewById(android.R.id.content);
-        final VolumeComponent volumeComponent = mHost.getVolumeComponent();
-        final VolumePanel vp = new VolumePanel(mContext, content, mZenController);
-        v.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
-            @Override
-            public void onViewDetachedFromWindow(View v) {
-                volumeComponent.setVolumePanel(null);
-            }
-
-            @Override
-            public void onViewAttachedToWindow(View v) {
-                vp.updateStates();
-                volumeComponent.setVolumePanel(vp);
-            }
-        });
-        vp.setZenModePanelCallback(new ZenModePanel.Callback() {
-            @Override
-            public void onMoreSettings() {
-                mHost.startSettingsActivity(ZenModePanel.ZEN_SETTINGS);
-            }
-
-            @Override
-            public void onInteraction() {
-                // noop
-            }
-        });
-        vp.postVolumeChanged(AudioManager.STREAM_RING, AudioManager.FLAG_SHOW_UI);
-        return v;
+    public DetailAdapter getDetailAdapter() {
+        return mDetailAdapter;
     }
 
     @Override
@@ -162,6 +123,60 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
             if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(intent.getAction())) {
                 refreshState();
             }
+        }
+    };
+
+    private final DetailAdapter mDetailAdapter = new DetailAdapter() {
+
+        @Override
+        public int getTitle() {
+            return R.string.quick_settings_notifications_label;
+        }
+
+        @Override
+        public Boolean getToggleState() {
+            return null;
+        }
+
+        public void setToggleState(boolean state) {
+            // noop
+        }
+
+        public Intent getSettingsIntent() {
+            return ZenModePanel.ZEN_SETTINGS;
+        }
+
+        @Override
+        public View createDetailView(Context context, View convertView, ViewGroup parent) {
+            if (convertView != null) return convertView;
+            final VolumeComponent volumeComponent = mHost.getVolumeComponent();
+            final VolumePanel vp = new VolumePanel(mContext, parent, mZenController);
+            final View v = vp.getContentView();
+            v.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    volumeComponent.setVolumePanel(null);
+                }
+
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    vp.updateStates();
+                    volumeComponent.setVolumePanel(vp);
+                }
+            });
+            vp.setZenModePanelCallback(new ZenModePanel.Callback() {
+                @Override
+                public void onMoreSettings() {
+                    mHost.startSettingsActivity(ZenModePanel.ZEN_SETTINGS);
+                }
+
+                @Override
+                public void onInteraction() {
+                    // noop
+                }
+            });
+            vp.postVolumeChanged(AudioManager.STREAM_RING, AudioManager.FLAG_SHOW_UI);
+            return v;
         }
     };
 }
