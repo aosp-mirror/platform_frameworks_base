@@ -59,7 +59,6 @@ public class KeyguardPageSwipeHelper {
     private int mMinTranslationAmount;
     private int mMinFlingVelocity;
     private int mHintDistance;
-    private PowerManager mPowerManager;
     private final View mLeftIcon;
     private final View mCenterIcon;
     private final View mRightIcon;
@@ -77,7 +76,6 @@ public class KeyguardPageSwipeHelper {
         updateIcon(mLeftIcon, 1.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mCenterIcon, 1.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mRightIcon, 1.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         initDimens();
     }
 
@@ -145,7 +143,6 @@ public class KeyguardPageSwipeHelper {
                 }
                 if (mSwipingInProgress) {
                     setTranslation(mTranslationOnDown + x - mInitialTouchX, false);
-                    onUserActivity(event.getEventTime());
                 }
                 break;
 
@@ -252,10 +249,6 @@ public class KeyguardPageSwipeHelper {
                     .setInterpolator(interpolator)
                     .translationX(target);
         }
-    }
-
-    private void onUserActivity(long when) {
-        mPowerManager.userActivity(when, false);
     }
 
     private void cancelAnimations() {

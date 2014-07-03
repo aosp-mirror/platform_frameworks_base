@@ -47,7 +47,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         public boolean dismiss(boolean authenticated);
-        public void userActivity(long timeout);
+        public void userActivity();
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
         public void finish();
     }
@@ -419,9 +419,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {
 
-        public void userActivity(long timeout) {
+        public void userActivity() {
             if (mSecurityCallback != null) {
-                mSecurityCallback.userActivity(timeout);
+                mSecurityCallback.userActivity();
             }
         }
 
@@ -459,7 +459,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     // state for the current security method.
     private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
         @Override
-        public void userActivity(long timeout) { }
+        public void userActivity() { }
         @Override
         public void showBackupSecurity() { }
         @Override

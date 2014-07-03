@@ -618,6 +618,7 @@ public class NotificationPanelView extends PanelView implements
             updateQsState();
             requestPanelHeightUpdate();
             mNotificationStackScroller.setInterceptDelegateEnabled(expanded);
+            mStatusBar.setQsExpanded(expanded);
         }
     }
 
@@ -657,7 +658,6 @@ public class NotificationPanelView extends PanelView implements
         setQsTranslation(height);
         requestScrollerTopPaddingUpdate(false /* animate */);
         updateNotificationScrim(height);
-        mStatusBar.userActivity();
     }
 
     private void updateNotificationScrim(float height) {

@@ -58,7 +58,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
             if (resId == R.drawable.ic_lockscreen_unlock_phantom
                     || resId == R.drawable.ic_lockscreen_unlock) {
-                mCallback.userActivity(0);
+                mCallback.userActivity();
                 mCallback.dismiss(false);
             }
         }
@@ -70,7 +70,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         public void onGrabbed(View v, int handle) {
-            mCallback.userActivity(0);
+            mCallback.userActivity();
             doTransition(mFadeView, 0.0f);
         }
 

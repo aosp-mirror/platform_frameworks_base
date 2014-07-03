@@ -155,17 +155,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return mSecurityContainer;
     }
 
-    /**
-     * Extend display timeout
-     * @param timeout duration to delay timeout, in ms.
-     */
-    @Override
-    public void userActivity(long timeout) {
-        if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.userActivity(timeout);
-        }
-    }
-
     @Override
     public boolean dismiss(boolean authenticated) {
         return mSecurityContainer.showNextSecurityScreenOrFinish(authenticated);

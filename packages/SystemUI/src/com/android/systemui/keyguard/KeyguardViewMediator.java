@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,8 +44,8 @@ import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.view.ViewGroup;
 import android.view.IWindowManager;
+import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 
@@ -64,8 +63,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-
-import java.io.File;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
@@ -406,10 +403,6 @@ public class KeyguardViewMediator extends SystemUI {
             KeyguardViewMediator.this.userActivity();
         }
 
-        public void userActivity(long holdMs) {
-            KeyguardViewMediator.this.userActivity(holdMs);
-        }
-
         public void keyguardDone(boolean authenticated) {
             KeyguardViewMediator.this.keyguardDone(authenticated, true);
         }
@@ -439,13 +432,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
     };
 
-    private void userActivity() {
-        userActivity(AWAKE_INTERVAL_DEFAULT_MS);
-    }
-
-    public void userActivity(long holdMs) {
-        // We ignore the hold time.  Eventually we should remove it.
-        // Instead, the keyguard window has an explicit user activity timeout set on it.
+    public void userActivity() {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
     }
 

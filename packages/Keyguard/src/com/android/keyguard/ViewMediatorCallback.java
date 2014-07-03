@@ -27,13 +27,6 @@ public interface ViewMediatorCallback {
     void userActivity();
 
     /**
-     * Reports user activity and requests that the screen stay on for at least
-     * the specified amount of time.
-     * @param millis The amount of time in millis.  This value is currently ignored.
-     */
-    void userActivity(long millis);
-
-    /**
      * Report that the keyguard is done.
      * @param authenticated Whether the user securely got past the keyguard.
      *   the only reason for this to be false is if the keyguard was instructed
