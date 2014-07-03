@@ -496,7 +496,11 @@ public class WifiPasspointManager {
      * @return The list of credentials
      */
     public List<WifiPasspointCredential> getCredentials() {
-        return null;
+        try {
+            return mService.getCredentials();
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 
     /**
@@ -506,7 +510,11 @@ public class WifiPasspointManager {
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean addCredential(WifiPasspointCredential cred) {
-        return true;
+        try {
+            return mService.addCredential(cred);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**
@@ -517,7 +525,11 @@ public class WifiPasspointManager {
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean updateCredential(WifiPasspointCredential cred) {
-        return true;
+        try {
+            return mService.updateCredential(cred);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**
@@ -528,7 +540,11 @@ public class WifiPasspointManager {
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean removeCredential(WifiPasspointCredential cred) {
-        return true;
+        try {
+            return mService.removeCredential(cred);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     public void startOsu(Channel c, WifiPasspointOsuProvider osu, OsuRemListener listener) {
