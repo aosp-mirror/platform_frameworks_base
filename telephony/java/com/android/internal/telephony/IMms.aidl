@@ -44,4 +44,25 @@ interface IMms {
      *  broadcast when the message is downloaded, or the download is failed
      */
     void downloadMessage(String callingPkg, String locationUrl, in PendingIntent downloadedIntent);
+
+    /**
+     * Update the status of a pending (send-by-IP) MMS message handled by the carrier app.
+     * If the carrier app fails to send this message, it would be resent via carrier network.
+     *
+     * @param messageRef the reference number of the MMS message.
+     * @param success True if and only if the message was sent successfully. If its value is
+     *  false, this message should be resent via carrier network
+     */
+    void updateMmsSendStatus(int messageRef, boolean success);
+
+    /**
+     * Update the status of a pending (download-by-IP) MMS message handled by the carrier app.
+     * If the carrier app fails to download this message, it would be re-downloaded via carrier
+     * network.
+     *
+     * @param messageRef the reference number of the MMS message.
+     * @param pdu non-empty if downloaded successfully, otherwise, it is empty and the message
+     *  will be downloaded via carrier network
+     */
+    void updateMmsDownloadStatus(int messageRef, in byte[] pdu);
 }
