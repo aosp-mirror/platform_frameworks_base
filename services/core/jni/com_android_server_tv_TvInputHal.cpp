@@ -74,17 +74,17 @@ public:
 
     static JTvInputHal* createInstance(JNIEnv* env, jobject thiz);
 
-    int setSurface(int deviceId, int streamId, const sp<Surface>& surface);
+    int addStream(int deviceId, int streamId, const sp<Surface>& surface);
+    int removeStream(int deviceId, int streamId);
     const tv_stream_config_t* getStreamConfigs(int deviceId, int* numConfigs);
 
 private:
     class Connection {
     public:
-        Connection() : mStreamId(0) {}
+        Connection() {}
 
         sp<Surface> mSurface;
         sp<NativeHandle> mSourceHandle;
-        int mStreamId;
     };
 
     JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* dev);
@@ -100,7 +100,7 @@ private:
     tv_input_device_t* mDevice;
     tv_input_callback_ops_t mCallback;
 
-    KeyedVector<int, Connection> mConnections;
+    KeyedVector<int, KeyedVector<int, Connection> > mConnections;
 };
 
 JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device) {
@@ -143,30 +143,18 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
     return new JTvInputHal(env, thiz, device);
 }
 
-int JTvInputHal::setSurface(int deviceId, int streamId, const sp<Surface>& surface) {
-    Connection& connection = mConnections.editValueFor(deviceId);
-    if (connection.mStreamId == streamId && connection.mSurface == surface) {
+int JTvInputHal::addStream(int deviceId, int streamId, const sp<Surface>& surface) {
+    KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
+    if (connections.indexOfKey(streamId) < 0) {
+        connections.add(streamId, Connection());
+    }
+    Connection& connection = connections.editValueFor(streamId);
+    if (connection.mSurface == surface) {
         // Nothing to do
         return NO_ERROR;
     }
     if (Surface::isValid(connection.mSurface)) {
         connection.mSurface.clear();
-    }
-    if (surface == NULL) {
-        if (connection.mSurface != NULL) {
-            connection.mSurface->setSidebandStream(NULL);
-            connection.mSurface.clear();
-        }
-        if (connection.mSourceHandle != NULL) {
-            // Need to reset streams
-            if (mDevice->close_stream(
-                    mDevice, deviceId, connection.mStreamId) != 0) {
-                ALOGE("Couldn't remove stream");
-                return BAD_VALUE;
-            }
-            connection.mSourceHandle.clear();
-        }
-        return NO_ERROR;
     }
     connection.mSurface = surface;
     if (connection.mSourceHandle == NULL) {
@@ -204,8 +192,35 @@ int JTvInputHal::setSurface(int deviceId, int streamId, const sp<Surface>& surfa
         }
         connection.mSourceHandle = NativeHandle::create(
                 stream.sideband_stream_source_handle, false);
-        connection.mStreamId = stream.stream_id;
         connection.mSurface->setSidebandStream(connection.mSourceHandle);
+    }
+    return NO_ERROR;
+}
+
+int JTvInputHal::removeStream(int deviceId, int streamId) {
+    KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
+    if (connections.indexOfKey(streamId) < 0) {
+        return BAD_VALUE;
+    }
+    Connection& connection = connections.editValueFor(streamId);
+    if (connection.mSurface == NULL) {
+        // Nothing to do
+        return NO_ERROR;
+    }
+    if (Surface::isValid(connection.mSurface)) {
+        connection.mSurface.clear();
+    }
+    if (connection.mSurface != NULL) {
+        connection.mSurface->setSidebandStream(NULL);
+        connection.mSurface.clear();
+    }
+    if (connection.mSourceHandle != NULL) {
+        // Need to reset streams
+        if (mDevice->close_stream(mDevice, deviceId, streamId) != 0) {
+            ALOGE("Couldn't remove stream");
+            return BAD_VALUE;
+        }
+        connection.mSourceHandle.clear();
     }
     return NO_ERROR;
 }
@@ -241,7 +256,7 @@ void JTvInputHal::notify(
 
 void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    mConnections.add(info.device_id, Connection());
+    mConnections.add(info.device_id, KeyedVector<int, Connection>());
 
     jobject builder = env->NewObject(
             gTvInputHardwareInfoBuilderClassInfo.clazz,
@@ -276,6 +291,11 @@ void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
 
 void JTvInputHal::onDeviceUnavailable(int deviceId) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+    KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
+    for (size_t i = 0; i < connections.size(); ++i) {
+        removeStream(deviceId, connections.keyAt(i));
+    }
+    connections.clear();
     mConnections.removeItem(deviceId);
     env->CallVoidMethod(
             mThiz,
@@ -285,7 +305,11 @@ void JTvInputHal::onDeviceUnavailable(int deviceId) {
 
 void JTvInputHal::onStreamConfigurationsChanged(int deviceId) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    mConnections.removeItem(deviceId);
+    KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
+    for (size_t i = 0; i < connections.size(); ++i) {
+        removeStream(deviceId, connections.keyAt(i));
+    }
+    connections.clear();
     env->CallVoidMethod(
             mThiz,
             gTvInputHalClassInfo.streamConfigsChanged,
@@ -298,14 +322,20 @@ static jlong nativeOpen(JNIEnv* env, jobject thiz) {
     return (jlong)JTvInputHal::createInstance(env, thiz);
 }
 
-static int nativeSetSurface(JNIEnv* env, jclass clazz,
+static int nativeAddStream(JNIEnv* env, jclass clazz,
         jlong ptr, jint deviceId, jint streamId, jobject jsurface) {
     JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
-    sp<Surface> surface(
-            jsurface
-            ? android_view_Surface_getSurface(env, jsurface)
-            : NULL);
-    return tvInputHal->setSurface(deviceId, streamId, surface);
+    if (!jsurface) {
+        return BAD_VALUE;
+    }
+    sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
+    return tvInputHal->addStream(deviceId, streamId, surface);
+}
+
+static int nativeRemoveStream(JNIEnv* env, jclass clazz,
+        jlong ptr, jint deviceId, jint streamId) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    return tvInputHal->removeStream(deviceId, streamId);
 }
 
 static jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
@@ -349,8 +379,10 @@ static JNINativeMethod gTvInputHalMethods[] = {
     /* name, signature, funcPtr */
     { "nativeOpen", "()J",
             (void*) nativeOpen },
-    { "nativeSetSurface", "(JIILandroid/view/Surface;)I",
-            (void*) nativeSetSurface },
+    { "nativeAddStream", "(JIILandroid/view/Surface;)I",
+            (void*) nativeAddStream },
+    { "nativeRemoveStream", "(JII)I",
+            (void*) nativeRemoveStream },
     { "nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
             (void*) nativeGetStreamConfigs },
     { "nativeClose", "(J)V",

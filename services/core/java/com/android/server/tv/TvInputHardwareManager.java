@@ -269,6 +269,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private final AudioDevicePort mAudioSink;
         private AudioPatch mAudioPatch = null;
 
+        private TvStreamConfig mActiveConfig = null;
+
         public TvInputHardwareImpl(TvInputHardwareInfo info) {
             mInfo = info;
             AudioDevicePort audioSource = null;
@@ -311,12 +313,21 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
+        // A TvInputHardwareImpl object holds only one active session. Therefore, if a client
+        // attempts to call setSurface with different TvStreamConfig objects, the last call will
+        // prevail.
         @Override
         public boolean setSurface(Surface surface, TvStreamConfig config)
                 throws RemoteException {
             synchronized (mImplLock) {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
+                }
+                if (surface != null && config == null) {
+                    return false;
+                }
+                if (surface == null && mActiveConfig == null) {
+                    return false;
                 }
                 if (mInfo.getType() == TvInputHal.TYPE_HDMI) {
                     if (surface != null) {
@@ -347,7 +358,24 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         mAudioPatch = null;
                     }
                 }
-                return mHal.setSurface(mInfo.getDeviceId(), surface, config) == TvInputHal.SUCCESS;
+                int result = TvInputHal.ERROR_UNKNOWN;
+                if (surface == null) {
+                    result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
+                    mActiveConfig = null;
+                } else {
+                    if (config != mActiveConfig && mActiveConfig != null) {
+                        result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
+                        if (result != TvInputHal.SUCCESS) {
+                            mActiveConfig = null;
+                            return false;
+                        }
+                    }
+                    result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                    if (result == TvInputHal.SUCCESS) {
+                        mActiveConfig = config;
+                    }
+                }
+                return result == TvInputHal.SUCCESS;
             }
         }
 

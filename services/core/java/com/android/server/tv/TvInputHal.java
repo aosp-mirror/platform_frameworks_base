@@ -57,8 +57,9 @@ final class TvInputHal implements Handler.Callback {
 
     private native long nativeOpen();
 
-    private static native int nativeSetSurface(long ptr, int deviceId, int streamId,
+    private static native int nativeAddStream(long ptr, int deviceId, int streamId,
             Surface surface);
+    private static native int nativeRemoveStream(long ptr, int deviceId, int streamId);
     private static native TvStreamConfig[] nativeGetStreamConfigs(long ptr, int deviceId,
             int generation);
     private static native void nativeClose(long ptr);
@@ -81,7 +82,7 @@ final class TvInputHal implements Handler.Callback {
         mHandler.sendEmptyMessage(EVENT_OPEN);
     }
 
-    public int setSurface(int deviceId, Surface surface, TvStreamConfig streamConfig) {
+    public int addStream(int deviceId, Surface surface, TvStreamConfig streamConfig) {
         long ptr = mPtr;
         if (ptr == 0) {
             return ERROR_NO_INIT;
@@ -89,7 +90,22 @@ final class TvInputHal implements Handler.Callback {
         if (mStreamConfigGeneration != streamConfig.getGeneration()) {
             return ERROR_STALE_CONFIG;
         }
-        if (nativeSetSurface(ptr, deviceId, streamConfig.getStreamId(), surface) == 0) {
+        if (nativeAddStream(ptr, deviceId, streamConfig.getStreamId(), surface) == 0) {
+            return SUCCESS;
+        } else {
+            return ERROR_UNKNOWN;
+        }
+    }
+
+    public int removeStream(int deviceId, TvStreamConfig streamConfig) {
+        long ptr = mPtr;
+        if (ptr == 0) {
+            return ERROR_NO_INIT;
+        }
+        if (mStreamConfigGeneration != streamConfig.getGeneration()) {
+            return ERROR_STALE_CONFIG;
+        }
+        if (nativeRemoveStream(ptr, deviceId, streamConfig.getStreamId()) == 0) {
             return SUCCESS;
         } else {
             return ERROR_UNKNOWN;
