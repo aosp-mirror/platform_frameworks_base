@@ -28,10 +28,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.util.Pair;
-import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.SystemServicesProxy;
+import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -368,10 +368,9 @@ public class RecentsTaskLoader {
         return mSystemServicesProxy;
     }
 
-    private List<ActivityManager.RecentTaskInfo> getRecentTasks() {
+    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp) {
         long t1 = System.currentTimeMillis();
 
-        SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> tasks =
                 ssp.getRecentTasks(50, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
@@ -402,7 +401,7 @@ public class RecentsTaskLoader {
 
         // Get the recent tasks
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks();
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
 
         // Add each task to the task stack
         t1 = System.currentTimeMillis();
@@ -430,7 +429,7 @@ public class RecentsTaskLoader {
 
             // Create a new task
             Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
-                    activityIcon, activityColor, t.userId, t.lastActiveTime);
+                    activityIcon, activityColor, t.userId, t.firstActiveTime, t.lastActiveTime);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
@@ -495,6 +494,9 @@ public class RecentsTaskLoader {
                     "" + (System.currentTimeMillis() - t1) + "ms");
         }
 
+        // Simulate the groupings that we describe
+        stack.createSimulatedAffiliatedGroupings();
+
         // Start the task loader
         mLoader.start(context);
 
@@ -507,6 +509,24 @@ public class RecentsTaskLoader {
         mPackageMonitor.setTasks(tasks);
 
         return root;
+    }
+
+    /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
+    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp) {
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
+        TaskStack stack = new TaskStack();
+
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            ActivityManager.RecentTaskInfo t = tasks.get(i);
+            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
+            if (info == null) continue;
+
+            stack.addTask(new Task(t.persistentId, true, t.baseIntent, null, null, 0, 0,
+                    t.firstActiveTime, t.lastActiveTime));
+        }
+        stack.createSimulatedAffiliatedGroupings();
+        return stack;
     }
 
     /** Acquires the task resource data directly from the pool. */

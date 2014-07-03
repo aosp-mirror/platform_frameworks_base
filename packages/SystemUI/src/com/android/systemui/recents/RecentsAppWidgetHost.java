@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 
 /** Our special app widget host for the Search widget */

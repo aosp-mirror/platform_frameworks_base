@@ -19,7 +19,7 @@ package com.android.systemui.recents.views;
 import android.graphics.Rect;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.misc.Utilities;
 
 /* The layout logic for a TaskStackView */
 public class TaskStackViewLayoutAlgorithm {
@@ -94,17 +94,11 @@ public class TaskStackViewLayoutAlgorithm {
         }
     }
 
-    /** Update/get the transform (creates a new TaskViewTransform) */
-    public TaskViewTransform getStackTransform(int indexInStack, int stackScroll) {
-        TaskViewTransform transform = new TaskViewTransform();
-        return getStackTransform(indexInStack, stackScroll, transform);
-    }
-
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(int indexInStack, int stackScroll,
-                                               TaskViewTransform transformOut) {
+    public TaskViewTransform getStackTransform(int groupIndexInStack, int taskIndexInGroup,
+                                               int stackScroll, TaskViewTransform transformOut) {
         // Return early if we have an invalid index
-        if (indexInStack < 0) {
+        if (groupIndexInStack < 0) {
             transformOut.reset();
             return transformOut;
         }
@@ -113,7 +107,7 @@ public class TaskStackViewLayoutAlgorithm {
         int numPeekCards = StackPeekNumCards;
         float overlapHeight = StackOverlapPct * mTaskRect.height();
         float peekHeight = StackPeekHeightPct * mStackRect.height();
-        float t = ((indexInStack * overlapHeight) - stackScroll) / overlapHeight;
+        float t = ((groupIndexInStack * overlapHeight) - stackScroll) / overlapHeight;
         float boundedT = Math.max(t, -(numPeekCards + 1));
 
         // Set the scale relative to its position
@@ -133,6 +127,7 @@ public class TaskStackViewLayoutAlgorithm {
         } else {
             transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
         }
+        transformOut.translationY += 100 * taskIndexInGroup;
 
         // Set the z translation
         int minZ = mConfig.taskViewTranslationZMinPx;

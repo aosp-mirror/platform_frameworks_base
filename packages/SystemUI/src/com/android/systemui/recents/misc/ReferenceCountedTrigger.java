@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.misc;
 
 import android.content.Context;
 

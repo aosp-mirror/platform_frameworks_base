@@ -28,6 +28,7 @@ import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.Console;
 
 
 /** A static Recents configuration for the current context
@@ -75,7 +76,6 @@ public class RecentsConfiguration {
     public int taskViewRemoveAnimTranslationXPx;
     public int taskViewTranslationZMinPx;
     public int taskViewTranslationZIncrementPx;
-    public int taskViewShadowOutlineBottomInsetPx;
     public int taskViewRoundedCornerRadiusPx;
     public int taskViewHighlightPx;
 
@@ -202,8 +202,6 @@ public class RecentsConfiguration {
         taskViewTranslationZMinPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         taskViewTranslationZIncrementPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_z_increment);
-        taskViewShadowOutlineBottomInsetPx =
-                res.getDimensionPixelSize(R.dimen.recents_task_view_shadow_outline_bottom_inset);
 
         // Task bar colors
         taskBarViewDefaultBackgroundColor =

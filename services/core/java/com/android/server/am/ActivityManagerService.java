@@ -7258,6 +7258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.stackId = tr.stack != null ? tr.stack.mStackId : -1;
         rti.userId = tr.userId;
         rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
+        rti.firstActiveTime = tr.firstActiveTime;
         rti.lastActiveTime = tr.lastActiveTime;
         return rti;
     }
