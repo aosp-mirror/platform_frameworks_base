@@ -131,7 +131,8 @@ public class LocalePicker extends ListFragment {
         final ArrayList<LocaleInfo> localeInfos = new ArrayList<LocaleInfo>(localeList.size());
         for (String locale : localeList) {
             final Locale l = Locale.forLanguageTag(locale.replace('_', '-'));
-            if (l == null || "und".equals(l.getLanguage())) {
+            if (l == null || "und".equals(l.getLanguage())
+                    || l.getLanguage().isEmpty() || l.getCountry().isEmpty()) {
                 continue;
             }
 
