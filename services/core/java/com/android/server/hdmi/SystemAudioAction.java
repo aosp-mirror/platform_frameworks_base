@@ -17,8 +17,8 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -59,7 +59,7 @@ abstract class SystemAudioAction extends FeatureAction {
     SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus,
             IHdmiControlCallback callback) {
         super(source);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
         mCallback = callback;
@@ -73,12 +73,12 @@ abstract class SystemAudioAction extends FeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error == Constants.SEND_RESULT_SUCCESS) {
                     mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
                     addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
                 } else {
                     setSystemAudioMode(false);
-                    finishWithCallback(HdmiCec.RESULT_EXCEPTION);
+                    finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
                 }
             }
         });
@@ -88,7 +88,7 @@ abstract class SystemAudioAction extends FeatureAction {
         if (!mTargetAudioStatus  // Don't retry for Off case.
                 || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
             setSystemAudioMode(false);
-            finishWithCallback(HdmiCec.RESULT_TIMEOUT);
+            finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
             return;
         }
         sendSystemAudioModeRequest();
@@ -103,7 +103,7 @@ abstract class SystemAudioAction extends FeatureAction {
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 // TODO: Handle <FeatureAbort> of <SystemAudioModeRequest>
-                if (cmd.getOpcode() != HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE
+                if (cmd.getOpcode() != Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE
                         || !HdmiUtils.checkCommandSource(cmd, mAvrLogicalAddress, TAG)) {
                     return false;
                 }
@@ -116,7 +116,7 @@ abstract class SystemAudioAction extends FeatureAction {
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'false' will initiate new SystemAudioActionFromAvr by the control
                     // service.
-                    finishWithCallback(HdmiCec.RESULT_EXCEPTION);
+                    finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
                     return false;
                 }
             default:

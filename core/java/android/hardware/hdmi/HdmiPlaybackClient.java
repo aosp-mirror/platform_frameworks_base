@@ -42,7 +42,7 @@ public final class HdmiPlaybackClient {
         /**
          * Called when the result of the feature one touch play is returned.
          *
-         * @param result the result of the operation. {@link HdmiCec#RESULT_SUCCESS}
+         * @param result the result of the operation. {@link HdmiControlManager#RESULT_SUCCESS}
          *         if successful.
          */
         public void onComplete(int result);
@@ -56,11 +56,11 @@ public final class HdmiPlaybackClient {
          * Called when display device status is reported.
          *
          * @param status display device status
-         * @see {@link HdmiCec#POWER_STATUS_ON}
-         * @see {@link HdmiCec#POWER_STATUS_STANDBY}
-         * @see {@link HdmiCec#POWER_STATUS_TRANSIENT_TO_ON}
-         * @see {@link HdmiCec#POWER_STATUS_TRANSIENT_TO_STANDBY}
-         * @see {@link HdmiCec#POWER_STATUS_UNKNOWN}
+         * @see {@link HdmiControlManager#POWER_STATUS_ON}
+         * @see {@link HdmiControlManager#POWER_STATUS_STANDBY}
+         * @see {@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_ON}
+         * @see {@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_STANDBY}
+         * @see {@link HdmiControlManager#POWER_STATUS_UNKNOWN}
          */
         public void onComplete(int status);
     }

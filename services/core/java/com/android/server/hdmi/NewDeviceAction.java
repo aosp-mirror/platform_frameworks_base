@@ -15,9 +15,7 @@
  */
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
 import java.io.UnsupportedEncodingException;
@@ -65,12 +63,13 @@ final class NewDeviceAction extends FeatureAction {
         super(source);
         mDeviceLogicalAddress = deviceLogicalAddress;
         mDevicePhysicalAddress = devicePhysicalAddress;
-        mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
+        mVendorId = Constants.UNKNOWN_VENDOR_ID;
     }
 
     @Override
     public boolean start() {
-        if (HdmiCec.getTypeFromAddress(getSourceAddress()) == HdmiCec.DEVICE_AUDIO_SYSTEM) {
+        if (HdmiUtils.getTypeFromAddress(getSourceAddress())
+                == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             if (tv().getAvrDeviceInfo() == null) {
                 // TODO: Start system audio initiation action
             }
@@ -82,7 +81,7 @@ final class NewDeviceAction extends FeatureAction {
         }
 
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
-        if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_SET_OSD_NAME)) {
+        if (mayProcessCommandIfCached(mDeviceLogicalAddress, Constants.MESSAGE_SET_OSD_NAME)) {
             return true;
         }
 
@@ -111,7 +110,7 @@ final class NewDeviceAction extends FeatureAction {
         }
 
         if (mState == STATE_WAITING_FOR_SET_OSD_NAME) {
-            if (opcode == HdmiCec.MESSAGE_SET_OSD_NAME) {
+            if (opcode == Constants.MESSAGE_SET_OSD_NAME) {
                 try {
                     mDisplayName = new String(params, "US-ASCII");
                 } catch (UnsupportedEncodingException e) {
@@ -119,15 +118,15 @@ final class NewDeviceAction extends FeatureAction {
                 }
                 requestVendorId();
                 return true;
-            } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
+            } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
                 int requestOpcode = params[1] & 0xFF;
-                if (requestOpcode == HdmiCec.MESSAGE_SET_OSD_NAME) {
+                if (requestOpcode == Constants.MESSAGE_SET_OSD_NAME) {
                     requestVendorId();
                     return true;
                 }
             }
         } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
-            if (opcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
+            if (opcode == Constants.MESSAGE_DEVICE_VENDOR_ID) {
                 if (params.length == 3) {
                     mVendorId = HdmiUtils.threeBytesToInt(params);
                 } else {
@@ -136,9 +135,9 @@ final class NewDeviceAction extends FeatureAction {
                 addDeviceInfo();
                 finish();
                 return true;
-            } else if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
+            } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
                 int requestOpcode = params[1] & 0xFF;
-                if (requestOpcode == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
+                if (requestOpcode == Constants.MESSAGE_DEVICE_VENDOR_ID) {
                     addDeviceInfo();
                     finish();
                     return true;
@@ -160,7 +159,8 @@ final class NewDeviceAction extends FeatureAction {
         // At first, transit to waiting status for <Device Vendor Id>.
         mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
         // If the message is already in cache, process it.
-        if (mayProcessCommandIfCached(mDeviceLogicalAddress, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
+        if (mayProcessCommandIfCached(mDeviceLogicalAddress,
+                Constants.MESSAGE_DEVICE_VENDOR_ID)) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(getSourceAddress(),
@@ -170,11 +170,11 @@ final class NewDeviceAction extends FeatureAction {
 
     private void addDeviceInfo() {
         if (mDisplayName == null) {
-            mDisplayName = HdmiCec.getDefaultDeviceName(mDeviceLogicalAddress);
+            mDisplayName = HdmiUtils.getDefaultDeviceName(mDeviceLogicalAddress);
         }
         tv().addCecDevice(new HdmiCecDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
-                HdmiCec.getTypeFromAddress(mDeviceLogicalAddress),
+                HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
                 mVendorId, mDisplayName));
     }
 

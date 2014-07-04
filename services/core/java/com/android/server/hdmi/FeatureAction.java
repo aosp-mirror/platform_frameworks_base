@@ -15,7 +15,6 @@
  */
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;

@@ -15,9 +15,8 @@
  */
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.HdmiConstants.IRT_MS;
+import static com.android.server.hdmi.Constants.IRT_MS;
 
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 import android.view.KeyEvent;
 

@@ -16,9 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -72,10 +70,10 @@ final class DeviceDiscoveryAction extends FeatureAction {
     private static final class DeviceInfo {
         private final int mLogicalAddress;
 
-        private int mPhysicalAddress = HdmiConstants.INVALID_PHYSICAL_ADDRESS;
-        private int mVendorId = HdmiCec.UNKNOWN_VENDOR_ID;
+        private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
+        private int mVendorId = Constants.UNKNOWN_VENDOR_ID;
         private String mDisplayName = "";
-        private int mDeviceType = HdmiCec.DEVICE_INACTIVE;
+        private int mDeviceType = HdmiCecDeviceInfo.DEVICE_INACTIVE;
 
         private DeviceInfo(int logicalAddress) {
             mLogicalAddress = logicalAddress;
@@ -119,8 +117,8 @@ final class DeviceDiscoveryAction extends FeatureAction {
                 allocateDevices(ackedAddress);
                 startPhysicalAddressStage();
             }
-        }, HdmiConstants.POLL_ITERATION_REVERSE_ORDER
-            | HdmiConstants.POLL_STRATEGY_REMOTES_DEVICES, DEVICE_POLLING_RETRY);
+        }, Constants.POLL_ITERATION_REVERSE_ORDER
+            | Constants.POLL_STRATEGY_REMOTES_DEVICES, DEVICE_POLLING_RETRY);
         return true;
     }
 
@@ -140,7 +138,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
     }
 
     private boolean verifyValidLogicalAddress(int address) {
-        return address >= HdmiCec.ADDR_TV && address < HdmiCec.ADDR_UNREGISTERED;
+        return address >= Constants.ADDR_TV && address < Constants.ADDR_UNREGISTERED;
     }
 
     private void queryPhysicalAddress(int address) {
@@ -152,7 +150,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         mActionTimer.clearTimerMessage();
 
         // Check cache first and send request if not exist.
-        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS)) {
+        if (mayProcessMessageIfCached(address, Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS)) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(), address));
@@ -175,7 +173,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
         mActionTimer.clearTimerMessage();
 
-        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_SET_OSD_NAME)) {
+        if (mayProcessMessageIfCached(address, Constants.MESSAGE_SET_OSD_NAME)) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(), address));
@@ -199,7 +197,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
 
         mActionTimer.clearTimerMessage();
 
-        if (mayProcessMessageIfCached(address, HdmiCec.MESSAGE_DEVICE_VENDOR_ID)) {
+        if (mayProcessMessageIfCached(address, Constants.MESSAGE_DEVICE_VENDOR_ID)) {
             return;
         }
         sendCommand(
@@ -220,19 +218,19 @@ final class DeviceDiscoveryAction extends FeatureAction {
     boolean processCommand(HdmiCecMessage cmd) {
         switch (mState) {
             case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
-                if (cmd.getOpcode() == HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS) {
+                if (cmd.getOpcode() == Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS) {
                     handleReportPhysicalAddress(cmd);
                     return true;
                 }
                 return false;
             case STATE_WAITING_FOR_OSD_NAME:
-                if (cmd.getOpcode() == HdmiCec.MESSAGE_SET_OSD_NAME) {
+                if (cmd.getOpcode() == Constants.MESSAGE_SET_OSD_NAME) {
                     handleSetOsdName(cmd);
                     return true;
                 }
                 return false;
             case STATE_WAITING_FOR_VENDOR_ID:
-                if (cmd.getOpcode() == HdmiCec.MESSAGE_DEVICE_VENDOR_ID) {
+                if (cmd.getOpcode() == Constants.MESSAGE_DEVICE_VENDOR_ID) {
                     handleVendorId(cmd);
                     return true;
                 }
@@ -285,7 +283,7 @@ final class DeviceDiscoveryAction extends FeatureAction {
         } catch (UnsupportedEncodingException e) {
             Slog.w(TAG, "Failed to decode display name: " + cmd.toString());
             // If failed to get display name, use the default name of device.
-            displayName = HdmiCec.getDefaultDeviceName(current.mLogicalAddress);
+            displayName = HdmiUtils.getDefaultDeviceName(current.mLogicalAddress);
         }
         current.mDisplayName = displayName;
         increaseProcessedDeviceCount();

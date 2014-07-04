@@ -16,8 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+
 import android.util.Slog;
 
 /**
@@ -42,8 +42,8 @@ abstract class RequestArcAction extends FeatureAction {
      */
     RequestArcAction(HdmiCecLocalDevice source, int avrAddress) {
         super(source);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCecDeviceInfo.DEVICE_TV);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
     }
 
@@ -58,7 +58,7 @@ abstract class RequestArcAction extends FeatureAction {
             // Handles only <Feature Abort> here and, both <Initiate ARC> and <Terminate ARC>
             // are handled in HdmiControlService itself because both can be
             // received wihtout <Request ARC Initiation> or <Request ARC Termination>.
-            case HdmiCec.MESSAGE_FEATURE_ABORT:
+            case Constants.MESSAGE_FEATURE_ABORT:
                 disableArcTransmission();
                 finish();
                 return true;

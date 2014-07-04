@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,7 +57,7 @@ final class HdmiCecController {
          *
          * @param deviceType requested device type to allocate logical address
          * @param logicalAddress allocated logical address. If it is
-         *                       {@link HdmiCec#ADDR_UNREGISTERED}, it means that
+         *                       {@link Constants.ADDR_UNREGISTERED}, it means that
          *                       it failed to allocate logical address for the given device type
          */
         void onAllocated(int deviceType, int logicalAddress);
@@ -93,7 +91,7 @@ final class HdmiCecController {
     private final Predicate<Integer> mSystemAudioAddressPredicate = new Predicate<Integer>() {
         @Override
         public boolean apply(Integer address) {
-            return HdmiCec.getTypeFromAddress(address) == HdmiCec.ADDR_AUDIO_SYSTEM;
+            return HdmiUtils.getTypeFromAddress(address) == Constants.ADDR_AUDIO_SYSTEM;
         }
     };
 
@@ -160,7 +158,7 @@ final class HdmiCecController {
      *
      * @param deviceType type of device to used to determine logical address
      * @param preferredAddress a logical address preferred to be allocated.
-     *                         If sets {@link HdmiCec#ADDR_UNREGISTERED}, scans
+     *                         If sets {@link Constants.ADDR_UNREGISTERED}, scans
      *                         the smallest logical address matched with the given device type.
      *                         Otherwise, scan address will start from {@code preferredAddress}
      * @param callback callback interface to report allocated logical address to caller
@@ -185,21 +183,21 @@ final class HdmiCecController {
         int startAddress = preferredAddress;
         // If preferred address is "unregistered", start address will be the smallest
         // address matched with the given device type.
-        if (preferredAddress == HdmiCec.ADDR_UNREGISTERED) {
+        if (preferredAddress == Constants.ADDR_UNREGISTERED) {
             for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
-                if (deviceType == HdmiCec.getTypeFromAddress(i)) {
+                if (deviceType == HdmiUtils.getTypeFromAddress(i)) {
                     startAddress = i;
                     break;
                 }
             }
         }
 
-        int logicalAddress = HdmiCec.ADDR_UNREGISTERED;
+        int logicalAddress = Constants.ADDR_UNREGISTERED;
         // Iterates all possible addresses which has the same device type.
         for (int i = 0; i < NUM_LOGICAL_ADDRESS; ++i) {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
-            if (curAddress != HdmiCec.ADDR_UNREGISTERED
-                    && deviceType == HdmiCec.getTypeFromAddress(curAddress)) {
+            if (curAddress != Constants.ADDR_UNREGISTERED
+                    && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
                 if (!sendPollMessage(curAddress, curAddress,
                         RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION)) {
                     logicalAddress = curAddress;
@@ -255,7 +253,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     int addLogicalAddress(int newLogicalAddress) {
         assertRunOnServiceThread();
-        if (HdmiCec.isValidAddress(newLogicalAddress)) {
+        if (HdmiUtils.isValidAddress(newLogicalAddress)) {
             return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
             return -1;
@@ -315,13 +313,10 @@ final class HdmiCecController {
     }
 
     /**
-     * Pass a option to CEC HAL.
+     * Set an option to CEC HAL.
      *
-     * @param flag a key of option. For more details, look at
-     *        {@link HdmiConstants#FLAG_HDMI_OPTION_WAKEUP} to
-     *        {@link HdmiConstants#FLAG_HDMI_OPTION_SYSTEM_CEC_CONTROL}.
-     * @param value a value of option. Actual value varies from flag to flag. For more
-     *        details, look at description of flags.
+     * @param flag key of option
+     * @param value value of option
      */
     @ServiceThreadOnly
     void setOption(int flag, int value) {
@@ -385,31 +380,31 @@ final class HdmiCecController {
     }
 
     private List<Integer> pickPollCandidates(int pickStrategy) {
-        int strategy = pickStrategy & HdmiConstants.POLL_STRATEGY_MASK;
+        int strategy = pickStrategy & Constants.POLL_STRATEGY_MASK;
         Predicate<Integer> pickPredicate = null;
         switch (strategy) {
-            case HdmiConstants.POLL_STRATEGY_SYSTEM_AUDIO:
+            case Constants.POLL_STRATEGY_SYSTEM_AUDIO:
                 pickPredicate = mSystemAudioAddressPredicate;
                 break;
-            case HdmiConstants.POLL_STRATEGY_REMOTES_DEVICES:
+            case Constants.POLL_STRATEGY_REMOTES_DEVICES:
             default:  // The default is POLL_STRATEGY_REMOTES_DEVICES.
                 pickPredicate = mRemoteDeviceAddressPredicate;
                 break;
         }
 
-        int iterationStrategy = pickStrategy & HdmiConstants.POLL_ITERATION_STRATEGY_MASK;
+        int iterationStrategy = pickStrategy & Constants.POLL_ITERATION_STRATEGY_MASK;
         ArrayList<Integer> pollingCandidates = new ArrayList<>();
         switch (iterationStrategy) {
-            case HdmiConstants.POLL_ITERATION_IN_ORDER:
-                for (int i = HdmiCec.ADDR_TV; i <= HdmiCec.ADDR_SPECIFIC_USE; ++i) {
+            case Constants.POLL_ITERATION_IN_ORDER:
+                for (int i = Constants.ADDR_TV; i <= Constants.ADDR_SPECIFIC_USE; ++i) {
                     if (pickPredicate.apply(i)) {
                         pollingCandidates.add(i);
                     }
                 }
                 break;
-            case HdmiConstants.POLL_ITERATION_REVERSE_ORDER:
+            case Constants.POLL_ITERATION_REVERSE_ORDER:
             default:  // The default is reverse order.
-                for (int i = HdmiCec.ADDR_SPECIFIC_USE; i >= HdmiCec.ADDR_TV; --i) {
+                for (int i = Constants.ADDR_SPECIFIC_USE; i >= Constants.ADDR_TV; --i) {
                     if (pickPredicate.apply(i)) {
                         pollingCandidates.add(i);
                     }
@@ -465,7 +460,7 @@ final class HdmiCecController {
             // new logical address for the device because no device uses
             // it as logical address of the device.
             if (nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY)
-                    == HdmiConstants.SEND_RESULT_SUCCESS) {
+                    == Constants.SEND_RESULT_SUCCESS) {
                 return true;
             }
         }
@@ -497,7 +492,7 @@ final class HdmiCecController {
 
     private boolean isAcceptableAddress(int address) {
         // Can access command targeting devices available in local device or broadcast command.
-        if (address == HdmiCec.ADDR_BROADCAST) {
+        if (address == Constants.ADDR_BROADCAST) {
             return true;
         }
         return isAllocatedLocalDeviceAddress(address);
@@ -511,12 +506,12 @@ final class HdmiCecController {
             return;
         }
 
-        if (message.getDestination() != HdmiCec.ADDR_BROADCAST) {
+        if (message.getDestination() != Constants.ADDR_BROADCAST) {
             int sourceAddress = message.getDestination();
             // Reply <Feature Abort> to initiator (source) for all requests.
             HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildFeatureAbortCommand(
                     sourceAddress, message.getSource(), message.getOpcode(),
-                    HdmiConstants.ABORT_REFUSED);
+                    Constants.ABORT_REFUSED);
             sendCommand(cecMessage);
         }
     }
@@ -537,7 +532,7 @@ final class HdmiCecController {
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 final int error = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
                         cecMessage.getDestination(), body);
-                if (error != HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     Slog.w(TAG, "Failed to send " + cecMessage);
                 }
                 if (callback != null) {

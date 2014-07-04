@@ -16,9 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
@@ -108,12 +107,12 @@ final class DeviceSelectAction extends FeatureAction {
 
         switch (mState) {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
-                if (opcode == HdmiCec.MESSAGE_REPORT_POWER_STATUS && params.length == 1) {
+                if (opcode == Constants.MESSAGE_REPORT_POWER_STATUS && params.length == 1) {
                     return handleReportPowerStatus(params[0]);
                 }
                 return false;
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
-                if (opcode == HdmiCec.MESSAGE_ACTIVE_SOURCE && params.length == 2) {
+                if (opcode == Constants.MESSAGE_ACTIVE_SOURCE && params.length == 2) {
                     int activePath = HdmiUtils.twoBytesToInt(params);
                     ActiveSourceHandler
                             .create((HdmiCecLocalDeviceTv) localDevice(), mCallback)
@@ -133,10 +132,10 @@ final class DeviceSelectAction extends FeatureAction {
         //       If in 'Standby' or 'Transit to standby', remove the banner
         //       and stop this action. Otherwise, send <Set Stream Path>
         switch (powerStatus) {
-            case HdmiCec.POWER_STATUS_ON:
+            case HdmiControlManager.POWER_STATUS_ON:
                 sendSetStreamPath();
                 return true;
-            case HdmiCec.POWER_STATUS_TRANSIENT_TO_STANDBY:
+            case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY:
                 if (mPowerStatusCounter < 4) {
                     mState = STATE_WAIT_FOR_DEVICE_TO_TRANSIT_TO_STANDBY;
                     addTimer(mState, TIMEOUT_TRANSIT_TO_STANDBY_MS);
@@ -144,14 +143,14 @@ final class DeviceSelectAction extends FeatureAction {
                     sendSetStreamPath();
                 }
                 return true;
-            case HdmiCec.POWER_STATUS_STANDBY:
+            case HdmiControlManager.POWER_STATUS_STANDBY:
                 if (mPowerStatusCounter == 0) {
                     turnOnDevice();
                 } else {
                     sendSetStreamPath();
                 }
                 return true;
-            case HdmiCec.POWER_STATUS_TRANSIENT_TO_ON:
+            case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON:
                 if (mPowerStatusCounter < LOOP_COUNTER_MAX) {
                     mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
                     addTimer(mState, TIMEOUT_POWER_ON_MS);
@@ -197,7 +196,7 @@ final class DeviceSelectAction extends FeatureAction {
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
                 // TODO: Remove the banner
                 //       Display banner "Communication failed. Please check your cable or connection"
-                invokeCallback(HdmiCec.RESULT_TIMEOUT);
+                invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
                 finish();
                 break;
         }

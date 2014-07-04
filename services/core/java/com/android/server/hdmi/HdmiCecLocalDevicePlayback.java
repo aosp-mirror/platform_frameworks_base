@@ -16,8 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -33,7 +33,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private boolean mIsActiveSource = false;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
-        super(service, HdmiCec.DEVICE_PLAYBACK);
+        super(service, HdmiCecDeviceInfo.DEVICE_PLAYBACK);
     }
 
     @Override
@@ -49,16 +49,17 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (hasAction(OneTouchPlayAction.class)) {
             Slog.w(TAG, "oneTouchPlay already in progress");
-            invokeCallback(callback, HdmiCec.RESULT_ALREADY_IN_PROGRESS);
+            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
             return;
         }
 
         // TODO: Consider the case of multiple TV sets. For now we always direct the command
         //       to the primary one.
-        OneTouchPlayAction action = OneTouchPlayAction.create(this, HdmiCec.ADDR_TV, callback);
+        OneTouchPlayAction action = OneTouchPlayAction.create(this, Constants.ADDR_TV,
+                callback);
         if (action == null) {
             Slog.w(TAG, "Cannot initiate oneTouchPlay");
-            invokeCallback(callback, HdmiCec.RESULT_EXCEPTION);
+            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
             return;
         }
         addAndStartAction(action);
@@ -69,14 +70,14 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (hasAction(DevicePowerStatusAction.class)) {
             Slog.w(TAG, "queryDisplayStatus already in progress");
-            invokeCallback(callback, HdmiCec.RESULT_ALREADY_IN_PROGRESS);
+            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
             return;
         }
         DevicePowerStatusAction action = DevicePowerStatusAction.create(this,
-                HdmiCec.ADDR_TV, callback);
+                Constants.ADDR_TV, callback);
         if (action == null) {
             Slog.w(TAG, "Cannot initiate queryDisplayStatus");
-            invokeCallback(callback, HdmiCec.RESULT_EXCEPTION);
+            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
             return;
         }
         addAndStartAction(action);

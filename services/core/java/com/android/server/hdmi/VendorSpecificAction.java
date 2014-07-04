@@ -1,7 +1,5 @@
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecMessage;
-
 /**
  * Handles vendor-specific commands that require a sequence of command exchange,
  * or need to manage some states to complete the processing.
