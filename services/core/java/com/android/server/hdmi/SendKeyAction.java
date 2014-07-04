@@ -44,24 +44,30 @@ final class SendKeyAction extends FeatureAction {
     private final int mTargetAddress;
 
     // The key code of the last key press event the action is passed via processKeyEvent.
-    private int mLastKeyCode;
+    private int mLastKeycode;
 
     /**
      * Constructor.
      *
      * @param source {@link HdmiCecLocalDevice} instance
      * @param targetAddress logical address of the device to send the keys to
-     * @param keyCode remote control key code as defined in {@link KeyEvent}
+     * @param keycode remote control key code as defined in {@link KeyEvent}
      */
-    SendKeyAction(HdmiCecLocalDevice source, int targetAddress, int keyCode) {
+    SendKeyAction(HdmiCecLocalDevice source, int targetAddress, int keycode) {
         super(source);
         mTargetAddress = targetAddress;
-        mLastKeyCode = keyCode;
+        mLastKeycode = keycode;
     }
 
     @Override
     public boolean start() {
-        sendKeyDown(mLastKeyCode);
+        sendKeyDown(mLastKeycode);
+        // finish action for non-repeatable key.
+        if (!HdmiCecKeycode.isRepeatableKey(mLastKeycode)) {
+            sendKeyUp();
+            finish();
+            return true;
+        }
         mState = STATE_PROCESSING_KEYCODE;
         addTimer(mState, IRT_MS);
         return true;
@@ -70,10 +76,10 @@ final class SendKeyAction extends FeatureAction {
     /**
      * Called when a key event should be handled for the action.
      *
-     * @param keyCode key code of {@link KeyEvent} object
+     * @param keycode key code of {@link KeyEvent} object
      * @param isPressed true if the key event is of {@link KeyEvent#ACTION_DOWN}
      */
-    void processKeyEvent(int keyCode, boolean isPressed) {
+    void processKeyEvent(int keycode, boolean isPressed) {
         if (mState != STATE_PROCESSING_KEYCODE) {
             Slog.w(TAG, "Not in a valid state");
             return;
@@ -84,27 +90,32 @@ final class SendKeyAction extends FeatureAction {
         // Key release event indicates that the action shall be finished. Send UCR
         // command and terminate the action. Other release events are ignored.
         if (isPressed) {
-            if (keyCode != mLastKeyCode) {
+            if (keycode != mLastKeycode) {
+                if (!HdmiCecKeycode.isRepeatableKey(keycode)) {
+                    sendKeyUp();
+                    finish();
+                    return;
+                }
                 mActionTimer.clearTimerMessage();
-                sendKeyDown(keyCode);
+                sendKeyDown(keycode);
                 addTimer(mState, IRT_MS);
-                mLastKeyCode = keyCode;
+                mLastKeycode = keycode;
             }
         } else {
-            if (keyCode == mLastKeyCode) {
+            if (keycode == mLastKeycode) {
                 sendKeyUp();
                 finish();
             }
         }
     }
 
-    private void sendKeyDown(int keyCode) {
-        byte[] keyCodeAndParam = getCecKeyCodeAndParam(keyCode);
-        if (keyCodeAndParam == null) {
+    private void sendKeyDown(int keycode) {
+        byte[] keycodeAndParam = getCecKeycodeAndParam(keycode);
+        if (keycodeAndParam == null) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
-                mTargetAddress, keyCodeAndParam));
+                mTargetAddress, keycodeAndParam));
     }
 
     private void sendKeyUp() {
@@ -128,7 +139,7 @@ final class SendKeyAction extends FeatureAction {
             Slog.w(TAG, "Not in a valid state");
             return;
         }
-        sendKeyDown(mLastKeyCode);
+        sendKeyDown(mLastKeycode);
         addTimer(mState, IRT_MS);
     }
 
@@ -137,7 +148,7 @@ final class SendKeyAction extends FeatureAction {
     // Broadcast' with the parameter 'cable', for instance, shall have its counterpart such as
     // KeyEvent.KEYCODE_TV_BROADCAST_CABLE.
     // The return byte array contains both UI command (keycode) and optional parameter.
-    private byte[] getCecKeyCodeAndParam(int keyCode) {
-        return HdmiCecKeycode.androidKeyToCecKey(keyCode);
+    private byte[] getCecKeycodeAndParam(int keycode) {
+        return HdmiCecKeycode.androidKeyToCecKey(keycode);
     }
 }
