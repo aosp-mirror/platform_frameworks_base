@@ -31,4 +31,6 @@ oneway interface ITvInputSessionCallback {
     void onSessionEvent(in String name, in Bundle args);
     void onChannelRetuned(in Uri channelUri);
     void onTrackInfoChanged(in List<TvTrackInfo> tracks);
+    void onVideoAvailable();
+    void onVideoUnavailable(int reason);
 }

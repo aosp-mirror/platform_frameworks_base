@@ -267,6 +267,56 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that video is available and the playback of the TV stream has
+         * been started.
+         */
+        public void dispatchVideoAvailable() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchVideoAvailable");
+                        mSessionCallback.onVideoAvailable();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchVideoAvailable");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that video is not available, so the TV input cannot continue
+         * playing the TV stream.
+         *
+         * @param reason The reason why the TV input stopped the playback:
+         * <ul>
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNE}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * </ul>
+         */
+        public void dispatchVideoUnavailable(final int reason) {
+            if (reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_UNKNOWN
+                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_TUNE
+                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL
+                    && reason != TvInputManager.VIDEO_UNAVAILABLE_REASON_BUFFERING) {
+                throw new IllegalArgumentException("Unknown reason: " + reason);
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "dispatchVideoUnavailable");
+                        mSessionCallback.onVideoUnavailable(reason);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in dispatchVideoUnavailable");
+                    }
+                }
+            });
+        }
+
+        /**
          * Called when the session is released.
          */
         public abstract void onRelease();
@@ -289,7 +339,9 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(float volume);
 
         /**
-         * Tunes to a given channel.
+         * Tunes to a given channel. When the video is available, {@link #dispatchVideoAvailable()}
+         * should be called. Also, {@link #dispatchVideoUnavailable(int)} should be called when the
+         * TV input cannot continue playing the given channel.
          *
          * @param channelUri The URI of the channel.
          * @return {@code true} the tuning was successful, {@code false} otherwise.
