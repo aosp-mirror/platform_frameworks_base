@@ -598,7 +598,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     SkASSERT(bitmap_class);
     gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "J");
-    gBitmap_layoutBoundsFieldID = getFieldIDCheck(env, bitmap_class, "mLayoutBounds", "[I");
+    gBitmap_layoutBoundsFieldID = getFieldIDCheck(env, bitmap_class, "mOpticalInsets", "[I");
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",
                                     gOptionsMethods,

@@ -188,6 +188,16 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
+    /** @hide */
+    @Override
+    public Insets getOpticalInsets() {
+        final Insets contentInsets = super.getOpticalInsets();
+        return Insets.of(contentInsets.left + mInsetState.mInsetLeft,
+                contentInsets.top + mInsetState.mInsetTop,
+                contentInsets.right + mInsetState.mInsetRight,
+                contentInsets.bottom + mInsetState.mInsetBottom);
+    }
+
     @Override
     public void setHotspot(float x, float y) {
         mInsetState.mDrawable.setHotspot(x, y);

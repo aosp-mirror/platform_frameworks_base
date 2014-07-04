@@ -23,12 +23,10 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
@@ -418,6 +416,9 @@ public class NinePatchDrawable extends Drawable {
                 throw new XmlPullParserException(a.getPositionDescription() +
                         ": <nine-patch> requires a valid 9-patch source image");
             }
+
+            // Hey, now might be a good time to actually load optical bounds!
+            bitmap.getOpticalInsets(opticalInsets);
 
             state.mNinePatch = new NinePatch(bitmap, bitmap.getNinePatchChunk());
             state.mPadding = padding;

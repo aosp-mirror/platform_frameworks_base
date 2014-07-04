@@ -948,13 +948,10 @@ public abstract class Drawable {
                 np = null;
                 pad = null;
             }
-            int[] layoutBounds = bm.getLayoutBounds();
-            Rect layoutBoundsRect = null;
-            if (layoutBounds != null) {
-                layoutBoundsRect = new Rect(layoutBounds[0], layoutBounds[1],
-                                             layoutBounds[2], layoutBounds[3]);
-            }
-            return drawableFromBitmap(res, bm, np, pad, layoutBoundsRect, srcName);
+
+            final Rect opticalInsets = new Rect();
+            bm.getOpticalInsets(opticalInsets);
+            return drawableFromBitmap(res, bm, np, pad, opticalInsets, srcName);
         }
         return null;
     }

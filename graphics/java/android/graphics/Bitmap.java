@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
@@ -73,7 +74,7 @@ public final class Bitmap implements Parcelable {
     private boolean mRequestPremultiplied;
 
     private byte[] mNinePatchChunk;   // may be null
-    private int[] mLayoutBounds;   // may be null
+    private int[] mOpticalInsets;     // may be null
     private int mWidth;
     private int mHeight;
     private boolean mRecycled;
@@ -110,7 +111,7 @@ public final class Bitmap implements Parcelable {
     @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
     Bitmap(long nativeBitmap, byte[] buffer, int width, int height, int density,
             boolean isMutable, boolean requestPremultiplied,
-            byte[] ninePatchChunk, int[] layoutBounds) {
+            byte[] ninePatchChunk, int[] opticalInsets) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
@@ -125,7 +126,7 @@ public final class Bitmap implements Parcelable {
         mFinalizer = new BitmapFinalizer(nativeBitmap);
 
         mNinePatchChunk = ninePatchChunk;
-        mLayoutBounds = layoutBounds;
+        mOpticalInsets = opticalInsets;
         if (density >= 0) {
             mDensity = density;
         }
@@ -289,16 +290,6 @@ public final class Bitmap implements Parcelable {
      */
     public void setNinePatchChunk(byte[] chunk) {
         mNinePatchChunk = chunk;
-    }
-
-    /**
-     * Sets the layout bounds as an array of left, top, right, bottom integers
-     * @param bounds the array containing the padding values
-     *
-     * @hide
-     */
-    public void setLayoutBounds(int[] bounds) {
-        mLayoutBounds = bounds;
     }
 
     /**
@@ -949,11 +940,20 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Populates a rectangle with the bitmap's optical insets.
+     *
+     * @param outInsets Rect to populate with optical insets
      * @hide
-     * @return the layout padding [left, right, top, bottom]
      */
-    public int[] getLayoutBounds() {
-        return mLayoutBounds;
+    public void getOpticalInsets(@NonNull Rect outInsets) {
+        if (mOpticalInsets == null) {
+            outInsets.setEmpty();
+        } else {
+            outInsets.left = mOpticalInsets[0];
+            outInsets.top = mOpticalInsets[1];
+            outInsets.right = mOpticalInsets[2];
+            outInsets.bottom = mOpticalInsets[3];
+        }
     }
 
     /**
