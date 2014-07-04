@@ -69,6 +69,7 @@ public class StackScrollAlgorithm {
     private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
     private int mBottomStackSlowDownLength;
+    private int mTopStackSlowDownLength;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -79,7 +80,8 @@ public class StackScrollAlgorithm {
         mPaddingBetweenElements = dimmed
                 ? mPaddingBetweenElementsDimmed
                 : mPaddingBetweenElementsNormal;
-        mTopStackTotalSize = mCollapsedSize + mPaddingBetweenElements;
+        mTopStackTotalSize = mTopStackSlowDownLength + mPaddingBetweenElements
+                + mTopStackPeekSize;
         mTopStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
                 MAX_ITEMS_IN_TOP_STACK,
                 mTopStackPeekSize,
@@ -112,6 +114,8 @@ public class StackScrollAlgorithm {
         mZBasicHeight = (MAX_ITEMS_IN_BOTTOM_STACK + 1) * mZDistanceBetweenElements;
         mBottomStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
+        mTopStackSlowDownLength = context.getResources()
+                .getDimensionPixelSize(R.dimen.top_stack_slow_down_length);
         mRoundedRectCornerRadius = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
     }
@@ -522,8 +526,10 @@ public class StackScrollAlgorithm {
         if (paddedIndex >= 0) {
 
             // We are currently visually entering the top stack
-            float distanceToStack = childHeight - algorithmState.scrolledPixelsTop;
-            if (i == algorithmState.lastTopStackIndex && distanceToStack > mTopStackTotalSize) {
+            float distanceToStack = (childHeight + mPaddingBetweenElements)
+                    - algorithmState.scrolledPixelsTop;
+            if (i == algorithmState.lastTopStackIndex
+                    && distanceToStack > (mTopStackTotalSize + mPaddingBetweenElements)) {
 
                 // Child is currently translating into stack but not yet inside slow down zone.
                 // Handle it like the regular scrollview.
@@ -532,13 +538,14 @@ public class StackScrollAlgorithm {
                 // Apply stacking logic.
                 float numItemsBefore;
                 if (i == algorithmState.lastTopStackIndex) {
-                    numItemsBefore = 1.0f - (distanceToStack / mTopStackTotalSize);
+                    numItemsBefore = 1.0f
+                            - (distanceToStack / (mTopStackTotalSize + mPaddingBetweenElements));
                 } else {
                     numItemsBefore = algorithmState.itemsInTopStack - i;
                 }
                 // The end position of the current child
-                float currentChildEndY = mCollapsedSize + mTopStackTotalSize -
-                        mTopStackIndentationFunctor.getValue(numItemsBefore);
+                float currentChildEndY = mCollapsedSize + mTopStackTotalSize
+                        - mTopStackIndentationFunctor.getValue(numItemsBefore);
                 childViewState.yTranslation = currentChildEndY - childHeight;
             }
             childViewState.location = StackScrollState.ViewState.LOCATION_TOP_STACK_PEEKING;
@@ -598,25 +605,23 @@ public class StackScrollAlgorithm {
                     }
                 } else {
                     // According to the regular scroll view we are partially off screen
-                    // If it is expanded we have to collapse it to a new size
-                    float newSize = yPositionInScrollViewAfterElement
-                            - mPaddingBetweenElements
-                            - algorithmState.scrollY;
-
-                    if (i == 0) {
-                        newSize += mCollapsedSize;
-                    }
 
                     // How much did we scroll into this child
-                    algorithmState.scrolledPixelsTop = childHeight - newSize;
+                    algorithmState.scrolledPixelsTop = algorithmState.scrollY
+                            - yPositionInScrollView;
                     algorithmState.partialInTop = (algorithmState.scrolledPixelsTop) / (childHeight
                             + mPaddingBetweenElements);
 
                     // Our element can be expanded, so this can get negative
                     algorithmState.partialInTop = Math.max(0.0f, algorithmState.partialInTop);
                     algorithmState.itemsInTopStack += algorithmState.partialInTop;
-                    newSize = Math.max(mCollapsedSize, newSize);
+
                     if (i == 0) {
+                        // If it is expanded we have to collapse it to a new size
+                        float newSize = yPositionInScrollViewAfterElement
+                                - mPaddingBetweenElements
+                                - algorithmState.scrollY + mCollapsedSize;
+                        newSize = Math.max(mCollapsedSize, newSize);
                         algorithmState.itemsInTopStack = 1.0f;
                         childViewState.height = (int) newSize;
                     }
