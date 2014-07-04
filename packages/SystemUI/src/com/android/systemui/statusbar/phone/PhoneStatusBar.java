@@ -2901,9 +2901,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean onBackPressed() {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            return mStatusBarKeyguardViewManager.onBackPressed();
+            if (mStatusBarKeyguardViewManager.onBackPressed()) {
+                return true;
+            }
+            if (mNotificationPanel.isQsExpanded()) {
+                mNotificationPanel.animateCloseQs();
+                return true;
+            }
+            return false;
         } else {
-            animateCollapsePanels();
+            if (mNotificationPanel.isQsExpanded()) {
+                mNotificationPanel.animateCloseQs();
+            } else {
+                animateCollapsePanels();
+            }
             return true;
         }
     }
