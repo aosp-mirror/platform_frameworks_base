@@ -1449,7 +1449,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private void updateScrollStateForRemovedChild(View removedChild) {
         int startingPosition = getPositionInLinearLayout(removedChild);
-        int childHeight = removedChild.getHeight() + mPaddingBetweenElements;
+        int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
         int endPosition = startingPosition + childHeight;
         if (endPosition <= mOwnScrollY) {
             // This child is fully scrolled of the top, so we have to deduct its height from the
@@ -1460,6 +1460,14 @@ public class NotificationStackScrollLayout extends ViewGroup
             // this child
             mOwnScrollY = startingPosition;
         }
+    }
+
+    private int getIntrinsicHeight(View view) {
+        if (view instanceof ExpandableView) {
+            ExpandableView expandableView = (ExpandableView) view;
+            return expandableView.getIntrinsicHeight();
+        }
+        return view.getHeight();
     }
 
     private int getPositionInLinearLayout(View requestedChild) {
