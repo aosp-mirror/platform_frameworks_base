@@ -472,6 +472,40 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
+            public void onVideoAvailable() {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onVideoAvailable()");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onVideoAvailable(sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onVideoAvailable");
+                    }
+                }
+            }
+
+            @Override
+            public void onVideoUnavailable(int reason) {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "onVideoUnavailable(" + reason + ")");
+                    }
+                    if (sessionState.mSession == null || sessionState.mClient == null) {
+                        return;
+                    }
+                    try {
+                        sessionState.mClient.onVideoUnavailable(reason, sessionState.mSeq);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onVideoUnavailable");
+                    }
+                }
+            }
+
+            @Override
             public void onSessionEvent(String eventType, Bundle eventArgs) {
                 synchronized (mLock) {
                     if (DEBUG) {
