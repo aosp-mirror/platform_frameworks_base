@@ -30,6 +30,7 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
+import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.media.AudioManager;
 import android.os.Build;
@@ -138,6 +139,12 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
             new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private IHdmiInputChangeListener mInputChangeListener;
+
+    @GuardedBy("mLock")
+    private InputChangeListenerRecord mInputChangeListenerRecord;
 
     // Set to true while HDMI control is enabled. If set to false, HDMI-CEC/MHL protocol
     // handling will be disabled and no request will be handled.
@@ -773,6 +780,24 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void setInputChangeListener(final IHdmiInputChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.setInputChangeListener(listener);
+        }
+
+        @Override
+        public List<HdmiCecDeviceInfo> getInputDevices() {
+            enforceAccessPermission();
+            // No need to hold the lock for obtaining TV device as the local device instance
+            // is preserved while the HDMI control is enabled.
+            HdmiCecLocalDeviceTv tv = tv();
+            if (tv == null) {
+                return Collections.emptyList();
+            }
+            return tv.getSafeExternalInputs();
+        }
+
+        @Override
         public void setControlEnabled(final boolean enabled) {
             enforceAccessPermission();
             synchronized (mLock) {
@@ -978,6 +1003,41 @@ public final class HdmiControlService extends SystemService {
                 }
             }
             mSystemAudioModeChangeListeners.remove(listener);
+        }
+    }
+
+    private final class InputChangeListenerRecord implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mInputChangeListener = null;
+            }
+        }
+    }
+
+    private void setInputChangeListener(IHdmiInputChangeListener listener) {
+        synchronized (mLock) {
+            mInputChangeListenerRecord = new InputChangeListenerRecord();
+            try {
+                listener.asBinder().linkToDeath(mInputChangeListenerRecord, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Listener already died");
+                return;
+            }
+            mInputChangeListener = listener;
+        }
+    }
+
+    void invokeInputChangeListener(int activeAddress) {
+        synchronized (mLock) {
+            if (mInputChangeListener != null) {
+                HdmiCecDeviceInfo activeSource = getDeviceInfo(activeAddress);
+                try {
+                    mInputChangeListener.onChanged(activeSource);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Exception thrown by IHdmiInputChangeListener: " + e);
+                }
+            }
         }
     }
 
