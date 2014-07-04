@@ -16,9 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
@@ -46,7 +44,8 @@ final class HotplugDetectionAction extends FeatureAction {
     private static final int STATE_WAIT_FOR_NEXT_POLLING = 1;
 
     // All addresses except for broadcast (unregistered address).
-    private static final int NUM_OF_ADDRESS = HdmiCec.ADDR_SPECIFIC_USE - HdmiCec.ADDR_TV + 1;
+    private static final int NUM_OF_ADDRESS = Constants.ADDR_SPECIFIC_USE
+            - Constants.ADDR_TV + 1;
 
     private int mTimeoutCount = 0;
 
@@ -126,8 +125,8 @@ final class HotplugDetectionAction extends FeatureAction {
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, false);
             }
-        }, HdmiConstants.POLL_ITERATION_IN_ORDER
-                | HdmiConstants.POLL_STRATEGY_REMOTES_DEVICES, POLL_RETRY_COUNT);
+        }, Constants.POLL_ITERATION_IN_ORDER
+                | Constants.POLL_STRATEGY_REMOTES_DEVICES, POLL_RETRY_COUNT);
     }
 
     private void pollAudioSystem() {
@@ -138,8 +137,8 @@ final class HotplugDetectionAction extends FeatureAction {
             public void onPollingFinished(List<Integer> ackedAddress) {
                 checkHotplug(ackedAddress, true);
             }
-        }, HdmiConstants.POLL_ITERATION_IN_ORDER
-                | HdmiConstants.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
+        }, Constants.POLL_ITERATION_IN_ORDER
+                | Constants.POLL_STRATEGY_SYSTEM_AUDIO, POLL_RETRY_COUNT);
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {
@@ -167,7 +166,7 @@ final class HotplugDetectionAction extends FeatureAction {
         BitSet set = new BitSet(NUM_OF_ADDRESS);
         for (HdmiCecDeviceInfo info : infoList) {
             if (audioOnly) {
-                if (info.getDeviceType() == HdmiCec.DEVICE_AUDIO_SYSTEM) {
+                if (info.getDeviceType() == HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
                     set.set(info.getLogicalAddress());
                 }
             } else {
@@ -233,7 +232,7 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayDisableSystemAudioAndARC(int address) {
-        if (HdmiCec.getTypeFromAddress(address) != HdmiCec.DEVICE_AUDIO_SYSTEM) {
+        if (HdmiUtils.getTypeFromAddress(address) != HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             return;
         }
 

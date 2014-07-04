@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCecMessage;
-
 /**
  * Feature action that handles ARC action initiated by TV devices.
  *
@@ -42,7 +40,7 @@ final class RequestArcInitiationAction extends RequestArcAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error == Constants.SEND_RESULT_SUCCESS) {
                     mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
                     addTimer(mState, TIMEOUT_MS);
                 } else {

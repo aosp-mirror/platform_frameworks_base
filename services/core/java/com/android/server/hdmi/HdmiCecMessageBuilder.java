@@ -16,9 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
@@ -60,7 +57,7 @@ public class HdmiCecMessageBuilder {
                 (byte) originalOpcode,
                 (byte) reason,
         };
-        return buildCommand(src, dest, HdmiCec.MESSAGE_FEATURE_ABORT, params);
+        return buildCommand(src, dest, Constants.MESSAGE_FEATURE_ABORT, params);
     }
 
     /**
@@ -71,7 +68,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGivePhysicalAddress(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS);
     }
 
     /**
@@ -82,7 +79,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGiveOsdNameCommand(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_OSD_NAME);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_OSD_NAME);
     }
 
     /**
@@ -93,7 +90,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGiveDeviceVendorIdCommand(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID);
     }
 
     /**
@@ -118,8 +115,8 @@ public class HdmiCecMessageBuilder {
                 (byte) normalized.charAt(2),
         };
         // <Set Menu Language> is broadcast message.
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_SET_MENU_LANGUAGE,
-                params);
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_SET_MENU_LANGUAGE, params);
     }
 
     /**
@@ -138,7 +135,7 @@ public class HdmiCecMessageBuilder {
         } catch (UnsupportedEncodingException e) {
             return null;
         }
-        return buildCommand(src, dest, HdmiCec.MESSAGE_SET_OSD_NAME, params);
+        return buildCommand(src, dest, Constants.MESSAGE_SET_OSD_NAME, params);
     }
 
     /**
@@ -161,8 +158,8 @@ public class HdmiCecMessageBuilder {
                 (byte) deviceType
         };
         // <Report Physical Address> is broadcast message.
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                params);
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS, params);
     }
 
     /**
@@ -182,8 +179,8 @@ public class HdmiCecMessageBuilder {
                 (byte) (vendorId & 0xFF)
         };
         // <Device Vendor Id> is broadcast message.
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_DEVICE_VENDOR_ID,
-                params);
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_DEVICE_VENDOR_ID, params);
     }
 
     /**
@@ -199,7 +196,7 @@ public class HdmiCecMessageBuilder {
         byte[] params = new byte[] {
                 (byte) version
         };
-        return buildCommand(src, dest, HdmiCec.MESSAGE_CEC_VERSION, params);
+        return buildCommand(src, dest, Constants.MESSAGE_CEC_VERSION, params);
     }
 
     /**
@@ -210,7 +207,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildRequestArcInitiation(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_REQUEST_ARC_INITIATION);
+        return buildCommand(src, dest, Constants.MESSAGE_REQUEST_ARC_INITIATION);
     }
 
     /**
@@ -221,7 +218,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildRequestArcTermination(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_REQUEST_ARC_TERMINATION);
+        return buildCommand(src, dest, Constants.MESSAGE_REQUEST_ARC_TERMINATION);
     }
 
     /**
@@ -232,7 +229,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildReportArcInitiated(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_ARC_INITIATED);
+        return buildCommand(src, dest, Constants.MESSAGE_REPORT_ARC_INITIATED);
     }
 
     /**
@@ -243,7 +240,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildReportArcTerminated(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_ARC_TERMINATED);
+        return buildCommand(src, dest, Constants.MESSAGE_REPORT_ARC_TERMINATED);
     }
 
     /**
@@ -254,7 +251,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildTextViewOn(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_TEXT_VIEW_ON);
+        return buildCommand(src, dest, Constants.MESSAGE_TEXT_VIEW_ON);
     }
 
     /**
@@ -265,7 +262,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildActiveSource(int src, int physicalAddress) {
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_ACTIVE_SOURCE,
+        return buildCommand(src, Constants.ADDR_BROADCAST, Constants.MESSAGE_ACTIVE_SOURCE,
                 physicalAddressToParam(physicalAddress));
     }
 
@@ -277,8 +274,8 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildInactiveSource(int src, int physicalAddress) {
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_INACTIVE_SOURCE,
-                physicalAddressToParam(physicalAddress));
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_INACTIVE_SOURCE, physicalAddressToParam(physicalAddress));
     }
 
     /**
@@ -291,8 +288,8 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildSetStreamPath(int src, int streamPath) {
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_SET_STREAM_PATH,
-                physicalAddressToParam(streamPath));
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_SET_STREAM_PATH, physicalAddressToParam(streamPath));
     }
 
     /**
@@ -310,7 +307,8 @@ public class HdmiCecMessageBuilder {
             (byte) ((oldPath >> 8) & 0xFF), (byte) (oldPath & 0xFF),
             (byte) ((newPath >> 8) & 0xFF), (byte) (newPath & 0xFF)
         };
-        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_ROUTING_CHANGE, param);
+        return buildCommand(src, Constants.ADDR_BROADCAST, Constants.MESSAGE_ROUTING_CHANGE,
+                param);
     }
 
     /**
@@ -321,7 +319,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGiveDevicePowerStatus(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS);
     }
 
     /**
@@ -336,7 +334,7 @@ public class HdmiCecMessageBuilder {
         byte[] param = new byte[] {
                 (byte) (powerStatus)
         };
-        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_POWER_STATUS, param);
+        return buildCommand(src, dest, Constants.MESSAGE_REPORT_POWER_STATUS, param);
     }
 
     /**
@@ -351,10 +349,10 @@ public class HdmiCecMessageBuilder {
     static HdmiCecMessage buildSystemAudioModeRequest(int src, int avr, int avrPhysicalAddress,
             boolean enableSystemAudio) {
         if (enableSystemAudio) {
-            return buildCommand(src, avr, HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
+            return buildCommand(src, avr, Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
                     physicalAddressToParam(avrPhysicalAddress));
         } else {
-            return buildCommand(src, avr, HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST);
+            return buildCommand(src, avr, Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST);
         }
     }
 
@@ -366,7 +364,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGiveAudioStatus(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_AUDIO_STATUS);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_AUDIO_STATUS);
     }
 
     /**
@@ -390,7 +388,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildUserControlPressed(int src, int dest, byte[] commandParam) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_PRESSED, commandParam);
+        return buildCommand(src, dest, Constants.MESSAGE_USER_CONTROL_PRESSED, commandParam);
     }
 
     /**
@@ -401,7 +399,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildUserControlReleased(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_USER_CONTROL_RELEASED);
+        return buildCommand(src, dest, Constants.MESSAGE_USER_CONTROL_RELEASED);
     }
 
     /**
@@ -412,7 +410,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildGiveSystemAudioModeStatus(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS);
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS);
     }
 
     /**
@@ -423,7 +421,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     public static HdmiCecMessage buildStandby(int src, int dest) {
-        return buildCommand(src, dest, HdmiCec.MESSAGE_STANDBY);
+        return buildCommand(src, dest, Constants.MESSAGE_STANDBY);
     }
 
     /***** Please ADD new buildXXX() methods above. ******/

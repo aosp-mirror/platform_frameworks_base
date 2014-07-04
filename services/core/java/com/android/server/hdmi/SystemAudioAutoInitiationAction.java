@@ -16,9 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
-
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -50,7 +47,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
                 mAvrAddress), new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     tv().setSystemAudioMode(false);
                     finish();
                 }
@@ -65,7 +62,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
         }
 
         switch (cmd.getOpcode()) {
-            case HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
+            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
                 handleSystemAudioModeStatusMessage();
                 return true;
             default:

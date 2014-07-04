@@ -17,8 +17,7 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -57,7 +56,7 @@ final class SystemAudioStatusAction extends FeatureAction {
                 new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     handleSendGiveAudioStatusFailure();
                 }
             }
@@ -67,7 +66,7 @@ final class SystemAudioStatusAction extends FeatureAction {
     private void handleSendGiveAudioStatusFailure() {
         // Inform to all application that the audio status (volumn, mute) of
         // the audio amplifier is unknown.
-        tv().setAudioStatus(false, HdmiConstants.UNKNOWN_VOLUME);
+        tv().setAudioStatus(false, Constants.UNKNOWN_VOLUME);
 
         int uiCommand = tv().getSystemAudioMode()
                 ? HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
@@ -75,7 +74,7 @@ final class SystemAudioStatusAction extends FeatureAction {
         sendUserControlPressedAndReleased(mAvrAddress, uiCommand);
 
         // Still return SUCCESS to callback.
-        finishWithCallback(HdmiCec.RESULT_SUCCESS);
+        finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Override
@@ -85,7 +84,7 @@ final class SystemAudioStatusAction extends FeatureAction {
         }
 
         switch (cmd.getOpcode()) {
-            case HdmiCec.MESSAGE_REPORT_AUDIO_STATUS:
+            case Constants.MESSAGE_REPORT_AUDIO_STATUS:
                 handleReportAudioStatus(cmd);
                 return true;
         }
@@ -104,7 +103,7 @@ final class SystemAudioStatusAction extends FeatureAction {
                 // Toggle AVR's mute status to match with the system audio status.
                 sendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode.CEC_KEYCODE_MUTE);
             }
-            finishWithCallback(HdmiCec.RESULT_SUCCESS);
+            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         } else {
             Slog.e(TAG, "Invalid <Report Audio Status> message:" + cmd);
             handleSendGiveAudioStatusFailure();

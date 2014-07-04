@@ -16,8 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+
 import android.util.Slog;
 
 /**
@@ -45,8 +45,8 @@ final class SetArcTransmissionStateAction extends FeatureAction {
     SetArcTransmissionStateAction(HdmiCecLocalDevice source, int avrAddress,
             boolean enabled) {
         super(source);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiCec.DEVICE_AUDIO_SYSTEM);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCecDeviceInfo.DEVICE_TV);
+        HdmiUtils.verifyAddressType(avrAddress, HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
         mEnabled = enabled;
     }
@@ -68,7 +68,7 @@ final class SetArcTransmissionStateAction extends FeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == HdmiConstants.SEND_RESULT_SUCCESS) {
+                if (error == Constants.SEND_RESULT_SUCCESS) {
                     // Enable ARC status immediately after sending <Report Arc Initiated>.
                     // If AVR responds with <Feature Abort>, disable ARC status again.
                     // This is different from spec that says that turns ARC status to
@@ -110,7 +110,7 @@ final class SetArcTransmissionStateAction extends FeatureAction {
         }
 
         int opcode = cmd.getOpcode();
-        if (opcode == HdmiCec.MESSAGE_FEATURE_ABORT) {
+        if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
             setArcStatus(false);
         }
         finish();

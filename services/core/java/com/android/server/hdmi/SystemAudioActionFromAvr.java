@@ -16,7 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 
 /**
@@ -36,7 +37,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
     SystemAudioActionFromAvr(HdmiCecLocalDevice source, int avrAddress,
             boolean targetStatus, IHdmiControlCallback callback) {
         super(source, avrAddress, targetStatus, callback);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCec.DEVICE_TV);
+        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiCecDeviceInfo.DEVICE_TV);
     }
 
     @Override
@@ -48,13 +49,13 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
 
     private void handleSystemAudioActionFromAvr() {
         if (mTargetAudioStatus == tv().getSystemAudioMode()) {
-            finishWithCallback(HdmiCec.RESULT_SUCCESS);
+            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
             return;
         }
         if (tv().isProhibitMode()) {
             sendCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
                     getSourceAddress(), mAvrLogicalAddress,
-                    HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE, HdmiConstants.ABORT_REFUSED));
+                    Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, Constants.ABORT_REFUSED));
             mTargetAudioStatus = false;
             sendSystemAudioModeRequest();
             return;
@@ -67,7 +68,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
             startAudioStatusAction();
         } else {
             setSystemAudioMode(false);
-            finishWithCallback(HdmiCec.RESULT_SUCCESS);
+            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         }
     }
 }

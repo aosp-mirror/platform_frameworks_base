@@ -16,8 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -30,7 +29,98 @@ import java.util.List;
  */
 final class HdmiUtils {
 
+    private static final int[] ADDRESS_TO_TYPE = {
+        HdmiCecDeviceInfo.DEVICE_TV,  // ADDR_TV
+        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_1
+        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_2
+        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_1
+        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_1
+        HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM,  // ADDR_AUDIO_SYSTEM
+        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_2
+        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_3
+        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_2
+        HdmiCecDeviceInfo.DEVICE_RECORDER,  // ADDR_RECORDER_3
+        HdmiCecDeviceInfo.DEVICE_TUNER,  // ADDR_TUNER_4
+        HdmiCecDeviceInfo.DEVICE_PLAYBACK,  // ADDR_PLAYBACK_3
+        HdmiCecDeviceInfo.DEVICE_RESERVED,
+        HdmiCecDeviceInfo.DEVICE_RESERVED,
+        HdmiCecDeviceInfo.DEVICE_TV,  // ADDR_SPECIFIC_USE
+    };
+
+    private static final String[] DEFAULT_NAMES = {
+        "TV",
+        "Recorder_1",
+        "Recorder_2",
+        "Tuner_1",
+        "Playback_1",
+        "AudioSystem",
+        "Tuner_2",
+        "Tuner_3",
+        "Playback_2",
+        "Recorder_3",
+        "Tuner_4",
+        "Playback_3",
+        "Reserved_1",
+        "Reserved_2",
+        "Secondary_TV",
+    };
+
     private HdmiUtils() { /* cannot be instantiated */ }
+
+    /**
+     * Check if the given type is valid. A valid type is one of the actual
+     * logical device types defined in the standard ({@link #DEVICE_TV},
+     * {@link #DEVICE_PLAYBACK}, {@link #DEVICE_TUNER}, {@link #DEVICE_RECORDER},
+     * and {@link #DEVICE_AUDIO_SYSTEM}).
+     *
+     * @param type device type
+     * @return true if the given type is valid
+     */
+    static boolean isValidType(int type) {
+        return (HdmiCecDeviceInfo.DEVICE_TV <= type && type <= HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM)
+                && type != HdmiCecDeviceInfo.DEVICE_RESERVED;
+    }
+
+    /**
+     * Check if the given logical address is valid. A logical address is valid
+     * if it is one allocated for an actual device which allows communication
+     * with other logical devices.
+     *
+     * @param address logical address
+     * @return true if the given address is valid
+     */
+    static boolean isValidAddress(int address) {
+        return (Constants.ADDR_TV <= address && address <= Constants.ADDR_SPECIFIC_USE);
+    }
+
+    /**
+     * Return the device type for the given logical address.
+     *
+     * @param address logical address
+     * @return device type for the given logical address; DEVICE_INACTIVE
+     *         if the address is not valid.
+     */
+    static int getTypeFromAddress(int address) {
+        if (isValidAddress(address)) {
+            return ADDRESS_TO_TYPE[address];
+        }
+        return HdmiCecDeviceInfo.DEVICE_INACTIVE;
+    }
+
+    /**
+     * Return the default device name for a logical address. This is the name
+     * by which the logical device is known to others until a name is
+     * set explicitly using HdmiCecService.setOsdName.
+     *
+     * @param address logical address
+     * @return default device name; empty string if the address is not valid
+     */
+    static String getDefaultDeviceName(int address) {
+        if (isValidAddress(address)) {
+            return DEFAULT_NAMES[address];
+        }
+        return "";
+    }
 
     /**
      * Verify if the given address is for the given device type.  If not it will throw
@@ -41,7 +131,7 @@ final class HdmiUtils {
      * @throw IllegalArgumentException
      */
     static void verifyAddressType(int logicalAddress, int deviceType) {
-        int actualDeviceType = HdmiCec.getTypeFromAddress(logicalAddress);
+        int actualDeviceType = getTypeFromAddress(logicalAddress);
         if (actualDeviceType != deviceType) {
             throw new IllegalArgumentException("Device type missmatch:[Expected:" + deviceType
                     + ", Actual:" + actualDeviceType);
@@ -74,7 +164,7 @@ final class HdmiUtils {
     static boolean parseCommandParamSystemAudioStatus(HdmiCecMessage cmd) {
         // TODO: Handle the exception when the length is wrong.
         return cmd.getParams().length > 0
-                && cmd.getParams()[0] == HdmiConstants.SYSTEM_AUDIO_STATUS_ON;
+                && cmd.getParams()[0] == Constants.SYSTEM_AUDIO_STATUS_ON;
     }
 
     /**
@@ -192,5 +282,4 @@ final class HdmiUtils {
         }
         return true;
     }
-
 }

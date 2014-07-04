@@ -16,10 +16,8 @@
 
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.HdmiConstants.IRT_MS;
+import static com.android.server.hdmi.Constants.IRT_MS;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -156,10 +154,10 @@ final class VolumeControlAction extends FeatureAction {
         }
 
         switch (cmd.getOpcode()) {
-            case HdmiCec.MESSAGE_REPORT_AUDIO_STATUS:
+            case Constants.MESSAGE_REPORT_AUDIO_STATUS:
                 handleReportAudioStatus(cmd);
                 return true;
-            case HdmiCec.MESSAGE_FEATURE_ABORT:
+            case Constants.MESSAGE_FEATURE_ABORT:
                 // TODO: handle feature abort.
                 finish();
                 return true;

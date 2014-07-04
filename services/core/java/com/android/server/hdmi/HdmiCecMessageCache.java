@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.util.FastImmutableArraySet;
 import android.util.SparseArray;
 
@@ -29,12 +27,12 @@ import android.util.SparseArray;
  * to clean up messages come from the device.
  */
 final class HdmiCecMessageCache {
-    private static final FastImmutableArraySet<Integer> CACHEABLE_OPCODES = new FastImmutableArraySet<>(
-            new Integer[] {
-                    HdmiCec.MESSAGE_SET_OSD_NAME,
-                    HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                    HdmiCec.MESSAGE_DEVICE_VENDOR_ID,
-                    HdmiCec.MESSAGE_CEC_VERSION,
+    private static final FastImmutableArraySet<Integer> CACHEABLE_OPCODES =
+            new FastImmutableArraySet<>(new Integer[] {
+                    Constants.MESSAGE_SET_OSD_NAME,
+                    Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
+                    Constants.MESSAGE_DEVICE_VENDOR_ID,
+                    Constants.MESSAGE_CEC_VERSION,
             });
 
     // It's like [Source Logical Address, [Opcode, HdmiCecMessage]].

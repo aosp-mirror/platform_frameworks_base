@@ -16,8 +16,6 @@ package com.android.server.hdmi;
  * limitations under the License.
  */
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
@@ -75,7 +73,7 @@ final class DevicePowerStatusAction extends FeatureAction {
         if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
             return false;
         }
-        if (cmd.getOpcode() == HdmiCec.MESSAGE_REPORT_POWER_STATUS) {
+        if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
             invokeCallback(status);
             finish();
@@ -91,7 +89,7 @@ final class DevicePowerStatusAction extends FeatureAction {
         }
         if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
             // Got no response from TV. Report status 'unknown'.
-            invokeCallback(HdmiCec.POWER_STATUS_UNKNOWN);
+            invokeCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
             finish();
         }
     }

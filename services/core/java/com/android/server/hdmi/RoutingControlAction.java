@@ -17,9 +17,8 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -86,7 +85,7 @@ final class RoutingControlAction extends FeatureAction {
         int opcode = cmd.getOpcode();
         byte[] params = cmd.getParams();
         if (mState == STATE_WAIT_FOR_ROUTING_INFORMATION
-                && opcode == HdmiCec.MESSAGE_ROUTING_INFORMATION) {
+                && opcode == Constants.MESSAGE_ROUTING_INFORMATION) {
             // Keep updating the physicalAddress as we receive <Routing Information>.
             // If the routing path doesn't belong to the currently active one, we should
             // ignore it since it might have come from other routing change sequence.
@@ -100,7 +99,7 @@ final class RoutingControlAction extends FeatureAction {
             addTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
             return true;
         } else if (mState == STATE_WAIT_FOR_REPORT_POWER_STATUS
-                  && opcode == HdmiCec.MESSAGE_REPORT_POWER_STATUS) {
+                  && opcode == Constants.MESSAGE_REPORT_POWER_STATUS) {
             handleReportPowerStatus(cmd.getParams()[0]);
             return true;
         }
@@ -115,7 +114,7 @@ final class RoutingControlAction extends FeatureAction {
                 tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
             }
         }
-        invokeCallback(HdmiCec.RESULT_SUCCESS);
+        invokeCallback(HdmiControlManager.RESULT_SUCCESS);
         finish();
      }
 
@@ -124,7 +123,8 @@ final class RoutingControlAction extends FeatureAction {
     }
 
     private static boolean isPowerOnOrTransient(int status) {
-        return status == HdmiCec.POWER_STATUS_ON || status == HdmiCec.POWER_STATUS_TRANSIENT_TO_ON;
+        return status == HdmiControlManager.POWER_STATUS_ON
+                || status == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
     }
 
     private void sendSetStreamPath() {
@@ -146,7 +146,8 @@ final class RoutingControlAction extends FeatureAction {
                     queryDevicePowerStatus(deviceLogicalAddress, new SendMessageCallback() {
                         @Override
                         public void onSendCompleted(int error) {
-                            handlDevicePowerStatusAckResult(error == HdmiCec.RESULT_SUCCESS);
+                            handlDevicePowerStatusAckResult(
+                                    error == HdmiControlManager.RESULT_SUCCESS);
                         }
                     });
                 } else {
@@ -158,7 +159,7 @@ final class RoutingControlAction extends FeatureAction {
                     tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
                     sendSetStreamPath();
                 }
-                invokeCallback(HdmiCec.RESULT_SUCCESS);
+                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
                 finish();
                 return;
         }

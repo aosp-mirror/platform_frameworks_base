@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.hardware.hdmi;
+package com.android.server.hdmi;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,10 +27,7 @@ import java.util.Arrays;
  * A class to encapsulate HDMI-CEC message used for the devices connected via
  * HDMI cable to communicate with one another. A message is defined by its
  * source and destination address, command (or opcode), and optional parameters.
- *
- * @hide
  */
-@SystemApi
 public final class HdmiCecMessage implements Parcelable {
 
     public static final byte[] EMPTY_PARAM = EmptyArray.BYTE;
@@ -158,23 +154,23 @@ public final class HdmiCecMessage implements Parcelable {
 
     private static String opcodeToString(int opcode) {
         switch (opcode) {
-            case HdmiCec.MESSAGE_FEATURE_ABORT:
+            case Constants.MESSAGE_FEATURE_ABORT:
                 return "Feature Abort";
-            case HdmiCec.MESSAGE_CEC_VERSION:
+            case Constants.MESSAGE_CEC_VERSION:
                 return "CEC Version";
-            case HdmiCec.MESSAGE_REQUEST_ARC_INITIATION:
+            case Constants.MESSAGE_REQUEST_ARC_INITIATION:
                 return "Request ARC Initiation";
-            case HdmiCec.MESSAGE_REQUEST_ARC_TERMINATION:
+            case Constants.MESSAGE_REQUEST_ARC_TERMINATION:
                 return "Request ARC Termination";
-            case HdmiCec.MESSAGE_REPORT_ARC_INITIATED:
+            case Constants.MESSAGE_REPORT_ARC_INITIATED:
                 return "Report ARC Initiated";
-            case HdmiCec.MESSAGE_REPORT_ARC_TERMINATED:
+            case Constants.MESSAGE_REPORT_ARC_TERMINATED:
                 return "Report ARC Terminated";
-            case HdmiCec.MESSAGE_TEXT_VIEW_ON:
+            case Constants.MESSAGE_TEXT_VIEW_ON:
                 return "Text View On";
-            case HdmiCec.MESSAGE_ACTIVE_SOURCE:
+            case Constants.MESSAGE_ACTIVE_SOURCE:
                 return "Active Source";
-            case HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS:
+            case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return "Give Device Power Status";
             default:
                 return String.format("Opcode: %02X", opcode);

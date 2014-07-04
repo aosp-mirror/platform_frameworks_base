@@ -16,9 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioSystem;
 import android.os.IBinder;
@@ -57,12 +56,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // be able to switch to it upon receiving <Inactive Source> from currently active source.
     // This remains valid only when the active source was switched via one touch play operation
     // (either by TV or source device). Manual port switching invalidates this value to
-    // HdmiConstants.PORT_INVALID, for which case <Inactive Source> does not do anything.
+    // Constants.PORT_INVALID, for which case <Inactive Source> does not do anything.
     @GuardedBy("mLock")
     private int mPrevPortId;
 
     @GuardedBy("mLock")
-    private int mSystemAudioVolume = HdmiConstants.UNKNOWN_VOLUME;
+    private int mSystemAudioVolume = Constants.UNKNOWN_VOLUME;
 
     @GuardedBy("mLock")
     private boolean mSystemAudioMute = false;
@@ -83,8 +82,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private boolean mAutoDeviceOff;
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
-        super(service, HdmiCec.DEVICE_TV);
-        mPrevPortId = HdmiConstants.INVALID_PORT_ID;
+        super(service, HdmiCecDeviceInfo.DEVICE_TV);
+        mPrevPortId = Constants.INVALID_PORT_ID;
         // TODO: load system audio mode and set it to mSystemAudioMode.
     }
 
@@ -111,13 +110,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void deviceSelect(int targetAddress, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (targetAddress == HdmiCec.ADDR_INTERNAL) {
+        if (targetAddress == Constants.ADDR_INTERNAL) {
             handleSelectInternalSource(callback);
             return;
         }
         HdmiCecDeviceInfo targetDevice = getDeviceInfo(targetAddress);
         if (targetDevice == null) {
-            invokeCallback(callback, HdmiCec.RESULT_TARGET_NOT_AVAILABLE);
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
         removeAction(DeviceSelectAction.class);
@@ -194,7 +193,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Seq #20
         if (!mService.isControlEnabled() || portId == getActivePortId()) {
-            invokeCallback(callback, HdmiCec.RESULT_INCORRECT_MODE);
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
         // TODO: Make sure this call does not stem from <Active Source> message reception.
@@ -279,7 +278,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return true;
         }
         int portId = getPrevPortId();
-        if (portId != HdmiConstants.INVALID_PORT_ID) {
+        if (portId != Constants.INVALID_PORT_ID) {
             // TODO: Do this only if TV is not showing multiview like PIP/PAP.
 
             HdmiCecDeviceInfo inactiveSource = getDeviceInfo(message.getSource());
@@ -293,7 +292,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
             setActivePortId(portId);
             doManualPortSwitching(portId, null);
-            setPrevPortId(HdmiConstants.INVALID_PORT_ID);
+            setPrevPortId(Constants.INVALID_PORT_ID);
         }
         return true;
     }
@@ -426,7 +425,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // For now, simply reply with <Feature Abort> and mark it consumed by returning true.
         mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
                 message.getDestination(), message.getSource(), message.getOpcode(),
-                HdmiConstants.ABORT_REFUSED));
+                Constants.ABORT_REFUSED));
         return true;
     }
 
@@ -516,7 +515,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
-            invokeCallback(callback, HdmiCec.RESULT_SOURCE_NOT_AVAILABLE);
+            invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
             return;
         }
 
@@ -737,8 +736,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
-        if (message.getSource() != HdmiCec.ADDR_AUDIO_SYSTEM
-                || message.getDestination() != HdmiCec.ADDR_TV
+        if (message.getSource() != Constants.ADDR_AUDIO_SYSTEM
+                || message.getDestination() != Constants.ADDR_TV
                 || getAvrDeviceInfo() == null) {
             Slog.w(TAG, "Skip abnormal CecMessage: " + message);
             return false;
@@ -865,7 +864,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     HdmiCecDeviceInfo getAvrDeviceInfo() {
         assertRunOnServiceThread();
-        return getDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+        return getDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
 
     /**
@@ -889,7 +888,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     HdmiCecDeviceInfo getSafeAvrDeviceInfo() {
-        return getSafeDeviceInfo(HdmiCec.ADDR_AUDIO_SYSTEM);
+        return getSafeDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
 
     /**
@@ -958,7 +957,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void launchRoutingControl(boolean routingForBootup) {
         assertRunOnServiceThread();
         // Seq #24
-        if (getActivePortId() != HdmiConstants.INVALID_PORT_ID) {
+        if (getActivePortId() != Constants.INVALID_PORT_ID) {
             if (!routingForBootup && !isProhibitMode()) {
                 removeAction(RoutingControlAction.class);
                 int newPath = mService.portIdToPath(getActivePortId());
@@ -1058,7 +1057,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
         if (!initiatedByCec) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(
-                    mAddress, HdmiCec.ADDR_BROADCAST));
+                    mAddress, Constants.ADDR_BROADCAST));
         }
     }
 

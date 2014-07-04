@@ -29,6 +29,28 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class HdmiCecDeviceInfo implements Parcelable {
+
+    /** TV device type. */
+    public static final int DEVICE_TV = 0;
+
+    /** Recording device type. */
+    public static final int DEVICE_RECORDER = 1;
+
+    /** Device type reserved for future usage. */
+    public static final int DEVICE_RESERVED = 2;
+
+    /** Tuner device type. */
+    public static final int DEVICE_TUNER = 3;
+
+    /** Playback device type. */
+    public static final int DEVICE_PLAYBACK = 4;
+
+    /** Audio system device type. */
+    public static final int DEVICE_AUDIO_SYSTEM = 5;
+
+    // Value indicating the device is not an active source.
+    public static final int DEVICE_INACTIVE = -1;
+
     // Logical address, phsical address, device type, vendor id and display name
     // are immutable value.
     private final int mLogicalAddress;
@@ -36,7 +58,6 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     private final int mDeviceType;
     private final int mVendorId;
     private final String mDisplayName;
-
 
     /**
      * A helper class to deserialize {@link HdmiCecDeviceInfo} for a parcel.
@@ -63,11 +84,10 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     /**
      * Constructor.
      *
-     * @param logicalAddress logical address of HDMI-Cec device.
-     *                       For more details, refer {@link HdmiCec}
-     * @param physicalAddress physical address of HDMI-Cec device
-     * @param deviceType type of device. For more details, refer {@link HdmiCec}
-     * @param vendorId vendor id of device. It's used for vendor specific command
+     * @param logicalAddress logical address of HDMI-CEC device
+     * @param physicalAddress physical address of HDMI-CEC device
+     * @param deviceType type of device
+     * @param vendorId vendor id of device. Used for vendor specific command.
      * @param displayName name of device
      * @hide
      */
@@ -81,9 +101,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     }
 
     /**
-     * Return the logical address of the device. It can have 0-15 values.
-     * For more details, refer constants between {@link HdmiCec#ADDR_TV}
-     * and {@link HdmiCec#ADDR_UNREGISTERED}.
+     * Return the logical address of the device.
      */
     public int getLogicalAddress() {
         return mLogicalAddress;
@@ -98,7 +116,7 @@ public final class HdmiCecDeviceInfo implements Parcelable {
 
     /**
      * Return type of the device. For more details, refer constants between
-     * {@link HdmiCec#DEVICE_TV} and {@link HdmiCec#DEVICE_INACTIVE}.
+     * {@link DEVICE_TV} and {@link DEVICE_INACTIVE}.
      */
     public int getDeviceType() {
         return mDeviceType;
@@ -108,9 +126,9 @@ public final class HdmiCecDeviceInfo implements Parcelable {
      * Return {@code true} if the device is of a type that can be an input source.
      */
     public boolean isSourceType() {
-        return mDeviceType == HdmiCec.DEVICE_PLAYBACK
-                || mDeviceType == HdmiCec.DEVICE_RECORDER
-                || mDeviceType == HdmiCec.DEVICE_TUNER;
+        return mDeviceType == DEVICE_PLAYBACK
+                || mDeviceType == DEVICE_RECORDER
+                || mDeviceType == DEVICE_TUNER;
     }
 
     /**

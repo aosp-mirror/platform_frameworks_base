@@ -15,8 +15,6 @@
  */
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
@@ -98,11 +96,11 @@ final class OneTouchPlayAction extends FeatureAction {
         if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
             return false;
         }
-        if (cmd.getOpcode() == HdmiCec.MESSAGE_REPORT_POWER_STATUS) {
+        if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
-            if (status == HdmiCec.POWER_STATUS_ON) {
+            if (status == HdmiControlManager.POWER_STATUS_ON) {
                 broadcastActiveSource();
-                invokeCallback(HdmiCec.RESULT_SUCCESS);
+                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
                 finish();
             }
             return true;
@@ -121,7 +119,7 @@ final class OneTouchPlayAction extends FeatureAction {
                 addTimer(mState, FeatureAction.TIMEOUT_MS);
             } else {
                 // Couldn't wake up the TV for whatever reason. Report failure.
-                invokeCallback(HdmiCec.RESULT_TIMEOUT);
+                invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
                 finish();
             }
         }

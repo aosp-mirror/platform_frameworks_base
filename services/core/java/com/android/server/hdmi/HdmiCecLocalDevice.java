@@ -16,9 +16,7 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiCec;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-import android.hardware.hdmi.HdmiCecMessage;
 import android.os.Looper;
 import android.util.Slog;
 
@@ -63,16 +61,16 @@ abstract class HdmiCecLocalDevice {
     protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
         mService = service;
         mDeviceType = deviceType;
-        mAddress = HdmiCec.ADDR_UNREGISTERED;
+        mAddress = Constants.ADDR_UNREGISTERED;
         mLock = service.getServiceLock();
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
     static HdmiCecLocalDevice create(HdmiControlService service, int deviceType) {
         switch (deviceType) {
-        case HdmiCec.DEVICE_TV:
+        case HdmiCecDeviceInfo.DEVICE_TV:
             return new HdmiCecLocalDeviceTv(service);
-        case HdmiCec.DEVICE_PLAYBACK:
+        case HdmiCecDeviceInfo.DEVICE_PLAYBACK:
             return new HdmiCecLocalDevicePlayback(service);
         default:
             return null;
@@ -82,7 +80,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void init() {
         assertRunOnServiceThread();
-        mPreferredAddress = HdmiCec.ADDR_UNREGISTERED;
+        mPreferredAddress = Constants.ADDR_UNREGISTERED;
         // TODO: load preferred address from permanent storage.
     }
 
@@ -101,7 +99,7 @@ abstract class HdmiCecLocalDevice {
     final boolean dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int dest = message.getDestination();
-        if (dest != mAddress && dest != HdmiCec.ADDR_BROADCAST) {
+        if (dest != mAddress && dest != Constants.ADDR_BROADCAST) {
             return false;
         }
         // Cache incoming message. Note that it caches only white-listed one.
@@ -116,47 +114,47 @@ abstract class HdmiCecLocalDevice {
             return true;
         }
         switch (message.getOpcode()) {
-            case HdmiCec.MESSAGE_ACTIVE_SOURCE:
+            case Constants.MESSAGE_ACTIVE_SOURCE:
                 return handleActiveSource(message);
-            case HdmiCec.MESSAGE_INACTIVE_SOURCE:
+            case Constants.MESSAGE_INACTIVE_SOURCE:
                 return handleInactiveSource(message);
-            case HdmiCec.MESSAGE_REQUEST_ACTIVE_SOURCE:
+            case Constants.MESSAGE_REQUEST_ACTIVE_SOURCE:
                 return handleRequestActiveSource(message);
-            case HdmiCec.MESSAGE_GET_MENU_LANGUAGE:
+            case Constants.MESSAGE_GET_MENU_LANGUAGE:
                 return handleGetMenuLanguage(message);
-            case HdmiCec.MESSAGE_GIVE_PHYSICAL_ADDRESS:
+            case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
                 return handleGivePhysicalAddress();
-            case HdmiCec.MESSAGE_GIVE_OSD_NAME:
+            case Constants.MESSAGE_GIVE_OSD_NAME:
                 return handleGiveOsdName(message);
-            case HdmiCec.MESSAGE_GIVE_DEVICE_VENDOR_ID:
+            case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
                 return handleGiveDeviceVendorId();
-            case HdmiCec.MESSAGE_GET_CEC_VERSION:
+            case Constants.MESSAGE_GET_CEC_VERSION:
                 return handleGetCecVersion(message);
-            case HdmiCec.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+            case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
                 return handleReportPhysicalAddress(message);
-            case HdmiCec.MESSAGE_ROUTING_CHANGE:
+            case Constants.MESSAGE_ROUTING_CHANGE:
                 return handleRoutingChange(message);
-            case HdmiCec.MESSAGE_INITIATE_ARC:
+            case Constants.MESSAGE_INITIATE_ARC:
                 return handleInitiateArc(message);
-            case HdmiCec.MESSAGE_TERMINATE_ARC:
+            case Constants.MESSAGE_TERMINATE_ARC:
                 return handleTerminateArc(message);
-            case HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE:
+            case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
                 return handleSetSystemAudioMode(message);
-            case HdmiCec.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
+            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
                 return handleSystemAudioModeStatus(message);
-            case HdmiCec.MESSAGE_REPORT_AUDIO_STATUS:
+            case Constants.MESSAGE_REPORT_AUDIO_STATUS:
                 return handleReportAudioStatus(message);
-            case HdmiCec.MESSAGE_STANDBY:
+            case Constants.MESSAGE_STANDBY:
                 return handleStandby(message);
-            case HdmiCec.MESSAGE_TEXT_VIEW_ON:
+            case Constants.MESSAGE_TEXT_VIEW_ON:
                 return handleTextViewOn(message);
-            case HdmiCec.MESSAGE_IMAGE_VIEW_ON:
+            case Constants.MESSAGE_IMAGE_VIEW_ON:
                 return handleImageViewOn(message);
-            case HdmiCec.MESSAGE_USER_CONTROL_PRESSED:
+            case Constants.MESSAGE_USER_CONTROL_PRESSED:
                 return handleUserControlPressed(message);
-            case HdmiCec.MESSAGE_SET_STREAM_PATH:
+            case Constants.MESSAGE_SET_STREAM_PATH:
                 return handleSetStreamPath(message);
-            case HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS:
+            case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return handleGiveDevicePowerStatus(message);
             default:
                 return false;
@@ -226,8 +224,8 @@ abstract class HdmiCecLocalDevice {
         Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
-                        message.getSource(), HdmiCec.MESSAGE_GET_MENU_LANGUAGE,
-                        HdmiConstants.ABORT_UNRECOGNIZED_MODE));
+                        message.getSource(), Constants.MESSAGE_GET_MENU_LANGUAGE,
+                        Constants.ABORT_UNRECOGNIZED_MODE));
         return true;
     }
 
@@ -305,7 +303,8 @@ abstract class HdmiCecLocalDevice {
 
     private static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
-        return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
+        return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
+                && params.length == 1
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
@@ -313,7 +312,8 @@ abstract class HdmiCecLocalDevice {
 
     private static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
-        return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
+        return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
+                && params.length == 1
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_OFF_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
@@ -367,7 +367,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void clearAddress() {
         assertRunOnServiceThread();
-        mAddress = HdmiCec.ADDR_UNREGISTERED;
+        mAddress = Constants.ADDR_UNREGISTERED;
     }
 
     @ServiceThreadOnly

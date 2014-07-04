@@ -36,6 +36,20 @@ import android.os.RemoteException;
 public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
 
+    public static final int POWER_STATUS_UNKNOWN = -1;
+    public static final int POWER_STATUS_ON = 0;
+    public static final int POWER_STATUS_STANDBY = 1;
+    public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
+    public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
+
+    public static final int RESULT_SUCCESS = 0;
+    public static final int RESULT_TIMEOUT = 1;
+    public static final int RESULT_SOURCE_NOT_AVAILABLE = 2;
+    public static final int RESULT_TARGET_NOT_AVAILABLE = 3;
+    public static final int RESULT_ALREADY_IN_PROGRESS = 4;
+    public static final int RESULT_EXCEPTION = 5;
+    public static final int RESULT_INCORRECT_MODE = 6;
+
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
     // True if we have a logical device of type TV hosted in the system.
@@ -57,8 +71,8 @@ public final class HdmiControlManager {
                 // Do nothing.
             }
         }
-        mHasTvDevice = hasDeviceType(types, HdmiCec.DEVICE_TV);
-        mHasPlaybackDevice = hasDeviceType(types, HdmiCec.DEVICE_PLAYBACK);
+        mHasTvDevice = hasDeviceType(types, HdmiCecDeviceInfo.DEVICE_TV);
+        mHasPlaybackDevice = hasDeviceType(types, HdmiCecDeviceInfo.DEVICE_PLAYBACK);
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
