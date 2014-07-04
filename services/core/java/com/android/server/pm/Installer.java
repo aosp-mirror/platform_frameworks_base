@@ -365,7 +365,7 @@ public final class Installer extends SystemService {
     }
 
     public int getSizeInfo(String pkgName, int persona, String apkPath, String libDirPath,
-            String fwdLockApkPath, String asecPath, String instructionSet, PackageStats pStats) {
+            String fwdLockApkPath, String asecPath, String[] instructionSets, PackageStats pStats) {
         StringBuilder builder = new StringBuilder("getsize");
         builder.append(' ');
         builder.append(pkgName);
@@ -374,13 +374,17 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(apkPath);
         builder.append(' ');
+        // TODO: Extend getSizeInfo to look at the full subdirectory tree,
+        // not just the first level.
         builder.append(libDirPath != null ? libDirPath : "!");
         builder.append(' ');
         builder.append(fwdLockApkPath != null ? fwdLockApkPath : "!");
         builder.append(' ');
         builder.append(asecPath != null ? asecPath : "!");
         builder.append(' ');
-        builder.append(instructionSet);
+        // TODO: Extend getSizeInfo to look at *all* instrution sets, not
+        // just the primary.
+        builder.append(instructionSets[0]);
 
         String s = transaction(builder.toString());
         String res[] = s.split(" ");
@@ -404,18 +408,17 @@ public final class Installer extends SystemService {
     }
 
     /**
-     * Links the native library directory in an application's directory to its
-     * real location.
+     * Links the 32 bit native library directory in an application's data directory to the
+     * real location for backward compatibility. Note that no such symlink is created for
+     * 64 bit shared libraries.
      *
-     * @param dataPath data directory where the application is
-     * @param nativeLibPath target native library path
      * @return -1 on error
      */
-    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath, int userId) {
+    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath32, int userId) {
         if (dataPath == null) {
             Slog.e(TAG, "linkNativeLibraryDirectory dataPath is null");
             return -1;
-        } else if (nativeLibPath == null) {
+        } else if (nativeLibPath32 == null) {
             Slog.e(TAG, "linkNativeLibraryDirectory nativeLibPath is null");
             return -1;
         }
@@ -423,7 +426,7 @@ public final class Installer extends SystemService {
         StringBuilder builder = new StringBuilder("linklib ");
         builder.append(dataPath);
         builder.append(' ');
-        builder.append(nativeLibPath);
+        builder.append(nativeLibPath32);
         builder.append(' ');
         builder.append(userId);
 

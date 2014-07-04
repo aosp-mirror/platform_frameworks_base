@@ -131,10 +131,15 @@ public class NativeLibraryHelper {
      *
      * @return size of all native binary files in bytes
      */
-    public static long sumNativeBinariesLI(Handle handle, String abi) {
+    public static long sumNativeBinariesLI(Handle handle, String[] abis) {
         long sum = 0;
         for (long apkHandle : handle.apkHandles) {
-            sum += nativeSumNativeBinaries(apkHandle, abi);
+            // NOTE: For a given APK handle, we parse the central directory precisely
+            // once, but prefix matching of entries requires a CD traversal, which can
+            // take a while (even if it needs no additional I/O).
+            for (String abi : abis) {
+                sum += nativeSumNativeBinaries(apkHandle, abi);
+            }
         }
         return sum;
     }
@@ -196,45 +201,47 @@ public class NativeLibraryHelper {
     private native static int nativeFindSupportedAbi(long handle, String[] supportedAbis);
 
     // Convenience method to call removeNativeBinariesFromDirLI(File)
-    public static boolean removeNativeBinariesLI(String nativeLibraryPath) {
-        if (nativeLibraryPath == null) return false;
-        return removeNativeBinariesFromDirLI(new File(nativeLibraryPath));
+    public static void removeNativeBinariesLI(String nativeLibraryPath) {
+        if (nativeLibraryPath == null) return;
+        removeNativeBinariesFromDirLI(new File(nativeLibraryPath), false /* delete root dir */);
     }
 
-    // Remove the native binaries of a given package. This simply
-    // gets rid of the files in the 'lib' sub-directory.
-    public static boolean removeNativeBinariesFromDirLI(File nativeLibraryDir) {
+    /**
+     * Remove the native binaries of a given package. This deletes the files
+     */
+    public static void removeNativeBinariesFromDirLI(File nativeLibraryRoot, boolean deleteRootDir) {
         if (DEBUG_NATIVE) {
-            Slog.w(TAG, "Deleting native binaries from: " + nativeLibraryDir.getPath());
+            Slog.w(TAG, "Deleting native binaries from: " + nativeLibraryRoot.getPath());
         }
-
-        boolean deletedFiles = false;
 
         /*
          * Just remove any file in the directory. Since the directory is owned
          * by the 'system' UID, the application is not supposed to have written
          * anything there.
          */
-        if (nativeLibraryDir.exists()) {
-            final File[] binaries = nativeLibraryDir.listFiles();
-            if (binaries != null) {
-                for (int nn = 0; nn < binaries.length; nn++) {
+        if (nativeLibraryRoot.exists()) {
+            final File[] files = nativeLibraryRoot.listFiles();
+            if (files != null) {
+                for (int nn = 0; nn < files.length; nn++) {
                     if (DEBUG_NATIVE) {
-                        Slog.d(TAG, "    Deleting " + binaries[nn].getName());
+                        Slog.d(TAG, "    Deleting " + files[nn].getName());
                     }
 
-                    if (!binaries[nn].delete()) {
-                        Slog.w(TAG, "Could not delete native binary: " + binaries[nn].getPath());
-                    } else {
-                        deletedFiles = true;
+                    if (files[nn].isDirectory()) {
+                        removeNativeBinariesFromDirLI(files[nn], true /* delete root dir */);
+                    } else if (!files[nn].delete()) {
+                        Slog.w(TAG, "Could not delete native binary: " + files[nn].getPath());
                     }
                 }
             }
-            // Do not delete 'lib' directory itself, or this will prevent
-            // installation of future updates.
+            // Do not delete 'lib' directory itself, unless we're specifically
+            // asked to or this will prevent installation of future updates.
+            if (deleteRootDir) {
+                if (!nativeLibraryRoot.delete()) {
+                    Slog.w(TAG, "Could not delete native binary directory: " + nativeLibraryRoot.getPath());
+                }
+            }
         }
-
-        return deletedFiles;
     }
 
     // We don't care about the other return values for now.

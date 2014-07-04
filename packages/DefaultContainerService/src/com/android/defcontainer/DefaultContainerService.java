@@ -50,6 +50,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.util.ArrayUtils;
 
+import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -186,6 +187,7 @@ public class DefaultContainerService extends IntentService {
             ret.verifiers = pkg.verifiers;
             ret.recommendedInstallLocation = recommendAppInstallLocation(pkg, flags, threshold,
                     abiOverride);
+            ret.multiArch = pkg.multiArch;
 
             return ret;
         }
@@ -363,31 +365,26 @@ public class DefaultContainerService extends IntentService {
         final String resFileName = "pkg.apk";
         final String publicResFileName = "res.zip";
 
-        // The .apk file
-        String codePath = pkg.baseCodePath;
-        File codeFile = new File(codePath);
-
-        String[] abiList = Build.SUPPORTED_ABIS;
-        if (abiOverride != null) {
-            abiList = new String[] { abiOverride };
-        } else {
-            try {
-                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
-                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                    abiList = Build.SUPPORTED_32_BIT_ABIS;
-                }
-            } catch (IOException ioe) {
-                Slog.w(TAG, "Problem determining ABI for: " + codeFile.getPath());
-                return null;
-            }
+        if (pkg.multiArch) {
+            // TODO: Support multiArch installs on ASEC.
+            throw new IllegalArgumentException("multiArch not supported on ASEC installs.");
         }
 
-        final int abiIndex = NativeLibraryHelper.findSupportedAbi(handle, abiList);
+        // The .apk file
+        final String codePath = pkg.baseCodePath;
+        final File codeFile = new File(codePath);
+        final String[] abis;
+        try {
+            abis = calculateAbiList(handle, abiOverride, pkg.multiArch);
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Problem determining app ABIS: " + ioe);
+            return null;
+        }
 
         // Calculate size of container needed to hold base APK.
         final int sizeMb;
         try {
-            sizeMb = calculateContainerSize(pkg, handle, isForwardLocked, abiIndex);
+            sizeMb = calculateContainerSize(pkg, handle, isForwardLocked, abis);
         } catch (IOException e) {
             Slog.w(TAG, "Problem when trying to copy " + codeFile.getPath());
             return null;
@@ -451,17 +448,18 @@ public class DefaultContainerService extends IntentService {
         final File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
         if (sharedLibraryDir.mkdir()) {
             int ret = PackageManager.INSTALL_SUCCEEDED;
-            if (abiIndex >= 0) {
+            if (abis != null) {
+                // TODO(multiArch): Support multi-arch installs on asecs. Note that we are NOT
+                // using an ISA specific subdir here for now.
+                final String abi = abis[0];
                 ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
-                        sharedLibraryDir, abiList[abiIndex]);
-            } else if (abiIndex != PackageManager.NO_NATIVE_LIBRARIES) {
-                ret = abiIndex;
-            }
+                        sharedLibraryDir, abi);
 
-            if (ret != PackageManager.INSTALL_SUCCEEDED) {
-                Slog.e(TAG, "Could not copy native libraries to " + sharedLibraryDir.getPath());
-                PackageHelper.destroySdDir(newCid);
-                return null;
+                if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                    Slog.e(TAG, "Could not copy native libraries to " + sharedLibraryDir.getPath());
+                    PackageHelper.destroySdDir(newCid);
+                    return null;
+                }
             }
         } else {
             Slog.e(TAG, "Could not create native lib directory: " + sharedLibraryDir.getPath());
@@ -687,12 +685,51 @@ public class DefaultContainerService extends IntentService {
         NativeLibraryHelper.Handle handle = null;
         try {
             handle = NativeLibraryHelper.Handle.create(pkg);
-            final int abi = NativeLibraryHelper.findSupportedAbi(handle,
-                    (abiOverride != null) ? new String[] { abiOverride } : Build.SUPPORTED_ABIS);
-            return calculateContainerSize(pkg, handle, isForwardLocked, abi);
+            return calculateContainerSize(pkg, handle, isForwardLocked,
+                    calculateAbiList(handle, abiOverride, pkg.multiArch));
         } finally {
             IoUtils.closeQuietly(handle);
         }
+    }
+
+    private String[] calculateAbiList(NativeLibraryHelper.Handle handle, String abiOverride,
+                                      boolean isMultiArch) throws IOException {
+        if (isMultiArch) {
+            final int abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
+            final int abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
+
+            if (abi32 >= 0 && abi64 >= 0) {
+                return new String[] { Build.SUPPORTED_64_BIT_ABIS[abi64], Build.SUPPORTED_32_BIT_ABIS[abi32] };
+            } else if (abi64 >= 0) {
+                return new String[] { Build.SUPPORTED_64_BIT_ABIS[abi64] };
+            } else if (abi32 >= 0) {
+                return new String[] { Build.SUPPORTED_32_BIT_ABIS[abi32] };
+            }
+
+            if (abi64 != PackageManager.NO_NATIVE_LIBRARIES || abi32 != PackageManager.NO_NATIVE_LIBRARIES) {
+                throw new IOException("Error determining ABI list: errorCode=[" + abi32 + "," + abi64 + "]");
+            }
+
+        } else {
+            String[] abiList = Build.SUPPORTED_ABIS;
+            if (abiOverride != null) {
+                abiList = new String[] { abiOverride };
+            } else if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
+                    NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                abiList = Build.SUPPORTED_32_BIT_ABIS;
+            }
+
+            final int abi = NativeLibraryHelper.findSupportedAbi(handle,abiList);
+            if (abi >= 0) {
+               return new String[]{Build.SUPPORTED_ABIS[abi]};
+            }
+
+            if (abi != PackageManager.NO_NATIVE_LIBRARIES) {
+                throw new IOException("Error determining ABI list: errorCode=" + abi);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -702,7 +739,7 @@ public class DefaultContainerService extends IntentService {
      * @throws IOException when there is a problem reading the file
      */
     private int calculateContainerSize(PackageLite pkg, NativeLibraryHelper.Handle handle,
-            boolean isForwardLocked, int abiIndex) throws IOException {
+            boolean isForwardLocked, String[] abis) throws IOException {
         // Calculate size of container needed to hold APKs.
         long sizeBytes = 0;
         for (String codePath : pkg.getAllCodePaths()) {
@@ -715,9 +752,8 @@ public class DefaultContainerService extends IntentService {
 
         // Check all the native files that need to be copied and add that to the
         // container size.
-        if (abiIndex >= 0) {
-            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle,
-                    Build.SUPPORTED_ABIS[abiIndex]);
+        if (abis != null) {
+            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle, abis);
         }
 
         int sizeMb = (int) (sizeBytes >> 20);

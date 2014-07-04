@@ -29,7 +29,13 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.PatternMatcher;
+import android.os.Process;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.LogPrinter;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -56,12 +62,6 @@ import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.pm.PackageUserState;
 import android.content.pm.VerifierDeviceIdentity;
-import android.os.Binder;
-import android.os.Environment;
-import android.os.FileUtils;
-import android.os.Process;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -317,11 +317,12 @@ final class Settings {
 
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-            String nativeLibraryPathString, String cpuAbiString, int pkgFlags, UserHandle user, boolean add) {
+            String nativeLibraryRoot, String primaryCpuAbi, String secondaryCpuAbi, int pkgFlags,
+            UserHandle user, boolean add) {
         final String name = pkg.packageName;
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
-                resourcePath, nativeLibraryPathString, cpuAbiString, pkg.mVersionCode, pkgFlags,
-                user, add, true /* allowInstall */);
+                resourcePath, nativeLibraryRoot, primaryCpuAbi, secondaryCpuAbi,
+                pkg.mVersionCode, pkgFlags, user, add, true /* allowInstall */);
         return p;
     }
 
@@ -407,7 +408,8 @@ final class Settings {
             p.pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
-                p.nativeLibraryPathString, p.cpuAbiString, p.appId, p.versionCode, p.pkgFlags);
+                p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
+                p.secondaryCpuAbiString, p.appId, p.versionCode, p.pkgFlags);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -421,7 +423,8 @@ final class Settings {
     }
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, String cpuAbiString, int uid, int vc, int pkgFlags) {
+            String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
+            int uid, int vc, int pkgFlags) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -431,8 +434,8 @@ final class Settings {
                     "Adding duplicate package, keeping first: " + name);
             return null;
         }
-        p = new PackageSetting(name, realName, codePath, resourcePath, nativeLibraryPathString, cpuAbiString,
-                vc, pkgFlags);
+        p = new PackageSetting(name, realName, codePath, resourcePath,
+                legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString, vc, pkgFlags);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -500,11 +503,12 @@ final class Settings {
 
     private PackageSetting getPackageLPw(String name, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
-            String nativeLibraryPathString, String cpuAbiString, int vc, int pkgFlags,
-            UserHandle installUser, boolean add, boolean allowInstall) {
+            String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
+            int vc, int pkgFlags, UserHandle installUser, boolean add, boolean allowInstall) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
-            p.cpuAbiString = cpuAbiString;
+            p.primaryCpuAbiString = primaryCpuAbiString;
+            p.secondaryCpuAbiString = secondaryCpuAbiString;
             if (!p.codePath.equals(codePath)) {
                 // Check to see if its a disabled system app
                 if ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
@@ -524,7 +528,7 @@ final class Settings {
                      * package settings since we might have moved from
                      * internal to external storage or vice versa.
                      */
-                    p.nativeLibraryPathString = nativeLibraryPathString;
+                    p.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
                 }
             }
             if (p.sharedUser != sharedUser) {
@@ -548,7 +552,7 @@ final class Settings {
             if (origPackage != null) {
                 // We are consuming the data from an existing package.
                 p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
-                        nativeLibraryPathString, cpuAbiString, vc, pkgFlags);
+                        legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString, vc, pkgFlags);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                         + name + " is adopting original package " + origPackage.name);
                 // Note that we will retain the new package's signature so
@@ -565,7 +569,7 @@ final class Settings {
                 p.setTimeStamp(codePath.lastModified());
             } else {
                 p = new PackageSetting(name, realName, codePath, resourcePath,
-                        nativeLibraryPathString, cpuAbiString, vc, pkgFlags);
+                        legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString, vc, pkgFlags);
                 p.setTimeStamp(codePath.lastModified());
                 p.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
@@ -699,14 +703,15 @@ final class Settings {
             p.resourcePath = new File(resourcePath);
             p.resourcePathString = resourcePath;
         }
-        // Update the native library path if needed
-        final String nativeLibraryPath = pkg.applicationInfo.nativeLibraryDir;
-        if (nativeLibraryPath != null
-                && !nativeLibraryPath.equalsIgnoreCase(p.nativeLibraryPathString)) {
-            p.nativeLibraryPathString = nativeLibraryPath;
+        // Update the native library paths if needed
+        final String nativeLibraryRoot = pkg.applicationInfo.legacyNativeLibraryDir;
+        if (nativeLibraryRoot != null && !nativeLibraryRoot.equalsIgnoreCase(p.legacyNativeLibraryPathString)) {
+            p.legacyNativeLibraryPathString = nativeLibraryRoot;
         }
+
         // Update the required Cpu Abi
-        p.cpuAbiString = pkg.applicationInfo.cpuAbi;
+        p.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
+        p.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
         // Update version code if needed
         if (pkg.mVersionCode != p.versionCode) {
             p.versionCode = pkg.mVersionCode;
@@ -1861,12 +1866,16 @@ final class Settings {
         if (!pkg.resourcePathString.equals(pkg.codePathString)) {
             serializer.attribute(null, "resourcePath", pkg.resourcePathString);
         }
-        if (pkg.nativeLibraryPathString != null) {
-            serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
+        if (pkg.legacyNativeLibraryPathString != null) {
+            serializer.attribute(null, "nativeLibraryPath", pkg.legacyNativeLibraryPathString);
         }
-        if (pkg.cpuAbiString != null) {
-           serializer.attribute(null, "requiredCpuAbi", pkg.cpuAbiString);
+        if (pkg.primaryCpuAbiString != null) {
+           serializer.attribute(null, "primaryCpuAbi", pkg.primaryCpuAbiString);
         }
+        if (pkg.secondaryCpuAbiString != null) {
+            serializer.attribute(null, "secondaryCpuAbi", pkg.secondaryCpuAbiString);
+        }
+
         if (pkg.sharedUser == null) {
             serializer.attribute(null, "userId", Integer.toString(pkg.appId));
         } else {
@@ -1906,12 +1915,17 @@ final class Settings {
         if (!pkg.resourcePathString.equals(pkg.codePathString)) {
             serializer.attribute(null, "resourcePath", pkg.resourcePathString);
         }
-        if (pkg.nativeLibraryPathString != null) {
-            serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
+
+        if (pkg.legacyNativeLibraryPathString != null) {
+            serializer.attribute(null, "nativeLibraryPath", pkg.legacyNativeLibraryPathString);
         }
-        if (pkg.cpuAbiString != null) {
-           serializer.attribute(null, "requiredCpuAbi", pkg.cpuAbiString);
+        if (pkg.primaryCpuAbiString != null) {
+            serializer.attribute(null, "primaryCpuAbi", pkg.primaryCpuAbiString);
         }
+        if (pkg.secondaryCpuAbiString != null) {
+            serializer.attribute(null, "secondaryCpuAbi", pkg.secondaryCpuAbiString);
+        }
+
         serializer.attribute(null, "flags", Integer.toString(pkg.pkgFlags));
         serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
@@ -2219,7 +2233,8 @@ final class Settings {
             if (idObj != null && idObj instanceof SharedUserSetting) {
                 PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
                         (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
-                        pp.nativeLibraryPathString, pp.cpuAbiString, pp.versionCode, pp.pkgFlags,
+                        pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
+                        pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags,
                         null, true /* add */, false /* allowInstall */);
                 if (p == null) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -2638,8 +2653,16 @@ final class Settings {
         String realName = parser.getAttributeValue(null, "realName");
         String codePathStr = parser.getAttributeValue(null, "codePath");
         String resourcePathStr = parser.getAttributeValue(null, "resourcePath");
-        String nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
-        String cpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
+
+        String legacyCpuAbiStr = parser.getAttributeValue(null, "requiredCpuAbi");
+        String legacyNativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
+
+        String primaryCpuAbiStr = parser.getAttributeValue(null, "primaryCpuAbi");
+        String secondaryCpuAbiStr = parser.getAttributeValue(null, "secondaryCpuAbi");
+
+        if (primaryCpuAbiStr == null && legacyCpuAbiStr != null) {
+            primaryCpuAbiStr = legacyCpuAbiStr;
+        }
 
         if (resourcePathStr == null) {
             resourcePathStr = codePathStr;
@@ -2660,7 +2683,8 @@ final class Settings {
             pkgFlags |= ApplicationInfo.FLAG_PRIVILEGED;
         }
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
-                new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, versionCode, pkgFlags);
+                new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
+                secondaryCpuAbiStr, versionCode, pkgFlags);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -2726,8 +2750,10 @@ final class Settings {
         String sharedIdStr = null;
         String codePathStr = null;
         String resourcePathStr = null;
-        String nativeLibraryPathStr = null;
-        String cpuAbiString = null;
+        String legacyCpuAbiString = null;
+        String legacyNativeLibraryPathStr = null;
+        String primaryCpuAbiString = null;
+        String secondaryCpuAbiString = null;
         String systemStr = null;
         String installerPackageName = null;
         String uidError = null;
@@ -2746,9 +2772,17 @@ final class Settings {
             sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
             codePathStr = parser.getAttributeValue(null, "codePath");
             resourcePathStr = parser.getAttributeValue(null, "resourcePath");
-            nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
-            cpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
 
+            legacyCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
+
+            legacyNativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
+            primaryCpuAbiString = parser.getAttributeValue(null, "primaryCpuAbi");
+            secondaryCpuAbiString = parser.getAttributeValue(null, "secondaryCpuAbi");
+
+            if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
+                primaryCpuAbiString = legacyCpuAbiString;
+            }
+;
             version = parser.getAttributeValue(null, "version");
             if (version != null) {
                 try {
@@ -2825,8 +2859,8 @@ final class Settings {
                                 + parser.getPositionDescription());
             } else if (userId > 0) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
-                        new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, userId, versionCode,
-                        pkgFlags);
+                        new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
+                        secondaryCpuAbiString, userId, versionCode, pkgFlags);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -2843,8 +2877,8 @@ final class Settings {
                 userId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
                 if (userId > 0) {
                     packageSetting = new PendingPackage(name.intern(), realName, new File(
-                            codePathStr), new File(resourcePathStr), nativeLibraryPathStr, cpuAbiString, userId,
-                            versionCode, pkgFlags);
+                            codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
+                            primaryCpuAbiString, legacyCpuAbiString, userId, versionCode, pkgFlags);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -2871,8 +2905,9 @@ final class Settings {
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installerPackageName = installerPackageName;
-            packageSetting.nativeLibraryPathString = nativeLibraryPathStr;
-            packageSetting.cpuAbiString = cpuAbiString;
+            packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
+            packageSetting.primaryCpuAbiString = primaryCpuAbiString;
+            packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -3417,8 +3452,9 @@ final class Settings {
         pw.print(prefix); pw.print("  pkg="); pw.println(ps.pkg);
         pw.print(prefix); pw.print("  codePath="); pw.println(ps.codePathString);
         pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.resourcePathString);
-        pw.print(prefix); pw.print("  nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
-        pw.print(prefix); pw.print("  requiredCpuAbi="); pw.println(ps.cpuAbiString);
+        pw.print(prefix); pw.print("  legacyNativeLibraryDir="); pw.println(ps.legacyNativeLibraryPathString);
+        pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
+        pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (ps.pkg != null) {
             pw.print(" targetSdk="); pw.print(ps.pkg.applicationInfo.targetSdkVersion);

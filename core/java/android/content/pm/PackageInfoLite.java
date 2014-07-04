@@ -37,6 +37,13 @@ public class PackageInfoLite implements Parcelable {
     public int versionCode;
 
     /**
+     * The android:multiArch flag from the package manifest. If set,
+     * we will extract all native libraries for the given app, not just those
+     * from the preferred ABI.
+     */
+    public boolean multiArch;
+
+    /**
      * Specifies the recommended install location. Can be one of
      * {@link #PackageHelper.RECOMMEND_INSTALL_INTERNAL} to install on internal storage
      * {@link #PackageHelper.RECOMMEND_INSTALL_EXTERNAL} to install on external media

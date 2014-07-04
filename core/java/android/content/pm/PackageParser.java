@@ -249,6 +249,8 @@ public class PackageParser {
         /** Paths of any split APKs, ordered by parsed splitName */
         public final String[] splitCodePaths;
 
+        public final boolean multiArch;
+
         private PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
                 String[] splitCodePaths) {
             this.packageName = baseApk.packageName;
@@ -259,6 +261,7 @@ public class PackageParser {
             this.codePath = codePath;
             this.baseCodePath = baseApk.codePath;
             this.splitCodePaths = splitCodePaths;
+            this.multiArch = baseApk.multiArch;
         }
 
         public List<String> getAllCodePaths() {
@@ -282,9 +285,11 @@ public class PackageParser {
         public final int installLocation;
         public final VerifierInfo[] verifiers;
         public final Signature[] signatures;
+        public final boolean multiArch;
 
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
-                int installLocation, List<VerifierInfo> verifiers, Signature[] signatures) {
+                int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
+                boolean multiArch) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -292,6 +297,7 @@ public class PackageParser {
             this.installLocation = installLocation;
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
             this.signatures = signatures;
+            this.multiArch = multiArch;
         }
     }
 
@@ -1114,6 +1120,7 @@ public class PackageParser {
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
         int numFound = 0;
+        boolean multiArch = false;
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             String attr = attrs.getAttributeName(i);
             if (attr.equals("installLocation")) {
@@ -1123,8 +1130,11 @@ public class PackageParser {
             } else if (attr.equals("versionCode")) {
                 versionCode = attrs.getAttributeIntValue(i, 0);
                 numFound++;
+            } else if (attr.equals("multiArch")) {
+                multiArch = attrs.getAttributeBooleanValue(i, false);
+                numFound++;
             }
-            if (numFound >= 2) {
+            if (numFound >= 3) {
                 break;
             }
         }
@@ -1149,7 +1159,7 @@ public class PackageParser {
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
-                installLocation, verifiers, signatures);
+                installLocation, verifiers, signatures, multiArch);
     }
 
     /**
