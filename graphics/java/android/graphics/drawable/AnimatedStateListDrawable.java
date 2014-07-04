@@ -20,6 +20,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -82,17 +84,23 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        // If we're relying on an Animatable transition, the super method
+        // will handle visibility changes.
         final boolean changed = super.setVisible(visible, restart);
+
         if (mAnim != null) {
             if (visible) {
-                if (changed || restart) {
-                    // TODO: Should this support restart?
-                    mAnim.end();
+                if (restart) {
+                    mAnim.cancel();
+                    mAnim.start();
+                } else if (changed && mAnim.isPaused()) {
+                    mAnim.resume();
                 }
-            } else {
-                mAnim.end();
+            } else if (mAnim.isRunning()) {
+                mAnim.pause();
             }
         }
+
         return changed;
     }
 
@@ -100,14 +108,16 @@ public class AnimatedStateListDrawable extends StateListDrawable {
      * Add a new drawable to the set of keyframes.
      *
      * @param stateSet An array of resource IDs to associate with the keyframe
-     * @param drawable The drawable to show when in the specified state
+     * @param drawable The drawable to show when in the specified state, may not be null
      * @param id The unique identifier for the keyframe
      */
-    public void addState(int[] stateSet, Drawable drawable, int id) {
-        if (drawable != null) {
-            mState.addStateSet(stateSet, drawable, id);
-            onStateChange(getState());
+    public void addState(@NonNull int[] stateSet, @NonNull Drawable drawable, int id) {
+        if (drawable == null) {
+            throw new IllegalArgumentException("Drawable must not be null");
         }
+
+        mState.addStateSet(stateSet, drawable, id);
+        onStateChange(getState());
     }
 
     /**
@@ -115,11 +125,16 @@ public class AnimatedStateListDrawable extends StateListDrawable {
      *
      * @param fromId Unique identifier of the starting keyframe
      * @param toId Unique identifier of the ending keyframe
-     * @param anim An AnimationDrawable to use as a transition
+     * @param transition An animatable drawable to use as a transition, may not be null
      * @param reversible Whether the transition can be reversed
      */
-    public void addTransition(int fromId, int toId, AnimationDrawable anim, boolean reversible) {
-        mState.addTransition(fromId, toId, anim, reversible);
+    public void addTransition(int fromId, int toId, @NonNull Drawable transition,
+            boolean reversible) {
+        if (transition == null) {
+            throw new IllegalArgumentException("Transition drawable must not be null");
+        }
+
+        mState.addTransition(fromId, toId, transition, reversible);
     }
 
     @Override
@@ -131,13 +146,16 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     protected boolean onStateChange(int[] stateSet) {
         final int keyframeIndex = mState.indexOfKeyframe(stateSet);
         if (keyframeIndex == getCurrentIndex()) {
+            // No transition needed.
             return false;
         }
 
+        // Attempt to find a valid transition to the keyframe.
         if (selectTransition(keyframeIndex)) {
             return true;
         }
 
+        // No valid transition, attempt to jump directly to the keyframe.
         if (selectDrawable(keyframeIndex)) {
             return true;
         }
@@ -146,9 +164,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     }
 
     private boolean selectTransition(int toIndex) {
+        if (toIndex == mAnimToIndex) {
+            // Already animating to that keyframe.
+            return true;
+        }
+
         if (mAnim != null) {
             if (toIndex == mAnimToIndex) {
-                // Already animating to that keyframe.
                 return true;
             } else if (toIndex == mAnimFromIndex) {
                 // Reverse the current animation.
@@ -159,8 +181,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             }
 
             // Changing animation, end the current animation.
-            mAnim.end();
+            mAnim.cancel();
+            mAnim = null;
         }
+
+        // Reset state.
+        mAnimFromIndex = -1;
+        mAnimToIndex = -1;
 
         final AnimatedStateListState state = mState;
         final int fromIndex = getCurrentIndex();
@@ -179,42 +206,54 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         }
 
         final Drawable d = getCurrent();
-        if (!(d instanceof AnimationDrawable)) {
-            // Transition isn't an animation.
+        if (d instanceof AnimationDrawable) {
+            // We can support reverse() here.
+            final boolean reversed = mState.isTransitionReversed(fromId, toId);
+            mAnim = getAnimationDrawableAnimator((AnimationDrawable) d, reversed);
+            mAnim.start();
+        } else if (d instanceof Animatable) {
+            // Let the transition animate itself.
+            ((Animatable) d).start();
+        } else {
+            // We don't know how to animate this transition.
             return false;
         }
 
-        final AnimationDrawable ad = (AnimationDrawable) d;
-        final boolean reversed = mState.isTransitionReversed(fromId, toId);
+        mAnimFromIndex = fromIndex;
+        mAnimToIndex = toIndex;
+        return true;
+    }
+
+    private ObjectAnimator getAnimationDrawableAnimator(@NonNull AnimationDrawable ad,
+            boolean reversed) {
         final int frameCount = ad.getNumberOfFrames();
         final int fromFrame = reversed ? frameCount - 1 : 0;
         final int toFrame = reversed ? 0 : frameCount - 1;
-
         final FrameInterpolator interp = new FrameInterpolator(ad, reversed);
         final ObjectAnimator anim = ObjectAnimator.ofInt(ad, "currentIndex", fromFrame, toFrame);
         anim.setAutoCancel(true);
         anim.setDuration(interp.getTotalDuration());
         anim.addListener(mAnimListener);
         anim.setInterpolator(interp);
-        anim.start();
 
-        mAnim = anim;
-        mAnimFromIndex = fromIndex;
-        mAnimToIndex = toIndex;
-        return true;
+        return anim;
     }
 
     @Override
     public void jumpToCurrentState() {
+        // If we're relying on an Animatable transition, the super method
+        // will handle jumping it to the current state.
         super.jumpToCurrentState();
 
         if (mAnim != null) {
             mAnim.end();
+            mAnim = null;
         }
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = r.obtainAttributes(attrs, R.styleable.AnimatedStateListDrawable);
 
@@ -260,7 +299,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         onStateChange(getState());
     }
 
-    private int parseTransition(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    private int parseTransition(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         int drawableRes = 0;
         int fromId = 0;
@@ -304,19 +344,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
         }
 
-        final AnimationDrawable anim;
-        if (dr instanceof AnimationDrawable) {
-            anim = (AnimationDrawable) dr;
-        } else {
-            throw new XmlPullParserException(parser.getPositionDescription()
-                    + ": <transition> tag requires a 'drawable' attribute or "
-                    + "child tag defining a drawable of type <animation>");
-        }
-
-        return mState.addTransition(fromId, toId, anim, reversible);
+        return mState.addTransition(fromId, toId, dr, reversible);
     }
 
-    private int parseItem(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    private int parseItem(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         int drawableRes = 0;
         int keyframeId = 0;
@@ -390,8 +422,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         final LongSparseLongArray mTransitions;
         final SparseIntArray mStateIds;
 
-        AnimatedStateListState(AnimatedStateListState orig, AnimatedStateListDrawable owner,
-                Resources res) {
+        AnimatedStateListState(@Nullable AnimatedStateListState orig,
+                @NonNull AnimatedStateListDrawable owner, @Nullable Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
@@ -403,7 +435,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             }
         }
 
-        int addTransition(int fromId, int toId, AnimationDrawable anim, boolean reversible) {
+        int addTransition(int fromId, int toId, @NonNull Drawable anim, boolean reversible) {
             final int pos = super.addChild(anim);
             final long keyFromTo = generateTransitionKey(fromId, toId);
             mTransitions.append(keyFromTo, pos);
@@ -416,13 +448,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             return addChild(anim);
         }
 
-        int addStateSet(int[] stateSet, Drawable drawable, int id) {
+        int addStateSet(@NonNull int[] stateSet, @NonNull Drawable drawable, int id) {
             final int index = super.addStateSet(stateSet, drawable);
             mStateIds.put(index, id);
             return index;
         }
 
-        int indexOfKeyframe(int[] stateSet) {
+        int indexOfKeyframe(@NonNull int[] stateSet) {
             final int index = super.indexOfStateSet(stateSet);
             if (index >= 0) {
                 return index;
@@ -460,13 +492,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         }
     }
 
-    void setConstantState(AnimatedStateListState state) {
+    void setConstantState(@NonNull AnimatedStateListState state) {
         super.setConstantState(state);
 
         mState = state;
     }
 
-    private AnimatedStateListDrawable(AnimatedStateListState state, Resources res) {
+    private AnimatedStateListDrawable(@Nullable AnimatedStateListState state, @Nullable Resources res) {
         super(null);
 
         final AnimatedStateListState newState = new AnimatedStateListState(state, this, res);

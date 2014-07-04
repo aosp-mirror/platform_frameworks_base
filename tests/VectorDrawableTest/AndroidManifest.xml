@@ -71,6 +71,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="AnimatedStateVectorDrawableTest"
+            android:label="AnimatedStateList and AnimatedVectorDrawable" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.android.test.dynamic.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name="VectorDrawable01"
             android:label="VectorTest1" >
             <intent-filter>
