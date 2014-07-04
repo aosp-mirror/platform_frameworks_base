@@ -34,6 +34,7 @@ import java.util.List;
  * If system audio is on, check hot-plug for audio system every 5 secs.
  * For other devices, keep 15 secs period.
  */
+// #Seq 3
 final class HotplugDetectionAction extends FeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
@@ -193,14 +194,12 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void addDevice(int addedAddress) {
-        // Send <Give Physical Address>.
+        // Sending <Give Physical Address> will initiate new device action.
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(),
                 addedAddress));
     }
 
     private void removeDevice(int removedAddress) {
-        // TODO: move the following logic to local device once move many logic to
-        //       local device.
         mayChangeRoutingPath(removedAddress);
         mayCancelDeviceSelect(removedAddress);
         mayCancelOneTouchRecord(removedAddress);
@@ -210,10 +209,10 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayChangeRoutingPath(int address) {
-        // TODO: if removed address is current active source, it should change active source
-        // path new one. we can keep previous selection or can choose default input,
-        // such as internal tuner. Consider send intent to app so that app
-        // can handle it.
+        HdmiCecDeviceInfo info = tv().getDeviceInfo(address);
+        if (info != null) {
+            tv().handleRemoveActiveRoutingPath(info.getPhysicalAddress());
+        }
     }
 
     private void mayCancelDeviceSelect(int address) {

@@ -891,12 +891,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     final void removeCecDevice(int address) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo info = removeDeviceInfo(address);
-        handleRemoveActiveRoutingPath(info.getPhysicalAddress());
+
         mCecMessageCache.flushMessagesFrom(address);
         mService.invokeDeviceEventListeners(info, false);
     }
 
-    private void handleRemoveActiveRoutingPath(int path) {
+    @ServiceThreadOnly
+    void handleRemoveActiveRoutingPath(int path) {
+        assertRunOnServiceThread();
         // Seq #23
         if (isTailOfActivePath(path, getActivePath())) {
             removeAction(RoutingControlAction.class);
