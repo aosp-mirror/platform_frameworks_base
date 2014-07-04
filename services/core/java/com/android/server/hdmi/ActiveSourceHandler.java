@@ -72,7 +72,7 @@ final class ActiveSourceHandler {
 
         int currentActive = tv.getActiveSource();
         int currentPath = tv.getActivePath();
-        if (!tv.isInPresetInstallationMode()) {
+        if (!tv.isProhibitMode()) {
             tv.updateActiveSource(activeAddress, activePath);
             if (currentActive != activeAddress && currentPath != activePath) {
                 tv.updateActivePortId(mService.pathToPortId(activePath));

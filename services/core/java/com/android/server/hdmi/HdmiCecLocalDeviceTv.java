@@ -272,7 +272,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (getActiveSource() != message.getSource()) {
             return true;
         }
-        if (isInPresetInstallationMode()) {
+        if (isProhibitMode()) {
             return true;
         }
         int portId = getPrevPortId();
@@ -1060,5 +1060,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             super.handleStandby(message);
         }
         return false;
+    }
+
+    boolean isProhibitMode() {
+        return mService.isProhibitMode();
     }
 }

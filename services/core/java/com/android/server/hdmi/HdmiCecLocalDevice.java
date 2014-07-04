@@ -53,12 +53,6 @@ abstract class HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private int mActiveRoutingPath;
 
-    // Set to true while the service is in normal mode. While set to false, no input change is
-    // allowed. Used for situations where input change can confuse users such as channel auto-scan,
-    // system upgrade, etc., a.k.a. "prohibit mode".
-    @GuardedBy("mLock")
-    private boolean mInputChangeEnabled;
-
     protected final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
     protected final Object mLock;
 
@@ -71,9 +65,6 @@ abstract class HdmiCecLocalDevice {
         mDeviceType = deviceType;
         mAddress = HdmiCec.ADDR_UNREGISTERED;
         mLock = service.getServiceLock();
-
-        // TODO: Get control flag from persistent storage
-        mInputChangeEnabled = true;
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
@@ -291,7 +282,7 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #12
-        if (mService.isControlEnabled() && !isInPresetInstallationMode()
+        if (mService.isControlEnabled() && !mService.isProhibitMode()
                 && mService.isPowerOnOrTransient()) {
             mService.standby();
             return true;
@@ -543,19 +534,6 @@ abstract class HdmiCecLocalDevice {
         synchronized (mLock) {
             mActiveSource = logicalAddress;
             mActiveRoutingPath = physicalAddress;
-        }
-    }
-
-    void setInputChangeEnabled(boolean enabled) {
-        synchronized (mLock) {
-            mInputChangeEnabled = enabled;
-        }
-    }
-
-    boolean isInPresetInstallationMode() {
-        // TODO: Change this to check the right flag.
-        synchronized (mLock) {
-            return !mInputChangeEnabled;
         }
     }
 

@@ -51,7 +51,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
             finishWithCallback(HdmiCec.RESULT_SUCCESS);
             return;
         }
-        if (tv().isInPresetInstallationMode()) {
+        if (tv().isProhibitMode()) {
             sendCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
                     getSourceAddress(), mAvrLogicalAddress,
                     HdmiCec.MESSAGE_SET_SYSTEM_AUDIO_MODE, HdmiConstants.ABORT_REFUSED));

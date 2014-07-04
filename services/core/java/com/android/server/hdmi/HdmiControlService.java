@@ -151,6 +151,12 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mHdmiControlEnabled;
 
+    // Set to true while the service is in normal mode. While set to false, no input change is
+    // allowed. Used for situations where input change can confuse users such as channel auto-scan,
+    // system upgrade, etc., a.k.a. "prohibit mode".
+    @GuardedBy("mLock")
+    private boolean mProhibitMode;
+
     // List of listeners registered by callers that want to get notified of
     // system audio mode changes.
     private final ArrayList<IHdmiSystemAudioModeChangeListener>
@@ -217,6 +223,8 @@ public final class HdmiControlService extends SystemService {
         // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
         // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
         mHdmiControlEnabled = true;
+        // TODO: Get control flag from persistent storage
+        mProhibitMode = false;
     }
 
     @ServiceThreadOnly
@@ -875,6 +883,7 @@ public final class HdmiControlService extends SystemService {
 
         @Override
         public void setOption(final int key, final int value) {
+            enforceAccessPermission();
             if (!isTvDevice()) {
                 return;
             }
@@ -897,6 +906,15 @@ public final class HdmiControlService extends SystemService {
 
         private boolean isTvDevice() {
             return tv() != null;
+        }
+
+        @Override
+        public void setProhibitMode(final boolean enabled) {
+            enforceAccessPermission();
+            if (!isTvDevice()) {
+                return;
+            }
+            HdmiControlService.this.setProhibitMode(enabled);
         }
     }
 
@@ -1175,5 +1193,17 @@ public final class HdmiControlService extends SystemService {
         }
         mStandbyMessageReceived = false;
         mCecController.setOption(HdmiCec.OPTION_CEC_SERVICE_CONTROL, HdmiCec.DISABLED);
+    }
+
+    boolean isProhibitMode() {
+        synchronized (mLock) {
+            return mProhibitMode;
+        }
+    }
+
+    void setProhibitMode(boolean enabled) {
+        synchronized (mLock) {
+            mProhibitMode = enabled;
+        }
     }
 }
