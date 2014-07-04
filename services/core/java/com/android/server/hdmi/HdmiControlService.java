@@ -448,14 +448,17 @@ public final class HdmiControlService extends SystemService {
      * devices.
      *
      * @param callback an interface used to get a list of all remote devices' address
+     * @param sourceAddress a logical address of source device where sends polling message
      * @param pickStrategy strategy how to pick polling candidates
      * @param retryCount the number of retry used to send polling message to remote devices
      * @throw IllegalArgumentException if {@code pickStrategy} is invalid value
      */
     @ServiceThreadOnly
-    void pollDevices(DevicePollingCallback callback, int pickStrategy, int retryCount) {
+    void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
+            int retryCount) {
         assertRunOnServiceThread();
-        mCecController.pollDevices(callback, checkPollStrategy(pickStrategy), retryCount);
+        mCecController.pollDevices(callback, sourceAddress, checkPollStrategy(pickStrategy),
+                retryCount);
     }
 
     private int checkPollStrategy(int pickStrategy) {
