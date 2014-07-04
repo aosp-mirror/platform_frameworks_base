@@ -97,10 +97,6 @@ public:
             mEvent.hotplug.connected = event.hotplug.connected;
             mEvent.hotplug.port = event.hotplug.port;
             break;
-        case HDMI_EVENT_TX_STATUS:
-            mEvent.tx_status.status = event.tx_status.status;
-            mEvent.tx_status.opcode = event.tx_status.opcode;
-            break;
         default:
             // TODO: add more type whenever new type is introduced.
             break;
@@ -139,8 +135,6 @@ public:
         case HDMI_EVENT_HOT_PLUG:
             propagateHotplugEvent(mEventWrapper->hotplug());
             break;
-        case HDMI_EVENT_TX_STATUS:
-            // TODO: propagate this to controller.
         default:
             // TODO: add more type whenever new type is introduced.
             break;
