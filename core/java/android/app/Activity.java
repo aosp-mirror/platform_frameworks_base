@@ -3751,6 +3751,48 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide Implement to provide correct calling token.
      */
+    public void startActivityForResultAsUser(Intent intent, int requestCode, UserHandle user) {
+        startActivityForResultAsUser(intent, requestCode, null, user);
+    }
+
+    /**
+     * @hide Implement to provide correct calling token.
+     */
+    public void startActivityForResultAsUser(Intent intent, int requestCode,
+            @Nullable Bundle options, UserHandle user) {
+        if (options != null) {
+            mActivityTransitionState.startExitOutTransition(this, options);
+        }
+        if (mParent != null) {
+            throw new RuntimeException("Can't be called from a child");
+        }
+        Instrumentation.ActivityResult ar = mInstrumentation.execStartActivity(
+                this, mMainThread.getApplicationThread(), mToken, this, intent, requestCode,
+                options, user);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
+        }
+        if (requestCode >= 0) {
+            // If this start is requesting a result, we can avoid making
+            // the activity visible until the result is received.  Setting
+            // this code during onCreate(Bundle savedInstanceState) or onResume() will keep the
+            // activity hidden during this time, to avoid flickering.
+            // This can only be done when a result is requested because
+            // that guarantees we will get information back when the
+            // activity is finished, no matter what happens to it.
+            mStartedActivity = true;
+        }
+
+        final View decor = mWindow != null ? mWindow.peekDecorView() : null;
+        if (decor != null) {
+            decor.cancelPendingInputEvents();
+        }
+    }
+
+    /**
+     * @hide Implement to provide correct calling token.
+     */
     public void startActivityAsUser(Intent intent, UserHandle user) {
         startActivityAsUser(intent, null, user);
     }
@@ -3760,7 +3802,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
         if (mParent != null) {
-            throw new RuntimeException("Called be called from a child");
+            throw new RuntimeException("Can't be called from a child");
         }
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
