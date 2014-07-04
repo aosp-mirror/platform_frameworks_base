@@ -236,6 +236,9 @@
     <!-- The height of the area before the bottom stack in which the notifications slow down -->
     <dimen name="bottom_stack_slow_down_length">12dp</dimen>
 
+    <!-- The height of the area before the top stack in which the notifications slow down -->
+    <dimen name="top_stack_slow_down_length">12dp</dimen>
+
     <!-- The side padding of the notifications-->
     <dimen name="notification_side_padding">8dp</dimen>
 
