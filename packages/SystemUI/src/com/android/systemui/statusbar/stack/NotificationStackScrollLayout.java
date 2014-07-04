@@ -91,6 +91,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
     private int mTopPadding;
+    private int mCollapseSecondCardPadding;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -263,6 +264,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.min_top_overscroll_to_qs);
         mNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notifications_top_padding);
+        mCollapseSecondCardPadding = getResources().getDimensionPixelSize(
+                R.dimen.notification_collapse_second_card_padding);
     }
 
     private void updatePadding(boolean dimmed) {
@@ -420,9 +423,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setStackHeight(float height) {
         setIsExpanded(height > 0.0f);
         int newStackHeight = (int) height;
-        int itemHeight = getItemHeight();
-        int bottomStackPeekSize = mBottomStackPeekSize;
-        int minStackHeight = itemHeight + bottomStackPeekSize;
+        int minStackHeight = getMinStackHeight();
         int stackHeight;
         if (newStackHeight - mTopPadding >= minStackHeight || getNotGoneChildCount() == 0) {
             setTranslationY(mTopPaddingOverflow);
@@ -436,7 +437,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             // the top card.
             float partiallyThere = (float) (newStackHeight - mTopPadding) / minStackHeight;
             partiallyThere = Math.max(0, partiallyThere);
-            translationY += (1 - partiallyThere) * bottomStackPeekSize;
+            translationY += (1 - partiallyThere) * (mBottomStackPeekSize +
+                    mCollapseSecondCardPadding);
             setTranslationY(translationY - mTopPadding);
             stackHeight = (int) (height - (translationY - mTopPadding));
         }
@@ -1306,7 +1308,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getMinStackHeight() {
-        return mCollapsedSize + mBottomStackPeekSize;
+        return mCollapsedSize + mBottomStackPeekSize + mCollapseSecondCardPadding;
     }
 
     public float getTopPaddingOverflow() {

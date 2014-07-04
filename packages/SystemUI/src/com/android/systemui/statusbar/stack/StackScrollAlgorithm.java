@@ -70,6 +70,7 @@ public class StackScrollAlgorithm {
     private int mPaddingBetweenElementsNormal;
     private int mBottomStackSlowDownLength;
     private int mTopStackSlowDownLength;
+    private int mCollapseSecondCardPadding;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -118,6 +119,8 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.top_stack_slow_down_length);
         mRoundedRectCornerRadius = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
+        mCollapseSecondCardPadding = context.getResources().getDimensionPixelSize(
+                R.dimen.notification_collapse_second_card_padding);
     }
 
 
@@ -403,9 +406,11 @@ public class StackScrollAlgorithm {
             if (i == 0) {
                 childViewState.alpha = 1.0f;
                 childViewState.yTranslation = Math.max(mCollapsedSize - algorithmState.scrollY, 0);
-                if (childViewState.yTranslation + childViewState.height > bottomPeekStart) {
+                if (childViewState.yTranslation + childViewState.height
+                        > bottomPeekStart - mCollapseSecondCardPadding) {
                     childViewState.height = (int) Math.max(
-                            bottomPeekStart - childViewState.yTranslation, mCollapsedSize);
+                            bottomPeekStart - mCollapseSecondCardPadding
+                                    - childViewState.yTranslation, mCollapsedSize);
                 }
                 childViewState.location = StackScrollState.ViewState.LOCATION_FIRST_CARD;
             }
@@ -440,7 +445,7 @@ public class StackScrollAlgorithm {
     private void clampPositionToBottomStackStart(StackScrollState.ViewState childViewState,
             int childHeight) {
         childViewState.yTranslation = Math.min(childViewState.yTranslation,
-                mInnerHeight - mBottomStackPeekSize - childHeight);
+                mInnerHeight - mBottomStackPeekSize - mCollapseSecondCardPadding - childHeight);
     }
 
     /**
@@ -588,7 +593,8 @@ public class StackScrollAlgorithm {
                 if (i == 0 && algorithmState.scrollY <= mCollapsedSize) {
 
                     // The starting position of the bottom stack peek
-                    int bottomPeekStart = mInnerHeight - mBottomStackPeekSize;
+                    int bottomPeekStart = mInnerHeight - mBottomStackPeekSize -
+                            mCollapseSecondCardPadding;
                     // Collapse and expand the first child while the shade is being expanded
                     float maxHeight = mIsExpansionChanging && child == mFirstChildWhileExpanding
                             ? mFirstChildMaxHeight
