@@ -302,8 +302,6 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleUserControlPressed(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        final int opCode = message.getOpcode();
-        final byte[] params = message.getParams();
         if (mService.isPowerOnOrTransient() && isPowerOffOrToggleCommand(message)) {
             mService.standby();
             return true;
@@ -317,17 +315,17 @@ abstract class HdmiCecLocalDevice {
     private static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
-                && (params[0] == HdmiConstants.UI_COMMAND_POWER
-                        || params[0] == HdmiConstants.UI_COMMAND_POWER_ON_FUNCTION
-                        || params[0] == HdmiConstants.UI_COMMAND_POWER_TOGGLE_FUNCTION);
+                && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
+                        || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION
+                        || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
     }
 
     private static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == HdmiCec.MESSAGE_USER_CONTROL_PRESSED && params.length == 1
-                && (params[0] == HdmiConstants.UI_COMMAND_POWER
-                        || params[0] == HdmiConstants.UI_COMMAND_POWER_OFF_FUNCTION
-                        || params[0] == HdmiConstants.UI_COMMAND_POWER_TOGGLE_FUNCTION);
+                && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
+                        || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_OFF_FUNCTION
+                        || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
     }
 
     protected boolean handleTextViewOn(HdmiCecMessage message) {

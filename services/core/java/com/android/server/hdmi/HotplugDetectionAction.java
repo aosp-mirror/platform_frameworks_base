@@ -34,7 +34,7 @@ import java.util.List;
  * If system audio is on, check hot-plug for audio system every 5 secs.
  * For other devices, keep 15 secs period.
  */
-// #Seq 3
+// Seq #3
 final class HotplugDetectionAction extends FeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
