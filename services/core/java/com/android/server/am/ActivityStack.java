@@ -2575,7 +2575,7 @@ final class ActivityStack {
                     + " res=" + resultCode + " data=" + resultData);
             if (resultTo.userId != r.userId) {
                 if (resultData != null) {
-                    resultData.prepareToLeaveUser(r.userId);
+                    resultData.setContentUserHint(r.userId);
                 }
             }
             if (r.info.applicationInfo.uid > 0) {

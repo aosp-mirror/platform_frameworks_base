@@ -6644,6 +6644,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (data == null && clip == null) {
             return null;
         }
+        // Default userId for uris in the intent (if they don't specify it themselves)
+        int contentUserHint = intent.getContentUserHint();
+        if (contentUserHint == UserHandle.USER_CURRENT) {
+            contentUserHint = UserHandle.getUserId(callingUid);
+        }
         final IPackageManager pm = AppGlobals.getPackageManager();
         int targetUid;
         if (needed != null) {
@@ -6663,7 +6668,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (data != null) {
-            GrantUri grantUri = GrantUri.resolve(UserHandle.getUserId(callingUid), data);
+            GrantUri grantUri = GrantUri.resolve(contentUserHint, data);
             targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, mode,
                     targetUid);
             if (targetUid > 0) {
@@ -6677,7 +6682,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<clip.getItemCount(); i++) {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null) {
-                    GrantUri grantUri = GrantUri.resolve(UserHandle.getUserId(callingUid), uri);
+                    GrantUri grantUri = GrantUri.resolve(contentUserHint, uri);
                     targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, grantUri, mode,
                             targetUid);
                     if (targetUid > 0) {
