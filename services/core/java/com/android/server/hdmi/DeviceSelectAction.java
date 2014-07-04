@@ -165,9 +165,9 @@ final class DeviceSelectAction extends FeatureAction {
 
     private void turnOnDevice() {
         sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
-                HdmiConstants.UI_COMMAND_POWER);
+                HdmiCecKeycode.CEC_KEYCODE_POWER);
         sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
-                HdmiConstants.UI_COMMAND_POWER_ON_FUNCTION);
+                HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION);
         mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
         addTimer(mState, TIMEOUT_POWER_ON_MS);
     }

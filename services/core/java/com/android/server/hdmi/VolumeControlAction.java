@@ -130,7 +130,6 @@ final class VolumeControlAction extends FeatureAction {
         return mTargetVolume == VOLUME_MUTE || mTargetVolume == VOLUME_RESTORE;
     }
 
-
     private void startVolumeChange() {
         mTimeoutCount = 0;
         sendVolumeChange(mIsVolumeUp);
@@ -146,8 +145,8 @@ final class VolumeControlAction extends FeatureAction {
 
     private void sendMuteChange(boolean mute) {
         sendUserControlPressedAndReleased(mAvrAddress,
-                mute ? HdmiConstants.UI_COMMAND_MUTE_FUNCTION :
-                        HdmiConstants.UI_COMMAND_RESTORE_VOLUME_FUNCTION);
+                mute ? HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION :
+                        HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
     }
 
     @Override

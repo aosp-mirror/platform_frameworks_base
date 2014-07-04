@@ -37,18 +37,6 @@ final class HdmiConstants {
     static final int SYSTEM_AUDIO_STATUS_OFF = 0;
     static final int SYSTEM_AUDIO_STATUS_ON = 1;
 
-    // Constants related to UI Command Codes.
-    // Refer to CEC Table 30 in HDMI Spec v1.4b.
-    static final int UI_COMMAND_POWER = 0x40;
-    static final int UI_COMMAND_VOLUME_UP = 0x41;
-    static final int UI_COMMAND_VOLUME_DOWN = 0x42;
-    static final int UI_COMMAND_MUTE = 0x43;
-    static final int UI_COMMAND_MUTE_FUNCTION = 0x65;
-    static final int UI_COMMAND_RESTORE_VOLUME_FUNCTION = 0x66;
-    static final int UI_COMMAND_POWER_TOGGLE_FUNCTION = 0x6B;
-    static final int UI_COMMAND_POWER_OFF_FUNCTION = 0x6C;
-    static final int UI_COMMAND_POWER_ON_FUNCTION = 0x6D;
-
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
