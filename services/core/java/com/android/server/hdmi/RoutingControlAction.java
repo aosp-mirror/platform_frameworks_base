@@ -108,9 +108,8 @@ final class RoutingControlAction extends FeatureAction {
     }
 
     private void handleReportPowerStatus(int devicePowerStatus) {
-        int tvPowerStatus = getTvPowerStatus();
-        if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
-            if (isPowerStatusOnOrTransientToOn(devicePowerStatus)) {
+        if (isPowerOnOrTransient(getTvPowerStatus())) {
+            if (isPowerOnOrTransient(devicePowerStatus)) {
                 sendSetStreamPath();
             } else {
                 tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
@@ -121,11 +120,10 @@ final class RoutingControlAction extends FeatureAction {
      }
 
     private int getTvPowerStatus() {
-        // TODO: Obtain TV power status.
-        return HdmiCec.POWER_STATUS_ON;
+        return tv().getPowerStatus();
     }
 
-    private static boolean isPowerStatusOnOrTransientToOn(int status) {
+    private static boolean isPowerOnOrTransient(int status) {
         return status == HdmiCec.POWER_STATUS_ON || status == HdmiCec.POWER_STATUS_TRANSIENT_TO_ON;
     }
 
@@ -156,8 +154,7 @@ final class RoutingControlAction extends FeatureAction {
                 }
                 return;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
-                int tvPowerStatus = getTvPowerStatus();
-                if (isPowerStatusOnOrTransientToOn(tvPowerStatus)) {
+                if (isPowerOnOrTransient(getTvPowerStatus())) {
                     tv().updateActivePortId(tv().pathToPortId(mCurrentRoutingPath));
                     sendSetStreamPath();
                 }

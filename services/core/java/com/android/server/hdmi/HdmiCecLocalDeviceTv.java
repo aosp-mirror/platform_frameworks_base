@@ -215,6 +215,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(new RoutingControlAction(this, newPath, false, callback));
     }
 
+    int getPowerStatus() {
+        return mService.getPowerStatus();
+    }
+
     /**
      * Sends key to a target CEC device.
      *
