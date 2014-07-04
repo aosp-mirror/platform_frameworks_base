@@ -595,13 +595,39 @@ static jint android_media_AudioTrack_native_write_short(JNIEnv *env,  jobject th
                                                   jshortArray javaAudioData,
                                                   jint offsetInShorts, jint sizeInShorts,
                                                   jint javaAudioFormat) {
-    jint written = android_media_AudioTrack_native_write_byte(env, thiz,
-                                                 (jbyteArray) javaAudioData,
-                                                 offsetInShorts*2, sizeInShorts*2,
-                                                 javaAudioFormat);
-    if (written > 0) {
-        written /= 2;
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
     }
+
+    // get the pointer for the audio data from the java array
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
+    jshort* cAudioData = NULL;
+    if (javaAudioData) {
+        cAudioData = (jshort *)env->GetShortArrayElements(javaAudioData, NULL);
+        if (cAudioData == NULL) {
+            ALOGE("Error retrieving source of audio data to play, can't play");
+            return 0; // out of memory or no data to load
+        }
+    } else {
+        ALOGE("NULL java array of audio data to play, can't play");
+        return 0;
+    }
+    jint written = writeToTrack(lpTrack, javaAudioFormat, (jbyte *)cAudioData,
+                                offsetInShorts * sizeof(short), sizeInShorts * sizeof(short));
+    env->ReleaseShortArrayElements(javaAudioData, cAudioData, 0);
+
+    if (written > 0) {
+        written /= sizeof(short);
+    }
+    //ALOGV("write wrote %d (tried %d) shorts in the native AudioTrack with offset %d",
+    //     (int)written, (int)(sizeInShorts), (int)offsetInShorts);
+
     return written;
 }
 

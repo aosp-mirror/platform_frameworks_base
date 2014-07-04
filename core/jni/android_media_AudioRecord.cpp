@@ -399,13 +399,46 @@ static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thi
                                                         jshortArray javaAudioData,
                                                         jint offsetInShorts, jint sizeInShorts) {
 
-    jint read = android_media_AudioRecord_readInByteArray(env, thiz,
-                                                        (jbyteArray) javaAudioData,
-                                                        offsetInShorts*2, sizeInShorts*2);
-    if (read > 0) {
-        read /= 2;
+    jshort* recordBuff = NULL;
+    // get the audio recorder from which we'll read new audio samples
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        ALOGE("Unable to retrieve AudioRecord object, can't record");
+        return 0;
     }
-    return read;
+
+    if (!javaAudioData) {
+        ALOGE("Invalid Java array to store recorded audio, can't record");
+        return 0;
+    }
+
+    // get the pointer to where we'll record the audio
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
+    recordBuff = (jshort *)env->GetShortArrayElements(javaAudioData, NULL);
+
+    if (recordBuff == NULL) {
+        ALOGE("Error retrieving destination for recorded audio data, can't record");
+        return 0;
+    }
+
+    // read the new audio data from the native AudioRecord object
+    const size_t recorderBuffSize = lpRecorder->frameCount()*lpRecorder->frameSize();
+    const size_t sizeInBytes = sizeInShorts * sizeof(short);
+    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts * sizeof(short),
+                                        sizeInBytes > recorderBuffSize ?
+                                            recorderBuffSize : sizeInBytes);
+
+    env->ReleaseShortArrayElements(javaAudioData, recordBuff, 0);
+
+    if (readSize < 0) {
+        readSize = AUDIORECORD_ERROR_INVALID_OPERATION;
+    } else {
+        readSize /= sizeof(short);
+    }
+    return (jint) readSize;
 }
 
 // ----------------------------------------------------------------------------
