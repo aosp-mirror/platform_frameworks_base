@@ -692,7 +692,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
      * Typically JPEG format (ImageFormat#JPEG).</li>
-     * <li>Raw formats: ImageFormat#RAW_SENSOR and ImageFormat#RAW_OPAQUE.</li>
+     * <li>Raw formats: ImageFormat#RAW_SENSOR, ImageFormat#RAW10 and ImageFormat#RAW_OPAQUE.</li>
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
@@ -714,6 +714,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>In particular, a <code>RAW</code> format is typically one of:</p>
      * <ul>
      * <li>ImageFormat#RAW_SENSOR</li>
+     * <li>ImageFormat#RAW10</li>
      * <li>Opaque <code>RAW</code></li>
      * </ul>
      *
@@ -1213,13 +1214,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * ignored).</p>
      * <p>The following formats may always have a stall duration:</p>
      * <ul>
-     * <li>JPEG</li>
-     * <li>RAW16</li>
+     * <li>ImageFormat#JPEG</li>
+     * <li>ImageFormat#RAW_SENSOR</li>
      * </ul>
      * <p>The following formats will never have a stall duration:</p>
      * <ul>
-     * <li>YUV_420_888</li>
-     * <li>IMPLEMENTATION_DEFINED</li>
+     * <li>ImageFormat#YUV_420_888</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
      * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
