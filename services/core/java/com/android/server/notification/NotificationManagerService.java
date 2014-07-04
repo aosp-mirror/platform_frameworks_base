@@ -220,6 +220,7 @@ public class NotificationManagerService extends SystemService {
     private static final int REASON_NOMAN_CANCEL_ALL = 9;
     private static final int REASON_LISTENER_CANCEL = 10;
     private static final int REASON_LISTENER_CANCEL_ALL = 11;
+    private static final int REASON_GROUP_SUMMARY_CANCELED = 12;
 
     private static class Archive {
         final int mBufferSize;
@@ -2059,9 +2060,9 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                String listenerName = listener == null ? null : listener.component.toShortString();
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, id, tag, userId,
-                        mustHaveFlags, mustNotHaveFlags, reason,
-                        listener == null ? null : listener.component.toShortString());
+                        mustHaveFlags, mustNotHaveFlags, reason, listenerName);
 
                 synchronized (mNotificationList) {
                     int index = indexOfNotificationLocked(pkg, tag, id, userId);
@@ -2085,6 +2086,7 @@ public class NotificationManagerService extends SystemService {
                         mNotificationsByKey.remove(r.sbn.getKey());
 
                         cancelNotificationLocked(r, sendDelete, reason);
+                        cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName);
                         updateLightsLocked();
                     }
                 }
@@ -2123,13 +2125,14 @@ public class NotificationManagerService extends SystemService {
     boolean cancelAllNotificationsInt(int callingUid, int callingPid, String pkg, int mustHaveFlags,
             int mustNotHaveFlags, boolean doit, int userId, int reason,
             ManagedServiceInfo listener) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
         EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
                 pkg, userId, mustHaveFlags, mustNotHaveFlags, reason,
-                listener == null ? null : listener.component.toShortString());
+                listenerName);
 
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
-            boolean canceledSomething = false;
+            ArrayList<NotificationRecord> canceledNotifications = null;
             for (int i = N-1; i >= 0; --i) {
                 NotificationRecord r = mNotificationList.get(i);
                 if (!notificationMatchesUserId(r, userId)) {
@@ -2148,7 +2151,10 @@ public class NotificationManagerService extends SystemService {
                 if (pkg != null && !r.sbn.getPackageName().equals(pkg)) {
                     continue;
                 }
-                canceledSomething = true;
+                if (canceledNotifications == null) {
+                    canceledNotifications = new ArrayList<>();
+                }
+                canceledNotifications.add(r);
                 if (!doit) {
                     return true;
                 }
@@ -2156,19 +2162,27 @@ public class NotificationManagerService extends SystemService {
                 mNotificationsByKey.remove(r.sbn.getKey());
                 cancelNotificationLocked(r, false, reason);
             }
-            if (canceledSomething) {
+            if (doit && canceledNotifications != null) {
+                final int M = canceledNotifications.size();
+                for (int i = 0; i < M; i++) {
+                    cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
+                            listenerName);
+                }
+            }
+            if (canceledNotifications != null) {
                 updateLightsLocked();
             }
-            return canceledSomething;
+            return canceledNotifications != null;
         }
     }
 
     void cancelAllLocked(int callingUid, int callingPid, int userId, int reason,
             ManagedServiceInfo listener, boolean includeCurrentProfiles) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
         EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
-                null, userId, 0, 0, reason,
-                listener == null ? null : listener.component.toShortString());
+                null, userId, 0, 0, reason, listenerName);
 
+        ArrayList<NotificationRecord> canceledNotifications = null;
         final int N = mNotificationList.size();
         for (int i=N-1; i>=0; i--) {
             NotificationRecord r = mNotificationList.get(i);
@@ -2187,9 +2201,52 @@ public class NotificationManagerService extends SystemService {
                 mNotificationList.remove(i);
                 mNotificationsByKey.remove(r.sbn.getKey());
                 cancelNotificationLocked(r, true, reason);
+                // Make a note so we can cancel children later.
+                if (canceledNotifications == null) {
+                    canceledNotifications = new ArrayList<>();
+                }
+                canceledNotifications.add(r);
             }
         }
+        int M = canceledNotifications != null ? canceledNotifications.size() : 0;
+        for (int i = 0; i < M; i++) {
+            cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
+                    listenerName);
+        }
         updateLightsLocked();
+    }
+
+    // Warning: The caller is responsible for invoking updateLightsLocked().
+    private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
+            String listenerName) {
+        Notification n = r.getNotification();
+        if (n.getGroup() == null || (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0) {
+            return;
+        }
+
+        String pkg = r.sbn.getPackageName();
+        int userId = r.getUserId();
+
+        if (pkg == null) {
+            if (DBG) Log.e(TAG, "No package for group summary: " + r.getKey());
+            return;
+        }
+
+        final int N = mNotificationList.size();
+        for (int i = N - 1; i >= 0; i--) {
+            NotificationRecord childR = mNotificationList.get(i);
+            Notification childN = childR.getNotification();
+            StatusBarNotification childSbn = childR.sbn;
+            if (childR.getUserId() == userId && pkg.equals(childSbn.getPackageName()) &&
+                    n.getGroup().equals(childN.getGroup())) {
+                EventLogTags.writeNotificationCancel(callingUid, callingPid,
+                        pkg, childSbn.getId(), childSbn.getTag(), userId, 0, 0,
+                        REASON_GROUP_SUMMARY_CANCELED, listenerName);
+                mNotificationList.remove(i);
+                mNotificationsByKey.remove(childR.getKey());
+                cancelNotificationLocked(childR, false, REASON_GROUP_SUMMARY_CANCELED);
+            }
+        }
     }
 
     // lock on mNotificationList
