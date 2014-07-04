@@ -270,6 +270,18 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Inactive Source&gt; command.
+     *
+     * @param src source address of command
+     * @param physicalAddress physical address of the device to become inactive
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildInactiveSource(int src, int physicalAddress) {
+        return buildCommand(src, HdmiCec.ADDR_BROADCAST, HdmiCec.MESSAGE_INACTIVE_SOURCE,
+                physicalAddressToParam(physicalAddress));
+    }
+
+    /**
      * Build &lt;Set Stream Path&gt; command.
      *
      * <p>This is a broadcast message sent to all devices on the bus.
@@ -310,6 +322,21 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildGiveDevicePowerStatus(int src, int dest) {
         return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_DEVICE_POWER_STATUS);
+    }
+
+    /**
+     * Build &lt;Report Power Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param powerStatus power status of the device
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportPowerStatus(int src, int dest, int powerStatus) {
+        byte[] param = new byte[] {
+                (byte) (powerStatus)
+        };
+        return buildCommand(src, dest, HdmiCec.MESSAGE_REPORT_POWER_STATUS, param);
     }
 
     /**
@@ -386,6 +413,17 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildGiveSystemAudioModeStatus(int src, int dest) {
         return buildCommand(src, dest, HdmiCec.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS);
+    }
+
+    /**
+     * Build &lt;Standby&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    public static HdmiCecMessage buildStandby(int src, int dest) {
+        return buildCommand(src, dest, HdmiCec.MESSAGE_STANDBY);
     }
 
     /***** Please ADD new buildXXX() methods above. ******/
