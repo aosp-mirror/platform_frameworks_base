@@ -139,7 +139,8 @@ public class StatusBarWindowManager {
 
     private void applyUserActivityTimeout(State state) {
         if (state.isKeyguardShowingAndNotOccluded()
-                && state.statusBarState == StatusBarState.KEYGUARD) {
+                && state.statusBarState == StatusBarState.KEYGUARD
+                && !state.qsExpanded) {
             mLp.userActivityTimeout = state.keyguardUserActivityTimeout;
         } else {
             mLp.userActivityTimeout = -1;
@@ -148,7 +149,8 @@ public class StatusBarWindowManager {
 
     private void applyInputFeatures(State state) {
         if (state.isKeyguardShowingAndNotOccluded()
-                && state.statusBarState == StatusBarState.KEYGUARD) {
+                && state.statusBarState == StatusBarState.KEYGUARD
+                && !state.qsExpanded) {
             mLp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         } else {
             mLp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
@@ -207,6 +209,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setQsExpanded(boolean expanded) {
+        mCurrentState.qsExpanded = expanded;
+        apply(mCurrentState);
+    }
+
     /**
      * @param state The {@link StatusBarState} of the status bar.
      */
@@ -224,6 +231,7 @@ public class StatusBarWindowManager {
         long keyguardUserActivityTimeout;
         boolean bouncerShowing;
         boolean keyguardFadingAway;
+        boolean qsExpanded;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.

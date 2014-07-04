@@ -59,9 +59,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     // how long we stay awake after each key beyond MIN_PATTERN_BEFORE_POKE_WAKELOCK
     private static final int UNLOCK_PATTERN_WAKE_INTERVAL_MS = 7000;
 
-    // how long we stay awake after the user hits the first dot.
-    private static final int UNLOCK_PATTERN_WAKE_INTERVAL_FIRST_DOTS_MS = 2000;
-
     // how many cells the user has to cross before we poke the wakelock
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
@@ -256,14 +253,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
 
         public void onPatternCellAdded(List<LockPatternView.Cell> pattern) {
-            // To guard against accidental poking of the wakelock, look for
-            // the user actually trying to draw a pattern of some minimal length.
-            if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
-                mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
-            } else {
-                // Give just a little extra time if they hit one of the first few dots
-                mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_FIRST_DOTS_MS);
-            }
+            mCallback.userActivity();
         }
 
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
@@ -273,7 +263,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mCallback.dismiss(true);
             } else {
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
-                    mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
+                    mCallback.userActivity();
                 }
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
                 boolean registeredAttempt =

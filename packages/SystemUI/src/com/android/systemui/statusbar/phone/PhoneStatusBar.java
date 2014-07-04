@@ -61,6 +61,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -377,14 +378,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private Interpolator mAlphaIn = new PathInterpolator(0f, 0.2f, 1f, 1f);
     private Interpolator mAlphaOut = new PathInterpolator(0f, 0f, 0.8f, 1f);
 
-    private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
-            new OnChildLocationsChangedListener() {
-        @Override
-        public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout) {
-            userActivity();
-        }
-    };
-
     private int mDisabledUnmodified;
 
     /** Keys of notifications currently visible to the user. */
@@ -608,7 +601,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller = (NotificationStackScrollLayout) mStatusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
-        mStackScroller.setChildLocationsChangedListener(mOnChildLocationsChangedListener);
 
         mKeyguardIconOverflowContainer =
                 (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
@@ -1551,6 +1543,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public ScrimController getScrimController() {
         return mScrimController;
+    }
+
+    public void setQsExpanded(boolean expanded) {
+        mStatusBarWindowManager.setQsExpanded(expanded);
     }
 
     /**
@@ -2886,8 +2882,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void userActivity() {
-        mHandler.removeCallbacks(mUserActivity);
-        mHandler.post(mUserActivity);
+        if (mState == StatusBarState.KEYGUARD) {
+            mKeyguardViewMediatorCallback.userActivity();
+        }
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
@@ -2939,7 +2936,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onActivated(ActivatableNotificationView view) {
-        userActivity();
         mKeyguardIndicationController.showTransientIndication(R.string.notification_tap_again);
         ActivatableNotificationView previousView = mStackScroller.getActivatedChild();
         if (previousView != null) {
@@ -3104,15 +3100,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             Log.d(TAG, "Unable to toggle Lock-to-app", e);
         }
     }
-
-    private final Runnable mUserActivity = new Runnable() {
-        @Override
-        public void run() {
-            if (mState == StatusBarState.KEYGUARD) {
-                mKeyguardViewMediatorCallback.userActivity();
-            }
-        }
-    };
 
     // Recents
 

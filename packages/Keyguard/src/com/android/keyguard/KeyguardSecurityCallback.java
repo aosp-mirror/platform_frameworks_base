@@ -24,11 +24,9 @@ public interface KeyguardSecurityCallback {
     void dismiss(boolean securityVerified);
 
     /**
-     * Manually report user activity to keep the device awake. If timeout is 0,
-     * uses user-defined timeout.
-     * @param timeout
+     * Manually report user activity to keep the device awake.
      */
-    void userActivity(long timeout);
+    void userActivity();
 
     /**
      * Checks if keyguard is in "verify credentials" mode.

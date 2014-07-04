@@ -368,6 +368,7 @@ public abstract class PanelView extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mStatusBar.userActivity();
                 if (mHeightAnimator != null && !mHintAnimationRunning ||
                         mPeekPending || mPeekAnimator != null) {
                     if (mHeightAnimator != null) {

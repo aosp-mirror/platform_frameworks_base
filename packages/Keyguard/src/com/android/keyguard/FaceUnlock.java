@@ -66,10 +66,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     // mRunning and mServiceRunning.  I'd just rather wait to change that logic.
     private volatile boolean mIsRunning = false;
 
-    // So the user has a consistent amount of time when brought to the backup method from Face
-    // Unlock
-    private final int BACKUP_LOCK_TIMEOUT = 5000;
-
     KeyguardSecurityCallback mKeyguardScreenCallback;
 
     /**
@@ -268,7 +264,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 // When switching between portrait and landscape view while Face Unlock is running,
                 // the screen will eventually go dark unless we poke the wakelock when Face Unlock
                 // is restarted.
-                mKeyguardScreenCallback.userActivity(0);
+                mKeyguardScreenCallback.userActivity();
 
                 int[] position;
                 position = new int[2];
@@ -325,7 +321,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
         mKeyguardScreenCallback.showBackupSecurity();
         stop();
-        mKeyguardScreenCallback.userActivity(BACKUP_LOCK_TIMEOUT);
+        mKeyguardScreenCallback.userActivity();
     }
 
     /**
@@ -347,7 +343,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     void handlePokeWakelock(int millis) {
       PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
       if (powerManager.isScreenOn()) {
-        mKeyguardScreenCallback.userActivity(millis);
+        mKeyguardScreenCallback.userActivity();
       }
     }
 

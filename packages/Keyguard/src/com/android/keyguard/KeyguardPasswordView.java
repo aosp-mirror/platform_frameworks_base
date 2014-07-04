@@ -111,7 +111,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mCallback.userActivity(0); // TODO: customize timeout for text?
+                mCallback.userActivity();
             }
         });
 
@@ -127,7 +127,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
             public void afterTextChanged(Editable s) {
                 if (mCallback != null) {
-                    mCallback.userActivity(0);
+                    mCallback.userActivity();
                 }
             }
         });
@@ -141,7 +141,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             imeOrDeleteButtonVisible = true;
             switchImeButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    mCallback.userActivity(0); // Leave the screen on a bit longer
+                    mCallback.userActivity(); // Leave the screen on a bit longer
                     mImm.showInputMethodPicker();
                 }
             });
@@ -247,7 +247,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         if (mCallback != null) {
-            mCallback.userActivity(KeyguardConstants.DIGIT_PRESS_WAKE_MILLIS);
+            mCallback.userActivity();
         }
     }
 

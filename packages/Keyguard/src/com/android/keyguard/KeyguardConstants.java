@@ -26,7 +26,4 @@ public class KeyguardConstants {
      * be used temporarily for debugging.
      */
     public static final boolean DEBUG = false;
-
-    /** Timeout used for key presses. */
-    public static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 }

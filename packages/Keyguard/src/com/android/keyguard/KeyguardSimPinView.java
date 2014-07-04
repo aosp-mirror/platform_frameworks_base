@@ -185,7 +185,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             // otherwise, display a message to the user, and don't submit.
             mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);
             resetPasswordText(true);
-            mCallback.userActivity(0);
+            mCallback.userActivity();
             return;
         }
 
@@ -223,7 +223,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                         + " attemptsRemaining=" + attemptsRemaining);
                                 resetPasswordText(true /* animate */);
                             }
-                            mCallback.userActivity(0);
+                            mCallback.userActivity();
                             mCheckSimPinThread = null;
                         }
                     });
