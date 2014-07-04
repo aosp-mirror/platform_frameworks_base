@@ -39,6 +39,7 @@ import android.util.Log;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +50,7 @@ import java.util.Set;
 
 /**
  * Abstract base class for TTS engine implementations. The following methods
- * need to be implemented for V1 API ({@link TextToSpeech}) implementation.
+ * need to be implemented:
  * <ul>
  * <li>{@link #onIsLanguageAvailable}</li>
  * <li>{@link #onLoadLanguage}</li>
@@ -76,6 +77,29 @@ import java.util.Set;
  *
  * {@link #onGetLanguage} is not required as of JELLYBEAN_MR2 (API 18) and later, it is only
  * called on earlier versions of Android.
+ *
+ * API Level 20 adds support for Voice objects. Voices are an abstraction that allow the TTS
+ * service to expose multiple backends for a single locale. Each one of them can have a different
+ * features set. In order to fully take advantage of voices, an engine should implement
+ * the following methods:
+ * <ul>
+ * <li>{@link #onGetVoices()}</li>
+ * <li>{@link #isValidVoiceName(String)}</li>
+ * <li>{@link #onLoadVoice(String)}</li>
+ * <li>{@link #onGetDefaultVoiceNameFor(String, String, String)}</li>
+ * </ul>
+ * The first three methods are siblings of the {@link #onGetLanguage},
+ * {@link #onIsLanguageAvailable} and {@link #onLoadLanguage} methods. The last one,
+ * {@link #onGetDefaultVoiceNameFor(String, String, String)} is a link between locale and voice
+ * based methods. Since API level 20 {@link TextToSpeech#setLanguage} is implemented by
+ * calling {@link TextToSpeech#setVoice} with the voice returned by
+ * {@link #onGetDefaultVoiceNameFor(String, String, String)}.
+ *
+ * If the client uses a voice instead of a locale, {@link SynthesisRequest} will contain the
+ * requested voice name.
+ *
+ * The default implementations of Voice-related methods implement them using the
+ * pre-existing locale-based implementation.
  */
 public abstract class TextToSpeechService extends Service {
 
@@ -226,6 +250,160 @@ public abstract class TextToSpeechService extends Service {
      */
     protected Set<String> onGetFeaturesForLanguage(String lang, String country, String variant) {
         return null;
+    }
+
+    private int getExpectedLanguageAvailableStatus(Locale locale) {
+        int expectedStatus = TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE;
+        if (locale.getVariant().isEmpty()) {
+            if (locale.getCountry().isEmpty()) {
+                expectedStatus = TextToSpeech.LANG_AVAILABLE;
+            } else {
+                expectedStatus = TextToSpeech.LANG_COUNTRY_AVAILABLE;
+            }
+        }
+        return expectedStatus;
+    }
+
+    /**
+     * Queries the service for a set of supported voices.
+     *
+     * Can be called on multiple threads.
+     *
+     * The default implementation tries to enumerate all available locales, pass them to
+     * {@link #onIsLanguageAvailable(String, String, String)} and create Voice instances (using
+     * the locale's BCP-47 language tag as the voice name) for the ones that are supported.
+     * Note, that this implementation is suitable only for engines that don't have multiple voices
+     * for a single locale. Also, this implementation won't work with Locales not listed in the
+     * set returned by the {@link Locale#getAvailableLocales()} method.
+     *
+     * @return A list of voices supported.
+     */
+    protected List<Voice> onGetVoices() {
+        // Enumerate all locales and check if they are available
+        ArrayList<Voice> voices = new ArrayList<Voice>();
+        for (Locale locale : Locale.getAvailableLocales()) {
+            int expectedStatus = getExpectedLanguageAvailableStatus(locale);
+            try {
+                int localeStatus = onIsLanguageAvailable(locale.getISO3Language(),
+                        locale.getISO3Country(), locale.getVariant());
+                if (localeStatus != expectedStatus) {
+                    continue;
+                }
+            } catch (MissingResourceException e) {
+                // Ignore locale without iso 3 codes
+                continue;
+            }
+            Set<String> features = onGetFeaturesForLanguage(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            voices.add(new Voice(locale.toLanguageTag(), locale, Voice.QUALITY_NORMAL,
+                    Voice.LATENCY_NORMAL, false, features));
+        }
+        return voices;
+    }
+
+    /**
+     * Return a name of the default voice for a given locale.
+     *
+     * This method provides a mapping between locales and available voices. This method is
+     * used in {@link TextToSpeech#setLanguage}, which calls this method and then calls
+     * {@link TextToSpeech#setVoice} with the voice returned by this method.
+     *
+     * Also, it's used by {@link TextToSpeech#getDefaultVoice()} to find a default voice for
+     * the default locale.
+     *
+     * @param lang ISO-3 language code.
+     * @param country ISO-3 country code. May be empty or null.
+     * @param variant Language variant. May be empty or null.
+
+     * @return A name of the default voice for a given locale.
+     */
+    protected String onGetDefaultVoiceNameFor(String lang, String country, String variant) {
+        int localeStatus = onIsLanguageAvailable(lang, country, variant);
+        Locale iso3Locale = null;
+        switch (localeStatus) {
+            case TextToSpeech.LANG_AVAILABLE:
+                iso3Locale = new Locale(lang);
+                break;
+            case TextToSpeech.LANG_COUNTRY_AVAILABLE:
+                iso3Locale = new Locale(lang, country);
+                break;
+            case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
+                iso3Locale = new Locale(lang, country, variant);
+                break;
+            default:
+                return null;
+        }
+        Locale properLocale = TtsEngines.normalizeTTSLocale(iso3Locale);
+        String voiceName = properLocale.toLanguageTag();
+        if (isValidVoiceName(voiceName) == TextToSpeech.SUCCESS) {
+            return voiceName;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Notifies the engine that it should load a speech synthesis voice. There is no guarantee
+     * that this method is always called before the voice is used for synthesis. It is merely
+     * a hint to the engine that it will probably get some synthesis requests for this voice
+     * at some point in the future.
+     *
+     * Will be called only on synthesis thread.
+     *
+     * The default implementation creates a Locale from the voice name (by interpreting the name as
+     * a BCP-47 tag for the locale), and passes it to
+     * {@link #onLoadLanguage(String, String, String)}.
+     *
+     * @param voiceName Name of the voice.
+     * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
+     */
+    protected int onLoadVoice(String voiceName) {
+        Locale locale = Locale.forLanguageTag(voiceName);
+        if (locale == null) {
+            return TextToSpeech.ERROR;
+        }
+        int expectedStatus = getExpectedLanguageAvailableStatus(locale);
+        try {
+            int localeStatus = onIsLanguageAvailable(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            if (localeStatus != expectedStatus) {
+                return TextToSpeech.ERROR;
+            }
+            onLoadLanguage(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            return TextToSpeech.SUCCESS;
+        } catch (MissingResourceException e) {
+            return TextToSpeech.ERROR;
+        }
+    }
+
+    /**
+     * Checks whether the engine supports a voice with a given name.
+     *
+     * Can be called on multiple threads.
+     *
+     * The default implementation treats the voice name as a language tag, creating a Locale from
+     * the voice name, and passes it to {@link #onIsLanguageAvailable(String, String, String)}.
+     *
+     * @param voiceName Name of the voice.
+     * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
+     */
+    protected int isValidVoiceName(String voiceName) {
+        Locale locale = Locale.forLanguageTag(voiceName);
+        if (locale == null) {
+            return TextToSpeech.ERROR;
+        }
+        int expectedStatus = getExpectedLanguageAvailableStatus(locale);
+        try {
+            int localeStatus = onIsLanguageAvailable(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            if (localeStatus != expectedStatus) {
+                return TextToSpeech.ERROR;
+            }
+            return TextToSpeech.SUCCESS;
+        } catch (MissingResourceException e) {
+            return TextToSpeech.ERROR;
+        }
     }
 
     private int getDefaultSpeechRate() {
@@ -736,7 +914,11 @@ public abstract class TextToSpeechService extends Service {
         }
 
         private void setRequestParams(SynthesisRequest request) {
+            String voiceName = getVoiceName();
             request.setLanguage(getLanguage(), getCountry(), getVariant());
+            if (!TextUtils.isEmpty(voiceName)) {
+                request.setVoiceName(getVoiceName());
+            }
             request.setSpeechRate(getSpeechRate());
             request.setCallerUid(mCallerUid);
             request.setPitch(getPitch());
@@ -769,6 +951,10 @@ public abstract class TextToSpeechService extends Service {
 
         public String getLanguage() {
             return getStringParam(mParams, Engine.KEY_PARAM_LANGUAGE, mDefaultLocale[0]);
+        }
+
+        public String getVoiceName() {
+            return getStringParam(mParams, Engine.KEY_PARAM_VOICE_NAME, "");
         }
     }
 
@@ -895,6 +1081,35 @@ public abstract class TextToSpeechService extends Service {
             // No-op
         }
     }
+
+    /**
+     * Call {@link TextToSpeechService#onLoadLanguage} on synth thread.
+     */
+    private class LoadVoiceItem extends SpeechItem {
+        private final String mVoiceName;
+
+        public LoadVoiceItem(Object callerIdentity, int callerUid, int callerPid,
+                String voiceName) {
+            super(callerIdentity, callerUid, callerPid);
+            mVoiceName = voiceName;
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        protected void playImpl() {
+            TextToSpeechService.this.onLoadVoice(mVoiceName);
+        }
+
+        @Override
+        protected void stopImpl() {
+            // No-op
+        }
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -1039,6 +1254,44 @@ public abstract class TextToSpeechService extends Service {
                 }
             }
             return retVal;
+        }
+
+        @Override
+        public List<Voice> getVoices() {
+            return onGetVoices();
+        }
+
+        @Override
+        public int loadVoice(IBinder caller, String voiceName) {
+            if (!checkNonNull(voiceName)) {
+                return TextToSpeech.ERROR;
+            }
+            int retVal = isValidVoiceName(voiceName);
+
+            if (retVal == TextToSpeech.SUCCESS) {
+                SpeechItem item = new LoadVoiceItem(caller, Binder.getCallingUid(),
+                        Binder.getCallingPid(), voiceName);
+                if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item) !=
+                        TextToSpeech.SUCCESS) {
+                    return TextToSpeech.ERROR;
+                }
+            }
+            return retVal;
+        }
+
+        public String getDefaultVoiceNameFor(String lang, String country, String variant) {
+            if (!checkNonNull(lang)) {
+                return null;
+            }
+            int retVal = onIsLanguageAvailable(lang, country, variant);
+
+            if (retVal == TextToSpeech.LANG_AVAILABLE ||
+                    retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE ||
+                    retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+                return onGetDefaultVoiceNameFor(lang, country, variant);
+            } else {
+                return null;
+            }
         }
 
         @Override

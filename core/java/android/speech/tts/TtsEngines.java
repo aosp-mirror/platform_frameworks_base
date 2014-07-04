@@ -427,6 +427,36 @@ public class TtsEngines {
     }
 
     /**
+     * This method tries its best to return a valid {@link Locale} object from the TTS-specific
+     * Locale input (returned by {@link TextToSpeech#getLanguage}
+     * and {@link TextToSpeech#getDefaultLanguage}). A TTS Locale language field contains
+     * a three-letter ISO 639-2/T code (where a proper Locale would use a two-letter ISO 639-1
+     * code), and the country field contains a three-letter ISO 3166 country code (where a proper
+     * Locale would use a two-letter ISO 3166-1 code).
+     *
+     * This method tries to convert three-letter language and country codes into their two-letter
+     * equivalents. If it fails to do so, it keeps the value from the TTS locale.
+     */
+    public static Locale normalizeTTSLocale(Locale ttsLocale) {
+        String language = ttsLocale.getLanguage();
+        if (!TextUtils.isEmpty(language)) {
+            String normalizedLanguage = sNormalizeLanguage.get(language);
+            if (normalizedLanguage != null) {
+                language = normalizedLanguage;
+            }
+        }
+
+        String country = ttsLocale.getCountry();
+        if (!TextUtils.isEmpty(country)) {
+            String normalizedCountry= sNormalizeCountry.get(country);
+            if (normalizedCountry != null) {
+                country = normalizedCountry;
+            }
+        }
+        return new Locale(language, country, ttsLocale.getVariant());
+    }
+
+    /**
      * Return the old-style string form of the locale. It consists of 3 letter codes:
      * <ul>
      *   <li>"ISO 639-2/T language code" if the locale has no country entry</li>

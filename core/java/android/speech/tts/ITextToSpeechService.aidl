@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.speech.tts.ITextToSpeechCallback;
+import android.speech.tts.Voice;
 
 /**
  * Interface for TextToSpeech to talk to TextToSpeechService.
@@ -173,4 +174,37 @@ interface ITextToSpeechService {
      * @param cb The callback.
      */
     void setCallback(in IBinder caller, ITextToSpeechCallback cb);
+
+    /**
+     * Get the array of available voices.
+     */
+    List<Voice> getVoices();
+
+    /**
+     * Notifies the engine that it should load a speech synthesis voice.
+     *
+     * @param caller a binder representing the identity of the calling
+     *        TextToSpeech object.
+     * @param voiceName Unique voice of the name.
+     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+     */
+    int loadVoice(in IBinder caller, in String voiceName);
+
+    /**
+     * Return a name of the default voice for a given locale.
+     *
+     * This allows {@link TextToSpeech#getVoice} to return a sensible value after a client calls
+     * {@link TextToSpeech#setLanguage}.
+     *
+     * @param lang ISO 3-character language code.
+     * @param country ISO 3-character country code. May be empty or null.
+     * @param variant Language variant. May be empty or null.
+     * @return Code indicating the support status for the locale.
+     *         One of {@link TextToSpeech#LANG_AVAILABLE},
+     *         {@link TextToSpeech#LANG_COUNTRY_AVAILABLE},
+     *         {@link TextToSpeech#LANG_COUNTRY_VAR_AVAILABLE},
+     *         {@link TextToSpeech#LANG_MISSING_DATA}
+     *         {@link TextToSpeech#LANG_NOT_SUPPORTED}.
+     */
+    String getDefaultVoiceNameFor(in String lang, in String country, in String variant);
 }

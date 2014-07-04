@@ -26609,6 +26609,7 @@ package android.speech.tts {
     method public int getSpeechRate();
     method public deprecated java.lang.String getText();
     method public java.lang.String getVariant();
+    method public java.lang.String getVoiceName();
   }
 
   public class TextToSpeech {
@@ -26620,13 +26621,17 @@ package android.speech.tts {
     method public int addSpeech(java.lang.CharSequence, java.lang.String, int);
     method public int addSpeech(java.lang.String, java.lang.String);
     method public int addSpeech(java.lang.CharSequence, java.lang.String);
-    method public boolean areDefaultsEnforced();
+    method public deprecated boolean areDefaultsEnforced();
+    method public java.util.Set<java.util.Locale> getAvailableLanguages();
     method public java.lang.String getDefaultEngine();
-    method public java.util.Locale getDefaultLanguage();
+    method public deprecated java.util.Locale getDefaultLanguage();
+    method public android.speech.tts.Voice getDefaultVoice();
     method public java.util.List<android.speech.tts.TextToSpeech.EngineInfo> getEngines();
-    method public java.util.Set<java.lang.String> getFeatures(java.util.Locale);
-    method public java.util.Locale getLanguage();
+    method public deprecated java.util.Set<java.lang.String> getFeatures(java.util.Locale);
+    method public deprecated java.util.Locale getLanguage();
     method public static int getMaxSpeechInputLength();
+    method public android.speech.tts.Voice getVoice();
+    method public java.util.Set<android.speech.tts.Voice> getVoices();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
     method public int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
@@ -26639,6 +26644,7 @@ package android.speech.tts {
     method public int setOnUtteranceProgressListener(android.speech.tts.UtteranceProgressListener);
     method public int setPitch(float);
     method public int setSpeechRate(float);
+    method public int setVoice(android.speech.tts.Voice);
     method public void shutdown();
     method public int speak(java.lang.CharSequence, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     method public deprecated int speak(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
@@ -26650,6 +26656,7 @@ package android.speech.tts {
     field public static final int ERROR_INVALID_REQUEST = -8; // 0xfffffff8
     field public static final int ERROR_NETWORK = -6; // 0xfffffffa
     field public static final int ERROR_NETWORK_TIMEOUT = -7; // 0xfffffff9
+    field public static final int ERROR_NOT_INSTALLED_YET = -9; // 0xfffffff7
     field public static final int ERROR_OUTPUT = -5; // 0xfffffffb
     field public static final int ERROR_SERVICE = -4; // 0xfffffffc
     field public static final int ERROR_SYNTHESIS = -3; // 0xfffffffd
@@ -26685,8 +26692,11 @@ package android.speech.tts {
     field public static final deprecated java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
     field public static final deprecated java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
     field public static final java.lang.String INTENT_ACTION_TTS_SERVICE = "android.intent.action.TTS_SERVICE";
-    field public static final java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
-    field public static final java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
+    field public static final deprecated java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
+    field public static final java.lang.String KEY_FEATURE_NETWORK_RETRIES_COUNT = "networkRetriesCount";
+    field public static final deprecated java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
+    field public static final java.lang.String KEY_FEATURE_NETWORK_TIMEOUT_MS = "networkTimeoutMs";
+    field public static final java.lang.String KEY_FEATURE_NOT_INSTALLED = "notInstalled";
     field public static final java.lang.String KEY_PARAM_PAN = "pan";
     field public static final java.lang.String KEY_PARAM_SESSION_ID = "sessionId";
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
@@ -26712,11 +26722,15 @@ package android.speech.tts {
 
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
+    method protected int isValidVoiceName(java.lang.String);
     method public android.os.IBinder onBind(android.content.Intent);
+    method protected java.lang.String onGetDefaultVoiceNameFor(java.lang.String, java.lang.String, java.lang.String);
     method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
+    method protected java.util.List<android.speech.tts.Voice> onGetVoices();
     method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
+    method protected int onLoadVoice(java.lang.String);
     method protected abstract void onStop();
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
   }
@@ -26806,6 +26820,28 @@ package android.speech.tts {
     method public abstract deprecated void onError(java.lang.String);
     method public void onError(java.lang.String, int);
     method public abstract void onStart(java.lang.String);
+  }
+
+  public class Voice implements android.os.Parcelable {
+    ctor public Voice(java.lang.String, java.util.Locale, int, int, boolean, java.util.Set<java.lang.String>);
+    method public int describeContents();
+    method public java.util.Set<java.lang.String> getFeatures();
+    method public int getLatency();
+    method public java.util.Locale getLocale();
+    method public java.lang.String getName();
+    method public int getQuality();
+    method public boolean getRequiresNetworkConnection();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int LATENCY_HIGH = 400; // 0x190
+    field public static final int LATENCY_LOW = 200; // 0xc8
+    field public static final int LATENCY_NORMAL = 300; // 0x12c
+    field public static final int LATENCY_VERY_HIGH = 500; // 0x1f4
+    field public static final int LATENCY_VERY_LOW = 100; // 0x64
+    field public static final int QUALITY_HIGH = 400; // 0x190
+    field public static final int QUALITY_LOW = 200; // 0xc8
+    field public static final int QUALITY_NORMAL = 300; // 0x12c
+    field public static final int QUALITY_VERY_HIGH = 500; // 0x1f4
+    field public static final int QUALITY_VERY_LOW = 100; // 0x64
   }
 
 }
