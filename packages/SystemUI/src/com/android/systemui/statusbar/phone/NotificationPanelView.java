@@ -903,10 +903,8 @@ public class NotificationPanelView extends PanelView implements
         }
     }
     private void updateNotificationTranslucency() {
-        float alpha = (mNotificationStackScroller.getNotificationsTopY()
-                + mNotificationStackScroller.getItemHeight())
-                / (mQsMinExpansionHeight
-                        + mNotificationStackScroller.getItemHeight() / 2);
+        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
+                / (mQsMinExpansionHeight + mNotificationStackScroller.getItemHeight() / 2);
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
 
@@ -989,7 +987,7 @@ public class NotificationPanelView extends PanelView implements
 
             // When on Keyguard, we hide the header as soon as the top card of the notification
             // stack scroller is close enough (collision distance) to the bottom of the header.
-            alpha = mNotificationStackScroller.getNotificationsTopY()
+            alpha = getNotificationsTopY()
                     /
                     (mQsMinExpansionHeight + mNotificationsHeaderCollideDistance);
 
@@ -997,13 +995,20 @@ public class NotificationPanelView extends PanelView implements
 
             // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
             // soon as we start translating the stack.
-            alpha = mNotificationStackScroller.getNotificationsTopY() / mQsMinExpansionHeight;
+            alpha = getNotificationsTopY() / mQsMinExpansionHeight;
         }
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
         mHeader.setAlpha(alpha);
         mKeyguardBottomArea.setAlpha(alpha);
         setQsTranslation(mQsExpansionHeight);
+    }
+
+    private float getNotificationsTopY() {
+        if (mNotificationStackScroller.getNotGoneChildCount() == 0) {
+            return getExpandedHeight();
+        }
+        return mNotificationStackScroller.getNotificationsTopY();
     }
 
     @Override
