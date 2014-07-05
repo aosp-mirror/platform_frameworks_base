@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
-import com.android.internal.telecomm.ICallService;
+import com.android.internal.telecomm.IConnectionService;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,10 +36,11 @@ public final class RemoteConnection {
         void onDisconnected(RemoteConnection connection, int cause, String message);
         void onRequestingRingback(RemoteConnection connection, boolean ringback);
         void onPostDialWait(RemoteConnection connection, String remainingDigits);
+        void onFeaturesChanged(RemoteConnection connection, int features);
         void onDestroyed(RemoteConnection connection);
     }
 
-    private final ICallService mCallService;
+    private final IConnectionService mConnectionService;
     private final String mConnectionId;
     private final Set<Listener> mListeners = new HashSet<>();
 
@@ -48,12 +49,13 @@ public final class RemoteConnection {
     private String mDisconnectMessage;
     private boolean mRequestingRingback;
     private boolean mConnected;
+    private int mFeatures;
 
     /**
      * @hide
      */
-    RemoteConnection(ICallService callService, String connectionId) {
-        mCallService = callService;
+    RemoteConnection(IConnectionService connectionService, String connectionId) {
+        mConnectionService = connectionService;
         mConnectionId = connectionId;
 
         mConnected = true;
@@ -79,10 +81,14 @@ public final class RemoteConnection {
         return mDisconnectMessage;
     }
 
+    public int getFeatures() {
+        return mFeatures;
+    }
+
     public void abort() {
         try {
             if (mConnected) {
-                mCallService.abort(mConnectionId);
+                mConnectionService.abort(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -91,7 +97,7 @@ public final class RemoteConnection {
     public void answer() {
         try {
             if (mConnected) {
-                mCallService.answer(mConnectionId);
+                mConnectionService.answer(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -100,7 +106,7 @@ public final class RemoteConnection {
     public void reject() {
         try {
             if (mConnected) {
-                mCallService.reject(mConnectionId);
+                mConnectionService.reject(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -109,7 +115,7 @@ public final class RemoteConnection {
     public void hold() {
         try {
             if (mConnected) {
-                mCallService.hold(mConnectionId);
+                mConnectionService.hold(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -118,7 +124,7 @@ public final class RemoteConnection {
     public void unhold() {
         try {
             if (mConnected) {
-                mCallService.unhold(mConnectionId);
+                mConnectionService.unhold(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -127,7 +133,7 @@ public final class RemoteConnection {
     public void disconnect() {
         try {
             if (mConnected) {
-                mCallService.disconnect(mConnectionId);
+                mConnectionService.disconnect(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -136,7 +142,7 @@ public final class RemoteConnection {
     public void playDtmf(char digit) {
         try {
             if (mConnected) {
-                mCallService.playDtmfTone(mConnectionId, digit);
+                mConnectionService.playDtmfTone(mConnectionId, digit);
             }
         } catch (RemoteException ignored) {
         }
@@ -145,7 +151,7 @@ public final class RemoteConnection {
     public void stopDtmf() {
         try {
             if (mConnected) {
-                mCallService.stopDtmfTone(mConnectionId);
+                mConnectionService.stopDtmfTone(mConnectionId);
             }
         } catch (RemoteException ignored) {
         }
@@ -154,7 +160,7 @@ public final class RemoteConnection {
     public void postDialContinue(boolean proceed) {
         try {
             if (mConnected) {
-                mCallService.onPostDialContinue(mConnectionId, proceed);
+                mConnectionService.onPostDialContinue(mConnectionId, proceed);
             }
         } catch (RemoteException ignored) {
         }
@@ -163,7 +169,7 @@ public final class RemoteConnection {
     public void setAudioState(CallAudioState state) {
         try {
             if (mConnected) {
-                mCallService.onAudioStateChanged(mConnectionId, state);
+                mConnectionService.onAudioStateChanged(mConnectionId, state);
             }
         } catch (RemoteException ignored) {
         }
@@ -234,6 +240,16 @@ public final class RemoteConnection {
     void setPostDialWait(String remainingDigits) {
         for (Listener l : mListeners) {
             l.onPostDialWait(this, remainingDigits);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setFeatures(int features) {
+        mFeatures = features;
+        for (Listener l : mListeners) {
+            l.onFeaturesChanged(this, features);
         }
     }
 }

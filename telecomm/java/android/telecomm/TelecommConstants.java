@@ -48,7 +48,7 @@ public final class TelecommConstants {
     /**
      * The service action used to bind to {@link ConnectionService} implementations.
      */
-    public static final String ACTION_CALL_SERVICE = CallService.class.getName();
+    public static final String ACTION_CONNECTION_SERVICE = ConnectionService.class.getName();
 
     /**
      * Optional extra for {@link Intent#ACTION_CALL} containing a boolean that determines whether
@@ -92,6 +92,13 @@ public final class TelecommConstants {
      */
     public static final String EXTRA_CALL_DISCONNECT_MESSAGE =
             "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
+
+    /**
+     * Optional extra for {@link TelephonyManager#ACTION_PHONE_STATE_CHANGED} containing the
+     * component name of the associated connection service.
+     */
+    public static final String EXTRA_CONNECTION_SERVICE =
+            "android.telecomm.extra.CONNECTION_SERVICE";
 
     /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should

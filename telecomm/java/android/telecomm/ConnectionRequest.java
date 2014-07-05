@@ -80,9 +80,6 @@ public final class ConnectionRequest implements Parcelable {
                 mExtras == null ? "" : mExtras);
     }
 
-    /**
-     * Responsible for creating CallInfo objects for deserialized Parcels.
-     */
     public static final Parcelable.Creator<ConnectionRequest> CREATOR =
             new Parcelable.Creator<ConnectionRequest> () {
                 @Override
@@ -107,9 +104,6 @@ public final class ConnectionRequest implements Parcelable {
         return 0;
     }
 
-    /**
-     * Writes CallInfo object into a serializeable Parcel.
-     */
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mCallId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,26 @@
 
 package com.android.internal.telecomm;
 
-import android.telecomm.CallInfo;
 import android.telecomm.ConnectionRequest;
 
 import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 /**
- * Internal remote callback interface for call services.
+ * Internal remote callback interface for connection services.
  *
- * @see android.telecomm.CallServiceAdapter
+ * @see android.telecomm.ConnectionServiceAdapter
  *
  * {@hide}
  */
-oneway interface ICallServiceAdapter {
-    void notifyIncomingCall(in CallInfo callInfo);
+oneway interface IConnectionServiceAdapter {
+    void notifyIncomingCall(in ConnectionRequest request);
 
-    void handleSuccessfulOutgoingCall(String callId);
+    void handleSuccessfulOutgoingCall(in ConnectionRequest request);
 
     void handleFailedOutgoingCall(in ConnectionRequest request, int errorCode, String errorMessage);
 
-    void cancelOutgoingCall(String callId);
+    void cancelOutgoingCall(in ConnectionRequest request);
 
     void setActive(String callId);
 
@@ -54,7 +53,7 @@ oneway interface ICallServiceAdapter {
 
     void setIsConferenced(String callId, String conferenceCallId);
 
-    void addConferenceCall(String callId, in CallInfo callInfo);
+    void addConferenceCall(String callId);
 
     void removeCall(String callId);
 

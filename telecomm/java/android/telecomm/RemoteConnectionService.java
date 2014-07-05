@@ -24,8 +24,8 @@ import android.telephony.DisconnectCause;
 
 import android.text.TextUtils;
 
-import com.android.internal.telecomm.ICallService;
-import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.IConnectionService;
+import com.android.internal.telecomm.IConnectionServiceAdapter;
 import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
@@ -38,8 +38,8 @@ import java.util.UUID;
  *
  * @hide
  */
-public final class RemoteConnectionService implements DeathRecipient {
-    private final ICallService mCallService;
+final class RemoteConnectionService implements DeathRecipient {
+    private final IConnectionService mConnectionService;
     private final ComponentName mComponentName;
 
     private String mConnectionId;
@@ -48,26 +48,26 @@ public final class RemoteConnectionService implements DeathRecipient {
     // Remote connection services only support a single connection.
     private RemoteConnection mConnection;
 
-    private final ICallServiceAdapter mAdapter = new ICallServiceAdapter.Stub() {
+    private final IConnectionServiceAdapter mAdapter = new IConnectionServiceAdapter.Stub() {
 
         /** ${inheritDoc} */
-            @Override
-        public void notifyIncomingCall(CallInfo callInfo) {
+        @Override
+        public void notifyIncomingCall(ConnectionRequest request) {
             Log.w(this, "notifyIncomingCall not implemented in Remote connection");
         }
 
         /** ${inheritDoc} */
-            @Override
-        public void handleSuccessfulOutgoingCall(String connectionId) {
-            if (isPendingConnection(connectionId)) {
-                mConnection = new RemoteConnection(mCallService, connectionId);
-                mPendingOutgoingCallResponse.onSuccess(mPendingRequest, mConnection);
+        @Override
+        public void handleSuccessfulOutgoingCall(ConnectionRequest request) {
+            if (isPendingConnection(request.getCallId())) {
+                mConnection = new RemoteConnection(mConnectionService, request.getCallId());
+                mPendingOutgoingCallResponse.onSuccess(request, mConnection);
                 clearPendingInformation();
             }
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void handleFailedOutgoingCall(
                 ConnectionRequest request, int errorCode, String errorMessage) {
             if (isPendingConnection(request.getCallId())) {
@@ -78,17 +78,17 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
-        public void cancelOutgoingCall(String connectionId) {
-            if (isPendingConnection(connectionId)) {
-                mPendingOutgoingCallResponse.onCancel(mPendingRequest);
+        @Override
+        public void cancelOutgoingCall(ConnectionRequest request) {
+            if (isPendingConnection(request.getCallId())) {
+                mPendingOutgoingCallResponse.onCancel(request);
                 mConnectionId = null;
                 clearPendingInformation();
             }
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setActive(String connectionId) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setState(Connection.State.ACTIVE);
@@ -96,7 +96,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setRinging(String connectionId) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setState(Connection.State.RINGING);
@@ -110,7 +110,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setDialing(String connectionId) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setState(Connection.State.DIALING);
@@ -118,7 +118,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setDisconnected(
                 String connectionId, int disconnectCause, String disconnectMessage) {
             if (isCurrentConnection(connectionId)) {
@@ -127,7 +127,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setOnHold(String connectionId) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setState(Connection.State.HOLDING);
@@ -135,7 +135,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setRequestingRingback(String connectionId, boolean isRequestingRingback) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setRequestingRingback(isRequestingRingback);
@@ -143,25 +143,25 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setCanConference(String connectionId, boolean canConference) {
             // not supported for remote connections.
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void setIsConferenced(String connectionId, String conferenceConnectionId) {
             // not supported for remote connections.
         }
 
         /** ${inheritDoc} */
-            @Override
-        public void addConferenceCall(String connectionId, CallInfo callInfo) {
+        @Override
+        public void addConferenceCall(String connectionId) {
             // not supported for remote connections.
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void removeCall(String connectionId) {
             if (isCurrentConnection(connectionId)) {
                 destroyConnection();
@@ -169,7 +169,7 @@ public final class RemoteConnectionService implements DeathRecipient {
         }
 
         /** ${inheritDoc} */
-            @Override
+        @Override
         public void onPostDialWait(String connectionId, String remainingDigits) {
             if (isCurrentConnection(connectionId)) {
                 mConnection.setPostDialWait(remainingDigits);
@@ -189,23 +189,24 @@ public final class RemoteConnectionService implements DeathRecipient {
         /** ${inheritDoc} */
         @Override
         public void setFeatures(String connectionId, int features) {
-            // not supported for remote connections.
+            if (isCurrentConnection(connectionId)) {
+                mConnection.setFeatures(features);
+            }
         }
     };
 
-    RemoteConnectionService(ComponentName componentName, ICallService callService)
+    RemoteConnectionService(ComponentName componentName, IConnectionService connectionService)
             throws RemoteException {
         mComponentName = componentName;
-        mCallService = callService;
+        mConnectionService = connectionService;
 
-        // TODO(santoscordon): Rename from setCallServiceAdapter to addCallServiceAdapter.
-        mCallService.setCallServiceAdapter(mAdapter);
-        mCallService.asBinder().linkToDeath(this, 0);
+        mConnectionService.addConnectionServiceAdapter(mAdapter);
+        mConnectionService.asBinder().linkToDeath(this, 0);
     }
 
     @Override
     public String toString() {
-        return "[RemoteCS - " + mCallService.asBinder().toString() + "]";
+        return "[RemoteCS - " + mConnectionService.asBinder().toString() + "]";
     }
 
     /** ${inheritDoc} */
@@ -221,15 +222,16 @@ public final class RemoteConnectionService implements DeathRecipient {
     /**
      * Places an outgoing call.
      */
-    public final void createOutgoingConnection(
+    final void createOutgoingConnection(
             ConnectionRequest request,
             ConnectionService.OutgoingCallResponse<RemoteConnection> response) {
 
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
-            CallInfo callInfo = new CallInfo(id, CallState.NEW, request.getHandle());
+            ConnectionRequest newRequest = new ConnectionRequest(request.getAccount(), id,
+                    request.getHandle(), request.getExtras());
             try {
-                mCallService.call(callInfo);
+                mConnectionService.call(newRequest);
                 mConnectionId = id;
                 mPendingOutgoingCallResponse = response;
                 mPendingRequest = request;
@@ -244,7 +246,7 @@ public final class RemoteConnectionService implements DeathRecipient {
     // TODO(santoscordon): Handle incoming connections
     // public final void handleIncomingConnection() {}
 
-    public final List<PhoneAccount> lookupAccounts(Uri handle) {
+    final List<PhoneAccount> lookupAccounts(Uri handle) {
         // TODO(santoscordon): Update this so that is actually calls into the RemoteConnection
         // each time.
         List<PhoneAccount> accounts = new LinkedList<>();
@@ -264,7 +266,7 @@ public final class RemoteConnectionService implements DeathRecipient {
      * the remote service is no longer being used.
      */
     void release() {
-        mCallService.asBinder().unlinkToDeath(this, 0);
+        mConnectionService.asBinder().unlinkToDeath(this, 0);
     }
 
     private boolean isPendingConnection(String id) {

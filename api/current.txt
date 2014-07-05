@@ -27536,21 +27536,6 @@ package android.telecomm {
     field public static final int VoWIFI = 2; // 0x2
   }
 
-  public final class CallInfo implements android.os.Parcelable {
-    ctor public CallInfo(java.lang.String, android.telecomm.CallState, android.net.Uri);
-    method public int describeContents();
-    method public android.telecomm.PhoneAccount getAccount();
-    method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
-    method public android.os.Bundle getExtras();
-    method public android.telecomm.GatewayInfo getGatewayInfo();
-    method public android.net.Uri getHandle();
-    method public java.lang.String getId();
-    method public android.net.Uri getOriginalHandle();
-    method public android.telecomm.CallState getState();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public final class CallNumberPresentation extends java.lang.Enum {
     method public static android.telecomm.CallNumberPresentation valueOf(java.lang.String);
     method public static final android.telecomm.CallNumberPresentation[] values();
@@ -27560,15 +27545,9 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallNumberPresentation UNKNOWN;
   }
 
-  public abstract class CallService extends android.app.Service {
-    ctor public CallService();
-    method public final android.os.IBinder getBinder();
-    method public final android.os.IBinder onBind(android.content.Intent);
-  }
-
   public final class CallServiceDescriptor implements android.os.Parcelable {
     method public int describeContents();
-    method public java.lang.String getCallServiceId();
+    method public java.lang.String getConnectionServiceId();
     method public int getNetworkType();
     method public android.content.ComponentName getServiceComponent();
     method public static android.telecomm.CallServiceDescriptor.Builder newBuilder(android.content.Context);
@@ -27581,7 +27560,7 @@ package android.telecomm {
 
   public static class CallServiceDescriptor.Builder {
     method public android.telecomm.CallServiceDescriptor build();
-    method public android.telecomm.CallServiceDescriptor.Builder setCallService(java.lang.Class<? extends android.telecomm.CallService>);
+    method public android.telecomm.CallServiceDescriptor.Builder setConnectionService(java.lang.Class<? extends android.telecomm.ConnectionService>);
     method public android.telecomm.CallServiceDescriptor.Builder setNetworkType(int);
   }
 
@@ -27654,7 +27633,6 @@ package android.telecomm {
     method protected void onAbort();
     method protected void onAnswer();
     method protected void onChildrenChanged(java.util.List<android.telecomm.Connection>);
-    method protected void onConference();
     method protected void onDisconnect();
     method protected void onHold();
     method protected void onPhoneAccountClicked();
@@ -27705,12 +27683,13 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class ConnectionService extends android.telecomm.CallService {
+  public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
     method public final void createRemoteOutgoingConnection(android.telecomm.ConnectionRequest, android.telecomm.ConnectionService.OutgoingCallResponse<android.telecomm.RemoteConnection>);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final void lookupRemoteAccounts(android.net.Uri, android.telecomm.SimpleResponse<android.net.Uri, java.util.List<android.telecomm.PhoneAccount>>);
     method public final void maybeRespondToAccountLookup();
+    method public final android.os.IBinder onBind(android.content.Intent);
     method protected void onConnectionAdded(android.telecomm.Connection);
     method protected void onConnectionRemoved(android.telecomm.Connection);
     method protected void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
@@ -27828,6 +27807,7 @@ package android.telecomm {
     method public void disconnect();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
+    method public int getFeatures();
     method public int getState();
     method public void hold();
     method public void playDtmf(char);
@@ -27842,6 +27822,7 @@ package android.telecomm {
   public static abstract interface RemoteConnection.Listener {
     method public abstract void onDestroyed(android.telecomm.RemoteConnection);
     method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
+    method public abstract void onFeaturesChanged(android.telecomm.RemoteConnection, int);
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
@@ -27859,14 +27840,15 @@ package android.telecomm {
 
   public final class TelecommConstants {
     ctor public TelecommConstants();
-    field public static final java.lang.String ACTION_CALL_SERVICE;
     field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
+    field public static final java.lang.String ACTION_CONNECTION_SERVICE;
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CALL_SERVICE_DESCRIPTOR = "android.intent.extra.CALL_SERVICE_DESCRIPTOR";
+    field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO = "android.intent.extra.START_CALL_WITH_VIDEO";

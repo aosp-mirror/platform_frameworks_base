@@ -21,8 +21,8 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 
-import com.android.internal.telecomm.ICallService;
-import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.IConnectionService;
+import com.android.internal.telecomm.IConnectionServiceAdapter;
 import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
@@ -32,24 +32,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Provides methods for ICallService implementations to interact with the system phone app.
- * TODO(santoscordon): Rename this to CallServiceAdapterDemultiplexer (or something).
+ * Provides methods for IConnectionService implementations to interact with the system phone app.
  *
  * @hide
  */
-public final class CallServiceAdapter implements DeathRecipient {
-    private final Set<ICallServiceAdapter> mAdapters = new HashSet<>();
+final class ConnectionServiceAdapter implements DeathRecipient {
+    private final Set<IConnectionServiceAdapter> mAdapters = new HashSet<>();
 
-    /**
-     * @hide
-     */
-    public CallServiceAdapter() {
+    ConnectionServiceAdapter() {
     }
 
-    /**
-     * @hide
-     */
-    public void addAdapter(ICallServiceAdapter adapter) {
+    void addAdapter(IConnectionServiceAdapter adapter) {
         if (mAdapters.add(adapter)) {
             try {
                 adapter.asBinder().linkToDeath(this, 0);
@@ -59,10 +52,7 @@ public final class CallServiceAdapter implements DeathRecipient {
         }
     }
 
-    /**
-     * @hide
-     */
-    public void removeAdapter(ICallServiceAdapter adapter) {
+    void removeAdapter(IConnectionServiceAdapter adapter) {
         if (mAdapters.remove(adapter)) {
             adapter.asBinder().unlinkToDeath(this, 0);
         }
@@ -71,31 +61,25 @@ public final class CallServiceAdapter implements DeathRecipient {
     /** ${inheritDoc} */
     @Override
     public void binderDied() {
-        ICallServiceAdapter adapterToRemove = null;
-        for (ICallServiceAdapter adapter : mAdapters) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             if (!adapter.asBinder().isBinderAlive()) {
-                adapterToRemove = adapter;
-                break;
+                removeAdapter(adapter);
             }
-        }
-
-        if (adapterToRemove != null) {
-            removeAdapter(adapterToRemove);
         }
     }
 
     /**
      * Provides Telecomm with the details of an incoming call. An invocation of this method must
-     * follow {@link CallService#setIncomingCallId} and use the call ID specified therein. Upon the
-     * invocation of this method, Telecomm will bring up the incoming-call interface where the user
-     * can elect to answer or reject a call.
+     * follow {@link ConnectionService#setIncomingCallId} and use the call ID specified therein.
+     * Upon the invocation of this method, Telecomm will bring up the incoming-call interface where
+     * the user can elect to answer or reject a call.
      *
-     * @param callInfo The details of the relevant call.
+     * @param request The connection request.
      */
-    public void notifyIncomingCall(CallInfo callInfo) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void notifyIncomingCall(ConnectionRequest request) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.notifyIncomingCall(callInfo);
+                adapter.notifyIncomingCall(request);
             } catch (RemoteException e) {
             }
         }
@@ -103,15 +87,13 @@ public final class CallServiceAdapter implements DeathRecipient {
 
     /**
      * Tells Telecomm that an attempt to place the specified outgoing call succeeded.
-     * TODO(santoscordon): Consider adding a CallState parameter in case this outgoing call is
-     * somehow no longer in the DIALING state.
      *
-     * @param callId The ID of the outgoing call.
+     * @param request The originating request for a connection.
      */
-    public void handleSuccessfulOutgoingCall(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void handleSuccessfulOutgoingCall(ConnectionRequest request) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleSuccessfulOutgoingCall(callId);
+                adapter.handleSuccessfulOutgoingCall(request);
             } catch (RemoteException e) {
             }
         }
@@ -124,11 +106,11 @@ public final class CallServiceAdapter implements DeathRecipient {
      * @param errorCode The error code associated with the failed call attempt.
      * @param errorMsg The error message associated with the failed call attempt.
      */
-    public void handleFailedOutgoingCall(
+    void handleFailedOutgoingCall(
             ConnectionRequest request,
             int errorCode,
             String errorMsg) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.handleFailedOutgoingCall(request, errorCode, errorMsg);
             } catch (RemoteException e) {
@@ -139,12 +121,12 @@ public final class CallServiceAdapter implements DeathRecipient {
     /**
      * Tells Telecomm to cancel the call.
      *
-     * @param callId The ID of the outgoing call.
+     * @param request The originating request for a connection.
      */
-    public void cancelOutgoingCall(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void cancelOutgoingCall(ConnectionRequest request) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.cancelOutgoingCall(callId);
+                adapter.cancelOutgoingCall(request);
             } catch (RemoteException e) {
             }
         }
@@ -156,8 +138,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the call whose state is changing to active.
      */
-    public void setActive(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setActive(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setActive(callId);
             } catch (RemoteException e) {
@@ -170,8 +152,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the call whose state is changing to ringing.
      */
-    public void setRinging(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setRinging(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setRinging(callId);
             } catch (RemoteException e) {
@@ -184,8 +166,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the call whose state is changing to dialing.
      */
-    public void setDialing(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setDialing(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setDialing(callId);
             } catch (RemoteException e) {
@@ -201,8 +183,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      *            {@link android.telephony.DisconnectCause}.
      * @param disconnectMessage Optional call-service-provided message about the disconnect.
      */
-    public void setDisconnected(String callId, int disconnectCause, String disconnectMessage) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setDisconnected(String callId, int disconnectCause, String disconnectMessage) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setDisconnected(callId, disconnectCause, disconnectMessage);
             } catch (RemoteException e) {
@@ -215,8 +197,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId - The unique ID of the call whose state is changing to be on hold.
      */
-    public void setOnHold(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setOnHold(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setOnHold(callId);
             } catch (RemoteException e) {
@@ -230,8 +212,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call whose ringback is being changed.
      * @param ringback Whether Telecomm should start playing a ringback tone.
      */
-    public void setRequestingRingback(String callId, boolean ringback) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setRequestingRingback(String callId, boolean ringback) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setRequestingRingback(callId, ringback);
             } catch (RemoteException e) {
@@ -244,10 +226,9 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the call.
      * @param canConference Specified whether or not the call can be conferenced.
-     * @hide
      */
-    public void setCanConference(String callId, boolean canConference) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setCanConference(String callId, boolean canConference) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setCanConference(callId, canConference);
             } catch (RemoteException ignored) {
@@ -262,10 +243,9 @@ public final class CallServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call being conferenced.
      * @param conferenceCallId The unique ID of the conference call. Null if call is not
      *            conferenced.
-     * @hide
      */
-    public void setIsConferenced(String callId, String conferenceCallId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setIsConferenced(String callId, String conferenceCallId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setIsConferenced(callId, conferenceCallId);
             } catch (RemoteException ignored) {
@@ -278,10 +258,9 @@ public final class CallServiceAdapter implements DeathRecipient {
      * call.
      *
      * @param callId The unique ID of the call.
-     * @hide
      */
-    public void removeCall(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void removeCall(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.removeCall(callId);
             } catch (RemoteException ignored) {
@@ -289,8 +268,8 @@ public final class CallServiceAdapter implements DeathRecipient {
         }
     }
 
-    public void onPostDialWait(String callId, String remaining) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void onPostDialWait(String callId, String remaining) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.onPostDialWait(callId, remaining);
             } catch (RemoteException ignored) {
@@ -303,10 +282,10 @@ public final class CallServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the conference call.
      */
-    public void addConferenceCall(String callId) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void addConferenceCall(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.addConferenceCall(callId, null);
+                adapter.addConferenceCall(callId);
             } catch (RemoteException ignored) {
             }
         }
@@ -314,9 +293,8 @@ public final class CallServiceAdapter implements DeathRecipient {
 
     /**
      * Retrieves a list of remote connection services usable to place calls.
-     * @hide
      */
-    public void queryRemoteConnectionServices(RemoteServiceCallback callback) {
+    void queryRemoteConnectionServices(RemoteServiceCallback callback) {
         // Only supported when there is only one adapter.
         if (mAdapters.size() == 1) {
             try {
@@ -333,8 +311,8 @@ public final class CallServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call to set with the given call video provider.
      * @param callVideoProvider The call video provider instance to set on the call.
      */
-    public void setCallVideoProvider(String callId, CallVideoProvider callVideoProvider) {
-        for (ICallServiceAdapter adapter : mAdapters) {
+    void setCallVideoProvider(String callId, CallVideoProvider callVideoProvider) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setCallVideoProvider(callId, callVideoProvider.getInterface());
             } catch (RemoteException e) {
@@ -350,9 +328,9 @@ public final class CallServiceAdapter implements DeathRecipient {
     * @param callId The unique ID of the call to set features for.
     * @param features The features.
     */
-    public void setFeatures(String callId, int features) {
+    void setFeatures(String callId, int features) {
         Log.v(this, "setFeatures: %d", features);
-        for (ICallServiceAdapter adapter : mAdapters) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.setFeatures(callId, features);
             } catch (RemoteException ignored) {

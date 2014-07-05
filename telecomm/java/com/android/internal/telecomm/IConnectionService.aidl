@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,25 @@ package com.android.internal.telecomm;
 
 import android.os.Bundle;
 import android.telecomm.CallAudioState;
-import android.telecomm.CallInfo;
+import android.telecomm.ConnectionRequest;
 
-import com.android.internal.telecomm.ICallServiceAdapter;
+import com.android.internal.telecomm.IConnectionServiceAdapter;
 
 /**
- * Internal remote interface for call services.
+ * Internal remote interface for connection services.
  *
- * @see android.telecomm.CallService
+ * @see android.telecomm.ConnectionService
  *
  * @hide
  */
-oneway interface ICallService {
-    void setCallServiceAdapter(in ICallServiceAdapter callServiceAdapter);
+oneway interface IConnectionService {
+    void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
 
-    void call(in CallInfo callInfo);
+    void call(in ConnectionRequest request);
 
     void abort(String callId);
 
-    void setIncomingCallId(String callId, in Bundle extras);
+    void createIncomingCall(in ConnectionRequest request);
 
     void answer(String callId);
 

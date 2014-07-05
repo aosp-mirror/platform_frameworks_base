@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 /**
- * An immutable object containing information about a given {@link CallService}. Instances are
+ * An immutable object containing information about a given {@link ConnectionService}. Instances are
  * created using the enclosed {@link Builder}.
  */
 public final class CallServiceDescriptor implements Parcelable {
@@ -40,19 +40,19 @@ public final class CallServiceDescriptor implements Parcelable {
 
     /**
      * Indicates that the device must be connected to a Wi-Fi network in order for the backing
-     * {@link CallService} to be used.
+     * {@link ConnectionService} to be used.
      */
     public static final int FLAG_WIFI = 0x01;
 
     /**
      * Indicates that the device must be connected to a cellular PSTN network in order for the
-     * backing {@link CallService} to be used.
+     * backing {@link ConnectionService} to be used.
      */
     public static final int FLAG_PSTN = 0x02;
 
     /**
      * Indicates that the device must be connected to a cellular data network in order for the
-     * backing {@link CallService} to be used.
+     * backing {@link ConnectionService} to be used.
      */
     public static final int FLAG_MOBILE = 0x04;
 
@@ -65,45 +65,46 @@ public final class CallServiceDescriptor implements Parcelable {
     /**
      * A unique ID used to identify a given instance.
      */
-    private final String mCallServiceId;
+    private final String mConnectionServiceId;
 
     /**
-     * The {@link ComponentName} of the {@link CallService} implementation which this is describing.
+     * The {@link ComponentName} of the {@link ConnectionService} implementation which this is
+     * describing.
      */
     private final ComponentName mComponentName;
 
     /**
-     * The type of connection that the {@link CallService} requires; will be one of the FLAG_*
+     * The type of connection that the {@link ConnectionService} requires; will be one of the FLAG_*
      * constants defined in this class.
      */
     private final int mNetworkType;
 
     private CallServiceDescriptor(
-            String callServiceId,
+            String connectionServiceId,
             ComponentName componentName,
             int networkType) {
 
-        mCallServiceId = callServiceId;
+        mConnectionServiceId = connectionServiceId;
         mComponentName = componentName;
         mNetworkType = networkType;
     }
 
     /**
-     * @return The ID used to identify this {@link CallService}.
+     * @return The ID used to identify this {@link ConnectionService}.
      */
-    public String getCallServiceId() {
-        return mCallServiceId;
+    public String getConnectionServiceId() {
+        return mConnectionServiceId;
     }
 
     /**
-     * @return The {@link ComponentName} of the {@link CallService}.
+     * @return The {@link ComponentName} of the {@link ConnectionService}.
      */
     public ComponentName getServiceComponent() {
         return mComponentName;
     }
 
     /**
-     * @return The network type required by the {@link CallService} to place a call.
+     * @return The network type required by the {@link ConnectionService} to place a call.
      */
     public int getNetworkType() {
         return mNetworkType;
@@ -119,7 +120,7 @@ public final class CallServiceDescriptor implements Parcelable {
             return false;
         }
         CallServiceDescriptor descriptor = (CallServiceDescriptor) obj;
-        return mCallServiceId.equals(descriptor.mCallServiceId) &&
+        return mConnectionServiceId.equals(descriptor.mConnectionServiceId) &&
                 mComponentName.equals(descriptor.mComponentName) &&
                 mNetworkType == descriptor.mNetworkType;
     }
@@ -147,10 +148,10 @@ public final class CallServiceDescriptor implements Parcelable {
         /** The {@link Context} to use to verify {@link ComponentName} ownership. */
         private Context mContext;
 
-        /** The {@link ComponentName} pointing to the backing {@link CallService}. */
+        /** The {@link ComponentName} pointing to the backing {@link ConnectionService}. */
         private ComponentName mComponentName;
 
-        /** The required network type that the {@link CallService} needs. */
+        /** The required network type that the {@link ConnectionService} needs. */
         private int mNetworkType = FLAG_INVALID;
 
         private Builder(Context context) {
@@ -158,21 +159,21 @@ public final class CallServiceDescriptor implements Parcelable {
         }
 
         /**
-         * Set which {@link CallService} this {@link CallServiceDescriptor} is describing.
+         * Set which {@link ConnectionService} this {@link CallServiceDescriptor} is describing.
          *
-         * @param callServiceClass The {@link CallService} class
+         * @param serviceClass The {@link ConnectionService} class
          * @return This {@link Builder} for method chaining.
          */
-        public Builder setCallService(Class<? extends CallService> callServiceClass) {
-            mComponentName = new ComponentName(mContext, callServiceClass);
+        public Builder setConnectionService(Class<? extends ConnectionService> serviceClass) {
+            mComponentName = new ComponentName(mContext, serviceClass);
             return this;
         }
 
         /**
-         * Which network type the backing {@link CallService} requires. This must be one of the
-         * {@link CallServiceDescriptor}.TYPE_* fields.
+         * Which network type the backing {@link ConnectionService} requires. This must be one of
+         * the {@link CallServiceDescriptor}.TYPE_* fields.
          *
-         * @param networkType Which network type the backing {@link CallService} requires.
+         * @param networkType Which network type the backing {@link ConnectionService} requires.
          * @return This {@link Builder} for method chaining.
          */
         public Builder setNetworkType(int networkType) {
@@ -207,7 +208,7 @@ public final class CallServiceDescriptor implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mCallServiceId);
+        dest.writeString(mConnectionServiceId);
         dest.writeParcelable(mComponentName, 0);
         dest.writeInt(mNetworkType);
     }

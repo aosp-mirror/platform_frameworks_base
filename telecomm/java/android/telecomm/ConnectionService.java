@@ -16,16 +16,19 @@
 
 package android.telecomm;
 
+import android.app.Service;
+import android.content.Intent;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
-
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.telephony.DisconnectCause;
+import android.os.Message;
 
-import com.android.internal.telecomm.ICallService;
+import com.android.internal.os.SomeArgs;
+import com.android.internal.telecomm.IConnectionService;
+import com.android.internal.telecomm.IConnectionServiceAdapter;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.Collection;
@@ -34,23 +37,39 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@link android.app.Service} that provides telephone connections to
- * processes running on an Android device.
+ * A {@link android.app.Service} that provides telephone connections to processes running on an
+ * Android device.
  */
-public abstract class ConnectionService extends CallService {
+public abstract class ConnectionService extends Service {
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
     private static final Connection NULL_CONNECTION = new Connection() {};
 
-    // Mappings from Connections to IDs as understood by the current CallService implementation
+    private static final int MSG_ADD_CALL_SERVICE_ADAPTER = 1;
+    private static final int MSG_CALL = 2;
+    private static final int MSG_ABORT = 3;
+    private static final int MSG_CREATE_INCOMING_CALL = 4;
+    private static final int MSG_ANSWER = 5;
+    private static final int MSG_REJECT = 6;
+    private static final int MSG_DISCONNECT = 7;
+    private static final int MSG_HOLD = 8;
+    private static final int MSG_UNHOLD = 9;
+    private static final int MSG_ON_AUDIO_STATE_CHANGED = 10;
+    private static final int MSG_PLAY_DTMF_TONE = 11;
+    private static final int MSG_STOP_DTMF_TONE = 12;
+    private static final int MSG_CONFERENCE = 13;
+    private static final int MSG_SPLIT_FROM_CONFERENCE = 14;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
+    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
+
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
     private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private SimpleResponse<Uri, List<PhoneAccount>> mAccountLookupResponse;
     private Uri mAccountLookupHandle;
     private boolean mAreAccountsInitialized = false;
+    private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
     /**
      * A callback for providing the resuilt of creating a connection.
@@ -81,6 +100,180 @@ public abstract class ConnectionService extends CallService {
         void onCancel(ConnectionRequest request);
     }
 
+    private final IBinder mBinder = new IConnectionService.Stub() {
+        @Override
+        public void addConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
+            mHandler.obtainMessage(MSG_ADD_CALL_SERVICE_ADAPTER, adapter).sendToTarget();
+        }
+
+        @Override
+        public void call(ConnectionRequest request) {
+            mHandler.obtainMessage(MSG_CALL, request).sendToTarget();
+        }
+
+        @Override
+        public void abort(String callId) {
+            mHandler.obtainMessage(MSG_ABORT, callId).sendToTarget();
+        }
+
+        @Override
+        public void createIncomingCall(ConnectionRequest request) {
+            mHandler.obtainMessage(MSG_CREATE_INCOMING_CALL, request).sendToTarget();
+        }
+
+        @Override
+        public void answer(String callId) {
+            mHandler.obtainMessage(MSG_ANSWER, callId).sendToTarget();
+        }
+
+        @Override
+        public void reject(String callId) {
+            mHandler.obtainMessage(MSG_REJECT, callId).sendToTarget();
+        }
+
+        @Override
+        public void disconnect(String callId) {
+            mHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
+        }
+
+        @Override
+        public void hold(String callId) {
+            mHandler.obtainMessage(MSG_HOLD, callId).sendToTarget();
+        }
+
+        @Override
+        public void unhold(String callId) {
+            mHandler.obtainMessage(MSG_UNHOLD, callId).sendToTarget();
+        }
+
+        @Override
+        public void onAudioStateChanged(String callId, CallAudioState audioState) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = audioState;
+            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void playDtmfTone(String callId, char digit) {
+            mHandler.obtainMessage(MSG_PLAY_DTMF_TONE, digit, 0, callId).sendToTarget();
+        }
+
+        @Override
+        public void stopDtmfTone(String callId) {
+            mHandler.obtainMessage(MSG_STOP_DTMF_TONE, callId).sendToTarget();
+        }
+
+        @Override
+        public void conference(String conferenceCallId, String callId) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = conferenceCallId;
+            args.arg2 = callId;
+            mHandler.obtainMessage(MSG_CONFERENCE, args).sendToTarget();
+        }
+
+        @Override
+        public void splitFromConference(String callId) {
+            mHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, callId).sendToTarget();
+        }
+
+        @Override
+        public void onPostDialContinue(String callId, boolean proceed) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.argi1 = proceed ? 1 : 0;
+            mHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
+        }
+
+        @Override
+        public void onPhoneAccountClicked(String callId) {
+            mHandler.obtainMessage(MSG_ON_PHONE_ACCOUNT_CLICKED, callId).sendToTarget();
+        }
+    };
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ADD_CALL_SERVICE_ADAPTER:
+                    mAdapter.addAdapter((IConnectionServiceAdapter) msg.obj);
+                    onAdapterAttached();
+                    break;
+                case MSG_CALL:
+                    call((ConnectionRequest) msg.obj);
+                    break;
+                case MSG_ABORT:
+                    abort((String) msg.obj);
+                    break;
+                case MSG_CREATE_INCOMING_CALL:
+                    createIncomingCall((ConnectionRequest) msg.obj);
+                    break;
+                case MSG_ANSWER:
+                    answer((String) msg.obj);
+                    break;
+                case MSG_REJECT:
+                    reject((String) msg.obj);
+                    break;
+                case MSG_DISCONNECT:
+                    disconnect((String) msg.obj);
+                    break;
+                case MSG_HOLD:
+                    hold((String) msg.obj);
+                    break;
+                case MSG_UNHOLD:
+                    unhold((String) msg.obj);
+                    break;
+                case MSG_ON_AUDIO_STATE_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        CallAudioState audioState = (CallAudioState) args.arg2;
+                        onAudioStateChanged(callId, audioState);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_PLAY_DTMF_TONE:
+                    playDtmfTone((String) msg.obj, (char) msg.arg1);
+                    break;
+                case MSG_STOP_DTMF_TONE:
+                    stopDtmfTone((String) msg.obj);
+                    break;
+                case MSG_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String conferenceCallId = (String) args.arg1;
+                        String callId = (String) args.arg2;
+                        conference(conferenceCallId, callId);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_SPLIT_FROM_CONFERENCE:
+                    splitFromConference((String) msg.obj);
+                    break;
+                case MSG_ON_POST_DIAL_CONTINUE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean proceed = (args.argi1 == 1);
+                        onPostDialContinue(callId, proceed);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_ON_PHONE_ACCOUNT_CLICKED:
+                    onPhoneAccountClicked((String) msg.obj);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
         @Override
         public void onStateChanged(Connection c, int state) {
@@ -88,22 +281,22 @@ public abstract class ConnectionService extends CallService {
             Log.d(this, "Adapter set state %s %s", id, Connection.stateToString(state));
             switch (state) {
                 case Connection.State.ACTIVE:
-                    getAdapter().setActive(id);
+                    mAdapter.setActive(id);
                     break;
                 case Connection.State.DIALING:
-                    getAdapter().setDialing(id);
+                    mAdapter.setDialing(id);
                     break;
                 case Connection.State.DISCONNECTED:
                     // Handled in onDisconnected()
                     break;
                 case Connection.State.HOLDING:
-                    getAdapter().setOnHold(id);
+                    mAdapter.setOnHold(id);
                     break;
                 case Connection.State.NEW:
                     // Nothing to tell Telecomm
                     break;
                 case Connection.State.RINGING:
-                    getAdapter().setRinging(id);
+                    mAdapter.setRinging(id);
                     break;
             }
         }
@@ -113,23 +306,18 @@ public abstract class ConnectionService extends CallService {
         public void onFeaturesChanged(Connection c, int features) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter set features %d", features);
-            getAdapter().setFeatures(id, features);
+            mAdapter.setFeatures(id, features);
         }
 
         @Override
         public void onDisconnected(Connection c, int cause, String message) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter set disconnected %d %s", cause, message);
-            getAdapter().setDisconnected(id, cause, message);
+            mAdapter.setDisconnected(id, cause, message);
         }
 
         @Override
         public void onHandleChanged(Connection c, Uri newHandle) {
-            // TODO: Unsupported yet
-        }
-
-        @Override
-        public void onAudioStateChanged(Connection c, CallAudioState state) {
             // TODO: Unsupported yet
         }
 
@@ -144,23 +332,23 @@ public abstract class ConnectionService extends CallService {
         }
 
         @Override
-        public final void onPostDialWait(Connection c, String remaining) {
+        public void onPostDialWait(Connection c, String remaining) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter onPostDialWait %s, %s", c, remaining);
-            getAdapter().onPostDialWait(id, remaining);
+            mAdapter.onPostDialWait(id, remaining);
         }
 
         @Override
         public void onRequestingRingback(Connection c, boolean ringback) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter onRingback %b", ringback);
-            getAdapter().setRequestingRingback(id, ringback);
+            mAdapter.setRequestingRingback(id, ringback);
         }
 
         @Override
         public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {
             String id = mIdByConnection.get(c);
-            getAdapter().setCanConference(id, isConferenceCapable);
+            mAdapter.setCanConference(id, isConferenceCapable);
         }
 
         /** ${inheritDoc} */
@@ -168,156 +356,120 @@ public abstract class ConnectionService extends CallService {
         public void onParentConnectionChanged(Connection c, Connection parent) {
             String id = mIdByConnection.get(c);
             String parentId = parent == null ? null : mIdByConnection.get(parent);
-            getAdapter().setIsConferenced(id, parentId);
+            mAdapter.setIsConferenced(id, parentId);
         }
 
         @Override
         public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {
             String id = mIdByConnection.get(c);
-            getAdapter().setCallVideoProvider(id, callVideoProvider);
+            mAdapter.setCallVideoProvider(id, callVideoProvider);
         }
     };
 
-    /** @hide */
+    /** {@inheritDoc} */
     @Override
-    protected final void call(final CallInfo callInfo) {
-        Log.d(this, "call %s", callInfo);
+    public final IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    private void call(final ConnectionRequest originalRequest) {
+        Log.d(this, "call %s", originalRequest);
         onCreateConnections(
-                new ConnectionRequest(
-                        callInfo.getId(),
-                        callInfo.getHandle(),
-                        callInfo.getExtras()),
+                originalRequest,
                 new OutgoingCallResponse<Connection>() {
                     @Override
                     public void onSuccess(ConnectionRequest request, Connection connection) {
-                        Log.d(this, "adapter handleSuccessfulOutgoingCall %s",
-                                callInfo.getId());
-                        getAdapter().handleSuccessfulOutgoingCall(callInfo.getId());
-                        addConnection(callInfo.getId(), connection);
+                        Log.d(this, "adapter handleSuccessfulOutgoingCall %s", request.getCallId());
+                        mAdapter.handleSuccessfulOutgoingCall(request);
+                        addConnection(request.getCallId(), connection);
                     }
 
                     @Override
                     public void onFailure(ConnectionRequest request, int code, String msg) {
-                        getAdapter().handleFailedOutgoingCall(request, code, msg);
+                        mAdapter.handleFailedOutgoingCall(request, code, msg);
                     }
 
                     @Override
                     public void onCancel(ConnectionRequest request) {
-                        getAdapter().cancelOutgoingCall(callInfo.getId());
+                        mAdapter.cancelOutgoingCall(request);
                     }
                 }
         );
     }
 
-    /** @hide */
-    @Override
-    protected final void abort(String callId) {
+    private void abort(String callId) {
         Log.d(this, "abort %s", callId);
-        findConnectionForAction(callId, "abort").abort();
+        findConnectionForAction(callId, "abort").onAbort();
     }
 
-    /** @hide */
-    @Override
-    protected final void setIncomingCallId(final String callId, Bundle extras) {
-        Log.d(this, "setIncomingCallId %s %s", callId, extras);
+    private void createIncomingCall(ConnectionRequest originalRequest) {
+        Log.d(this, "createIncomingCall %s", originalRequest);
         onCreateIncomingConnection(
-                new ConnectionRequest(
-                        callId,
-                        null,  // TODO: Can we obtain this from "extras"?
-                        extras),
+                originalRequest,
                 new Response<ConnectionRequest, Connection>() {
                     @Override
                     public void onResult(ConnectionRequest request, Connection... result) {
                         if (result != null && result.length != 1) {
-                            Log.d(this, "adapter handleFailedOutgoingCall %s", callId);
-                            getAdapter().handleFailedOutgoingCall(
-                                    request,
-                                    DisconnectCause.ERROR_UNSPECIFIED,
-                                    "Created " + result.length + " Connections, expected 1");
                             for (Connection c : result) {
-                                c.abort();
+                                c.onAbort();
                             }
                         } else {
-                            addConnection(callId, result[0]);
-                            Log.d(this, "adapter notifyIncomingCall %s", callId);
-                            // TODO: Uri.EMPTY is because CallInfo crashes when Parceled with a
-                            // null URI ... need to fix that at its cause!
-                            getAdapter().notifyIncomingCall(new CallInfo(
-                                    callId,
-                                    connectionStateToCallState(result[0].getState()),
-                                    request.getHandle() /* result[0].getHandle() == null
-                                            ? Uri.EMPTY : result[0].getHandle() */));
+                            addConnection(request.getCallId(), result[0]);
+                            Log.d(this, "adapter notifyIncomingCall %s", request);
+                            mAdapter.notifyIncomingCall(request);
                         }
                     }
 
                     @Override
                     public void onError(ConnectionRequest request, int code, String msg) {
-                        Log.d(this, "adapter failed setIncomingCallId %s %d %s",
+                        Log.d(this, "adapter failed createIncomingCall %s %d %s",
                                 request, code, msg);
                     }
                 }
         );
     }
 
-    /** @hide */
-    @Override
-    protected final void answer(String callId) {
+    private void answer(String callId) {
         Log.d(this, "answer %s", callId);
-        findConnectionForAction(callId, "answer").answer();
+        findConnectionForAction(callId, "answer").onAnswer();
     }
 
-    /** @hide */
-    @Override
-    protected final void reject(String callId) {
+    private void reject(String callId) {
         Log.d(this, "reject %s", callId);
-        findConnectionForAction(callId, "reject").reject();
+        findConnectionForAction(callId, "reject").onReject();
     }
 
-    /** @hide */
-    @Override
-    protected final void disconnect(String callId) {
+    private void disconnect(String callId) {
         Log.d(this, "disconnect %s", callId);
-        findConnectionForAction(callId, "disconnect").disconnect();
+        findConnectionForAction(callId, "disconnect").onDisconnect();
     }
 
-    /** @hide */
-    @Override
-    protected final void hold(String callId) {
+    private void hold(String callId) {
         Log.d(this, "hold %s", callId);
-        findConnectionForAction(callId, "hold").hold();
+        findConnectionForAction(callId, "hold").onHold();
     }
 
-    /** @hide */
-    @Override
-    protected final void unhold(String callId) {
+    private void unhold(String callId) {
         Log.d(this, "unhold %s", callId);
-        findConnectionForAction(callId, "unhold").unhold();
+        findConnectionForAction(callId, "unhold").onUnhold();
     }
 
-    /** @hide */
-    @Override
-    protected final void playDtmfTone(String callId, char digit) {
-        Log.d(this, "playDtmfTone %s %c", callId, digit);
-        findConnectionForAction(callId, "playDtmfTone").playDtmfTone(digit);
-    }
-
-    /** @hide */
-    @Override
-    protected final void stopDtmfTone(String callId) {
-        Log.d(this, "stopDtmfTone %s", callId);
-        findConnectionForAction(callId, "stopDtmfTone").stopDtmfTone();
-    }
-
-    /** @hide */
-    @Override
-    protected final void onAudioStateChanged(String callId, CallAudioState audioState) {
+    private void onAudioStateChanged(String callId, CallAudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
         findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
     }
 
-    /** @hide */
-    @Override
-    protected final void conference(final String conferenceCallId, String callId) {
+    private void playDtmfTone(String callId, char digit) {
+        Log.d(this, "playDtmfTone %s %c", callId, digit);
+        findConnectionForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
+    }
+
+    private void stopDtmfTone(String callId) {
+        Log.d(this, "stopDtmfTone %s", callId);
+        findConnectionForAction(callId, "stopDtmfTone").onStopDtmfTone();
+    }
+
+    private void conference(final String conferenceCallId, String callId) {
         Log.d(this, "conference %s, %s", conferenceCallId, callId);
 
         Connection connection = findConnectionForAction(callId, "conference");
@@ -336,7 +488,7 @@ public abstract class ConnectionService extends CallService {
                             Connection conferenceConnection = result[0];
                             if (!mIdByConnection.containsKey(conferenceConnection)) {
                                 Log.v(this, "sending new conference call %s", conferenceCallId);
-                                getAdapter().addConferenceCall(conferenceCallId);
+                                mAdapter.addConferenceCall(conferenceCallId);
                                 addConnection(conferenceCallId, conferenceConnection);
                             }
                         }
@@ -350,9 +502,7 @@ public abstract class ConnectionService extends CallService {
                 });
     }
 
-    /** @hide */
-    @Override
-    protected final void splitFromConference(String callId) {
+    private void splitFromConference(String callId) {
         Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
@@ -364,55 +514,36 @@ public abstract class ConnectionService extends CallService {
         // TODO(santoscordon): Find existing conference call and invoke split(connection).
     }
 
-    /** @hide */
-    @Override
-    protected final void onPostDialContinue(String callId, boolean proceed) {
+    private void onPostDialContinue(String callId, boolean proceed) {
         Log.d(this, "onPostDialContinue(%s)", callId);
-
-        Connection connection = findConnectionForAction(callId, "onPostDialContinue");
-        if (connection == NULL_CONNECTION) {
-            Log.w(this, "Connection missing in post-dial request %s.", callId);
-            return;
-        }
-        connection.onPostDialContinue(proceed);
+        findConnectionForAction(callId, "stopDtmfTone").onPostDialContinue(proceed);
     }
 
-    /** @hide */
-    @Override
-    protected final void onFeaturesChanged(String callId, int features) {
-        Log.d(this, "onFeaturesChanged %s %d", callId, features);
-        findConnectionForAction(callId, "onFeaturesChanged").setFeatures(features);
-    }
-
-    /** @hide */
-    @Override
-    protected void onPhoneAccountClicked(String callId) {
+    private void onPhoneAccountClicked(String callId) {
         Log.d(this, "onPhoneAccountClicked %s", callId);
         findConnectionForAction(callId, "onPhoneAccountClicked").onPhoneAccountClicked();
     }
 
-    /** @hide */
-    @Override
-    protected final void onAdapterAttached(CallServiceAdapter adapter) {
+    private void onAdapterAttached() {
         if (mAreAccountsInitialized) {
             // No need to query again if we already did it.
             return;
         }
 
-        getAdapter().queryRemoteConnectionServices(new RemoteServiceCallback.Stub() {
+        mAdapter.queryRemoteConnectionServices(new RemoteServiceCallback.Stub() {
             @Override
             public void onResult(
                     final List<ComponentName> componentNames,
-                    final List<IBinder> callServices) {
+                    final List<IBinder> services) {
                 mHandler.post(new Runnable() {
                     @Override public void run() {
-                        for (int i = 0; i < componentNames.size() && i < callServices.size(); i++) {
+                        for (int i = 0; i < componentNames.size() && i < services.size(); i++) {
                             mRemoteConnectionManager.addConnectionService(
                                     componentNames.get(i),
-                                    ICallService.Stub.asInterface(callServices.get(i)));
+                                    IConnectionService.Stub.asInterface(services.get(i)));
                         }
                         mAreAccountsInitialized = true;
-                        Log.d(this, "remote call services found: " + callServices);
+                        Log.d(this, "remote call services found: " + services);
                         maybeRespondToAccountLookup();
                     }
                 });
@@ -538,26 +669,6 @@ public abstract class ConnectionService extends CallService {
             }
         }
         return builder.toString();
-    }
-
-    private CallState connectionStateToCallState(int connectionState) {
-        switch (connectionState) {
-            case Connection.State.NEW:
-                return CallState.NEW;
-            case Connection.State.RINGING:
-                return CallState.RINGING;
-            case Connection.State.DIALING:
-                return CallState.DIALING;
-            case Connection.State.ACTIVE:
-                return CallState.ACTIVE;
-            case Connection.State.HOLDING:
-                return CallState.ON_HOLD;
-            case Connection.State.DISCONNECTED:
-                return CallState.DISCONNECTED;
-            default:
-                Log.wtf(this, "Unknown Connection.State %d", connectionState);
-                return CallState.NEW;
-        }
     }
 
     private void addConnection(String callId, Connection connection) {

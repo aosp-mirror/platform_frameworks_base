@@ -20,7 +20,7 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import com.android.internal.telecomm.ICallService;
+import com.android.internal.telecomm.IConnectionService;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,11 +33,11 @@ import java.util.Map;
 public class RemoteConnectionManager {
     private Map<ComponentName, RemoteConnectionService> mRemoteConnectionServices = new HashMap<>();
 
-    void addConnectionService(ComponentName componentName, ICallService callService) {
+    void addConnectionService(ComponentName componentName, IConnectionService connectionService) {
         if (!mRemoteConnectionServices.containsKey(componentName)) {
             try {
                 RemoteConnectionService remoteConnectionService =
-                        new RemoteConnectionService(componentName, callService);
+                        new RemoteConnectionService(componentName, connectionService);
                 mRemoteConnectionServices.put(componentName, remoteConnectionService);
             } catch (RemoteException ignored) {
             }

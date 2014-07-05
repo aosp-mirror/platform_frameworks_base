@@ -35,7 +35,6 @@ public abstract class Connection {
     public interface Listener {
         void onStateChanged(Connection c, int state);
         void onFeaturesChanged(Connection c, int features);
-        void onAudioStateChanged(Connection c, CallAudioState state);
         void onHandleChanged(Connection c, Uri newHandle);
         void onSignalChanged(Connection c, Bundle details);
         void onDisconnected(Connection c, int cause, String message);
@@ -55,10 +54,6 @@ public abstract class Connection {
         /** {@inheritDoc} */
         @Override
         public void onFeaturesChanged(Connection c, int features) {}
-
-        /** {@inheritDoc} */
-         @Override
-        public void onAudioStateChanged(Connection c, CallAudioState state) {}
 
         @Override
         public void onHandleChanged(Connection c, Uri newHandle) {}
@@ -141,7 +136,9 @@ public abstract class Connection {
      * @return The features of the call.  These are items for which the InCall UI may wish to
      *         display a visual indicator.
      */
-    public final int getFeatures() { return mFeatures; }
+    public final int getFeatures() {
+        return mFeatures;
+    }
 
     /**
      * @return The audio state of the call, describing how its audio is currently
@@ -150,6 +147,21 @@ public abstract class Connection {
      */
     public final CallAudioState getCallAudioState() {
         return mCallAudioState;
+    }
+
+    /**
+     * Returns whether this connection is requesting that the system play a ringback tone
+     * on its behalf.
+     */
+    public final boolean isRequestingRingback() {
+        return mRequestingRingback;
+    }
+
+    /**
+     * Returns whether this connection is a conference connection (has child connections).
+     */
+    public final boolean isConferenceConnection() {
+        return !mChildConnections.isEmpty();
     }
 
     /**
@@ -179,151 +191,14 @@ public abstract class Connection {
     }
 
     /**
-     * Play a DTMF tone in this Connection.
-     *
-     * @param c A DTMF character.
-     *
-     * @hide
-     */
-    public final void playDtmfTone(char c) {
-        Log.d(this, "playDtmfTone %c", c);
-        onPlayDtmfTone(c);
-    }
-
-    /**
-     * Stop any DTMF tones which may be playing in this Connection.
-     *
-     * @hide
-     */
-    public final void stopDtmfTone() {
-        Log.d(this, "stopDtmfTone");
-        onStopDtmfTone();
-    }
-
-    /**
-     * Disconnect this Connection. If and when the Connection can comply with
-     * this request, it will transition to the {@link State#DISCONNECTED}
-     * state and notify its listeners.
-     *
-     * @hide
-     */
-    public final void disconnect() {
-        Log.d(this, "disconnect");
-        onDisconnect();
-    }
-
-    /**
-     * Separates this Connection from a parent connection.
-     *
-     * @hide
-     */
-    public final void separate() {
-        Log.d(this, "separate");
-        onSeparate();
-    }
-
-    /**
-     * Abort this Connection. The Connection will immediately transition to
-     * the {@link State#DISCONNECTED} state, and send no notifications of this
-     * or any other future events.
-     *
-     * @hide
-     */
-    public final void abort() {
-        Log.d(this, "abort");
-        onAbort();
-    }
-
-    /**
-     * Place this Connection on hold. If and when the Connection can comply with
-     * this request, it will transition to the {@link State#HOLDING}
-     * state and notify its listeners.
-     *
-     * @hide
-     */
-    public final void hold() {
-        Log.d(this, "hold");
-        onHold();
-    }
-
-    /**
-     * Un-hold this Connection. If and when the Connection can comply with
-     * this request, it will transition to the {@link State#ACTIVE}
-     * state and notify its listeners.
-     *
-     * @hide
-     */
-    public final void unhold() {
-        Log.d(this, "unhold");
-        onUnhold();
-    }
-
-    /**
-     * Accept a {@link State#RINGING} Connection. If and when the Connection
-     * can comply with this request, it will transition to the {@link State#ACTIVE}
-     * state and notify its listeners.
-     *
-     * @hide
-     */
-    public final void answer() {
-        Log.d(this, "answer");
-        if (mState == State.RINGING) {
-            onAnswer();
-        }
-    }
-
-    /**
-     * Reject a {@link State#RINGING} Connection. If and when the Connection
-     * can comply with this request, it will transition to the {@link State#ACTIVE}
-     * state and notify its listeners.
-     *
-     * @hide
-     */
-    public final void reject() {
-        Log.d(this, "reject");
-        if (mState == State.RINGING) {
-            onReject();
-        }
-    }
-
-    /**
-     * TODO(santoscordon): Needs updated documentation.
-     *
-     * @hide
-     */
-    public final void conference() {
-        Log.d(this, "conference");
-        onConference();
-    }
-
-    /**
-     * Set the features applicable to the connection.  These are items for which the InCall UI may
-     * wish to display a visual indicator.
-     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
-     * bit-mask.
-     *
-     * @param features The features active.
-     */
-    public final void setFeatures(int features) {
-        Log.d(this, "setFeatures %d", features);
-        this.mFeatures = features;
-        for (Listener l : mListeners) {
-            l.onFeaturesChanged(this, mFeatures);
-        }
-    }
-
-    /**
      * Inform this Connection that the state of its audio output has been changed externally.
      *
      * @param state The new audio state.
      * @hide
      */
-    public final void setAudioState(CallAudioState state) {
+    final void setAudioState(CallAudioState state) {
         Log.d(this, "setAudioState %s", state);
         mCallAudioState = state;
-        for (Listener l : mListeners) {
-            l.onAudioStateChanged(this, state);
-        }
         onSetAudioState(state);
     }
 
@@ -349,21 +224,6 @@ public abstract class Connection {
                 Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
         }
-    }
-
-    /**
-     * Returns whether this connection is requesting that the system play a ringback tone
-     * on its behalf.
-     */
-    public final boolean isRequestingRingback() {
-        return mRequestingRingback;
-    }
-
-    /**
-     * Returns whether this connection is a conference connection (has child connections).
-     */
-    public final boolean isConferenceConnection() {
-        return !mChildConnections.isEmpty();
     }
 
     /**
@@ -411,6 +271,22 @@ public abstract class Connection {
         mHandle = handle;
         for (Listener l : mListeners) {
             l.onHandleChanged(this, handle);
+        }
+    }
+
+    /**
+     * Set the features applicable to the connection.  These are items for which the InCall UI may
+     * wish to display a visual indicator.
+     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
+     * bit-mask.
+     *
+     * @param features The features active.
+     */
+    public final void setFeatures(int features) {
+        Log.d(this, "setFeatures %d", features);
+        mFeatures = features;
+        for (Listener l : mListeners) {
+            l.onFeaturesChanged(this, mFeatures);
         }
     }
 
@@ -600,11 +476,6 @@ public abstract class Connection {
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     protected void onPostDialContinue(boolean proceed) {}
-
-    /**
-     * TODO(santoscordon): Needs documentation.
-     */
-    protected void onConference() {}
 
     /**
      * TODO(santoscordon): Needs documentation.
