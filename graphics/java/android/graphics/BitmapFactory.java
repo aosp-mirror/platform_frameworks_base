@@ -472,7 +472,7 @@ public class BitmapFactory {
 
     /**
      * Synonym for {@link #decodeResource(Resources, int, android.graphics.BitmapFactory.Options)}
-     * will null Options.
+     * with null Options.
      *
      * @param res The resources object containing the image data
      * @param id The resource id of the image data
