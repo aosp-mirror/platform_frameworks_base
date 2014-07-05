@@ -392,7 +392,10 @@ public class FileUtils {
                 if (file.isDirectory()) {
                     success &= deleteContents(file);
                 }
-                success &= file.delete();
+                if (!file.delete()) {
+                    Log.w(TAG, "Failed to delete " + file);
+                    success = false;
+                }
             }
         }
         return success;

@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
-import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
@@ -31,7 +30,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.FileUtils;
@@ -40,7 +38,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SELinux;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.OsConstants;
@@ -48,11 +45,9 @@ import android.system.StructStat;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
 import java.io.File;
@@ -110,7 +105,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private Signature[] mSignatures;
 
     private boolean mMutationsAllowed;
-    private boolean mVerifierConfirmed;
     private boolean mPermissionsConfirmed;
     private boolean mInvalid;
 
@@ -238,20 +232,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Preconditions.checkNotNull(mPackageName);
         Preconditions.checkNotNull(mSignatures);
 
-        if (!mVerifierConfirmed) {
-            // TODO: async communication with verifier
-            // when they confirm, we'll kick off another install() pass
-            mVerifierConfirmed = true;
-        }
-
         if (!mPermissionsConfirmed) {
             // TODO: async confirm permissions with user
             // when they confirm, we'll kick off another install() pass
             mPermissionsConfirmed = true;
         }
-
-        // Unpack any native libraries contained in this session
-        unpackNativeLibraries();
 
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
@@ -421,58 +406,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 linkTreeIgnoringExisting(sourceFile, targetFile);
             } else {
                 Libcore.os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
-            }
-        }
-    }
-
-    private void unpackNativeLibraries() throws InstallFailedException {
-        final File libDir = new File(sessionDir, "lib");
-
-        if (!libDir.mkdir()) {
-            throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Failed to create " + libDir);
-        }
-
-        try {
-            Libcore.os.chmod(libDir.getAbsolutePath(), 0755);
-        } catch (ErrnoException e) {
-            throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Failed to prepare " + libDir + ": " + e);
-        }
-
-        if (!SELinux.restorecon(libDir)) {
-            throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Failed to set context on " + libDir);
-        }
-
-        // Unpack all native libraries under stage
-        final File[] files = sessionDir.listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            throw new InstallFailedException(INSTALL_FAILED_INVALID_APK, "No packages staged");
-        }
-
-        for (File file : files) {
-            NativeLibraryHelper.ApkHandle handle = null;
-            try {
-                handle = NativeLibraryHelper.ApkHandle.create(file);
-                final int abiIndex = NativeLibraryHelper.findSupportedAbi(handle,
-                        Build.SUPPORTED_ABIS);
-                if (abiIndex >= 0) {
-                    int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, libDir,
-                            Build.SUPPORTED_ABIS[abiIndex]);
-                    if (copyRet != INSTALL_SUCCEEDED) {
-                        throw new InstallFailedException(copyRet,
-                                "Failed to copy native libraries for " + file);
-                    }
-                } else if (abiIndex != PackageManager.NO_NATIVE_LIBRARIES) {
-                    throw new InstallFailedException(abiIndex,
-                            "Failed to copy native libraries for " + file);
-                }
-            } catch (IOException ioe) {
-                throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Failed to create handle for " + file);
-            } finally {
-                IoUtils.closeQuietly(handle);
             }
         }
     }
