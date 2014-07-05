@@ -69,7 +69,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nepavyko užfiksuoti ekrano kopijos."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Nepavyko išsaugoti ekrano kopijos. Gali būti naudojama atmintis."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failo perdavimo parinktys"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Įmontuoti kaip medijos grotuvą (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Įmontuoti kaip medijos leistuvę (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Įmontuoti kaip fotoaparatą (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Įdiegti „Mac“ skirtą „Android“ perkėl. priem. pr."</string>
     <string name="accessibility_back" msgid="567011538994429120">"Atgal"</string>
@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Akumuliatorius <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Lėktuvo režimas <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"„Bluetooth“ <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Vietovė – <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Signalas nustatytas <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G–3G duomenys neleidžiami"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G duomenys neleidžiami"</string>
@@ -179,7 +180,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"„Bluetooth“ (<xliff:g id="NUMBER">%d</xliff:g> įreng.)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"„Bluetooth“ išjungta"</string>
-    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Skaistis"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Šviesumas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Automatiškai sukti"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Sukimas užrakintas"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Įvesties metodas"</string>
@@ -195,9 +196,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Neprisijungta"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tinklo nėra"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"„Wi-Fi“ pateiktis"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Belaidis rodymas"</string>
-    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Skaistis"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Perduoti ekraną"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Šviesumas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Tinklas gali\nbūti stebimas"</string>
 </resources>

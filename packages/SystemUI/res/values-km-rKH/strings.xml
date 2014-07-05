@@ -64,7 +64,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"មិន​អាច​រក្សាទុក​រូបថត​អេក្រង់​។ ឧបករណ៍​ផ្ទុក​អាច​កំពុង​ប្រើ​​។"</string>
@@ -139,7 +139,7 @@
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"បាន​បើក GPS ។"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ទទួល​​ GPS ។"</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ​"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"កម្មវិធី​រោទ៍​ញ័រ។"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"កម្មវិធី​រោទ៍​ស្ងាត់។"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> បដិសេធ។"</string>
@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ថ្ម <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"របៀបពេល​ជិះ​យន្ត​ហោះ <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ប៊្លូធូស <xliff:g id="STATE">%s</xliff:g> ។"</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"ទីតាំង <xliff:g id="STATE">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"បាន​បិទ​ទិន្នន័យ 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"បាន​បិទ​ទិន្នន័យ 4G"</string>
@@ -178,13 +179,13 @@
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"បាន​បញ្ចូល​ពេញ"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ប៊្លូធូស"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ប៊្លូធូស (ឧបករណ៍ <xliff:g id="NUMBER">%d</xliff:g>)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"បិទ​ប៊្លូធូស"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"​ប៊្លូធូស​បាន​បិទ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ពន្លឺ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"បង្វិល​​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"បាន​ចាក់​សោ​ការ​បង្វិល"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បិទ"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង​"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"សម្រាប់​តែ​ការ​ហៅ​ពេល​អាសន្ន"</string>
@@ -194,10 +195,9 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"វ៉ាយហ្វាយ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"បិទ​វ៉ាយហ្វាយ"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"បង្ហា​ញ​វ៉ាយហ្វាយ"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"​បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ចាត់​ថ្នាក់​អេក្រង់"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
-    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
 </resources>
