@@ -16,12 +16,22 @@
 
 package com.android.internal.content;
 
+import static android.content.pm.PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS;
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
+import static android.content.pm.PackageManager.NO_NATIVE_LIBRARIES;
+
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageLite;
+import android.content.pm.PackageParser.PackageParserException;
 import android.util.Slog;
+
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Native libraries helper.
@@ -34,40 +44,72 @@ public class NativeLibraryHelper {
     private static final boolean DEBUG_NATIVE = false;
 
     /**
-     * A handle to an opened APK. Used as input to the various NativeLibraryHelper
-     * methods. Allows us to scan and parse the APK exactly once instead of doing
-     * it multiple times.
+     * A handle to an opened package, consisting of one or more APKs. Used as
+     * input to the various NativeLibraryHelper methods. Allows us to scan and
+     * parse the APKs exactly once instead of doing it multiple times.
      *
      * @hide
      */
-    public static class ApkHandle implements Closeable {
-        final String apkPath;
-        final long apkHandle;
+    public static class Handle implements Closeable {
+        private final CloseGuard mGuard = CloseGuard.get();
+        private volatile boolean mClosed;
 
-        public static ApkHandle create(String path) throws IOException {
-            final long handle = nativeOpenApk(path);
-            if (handle == 0) {
-                throw new IOException("Unable to open APK: " + path);
+        final long[] apkHandles;
+
+        public static Handle create(File packageFile) throws IOException {
+            final PackageLite lite;
+            try {
+                lite = PackageParser.parsePackageLite(packageFile, 0);
+            } catch (PackageParserException e) {
+                throw new IOException("Failed to parse package: " + packageFile, e);
             }
 
-            return new ApkHandle(path, handle);
+            final List<String> codePaths = lite.getAllCodePaths();
+            final int size = codePaths.size();
+            final long[] apkHandles = new long[size];
+            for (int i = 0; i < size; i++) {
+                final String path = codePaths.get(i);
+                apkHandles[i] = nativeOpenApk(path);
+                if (apkHandles[i] == 0) {
+                    // Unwind everything we've opened so far
+                    for (int j = 0; j < i; j++) {
+                        nativeClose(apkHandles[j]);
+                    }
+                    throw new IOException("Unable to open APK: " + path);
+                }
+            }
+
+            return new Handle(apkHandles);
         }
 
-        public static ApkHandle create(File path) throws IOException {
-            return create(path.getAbsolutePath());
-        }
-
-        private ApkHandle(String apkPath, long apkHandle) {
-            this.apkPath = apkPath;
-            this.apkHandle = apkHandle;
+        Handle(long[] apkHandles) {
+            this.apkHandles = apkHandles;
+            mGuard.open("close");
         }
 
         @Override
         public void close() {
-            nativeClose(apkHandle);
+            for (long apkHandle : apkHandles) {
+                nativeClose(apkHandle);
+            }
+            mGuard.close();
+            mClosed = true;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+            }
+            try {
+                if (!mClosed) {
+                    close();
+                }
+            } finally {
+                super.finalize();
+            }
         }
     }
-
 
     private static native long nativeOpenApk(String path);
     private static native void nativeClose(long handle);
@@ -79,8 +121,12 @@ public class NativeLibraryHelper {
      *
      * @return size of all native binary files in bytes
      */
-    public static long sumNativeBinariesLI(ApkHandle handle, String abi) {
-        return nativeSumNativeBinaries(handle.apkHandle, abi);
+    public static long sumNativeBinariesLI(Handle handle, String abi) {
+        long sum = 0;
+        for (long apkHandle : handle.apkHandles) {
+            sum += nativeSumNativeBinaries(apkHandle, abi);
+        }
+        return sum;
     }
 
     private native static int nativeCopyNativeBinaries(long handle,
@@ -94,9 +140,15 @@ public class NativeLibraryHelper {
      * @return {@link PackageManager#INSTALL_SUCCEEDED} if successful or another
      *         error code from that class if not
      */
-    public static int copyNativeBinariesIfNeededLI(ApkHandle handle, File sharedLibraryDir,
+    public static int copyNativeBinariesIfNeededLI(Handle handle, File sharedLibraryDir,
             String abi) {
-        return nativeCopyNativeBinaries(handle.apkHandle, sharedLibraryDir.getPath(), abi);
+        for (long apkHandle : handle.apkHandles) {
+            int res = nativeCopyNativeBinaries(apkHandle, sharedLibraryDir.getPath(), abi);
+            if (res != INSTALL_SUCCEEDED) {
+                return res;
+            }
+        }
+        return INSTALL_SUCCEEDED;
     }
 
     /**
@@ -106,8 +158,29 @@ public class NativeLibraryHelper {
      * APK doesn't contain any native code, and
      * {@link PackageManager#INSTALL_FAILED_NO_MATCHING_ABIS} if none of the ABIs match.
      */
-    public static int findSupportedAbi(ApkHandle handle, String[] supportedAbis) {
-        return nativeFindSupportedAbi(handle.apkHandle, supportedAbis);
+    public static int findSupportedAbi(Handle handle, String[] supportedAbis) {
+        int finalRes = NO_NATIVE_LIBRARIES;
+        for (long apkHandle : handle.apkHandles) {
+            final int res = nativeFindSupportedAbi(apkHandle, supportedAbis);
+            if (res == NO_NATIVE_LIBRARIES) {
+                // No native code, keep looking through all APKs.
+            } else if (res == INSTALL_FAILED_NO_MATCHING_ABIS) {
+                // Found some native code, but no ABI match; update our final
+                // result if we haven't found other valid code.
+                if (finalRes < 0) {
+                    finalRes = INSTALL_FAILED_NO_MATCHING_ABIS;
+                }
+            } else if (res >= 0) {
+                // Found valid native code, track the best ABI match
+                if (finalRes < 0 || res < finalRes) {
+                    finalRes = res;
+                }
+            } else {
+                // Unexpected error; bail
+                return res;
+            }
+        }
+        return finalRes;
     }
 
     private native static int nativeFindSupportedAbi(long handle, String[] supportedAbis);
@@ -156,13 +229,16 @@ public class NativeLibraryHelper {
     // We don't care about the other return values for now.
     private static final int BITCODE_PRESENT = 1;
 
-    public static boolean hasRenderscriptBitcode(ApkHandle handle) throws IOException {
-        final int returnVal = hasRenderscriptBitcode(handle.apkHandle);
-        if (returnVal < 0) {
-            throw new IOException("Error scanning APK, code: " + returnVal);
+    public static boolean hasRenderscriptBitcode(Handle handle) throws IOException {
+        for (long apkHandle : handle.apkHandles) {
+            final int res = hasRenderscriptBitcode(apkHandle);
+            if (res < 0) {
+                throw new IOException("Error scanning APK, code: " + res);
+            } else if (res == BITCODE_PRESENT) {
+                return true;
+            }
         }
-
-        return (returnVal == BITCODE_PRESENT);
+        return false;
     }
 
     private static native int hasRenderscriptBitcode(long apkHandle);

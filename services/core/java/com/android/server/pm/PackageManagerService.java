@@ -24,7 +24,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageParser.isPackageFilename;
+import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.S_IRGRP;
@@ -42,7 +42,6 @@ import com.android.internal.R;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.NativeLibraryHelper.ApkHandle;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -4096,7 +4095,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         for (File file : files) {
-            if (!isPackageFilename(file)) {
+            if (!isApkFile(file)) {
                 // Ignore entries which are not apk's
                 continue;
             }
@@ -5358,10 +5357,9 @@ public class PackageManagerService extends IPackageManager.Stub {
          *        only for non-system apps and system app upgrades.
          */
         if (pkg.applicationInfo.nativeLibraryDir != null) {
-            // TODO: extend to extract native code from split APKs
-            ApkHandle handle = null;
+            NativeLibraryHelper.Handle handle = null;
             try {
-                handle = ApkHandle.create(scanFile.getPath());
+                handle = NativeLibraryHelper.Handle.create(scanFile);
                 // Enable gross and lame hacks for apps that are built with old
                 // SDK tools. We must scan their APKs for renderscript bitcode and
                 // not launch them if it's present. Don't bother checking on devices
@@ -6178,7 +6176,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static int copyNativeLibrariesForInternalApp(ApkHandle handle,
+    private static int copyNativeLibrariesForInternalApp(NativeLibraryHelper.Handle handle,
             final File nativeLibraryDir, String[] abiList) throws IOException {
         if (!nativeLibraryDir.isDirectory()) {
             nativeLibraryDir.delete();
@@ -7486,7 +7484,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (DEBUG_APP_DIR_OBSERVER)
                     Log.v(TAG, "File " + fullPathStr + " changed: " + Integer.toHexString(event));
 
-                if (!isPackageFilename(path)) {
+                if (!isApkFile(fullPath)) {
                     if (DEBUG_APP_DIR_OBSERVER)
                         Log.v(TAG, "Ignoring change of non-package file: " + fullPathStr);
                     return;
@@ -9211,9 +9209,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             String[] abiList = (abiOverride != null) ?
                     new String[] { abiOverride } : Build.SUPPORTED_ABIS;
-            ApkHandle handle = null;
+            NativeLibraryHelper.Handle handle = null;
             try {
-                handle = ApkHandle.create(codeFile);
+                handle = NativeLibraryHelper.Handle.create(codeFile);
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
                         abiOverride == null &&
                         NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
@@ -12955,9 +12953,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final File newNativeDir = new File(newNativePath);
 
                                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
-                                        ApkHandle handle = null;
+                                        NativeLibraryHelper.Handle handle = null;
                                         try {
-                                            handle = ApkHandle.create(newCodePath);
+                                            handle = NativeLibraryHelper.Handle.create(
+                                                    new File(newCodePath));
                                             final int abi = NativeLibraryHelper.findSupportedAbi(
                                                     handle, Build.SUPPORTED_ABIS);
                                             if (abi >= 0) {

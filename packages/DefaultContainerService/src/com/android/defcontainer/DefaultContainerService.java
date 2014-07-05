@@ -48,7 +48,7 @@ import android.util.Slog;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.NativeLibraryHelper.ApkHandle;
+import com.android.internal.content.NativeLibraryHelper.Handle;
 import com.android.internal.content.PackageHelper;
 
 import libcore.io.IoUtils;
@@ -116,9 +116,9 @@ public class DefaultContainerService extends IntentService {
                 }
             }
 
-            ApkHandle handle = null;
+            Handle handle = null;
             try {
-                handle = ApkHandle.create(packagePath);
+                handle = Handle.create(new File(packagePath));
                 return copyResourceInner(packagePath, cid, key, resFileName, publicResFileName,
                         isExternal, isForwardLocked, handle, abiOverride);
             } catch (IOException ioe) {
@@ -349,7 +349,7 @@ public class DefaultContainerService extends IntentService {
 
     private String copyResourceInner(String packagePath, String newCid, String key, String resFileName,
             String publicResFileName, boolean isExternal, boolean isForwardLocked,
-            ApkHandle handle, String abiOverride) {
+            Handle handle, String abiOverride) {
         // The .apk file
         String codePath = packagePath;
         File codeFile = new File(codePath);
@@ -834,9 +834,9 @@ public class DefaultContainerService extends IntentService {
 
     private int calculateContainerSize(File apkFile, boolean forwardLocked,
             String abiOverride) throws IOException {
-        ApkHandle handle = null;
+        Handle handle = null;
         try {
-            handle = ApkHandle.create(apkFile);
+            handle = Handle.create(apkFile);
             final int abi = NativeLibraryHelper.findSupportedAbi(handle,
                     (abiOverride != null) ? new String[] { abiOverride } : Build.SUPPORTED_ABIS);
             return calculateContainerSize(handle, apkFile, abi, forwardLocked);
@@ -852,7 +852,7 @@ public class DefaultContainerService extends IntentService {
      * @return size in megabytes (2^20 bytes)
      * @throws IOException when there is a problem reading the file
      */
-    private int calculateContainerSize(NativeLibraryHelper.ApkHandle apkHandle,
+    private int calculateContainerSize(NativeLibraryHelper.Handle handle,
             File apkFile, int abiIndex, boolean forwardLocked) throws IOException {
         // Calculate size of container needed to hold base APK.
         long sizeBytes = apkFile.length();
@@ -863,7 +863,7 @@ public class DefaultContainerService extends IntentService {
         // Check all the native files that need to be copied and add that to the
         // container size.
         if (abiIndex >= 0) {
-            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(apkHandle,
+            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle,
                     Build.SUPPORTED_ABIS[abiIndex]);
         }
 
