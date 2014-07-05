@@ -314,8 +314,8 @@ public class ViewPropertyAnimator {
      */
     public ViewPropertyAnimator setStartDelay(long startDelay) {
         if (startDelay < 0) {
-            throw new IllegalArgumentException("Animators cannot have negative duration: " +
-                    startDelay);
+            throw new IllegalArgumentException("Animators cannot have negative start " +
+                "delay: " + startDelay);
         }
         mStartDelaySet = true;
         mStartDelay = startDelay;
