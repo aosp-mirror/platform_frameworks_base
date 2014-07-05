@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"อุปกรณ์อินพุต"</string>
-    <string name="keyboard_layouts_label" msgid="6688773268302087545">"แป้นพิมพ์แอนดรอยด์"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"แป้นพิมพ์ Android"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"อังกฤษ (สหราชอาณาจักร)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"อังกฤษ (อเมริกัน)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"อังกฤษ (อเมริกัน), รูปแบบนานาชาติ"</string>
