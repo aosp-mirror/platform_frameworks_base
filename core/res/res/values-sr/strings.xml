@@ -576,7 +576,7 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"прилагођавање величине позадине"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дозвољава апликацији да подеси савете за системску величину позадине."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"поновно постављање фабричких подразумеваних подешавања"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Дозвољава апликацији да поново постави комплетна фабричка подешавања система и тиме избрише све податке, конфигурацију и инсталиране апликације."</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"Дозвољава апликацији да ресетује систем на фабричка подешавања и тиме избрише све податке, конфигурацију и инсталиране апликације."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"подешавање времена"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Дозвољава апликацији да промени време на сату таблета."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Дозвољава апликацији да промени време на сату телефона."</string>
@@ -691,8 +691,8 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"Закључавање екрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролишите начин и време закључавања екрана."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Брисање свих података"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Брисање података на таблету без упозорења враћањем фабричких података."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Избришите податке на телефону без упозорења враћањем фабричких података."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Брисање података на таблету без упозорења ресетовањем на фабричка подешавања."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Избришите податке на телефону без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Подесите глобални прокси сервер уређаја"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Подесите глобални прокси сервер уређаја који ће се користити док су омогућене смернице. Само први администратор уређаја поставља ефективни глобални прокси сервер."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Подешавање истека лозинке екрана"</string>
@@ -865,8 +865,8 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели PIN. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Неисправно сте покушали да откључате таблет <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Покушајте поново за <xliff:g id="NUMBER">%d</xliff:g> секунде(и)."</string>
@@ -874,7 +874,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Откључавање налога"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Превише покушаја уноса шаблона"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (адреса е-поште)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (имејл адреса)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Пријави ме"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неважеће корисничко име или лозинка."</string>
@@ -924,7 +924,7 @@
     <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише следеће:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Напусти ову страницу"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Затвори ову страницу"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Остани на овој страници"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nДа ли стварно желите да напустите ову страницу?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Потврда"</string>
@@ -1534,7 +1534,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодови се не подударају"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Превише покушаја уноса шаблона"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Да бисте откључали, пријавите се помоћу Google налога."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (адреса е-поште)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (имејл адреса)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
@@ -1543,8 +1543,8 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити ресетован на фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>

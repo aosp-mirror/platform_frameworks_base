@@ -116,7 +116,7 @@
     <string name="fcError" msgid="3327560126588500777">"የተያያዥ ችግር ወይም  ትክከል ያልሆነኮድ ባህሪ።"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"እሺ"</string>
     <string name="httpError" msgid="7956392511146698522">"የአውታረ መረብ ስህተት ነበር።"</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"ዩ አር ኤል ማግኘት አልተቻለም።"</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"ዩአርኤል ማግኘት አልተቻለም።"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"የድረገፁ ማረጋገጫ ሙሉ ምስርት አይደገፍም።"</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"ማረጋገጥ አልተቻለም።"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"ማረጋገጫ በእጅ አዙር አገልጋይ በኩል አልተሳካም።"</string>
@@ -270,13 +270,13 @@
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"የበመልዕክት-በኩል-ምላሽ-ስጥ ክስተቶችን ይላኩ"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"መተግበሪያው ሌሎች የመልዕክት መላኪያ መተግበሪያዎች ለመጪ ጥሪዎች በመልዕክት-በኩል-ምላሽ-መስጠት ስራን እንዲይዙ ጥያቄዎች እንዲልክላቸው ያስችለዋል።"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"የጽሑፍ መልዕክቶችዎን ያንብቡ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"መገለጫው በጡባዊ ቱኮህ ወይም በSIM ካርድህ የተከማቹ የኤስ.ኤም.ኤስ. መልእክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስ.ኤም.ኤስ. መልእክቶች እንዲያነብ ይፈቅድለታል።"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"መገለጫው በጡባዊ ተኮዎ ወይም በSIM ካርድዎ የተከማቹ የኤስኤምኤስ. መልዕክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስኤምኤስ መልዕክቶች እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"መገለጫው በስልክዎ ወይም በSIM ካርድዎ የተከማቹ የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስ.ኤም.ኤስ. መልዕክቶች እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"የጽሑፍ መልዕክቶችህን አርትዕ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"በጡባዊ ተኮህ ወይም ሲም ካርድህ ላይ ኤስ ኤም ኤስ መልዕክቶችን ለመፃፍ ለመተግበሪያው ይፈቅዳሉ፡፡መልዕክቶችህን ተንኮል አዘል መተግበሪያዎች ሊሰርዙ ይችላሉ፡፡"</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"በስልክዎ ወይም ሲም ካርድዎ ላይ ኤስ ኤም ኤስ መልዕክቶችን ለመፃፍ ለመተግበሪያው ይፈቅዳሉ። መልዕክቶችዎን ተንኮል አዘል መተግበሪያዎች ሊሰርዙ ይችላሉ።"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"የፅሁፍ መልዕክቶችን ተቀበል (WAP)"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"መተግበሪያው የWAP መልእክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልህን መልእክቶች ላንተ ሳያሳይህ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"መተግበሪያው የWAP መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልዎን መልዕክቶች ለእርስዎ ሳያሳይዎ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"መተግበሪያው በአሁኑ ጊዜና በቅርቡ እየተካሄዱ ስላሉ ተግባሮችን መረጃ ሰርስሮ እንዲያወጣ ይፈቅድለታል። ይህ መተግበሪያው በመሳሪያው ላይ የትኛዎቹ መተግበሪያዎች ጥቅም ላይ ስለመዋላቸው መረጃ እንዲያገኝ ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"በተለያዩ ተጠቃሚዎች መካከል መስተጋብር መፍጠር"</string>
@@ -328,7 +328,7 @@
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"የአሁኑ የመተግበሪያ መረጃ ያግኙ"</string>
     <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ያዢው በማያ ገጹ ፊት ላይ ስላለው የአሁኑ መተግበሪያ የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ሁሉንም መተግበሪያ ማስነሻ አሳይ እና ተቆጣጠር"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ክብረ ገመና ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ግላዊነት ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"አካታች የተወገደለት ስርጭት ላክ"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"የመተግበሪያ ፓኬጅ መወገዱን ማሳወቂያዎችን ለማሰራጨት ለመተግበሪያው ይፈቅዳሉ፡፡ ማንኛውንም እየሄደ ያለን ሌላ መተግበሪያ ለመግደል ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙት ይችላሉ፡፡"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"የ SMS ደርስዋል ስርጭት ላክ"</string>
@@ -471,11 +471,11 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"መተግበሪያው የጓደኞችህን እና የስራ ባልደረቦችህን ጨምሮ በጡባዊ ተኮህ ላይ ልታስተካክላቸው የምትችላቸውን ክስተቶች እንዲያክል፣ እንዲያስወግድ፣ እንዲለውጥ ይፈቅድለታል። ይህ መተግበሪያው ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልእክቶችን እንዲልክ ወይም ያለባለቤቱ እውቀት ክስተቶችን እንዲያስተካክል ሊፈቅድለት ይችላል።"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"መተግበሪያው የጓደኞችዎን እና የስራ ባልደረቦችዎን ጨምሮ በስልክዎ ላይ ሊያስተካክሏቸው የሚችሏቸውን ክስተቶች እንዲያክል፣ እንዲያስወግድ፣ እንዲለውጥ ይፈቅድለታል። ይህ መተግበሪያው ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልዕክቶችን እንዲልክ ወይም ያለባለቤቱ እውቀት ክስተቶችን እንዲያስተካክል ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ለሙከራ ጊዜያዊ ሥፍራ ፍጠር።"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"ለሙከራ የማስመሰል የመነሻ ምንጮችን ፍጠር ወይም አዲስ የአካባቢ አቅራቢ ጫን። ይህ መተግበሪያው አካባቢውን እና/ወይም እንደ GPS ወይም የአካባቢ አቅራቢዎች ባሉ ሌላ የመነሻ ምንጮች የተመለሱ ሁኔታዎችን ችላ እንዲል ይፈቅድለታል።"</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"ለሙከራ የጊዜያዊ የመነሻ ምንጮችን ይፍጠሩ ወይም አዲስ የአካባቢ አቅራቢ ይጫኑ። ይህ መተግበሪያው አካባቢውን እና/ወይም እንደ GPS ወይም የአካባቢ አቅራቢዎች ባሉ ሌላ የመነሻ ምንጮች የተመለሱ ሁኔታዎችን ችላ እንዲል ይፈቅድለታል።"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ተጨማሪ ሥፍራ አቅራቢ ትዕዛዞችን ድረስ።"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይህ መተግበሪያው በGPS ወይም ሌላ የመነሻ ምንጮች ክወና ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"የሥፍራ አቅራቢ ለመጫን ፍቀድ"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"ለሙከራ የማስመሰል የመነሻ ምንጮችን ፍጠር ወይም አዲስ የአካባቢ አቅራቢ ጫን። ይህ መተግበሪያው አካባቢውን እና/ወይም እንደ GPS ወይም የአካባቢ አቅራቢዎች ባሉ ሌላ የመነሻ ምንጮች የተመለሱ ሁኔታዎችን ችላ እንዲል ይፈቅድለታል።"</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"ለሙከራ የጊዜያዊ የመነሻ ምንጮችን ይፍጠሩ ወይም አዲስ የአካባቢ አቅራቢ ይጫኑ። ይህ መተግበሪያው አካባቢውን እና/ወይም እንደ ጂፒኤስ ወይም የአካባቢ አቅራቢዎች ባሉ ሌላ የመነሻ ምንጮች የተመለሱ ሁኔታዎችን ችላ እንዲል ይፈቅድለታል።"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ትክክለኛ አካባቢ (በጂ ፒ ኤስ እና አውታረ መረብ ላይ የተመሠረተ)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"መተግበሪያው የእርስዎን አለምአቀፍ የመሬት አቀማመጥ ስርዓትን (ጂ ፒ ኤስ) ወይም እንደ የተንቀሳቃሽ ስልክ ማማዎች እና Wi-Fi ያሉ የአውታረ መረብ አካባቢ ምንጮችን ተጠቅሞ ትክክለኛ አካባቢዎትን እንዲያውቅ ያስችለዋል። መተግበሪያው እነዚህ የአካባቢ አገልግሎቶችን እንዲጠቀምባቸው እነሱ ሊበሩ እና ለመሣሪያዎ የሚገኙ መሆን አለባቸው። መተግበሪያዎች እርስዎ የት እንዳሉ ለማወቅ ይህንን ሊጠቀሙበት ይችላሉ፣ እና ተጨማሪ ባትሪ ሊፈጁ ይችላሉ።"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ግምታዊ አካባቢ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
@@ -1025,7 +1025,7 @@
   </plurals>
   <plurals name="in_num_days">
     <item quantity="one" msgid="5413088743009839518">"ነገ"</item>
-    <item quantity="other" msgid="5109449375100953247">"በ<xliff:g id="COUNT">%d</xliff:g> ቀናት"</item>
+    <item quantity="other" msgid="5109449375100953247">"በ<xliff:g id="COUNT">%d</xliff:g> ቀኖች"</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"1 ሴኮንድ በፊት"</item>
@@ -1057,7 +1057,7 @@
   </plurals>
   <plurals name="abbrev_in_num_days">
     <item quantity="one" msgid="2178576254385739855">"ነገ"</item>
-    <item quantity="other" msgid="2973062968038355991">"በ<xliff:g id="COUNT">%d</xliff:g> ቀናት"</item>
+    <item quantity="other" msgid="2973062968038355991">"በ<xliff:g id="COUNT">%d</xliff:g> ቀኖች"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"በ <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"በ <xliff:g id="TIME">%s</xliff:g>"</string>
