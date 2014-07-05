@@ -35,7 +35,7 @@ public class PathMeasure {
     
     /**
      * Create a PathMeasure object associated with the specified path object
-     * (already created and specified). The meansure object can now return the
+     * (already created and specified). The measure object can now return the
      * path's length, and the position and tangent of any position along the
      * path.
      *
