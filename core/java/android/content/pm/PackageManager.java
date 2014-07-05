@@ -1446,6 +1446,14 @@ public abstract class PackageManager {
     public static final String FEATURE_WEBVIEW = "android.software.webview";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This device supports ethernet.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */

@@ -51,6 +51,11 @@ public class EthernetManager {
      * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
      */
     public IpConfiguration getConfiguration() {
+        if (mService == null) {
+            return new IpConfiguration(IpAssignment.UNASSIGNED,
+                                       ProxySettings.UNASSIGNED,
+                                       new LinkProperties());
+        }
         try {
             return mService.getConfiguration();
         } catch (RemoteException e) {
@@ -64,6 +69,9 @@ public class EthernetManager {
      * Set Ethernet configuration.
      */
     public void setConfiguration(IpConfiguration config) {
+        if (mService == null) {
+            return;
+        }
         try {
             mService.setConfiguration(config);
         } catch (RemoteException e) {

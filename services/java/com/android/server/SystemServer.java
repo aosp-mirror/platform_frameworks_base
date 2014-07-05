@@ -648,21 +648,13 @@ public final class SystemServer {
                 }
 
                 mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
-
                 mSystemServiceManager.startService(WIFI_PASSPOINT_SERVICE_CLASS);
-
                 mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-
                 mSystemServiceManager.startService(
                             "com.android.server.wifi.WifiScanningService");
 
-                if (!isEmulator) {
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET)) {
                     mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
-                } else {
-                    // Don't start the Ethernet service on the emulator because
-                    // it interferes with qemu's SLIRP emulation, which uses
-                    // IPv4 over eth0. http://b/15341003 .
-                    Slog.i(TAG, "Not starting Ethernet service (emulator)");
                 }
 
                 try {

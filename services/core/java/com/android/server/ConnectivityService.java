@@ -256,7 +256,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private NetworkStateTracker mNetTrackers[];
 
-    /* Handles captive portal check on a network */
+    /*
+     * Handles captive portal check on a network.
+     * Only set if device has {@link PackageManager#FEATURE_WIFI}.
+     */
     private CaptivePortalTracker mCaptivePortalTracker;
 
     /**
@@ -2337,7 +2340,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     void systemReady() {
-        mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI)) {
+            mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
+        }
         loadGlobalProxy();
 
         synchronized(this) {
