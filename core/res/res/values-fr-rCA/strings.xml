@@ -1258,11 +1258,11 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Si vous activez la mémoire de stockage USB, certaines applications en cours d\'utilisation vont être fermées et risquent de rester indisponibles jusqu\'à ce que la mémoire de stockage USB soit désactivée."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Échec du fonctionnement de la mémoire de stockage USB."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connecté en tant qu\'appareil multimédia"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connecté en tant qu\'app. multimédia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connecté en tant qu\'appareil photo"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connecté en tant que programme d\'installation"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Appuyez ici pour accéder aux autres options USB."</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"Appuyez pour accéder aux autres options USB."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater mémoire?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formater la carte SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tous les fichiers stockés sur la mémoire de stockage USB vont être effacés. Cette action est irréversible."</string>

@@ -315,7 +315,7 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"מאפשר לאפליקציה לאחזר את התוכן של החלון הפעיל. אפליקציות זדוניות עלולות לאחזר את תוכן החלון כולו ולבחון את כל הטקסט שבו, מלבד סיסמאות."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"הפעלת נגישות זמנית"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"מאפשר לאפליקציה להפעיל באופן זמני נגישות במכשיר. אפליקציות זדוניות עלולות לאפשר נגישות ללא הסכמת משתמש."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"אחזר מידע חלון"</string>
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"אחזר נתוני חלון"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"מאפשר לאפליקציה לאחזר מידע לגבי החלונות ממנהל החלונות. אפליקציות זדוניות עשויות לאחזר מידע המיועד לשימוש מערכת פנימי."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"סנן אירועים"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"‏מאפשר לאפליקציה לרשום מסנן קלט שמסנן את הזרם של כל אירועי המשתמש לפני שהם נשלחים. אפליקציה זדונית עשויה לשלוט ב-UI של המערכת ללא התערבות משתמש."</string>
