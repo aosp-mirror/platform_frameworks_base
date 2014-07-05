@@ -165,7 +165,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Daten erneut aktivieren"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Keine Internetverbindung"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Standort durch GPS festgelegt"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Standortanfragen aktiv"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
