@@ -19,6 +19,6 @@
     <string name="app_label" msgid="3701846017049540910">"शेल"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"बग रिपोर्ट कैप्चर कर ली गई"</string>
     <string name="bugreport_finished_text" msgid="3559904746859400732">"अपनी बग रिपोर्ट साझा करने के लिए स्पर्श करें"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"बग रिपोर्ट में व्यक्तिगत और निजी जानकारी सहित, सिस्टम की विभिन्न लॉग फ़ाइलों का डेटा होता है. बग रिपोर्ट केवल विश्वसनीय एप्स और व्यक्तियों से ही साझा करें."</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"बग रिपोर्ट में व्यक्तिगत और निजी जानकारी सहित, सिस्टम की विभिन्न लॉग फ़ाइलों का डेटा होता है. बग रिपोर्ट केवल विश्वसनीय ऐप्स  और व्यक्तियों से ही साझा करें."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"यह संदेश अगली बार दिखाएं"</string>
 </resources>

@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Κέλυφος"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Η λήψη της αναφοράς ήταν επιτυχής"</string>
-    <string name="bugreport_finished_text" msgid="3559904746859400732">"Αγγίξτε για κοινή χρήση της αναφοράς σας σφαλμάτων"</string>
+    <string name="bugreport_finished_text" msgid="3559904746859400732">"Αγγίξτε για να μοιραστείτε τη αναφορά σφαλμάτων"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Οι αναφορές σφαλμάτων περιέχουν δεδομένα από τα διάφορα αρχεία καταγραφής του συστήματος, συμπεριλαμβανομένων προσωπικών και ιδιωτικών πληροφοριών. Να μοιράζεστε αναφορές σφαλμάτων μόνο με εφαρμογές και άτομα που εμπιστεύεστε."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Εμφάνιση αυτού του μηνύματος την επόμενη φορά"</string>
 </resources>
