@@ -20,7 +20,7 @@ page.tags="relativelayout"
 <p>{@link android.widget.RelativeLayout} is a view group that displays child views in relative
 positions. The position of each view can be specified as relative to sibling elements (such as to
 the left-of or below another view) or in positions relative to the parent {@link
-android.widget.RelativeLayout} area (such as aligned to the bottom, left of center).</p>
+android.widget.RelativeLayout} area (such as aligned to the bottom, left or center).</p>
 
 <img src="{@docRoot}images/ui/relativelayout.png" alt="" />
 
