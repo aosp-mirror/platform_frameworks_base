@@ -94,7 +94,7 @@ public class BluetoothTetheringDataTracker extends BaseNetworkStateTracker {
         return sInstance;
     }
 
-    public Object Clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
