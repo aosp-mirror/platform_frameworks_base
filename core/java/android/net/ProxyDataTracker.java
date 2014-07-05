@@ -116,7 +116,8 @@ public class ProxyDataTracker extends BaseNetworkStateTracker {
         }
     }
 
-    public Object Clone() throws CloneNotSupportedException {
+    @Override
+    public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
