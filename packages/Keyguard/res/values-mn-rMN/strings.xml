@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN кодыг бичнэ үү"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK-г бичээд шинэ PIN код оруулна уу"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Шинэ PIN код"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"СИМ ПҮК-г бичээд шинэ ПИН код оруулна уу"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"СИМ ПҮК код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Шинэ СИМ ПИН код"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нууц үг бичих бол хүрнэ үү"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Тайлах нууц үгийг бичнэ үү"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Тайлах PIN-г оруулна уу"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Хүссэн PIN кодоо оруулна уу"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Хүссэн PIN кодоо дахин оруулна уу"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картны түгжээг гаргаж байна…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Буруу PIN код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-8 тооноос бүтэх PIN-г бичнэ үү."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK код 8-с цөөнгүй тооноос бүтнэ."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Зөв PUK кодыг дахин оруулна уу. Давтан оролдвол SIM нь бүрмөсөн идэвхгүй болгоно."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл акаунтаа ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Устгах"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"СИМ ПИН код буруу, та төхөөрөмжийн түгжээг тайлахын тулд оператор компанитай холбоо барих шаардлагатай."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"СИМ ПИН код буруу байна, танд мобайл оператор компанитай холбогдохгүйгээр төхөөрөмжийн түгжээг тайлахад <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдсэн байна."</item>
+    <item quantity="other" msgid="2215723361575359486">"СИМ ПИН код буруу байна, танд <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдлээ."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"СИМ ашиглах боломжгүй. Өөрийн оператор компанитай холбоо барина уу."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"СИМ ПҮК код буруу, таны СИМ бүрмөсөн ашиглалтгүй болохоос өмнө <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдлээ."</item>
+    <item quantity="other" msgid="5477305226026342036">"СИМ ПҮК код буруу, таны СИМ бүрмөсөн ашиглалтгүй болохоос өмнө <xliff:g id="NUMBER">%d</xliff:g> оролдлого хийх боломж үлдлээ."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"СИМ ПИН ажиллуулах амжилтгүй боллоо!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"СИМ ПҮК ажиллуулах амжилтгүй боллоо!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Код зөвшөөрөгдлөө!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Өмнөх дуу товч"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Дараагийн дуу товч"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Түр зогсох товч"</string>

@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN kôd"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Unesite PUK i novi PIN kôd"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kôd"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Novi PIN kôd"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Unesite PUK i novi PIN kôd SIM kartice"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK kôd SIM kartice"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Novi PIN kôd SIM kartice"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Dodirnite za tipkanje zaporke"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Unesite zaporku za otključavanje"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Unesite PIN za otključavanje"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Upišite željeni PIN kôd"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdite željeni PIN kôd"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Otključavanje SIM kartice…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Netočan PIN kôd."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kôd treba imati 8 brojeva ili više."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji trajno će onemogućiti SIM."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Netočan PIN kôd SIM kartice; sada morate kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Netočan PIN kôd SIM kartice; imate još <xliff:g id="NUMBER">%d</xliff:g> pokušaj prije nego što budete morali kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</item>
+    <item quantity="other" msgid="2215723361575359486">"Netočan PIN kôd SIM kartice; imate još ovoliko preostalih pokušaja: <xliff:g id="NUMBER">%d</xliff:g>."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartica nije upotrebljiva. Kontaktirajte svog mobilnog operatera."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Netočan PUK kôd SIM kartice; imate još <xliff:g id="NUMBER">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva."</item>
+    <item quantity="other" msgid="5477305226026342036">"Netočan PUK kôd SIM kartice; imate još nekoliko preostalih pokušaja (<xliff:g id="NUMBER">%d</xliff:g>) prije nego što SIM kartica postane trajno neupotrebljiva."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operacija PIN-a SIM kartice nije uspjela!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operacija PUK-a SIM kartice nije uspjela!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kôd je prihvaćen!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Gumb Prethodni zapis"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Gumb Sljedeći zapis"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Gumb Pauza"</string>
