@@ -33,7 +33,7 @@
     <string name="page_count_unknown" msgid="6058852665954511124">"Pages"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Génération tâche impression…"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Enregistrer au format .PDF"</string>
-    <string name="all_printers" msgid="5018829726861876202">"Toutes les imprimantes…"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Toutes les imprim."</string>
     <string name="print_dialog" msgid="32628687461331979">"Boîte de dialogue d\'impression"</string>
     <string name="search" msgid="5421724265322228497">"Rechercher"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Toutes les imprimantes"</string>
