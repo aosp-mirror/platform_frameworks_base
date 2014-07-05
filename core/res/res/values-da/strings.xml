@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kommunikere på tværs af brugere"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"oprette binding til en tjeneste til formidling af betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Tillader, at brugeren opretter en binding til det øverste niveau af grænsefladen i en tjeneste til formidling af betingelser. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"fastlås til en drømmetjeneste"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Tillader, at indehaveren fastlåser det øverste niveau af brugergrænsefladen for en drømmetjeneste. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aktivere konfigurationsappen, der leveres af mobilselskabet"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er forsynet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"observer netværksforhold"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillader, at en applikation registrerer ændringer i trust-tilstand."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Angiv en tillidsagent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillader, at en applikation angiver en tillidsagent."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Åbn indstillingsmenuen for tillidsagenten"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Giver en applikation tilladelse til at starte en aktivitet, som ændrer adfærden for tillidsagenten."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Åbn indstillingsmenuen for trust agent."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Tillader, at en app starter en aktivitet, der ændrer adfærden for en betroet agent."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Knytte sig til en trust agent-tjeneste"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation knytter sig til en trust agent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interager med opdaterings- og gendannelsessystemet"</string>

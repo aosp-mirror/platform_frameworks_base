@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Pozwala aplikacji na zapisywanie wiadomości SMS przechowywanych w telefonie lub na karcie SIM. Szkodliwe aplikacje mogą usunąć wiadomości."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"odbieranie wiadomości tekstowych (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pozwala aplikacji na odbieranie i przetwarzanie wiadomości WAP. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"pobieranie uruchomionych aplikacji"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pozwala aplikacji na pobieranie informacji o aktualnie i niedawno działających zadaniach. Dzięki temu aplikacja może uzyskać informacje o tym, które aplikacje są używane na urządzeniu."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakcje między użytkownikami"</string>
@@ -671,7 +675,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizowania"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"włączanie i wyłączanie synchronizacji"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pozwala aplikacji na modyfikowanie ustawień synchronizacji z kontem. Tego uprawnienia można użyć np. do włączenia synchronizacji z kontem aplikacji Ludzie."</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi odbiornika powiadomień. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"powiąż z usługą dostawcy warunków"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi dostawcy warunków. Nieprzeznaczone dla zwykłych aplikacji."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"powiąż z usługą wygaszacza ekranu"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi wygaszacza ekranu. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Zezwala na wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"śledź stan sieci"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Zezwala aplikacji na monitorowanie zmian w stanie zaufania."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Dostarczaj agenta zaufania."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Zezwala aplikacji na dostarczanie agenta zaufania."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Uruchom menu ustawień zaufanego agenta."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Umożliwia aplikacji uruchamianie czynności, która zmienia działanie zaufanego agenta."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Otwieranie menu ustawień agenta zaufania."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Zezwala aplikacji na uruchamianie akcji, która zmienia sposób działania agenta zaufania."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Powiąż z usługą agenta zaufania"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Zezwala aplikacji na powiązanie z usługą agenta zaufania."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcja z systemem odzyskiwania i aktualizacjami"</string>

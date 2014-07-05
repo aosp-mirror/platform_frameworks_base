@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Hiermee kan de app naar de op uw telefoon of simkaart opgeslagen sms\'jes schrijven. Schadelijke apps kunnen uw berichten mogelijk verwijderen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactie tussen gebruikers"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Hiermee kan de houder koppelen aan de hoofdinterface van een listener-service voor meldingen. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binden aan de service van een provider van voorwaarden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Hiermee kan de houder binden aan de hoofdinterface van de service van een provider van voorwaarden. Nooit vereist voor normale apps."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"verbinding maken met een droomservice"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een droomservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"de door de provider geleverde configuratie-app aanroepen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Hiermee kan de houder de door de provider geleverde configuratie-app aanroepen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"controleren op waarnemingen met betrekking tot netwerkomstandigheden"</string>
@@ -731,8 +733,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Hiermee kan de app de kalibratieparameters van het aanraakscherm aanpassen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"toegang tot DRM-certificaten"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Toestaan dat een app DRM-certificaten registreert en gebruikt. Nooit vereist voor normale apps."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Handover-overdrachtsuitzendingen ontvangen."</string>
-    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Hiermee kan informatie over de handover-overdrachtsstatus worden ontvangen."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"Overdrachtsuitzendingen over de handover ontvangen."</string>
+    <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Hiermee kan informatie over de overdrachtsstatus van de handover worden ontvangen."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Toestaan dat een app controleert op wijzigingen in de trust-status."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Een trust-agent aanleveren."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Hiermee kan een app een trust-agent aanleveren."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Menu met instellingen voor vertrouwensagent starten."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Hiermee kan een app een activiteit starten waarmee het gedrag van de vertrouwensagent wordt gewijzigd."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Menu met instellingen voor trust-agents starten."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Hiermee kan een app een activiteit starten waarmee het gedrag van trust-agents wordt gewijzigd."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Binden aan een trust-agentservice"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Toestaan dat een app wordt gebonden aan een trust-agentservice."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interactie met update- en herstelsysteem"</string>

@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Antaa sovelluksen kirjoittaa puhelimelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth-viestien (MAP) vastaanotto"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Antaa sovelluksen vastaanottaa ja käsitellä Bluetooth MAP -viestejä. Sovellus voi valvoa ja poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"suorita käyttäjien välisiä toimintoja"</string>
@@ -1371,8 +1373,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Antaa sovelluksen seurata luottamuksen tilamuutoksia."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Luotettavan tahon tarjoaminen"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Antaa sovelluksen tarjota luotettavan tahon."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Käynnistä luotettavan tahon asetusvalikko."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Sallii sovelluksen käynnistää toiminnon, joka muuttaa luotettavan tahon toimintaa."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Luotettavaan tahoon sitoutuminen"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Antaa sovelluksen sitoutua luotettavaan tahoon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Vuorovaikutus päivitys- ja palautusjärjestelmän kanssa"</string>

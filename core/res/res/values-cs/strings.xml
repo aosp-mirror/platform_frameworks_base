@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Umožňuje aplikaci zapisování do zpráv SMS uložených v telefonu nebo na SIM kartě. Škodlivé aplikace mohou vaše zprávy smazat."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"příjem textových zpráv (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Aplikace s tímto oprávněním může odhalit informace o aplikacích, které se v zařízení používají."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakce napříč uživateli"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteli navázat se na nejvyšší úroveň služby pro poslouchání oznámení. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"navázání na službu poskytovatele podmínky"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby poskytovatele podmínky. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"navázat se na službu spořiče"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Umožňuje navázání na nejvyšší úroveň služby spořiče. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"vyvolat konfigurační aplikaci poskytnutou operátorem"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje vyvolání konfigurační aplikace poskytnuté operátorem. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"naslouchat informacím o stavu sítě"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Umožňuje aplikaci naslouchat změnám ve stavu důvěryhodnosti."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Poskytování zástupce důvěryhodnosti"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Umožňuje aplikaci poskytnout zástupce důvěryhodnosti."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Spustit nabídku nastavení agenta důvěryhodnosti"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Umožňuje aplikaci spustit aktivitu, která změní chování agenta důvěryhodnosti."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Spustit nabídku nastavení agenta důvěryhodnosti"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Umožňuje aplikaci spustit aktivitu, která změní chování agenta důvěryhodnosti."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Vázat se na službu zástupce důvěryhodnosti"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Umožňuje aplikaci vázat se na službu zástupce důvěryhodnosti."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakce se systémem aktualizací a obnovení"</string>

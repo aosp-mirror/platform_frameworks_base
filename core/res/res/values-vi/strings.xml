@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Cho phép ứng dụng ghi vào tin nhắn SMS được lưu trữ trên điện thoại hoặc thẻ SIM của bạn. Ứng dụng độc hại có thể xóa tin nhắn của bạn."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"nhận tin nhắn văn bản (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Cho phép ứng dụng nhận và xử lý tin nhắn WAP. Quyền này bao gồm khả năng giám sát hoặc xóa tin nhắn được gửi cho bạn mà không hiển thị chúng cho bạn."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Cho phép ứng dụng truy xuất thông tin về các công việc đã và đang chạy gần đây. Việc này có thể cho phép ứng dụng phát hiện thông tin về những ứng dụng nào đã được sử dụng trên thiết bị."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"tương tác giữa người dùng"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ trình xử lý thông báo. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"liên kết với dịch vụ trình cung cấp điều kiện"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ trình cung cấp điều kiện. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"liên kết với dịch vụ dream"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ dream. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Cho phép chủ sở hữu gọi ra ứng dụng cấu hình do nhà cung cấp dịch vụ cung cấp. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"quan sát các điều kiện mạng"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Cho phép ứng dụng quan sát các thay đổi ở trạng thái đáng tin cậy."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Cung cấp tác nhân đáng tin cậy."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Cho phép ứng dụng cung cấp tác nhân đáng tin cậy."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Chạy menu cài đặt đại lý đáng tin cậy."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Cho phép ứng dụng chạy hoạt động thay đổi hoạt động của đại lý đáng tin cậy."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Khởi chạy trình đơn cài đặt của đại lý tin cậy."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Cho phép ứng dụng khởi chạy hoạt động thay đổi hoạt động của đại lý tin cậy."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Liên kết với một dịch vụ của đại lý đáng tin cậy"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Cho phép ứng dụng liên kết với một dịch vụ của đại lý đáng tin cậy."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Tương tác với hệ thống khôi phục và bản cập nhật"</string>

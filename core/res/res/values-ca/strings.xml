@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats al telèfon o a la targeta SIM. Les aplicacions malicioses poden llegir els teus missatges confidencials."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recepció de missatges de text (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet que l\'aplicació rebi i processi missatges WAP. Aquest permís inclou la capacitat de controlar o de suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupera les aplicacions en execució"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet que l\'aplicació recuperi informació sobre les tasques que s\'executen actualment i les que s\'han executat recentment. Aquesta acció pot permetre que l\'aplicació descobreixi informació sobre les aplicacions que s\'utilitzen al dispositiu."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interacciona entre usuaris"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei oient de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"enllaçar amb el servei de proveïdor de condicions"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet enllaçar amb la interfície de nivell superior d\'un servei de proveïdor de condicions. No ha de ser mai necessari per a aplicacions normals."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"enllaçar amb un servei en repòs"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permet enllaçar amb la interfície de nivell superior d\'un servei en repòs. No hauria de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permet que una aplicació escolti els canvis en l\'estat de confiança."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Proporcionar un agent de confiança"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permet que una aplicació proporcioni un agent de confiança."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Inicia el menú de configuració de l\'agent de confiança."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Permet que una aplicació iniciï una activitat que canviï el comportament de l\'agent de confiança."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Iniciar el menú de configuració de l\'agent de confiança"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Permet que una aplicació iniciï una activitat que modifiqui el comportament de l\'agent de confiança."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Enllaçar amb el servei d\'un agent de confiança"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permet que una aplicació es vinculi amb el servei d\'un agent de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacciona amb el sistema de recuperació i amb les actualitzacions"</string>
@@ -1735,10 +1737,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionat"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Vols fer servir la funció Bloqueja una aplicació?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"La funció Bloqueja una aplicació bloqueja la visualització a una sola aplicació.\n\nPer sortir, mantén premut el botó d\'aplicacions recents $"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Vols fer servir la funció Bloqueig d\'aplicació?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"La funció Bloqueig d\'aplicació bloqueja la pantalla d\'una sola aplicació.\n\nPer sortir-ne, mantén premut el botó d\'aplicacions recents $"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"NO"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICI"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Inicia la funció Bloqueja una aplicació"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Surt de la funció Bloqueja una aplicació"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"Inicia Bloqueig d\'aplicació"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"Surt de Bloqueig d\'aplicació"</string>
 </resources>

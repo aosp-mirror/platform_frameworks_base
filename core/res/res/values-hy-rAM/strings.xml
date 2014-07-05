@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Թույլ է տալիս հավելվածին պատասխանել ձեր հեռախոսում կամ SIM քարտում պահված SMS հաղորդագրություններին: Վնասարար հավելվածները կարող են ջնջել ձեր հաղորդագրությունները:"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ստանալ տեքստային հաղորդագրություններ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Թույլ է տալիս հավելվածին ստանալ և գործարկել WAP հաղորդագրությունները: Այս թույլտվությունը ներառում է ձեզ ուղարկված հաղորդագրությունները հետևելու կամ ջնջելու կարողությունը` առանց ձեր տեսնելու:"</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ստանալ Bluetooth հաղորդագրությունները (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Թույլ է տալիս հավելվածին ստանալ և մշակել MAP հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"առբերել աշխատող հավելվածները"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Թույլ է տալիս հավելվածին առբերել մանրամասն տեղեկություններ առկա և վերջերս աշխատող առաջադրանքների մասին: Սա կարող է թույլ տալ հավելվածին հայտնաբերել անձնական տեղեկություններ այլ հավելվածների վերաբերյալ:"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"հաղորդակցվել օգտվողների միջև"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Թույլ է տալիս սեփականատիրոջը միանալ ծանուցումները ունկնդրող ծառայության վերին մակարդակի ինտերֆեյսին: Սովորական հավելվածների համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"կապվել պայմանների մատակարարի ծառայությանը"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Թույլ է տալիս սեփականատիրոջը միանալ պայմանների մատակարարների բազային միջերեսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"Միացում էկրանապահների ծառայությանը"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Թույլ է տալիս սեփականատիրոջը միանալ էկրանապահների ծառայության վերին մակարդակի միջերեսին: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"գործարկել օպերատորի կողմից տրամադրված կազմաձևման ծրագիրը"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Թույլ է տալիս սեփականատիրոջը գործարկել օպերատորի կողմից տրամադրված կազմաձևման ծրագիրը: Սովորական ծրագրերի համար երբևէ չպետք է անհրաժեշտ լինի:"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"լսել դիտարկումներ ցանցային պայմանների վերաբերյալ"</string>
@@ -1373,8 +1373,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ծրագրին թույլ է տալիս լսել վստահության կարգավիճակի փոփոխությունները:"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Տրամադրել վստահելի գործակալ:"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ծրագրին թույլ է տալիս տրամադրել վստահելի գործակալ:"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Գործարկել վստահելի գործակալի կարգավորումների ցանկը:"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Ծրագրին թույլ է տալիս իրականացնել այնպիսի գործունեություն, որը փոխում է վստահելի գործակալի վարքագիծը:"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Գործարկել վստահելի գործակալի կարգավորումների ընտրացանկը:"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Թույլ է տալիս ծրագրին գործարկել մի գործողություն, որը փոխում է վստահելի գործակալի վարքագիծը:"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Կապվել վստահելի գործակալի ծառայությանը"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ծրագրին թույլ է տալիս կապվել վստահելի գործակալի ծառայությանը:"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Փոխազդել թարմացման և վերականգնման համակարգի հետ"</string>

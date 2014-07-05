@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"तपाईँको फोन वा SIM कार्डमा भण्डारण भएका SMS सन्देशहरूलाई लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले सायद तपाईँको सन्देशहरू मेटाउन सक्छन्।"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"पाठ सन्देशहरू (WAP) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न अनुप्रयोगलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका सन्देशहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ब्लुटुथ सन्देश प्राप्त गर्नुहोस् (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"अनुप्रयोगलाई ब्लुटुथ MAP सन्देशहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यो अनुप्रयोगले तपाईँलाई नदेखाई आफ्नो उपकरणमा पठाइएको सन्देशहरू अनुगमन वा मेटाउन सक्दछ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चलिरहेका अनुप्रयोगहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न अनुप्रयोगलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"प्रयोगकर्ताहरू तर्फ अन्तर्क्रिया गर्नुहोस्"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"होल्डरलाई सूचना श्रोता सेवाको शीर्ष-स्तरको इन्टरफेस बाँध्न अनुमति दिन्छ। सामान्य अनुप्रयोगहरूलाई कहिले पनि आवश्यक नपर्न सक्दछ।"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"सर्त प्रदायक सेवामा जोड्न"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"सर्त प्रदायक सेवाको माथिल्लो स्तरको इन्टरफेसमा जोड्न बाहकलाई अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"सपना सेवामा बाँध्नुहोस्"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"होल्डरलाई सपना सेवाको माथिल्लो स्तरको इन्टरफेसमा बाँध्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"वाहक-प्रदान विन्यास अनुप्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"प्रयोगकर्तालाई वाहक-प्रदान विन्यास अनुप्रयोग सुरु गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"सञ्जाल अवस्थाका पर्यवेक्षणका लागि सुन्नुहोस्"</string>
@@ -1373,8 +1373,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"भरोसा स्थितिमा परिवर्तनको लागि सुन्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वस्त प्रतिनिधि प्रदान गर्नुहोस्।"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"अनुप्रयोगलाई विश्वस्त प्रतिनिधि प्रदान गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"विश्वस्त प्रतिनिधि सेटिङ्हरूका मेनु सुरुवात गर्नुहोस्।"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"उपकरण लाई विश्वस्त प्रतिनिधिको ब्यवहार परिवर्तन गर्ने गतिविधि सुरुवात गर्न अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"विश्वस्त प्रतिनिधि सेवासँग जोडिएको"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त प्रतिनिधि सेवालाई बाँध्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>

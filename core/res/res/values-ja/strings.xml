@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"携帯端末やSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"テキストメッセージ（WAP）の受信"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ユーザー間の交流"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"コンディションプロバイダサービスへのバインド"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"コンディションプロバイダサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ドリームサービスにバインド"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ドリームサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"携帯通信会社が提供する設定アプリの呼び出し"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"携帯通信会社が提供する設定アプリを呼び出すことを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ネットワーク状況監視のためのリッスン"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"信頼状態の変更をリッスンすることをアプリに許可します。"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"信頼できるエージェントの提供"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"信頼できるエージェントの提供をアプリに許可します。"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"信頼できるエージェントの設定メニューの起動"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"信頼できるエージェントの動作を変更するアクティビティを開始することをアプリに許可します。"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"信頼できるエージェントの設定メニューの起動"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"信頼できるエージェントの動作を変更するアクティビティを開始することをアプリに許可します。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"信頼できるエージェントサービスへのバインド"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"信頼できるエージェントサービスにバインドすることをアプリに許可します。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"アップデートと回復システムへのアクセス"</string>
@@ -1735,10 +1737,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"Lock-to-appの使用"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Lock-to-appでは1つのアプリの表示をロックします。\n\n終了するには[最近使ったアプリ]ボタン（$）を押し続けます"</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"アプリロックの使用"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"アプリロックでは表示を単一のアプリにロックします。\n\n終了するには[最近使ったアプリ]ボタン（$）を押し続けます"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"開始しない"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"開始する"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"Lock-to-appを開始"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"Lock-to-appを終了"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"アプリロックを開始"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"アプリロックを終了"</string>
 </resources>

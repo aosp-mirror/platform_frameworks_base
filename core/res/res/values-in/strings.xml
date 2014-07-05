@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Mengizinkan apl menulis ke pesan SMS yang tersimpan di ponsel atau kartu SIM. Apl berbahaya dapat menghapus pesan Anda."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"terima pesan teks (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Memungkinkan aplikasi menerima dan memproses pesan WAP. Izin ini mencakup kemampuan untuk memantau atau menghapus pesan yang dikirim kepada Anda tanpa menunjukkannya kepada Anda."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"mengambil apl yang berjalan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Memungkinkan aplikasi mengambil informasi tentang tugas yang dijalankan saat ini dan baru-baru ini. Izin ini memungkinkan aplikasi menemukan informasi tentang aplikasi mana yang digunakan pada perangkat."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"berinteraksi antar-pengguna"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan penyedia ketentuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"mengikat ke layanan lamunan"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan lamunan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"memanggil aplikasi konfigurasi yang disediakan operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Memungkinkan pemegang meminta aplikasi konfigurasi yang disediakan operator. Tidak pernah diperlukan aplikasi normal."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"mendengar untuk observasi kondisi jaringan"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Mengizinkan aplikasi mendengarkan perubahan dalam status kepercayaan."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Berikan agen tepercaya."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Memungkinkan aplikasi memberikan agen tepercaya."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Luncurkan menu setelan agen tepercaya."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Memungkinkan aplikasi meluncurkan aktivitas yang mengubah perilaku agen tepercaya."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Luncurkan menu setelan agen tepercaya."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Izinkan aplikasi meluncurkan aktivitas yang mengubah perilaku agen tepercaya."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Ikat ke layanan agen kepercayaan"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Mengizinkan aplikasi mengikat ke layanan agen kepercayaan."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Berinteraksi dengan sistem pemulihan dan pembaruan"</string>

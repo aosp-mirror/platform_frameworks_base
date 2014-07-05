@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"‏ایپ کو آپ کے فون یا SIM کارڈ پر اسٹور کردہ SMS پیغامات کو لکھنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کے پیغامات کو حذف کر سکتی ہیں۔"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏متنی پیغامات (WAP) حاصل کریں"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏ایپ کو WAP پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس اجازت میں آپ کو مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھنے یا انہیں حذف کرنے کی اہلیت شامل ہے۔"</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"سبھی صارفین کے ساتھ تعامل کریں"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"حامل کو اطلاع سننے والی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"شرط فراہم کرنے والی ایک سروس کے پابند بنیں"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"حامل کو شرط فراہم کنندہ کی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ایک ڈریم سروس کا پابند بنیں"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"حامل کو ڈریم سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہیے۔"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"کیریئر کے ذریعے فراہم کردہ کنفگریشن ایپ طلب کریں"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"حامل کو کیریئر کے ذریعے فراہم کردہ کنفگریشن ایپ طلب کرنے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"نیٹ ورک کی صورت حال کے بارے میں مشاہدے سنیں"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"ایک ایپلیکیشن کو ٹرسٹ اسٹیٹ میں تبدیلیاں سننے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ایک ٹرسٹ ایجنٹ فراہم کریں۔"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"کسی ایپلیکیشن کو ایک ٹرسٹ ایجنٹ فراہم کرنے کی اجازت دیتی ہے۔"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"ٹرسٹ ایجنٹ کی ترتیبات کا مینو شروع کریں۔"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"ایپلیکیشن کو ایک ایسی سرگرمی شروع کرنے کی اجازت دیتا ہے جو ٹرسٹ ایجنٹ کے برتاؤ کو تبدیل کر دیتا ہے۔"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"ٹرسٹ ایجنٹ کی ترتیبات کا مینو شروع کریں۔"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"ایپلیکیشن کو ایک ایسی سرگرمی شروع کرنے کی اجازت دیتی ہے جو ٹرسٹ ایجنٹ کے برتاؤ کو تبدیل کر دیتی ہے۔"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ٹرسٹ ایجنٹ کی ایک سروس کے پابند بنیں"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ایک ایپلیکیشن کو ایک ٹرسٹ ایجنٹ سروس کا پابند ہونے دیتا ہے۔"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"اپ ڈیٹ اور بازیابی سسٹم کے ساتھ تعامل کریں"</string>
@@ -1736,7 +1738,7 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> کو حذف کر دیا گیا"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"دفتر <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_title" msgid="5895142291937470019">"لاک ٹو ایپ استعمال کریں؟"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"لاک ٹو ایپ کسی واحد ایپ میں ڈسپلے کو مقفل کر دیتا ہے۔\n\nباہر نکلنے کیلئے حالیہ ایپس بٹن $ کو دبائیں رکھیں"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"لاک ٹو ایپ کسی واحد ایپ میں ڈسپلے کو مقفل کر دیتی ہے۔\n\nباہر نکلنے کیلئے حالیہ ایپس بٹن $ کو دبائیں رکھیں"</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"نہیں"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع کریں"</string>
     <string name="lock_to_app_start" msgid="8889002974248178076">"لاک ٹو ایپ شروع کریں"</string>

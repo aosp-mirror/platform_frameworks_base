@@ -185,7 +185,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛行模式為 [關閉]"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
-    <string name="global_action_lockdown" msgid="8751542514724332873">"即刻鎖定"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"立即鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允許應用程式寫入手機或 SIM 卡中儲存的短訊。惡意應用程式可能會藉此刪除您的訊息。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收短訊 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取有關目前和最近執行的工作的資訊。如此一來，應用程式或可找出裝置上所使用應用程式的相關資訊。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"與其他用戶互動"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"繫結至條件供應商服務"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允許應用程式繫結至條件供應商服務的頂層介面，但一般應用程式並不需要使用。"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"繫結至 Dream 服務"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允許應用程式繫結至 Dream 服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"調用流動網絡供應商提供的設定應用程式"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允許應用程式調用流動網絡供應商提供的設定應用程式 (不建議一般應用程式使用)。"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"監聽對網絡狀況的觀察"</string>
@@ -1006,8 +1008,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽器記錄或書籤。如此一來，應用程式或可清除或修改瀏覽器資料。注意：這項權限可能不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能沒有這項功能。"</string>
-    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"移除語音訊息"</string>
-    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"允許應用程式從您的留言信箱收件匣移除訊息。"</string>
+    <string name="permlab_removeVoicemail" msgid="6328485960478155867">"移除留言訊息"</string>
+    <string name="permdesc_removeVoicemail" msgid="8113704917331103065">"允許應用程式移除留言信箱中的訊息。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增留言"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允許應用程式將訊息加到您的留言信箱收件箱。"</string>
     <string name="permlab_readAllVoicemail" msgid="5834057671176753416">"讀取所有語音留言"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允許應用程式聽取信任狀態的變更。"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理程式。"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允許應用程式提供信任的代理程式。"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"啟動信任的代理程式設定選單。"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"允許應用程式啟動可變更信任的代理程式行為的活動。"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"啟動信任的代理程式設定選單。"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"允許應用程式啟動可變更信任的代理程式行為的活動。"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"繫結至信任的代理程式服務"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允許應用程式繫結至信任的代理程式服務。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"與更新和復原系統互動"</string>

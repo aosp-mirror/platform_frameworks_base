@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Дозволува апликацијата да пишува СМС-пораки складирани на телефонот или на СИМ-картичката. Злонамерните апликации може да ги избришат вашите пораки."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"прими текстуални пораки (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Овозможува апликацијата да прима и да обработува WAP пораки. Оваа дозвола ја опфаќа способноста за следење или за бришење пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"обнови активни апликации"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Овозможува апликацијата да поврати информации за тековно и до неодамна активни задачи. Ова може да овозможи апликацијата да открие информации за тоа кои апликации се користат на уредот."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"комуницирај со корисници"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Овозможува сопственикот да се поврзе со интерфејс од највисоко ниво на услугата слушател на известувања. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"поврзување со услуга за давател на услов"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Дозволува сопственикот да се поврзе со интерфејс од највисоко ниво на давател на услуги за услов. Не треба да се користи за стандардни апликации."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"поврзи се со услугата мечтаење"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Дозволува сопственикот да се поврзе со интерфејс од највисоко ниво на услугата мечтаење. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"повикај конфигурација на апликацијата обезбедена од давателот"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Овозможува сопственикот да ја повика конфигурацијата на апликацијата обезбедена од давателот. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"слушај за набљудувања во врска со услови на мрежа"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Дозволува апликацијата да слуша промени во состојба на доверба."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Обезбедување доверлив агент."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ѝ дозволува на апликацијата да обезбеди доверлив агент."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Го активира менито со поставки на агентот за доверба."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Дозволува апликацијата да активира активност што го менува однесувањето на агентот за доверба."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Активирајте го менито со поставки на агентот за доверба."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Дозволува апликацијата да активира активност што го менува однесувањето на агентот за доверба."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Поврзување со услуга за агент за доверба"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозволува апликацијата да се поврзе со услуга за агенти за доверба."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Комуницирај со системот за обновување и ажурирање"</string>

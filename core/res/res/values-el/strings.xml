@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Επιτρέπει στην εφαρμογή την εγγραφή σε μηνύματα SMS που είναι αποθηκευμένα στο τηλέφωνό σας ή στην κάρτα SIM. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαγράψουν τα μηνύματά σας."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"λήψη μηνυμάτων κειμένου (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων WAP. Αυτό σημαίνει ότι η εφαρμογή θα μπορούσε να παρακολουθήσει ή να διαγράψει τα μηνύματα που αποστέλλονται στη συσκευή σας χωρίς αυτά να εμφανιστούν σε εσάς."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"ανάκτηση εκτελούμενων εφαρμογών"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Επιτρέπει στην εφαρμογή την ανάκτηση πληροφοριών σχετικά με τρέχουσες και πρόσφατα εκτελούμενες εργασίες. Αυτό μπορεί να δίνει τη δυνατότητα στην εφαρμογή να ανακαλύπτει πληροφορίες σχετικά με το ποιες εφαρμογές χρησιμοποιούνται στη συσκευή."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"αλληλεπίδραση στους χρήστες"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ακρόασης ειδοποιήσεων. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"σύνδεση σε μια υπηρεσία παρόχου συνθηκών"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Επιτρέπει στον κάτοχο τη σύνδεση στη διεπαφή ανωτάτου επιπέδου ενός παρόχου συνθηκών. Δεν απαιτείται για κανονικές εφαρμογές."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"δέσμευση σε υπηρεσία dream"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας dream. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Επιτρέπει στον κάτοχο την κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"λήψη παρατηρήσεων σχετικά με την κατάσταση δικτύου"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Επιτρέπει σε μια εφαρμογή να αντιλαμβάνεται τις αλλαγές στην κατάσταση εμπιστοσύνης."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Παράσχετε έναν αξιόπιστο αντιπρόσωπο."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Επιτρέπει σε μια εφαρμογή να προσφέρει έναν αξιόπιστο αντιπρόσωπο."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Εκκίνηση μενού ρυθμίσεων αξιόπιστου αντιπροσώπου."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Επιτρέπει σε μια εφαρμογή να εκκινεί μια ενέργεια που αλλάζει τη συμπεριφορά του αξιόπιστου αντιπροσώπου."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Εκκίνηση μενού ρυθμίσεων αξιόπιστου αντιπροσώπου."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Επιτρέπει σε μια εφαρμογή την εκκίνηση της δραστηριότητας που αλλάζει τη συμπεριφορά του αξιόπιστου αντιπροσώπου."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Σύνδεση σε υπηρεσία trust agent"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Αλληλεπίδραση με το σύστημα ενημέρωσης και ανάκτησης"</string>

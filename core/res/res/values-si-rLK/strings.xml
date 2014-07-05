@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ආචයනය කරන ලද SMS පණිවිඩ ලිවීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් ඔබගේ පණිවිඩ මකා දැමිය හැක."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"පෙළ පණිවිඩ ලබාගැනීම (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"එවන ලද බ්ලූටූත් පණිවිඩ (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"බ්ලූටූත් MAP පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"පරිශීලකයන් අතර අන්තර්ක්‍රියාකාරී වන්න"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"දැනුම්දීම් අසන්නාගේ සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"තත්ත්වය සපයන්නාගේ සේවාවට බඳින්න"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"තත්ත්වය සපයන්නාගේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ඩ්‍රීම් සේවාවකට බැඳීම"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ඩ්‍රීම් සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"වාහකය සැපයු වින්‍යාසය යෙදුම ඉල්ලා සිටින්න"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"වාහකයා ලබාදුන් සැකසුම් යෙදුම් උත්පාදනයට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ජාල තත්ව මත නිරීක්ෂණ වෙත ඇහුම්කන් දීම"</string>
@@ -1376,8 +1376,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"යෙදුමකට විශ්වාසනීය තත්වයේ වෙනස්කම් වලට ඇහුම්කන් දීමට අවසර දේ."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"විශ්වාසවන්ත නියෝජිතයෙක් සපයන්න."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"විශ්වාසවන්ත නියෝජිතයෙක් සැපයීමට අවසර දෙන්න."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"විශ්වාසනීය නියෝජිතයාගේ සැකසීම් මෙනුව දියත් කරන්න."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Allows an application to lunch an activity that changes the trust agent behavior."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"විශ්වාසනීය ඒජන්ත සේවාවකට බැඳීම"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"යෙදුමකට විශ්වාසනීය ඒජන්ත සේවාවකට බැඳීමට අවසර දේ."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ප්‍රතිසාධන පද්ධතිය සහ යාවත්කාලීන සමඟ කටයුතු කරන්න"</string>
