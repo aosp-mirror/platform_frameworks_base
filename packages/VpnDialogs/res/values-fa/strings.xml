@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> تلاش می‌کند یک اتصال VPN ایجاد کند."</string>
+    <string name="prompt" msgid="8359175999006833462">"‏<xliff:g id="APP">%s</xliff:g> تلاش می‌کند یک اتصال VPN ایجاد کند."</string>
     <string name="warning" msgid="5470743576660160079">"با ادامه دادن، به برنامهٔ کاربردی اجازه می‌دهید تمام ترافیک شبکه را رهگیری کند. "<b>"تا به برنامه اعتماد نکردید آن را قبول نکنید."</b>" در غیر این صورت، این ریسک را قبول می‌کنید که داده‌های شما توسط یک نرم‌افزار مخرب به خطر بیفتد."</string>
     <string name="accept" msgid="2889226408765810173">"من به این برنامه اعتماد دارم."</string>
-    <string name="legacy_title" msgid="192936250066580964">"VPN متصل است"</string>
+    <string name="legacy_title" msgid="192936250066580964">"‏VPN متصل است"</string>
     <string name="configure" msgid="4905518375574791375">"پیکربندی"</string>
     <string name="disconnect" msgid="971412338304200056">"قطع اتصال"</string>
     <string name="session" msgid="6470628549473641030">"جلسه:"</string>
