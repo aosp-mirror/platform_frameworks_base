@@ -1071,7 +1071,7 @@ public class DevicePolicyManager {
     public static final int WIPE_EXTERNAL_STORAGE = 0x0001;
 
     /**
-     * Ask the user date be wiped.  This will cause the device to reboot,
+     * Ask the user data be wiped.  This will cause the device to reboot,
      * erasing all user data while next booting up.  External storage such
      * as SD cards will be also erased if the flag {@link #WIPE_EXTERNAL_STORAGE}
      * is set.
