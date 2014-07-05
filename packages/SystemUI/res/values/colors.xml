@@ -80,12 +80,7 @@
     <color name="notification_ripple_tinted_color">#30ffffff</color>
 
     <!-- The color of the circle around the primary user in the user switcher -->
-    <color name="current_user_border_color">@color/primary_color</color>
-
-    <!-- Our material color palette (deep teal) -->
-    <color name="primary_color">#ff7fcac3</color>
-    <color name="background_color_1">#ff384248</color>
-    <color name="background_color_1_press">#ff54656e</color>
+    <color name="current_user_border_color">@color/system_accent_color</color>
 
     <color name="segmented_button_selected">#ff3d4549</color><!-- #33afbdc4 = 20% #afbdc4 = #ff3d4549 composite -->
     <color name="segmented_button_background">#ff21272b</color>

@@ -654,4 +654,7 @@
 
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
     <string name="battery_saver_notification_action_text">Open battery saver settings</string>
+
+    <!-- Battery level for expanded quick settings [CHAR LIMIT=2] -->
+    <string name="battery_level_template"><xliff:g id="level" example="45">%d</xliff:g>%%</string>
 </resources>

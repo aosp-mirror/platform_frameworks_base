@@ -538,15 +538,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 R.id.notification_panel);
         mNotificationPanel.setStatusBar(this);
 
-        // make the header non-responsive to clicks
-        mNotificationPanel.findViewById(R.id.header).setOnTouchListener(
-                new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return true; // e eats everything
-                    }
-                });
-
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
@@ -700,7 +691,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 //                    updateCarrierLabelVisibility(false);
         }
 
-        mBatteryController.setStatusBarHeaderView(mHeader);
         mFlashlightController = new FlashlightController(mContext);
 
         // Set up the quick settings tile panel
@@ -719,6 +709,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // User info. Trigger first load.
         mHeader.setUserInfoController(mUserInfoController);
         mUserInfoController.reloadUserInfo();
+
+        mHeader.setBatteryController(mBatteryController);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,

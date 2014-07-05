@@ -147,7 +147,7 @@ public class NotificationPanelView extends PanelView implements
     protected void onFinishInflate() {
         super.onFinishInflate();
         mHeader = (StatusBarHeaderView) findViewById(R.id.header);
-        mHeader.getBackgroundView().setOnClickListener(this);
+        mHeader.setOnClickListener(this);
         mHeader.setOverlayParent(this);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
         mQsContainer = findViewById(R.id.quick_settings_container);
@@ -484,6 +484,9 @@ public class NotificationPanelView extends PanelView implements
             mInitialTouchY = event.getX();
             mInitialTouchX = event.getY();
         }
+        if (mExpandedHeight != 0) {
+            handleQsDown(event);
+        }
         if (mQsTracking || mQsExpanded) {
             onQsTouch(event);
             if (!mConflictingQsExpansionGesture) {
@@ -496,6 +499,17 @@ public class NotificationPanelView extends PanelView implements
         }
         super.onTouchEvent(event);
         return true;
+    }
+
+    private void handleQsDown(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN
+                && shouldQuickSettingsIntercept(event.getX(), event.getY(), 0)) {
+            mQsTracking = true;
+            onQsExpansionStarted();
+            mInitialHeightOnTouch = mQsExpansionHeight;
+            mInitialTouchY = event.getX();
+            mInitialTouchX = event.getY();
+        }
     }
 
     @Override
@@ -1120,7 +1134,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onClick(View v) {
-        if (v == mHeader.getBackgroundView()) {
+        if (v == mHeader) {
             onQsExpansionStarted();
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, false /* expand */);
@@ -1250,5 +1264,10 @@ public class NotificationPanelView extends PanelView implements
 
     public boolean isQsExpanded() {
         return mQsExpanded;
+    }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
     }
 }

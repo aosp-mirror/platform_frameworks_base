@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Outline;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,24 +37,20 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
  * The view to manage the header area in the expanded status bar.
  */
-public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener {
-
-    /**
-     * How much the header expansion gets rubberbanded while expanding the panel.
-     */
-    private static final float EXPANSION_RUBBERBAND_FACTOR = 0.35f;
+public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
+        BatteryController.BatteryStateChangeCallback {
 
     private boolean mExpanded;
     private boolean mListening;
     private boolean mOverscrolled;
     private boolean mKeyguardShowing;
 
-    private View mBackground;
     private ViewGroup mSystemIconsContainer;
     private View mSystemIconsSuperContainer;
     private View mDateTime;
@@ -66,10 +63,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mBrightnessContainer;
     private View mQsDetailHeader;
     private View mEmergencyCallsOnly;
-    private TextView mChargingInfo;
+    private TextView mBatteryLevel;
 
     private boolean mShowEmergencyCallsOnly;
-    private boolean mShowChargingInfo;
     private boolean mKeyguardUserSwitcherShowing;
 
     private int mCollapsedHeight;
@@ -84,6 +80,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private ActivityStarter mActivityStarter;
     private BrightnessController mBrightnessController;
+    private BatteryController mBatteryController;
     private QSPanel mQSPanel;
 
     private final Rect mClipBounds = new Rect();
@@ -96,9 +93,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mBackground = findViewById(R.id.background);
         mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
         mSystemIconsContainer = (ViewGroup) findViewById(R.id.system_icons_container);
+        mSystemIconsSuperContainer.setOnClickListener(this);
         mDateTime = findViewById(R.id.datetime);
         mKeyguardCarrierText = findViewById(R.id.keyguard_carrier_text);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
@@ -112,7 +109,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
         mQsDetailHeader.setAlpha(0);
         mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
-        mChargingInfo = (TextView) findViewById(R.id.header_charging_info);
+        mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         loadDimens();
         updateVisibilities();
         addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -145,6 +142,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mActivityStarter = activityStarter;
     }
 
+    public void setBatteryController(BatteryController batteryController) {
+        mBatteryController = batteryController;
+    }
+
     public int getCollapsedHeight() {
         return mKeyguardShowing ? mKeyguardHeight : mCollapsedHeight;
     }
@@ -159,6 +160,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
         mListening = listening;
         updateBrightnessControllerState();
+        updateBatteryListening();
     }
 
     public void setExpanded(boolean expanded, boolean overscrolled) {
@@ -220,7 +222,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateVisibilities() {
         boolean onKeyguardAndCollapsed = mKeyguardShowing && !mExpanded;
-        mBackground.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
+        if (onKeyguardAndCollapsed) {
+            setBackground(null);
+        } else {
+            setBackgroundResource(R.drawable.notification_header_bg);
+        }
         mDateTime.setVisibility(onKeyguardAndCollapsed ? View.INVISIBLE : View.VISIBLE);
         mKeyguardCarrierText.setVisibility(onKeyguardAndCollapsed ? View.VISIBLE : View.GONE);
         mDate.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
@@ -235,38 +241,23 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && !mOverscrolled && mShowEmergencyCallsOnly
                 ? VISIBLE : GONE);
-        mChargingInfo.setVisibility(mExpanded && !mOverscrolled && mShowChargingInfo
-                && !mShowEmergencyCallsOnly ? VISIBLE : GONE);
         mMultiUserSwitch.setVisibility(mExpanded || !mKeyguardUserSwitcherShowing
                 ? VISIBLE : GONE);
+        mBatteryLevel.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
-        boolean systemIconsAboveClock = mExpanded && !mOverscrolled
-                && mShowChargingInfo && !mShowEmergencyCallsOnly;
-        lp.setMarginEnd(0);
-        if (systemIconsAboveClock) {
-            lp.addRule(ALIGN_PARENT_START);
-            lp.removeRule(START_OF);
+        lp.addRule(RelativeLayout.START_OF, mExpanded
+                ? mSettingsButton.getId()
+                : mMultiUserSwitch.getId());
+        lp.removeRule(ALIGN_PARENT_START);
+        if (mMultiUserSwitch.getVisibility() == GONE) {
+            lp.setMarginEnd(mSystemIconsSwitcherHiddenExpandedMargin);
         } else {
-            lp.addRule(RelativeLayout.START_OF, mExpanded
-                    ? mSettingsButton.getId()
-                    : mMultiUserSwitch.getId());
-            lp.removeRule(ALIGN_PARENT_START);
-            if (mMultiUserSwitch.getVisibility() == GONE) {
-                lp.setMarginEnd(mSystemIconsSwitcherHiddenExpandedMargin);
-            }
+            lp.setMarginEnd(0);
         }
         mSystemIconsSuperContainer.setLayoutParams(lp);
-
-        RelativeLayout.LayoutParams clockLp = (LayoutParams) mDateTime.getLayoutParams();
-        if (systemIconsAboveClock) {
-            clockLp.addRule(BELOW, mChargingInfo.getId());
-        } else {
-            clockLp.addRule(BELOW, mEmergencyCallsOnly.getId());
-        }
-        mDateTime.setLayoutParams(clockLp);
     }
 
     private void updateBrightnessControllerState() {
@@ -277,9 +268,24 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
+    private void updateBatteryListening() {
+        if (mListening) {
+            mBatteryController.addStateChangedCallback(this);
+        } else {
+            mBatteryController.removeStateChangedCallback(this);
+        }
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
+    }
+
     private void updateClickTargets() {
+        setClickable(!mKeyguardShowing || mExpanded);
         mDateTime.setClickable(mExpanded);
         mMultiUserSwitch.setClickable(mExpanded);
+        mSystemIconsSuperContainer.setClickable(mExpanded);
     }
 
     private void updateZTranslation() {
@@ -326,10 +332,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         setOutline(mOutline);
     }
 
-    public View getBackgroundView() {
-        return mBackground;
-    }
-
     public void attachSystemIcons(LinearLayout systemIcons) {
         mSystemIconsContainer.addView(systemIcons);
         mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
@@ -355,6 +357,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateZTranslation();
         updatePadding();
         updateMultiUserSwitch();
+        updateClickTargets();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -369,11 +372,17 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     public void onClick(View v) {
         if (v == mSettingsButton) {
             startSettingsActivity();
+        } else if (v == mSystemIconsSuperContainer) {
+            startBatteryActivity();
         }
     }
 
     private void startSettingsActivity() {
         mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+    }
+
+    private void startBatteryActivity() {
+        mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY));
     }
 
     public void setQSPanel(QSPanel qsp) {
@@ -392,20 +401,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mShowEmergencyCallsOnly = show;
         if (mExpanded) {
             updateVisibilities();
-            updateSystemIconsLayoutParams();
         }
-    }
-
-    public void setShowChargingInfo(boolean showChargingInfo) {
-        mShowChargingInfo = showChargingInfo;
-        if (mExpanded) {
-            updateVisibilities();
-            updateSystemIconsLayoutParams();
-        }
-    }
-
-    public void setChargingInfo(CharSequence chargingInfo) {
-        mChargingInfo.setText(chargingInfo);
     }
 
     public void setKeyguardUserSwitcherShowing(boolean showing) {
