@@ -207,7 +207,10 @@ public class PackageHelper {
        return false;
    }
 
-    public static int extractPublicFiles(String packagePath, File publicZipFile)
+    /**
+     * Extract public files for the single given APK.
+     */
+    public static int extractPublicFiles(String apkPath, File publicZipFile)
             throws IOException {
         final FileOutputStream fstr;
         final ZipOutputStream publicZipOutStream;
@@ -223,7 +226,7 @@ public class PackageHelper {
         int size = 0;
 
         try {
-            final ZipFile privateZip = new ZipFile(packagePath);
+            final ZipFile privateZip = new ZipFile(apkPath);
             try {
                 // Copy manifest, resources.arsc and res directory to public zip
                 for (final ZipEntry zipEntry : Collections.list(privateZip.entries())) {
