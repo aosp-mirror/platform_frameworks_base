@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="8359175999006833462">"VPN ಸಂಪರ್ಕವನ್ನು ರಚಿಸಲು <xliff:g id="APP">%s</xliff:g> ಪ್ರಯತ್ನಿಸಿದೆ."</string>
+    <string name="warning" msgid="5470743576660160079">"ಮುಂದುವರಿಸುವುದರ ಮೂಲಕ, ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಟ್ ದಟ್ಟಣೆಯನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ನೀವು ಅನುಮತಿಯನ್ನು ನೀಡುತ್ತಿರುವಿರಿ. "<b>"ನೀವು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನಂಬದ ಹೊರತು ಸಮ್ಮತಿಸಬೇಡಿ."</b>" ಇಲ್ಲದಿದ್ದರೆ, ದೋಷಪೂರಿತ ಸಾಫ್ಟ್‌ವೇರ್‌ನಿಂದ ನಿಮ್ಮ ಡೇಟಾಗೆ ಧಕ್ಕೆಯುಂಟಾಗುವ ಅಪಾಯಕ್ಕೆ ಒಳಗಾಗುತ್ತೀರಿ."</string>
+    <string name="accept" msgid="2889226408765810173">"ನನಗೆ ಈ ಅಪ್ಲಿಕೇಶನ್ ಮೇಲೆ ನಂಬಿಕೆಯಿದೆ."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
+    <string name="configure" msgid="4905518375574791375">"ಕಾನ್ಫಿಗರ್ ಮಾಡು"</string>
+    <string name="disconnect" msgid="971412338304200056">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸು"</string>
+    <string name="session" msgid="6470628549473641030">"ಸೆಷನ್:"</string>
+    <string name="duration" msgid="3584782459928719435">"ಅವಧಿ:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"ಕಳುಹಿಸಲಾಗಿದೆ:"</string>
+    <string name="data_received" msgid="4062776929376067820">"ಸ್ವೀಕರಿಸಲಾಗಿದೆ:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> ಬೈಟ್‌ಗಳು / <xliff:g id="NUMBER_1">%2$s</xliff:g> ಪ್ಯಾಕೆಟ್‌ಗಳು"</string>
+</resources>
