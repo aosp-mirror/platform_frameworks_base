@@ -1387,7 +1387,7 @@
     <string name="permlab_accessLocationExtraCommands">access extra location provider commands</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessLocationExtraCommands">Allows the app to access
-      extra location provider commands.  This may allow the app to to interfere
+      extra location provider commands.  This may allow the app to interfere
       with the operation of the GPS or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
