@@ -18,7 +18,6 @@ package com.android.defcontainer;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.IPackageManager;
 import android.content.pm.LimitedLengthInputStream;
 import android.content.pm.MacAuthenticatedInputStream;
@@ -141,32 +140,24 @@ public class DefaultContainerService extends IntentService {
          *         {@link PackageManager}
          */
         @Override
-        public int copyResource(final String packagePath,
-                ContainerEncryptionParams encryptionParams, ParcelFileDescriptor outStream) {
+        public int copyResource(final String packagePath, ParcelFileDescriptor outStream) {
             if (packagePath == null || outStream == null) {
                 return PackageManager.INSTALL_FAILED_INVALID_URI;
             }
 
-            ParcelFileDescriptor.AutoCloseOutputStream autoOut
-                    = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
-
+            InputStream in = null;
+            OutputStream out = null;
             try {
-                copyFile(packagePath, autoOut, encryptionParams);
+                in = new FileInputStream(packagePath);
+                out = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
+                Streams.copy(in, out);
                 return PackageManager.INSTALL_SUCCEEDED;
-            } catch (FileNotFoundException e) {
-                Slog.e(TAG, "Could not copy URI " + packagePath.toString() + " FNF: "
-                        + e.getMessage());
-                return PackageManager.INSTALL_FAILED_INVALID_URI;
             } catch (IOException e) {
-                Slog.e(TAG, "Could not copy URI " + packagePath.toString() + " IO: "
-                        + e.getMessage());
+                Slog.e(TAG, "Failed to copy " + packagePath, e);
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            } catch (DigestException e) {
-                Slog.e(TAG, "Could not copy URI " + packagePath.toString() + " Security: "
-                                + e.getMessage());
-                return PackageManager.INSTALL_FAILED_INVALID_APK;
             } finally {
-                IoUtils.closeQuietly(autoOut);
+                IoUtils.closeQuietly(out);
+                IoUtils.closeQuietly(in);
             }
         }
 
@@ -482,190 +473,6 @@ public class DefaultContainerService extends IntentService {
         }
 
         return newCachePath;
-    }
-
-    private static void copyToFile(InputStream inputStream, OutputStream out) throws IOException {
-        byte[] buffer = new byte[16384];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) >= 0) {
-            out.write(buffer, 0, bytesRead);
-        }
-    }
-
-    private void copyFile(String packagePath, OutputStream outStream,
-            ContainerEncryptionParams encryptionParams) throws FileNotFoundException, IOException,
-            DigestException {
-        InputStream inStream = null;
-        try {
-            final InputStream is = new FileInputStream(new File(packagePath));
-            inStream = new BufferedInputStream(is);
-
-            /*
-             * If this resource is encrypted, get the decrypted stream version
-             * of it.
-             */
-            ApkContainer container = new ApkContainer(inStream, encryptionParams);
-
-            try {
-                /*
-                 * We copy the source package file to a temp file and then
-                 * rename it to the destination file in order to eliminate a
-                 * window where the package directory scanner notices the new
-                 * package file but it's not completely copied yet.
-                 */
-                copyToFile(container.getInputStream(), outStream);
-
-                if (!container.isAuthenticated()) {
-                    throw new DigestException();
-                }
-            } catch (GeneralSecurityException e) {
-                throw new DigestException("A problem occured copying the file.");
-            }
-        } finally {
-            IoUtils.closeQuietly(inStream);
-        }
-    }
-
-    private static class ApkContainer {
-        private static final int MAX_AUTHENTICATED_DATA_SIZE = 16384;
-
-        private final InputStream mInStream;
-
-        private MacAuthenticatedInputStream mAuthenticatedStream;
-
-        private byte[] mTag;
-
-        public ApkContainer(InputStream inStream, ContainerEncryptionParams encryptionParams)
-                throws IOException {
-            if (encryptionParams == null) {
-                mInStream = inStream;
-            } else {
-                mInStream = getDecryptedStream(inStream, encryptionParams);
-                mTag = encryptionParams.getMacTag();
-            }
-        }
-
-        public boolean isAuthenticated() {
-            if (mAuthenticatedStream == null) {
-                return true;
-            }
-
-            return mAuthenticatedStream.isTagEqual(mTag);
-        }
-
-        private Mac getMacInstance(ContainerEncryptionParams encryptionParams) throws IOException {
-            final Mac m;
-            try {
-                final String macAlgo = encryptionParams.getMacAlgorithm();
-
-                if (macAlgo != null) {
-                    m = Mac.getInstance(macAlgo);
-                    m.init(encryptionParams.getMacKey(), encryptionParams.getMacSpec());
-                } else {
-                    m = null;
-                }
-
-                return m;
-            } catch (NoSuchAlgorithmException e) {
-                throw new IOException(e);
-            } catch (InvalidKeyException e) {
-                throw new IOException(e);
-            } catch (InvalidAlgorithmParameterException e) {
-                throw new IOException(e);
-            }
-        }
-
-        public InputStream getInputStream() {
-            return mInStream;
-        }
-
-        private InputStream getDecryptedStream(InputStream inStream,
-                ContainerEncryptionParams encryptionParams) throws IOException {
-            final Cipher c;
-            try {
-                c = Cipher.getInstance(encryptionParams.getEncryptionAlgorithm());
-                c.init(Cipher.DECRYPT_MODE, encryptionParams.getEncryptionKey(),
-                        encryptionParams.getEncryptionSpec());
-            } catch (NoSuchAlgorithmException e) {
-                throw new IOException(e);
-            } catch (NoSuchPaddingException e) {
-                throw new IOException(e);
-            } catch (InvalidKeyException e) {
-                throw new IOException(e);
-            } catch (InvalidAlgorithmParameterException e) {
-                throw new IOException(e);
-            }
-
-            final long encStart = encryptionParams.getEncryptedDataStart();
-            final long end = encryptionParams.getDataEnd();
-            if (end < encStart) {
-                throw new IOException("end <= encStart");
-            }
-
-            final Mac mac = getMacInstance(encryptionParams);
-            if (mac != null) {
-                final long macStart = encryptionParams.getAuthenticatedDataStart();
-                if (macStart >= Integer.MAX_VALUE) {
-                    throw new IOException("macStart >= Integer.MAX_VALUE");
-                }
-
-                final long furtherOffset;
-                if (macStart >= 0 && encStart >= 0 && macStart < encStart) {
-                    /*
-                     * If there is authenticated data at the beginning, read
-                     * that into our MAC first.
-                     */
-                    final long authenticatedLengthLong = encStart - macStart;
-                    if (authenticatedLengthLong > MAX_AUTHENTICATED_DATA_SIZE) {
-                        throw new IOException("authenticated data is too long");
-                    }
-                    final int authenticatedLength = (int) authenticatedLengthLong;
-
-                    final byte[] authenticatedData = new byte[(int) authenticatedLength];
-
-                    Streams.readFully(inStream, authenticatedData, (int) macStart,
-                            authenticatedLength);
-                    mac.update(authenticatedData, 0, authenticatedLength);
-
-                    furtherOffset = 0;
-                } else {
-                    /*
-                     * No authenticated data at the beginning. Just skip the
-                     * required number of bytes to the beginning of the stream.
-                     */
-                    if (encStart > 0) {
-                        furtherOffset = encStart;
-                    } else {
-                        furtherOffset = 0;
-                    }
-                }
-
-                /*
-                 * If there is data at the end of the stream we want to ignore,
-                 * wrap this in a LimitedLengthInputStream.
-                 */
-                if (furtherOffset >= 0 && end > furtherOffset) {
-                    inStream = new LimitedLengthInputStream(inStream, furtherOffset, end - encStart);
-                } else if (furtherOffset > 0) {
-                    inStream.skip(furtherOffset);
-                }
-
-                mAuthenticatedStream = new MacAuthenticatedInputStream(inStream, mac);
-
-                inStream = mAuthenticatedStream;
-            } else {
-                if (encStart >= 0) {
-                    if (end > encStart) {
-                        inStream = new LimitedLengthInputStream(inStream, encStart, end - encStart);
-                    } else {
-                        inStream.skip(encStart);
-                    }
-                }
-            }
-
-            return new CipherInputStream(inStream, c);
-        }
-
     }
 
     private static final int PREFER_INTERNAL = 1;

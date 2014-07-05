@@ -38,6 +38,7 @@ import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
 
 import android.util.ArrayMap;
+
 import com.android.internal.R;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -7705,10 +7706,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final File fromFile = new File(packageURI.getPath());
 
+        if (encryptionParams != null) {
+            throw new UnsupportedOperationException("ContainerEncryptionParams not supported");
+        }
+
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(fromFile, observer, observer2, filteredFlags,
-                installerPackageName, verificationParams, encryptionParams, user,
-                packageAbiOverride);
+                installerPackageName, verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -8419,11 +8423,6 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         private final File mFromFile;
 
-        /**
-         * Local copy of {@link #mFromFile}, if generated.
-         */
-        private File mLocalFromFile;
-
         final IPackageInstallObserver observer;
         final IPackageInstallObserver2 observer2;
         int flags;
@@ -8431,14 +8430,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final VerificationParams verificationParams;
         private InstallArgs mArgs;
         private int mRet;
-        final ContainerEncryptionParams encryptionParams;
         final String packageAbiOverride;
         final String packageInstructionSetOverride;
 
         InstallParams(File fromFile, IPackageInstallObserver observer,
                 IPackageInstallObserver2 observer2, int flags, String installerPackageName,
-                VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
-                UserHandle user, String packageAbiOverride) {
+                VerificationParams verificationParams, UserHandle user, String packageAbiOverride) {
             super(user);
             mFromFile = Preconditions.checkNotNull(fromFile);
             this.observer = observer;
@@ -8446,7 +8443,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.flags = flags;
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
-            this.encryptionParams = encryptionParams;
             this.packageAbiOverride = packageAbiOverride;
             this.packageInstructionSetOverride = (packageAbiOverride == null) ?
                     packageAbiOverride : VMRuntime.getInstructionSet(packageAbiOverride);
@@ -8554,26 +8550,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final long lowThreshold = getMemoryLowThreshold();
                 if (lowThreshold == 0L) {
                     Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
-                }
-
-                if (encryptionParams != null) {
-                    // Make a temporary file for decryption.
-                    mLocalFromFile = createTempPackageFile(mDrmAppPrivateInstallDir);
-                    if (mLocalFromFile != null) {
-                        ParcelFileDescriptor out = null;
-                        try {
-                            out = ParcelFileDescriptor.open(mLocalFromFile,
-                                    ParcelFileDescriptor.MODE_READ_WRITE);
-                            ret = mContainerService.copyResource(mFromFile.getAbsolutePath(),
-                                    encryptionParams, out);
-                        } catch (FileNotFoundException e) {
-                            Slog.e(TAG, "Failed to create temporary file for: " + mFromFile);
-                        } finally {
-                            IoUtils.closeQuietly(out);
-                        }
-
-                        FileUtils.setPermissions(mLocalFromFile, 0644, -1, -1);
-                    }
                 }
 
                 // Remote call to find out default install location
@@ -8794,12 +8770,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // will succeed.
             if (mArgs != null) {
                 processPendingInstall(mArgs, mRet);
-
-                if (mLocalFromFile != null) {
-                    if (!mLocalFromFile.delete()) {
-                        Slog.w(TAG, "Couldn't delete temporary file: " + mLocalFromFile);
-                    }
-                }
             }
         }
 
@@ -8814,11 +8784,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         public File getFromFile() {
-            if (mLocalFromFile != null) {
-                return mLocalFromFile;
-            } else {
-                return mFromFile;
-            }
+            return mFromFile;
         }
     }
 
@@ -9181,7 +9147,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Copy the resource now
             int ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             try {
-                ret = imcs.copyResource(fromFile.getAbsolutePath(), null, out);
+                ret = imcs.copyResource(fromFile.getAbsolutePath(), out);
             } finally {
                 IoUtils.closeQuietly(out);
             }
