@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Print Spooler"</string>
+    <string name="advanced_settings_button" msgid="5764225091289415632">"Printerindstillinger"</string>
     <string name="print_button" msgid="645164566271246268">"Udskriv"</string>
     <string name="save_button" msgid="1921310454071758999">"Gem"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destination"</string>
@@ -25,8 +26,7 @@
     <string name="label_color" msgid="1108690305218188969">"Farve"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Retning"</string>
     <string name="label_pages" msgid="6300874667546617333">"Sider (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
-    <!-- no translation found for pages_range_example (8558694453556945172) -->
-    <skip />
+    <string name="pages_range_example" msgid="8558694453556945172">"f.eks. 1-5,8,11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Vis udskrift"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installer et PDF-visningsprog. for at se eksempel"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Udskrivningsapp gik ned"</string>
@@ -41,6 +41,8 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Søgefeltet vises"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Søgefeltet er skjult"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Tilføj printer"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Vælg printer"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Glem printer"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"Der blev fundet <xliff:g id="COUNT">%1$s</xliff:g> printer"</item>
     <item quantity="other" msgid="6533817036607128241">"Der blev fundet <xliff:g id="COUNT">%1$s</xliff:g> printere"</item>
@@ -61,15 +63,14 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Ingen forbindelse til printer"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ukendt"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – ikke tilgængelig"</string>
-    <!-- no translation found for print_error_default_message (8568506918983980567) -->
-    <skip />
+    <string name="print_error_default_message" msgid="8568506918983980567">"Der kunne ikke genereres et udskriftsjob"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Sort/hvid"</item>
     <item msgid="2762241247228983754">"Farve"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"Portræt"</item>
-    <item msgid="3199660090246166812">"Landskab"</item>
+    <item msgid="4061931020926489228">"Stående"</item>
+    <item msgid="3199660090246166812">"Liggende"</item>
   </string-array>
   <string-array name="page_options_labels">
     <item msgid="7421377442011699994">"Alle"</item>
