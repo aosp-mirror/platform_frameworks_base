@@ -164,7 +164,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Slå av"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Feilrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Utfør feilrapport"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om den nåværende tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Informasjon om tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Lyden er på"</string>

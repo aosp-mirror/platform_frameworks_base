@@ -540,9 +540,9 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoľuje prístup k ovládaču kernel MTP na implementáciu protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testovanie hardvéru"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Umožňuje aplikácii ovládať rôzne periférie na účely testovania hardvéru."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"priame volanie na telefónne čísla"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priame volanie na ľubovoľné telefónne čísla"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"priamo volať na ľubovoľné telefónne čísla"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Umožňuje aplikácii volať na akékoľvek telefónne číslo (bez vášho zásahu) vrátane čísiel tiesňového volania. Škodlivé aplikácie môžu uskutočňovať zbytočné a nezákonné volania na tiesňové linky."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"priamo spustiť nastavenie tabletu CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"priamo spustiť nastavenie telefónu CDMA"</string>
