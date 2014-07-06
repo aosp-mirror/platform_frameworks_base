@@ -20,20 +20,43 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:divider="?android:attr/dividerHorizontal"
-              android:showDividers="middle"
-              android:dividerPadding="0dip">
+              >
+    <Space android:layout_width="0dp"
+           android:layout_height="0dp"
+           android:layout_weight="1" />
 
-    <FrameLayout android:layout_width="match_parent"
+    <!-- TODO Drawer-thing -->
+    <LinearLayout android:layout_width="match_parent"
                  android:layout_height="wrap_content"
-                 android:layout_weight="1">
+                 android:layout_weight="1"
+                 android:orientation="vertical"
+                 android:paddingLeft="32dp"
+                 android:paddingRight="32dp"
+                 android:background="@color/white"
+                 android:elevation="8dp">
 
-        <ListView
+        <TextView android:id="@+id/title"
+                  android:layout_width="match_parent"
+                  android:layout_height="?android:attr/listPreferredItemHeight"
+                  android:textAppearance="?android:attr/textAppearanceLarge"
+                  android:gravity="start|center_vertical" />
+
+        <GridView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/resolver_list" />
+            android:id="@+id/resolver_list"
+            android:numColumns="4"
+            android:columnWidth="128dp"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay" />
 
-    </FrameLayout>
+        <TextView android:id="@+id/empty"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:text="@string/noApplications"
+                  android:visibility="gone" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/button_bar"
@@ -41,32 +64,39 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="end"
         android:orientation="horizontal"
         android:layoutDirection="locale"
-        android:measureWithLargestChild="true">
+        android:measureWithLargestChild="true"
+        android:background="@color/white"
+        android:elevation="8dp">
+        <Button android:id="@+id/button_once"
+                android:layout_width="wrap_content"
+                android:layout_gravity="start"
+                android:maxLines="2"
+                style="?android:attr/buttonBarButtonStyle"
+                android:textSize="14sp"
+                android:minHeight="@dimen/alert_dialog_button_bar_height"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:enabled="false"
+                android:text="@string/activity_resolver_use_once"
+                android:onClick="onButtonClick" />
         <Button android:id="@+id/button_always"
                 android:layout_width="wrap_content"
                 android:layout_gravity="end"
-                android:layout_weight="1"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 style="?android:attr/buttonBarButtonStyle"
+                android:textColor="@color/material_blue_500"
                 android:textSize="14sp"
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="@string/activity_resolver_use_always"
                 android:onClick="onButtonClick" />
-        <Button android:id="@+id/button_once"
-                android:layout_width="wrap_content"
-                android:layout_gravity="start"
-                android:layout_weight="1"
-                android:maxLines="2"
-                style="?android:attr/buttonBarButtonStyle"
-                android:textSize="14sp"
-                android:minHeight="@dimen/alert_dialog_button_bar_height"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/activity_resolver_use_once"
-                android:onClick="onButtonClick" />
     </LinearLayout>
+
 </LinearLayout>

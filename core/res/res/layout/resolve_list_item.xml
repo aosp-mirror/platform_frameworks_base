@@ -18,9 +18,11 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="horizontal"
+              android:orientation="vertical"
               android:layout_height="wrap_content"
               android:layout_width="match_parent"
+              android:paddingTop="4dp"
+              android:paddingBottom="4dp"
               android:background="?attr/activatedBackgroundIndicator">
 
     <!-- Activity icon when presenting dialog
@@ -28,28 +30,31 @@
     <ImageView android:id="@+id/icon"
                android:layout_width="0dp"
                android:layout_height="0dp"
-               android:layout_marginStart="12dp"
-               android:padding="4dp"
+               android:layout_gravity="center"
+               android:layout_margin="4dp"
                android:scaleType="fitCenter" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:gravity="start|center_vertical"
+              android:gravity="center"
               android:orientation="vertical"
               android:layout_height="wrap_content"
               android:layout_width="wrap_content"
-              android:layout_gravity="start|center_vertical"
-              android:layout_marginStart="12dp">
+              android:layout_gravity="center">
         <!-- Activity name -->
         <TextView android:id="@android:id/text1"
-                  android:textAppearance="?android:attr/textAppearanceMedium"
+                  android:textAppearance="?android:attr/textAppearanceSmall"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:minLines="2"
                   android:maxLines="2" />
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
                   android:textAppearance="?android:attr/textAppearanceSmall"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:minLines="2"
                   android:maxLines="2"
                   android:paddingTop="4dip" />
     </LinearLayout>
