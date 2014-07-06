@@ -232,6 +232,8 @@ public class PackageParser {
     public static class PackageLite {
         public final String packageName;
         public final int versionCode;
+        public final int installLocation;
+        public final VerifierInfo[] verifiers;
 
         /** Names of any split APKs, ordered by parsed splitName */
         public final String[] splitNames;
@@ -248,13 +250,15 @@ public class PackageParser {
         /** Paths of any split APKs, ordered by parsed splitName */
         public final String[] splitCodePaths;
 
-        private PackageLite(String packageName, int versionCode, String[] splitNames,
-                String codePath, String baseCodePath, String[] splitCodePaths) {
-            this.packageName = packageName;
-            this.versionCode = versionCode;
+        private PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
+                String[] splitCodePaths) {
+            this.packageName = baseApk.packageName;
+            this.versionCode = baseApk.versionCode;
+            this.installLocation = baseApk.installLocation;
+            this.verifiers = baseApk.verifiers;
             this.splitNames = splitNames;
             this.codePath = codePath;
-            this.baseCodePath = baseCodePath;
+            this.baseCodePath = baseApk.codePath;
             this.splitCodePaths = splitCodePaths;
         }
 
@@ -272,6 +276,7 @@ public class PackageParser {
      * Lightweight parsed details about a single APK file.
      */
     public static class ApkLite {
+        public final String codePath;
         public final String packageName;
         public final String splitName;
         public final int versionCode;
@@ -279,8 +284,9 @@ public class PackageParser {
         public final VerifierInfo[] verifiers;
         public final Signature[] signatures;
 
-        public ApkLite(String packageName, String splitName, int versionCode,
+        public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int installLocation, List<VerifierInfo> verifiers, Signature[] signatures) {
+            this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
             this.versionCode = versionCode;
@@ -592,10 +598,9 @@ public class PackageParser {
 
     private static PackageLite parseMonolithicPackageLite(File packageFile, int flags)
             throws PackageParserException {
-        final ApkLite lite = parseApkLite(packageFile, flags);
+        final ApkLite baseApk = parseApkLite(packageFile, flags);
         final String packagePath = packageFile.getAbsolutePath();
-        return new PackageLite(lite.packageName, lite.versionCode, null,
-                packagePath, packagePath, null);
+        return new PackageLite(packagePath, baseApk, null, null);
     }
 
     private static PackageLite parseClusterPackageLite(File packageDir, int flags)
@@ -609,7 +614,7 @@ public class PackageParser {
         String packageName = null;
         int versionCode = 0;
 
-        final ArrayMap<String, File> apks = new ArrayMap<>();
+        final ArrayMap<String, ApkLite> apks = new ArrayMap<>();
         for (File file : files) {
             if (isApkFile(file)) {
                 final ApkLite lite = parseApkLite(file, flags);
@@ -633,7 +638,7 @@ public class PackageParser {
                 }
 
                 // Assert that each split is defined only once
-                if (apks.put(lite.splitName, file) != null) {
+                if (apks.put(lite.splitName, lite) != null) {
                     throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                             "Split name " + lite.splitName
                             + " defined more than once; most recent was " + file);
@@ -641,7 +646,7 @@ public class PackageParser {
             }
         }
 
-        final File baseApk = apks.remove(null);
+        final ApkLite baseApk = apks.remove(null);
         if (baseApk == null) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Missing base APK in " + packageDir);
@@ -660,14 +665,12 @@ public class PackageParser {
             Arrays.sort(splitNames, sSplitNameComparator);
 
             for (int i = 0; i < size; i++) {
-                splitCodePaths[i] = apks.get(splitNames[i]).getAbsolutePath();
+                splitCodePaths[i] = apks.get(splitNames[i]).codePath;
             }
         }
 
         final String codePath = packageDir.getAbsolutePath();
-        final String baseCodePath = baseApk.getAbsolutePath();
-        return new PackageLite(packageName, versionCode, splitNames, codePath, baseCodePath,
-                splitCodePaths);
+        return new PackageLite(codePath, baseApk, splitNames, splitCodePaths);
     }
 
     public Package parsePackage(File packageFile, int flags) throws PackageParserException {
@@ -1020,7 +1023,7 @@ public class PackageParser {
             }
 
             final AttributeSet attrs = parser;
-            return parseApkLite(res, parser, attrs, flags, signatures);
+            return parseApkLite(apkPath, res, parser, attrs, flags, signatures);
 
         } catch (XmlPullParserException | IOException | RuntimeException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
@@ -1101,7 +1104,7 @@ public class PackageParser {
                 (splitName != null) ? splitName.intern() : splitName);
     }
 
-    private static ApkLite parseApkLite(Resources res, XmlPullParser parser,
+    private static ApkLite parseApkLite(String codePath, Resources res, XmlPullParser parser,
             AttributeSet attrs, int flags, Signature[] signatures) throws IOException,
             XmlPullParserException, PackageParserException {
         final Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs, flags);
@@ -1143,7 +1146,7 @@ public class PackageParser {
             }
         }
 
-        return new ApkLite(packageSplit.first, packageSplit.second, versionCode,
+        return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
                 installLocation, verifiers, signatures);
     }
 

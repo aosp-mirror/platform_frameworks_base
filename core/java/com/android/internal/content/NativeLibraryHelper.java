@@ -57,13 +57,15 @@ public class NativeLibraryHelper {
         final long[] apkHandles;
 
         public static Handle create(File packageFile) throws IOException {
-            final PackageLite lite;
             try {
-                lite = PackageParser.parsePackageLite(packageFile, 0);
+                final PackageLite lite = PackageParser.parsePackageLite(packageFile, 0);
+                return create(lite);
             } catch (PackageParserException e) {
                 throw new IOException("Failed to parse package: " + packageFile, e);
             }
+        }
 
+        public static Handle create(PackageLite lite) throws IOException {
             final List<String> codePaths = lite.getAllCodePaths();
             final int size = codePaths.size();
             final long[] apkHandles = new long[size];
