@@ -631,7 +631,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizowania"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"włączanie i wyłączanie synchronizacji"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pozwala aplikacji na modyfikowanie ustawień synchronizacji z kontem. Tego uprawnienia można użyć np. do włączenia synchronizacji z kontem aplikacji Ludzie."</string>
@@ -685,7 +685,7 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolowanie długości haseł odblokowania ekranu i dozwolonych w nich znaków"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoruj próby odblokowania ekranu"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Zmień hasło odblokowania ekranu"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Zmienianie hasła odblokowania ekranu"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Zablokuj ekran"</string>

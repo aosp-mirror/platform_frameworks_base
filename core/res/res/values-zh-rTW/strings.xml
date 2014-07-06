@@ -1126,7 +1126,7 @@
     <string name="whichHomeApplication" msgid="4616420172727326782">"選取主螢幕應用程式"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設為預設應用程式。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"前往 [系統設定] &gt; [應用程式] &gt; [下載] 清除預設值。"</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"選擇一種動作"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"選擇分享方式"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="2991814273936504689">"沒有應用程式可執行這項操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>

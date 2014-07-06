@@ -491,13 +491,13 @@
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ऑडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ऐप्स को ऑडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"हॉटवर्ड पहचान"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"एप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ऐप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"वीडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ऐप्स को वीडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"सुरक्षित वीडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"ऐप्स को सुरक्षित वीडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_mediaContentControl" msgid="8749790560720562511">"मीडिया प्लेबैक और मेटाडेटा एक्सेस नियंत्रित करें"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"एप्लिकेशन को मीडिया प्लेबैक नियंत्रित करने देती है और मीडिया जानकारी (शीर्षक, लेखक...) एक्सेस करने देती है."</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"ऐप्लिकेशन को मीडिया प्लेबैक नियंत्रित करने देती है और मीडिया जानकारी (शीर्षक, लेखक...) एक्सेस करने देती है."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडियो रिकॉर्ड करें"</string>
@@ -562,8 +562,8 @@
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ऐप्स  को टेबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ऐप्स  को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"इंफ़्रारेड संचारित करें"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"एप्लिकेशन को टेबलेट के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"एप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ऐप्लिकेशन को टेबलेट के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ऐप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"टेबलेट चालू या बंद करें"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फ़ोन चालू या बंद करें"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ऐप्स को टेबलेट चालू या बंद करने देता है."</string>
@@ -637,9 +637,9 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ऐप्स  को किसी खाते की समन्वयन सेटिंग संशोधित करने देता है. उदाहरण के लिए, इसका उपयोग लोग ऐप्स  का समन्‍वयन किसी खाते से सक्षम करने में हो सकता है."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"समन्वयन आंकड़े पढ़ें"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ऐप्स  को किसी खाते के समन्वयन आंकड़े, साथ ही समन्‍वयित ईवेंट का इतिहास और समन्‍वयित डेटा की मात्रा पढ़ने देता है."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ग्राहकी-प्राप्त फ़ीड पढ़ें"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता-प्राप्त फ़ीड पढ़ें"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ऐप्स को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"ग्राहकी-प्राप्त फ़ीड लिखें"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"सदस्यता-प्राप्त फ़ीड लिखें"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ऐप्स  को आपके वर्तमान समन्वयित फ़ीड को संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स  आपके समन्वयित फ़ीड को बदल सकते है."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"शब्दकोश में आपके द्वारा जोड़े गए शब्‍दों को पढ़ें"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ऐप्स को ऐसे सभी शब्‍दों, नामों और वाक्यांशों को पढ़ने देता है जो संभवत: उपयोगकर्ता द्वारा उपयोगकर्ता ‍शब्दकोश में संग्रहीत किए गए हों."</string>
@@ -664,7 +664,7 @@
     <string name="permlab_use_sip" msgid="5986952362795870502">"इंटरनेट कॉल करें/प्राप्त करें"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"ऐप्स  को इंटरनेट कॉल करने/प्राप्त करने के लिए SIP सेवा का उपयोग करने देता है."</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"इन-कॉल स्क्रीन से सहभागिता करें"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"एप्लिकेशन को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ऐप्लिकेशन को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ऐतिहासिक नेटवर्क उपयोग पढें"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"किसी ऐप्स  को विशिष्ट नेटवर्क और ऐप्स के लिए ऐतिहासिक नेटवर्क उपयोग को पढ़ने देता है."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क नीति प्रबंधित करें"</string>
@@ -816,7 +816,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"घर"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"कार्यालय"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"अन्य"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"इस संपर्क को देखने के लिए कोई एप्लिकेशन नहीं मिला."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"इस संपर्क को देखने के लिए कोई ऐप्लिकेशन नहीं मिला."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड लिखें"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK और नया पिन कोड लिखें"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
@@ -1123,7 +1123,7 @@
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
     <string name="whichApplication" msgid="4533185947064773386">"इसका उपयोग करके क्रिया पूर्ण करें"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"होम एप्लिकेशन चुनें"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"होम ऐप्लिकेशन चुनें"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"इस क्रिया के लिए डिफ़ॉल्‍ट रूप से उपयोग करें."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"सिस्‍टम सेटिंग &gt; Apps &gt; डाउनलोड किए गए में डिफ़ॉल्‍ट साफ करें."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"कोई क्रिया चुनें"</string>
