@@ -1896,6 +1896,7 @@
   <java-symbol type="color" name="timepicker_default_numbers_background_color_material" />
   <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
   <java-symbol type="attr" name="seekBarPreferenceStyle" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Resolver" />
 
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />

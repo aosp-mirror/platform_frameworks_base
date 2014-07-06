@@ -16,7 +16,9 @@
 
 package com.android.internal.app;
 
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.widget.GridView;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
@@ -62,16 +64,16 @@ import java.util.Set;
  * which there is more than one matching activity, allowing the user to decide
  * which to go to.  It is not normally used directly by application developers.
  */
-public class ResolverActivity extends AlertActivity implements AdapterView.OnItemClickListener {
+public class ResolverActivity extends Activity implements AdapterView.OnItemClickListener {
     private static final String TAG = "ResolverActivity";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private int mLaunchedFromUid;
     private ResolveListAdapter mAdapter;
     private PackageManager mPm;
     private boolean mAlwaysUseOption;
     private boolean mShowExtended;
-    private ListView mListView;
+    private GridView mGridView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     private int mIconDpi;
@@ -120,7 +122,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean alwaysUseOption) {
-        setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert);
+        setTheme(R.style.Theme_DeviceDefault_Resolver);
         super.onCreate(savedInstanceState);
         try {
             mLaunchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
@@ -131,10 +133,6 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         mPm = getPackageManager();
         mAlwaysUseOption = alwaysUseOption;
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
-
-        AlertController.AlertParams ap = mAlertParams;
-
-        ap.mTitle = title;
 
         mPackageMonitor.register(this, getMainLooper(), false);
         mRegistered = true;
@@ -151,15 +149,17 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             finish();
             return;
         } else if (count > 1) {
-            ap.mView = getLayoutInflater().inflate(R.layout.resolver_list, null);
-            mListView = (ListView) ap.mView.findViewById(R.id.resolver_list);
-            mListView.setAdapter(mAdapter);
-            mListView.setOnItemClickListener(this);
-            mListView.setOnItemLongClickListener(new ItemLongClickListener());
+            setContentView(R.layout.resolver_list);
+            mGridView = (GridView) findViewById(R.id.resolver_list);
+            mGridView.setAdapter(mAdapter);
+            mGridView.setOnItemClickListener(this);
+            mGridView.setOnItemLongClickListener(new ItemLongClickListener());
 
             if (alwaysUseOption) {
-                mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                mGridView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             }
+
+            resizeGrid();
         } else if (count == 1) {
             startActivity(mAdapter.intentForPosition(0));
             mPackageMonitor.unregister();
@@ -167,10 +167,19 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             finish();
             return;
         } else {
-            ap.mMessage = getResources().getText(R.string.noApplications);
+            setContentView(R.layout.resolver_list);
+
+            final TextView empty = (TextView) findViewById(R.id.empty);
+            empty.setVisibility(View.VISIBLE);
+
+            mGridView = (GridView) findViewById(R.id.resolver_list);
+            mGridView.setVisibility(View.GONE);
         }
 
-        setupAlert();
+        final TextView titleView = (TextView) findViewById(R.id.title);
+        if (titleView != null) {
+            titleView.setText(title);
+        }
 
         if (alwaysUseOption) {
             final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
@@ -184,9 +193,20 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             // Set the initial highlight if there was a preferred or last used choice
             final int initialHighlight = mAdapter.getInitialHighlight();
             if (initialHighlight >= 0) {
-                mListView.setItemChecked(initialHighlight, true);
+                mGridView.setItemChecked(initialHighlight, true);
                 onItemClick(null, null, initialHighlight, 0); // Other entries are not used
             }
+        }
+    }
+
+    void resizeGrid() {
+        final int itemCount = mAdapter.getCount();
+        mGridView.setNumColumns(Math.min(itemCount, mMaxColumns));
+    }
+
+    void dismiss() {
+        if (!isFinishing()) {
+            finish();
         }
     }
 
@@ -258,26 +278,26 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (mAlwaysUseOption) {
-            final int checkedPos = mListView.getCheckedItemPosition();
+            final int checkedPos = mGridView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             mLastSelected = checkedPos;
             setAlwaysButtonEnabled(hasValidSelection, checkedPos);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
-                mListView.setSelection(checkedPos);
+                mGridView.setSelection(checkedPos);
             }
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final int checkedPos = mListView.getCheckedItemPosition();
+        final int checkedPos = mGridView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
             setAlwaysButtonEnabled(hasValidSelection, checkedPos);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
-                mListView.smoothScrollToPosition(checkedPos);
+                mGridView.smoothScrollToPosition(checkedPos);
             }
             mLastSelected = checkedPos;
         } else {
@@ -298,7 +318,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        startSelected(mListView.getCheckedItemPosition(), id == R.id.button_always);
+        startSelected(mGridView.getCheckedItemPosition(), id == R.id.button_always);
         dismiss();
     }
 
@@ -462,7 +482,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             mInitialIntents = initialIntents;
             mBaseResolveList = rList;
             mLaunchedFromUid = launchedFromUid;
-            mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflater = LayoutInflater.from(context);
             mList = new ArrayList<DisplayResolveInfo>();
             rebuildList();
         }
@@ -475,6 +495,8 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             if (newItemCount == 0) {
                 // We no longer have any items...  just finish the activity.
                 finish();
+            } else if (newItemCount != oldItemCount) {
+                resizeGrid();
             }
         }
 

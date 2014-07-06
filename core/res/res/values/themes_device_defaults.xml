@@ -560,4 +560,15 @@ easier.
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
     <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings" />
 
+    <!-- Theme used for the intent picker activity. -->
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Material.Light">
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowBackground">@color/transparent</item>
+        <item name="statusBarColor">@color/black</item>
+        <item name="navigationBarColor">@color/black</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="colorControlActivated">?attr/colorControlHighlight</item>
+    </style>
+
 </resources>
