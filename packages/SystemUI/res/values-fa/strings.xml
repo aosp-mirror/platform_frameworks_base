@@ -27,7 +27,7 @@
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"رد کردن برنامه‌های اخیر"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 برنامه اخیر"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d برنامه‌ اخیر"</item>
+    <item quantity="other" msgid="1040784359794890744">"‏%d برنامه‌ اخیر"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"اعلانی موجود نیست"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"در حال انجام"</string>
@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"شارژر را متصل کنید"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"باتری در حال کم شدن است."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> باقیمانده است"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"شارژ USB پشتیبانی نمی‌شود.\nفقط از شارژر ارائه شده استفاده کنید."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"‏شارژ USB پشتیبانی نمی‌شود.\nفقط از شارژر ارائه شده استفاده کنید."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"استفاده از باتری"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -47,17 +47,17 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"تنظیم روش‌های ورودی"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"صفحه‌کلید فیزیکی"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به دستگاه USB دسترسی داشته باشد؟"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهد تا به وسیله جانبی USB دسترسی داشته باشد؟"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"وقتی این دستگاه USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"وقتی این وسیله جانبی USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"هیچ برنامهٔ کاربردی نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"لوازم جانبی USB"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"‏به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به دستگاه USB دسترسی داشته باشد؟"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"‏به برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهد تا به وسیله جانبی USB دسترسی داشته باشد؟"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"‏وقتی این دستگاه USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"‏وقتی این وسیله جانبی USB وصل است، <xliff:g id="ACTIVITY">%1$s</xliff:g> باز شود؟"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"‏هیچ برنامهٔ کاربردی نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"‏لوازم جانبی USB"</string>
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"اجازه به اشکال‌زدایی USB؟"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"اثر انگشت کلید RSA رایانه: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"‏استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"‏استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"‏اجازه به اشکال‌زدایی USB؟"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"‏اثر انگشت کلید RSA رایانه: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"همیشه از این رایانه انجام شود"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگنمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
@@ -68,10 +68,10 @@
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده تصویر صفحه خود، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تصویر صفحه گرفته نشد."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"تصویر صفحه ذخیره نشد. ممکن است دستگاه ذخیره‌ در حال استفاده باشد."</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"گزینه‌های انتقال فایل USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"نصب به‌عنوان دستگاه پخش رسانه (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7517127540301625751">"تصب به‌عنوان دوربین (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"برنامه Android File Transfer را برای Mac نصب کنید"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏نصب به‌عنوان دستگاه پخش رسانه (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تصب به‌عنوان دوربین (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"‏برنامه Android File Transfer را برای Mac نصب کنید"</string>
     <string name="accessibility_back" msgid="567011538994429120">"برگشت"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"صفحهٔ اصلی"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"منو"</string>
@@ -98,17 +98,17 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"دو نوار برای داده."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"سه نوار برای داده."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"قدرت سیگنال داده کامل است."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi‑Fi خاموش."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi قطع‌شد."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"یک نوار برای Wi‑Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"دو نوار برای Wi‑Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"سه نوار برای Wi‑Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"قدرت سیگنال Wi‑Fi کامل است."</string>
-    <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX وجود ندارد."</string>
-    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX دارای یک نوار است."</string>
-    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX دارای دو نوار است."</string>
-    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX دارای سه نوار است."</string>
-    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"قدرت سیگنال WiMAX کامل است."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"‏Wi‑Fi خاموش."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"‏Wi-Fi قطع‌شد."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"‏یک نوار برای Wi‑Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"‏دو نوار برای Wi‑Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"‏سه نوار برای Wi‑Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"‏قدرت سیگنال Wi‑Fi کامل است."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏WiMAX وجود ندارد."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏WiMAX دارای یک نوار است."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏WiMAX دارای دو نوار است."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"‏WiMAX دارای سه نوار است."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"‏قدرت سیگنال WiMAX کامل است."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"فاقد سیگنال."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"متصل نیست."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"بدون میله."</string>
@@ -137,9 +137,9 @@
     <string name="accessibility_settings_button" msgid="799583911231893380">"تنظیمات سیستم."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"اعلان‌ها."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"پاک کردن اعلان"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS فعال شد."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"دستیابی به GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter فعال شد."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS فعال شد."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏دستیابی به GPS."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"‏TeleTypewriter فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"زنگ لرزشی."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"زنگ بی‌صدا."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> نادیده گرفته شد."</string>
@@ -153,17 +153,18 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"باتری <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"حالت هواپیما <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"بلوتوث <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"مکان <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"هشدار برای <xliff:g id="TIME">%s</xliff:g> تنظیم شد."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"داده 2G-3G غیرفعال شد"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"داده 4G غیر فعال شد"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"‏داده 2G-3G غیرفعال شد"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"‏داده 4G غیر فعال شد"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"داده‌های تلفن همراه غیرفعال است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"داده غیرفعال شد"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"به حداکثر محدوده مشخص شده برای استفاده از داده رسیده‌اید.\n\nدر صورت فعال کردن مجدد داده، ممکن است از طرف اپراتور برای شما هزینه محاسبه شود."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"فعال کردن مجدد داده"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"اتصال اینترنتی وجود ندارد"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل شد"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"جستجو برای GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"مکان تنظیم شده توسط GPS"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi متصل شد"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏جستجو برای GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"درخواست‌های موقعیت مکانی فعال است"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"اطلاعات برنامه"</string>
@@ -194,9 +195,8 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"متصل نیست"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"شبکه‌ای موجود نیست"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi خاموش است"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi Display"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"نمایش بدون سیم"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi خاموش است"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"فرستادن صفحه"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"روشنایی"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"ممکن است شبکه\nتحت نظارت باشد"</string>

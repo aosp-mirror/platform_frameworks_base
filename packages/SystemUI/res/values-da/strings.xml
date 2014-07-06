@@ -29,7 +29,7 @@
     <item quantity="one" msgid="5854176083865845541">"1 seneste app"</item>
     <item quantity="other" msgid="1040784359794890744">"%d seneste apps"</item>
   </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen meddelelser"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen underretninger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Underretninger"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Tilslut oplader"</string>
@@ -64,7 +64,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer skærmbillede..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer skærmbillede..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skærmbilledet gemmes."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er taget."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er gemt."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Tryk for at se dit skærmbillede."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skærmbilledet kunne ikke tages."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Skærmbilledet kunne ikke gemmes. Eksternt lager kan være i brug."</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd meddelelse."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd underretning."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktiveret."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS samler data."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktiveret."</string>
@@ -153,6 +153,7 @@
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batteri <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Flytilstand <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Placering <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarmen er indstillet til <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-data er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-data er deaktiveret"</string>
@@ -165,7 +166,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søger efter GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Placeringen er angivet ved hjælp af GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive placeringsanmodninger"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ryd alle meddelelser."</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Ryd alle underretninger."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Oplysninger om appen"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
@@ -195,8 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Ikke forbundet"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Intet netværk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi slået fra"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi Display"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Trådløs skærm"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Cast skærm"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Netværket kan\nvære overvåget"</string>
