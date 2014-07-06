@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String KEY_RECOGNITION_MODES = "modes";
         public static final String KEY_LOCALE = "locale";
         public static final String KEY_HINT_TEXT = "hint_text";
-        public static final String KEY_NUM_USERS = "num_users";
+        public static final String KEY_USERS = "users";
         public static final String KEY_SOUND_MODEL_ID = "sound_model_id";
     }
 
@@ -62,7 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + KeyphraseContract.TABLE + "("
             + KeyphraseContract.KEY_ID + " INTEGER PRIMARY KEY,"
             + KeyphraseContract.KEY_RECOGNITION_MODES + " INTEGER,"
-            + KeyphraseContract.KEY_NUM_USERS + " INTEGER,"
+            + KeyphraseContract.KEY_USERS + " INTEGER,"
             + KeyphraseContract.KEY_SOUND_MODEL_ID + " TEXT,"
             + KeyphraseContract.KEY_LOCALE + " TEXT,"
             + KeyphraseContract.KEY_HINT_TEXT + " TEXT" + ")";
@@ -167,11 +167,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 int id = c.getInt(c.getColumnIndex(KeyphraseContract.KEY_ID));
                 int modes = c.getInt(c.getColumnIndex(KeyphraseContract.KEY_RECOGNITION_MODES));
-                int numUsers = c.getInt(c.getColumnIndex(KeyphraseContract.KEY_NUM_USERS));
+                int[] users = {c.getInt(c.getColumnIndex(KeyphraseContract.KEY_USERS))};
                 String locale = c.getString(c.getColumnIndex(KeyphraseContract.KEY_LOCALE));
                 String hintText = c.getString(c.getColumnIndex(KeyphraseContract.KEY_HINT_TEXT));
 
-                keyphrases.add(new Keyphrase(id, modes, locale, hintText, numUsers));
+                keyphrases.add(new Keyphrase(id, modes, locale, hintText, users));
             } while (c.moveToNext());
         }
         Keyphrase[] keyphraseArr = new Keyphrase[keyphrases.size()];

@@ -94,7 +94,8 @@ public class SoundTriggerModule {
      * Recognition must be restarted after each callback (success or failure) received on
      * the {@link SoundTrigger.StatusListener}.
      * @param soundModelHandle The sound model handle to start listening to
-     * @param data Opaque data for use by the implementation for this recognition
+     * @param config contains configuration information for this recognition request:
+     *  recognition mode, keyphrases, users, minimum confidence levels...
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
      *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
      *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
@@ -105,7 +106,7 @@ public class SoundTriggerModule {
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
-    public native int startRecognition(int soundModelHandle, byte[] data);
+    public native int startRecognition(int soundModelHandle, SoundTrigger.RecognitionConfig config);
 
     /**
      * Stop listening to all key phrases in a {@link SoundTrigger.SoundModel}

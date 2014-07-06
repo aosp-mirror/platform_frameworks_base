@@ -150,15 +150,16 @@ public class SoundTrigger {
         /** Key phrase text */
         public final String text;
 
-        /** Number of users this key phrase has been trained for */
-        public final int numUsers;
+        /** Users this key phrase has been trained for. countains sound trigger specific user IDs
+         * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}. */
+        public final int[] users;
 
-        public Keyphrase(int id, int recognitionModes, String locale, String text, int numUsers) {
+        public Keyphrase(int id, int recognitionModes, String locale, String text, int[] users) {
             this.id = id;
             this.recognitionModes = recognitionModes;
             this.locale = locale;
             this.text = text;
-            this.numUsers = numUsers;
+            this.users = users;
         }
     }
 
@@ -215,18 +216,63 @@ public class SoundTrigger {
         /** Delay in ms between end of model detection and start of audio available for capture.
          * A negative value is possible (e.g. if keyphrase is also available for capture) */
         public final int captureDelayMs;
+        /** Duration in ms of audio captured before the start of the trigger. 0 if none. */
+        public final int capturePreambleMs;
         /** Opaque data for use by system applications who know about voice engine internals,
          * typically during enrollment. */
         public final byte[] data;
 
         RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
-                int captureSession, int captureDelayMs, byte[] data) {
+                int captureSession, int captureDelayMs, int capturePreambleMs, byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
             this.captureAvailable = captureAvailable;
             this.captureSession = captureSession;
             this.captureDelayMs = captureDelayMs;
+            this.capturePreambleMs = capturePreambleMs;
             this.data = data;
+        }
+    }
+
+    /**
+     *  A RecognitionConfig is provided to
+     *  {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)} to configure the
+     *  recognition request.
+     */
+    public static class RecognitionConfig {
+        /** True if the DSP should capture the trigger sound and make it available for further
+         * capture. */
+        public final boolean captureRequested;
+        /** List of all keyphrases in the sound model for which recognition should be performed with
+         * options for each keyphrase. */
+        public final KeyphraseRecognitionExtra keyphrases[];
+        /** Opaque data for use by system applications who know about voice engine internals,
+         * typically during enrollment. */
+        public final byte[] data;
+
+        public RecognitionConfig(boolean captureRequested,
+                KeyphraseRecognitionExtra keyphrases[], byte[] data) {
+            this.captureRequested = captureRequested;
+            this.keyphrases = keyphrases;
+            this.data = data;
+        }
+    }
+
+    /**
+     * Confidence level for users defined in a keyphrase.
+     * - The confidence level is expressed in percent (0% -100%).
+     * When used in a {@link KeyphraseRecognitionEvent} it indicates the detected confidence level
+     * When used in a {@link RecognitionConfig} it indicates the minimum confidence level that
+     * should trigger a recognition.
+     * - The user ID is derived from the system ID {@link android.os.UserHandle#getIdentifier()}.
+     */
+    public static class ConfidenceLevel {
+        public final int userId;
+        public final int confidenceLevel;
+
+        public ConfidenceLevel(int userId, int confidenceLevel) {
+            this.userId = userId;
+            this.confidenceLevel = confidenceLevel;
         }
     }
 
@@ -235,16 +281,21 @@ public class SoundTrigger {
      *  for a key phrase detection.
      */
     public static class KeyphraseRecognitionExtra {
-        /** Confidence level for each user defined in the key phrase in the same order as
-         * users in the key phrase. The confidence level is expressed in percentage (0% -100%) */
-        public final int[] confidenceLevels;
+        /** The keyphrse ID */
+        public final int id;
 
         /** Recognition modes matched for this event */
         public final int recognitionModes;
 
-        KeyphraseRecognitionExtra(int[] confidenceLevels, int recognitionModes) {
-            this.confidenceLevels = confidenceLevels;
+        /** Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
+         * be recognized (RecognitionConfig) */
+        public final ConfidenceLevel[] confidenceLevels;
+
+        public KeyphraseRecognitionExtra(int id, int recognitionModes,
+                                  ConfidenceLevel[] confidenceLevels) {
+            this.id = id;
             this.recognitionModes = recognitionModes;
+            this.confidenceLevels = confidenceLevels;
         }
     }
 
@@ -259,9 +310,10 @@ public class SoundTrigger {
         public final boolean keyphraseInCapture;
 
         KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
-               int captureSession, int captureDelayMs, byte[] data,
+               int captureSession, int captureDelayMs, int capturePreambleMs, byte[] data,
                boolean keyphraseInCapture, KeyphraseRecognitionExtra[] keyphraseExtras) {
-            super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs, data);
+            super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                  capturePreambleMs, data);
             this.keyphraseInCapture = keyphraseInCapture;
             this.keyphraseExtras = keyphraseExtras;
         }
