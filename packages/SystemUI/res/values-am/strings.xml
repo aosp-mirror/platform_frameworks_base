@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"የስርዓት UI"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"አጥራ"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"አጽዳ"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ከዝርዝር አስወግድ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"የትግበራ መረጃ"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም"</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንብሮች"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ማሳወቂያዎች"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"ማሳወቂያ አጥራ"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"ማሳወቂያ አጽዳ"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ነቅቷል።"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS በማግኘት ላይ።"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ነቅቷል።"</string>

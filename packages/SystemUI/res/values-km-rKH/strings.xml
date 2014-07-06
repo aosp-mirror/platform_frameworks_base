@@ -64,7 +64,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"មិន​អាច​រក្សាទុក​រូបថត​អេក្រង់​។ ឧបករណ៍​ផ្ទុក​អាច​កំពុង​ប្រើ​​។"</string>
@@ -139,7 +139,7 @@
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"បាន​បើក GPS ។"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ទទួល​​ GPS ។"</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ​"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"កម្មវិធី​រោទ៍​ញ័រ។"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"កម្មវិធី​រោទ៍​ស្ងាត់។"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> បដិសេធ។"</string>
@@ -184,7 +184,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"បង្វិល​​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"បាន​ចាក់​សោ​ការ​បង្វិល"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង​"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -199,5 +199,5 @@
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"ចាត់​ថ្នាក់​អេក្រង់"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ពន្លឺ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ស្វ័យប្រវត្តិ"</string>
-    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
 </resources>
