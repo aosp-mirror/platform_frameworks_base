@@ -636,7 +636,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizowania"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"włączanie i wyłączanie synchronizacji"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pozwala aplikacji na modyfikowanie ustawień synchronizacji z kontem. Tego uprawnienia można użyć np. do włączenia synchronizacji z kontem aplikacji Ludzie."</string>
