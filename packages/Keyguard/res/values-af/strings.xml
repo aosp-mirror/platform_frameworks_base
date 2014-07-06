@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Voer PIN-kode in"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Voer PUK en nuwe PIN-kode in"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Nuwe PIN-kode"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Voer SIM PUK- en nuwe PIN-kode in"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK-kode"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nuwe SIM PIN-kode"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Raak om wagwoord in te voer"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Voer wagwoord in om te ontsluit"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Voer PIN in om te ontsluit"</string>
@@ -112,7 +112,6 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Voer die gewenste PIN-kode in"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bevestig gewenste PIN-kode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ontsluit tans SIM-kaart…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Verkeerde PIN-kode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 syfers lank is."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-kode moet 8 of meer syfers wees."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Voer weer die korrekte PUK-kode in. Herhaalde pogings sal die SIM permanent deaktiveer."</string>
@@ -136,6 +135,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Verkeerde SIM PIN-kode, jy sal nou jou diensverskaffer moet kontak om jou toestel te ontsluit."</string>
+  <plurals name="kg_password_wrong_pin_code">
+    <item quantity="one" msgid="8134313997799638254">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat jy jou diensverskaffer sal moet kontak om jou toestel te ontsluit."</item>
+    <item quantity="other" msgid="2215723361575359486">"Verkeerde SIM PIN-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings."</item>
+  </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM is onbruikbaar. Kontak jou diensverskaffer."</string>
+  <plurals name="kg_password_wrong_puk_code">
+    <item quantity="one" msgid="3256893607561060649">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende poging voordat SIM permanent onbruikbaar word."</item>
+    <item quantity="other" msgid="5477305226026342036">"Verkeerde SIM PUK-kode, jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings voordat SIM permanent onbruikbaar word."</item>
+  </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN-bewerking het misluk!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK-bewerking het misluk!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kode is aanvaar!"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Vorigesnit-knoppie"</string>
     <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Volgendesnit-knoppie"</string>
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Laatwag-knoppie"</string>
