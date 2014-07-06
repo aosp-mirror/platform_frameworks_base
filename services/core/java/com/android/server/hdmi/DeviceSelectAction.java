@@ -23,6 +23,8 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
 /**
  * Handles an action that selects a logical device as a new active source.
  *
@@ -66,6 +68,7 @@ final class DeviceSelectAction extends FeatureAction {
 
     private final HdmiCecDeviceInfo mTarget;
     private final IHdmiControlCallback mCallback;
+    private final HdmiCecMessage mGivePowerStatus;
 
     private int mPowerStatusCounter = 0;
 
@@ -81,25 +84,39 @@ final class DeviceSelectAction extends FeatureAction {
         super(source);
         mCallback = callback;
         mTarget = target;
+        mGivePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                getSourceAddress(), getTargetAddress());
+    }
+
+    int getTargetAddress() {
+        return mTarget.getLogicalAddress();
     }
 
     @Override
     public boolean start() {
-        // TODO: Call the logic that display a banner saying the select action got started.
+        // Seq #9
         queryDevicePowerStatus();
         return true;
     }
 
     private void queryDevicePowerStatus() {
-        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                getSourceAddress(), mTarget.getLogicalAddress()));
+        sendCommand(mGivePowerStatus, new SendMessageCallback() {
+            @Override
+            public void onSendCompleted(int error) {
+                if (error == Constants.SEND_RESULT_NAK) {
+                    invokeCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
+                    finish();
+                    return;
+                }
+            }
+        });
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
         addTimer(mState, TIMEOUT_MS);
     }
 
     @Override
     public boolean processCommand(HdmiCecMessage cmd) {
-        if (cmd.getSource() != mTarget.getLogicalAddress()) {
+        if (cmd.getSource() != getTargetAddress()) {
             return false;
         }
         int opcode = cmd.getOpcode();
@@ -128,9 +145,6 @@ final class DeviceSelectAction extends FeatureAction {
     }
 
     private boolean handleReportPowerStatus(int powerStatus) {
-        // TODO: Check TV's own status which might have been updated during the action.
-        //       If in 'Standby' or 'Transit to standby', remove the banner
-        //       and stop this action. Otherwise, send <Set Stream Path>
         switch (powerStatus) {
             case HdmiControlManager.POWER_STATUS_ON:
                 sendSetStreamPath();
@@ -186,6 +200,11 @@ final class DeviceSelectAction extends FeatureAction {
         }
         switch (mState) {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
+                if (tv().isPowerStandbyOrTransient()) {
+                    invokeCallback(HdmiControlManager.RESULT_INCORRECT_MODE);
+                    finish();
+                    return;
+                }
                 sendSetStreamPath();
                 break;
             case STATE_WAIT_FOR_DEVICE_TO_TRANSIT_TO_STANDBY:
@@ -194,8 +213,6 @@ final class DeviceSelectAction extends FeatureAction {
                 queryDevicePowerStatus();
                 break;
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
-                // TODO: Remove the banner
-                //       Display banner "Communication failed. Please check your cable or connection"
                 invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
                 finish();
                 break;
@@ -211,9 +228,5 @@ final class DeviceSelectAction extends FeatureAction {
         } catch (RemoteException e) {
             Slog.e(TAG, "Callback failed:" + e);
         }
-    }
-
-    int getTargetAddress() {
-        return mTarget.getLogicalAddress();
     }
 }

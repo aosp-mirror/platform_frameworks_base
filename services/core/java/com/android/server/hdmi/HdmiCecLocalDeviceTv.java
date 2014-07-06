@@ -1076,4 +1076,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     boolean isProhibitMode() {
         return mService.isProhibitMode();
     }
+
+    boolean isPowerStandbyOrTransient() {
+        return mService.isPowerStandbyOrTransient();
+    }
 }

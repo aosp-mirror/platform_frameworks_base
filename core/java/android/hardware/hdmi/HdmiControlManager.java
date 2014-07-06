@@ -49,6 +49,7 @@ public final class HdmiControlManager {
     public static final int RESULT_ALREADY_IN_PROGRESS = 4;
     public static final int RESULT_EXCEPTION = 5;
     public static final int RESULT_INCORRECT_MODE = 6;
+    public static final int RESULT_COMMUNICATION_FAILED = 7;
 
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
