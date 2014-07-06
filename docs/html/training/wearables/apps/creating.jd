@@ -140,7 +140,7 @@ receives the wearable app.</p>
 
 <p class="note"><b>Note:</b> The automatic installation of wearable apps
 does not work when you are signing apps with a debug key and only works with release keys. See
-<a href="{@docRoot}traiing/wearables/packaging.html">Packaging Wearable Apps</a> for
+<a href="{@docRoot}training/wearables/apps/packaging.html">Packaging Wearable Apps</a> for
 complete information on how to properly package wearable apps.</p>
 
 <li>
