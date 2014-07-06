@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Asiakirjat"</string>
-    <string name="title_open" msgid="4353228937663917801">"Avoinna alkaen"</string>
+    <string name="title_open" msgid="4353228937663917801">"Avaa sijainnista"</string>
     <string name="title_save" msgid="2433679664882857999">"Tallenna kohteeseen"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Luo kansio"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Ruudukkonäkymä"</string>
