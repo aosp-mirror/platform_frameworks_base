@@ -44,7 +44,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Skratky"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Zariadenia"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Ďalšie aplikácie"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Zobraziť rozšírené zariadenia"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"Zobraziť pokročilé zariadenia"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"Zobraziť veľkosť súboru"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Zobraziť veľkosť zariadenia"</string>
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
