@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Allows the app to write to SMS messages stored on your phone or SIM card. Malicious apps may delete your messages."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"receive text messages (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Allows the app to receive and process WAP messages. This permission includes the ability to monitor or delete messages sent to you without showing them to you."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"receive Bluetooth messages (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Allows the app to receive and process Bluetooth MAP messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"retrieve running apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Allows the app to retrieve information about currently and recently running tasks. This may allow the app to discover information about which applications are used on the device."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interact across users"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bind to a condition provider service"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"bind to a dream service"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoke the carrier-provided configuration app"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"listen for observations on network conditions"</string>
@@ -1373,8 +1373,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Allows an application to listen for changes in trust state."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Provide a trust agent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Allows an application to provide a trust agent."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Lunch trust agent settings menu."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Allows an application to lunch an activity that changes the trust agent behaviour."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Launch trust agent settings menu."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Allows an application to launch an activity that changes the trust agent behaviour."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bind to a trust agent service"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Allows an application to bind to a trust agent service."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interact with update and recovery system"</string>

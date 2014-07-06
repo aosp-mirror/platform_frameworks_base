@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ऐप्स  को आपके फ़ोन या सिम कार्ड में संग्रहीत SMS संदेशों को लिखने देता है.  दुर्भावनापूर्ण ऐप्स  आपके संदेशों को हटा सकते हैं."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"पाठ संदेश (WAP) प्राप्त करें"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ऐप्स  को WAP संदेशों को प्राप्‍त और संसाधित करने देता है. इस अनुमति में आपको भेजे गए संदेशों की निगरानी आपको दिखाए बिना करने और हटाने की क्षमता शामिल है."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"चल रहे ऐप्स पुनर्प्राप्त करें"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ऐप्स  को वर्तमान में और हाल ही में चल रहे कार्यों के बारे में जानकारी को पुन: प्राप्‍त करने देता है. इससे ऐप्स  उपकरण पर उपयोग किए गए ऐप्स  के बारे में जानकारी खोज सकता है."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"उपयोगकर्ताओं के बीच सहभागिता करें"</string>
@@ -333,9 +337,9 @@
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"आसान तरीका को अस्थायी रूप से सक्षम करें"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"ऐप्स  को उपकरण पर आसान तरीका को अस्थायी रूप से सक्षम करने देता है. दुर्भावनापूर्ण ऐप्स  उपयोगकर्ता की सहमति के बिना आसान तरीका को सक्षम कर सकते हैं."</string>
     <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"विंडो टोकन प्राप्त करें"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"एप्लिकेशन को विंडो टोकन प्राप्त करने देती है. दुर्भावनापूर्ण ऐप्स सिस्टम का प्रतिरूपण करने वाली एप्लिकेशन विंडो से अनधिकृत इंटरैक्शन कर सकते हैं."</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"ऐप्लिकेशन को विंडो टोकन प्राप्त करने देती है. दुर्भावनापूर्ण ऐप्स सिस्टम का प्रतिरूपण करने वाली ऐप्लिकेशन विंडो से अनधिकृत इंटरैक्शन कर सकते हैं."</string>
     <string name="permlab_frameStats" msgid="7056374987314361639">"फ़्रेम के आंकड़े प्राप्त करें"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"एप्लिकेशन को फ़्रेम के आंकड़े एकत्र करने देती है. दुर्भावनापूर्ण ऐप्स अन्य ऐप्स से विंडो के फ़्रेम के आंकड़ों को देख सकते हैं."</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"ऐप्लिकेशन को फ़्रेम के आंकड़े एकत्र करने देती है. दुर्भावनापूर्ण ऐप्स अन्य ऐप्स से विंडो के फ़्रेम के आंकड़ों को देख सकते हैं."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"ईवेंट फ़िल्टर करें"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"ऐप्स को इनपुट फ़िल्‍टर पंजीकृत करने देता है, जो सभी उपयोगकर्ता ईवेंट के स्‍ट्रीम को भेजे जाने से पहले फ़िल्‍टर करता है. दुर्भावनापूर्ण ऐप्स उपयोगकर्ता के हस्‍तक्षेप के बिना सिस्‍टम UI को नियंत्रित कर सकता है."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"आंशिक शटडाउन"</string>
@@ -448,8 +452,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ऐप्स  को प्लेबैक डीकोड करने के लिए किसी भी इंस्टॉल किए गए डीकोडर का उपयोग करने देता है."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"विश्वसनीय क्रेडेंशियल प्रबंधित करें"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"ऐप्स  को CA प्रमाणपत्रों को विश्वसनीय क्रेडेंशियल के रूप में इंस्टॉल और अनइंस्टॉल करने दें"</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"एप्लिकेशन का शेड्यूल किया गया पृष्ठभूमि कार्य चलाएं"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"यह अनुमति Android सिस्टम को, अनुरोध किए जाने पर एप्लिकेशन को पृष्ठभूमि में चलाने देती है."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"ऐप्लिकेशन का शेड्यूल किया गया पृष्ठभूमि कार्य चलाएं"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"यह अनुमति Android सिस्टम को, अनुरोध किए जाने पर ऐप्लिकेशन को पृष्ठभूमि में चलाने देती है."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"निदान के स्‍वामित्‍व वाले संसाधनों को पढ़ें/लिखें"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ऐप्स को diag समूह के स्‍वामित्‍व वाले किसी संसाधन को पढ़ने और उसमें लिखने देता है; उदाहरण के लिए, /dev की फ़ाइलें. यह सिस्‍टम की स्‍थिरता और सुरक्षा को संभावित रूप से प्रभावित कर सकता है. इसका उपयोग निर्माता या ऑपरेटर द्वारा केवल हार्डवेयर-विशिष्ट निदान के लिए किया जाना चाहिए."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ऐप्स घटकों को सक्षम या अक्षम करें"</string>
@@ -488,7 +492,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"स्‍वयं का संपर्क कार्ड बदलें"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ऐप्स  को आपके उपकरण में संग्रहीत निजी प्रोफ़ाइल जानकारी, जैसे आपका नाम और संपर्क जानकारी को बदलने या उसमें कुछ जोड़ने देता है. इसका अर्थ है कि ऐप्स  आपको पहचान सकता है और आपकी प्रोफ़ाइल जानकारी अन्य लोगों को भेज सकता है."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"बॉडी सेंसर (जैसे हृदय गति मॉनीटर)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"एप्लिकेशन को ऐसे सेंसर का डेटा एक्सेस करने देती है जिनका उपयोग आप यह मापने के लिए करते हैं कि आपके शरीर के भीतर क्या चल रहा है, जैसे हृदय गति."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"ऐप्लिकेशन को ऐसे सेंसर का डेटा एक्सेस करने देती है जिनका उपयोग आप यह मापने के लिए करते हैं कि आपके शरीर के भीतर क्या चल रहा है, जैसे हृदय गति."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"अपनी सामाजिक स्‍ट्रीम पढ़ें"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"एप को आपके और आपके मित्रों की नई सामाजिक जानकारी तक पहुंचने और उन्हें समन्‍वयित करने देता है. जानकारी साझा करते समय सावधान रहें - इससे गोपनीयता पर ध्यान दिए बिना, एप सामाजिक नेटवर्क पर आपके और आपके मित्रों के बीच संचारों को पढ़ सकता है. ध्‍यान दें: यह अनुमति सभी सामाजिक नेटवर्क पर लागू नहीं की जा सकती."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"सामाजिक स्‍ट्रीम में लिखें"</string>
@@ -522,7 +526,7 @@
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ऑडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ऐप्स को ऑडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"हॉटवर्ड पहचान"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"एप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ऐप्लिकेशन को हॉटवर्ड पहचान के लिए ऑडियो कैप्चर करने देती है. कैप्चर पृष्ठभूमि में हो सकता है लेकिन वह अन्य ऑडियो कैप्चर (उदा. कैमकॉर्डर) को नहीं रोकता."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ऑडियो रूटिंग"</string>
     <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ऐप्स को ऑडियो रूटिंग पर प्रत्यक्ष नियंत्रण करने देती है और ऑडियो नीति निर्णयों को ओवरराइड करने देती है."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"वीडियो आउटपुट को कैप्‍चर करें"</string>
@@ -530,7 +534,7 @@
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"सुरक्षित वीडियो आउटपुट को कैप्‍चर करें"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"ऐप्स को सुरक्षित वीडियो आउटपुट को कैप्‍चर और रीडायरेक्‍ट करने देता है."</string>
     <string name="permlab_mediaContentControl" msgid="8749790560720562511">"मीडिया प्लेबैक और मेटाडेटा एक्सेस नियंत्रित करें"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"एप्लिकेशन को मीडिया प्लेबैक नियंत्रित करने देती है और मीडिया जानकारी (शीर्षक, लेखक...) एक्सेस करने देती है."</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"ऐप्लिकेशन को मीडिया प्लेबैक नियंत्रित करने देती है और मीडिया जानकारी (शीर्षक, लेखक...) एक्सेस करने देती है."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडियो रिकॉर्ड करें"</string>
@@ -599,8 +603,8 @@
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ऐप्स  को टेबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ऐप्स  को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"इंफ़्रारेड संचारित करें"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"एप्लिकेशन को टेबलेट के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"एप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ऐप्लिकेशन को टेबलेट के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ऐप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"टेबलेट चालू या बंद करें"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फ़ोन चालू या बंद करें"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ऐप्स को टेबलेट चालू या बंद करने देता है."</string>
@@ -704,7 +708,7 @@
     <string name="permlab_use_sip" msgid="5986952362795870502">"इंटरनेट कॉल करें/प्राप्त करें"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"ऐप्स  को इंटरनेट कॉल करने/प्राप्त करने के लिए SIP सेवा का उपयोग करने देता है."</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"इन-कॉल स्क्रीन से सहभागिता करें"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"एप्लिकेशन को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ऐप्लिकेशन को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ऐतिहासिक नेटवर्क उपयोग पढें"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"किसी ऐप्स  को विशिष्ट नेटवर्क और ऐप्स के लिए ऐतिहासिक नेटवर्क उपयोग को पढ़ने देता है."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क नीति प्रबंधित करें"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को सूचना श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी स्थिति प्रदाता सेवा से आबद्ध हों"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"धारक को किसी स्थिति प्रदाता सेवा के शीर्ष-स्तर के इंटरफ़ेस से आबद्ध होने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"भावी सेवा से आबद्ध करें"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"धारक को किसी भावी सेवा के शीर्ष-स्तर इंटरफ़ेस से आबद्ध होने देता है. सामान्य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"वाहक के द्वारा उपलब्ध कराया गया कॉन्फ़िगरेशन ऐप्स  प्रारंभ करें"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"धारक को वाहक के द्वारा उपलब्ध कराया गया कॉन्फ़िगरेशन ऐप्स  प्रारंभ करने देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"नेटवर्क स्थितियों के अवलोकनों को सुनें"</string>
@@ -730,7 +732,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट उपकरण कैलिब्रेशन बदलें"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ऐप्स को टच स्क्रीन के कैलिब्रेशन पैरामीटर को बदलने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्र एक्सेस करें"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"एप्लिकेशन को DRM प्रमाणपत्रों का प्रावधान और उपयोग करने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होना चाहिए."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ऐप्लिकेशन को DRM प्रमाणपत्रों का प्रावधान और उपयोग करने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होना चाहिए."</string>
     <string name="permlab_handoverStatus" msgid="4558616203830448763">"हस्तांतरण स्थानान्तरण प्राप्त करें."</string>
     <string name="permdesc_handoverStatus" msgid="5738446261941364055">"हस्तांतरण स्थानान्तरण स्थिति की जानकारी प्राप्त करने देती है."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
@@ -868,7 +870,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"घर"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"कार्यालय"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"अन्य"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"इस संपर्क को देखने के लिए कोई एप्लिकेशन नहीं मिला."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"इस संपर्क को देखने के लिए कोई ऐप्लिकेशन नहीं मिला."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड लिखें"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK और नया पिन कोड लिखें"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
@@ -1179,7 +1181,7 @@
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
     <string name="whichApplication" msgid="4533185947064773386">"इसका उपयोग करके क्रिया पूर्ण करें"</string>
-    <string name="whichHomeApplication" msgid="4616420172727326782">"होम एप्लिकेशन चुनें"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"होम ऐप्लिकेशन चुनें"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"इस क्रिया के लिए डिफ़ॉल्‍ट रूप से उपयोग करें."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"सिस्‍टम सेटिंग &gt; Apps &gt; डाउनलोड किए गए में डिफ़ॉल्‍ट साफ करें."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"कोई क्रिया चुनें"</string>
@@ -1370,15 +1372,15 @@
     <string name="permlab_control_keyguard" msgid="172195184207828387">"कीगार्ड दिखाना और छिपाना नियंत्रित करें"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ऐप्स  को कीगार्ड नियंत्रित करने देती है."</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"ट्रस्ट स्थिति बदलावों को सुनें."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"किसी एप्लिकेशन को ट्रस्ट स्थिति के बदलावों को सुनने की अनुमति देती है."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"किसी ऐप्लिकेशन को ट्रस्ट स्थिति के बदलावों को सुनने की अनुमति देती है."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वसनीय एजेंट प्रदान करें."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"एप्लिकेशन को विश्वसनीय एजेंट प्रदान करने देती है."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"विश्वस्त एजेंट सेटिंग मेनू लॉन्च करें."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"एप्लिकेशन को ऐसी गतिविधि लॉन्च करने की अनुमति मिलती है जो विश्वस्त एजेंट के व्यवहार में बदलाव लाती है."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ऐप्लिकेशन को विश्वसनीय एजेंट प्रदान करने देती है."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"विश्वस्त एजेंट सेटिंग मेनू लॉन्च करें."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"ऐप्लिकेशन को ऐसी गतिविधि लॉन्च करने देती है जो विश्वस्त एजेंट के व्यवहार में बदलाव लाती है."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ट्रस्ट एजेंट सेवा से आबद्ध करना"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी एप्लिकेशन को ट्रस्ट एजेंट सेवा से आबद्ध करने की अनुमति देती है."</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी ऐप्लिकेशन को ट्रस्ट एजेंट सेवा से आबद्ध करने की अनुमति देती है."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अपडेट और पुनर्प्राप्ति सिस्टम के साथ सहभागिता करें"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"एप्लिकेशन को पुनर्प्राप्ति सिस्टम और सिस्टम अपडेट के साथ सहभागिता करने देती है."</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"ऐप्लिकेशन को पुनर्प्राप्ति सिस्टम और सिस्टम अपडेट के साथ सहभागिता करने देती है."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ज़ूम नियंत्रण के लिए दो बार स्पर्श करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>

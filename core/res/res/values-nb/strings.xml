@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Lar appen skrive til SMS-meldinger som er lagret på telefonen eller SIM-kortet ditt. Ondsinnede apper kan komme til å slette meldingene dine."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"motta tekstmeldinger (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lar appen motta og behandle WAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til deg uten at du har sett dem."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lar appen hente informasjon om oppgaver som kjører og som nylig har kjørt. Dette kan tillate appen å oppdage informasjon om hvilke apper som brukes på enheten."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samhandling på tvers av brukere"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lar innehaveren binde seg til det øverste grensesnittnivået for en varsellyttertjeneste. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binde seg til en leverandørtjeneste for betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en leverandørtjeneste for betingelser. Dette skal ikke være nødvendig for vanlige apper."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"binde til en drømmetjeneste"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Tillater eieren å binde seg til det øverste nivået av grensesnittet til en drømmetjeneste. Kreves aldri for vanlige apper."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"starte konfigurasjonsappen som ble levert av operatøren"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Gir innehaveren tillatelse til å kalle opp den konfigurasjonsappen som ble levert av operatøren. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lytte etter observasjoner om nettverksforhold"</string>
@@ -731,7 +733,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
-    <string name="permlab_handoverStatus" msgid="4558616203830448763">"motta kunngjøringer om overføringer."</string>
+    <string name="permlab_handoverStatus" msgid="4558616203830448763">"motta kunngjøringer om kringkastninger."</string>
     <string name="permdesc_handoverStatus" msgid="5738446261941364055">"Gjør det mulig å motta statusinformasjon om overføring."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Gir appen tillatelse til å oppdage endringer i tillitsstatusen."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Angivelse av en pålitelig agent."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillater appen å angi en pålitelig agent."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Start innstillingsmenyen til tillitsagenten."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Tillater apper å starte en aktivitet som endrer atferden til tillitsagenter."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Åpne innstillingsmenyen for klareringsagenter."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Tillater en app å starte aktiviteter som endrer atferden til klareringsagenten."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Tilknytt en tillitsagent-tjeneste."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Gir appen tillatelse til å knyttes til en tillitsagent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Samhandling med oppdateringer og gjenopprettingssystem"</string>

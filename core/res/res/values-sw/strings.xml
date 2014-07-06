@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Huruhusu programu kuandika SMS zinazohifadhiwa kwenye simu yako au SIM kadi. programu hasidi zinaweza kufuta SMS zako."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"pokea ujumbe wa maandishi wa WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Inaruhusu programu kupokea na kuchakata ujumbe wa WAP. Idhini hii inajumuisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwako bila ya kukuonyesha."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Inaruhusu programu kurudisha taarifa kuhusu kazi zinazoendeshwa sasa na hivi karibuni. Hii inaweza kuruhusu programu kugundua taarifa kuhusu ni programu zipi zinazotumika kwenye kifaa."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kuwasiliana na watumiaji wengine"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bandika kwenye huduma ya mtoa masharti"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Humruhusu mmiliki kubandika kwenye kiolesura cha kiwango cha juu cha huduma ya mtoa masharti. Isihitajike kamwe kwa pogramu za kawaida."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"shurutisha kwa huduma murua"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Huruhusu mmiliki kushurutisha kwenye kiolesura cha kiwango cha juu cha huduma murua. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mtoa huduma."</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"sikiliza matukio katika hali za mtandao"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Huruhusu programu kusikiliza mabadiliko katika hali ya kuaminiwa."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Toa wakala wa uaminifu."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Huruhusu programu kutoa wakala wa uaminifu."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Fungua menyu ya mipangilio ya madalali wa kuaminiwa."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Huruhusu programu kufungua kitendo ambacho hubadilisha tabia ya madalali wa kuaminiwa."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Fungua menyu ya mipangilio ya madalali wa kuaminiwa."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Huruhusu programu kufungua kitendo ambacho hubadilisha tabia ya madalali wa kuaminiwa."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Funga kwenye huduma ya dalali wa kuaminiwa"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Huruhusu programu kufungamanisha kwenye huduma ya dalali wa kuaminiwa."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Ingiliana na sasisho na mfumo wa kurejesha"</string>

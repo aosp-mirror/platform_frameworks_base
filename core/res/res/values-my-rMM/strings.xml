@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"appအား သင်၏ ဖုန်း သို့မဟုတ် ဆင်းမ်ကဒ်ထဲမှာ သိုလှောင်ထားသည့် စာတိုများသို့ ရေးခွင့် ပြုသည်။ ကြံဖန် appများက သင်၏ စာတိုမျာကို ဖျက်ပစ်နိုင်သည်။"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"စာပို့ခြင်းအား လက်ခံရယူခြင်း (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"အပလီကေးရှင်းအား WAP စာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"အလုပ်လုပ်နေကြသည့် appများကို ရယူခြင်း"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"အပလီကေးရှင်းအား လက်ရှိနဲ့ လတ်တလော လုပ်ဆောင်ခဲ့သော သတင်းအချက်အလက် အသေးစိတ်အား ထုတ်ယူခွင့်ပြုရန်။ အပလီကေးရှင်းမှ သင် ဘယ် အပလီကေးရှင်းများသုံးရှိကြောင့် တွေ့ရှိနိုင်ပါသည်"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"အသုံးပြုသူများအကြား ဆက်ဆံခြင်း"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အပလီကေးရှင်းများမှာ မလိုအပ်ပါ"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"အိပ်မက် ဝန်ဆောင်မှုသို့ ပေါင်းစည်းမည်"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"အိမ်မက်ဝန်ဆောင်မှု၏ ထိပ်တန်းအဆင့် မျက်နှာပြင်အား ကိုင်ဆောင်သူမှ ပေါင်းစည်းရန် ခွင့်ပြုမည်။ သာမန် အပလီကေးရှင်းများတွင် မလိုအပ်ပါ။"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"မိုဘိုင်းဆက်သွယ်ရေးဝန်ဆောင်မှုဌာန မှ ထည့်သွင်းပေးသော အခြေအနေများအား ပယ်ဖျက်ခြင်း"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ကိုင်ဆောင်သူအားမိုဘိုင်းဆက်သွယ်ရေးဝန်ဆောင်မှုဌာနမှ ထည့်သွင်းထားတဲ့ အပြင်အဆင်အား ပယ်ဖျက်ခွင့် ပေးခြင်း။ ပုံမှန် အပလီကေးရှင်းများမှာ မလိုပါ"</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ကွန်ယက်အခြေအနေအား လေ့လာနေမှုအား နားထောင်ခွင့်"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"အပလီကေးရှင်းအား ယုံကြည်မှု အခြေအနေ ထဲက အပြောင်းအလဲများကို စူးစမ်းခွင့် ပြုသည်။"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ယုံကြည်မှု အေဂျင့် စီစဉ်ပေးသည်။"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"အပလီကေးရှင်းအား ယုံကြည်မှု အေဂျင့် စီစဉ်ခွင့် ပေးသည်။"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"ယုံကြည်မှု အေဂျင့် ဆက်တင် မီနူးကို ဖွင့်တင်ပါ။"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"အပလီကေးရှင်း တစ်ခုအား ယုံကြည်မှု အေဂျင့်၏ ပြုမူပုံကို ပြောင်းလဲစေနိုင်သည့် လှုပ်ရှားမှု တစ်ခုကို ဖွင့်တင်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"ယုံကြည်ရ အေဂျင့် ဆက်တင် မီနူး ဖွင့်တင်ပါ။"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"အပလီကေးရှင်း တစ်ခုအား ယုံကြည်ရ အေဂျင့်၏ ပြုမူပုံကို ပြောင်းလဲစေနိုင်သည့် လှုပ်ရှားမှု တစ်ခုကို ဖွင့်တင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ယုံကြည်မှု အေဂျင့် ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"စွဲကိုင်ထားသူအား ယုံကြည်မှု အေဂျင့် ဝန်ဆောင်မှုသို့ ချိတ်တွဲခွင့်ကို ပေးသည်။"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"အဆင့်မြှင့်ခြင်းနဲ့ ပြန်လည် ထိန်းသိမ်းခြင်း များနှင့် ဆက်ဆံစေခြင်း"</string>

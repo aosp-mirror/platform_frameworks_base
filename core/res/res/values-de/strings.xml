@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"Textnachrichten (WAP) empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ermöglicht der App, WAP-Nachrichten zu empfangen und zu verarbeiten. Mit der Berechtigung können Nachrichten, die an Sie gesendet wurden, überwacht und gelöscht werden, bevor sie Ihnen angezeigt werden."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"Aktive Apps abrufen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ermöglicht der App, Informationen zu aktuellen und kürzlich ausgeführten Aufgaben abzurufen. Damit kann die App möglicherweise ermitteln, welche Apps auf Ihrem Gerät zum Einsatz kommen."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Nutzerübergreifend interagieren"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"An Dream-Dienst binden"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ermöglicht der App, sich an die Oberfläche eines Dream-Dienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ermöglicht einer App die Überwachungen von Änderungen des Trust-Status"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust Agent bereitstellen"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ermöglicht die Bereitstellung eines Trust Agents durch eine App"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Einstellungsmenü des Trust Agents starten"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Ermöglicht einer App das Starten einer Aktivität, die das Verhalten des Trust Agents ändert"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Einstellungsmenü des Trust Agents starten"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Ermöglicht einer App den Start einer Aktivität, mit der das Verhalten des Trust Agents geändert wird"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"An Trust Agent-Service anbinden"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ermöglicht einer App die Anbindung an einen Trust Agent-Service"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Mit Update- und Wiederherstellungssystem interagieren"</string>
@@ -1735,10 +1737,10 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ausgewählt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> gelöscht"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"\"Auf App einschränken\" verwenden?"</string>
-    <string name="lock_to_app_description" msgid="8597199033462406175">"Mit \"Auf App einschränken\" wird das Display in einer einzelnen App gesperrt.\n\nZum Beenden der Sperre berühren und halten Sie die Schaltfläche für die letzten Apps $."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"App-Verriegelung verwenden?"</string>
+    <string name="lock_to_app_description" msgid="8597199033462406175">"Durch die App-Verriegelung bleibt das Display auf eine App fixiert.\n\nZum Beenden halten Sie die Schaltfläche \"Kürzlich geöffnete Apps\" $ gedrückt."</string>
     <string name="lock_to_app_negative" msgid="8522854387366288195">"Nein"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"Starten"</string>
-    <string name="lock_to_app_start" msgid="8889002974248178076">"\"Auf App einschränken\" starten"</string>
-    <string name="lock_to_app_exit" msgid="7033017307788432861">"\"Auf App einschränken\" beenden"</string>
+    <string name="lock_to_app_start" msgid="8889002974248178076">"App-Verriegelung anwenden"</string>
+    <string name="lock_to_app_exit" msgid="7033017307788432861">"App-Verriegelung beenden"</string>
 </resources>

@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Omogućuje aplikaciji pisanje u SMS poruke pohranjene na telefonu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primanje tekstnih poruka (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka, a da vam ih ne prikaže."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogućuje dohvaćanje informacija o trenutačnim i nedavnim tekućim zadacima. To aplikaciji može omogućiti otkrivanje informacija o tome koje se aplikacije upotrebljavaju na uređaju."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakcija među korisnicima"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge slušatelja obavijesti. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"povezivanje s uslugom davatelja uvjeta"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Vlasniku omogućuje povezivanje sa sučeljem najviše razine usluge davatelja uvjeta. Nije potrebno za normalne aplikacije."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"vezanje na Dream"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Vlasniku omogućuje povezivanje sa sučeljem najviše razine za Dream. Ne bi trebalo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"pozovi operaterovu aplikaciju za konfiguraciju"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Dopušta nositelju pozivanje operaterove aplikacije za konfiguraciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"praćenje motrenja mrežnih uvjeta"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Omogućuje aplikaciji praćenje promjena pouzdanog stanja."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Pružanje agenta za pouzdanost."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Omogućuje aplikaciji pružanje agenta za pouzdanost."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Pokretanje izbornika postavki agenta za pouzdanost."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Aplikaciji omogućuje pokretanje aktivnosti koja mijenja ponašanje agenta za pouzdanost."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Pokrenite izbornik postavki agenta za pouzdanost."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Aplikaciji dopušta pokretanje aktivnosti koja mijenja ponašanje agenta za pouzdanost."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Povezivanje s uslugom pouzdanog predstavnika"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Omogućuje aplikaciji povezivanje s uslugom pouzdanog predstavnika."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interakcija s ažuriranjem i sustavom za oporavak"</string>

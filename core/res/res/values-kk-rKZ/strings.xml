@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Қолданбаға телефонда немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат береді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"мәтін хабарларын алу (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Қолданбаға WAP хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"жұмыс істеп жатқан қолданбаларды шығарып алу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Қолданбаларға ағымдағы және соңғы тапсырмалар туралы ақпарат алу мүмкіндігін береді. Бұл қолданбаға құрылғы қолданатын басқа қолданбалар туралы деректері анықтау мүмкіндігін беруі ықтимал."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"барлық пайдаланушылармен қарым-қатынас жасау"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Пайдаланушыға хабар есту қызметінің жоғары деңгейлі интерфейсіне жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"шарттар провайдері қызметіне байластыру"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Пайдаланушыға шарт провайдері қызметінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"dream қызметіне байластыру"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Иесіне dream қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"жабдықтаушы ұсынатын жасақтамалық қолданбаны қосу"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Пайдаланушыға жабдықтаушы ұсынатын жасақтамалық қолданбаны қосу мүмкіндігін ұсынады. Қалыпты қолданбаны қажет етпеуі тиіс."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"желі күйлері туралы бағдарды тыңдау мүмкіндігі"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Қолданбаға сенім күйіндегі өзгерістерді тыңдауға рұқсат береді."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Сенімді агентті қамтамасыз ету."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Қолданбаға сенімді агентті қамтамасыз етуге рұқсат береді."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Сенімді агенттің параметрлер мәзірін іске қосу."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Қолданбаға сенімді агенттің мінез-құлқын өзгертетін әрекетті іске қосуға рұқсат береді."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Сенімді агенттің параметрлер мәзірін іске қосу."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Қолданбаға сенімді агенттің мінез-құлқын өзгертетін әрекетті іске қосуға рұқсат береді."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Сенімді агент қызметіне байластыру"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Қолданбаға сенімді агент қызметіне байластыруға рұқсат береді."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Жаңарту және қалпына келтіру жүйелерімен қатынасу"</string>

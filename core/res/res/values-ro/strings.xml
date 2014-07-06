@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite aplicaţiei să scrie în mesajele SMS stocate pe telefon sau pe cardul SIM. Aplicaţiile rău intenţionate pot să vă şteargă mesajele."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primeşte mesaje text (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite aplicaţiei să primească şi să proceseze mesaje WAP. Această permisiune include capacitatea de a monitoriza sau şterge mesajele care v-au fost trimise fără a vi le arăta."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"primirea de mesaje prin Bluetooth (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite aplicației să primească și să proceseze mesaje MAP prin Bluetooth. Aceasta înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitiv fără a le afișa."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicaţii care rulează"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite aplicaţiei să preia informaţiile despre activităţile care rulează în prezent şi care au rulat recent. În acest fel, aplicaţia poate descoperi informaţii despre aplicaţiile care sunt utilizate pe dispozitiv."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interacţiune între utilizatori"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"se conectează la un serviciu de vis"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite deținătorului să se conecteze la interfața superioară a unui serviciu de vis. Această opțiune nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultă observații despre starea rețelei"</string>
@@ -1373,8 +1373,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite unei aplicații să detecteze modificările în starea de încredere."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Indicați un agent de încredere."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite unei aplicații să indice un agent de încredere."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Lansați meniul de setări pentru agentul de încredere."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Permite unei aplicații să lanseze o activitate care schimbă comportamentul agentului de încredere."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Asocierea la un serviciu „agenți de încredere”."</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite unei aplicații să se asocieze la un serviciu „agent de încredere”."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacțiune cu sistemul de recuperare și de actualizare"</string>
@@ -1552,7 +1554,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Ecran wireless"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Rezultate media"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectați-vă la dispozitiv"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Trimiteți ecranul pe dispozitiv"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Proiectați ecranul pe dispozitiv"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Se caută dispozitive..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Setări"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Deconectați-vă"</string>
@@ -1566,9 +1568,9 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Suprapunerea <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", securizat"</string>
-    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Se trimite ecranul"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Se proiectează ecranul"</string>
     <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Se conectează la <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Se trimite ecranul"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Se proiectează ecranul"</string>
     <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Conectat la <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Deconectaţi-vă"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Apel de urgenţă"</string>

@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite que o aplicativo grave mensagens SMS armazenadas no telefone ou cartão SIM. Aplicativos maliciosos podem excluir suas mensagens."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"receber mensagens de texto (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que o aplicativo receba e processe mensagens WAP. Esta permissão inclui a capacidade de monitorar ou excluir mensagens enviadas para você sem mostrá-las para você."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"receber mensagens por Bluetooth (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite que o aplicativo receba e processe mensagens Bluetooth MAP. Isso significa que o aplicativo pode monitorar ou excluir as mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicativos em execução"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que o aplicativo obtenha informações sobre tarefas em execução atuais e recentes. Pode permitir que o aplicativo descubra informações sobre os aplicativos usados ​​no dispositivo."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagir entre os usuários"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o proprietário sujeite a interface de nível superior a um serviço ouvinte de notificações. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"associar a um serviço provedor de condições"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite que o proprietário use a interface de nível superior de um serviço provedor de condições. Não deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"conectar-se a um serviço de sonho"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite que o sistema autorizado se conecte à interface de nível superior de um serviço de sonho. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar o aplicativo de configuração fornecido pela operadora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o proprietário invoque o aplicativo de configuração fornecido pela operadora. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar observações nas condições da rede"</string>
@@ -1373,8 +1373,10 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Permite que o aplicativo detecte alterações no estado de confiança."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Fornecer um agente de confiança."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Permite que um aplicativo forneça um agente de confiança."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Abra o menu de configurações do agente de confiança."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Permite que um aplicativo inicie uma atividade que altera o comportamento do agente de confiança."</string>
+    <!-- no translation found for permlab_launch_trust_agent_settings (5859430082240410200) -->
+    <skip />
+    <!-- no translation found for permdesc_launch_trust_agent_settings (8185142708644913381) -->
+    <skip />
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Associar a um serviço de agente de confiança"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite que o aplicativo se associe a um serviço de agente de confiança."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagir com o sistema de atualizações e recuperação"</string>

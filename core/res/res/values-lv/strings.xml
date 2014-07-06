@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ļauj lietotnei rakstīt īsziņās, kas ir saglabātas tālrunī vai SIM kartē. Ļaunprātīgas lietotnes var dzēst jūsu ziņojumus."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"saņemt īsziņas (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Šī atļauja ietver iespēju pārraudzīt vai dzēst jums nosūtītos ziņojumus, neparādot tos jums."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ļauj lietotnei izgūt informāciju par pašreiz un nesen darbinātajiem uzdevumiem. Tādējādi lietotne var atklāt informāciju par ierīcē izmantotajām lietojumprogrammām."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"darboties visos lietotāju kontos"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ļauj īpašniekam izveidot saiti ar paziņojumu uztvērēja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"Saistīšana ar nosacījumu sniedzēja pakalpojumu"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ļauj īpašniekam izveidot savienojumu ar drukas nosacījumu sniedzēja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"piesaistīt ekrānsaudzētāja pakalpojumu"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ļauj īpašniekam piesaistīt ekrānsaudzētāja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Operatora nodrošinātas konfigurācijas lietotnes izsaukšana"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ļauj īpašniekam izsaukt operatora nodrošināto konfigurācijas lietotni. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"iegūt informāciju par tīkla stāvokļa novērojumiem"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ļauj lietojumprogrammai klausīties uzticamības statusa izmaiņas."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Nodrošināt uzticamības pārbaudes programmu"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ļauj lietojumprogrammai nodrošināt uzticamības pārbaudes programmu."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Palaist uzticamības pārbaudes programmas iestatījumu izvēlni."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Ļauj lietojumprogrammai palaist darbību, kas maina uzticamības pārbaudes programmas rīcību."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Palaist uzticamības pārbaudes programmas iestatījumu izvēlni."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Ļauj lietojumprogrammai palaist darbību, kas maina uzticamības pārbaudes programmas rīcību."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Izveidot savienojumu ar uzticamības pārbaudes pakalpojumu"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ļauj lietojumprogrammai izveidot savienojumu ar uzticamības pārbaudes pakalpojumu."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Mijiedarbošanās ar atjauninājumu un atkopšanas sistēmu"</string>

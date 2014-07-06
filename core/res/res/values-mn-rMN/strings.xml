@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежрүү бичих боломжтой. Хортой апп нь таны мессежүүдийг устгах боломжтой."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"текст мессеж(WAP) хүлээн авах"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Блютүүт зурвас (MAP) хүлээн авах"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Апп нь Блютүүт MAP мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ажиллаж байгаа апп-г дуудах"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх мэдээллийг авах боломжтой. Ингэснээр апп нь төхөөмж дээрх ямар аппликешнүүд ашиглагдсан талаарх мэдээлийг олох боломжтой."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"хэрэглэгчидтэй харилцан үйлчлэлцэх"</string>
@@ -1371,8 +1373,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Итгэмжлэлд орж буй өөрчлөлтийг мэдэх боломжийг аппликешнд олгоно."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Итгэмжлэгдсэн төлөөлөгч нийлүүлэх"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Аппликешнд итгэмжлэгдсэн төлөөлөгч нийлүүлэх боломж олгоно."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Итгэмжлэгдсэн агентын тохиргоо цэсийг эхлүүлэх."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Аппликешнд итгэмжлэгдсэн агентын авирыг өөрчлөх боломжтой үйлдлийг эхлүүлэхийг зөвшөөрнө."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Итгэмжлэгдсэн агентын тохиргоо цэсийг эхлүүлэх."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Аппликешнд итгэмжлэгдсэн агентын авирыг өөрчлөх боломжтой үйлдлийг эхлүүлэхийг зөвшөөрнө."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Итгэмжлэгдсэн төлөөлөгчийн үйлчилгээтэй холбогдох"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Аппликешнд итгэмжлэгдсэн төлөөлөгчтэй холбогдох боломж олгоно."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Шинэчлэлт болон сэргээх системтэй харилцах"</string>

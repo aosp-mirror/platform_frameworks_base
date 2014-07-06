@@ -294,6 +294,8 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Leyfir forriti að skrifa inn í SMS-skilaboð sem vistuð eru í símanum eða á SIM-kortinu. Spilliforrit geta eytt skilaboðunum þínum."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"taka á móti textaskilaboðum (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"taka á móti Bluetooth-skilaboðum (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Leyfir forritinu að taka á móti og vinna úr Bluetooth MAP-skilaboðum. Þetta þýðir að forritið getur fylgst með eða eytt skilaboðum sem send eru í tækið án þess að sýna þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leyfir forriti að sækja upplýsingar um opin forrit og forrit sem nýlega hafa verið opin. Þetta getur gert forritinu kleift að nálgast upplýsingar um forritin sem notuð eru í tækinu."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"samskipti á milli notenda"</string>
@@ -719,10 +721,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Leyfir forriti að bindast efsta viðmótslagi hlustunarþjónustu tilkynninga. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bindast þjónustu skilyrðaveitu"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Leyfir handhafa að bindast efsta viðmótslagi skilyrðaveitu. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"bindast skjávaraþjónustu"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Leyfir handhafa að bindast efsta viðmótslagi skjávaraþjónustu. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ræsa grunnstillingarforrit frá símafyrirtæki"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Leyfir forriti að ræsa grunnstillingarforrit frá símafyrirtæki. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"fylgjast með breytingum á netskilyrðum"</string>
@@ -1373,8 +1373,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Leyfir forriti að hlusta eftir breytingum á trauststöðu."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Veita traustfulltrúaþjónustu."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Leyfir forriti að veita traustfulltrúaþjónustu."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Opna stillingavalmynd traustfulltrúa."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Leyfir forriti að ræsa aðgerð sem breytir hegðun traustfulltrúa."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Opna stillingavalmynd traustfulltrúa."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Leyfir forriti að ræsa aðgerð sem breytir hegðun traustfulltrúa."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bindast traustfulltrúaþjónustu"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Leyfir forriti að bindast traustfulltrúaþjónustu."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Eiga samskipti við uppfærslu- og endurheimtarkerfi"</string>

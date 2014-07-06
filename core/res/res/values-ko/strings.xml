@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"문자 메시지 받기(WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"앱이 WAP 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 앱이 기기에서 사용되는 다른 앱에 대한 정보를 검색할 수 있습니다."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"여러 사용자와의 상호작용"</string>
@@ -719,10 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"조건 제공자 서비스 사용"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"권한을 가진 프로그램이 조건 제공자 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_bindDreamService (4153646965978563462) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDreamService (7325825272223347863) -->
-    <skip />
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"드림 서비스에 연결"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"권한을 가진 프로그램이 드림 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"이동통신사에서 제공한 구성 앱 호출"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
@@ -1373,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"애플리케이션이 Trust 상태에서의 변경사항을 수신할 수 있도록 허용합니다."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Trust Agent 제공"</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"애플리케이션이 Trust Agent를 제공할 수 있도록 허용합니다."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Trust Agent 설정 메뉴를 실행합니다."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"애플리케이션에서 Trust Agent의 동작을 변경하는 활동을 실행하도록 허용합니다."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Trust Agent 설정 메뉴를 실행합니다."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"애플리케이션에서 Trust Agent 동작을 변경하는 활동을 실행하도록 허용합니다."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Trust Agent 서비스에 연결"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>

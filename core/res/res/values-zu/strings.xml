@@ -294,6 +294,10 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ivumela uhlelo lokusebenza ukuthi ibhale imiylezo ye-SMS egcinwe ocingweni lwakh noma kwikhadi lakho le-SIM. Izuhlelo lokusebenza ezinobungozi zingayisusa imiyalezo yakho."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"thola imiyalezo ebhaliwe (i-WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-WAP. Le mvume ifaka phakathi amandla okungamela noma okwesusa imilayezo ethunyelwe kuwe ngaphandle kokukubonisa."</string>
+    <!-- no translation found for permlab_receiveBluetoothMap (7593811487142360528) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveBluetoothMap (8656755936919466345) -->
+    <skip />
     <string name="permlab_getTasks" msgid="6466095396623933906">"thola izinhlelo zokusebenza ezisebenzayo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ivumela uhlelo lokusebenza ukubuyisa ulwazi mayelana nemisebenzi yamanje neyakamuva. Lokhu kungavumela uhlelo lokusebenza ukuthola ulwazi mayelana nokuthi iziphi izinhlelo zokusebenza ezisetshenziswa kudivayisi."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ihlanganyela phakathi kwabasebenzisi"</string>
@@ -1371,8 +1375,8 @@
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ivumela uhlelo lokusebenza ukuthi lilalelele izinguquko kusimo sethemba."</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Nikeza umsebenzeli owethembekile."</string>
     <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ivumela uhlelo lokusebenza ukunikeza umsebenzeli owethembekile."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="7494179366945389098">"Qalisa imenyu yezilungiselelo zomsebenzeli wethemba."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="985453787420853278">"Ivumela uhlelo lokusebenza ukuthi luqalise umsebenzi oguqula ukuziphatha komsebenzeli wethemba."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Ivula imenyu yamasethingi womsebenzeli."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Ivumela uhlelo lokusebenza ukuqalisa umsebenzi oshintsha ukuziphatha komsebenzeli owethembekile."</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bophezela kusevisi yomenzeli wethemba"</string>
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ivumela uhlelo lokusebenza ukuthi libophezeleke kusevisi yomenzeli wethemba."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Ixhumana nesibuyekezo nesistimu yokutakula"</string>
