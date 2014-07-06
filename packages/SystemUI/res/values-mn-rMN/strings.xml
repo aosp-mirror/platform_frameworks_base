@@ -215,9 +215,14 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Өнгийг урвуулах"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Өнгө залруулах горим"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Өөр тохиргоо"</string>
+    <!-- no translation found for quick_settings_done (3402999958839153376) -->
+    <skip />
+    <!-- no translation found for quick_settings_connected (1722253542984847487) -->
+    <skip />
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Мэдэгдэл"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Гар чийдэн"</string>
     <string name="recents_empty_message" msgid="7883614615463619450">"Сүүлд ашигласан апп байхгүй"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Аппликешны мэдээлэл"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"хайх"</string>
