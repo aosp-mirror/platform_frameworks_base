@@ -13069,6 +13069,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.resetPackageList(mProcessStats);
         app.unlinkDeathRecipient();
         app.makeInactive(mProcessStats);
+        app.waitingToKill = null;
         app.forcingToForeground = null;
         updateProcessForegroundLocked(app, false, false);
         app.foregroundActivities = false;
