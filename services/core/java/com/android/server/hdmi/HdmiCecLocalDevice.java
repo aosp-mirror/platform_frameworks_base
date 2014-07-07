@@ -581,7 +581,7 @@ abstract class HdmiCecLocalDevice {
      * Called when the system started transition to standby mode.
      *
      * @param initiatedByCec true if this power sequence is initiated
-     *         by the reception the CEC messages like <StandBy>
+     *         by the reception the CEC messages like &lt;StandBy&gt;
      */
     protected void onTransitionToStandby(boolean initiatedByCec) {
         // If there are no outstanding actions, we'll go to STANDBY state.
@@ -592,7 +592,17 @@ abstract class HdmiCecLocalDevice {
      * Called when the system goes to standby mode.
      *
      * @param initiatedByCec true if this power sequence is initiated
-     *         by the reception the CEC messages like <StandBy>
+     *         by the reception the CEC messages like &lt;StandBy&gt;
      */
     protected void onStandBy(boolean initiatedByCec) {}
+
+    /**
+     * Send a key event to other device.
+     *
+     * @param keyCode key code defined in {@link android.os.KeyEvent}
+     * @param isPressed {@code true} for key down event
+     */
+    protected void sendKeyEvent(int keyCode, boolean isPressed) {
+        Slog.w(TAG, "sendKeyEvent not implemented");
+    }
 }

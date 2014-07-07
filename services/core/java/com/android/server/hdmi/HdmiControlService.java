@@ -691,19 +691,17 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void sendKeyEvent(final int keyCode, final boolean isPressed) {
+        public void sendKeyEvent(final int deviceType, final int keyCode, final boolean isPressed) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    // TODO: sendKeyEvent is for TV device only for now. Allow other
-                    //       local devices of different types to use this as well.
-                    HdmiCecLocalDeviceTv tv = tv();
-                    if (tv == null) {
-                        Slog.w(TAG, "Local tv device not available");
+                    HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
+                    if (localDevice == null) {
+                        Slog.w(TAG, "Local device not available");
                         return;
                     }
-                    tv.sendKeyEvent(keyCode, isPressed);
+                    localDevice.sendKeyEvent(keyCode, isPressed);
                 }
             });
         }
