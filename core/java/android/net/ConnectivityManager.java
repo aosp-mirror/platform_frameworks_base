@@ -350,7 +350,7 @@ public class ConnectivityManager {
      * The lookup key for a {@link Network} object passed along with a
      * {@link #ACTION_CAPTIVE_PORTAL_DETECTED} or
      * {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} intent.  This network is not the
-     * default network and must be accessed using this {@link Nework} object.
+     * default network and must be accessed using this {@link Network} object.
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      */
     public static final String EXTRA_NETWORK = "network";
