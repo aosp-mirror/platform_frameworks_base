@@ -344,11 +344,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             final ApkLite info;
             try {
-                info = PackageParser.parseApkLite(new File(app.sourceDir),
+                info = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
                         PackageParser.PARSE_GET_SIGNATURES);
             } catch (PackageParserException e) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse existing base " + app.sourceDir + ": " + e);
+                        "Failed to parse existing base " + app.getBaseCodePath() + ": " + e);
             }
 
             assertPackageConsistent("Existing base", info.packageName, info.versionCode,
@@ -379,7 +379,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private void spliceExistingFilesIntoStage() throws InstallFailedException {
         final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
-        final File existingDir = new File(app.sourceDir).getParentFile();
+        final File existingDir = new File(app.getBaseCodePath());
 
         try {
             linkTreeIgnoringExisting(existingDir, sessionDir);

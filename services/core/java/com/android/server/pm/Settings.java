@@ -683,8 +683,8 @@ final class Settings {
         p.pkg = pkg;
         // pkg.mSetEnabled = p.getEnabled(userId);
         // pkg.mSetStopped = p.getStopped(userId);
-        final String codePath = pkg.applicationInfo.sourceDir;
-        final String resourcePath = pkg.applicationInfo.publicSourceDir;
+        final String codePath = pkg.applicationInfo.getCodePath();
+        final String resourcePath = pkg.applicationInfo.getResourcePath();
         // Update code path if needed
         if (!codePath.equalsIgnoreCase(p.codePathString)) {
             Slog.w(PackageManagerService.TAG, "Code path for pkg : " + p.pkg.packageName +

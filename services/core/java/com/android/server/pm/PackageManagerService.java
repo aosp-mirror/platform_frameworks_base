@@ -30,8 +30,10 @@ import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.EEXIST;
 import static android.system.OsConstants.O_EXCL;
 import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRWXU;
@@ -103,6 +105,7 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.ActivityIntentInfo;
+import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
@@ -146,6 +149,7 @@ import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -190,6 +194,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -374,6 +379,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Directory where third-party apps are staged before install */
     final File mAppStagingDir;
+
+    private final Random mTempFileRandom = new Random();
 
     // ----------------------------------------------------------------
 
@@ -4085,7 +4092,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.applicationInfo.resourceDirs = new String[overlayArray.length];
         int i = 0;
         for (PackageParser.Package p : overlayArray) {
-            pkg.applicationInfo.resourceDirs[i++] = p.applicationInfo.sourceDir;
+            pkg.applicationInfo.resourceDirs[i++] = p.baseCodePath;
         }
         return true;
     }
@@ -4184,8 +4191,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(File scanFile,
             int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-        String scanPath = scanFile.getPath();
-        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanPath);
+        if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
@@ -4198,7 +4204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package pkg;
         try {
-            pkg = pp.parseMonolithicPackage(scanFile, parseFlags);
+            pkg = pp.parsePackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
             mLastScanError = e.error;
             return null;
@@ -4357,27 +4363,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final String baseCodePath = pkg.baseCodePath;
-        final String[] splitCodePaths = pkg.splitCodePaths;
-
         // TODO: extend to support forward-locked splits
-        String baseResPath = null;
+        String resourcePath = null;
+        String baseResourcePath = null;
         if ((parseFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
             if (ps != null && ps.resourcePathString != null) {
-                baseResPath = ps.resourcePathString;
+                resourcePath = ps.resourcePathString;
+                baseResourcePath = ps.resourcePathString;
             } else {
                 // Should not happen at all. Just log an error.
                 Slog.e(TAG, "Resource path not set for pkg : " + pkg.packageName);
             }
         } else {
-            baseResPath = pkg.baseCodePath;
+            resourcePath = pkg.codePath;
+            baseResourcePath = pkg.baseCodePath;
         }
 
         // Set application objects path explicitly.
-        pkg.applicationInfo.sourceDir = baseCodePath;
-        pkg.applicationInfo.publicSourceDir = baseResPath;
-        pkg.applicationInfo.splitSourceDirs = splitCodePaths;
-        pkg.applicationInfo.splitPublicSourceDirs = splitCodePaths;
+        pkg.applicationInfo.setCodePath(pkg.codePath);
+        pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
+        pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
+        pkg.applicationInfo.setResourcePath(resourcePath);
+        pkg.applicationInfo.setBaseResourcePath(baseResourcePath);
+        pkg.applicationInfo.setSplitResourcePaths(pkg.splitCodePaths);
 
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
@@ -4906,8 +4914,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime, UserHandle user, String abiOverride) {
         final File scanFile = new File(pkg.codePath);
-        if (pkg.applicationInfo.sourceDir == null ||
-                pkg.applicationInfo.publicSourceDir == null) {
+        if (pkg.applicationInfo.getCodePath() == null ||
+                pkg.applicationInfo.getResourcePath() == null) {
             // Bail out. The resource and code paths haven't been set.
             Slog.w(TAG, " Code and resource paths haven't been set correctly");
             mLastScanError = PackageManager.INSTALL_FAILED_INVALID_APK;
@@ -4978,8 +4986,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Initialize package source and resource directories
-        File destCodeFile = new File(pkg.applicationInfo.sourceDir);
-        File destResourceFile = new File(pkg.applicationInfo.publicSourceDir);
+        File destCodeFile = new File(pkg.applicationInfo.getCodePath());
+        File destResourceFile = new File(pkg.applicationInfo.getResourcePath());
 
         SharedUserSetting suid = null;
         PackageSetting pkgSetting = null;
@@ -6137,19 +6145,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageSetting pkgSetting) {
         // "bundled" here means system-installed with no overriding update
         final boolean bundledApk = isSystemApp(pkg) && !isUpdatedSystemApp(pkg);
-        final String apkName = getApkName(pkg.applicationInfo.sourceDir);
-        final File libDir;
+        final File codeFile = new File(pkg.applicationInfo.getCodePath());
+        final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
+        final String nativeLibraryPath;
         if (bundledApk) {
             // If "/system/lib64/apkname" exists, assume that is the per-package
             // native library directory to use; otherwise use "/system/lib/apkname".
-            String apkRoot = calculateApkRoot(pkg.applicationInfo.sourceDir);
+            String apkRoot = calculateApkRoot(pkg.applicationInfo.getCodePath());
             File lib64 = new File(apkRoot, LIB64_DIR_NAME);
             File packLib64 = new File(lib64, apkName);
-            libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
+            File libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
+            nativeLibraryPath = (new File(libDir, apkName)).getAbsolutePath();
         } else {
-            libDir = mAppLibInstallDir;
+            // We're installing an upgrade; use directory found during scan
+            // TODO: consider deriving this based on instructionSet
+            nativeLibraryPath = pkg.applicationInfo.nativeLibraryDir;
         }
-        final String nativeLibraryPath = (new File(libDir, apkName)).getPath();
         pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
         // pkgSetting might be null during rescan following uninstall of updates
         // to a bundled app, so accommodate that possibility.  The settings in
@@ -6161,8 +6172,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Deduces the required ABI of an upgraded system app.
     private void setInternalAppAbi(PackageParser.Package pkg, PackageSetting pkgSetting) {
-        final String apkRoot = calculateApkRoot(pkg.applicationInfo.sourceDir);
-        final String apkName = getApkName(pkg.applicationInfo.sourceDir);
+        final String apkRoot = calculateApkRoot(pkg.applicationInfo.getCodePath());
+        final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
 
         // This is of the form "/system/lib64/<packagename>", "/vendor/lib64/<packagename>"
         // or similar.
@@ -8973,7 +8984,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return new AsecInstallArgs(codeFile, cid, instructionSet, installOnSd(flags),
                     installForwardLocked(flags));
         } else {
-            return new FileInstallArgs(codeFile, pkgName, instructionSet);
+            return new FileInstallArgs(codeFile, instructionSet);
         }
     }
 
@@ -9013,7 +9024,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
         abstract int doPreInstall(int status);
-        abstract boolean doRename(int status, String pkgName, String oldCodePath);
+
+        /**
+         * Rename package into final resting place. All paths on the given
+         * scanned package should be updated to reflect the rename.
+         */
+        abstract boolean doRename(int status, PackageParser.Package pkg, String oldCodePath);
         abstract int doPostInstall(int status, int uid);
 
         /** @see PackageSettingBase#codePathString */
@@ -9062,13 +9078,15 @@ public class PackageManagerService extends IPackageManager.Stub {
      * and renaming logic.
      */
     class FileInstallArgs extends InstallArgs {
-        // TODO: teach about handling cluster directories
+        private File codeFile;
+        private File resourceFile;
+        private File nativeLibraryFile;
 
-        File installDir;
-        String codeFileName;
-        String resourceFileName;
-        String libraryPath;
-        boolean created = false;
+        // Example topology:
+        // /data/app/com.example/base.apk
+        // /data/app/com.example/split_foo.apk
+        // /data/app/com.example/native/arm/libfoo.so
+        // /data/app/com.example/dalvik/arm/base.apk@classes.dex
 
         /** New install */
         FileInstallArgs(InstallParams params) {
@@ -9076,27 +9094,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     params.flags, params.installerPackageName, params.getManifestDigest(),
                     params.getUser(), params.packageInstructionSetOverride,
                     params.packageAbiOverride);
+            if (isFwdLocked()) {
+                throw new IllegalArgumentException("Forward locking only supported in ASEC");
+            }
         }
 
         /** Existing install */
-        FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
+        FileInstallArgs(String codePath, String resourcePath, String nativeLibraryPath,
                 String instructionSet) {
             super(null, false, null, null, 0, null, null, null, instructionSet, null);
-            File codeFile = new File(fullCodePath);
-            installDir = codeFile.getParentFile();
-            codeFileName = fullCodePath;
-            resourceFileName = fullResourcePath;
-            libraryPath = nativeLibraryPath;
+            this.codeFile = (codePath != null) ? new File(codePath) : null;
+            this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
+            this.nativeLibraryFile = (nativeLibraryPath != null) ? new File(nativeLibraryPath) : null;
         }
 
         /** New install from existing */
-        FileInstallArgs(File originFile, String pkgName, String instructionSet) {
+        FileInstallArgs(File originFile, String instructionSet) {
             super(originFile, true, null, null, 0, null, null, null, instructionSet, null);
-            installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
-            String apkName = getNextCodePath(null, pkgName, ".apk");
-            codeFileName = new File(installDir, apkName + ".apk").getPath();
-            resourceFileName = getResourcePathFromCodePath();
-            libraryPath = new File(mAppLibInstallDir, pkgName).getPath();
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
@@ -9120,70 +9134,38 @@ public class PackageManagerService extends IPackageManager.Stub {
                     lowThreshold);
         }
 
-        void createCopyFile() {
-            installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
-            codeFileName = createTempPackageFile(installDir).getPath();
-            resourceFileName = getResourcePathFromCodePath();
-            libraryPath = getLibraryPathFromCodePath();
-            created = true;
-        }
-
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
-            if (temp) {
-                // Generate temp file name
-                createCopyFile();
-            }
-            // Get a ParcelFileDescriptor to write to the output file
-            final File codeFile = new File(codeFileName);
-            if (!created) {
-                try {
-                    codeFile.createNewFile();
-                    // Set permissions
-                    if (!setPermissions()) {
-                        // Failed setting permissions.
-                        return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    }
-                } catch (IOException e) {
-                   Slog.w(TAG, "Failed to create file " + codeFile);
-                   return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                }
+            try {
+                final File tempDir = createTempPackageDir(mAppInstallDir);
+                codeFile = tempDir;
+                resourceFile = tempDir;
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to create copy file: " + e);
+                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             }
 
-            // TODO: extend to support copying into clusters
             final IParcelFileDescriptorFactory target = new IParcelFileDescriptorFactory.Stub() {
                 @Override
                 public ParcelFileDescriptor open(String name, int mode) throws RemoteException {
+                    if (!FileUtils.isValidExtFilename(name)) {
+                        throw new IllegalArgumentException("Invalid filename: " + name);
+                    }
                     try {
-                        return ParcelFileDescriptor.open(codeFile,
-                                ParcelFileDescriptor.MODE_READ_WRITE);
-                    } catch (FileNotFoundException e) {
-                        throw new RemoteException(e.getMessage());
+                        final File file = new File(codeFile, name);
+                        final FileDescriptor fd = Os.open(file.getAbsolutePath(),
+                                O_RDWR | O_CREAT, 0644);
+                        Os.chmod(file.getAbsolutePath(), 0644);
+                        return new ParcelFileDescriptor(fd);
+                    } catch (ErrnoException e) {
+                        throw new RemoteException("Failed to open: " + e.getMessage());
                     }
                 }
             };
 
-            // Copy the resource now
             int ret = imcs.copyPackage(originFile.getAbsolutePath(), target);
-
-            if (isFwdLocked()) {
-                final File destResourceFile = new File(getResourcePath());
-
-                // Copy the public files
-                try {
-                    PackageHelper.extractPublicFiles(codeFileName, destResourceFile);
-                } catch (IOException e) {
-                    Slog.e(TAG, "Couldn't create a new zip file for the public parts of a"
-                            + " forward-locked app.");
-                    destResourceFile.delete();
-                    return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                }
-            }
-
-            final File nativeLibraryFile = new File(getNativeLibraryPath());
-            Slog.i(TAG, "Copying native libraries to " + nativeLibraryFile.getPath());
-            if (nativeLibraryFile.exists()) {
-                NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
-                nativeLibraryFile.delete();
+            if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                Slog.e(TAG, "Failed to copy package");
+                return ret;
             }
 
             String[] abiList = (abiOverride != null) ?
@@ -9197,11 +9179,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                     abiList = Build.SUPPORTED_32_BIT_ABIS;
                 }
 
-                int copyRet = copyNativeLibrariesForInternalApp(handle, nativeLibraryFile, abiList);
-                if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                    return copyRet;
+                // TODO: refactor to avoid double findSupportedAbi()
+                final int abiIndex = NativeLibraryHelper.findSupportedAbi(handle, abiList);
+                if (abiIndex < 0 && abiIndex != PackageManager.NO_NATIVE_LIBRARIES) {
+                    return abiIndex;
+                } else if (abiIndex >= 0) {
+                    final File baseLibFile = new File(codeFile, LIB_DIR_NAME);
+                    baseLibFile.mkdir();
+                    Os.chmod(baseLibFile.getAbsolutePath(), 0755);
+
+                    final String abi = Build.SUPPORTED_ABIS[abiIndex];
+                    final String instructionSet = VMRuntime.getInstructionSet(abi);
+                    nativeLibraryFile = new File(baseLibFile, instructionSet);
+                    nativeLibraryFile.mkdir();
+                    Os.chmod(nativeLibraryFile.getAbsolutePath(), 0755);
+
+                    copyNativeLibrariesForInternalApp(handle, nativeLibraryFile, abiList);
                 }
-            } catch (IOException e) {
+            } catch (IOException | ErrnoException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             } finally {
@@ -9218,51 +9213,44 @@ public class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        boolean doRename(int status, final String pkgName, String oldCodePath) {
+        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
                 return false;
             } else {
-                final File oldCodeFile = new File(getCodePath());
-                final File oldResourceFile = new File(getResourcePath());
-                final File oldLibraryFile = new File(getNativeLibraryPath());
+                final File beforeCodeFile = codeFile;
+                final File afterCodeFile = new File(mAppInstallDir,
+                        getNextCodePath(oldCodePath, pkg.packageName, null));
 
-                // Rename APK file based on packageName
-                final String apkName = getNextCodePath(oldCodePath, pkgName, ".apk");
-                final File newCodeFile = new File(installDir, apkName + ".apk");
-                if (!oldCodeFile.renameTo(newCodeFile)) {
+                Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
+                if (!beforeCodeFile.renameTo(afterCodeFile)) {
                     return false;
                 }
-                codeFileName = newCodeFile.getPath();
-
-                // Rename public resource file if it's forward-locked.
-                final File newResFile = new File(getResourcePathFromCodePath());
-                if (isFwdLocked() && !oldResourceFile.renameTo(newResFile)) {
-                    return false;
-                }
-                resourceFileName = newResFile.getPath();
-
-                // Rename library path
-                final File newLibraryFile = new File(getLibraryPathFromCodePath());
-                if (newLibraryFile.exists()) {
-                    NativeLibraryHelper.removeNativeBinariesFromDirLI(newLibraryFile);
-                    newLibraryFile.delete();
-                }
-                if (!oldLibraryFile.renameTo(newLibraryFile)) {
-                    Slog.e(TAG, "Cannot rename native library directory "
-                            + oldLibraryFile.getPath() + " to " + newLibraryFile.getPath());
-                    return false;
-                }
-                libraryPath = newLibraryFile.getPath();
-
-                // Attempt to set permissions
-                if (!setPermissions()) {
+                if (!SELinux.restoreconRecursive(afterCodeFile)) {
                     return false;
                 }
 
-                if (!SELinux.restorecon(newCodeFile)) {
-                    return false;
-                }
+                // Reflect the rename internally
+                codeFile = afterCodeFile;
+                resourceFile = afterCodeFile;
+                nativeLibraryFile = FileUtils.rewriteAfterRename(beforeCodeFile, afterCodeFile,
+                        nativeLibraryFile);
+
+                // Reflect the rename in scanned details
+                pkg.codePath = afterCodeFile.getAbsolutePath();
+                pkg.baseCodePath = FileUtils.rewriteAfterRename(beforeCodeFile, afterCodeFile,
+                        pkg.baseCodePath);
+                pkg.splitCodePaths = FileUtils.rewriteAfterRename(beforeCodeFile, afterCodeFile,
+                        pkg.splitCodePaths);
+
+                // Reflect the rename in app info
+                pkg.applicationInfo.setCodePath(pkg.codePath);
+                pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
+                pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
+                pkg.applicationInfo.setResourcePath(pkg.codePath);
+                pkg.applicationInfo.setBaseResourcePath(pkg.baseCodePath);
+                pkg.applicationInfo.setSplitResourcePaths(pkg.splitCodePaths);
+                pkg.applicationInfo.nativeLibraryDir = getNativeLibraryPath();
 
                 return true;
             }
@@ -9275,120 +9263,71 @@ public class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        private String getResourcePathFromCodePath() {
-            final String codePath = getCodePath();
-            if (isFwdLocked()) {
-                final StringBuilder sb = new StringBuilder();
-
-                sb.append(mAppInstallDir.getPath());
-                sb.append('/');
-                sb.append(getApkName(codePath));
-                sb.append(".zip");
-
-                /*
-                 * If our APK is a temporary file, mark the resource as a
-                 * temporary file as well so it can be cleaned up after
-                 * catastrophic failure.
-                 */
-                if (codePath.endsWith(".tmp")) {
-                    sb.append(".tmp");
-                }
-
-                return sb.toString();
-            } else {
-                return codePath;
-            }
-        }
-
-        private String getLibraryPathFromCodePath() {
-            return new File(mAppLibInstallDir, getApkName(getCodePath())).getPath();
-        }
-
         @Override
         String getCodePath() {
-            return codeFileName;
+            return (codeFile != null) ? codeFile.getAbsolutePath() : null;
         }
 
         @Override
         String getResourcePath() {
-            return resourceFileName;
+            return (resourceFile != null) ? resourceFile.getAbsolutePath() : null;
         }
 
         @Override
         String getNativeLibraryPath() {
-            if (libraryPath == null) {
-                libraryPath = getLibraryPathFromCodePath();
-            }
-            return libraryPath;
+            return (nativeLibraryFile != null) ? nativeLibraryFile.getAbsolutePath() : null;
         }
 
         private boolean cleanUp() {
-            boolean ret = true;
-            String sourceDir = getCodePath();
-            String publicSourceDir = getResourcePath();
-            if (sourceDir != null) {
-                File sourceFile = new File(sourceDir);
-                if (!sourceFile.exists()) {
-                    Slog.w(TAG, "Package source " + sourceDir + " does not exist.");
-                    ret = false;
-                }
-                // Delete application's code and resources
-                sourceFile.delete();
-            }
-            if (publicSourceDir != null && !publicSourceDir.equals(sourceDir)) {
-                final File publicSourceFile = new File(publicSourceDir);
-                if (!publicSourceFile.exists()) {
-                    Slog.w(TAG, "Package public source " + publicSourceFile + " does not exist.");
-                }
-                if (publicSourceFile.exists()) {
-                    publicSourceFile.delete();
-                }
+            if (codeFile == null || !codeFile.exists()) {
+                return false;
             }
 
-            if (libraryPath != null) {
-                File nativeLibraryFile = new File(libraryPath);
-                NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
-                if (!nativeLibraryFile.delete()) {
-                    Slog.w(TAG, "Couldn't delete native library directory " + libraryPath);
-                }
+            if (codeFile.isDirectory()) {
+                FileUtils.deleteContents(codeFile);
+            }
+            codeFile.delete();
+
+            if (resourceFile != null && !FileUtils.contains(codeFile, resourceFile)) {
+                resourceFile.delete();
             }
 
-            return ret;
+            if (nativeLibraryFile != null && !FileUtils.contains(codeFile, nativeLibraryFile)) {
+                FileUtils.deleteContents(nativeLibraryFile);
+                nativeLibraryFile.delete();
+            }
+
+            return true;
         }
 
         void cleanUpResourcesLI() {
-            String sourceDir = getCodePath();
-            if (cleanUp()) {
+            // Try enumerating all code paths before deleting
+            List<String> allCodePaths = Collections.EMPTY_LIST;
+            if (codeFile != null && codeFile.exists()) {
+                try {
+                    final PackageLite pkg = PackageParser.parsePackageLite(codeFile, 0);
+                    allCodePaths = pkg.getAllCodePaths();
+                } catch (PackageParserException e) {
+                    // Ignored; we tried our best
+                }
+            }
+
+            cleanUp();
+
+            if (!allCodePaths.isEmpty()) {
                 if (instructionSet == null) {
                     throw new IllegalStateException("instructionSet == null");
                 }
-                int retCode = mInstaller.rmdex(sourceDir, instructionSet);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't remove dex file for package: "
-                            +  " at location "
-                            + sourceDir + ", retcode=" + retCode);
-                    // we don't consider this to be a failure of the core package deletion
-                }
-            }
-        }
 
-        private boolean setPermissions() {
-            // TODO Do this in a more elegant way later on. for now just a hack
-            if (!isFwdLocked()) {
-                final int filePermissions =
-                    FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP
-                    |FileUtils.S_IROTH;
-                int retCode = FileUtils.setPermissions(getCodePath(), filePermissions, -1, -1);
-                if (retCode != 0) {
-                    Slog.e(TAG, "Couldn't set new package file permissions for " +
-                            getCodePath()
-                            + ". The return code was: " + retCode);
-                    // TODO Define new internal error
-                    return false;
+                for (String codePath : allCodePaths) {
+                    int retCode = mInstaller.rmdex(codePath, instructionSet);
+                    if (retCode < 0) {
+                        Slog.w(TAG, "Couldn't remove dex file for package: "
+                                +  " at location " + codePath + ", retcode=" + retCode);
+                        // we don't consider this to be a failure of the core package deletion
+                    }
                 }
-                return true;
             }
-            return true;
         }
 
         boolean doPostDeleteLI(boolean delete) {
@@ -9538,9 +9477,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        boolean doRename(int status, final String pkgName,
-                String oldCodePath) {
-            String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
+        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
+            String newCacheId = getNextCodePath(oldCodePath, pkg.packageName, "/" + RES_FILE_NAME);
             String newCachePath = null;
             if (PackageHelper.isContainerMounted(cid)) {
                 // Unmount the container
@@ -9580,6 +9518,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     " at new path: " + newCachePath);
             cid = newCacheId;
             setCachePath(newCachePath);
+
+            // TODO: extend to support split APKs
+            pkg.codePath = getCodePath();
+            pkg.baseCodePath = getCodePath();
+            pkg.splitCodePaths = null;
+
+            pkg.applicationInfo.setCodePath(getCodePath());
+            pkg.applicationInfo.setBaseCodePath(getCodePath());
+            pkg.applicationInfo.setSplitCodePaths(null);
+            pkg.applicationInfo.setResourcePath(getResourcePath());
+            pkg.applicationInfo.setBaseResourcePath(getResourcePath());
+            pkg.applicationInfo.setSplitResourcePaths(null);
+            pkg.applicationInfo.nativeLibraryDir = getNativeLibraryPath();
+
             return true;
         }
 
@@ -9716,7 +9668,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (oldCodePath != null) {
             String subStr = oldCodePath;
             // Drop the suffix right away
-            if (subStr.endsWith(suffix)) {
+            if (suffix != null && subStr.endsWith(suffix)) {
                 subStr = subStr.substring(0, subStr.length() - suffix.length());
             }
             // If oldCodePath already contains prefix find out the
@@ -9747,7 +9699,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Utility method used to ignore ADD/REMOVE events
     // by directory observer.
     private static boolean ignoreCodePath(String fullPathStr) {
-        String apkName = getApkName(fullPathStr);
+        String apkName = deriveCodePathName(fullPathStr);
         int idx = apkName.lastIndexOf(INSTALL_PACKAGE_SUFFIX);
         if (idx != -1 && ((idx+1) < apkName.length())) {
             // Make sure the package ends with a numeral
@@ -9763,33 +9715,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Utility method that returns the relative package path with respect
     // to the installation directory. Like say for /data/data/com.test-1.apk
     // string com.test-1 is returned.
-    static String getApkName(String codePath) {
+    static String deriveCodePathName(String codePath) {
         if (codePath == null) {
             return null;
         }
-        int sidx = codePath.lastIndexOf("/");
-        int eidx = codePath.lastIndexOf(".");
-        if (eidx == -1) {
-            eidx = codePath.length();
-        } else if (eidx == 0) {
-            Slog.w(TAG, " Invalid code path, "+ codePath + " Not a valid apk name");
+        final File codeFile = new File(codePath);
+        final String name = codeFile.getName();
+        if (codeFile.isDirectory()) {
+            return name;
+        } else if (name.endsWith(".apk") || name.endsWith(".tmp")) {
+            final int lastDot = name.lastIndexOf('.');
+            return name.substring(0, lastDot);
+        } else {
+            Slog.w(TAG, "Odd, " + codePath + " doesn't look like an APK");
             return null;
         }
-        return codePath.substring(sidx+1, eidx);
-    }
-
-    private static String[] deriveSplitResPaths(String[] splitCodePaths) {
-        String[] splitResPaths = null;
-        if (!ArrayUtils.isEmpty(splitCodePaths)) {
-            splitResPaths = new String[splitCodePaths.length];
-            for (int i = 0; i < splitCodePaths.length; i++) {
-                final String splitCodePath = splitCodePaths[i];
-                final String resName = getApkName(splitCodePath) + ".zip";
-                splitResPaths[i] = new File(new File(splitCodePath).getParentFile(),
-                        resName).getAbsolutePath();
-            }
-        }
-        return splitResPaths;
     }
 
     class PackageInstalledInfo {
@@ -10058,8 +9998,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // which means we are replacing another update that is already
                 // installed.  We need to make sure to delete the older one's .apk.
                 res.removedInfo.args = createInstallArgsForExisting(0,
-                        deletedPackage.applicationInfo.sourceDir,
-                        deletedPackage.applicationInfo.publicSourceDir,
+                        deletedPackage.applicationInfo.getCodePath(),
+                        deletedPackage.applicationInfo.getResourcePath(),
                         deletedPackage.applicationInfo.nativeLibraryDir,
                         getAppInstructionSet(deletedPackage.applicationInfo));
             } else {
@@ -10223,7 +10163,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package pkg;
         try {
-            pkg = pp.parseMonolithicPackage(tmpPackageFile, parseFlags);
+            pkg = pp.parsePackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
             res.returnCode = e.error;
             return;
@@ -10341,21 +10281,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        if (!args.doRename(res.returnCode, pkgName, oldCodePath)) {
+        if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
             res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             return;
         }
-
-        // Set application objects path explicitly after the rename
-        // TODO: derive split paths from original scan after rename
-        pkg.codePath = args.getCodePath();
-        pkg.baseCodePath = args.getCodePath();
-        pkg.splitCodePaths = null;
-        pkg.applicationInfo.sourceDir = args.getCodePath();
-        pkg.applicationInfo.publicSourceDir = args.getResourcePath();
-        pkg.applicationInfo.splitSourceDirs = null;
-        pkg.applicationInfo.splitPublicSourceDirs = null;
-        pkg.applicationInfo.nativeLibraryDir = args.getNativeLibraryPath();
 
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,
@@ -10436,36 +10365,57 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final void deleteTempPackageFilesInDirectory(File directory,
             FilenameFilter filter) {
-        final String[] tmpFilesList = directory.list(filter);
-        if (tmpFilesList == null) {
-            return;
-        }
-        for (int i = 0; i < tmpFilesList.length; i++) {
-            final File tmpFile = new File(directory, tmpFilesList[i]);
-            tmpFile.delete();
+        final File[] files = directory.listFiles(filter);
+        if (!ArrayUtils.isEmpty(files)) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    FileUtils.deleteContents(file);
+                    file.delete();
+                } else if (file.isFile()) {
+                    file.delete();
+                }
+            }
         }
     }
 
-    private File createTempPackageFile(File installDir) {
-        File tmpPackageFile;
-        try {
-            tmpPackageFile = File.createTempFile("vmdl", ".tmp", installDir);
-        } catch (IOException e) {
-            Slog.e(TAG, "Couldn't create temp file for downloaded package file.");
-            return null;
-        }
-        try {
-            FileUtils.setPermissions(
-                    tmpPackageFile.getCanonicalPath(), FileUtils.S_IRUSR|FileUtils.S_IWUSR,
-                    -1, -1);
-            if (!SELinux.restorecon(tmpPackageFile)) {
-                return null;
+    private File createTempPackageDir(File installDir) throws IOException {
+        int n = 0;
+        while (n++ < 32) {
+            final File file = new File(installDir, "vmdl" + mTempFileRandom.nextInt() + ".tmp");
+            try {
+                Os.mkdir(file.getAbsolutePath(), 0755);
+                Os.chmod(file.getAbsolutePath(), 0755);
+                if (!SELinux.restorecon(file)) {
+                    throw new IOException("Failed to restorecon");
+                }
+                return file;
+            } catch (ErrnoException e) {
+                if (e.errno == EEXIST) continue;
+                throw e.rethrowAsIOException();
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Trouble getting the canoncical path for a temp file.");
-            return null;
         }
-        return tmpPackageFile;
+        throw new IOException("Failed to create temp directory");
+    }
+
+    private File createTempPackageFile(File installDir) throws IOException {
+        int n = 0;
+        while (n++ < 32) {
+            final File file = new File(installDir, "vmdl" + mTempFileRandom.nextInt() + ".tmp");
+            try {
+                final FileDescriptor fd = Os.open(file.getAbsolutePath(),
+                        O_RDWR | O_CREAT | O_EXCL, 0644);
+                IoUtils.closeQuietly(fd);
+                Os.chmod(file.getAbsolutePath(), 0644);
+                if (!SELinux.restorecon(file)) {
+                    throw new IOException("Failed to restorecon");
+                }
+                return file;
+            } catch (ErrnoException e) {
+                if (e.errno == EEXIST) continue;
+                throw e.rethrowAsIOException();
+            }
+        }
+        throw new IOException("Failed to create temp file");
     }
 
     @Override
@@ -11254,7 +11204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 libDirPath = ps.nativeLibraryPathString;
             }
             if (p != null && (isExternal(p) || isForwardLocked(p))) {
-                String secureContainerId = cidFromCodePath(p.applicationInfo.sourceDir);
+                String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
                 if (secureContainerId != null) {
                     asecPath = PackageHelper.getSdFilesystem(secureContainerId);
                 }
@@ -11268,7 +11218,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
             if (isForwardLocked(p)) {
-                publicSrcDir = applicationInfo.publicSourceDir;
+                publicSrcDir = applicationInfo.getBaseResourcePath();
             }
         }
         // TODO: extend to measure size of split APKs
@@ -12862,7 +12812,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Message msg = mHandler.obtainMessage(INIT_COPY);
                 final String instructionSet = getAppInstructionSet(pkg.applicationInfo);
                 InstallArgs srcArgs = createInstallArgsForExisting(currFlags,
-                        pkg.applicationInfo.sourceDir, pkg.applicationInfo.publicSourceDir,
+                        pkg.applicationInfo.getCodePath(), pkg.applicationInfo.getResourcePath(),
                         pkg.applicationInfo.nativeLibraryDir, instructionSet);
                 MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
                         instructionSet, pkg.applicationInfo.uid, user);
@@ -12889,10 +12839,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Slog.w(TAG, " Package " + mp.packageName
                                     + " doesn't exist. Aborting move");
                             returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
-                        } else if (!mp.srcArgs.getCodePath().equals(pkg.applicationInfo.sourceDir)) {
+                        } else if (!mp.srcArgs.getCodePath().equals(
+                                pkg.applicationInfo.getCodePath())) {
                             Slog.w(TAG, "Package " + mp.packageName + " code path changed from "
                                     + mp.srcArgs.getCodePath() + " to "
-                                    + pkg.applicationInfo.sourceDir
+                                    + pkg.applicationInfo.getCodePath()
                                     + " Aborting move and returning error");
                             returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
                         } else {
@@ -12916,10 +12867,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                                             + " doesn't exist. Aborting move");
                                     returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
                                 } else if (!mp.srcArgs.getCodePath().equals(
-                                        pkg.applicationInfo.sourceDir)) {
+                                        pkg.applicationInfo.getCodePath())) {
                                     Slog.w(TAG, "Package " + mp.packageName
                                             + " code path changed from " + mp.srcArgs.getCodePath()
-                                            + " to " + pkg.applicationInfo.sourceDir
+                                            + " to " + pkg.applicationInfo.getCodePath()
                                             + " Aborting move and returning error");
                                     returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
                                 } else {
@@ -12974,14 +12925,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     }
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
-                                        pkg.applicationInfo.sourceDir = newCodePath;
-                                        pkg.applicationInfo.publicSourceDir = newResPath;
+                                        pkg.applicationInfo.setCodePath(newCodePath);
+                                        pkg.applicationInfo.setBaseCodePath(newCodePath);
+                                        pkg.applicationInfo.setSplitCodePaths(null);
+                                        pkg.applicationInfo.setResourcePath(newResPath);
+                                        pkg.applicationInfo.setBaseResourcePath(newResPath);
+                                        pkg.applicationInfo.setSplitResourcePaths(null);
                                         pkg.applicationInfo.nativeLibraryDir = newNativePath;
+
                                         PackageSetting ps = (PackageSetting) pkg.mExtras;
-                                        ps.codePath = new File(pkg.applicationInfo.sourceDir);
+                                        ps.codePath = new File(pkg.applicationInfo.getCodePath());
                                         ps.codePathString = ps.codePath.getPath();
                                         ps.resourcePath = new File(
-                                                pkg.applicationInfo.publicSourceDir);
+                                                pkg.applicationInfo.getResourcePath());
                                         ps.resourcePathString = ps.resourcePath.getPath();
                                         ps.nativeLibraryPathString = newNativePath;
                                         // Set the application info flag

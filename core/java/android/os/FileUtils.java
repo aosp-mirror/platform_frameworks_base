@@ -371,6 +371,8 @@ public class FileUtils {
      * attacks.
      */
     public static boolean contains(File dir, File file) {
+        if (file == null) return false;
+
         String dirPath = dir.getAbsolutePath();
         String filePath = file.getAbsolutePath();
 
@@ -418,8 +420,18 @@ public class FileUtils {
     }
 
     public static String rewriteAfterRename(File beforeDir, File afterDir, String path) {
+        if (path == null) return null;
         final File result = rewriteAfterRename(beforeDir, afterDir, new File(path));
         return (result != null) ? result.getAbsolutePath() : null;
+    }
+
+    public static String[] rewriteAfterRename(File beforeDir, File afterDir, String[] paths) {
+        if (paths == null) return null;
+        final String[] result = new String[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            result[i] = rewriteAfterRename(beforeDir, afterDir, paths[i]);
+        }
+        return result;
     }
 
     /**
@@ -428,6 +440,7 @@ public class FileUtils {
      * {@code /after/foo/bar.txt}.
      */
     public static File rewriteAfterRename(File beforeDir, File afterDir, File file) {
+        if (file == null) return null;
         if (contains(beforeDir, file)) {
             final String splice = file.getAbsolutePath().substring(
                     beforeDir.getAbsolutePath().length());

@@ -28,8 +28,14 @@ import java.io.FileDescriptor;
  * {@hide}
  */
 public class SELinux {
-
     private static final String TAG = "SELinux";
+
+    /** Keep in sync with ./external/libselinux/include/selinux/android.h */
+    private static final int SELINUX_ANDROID_RESTORECON_NOCHANGE = 1;
+    private static final int SELINUX_ANDROID_RESTORECON_VERBOSE = 2;
+    private static final int SELINUX_ANDROID_RESTORECON_RECURSE = 4;
+    private static final int SELINUX_ANDROID_RESTORECON_FORCE = 8;
+    private static final int SELINUX_ANDROID_RESTORECON_DATADATA = 16;
 
     /**
      * Determine whether SELinux is disabled or enabled.
@@ -136,7 +142,7 @@ public class SELinux {
      */
     public static boolean restorecon(String pathname) throws NullPointerException {
         if (pathname == null) { throw new NullPointerException(); }
-        return native_restorecon(pathname);
+        return native_restorecon(pathname, 0);
     }
 
     /**
@@ -149,7 +155,7 @@ public class SELinux {
      * @param pathname The pathname of the file to be relabeled.
      * @return a boolean indicating whether the relabeling succeeded.
      */
-    private static native boolean native_restorecon(String pathname);
+    private static native boolean native_restorecon(String pathname, int flags);
 
     /**
      * Restores a file to its default SELinux security context.
@@ -164,10 +170,10 @@ public class SELinux {
      */
     public static boolean restorecon(File file) throws NullPointerException {
         try {
-            return native_restorecon(file.getCanonicalPath());
+            return native_restorecon(file.getCanonicalPath(), 0);
         } catch (IOException e) {
             Slog.e(TAG, "Error getting canonical path. Restorecon failed for " +
-                   file.getPath(), e);
+                    file.getPath(), e);
             return false;
         }
     }
@@ -180,14 +186,13 @@ public class SELinux {
      *
      * @return a boolean indicating whether the relabeling succeeded.
      */
-    public static boolean restoreconTree(File dir) {
-        final File[] files = dir.listFiles();
-        boolean success = true;
-        if (files != null) {
-            for (File file : files) {
-                success &= restorecon(file);
-            }
+    public static boolean restoreconRecursive(File file) {
+        try {
+            return native_restorecon(file.getCanonicalPath(), SELINUX_ANDROID_RESTORECON_RECURSE);
+        } catch (IOException e) {
+            Slog.e(TAG, "Error getting canonical path. Restorecon failed for " +
+                    file.getPath(), e);
+            return false;
         }
-        return success;
     }
 }

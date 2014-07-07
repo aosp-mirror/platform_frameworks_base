@@ -499,19 +499,26 @@ public class DefaultContainerService extends IntentService {
 
     private int copyPackageInner(PackageLite pkg, IParcelFileDescriptorFactory target)
             throws IOException, RemoteException {
-        // TODO: extend to support copying all split APKs
+        copyFile(pkg.baseCodePath, "base.apk", target);
         if (!ArrayUtils.isEmpty(pkg.splitNames)) {
-            throw new UnsupportedOperationException("Copying split APKs not yet supported");
+            for (int i = 0; i < pkg.splitNames.length; i++) {
+                copyFile(pkg.splitCodePaths[i], "split_" + pkg.splitNames[i] + ".apk", target);
+            }
         }
 
+        return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    private void copyFile(String sourcePath, String targetName,
+            IParcelFileDescriptorFactory target) throws IOException, RemoteException {
+        Slog.d(TAG, "Copying " + sourcePath + " to " + targetName);
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = new FileInputStream(pkg.baseCodePath);
+            in = new FileInputStream(sourcePath);
             out = new ParcelFileDescriptor.AutoCloseOutputStream(
-                    target.open(null, ParcelFileDescriptor.MODE_READ_WRITE));
+                    target.open(targetName, ParcelFileDescriptor.MODE_READ_WRITE));
             Streams.copy(in, out);
-            return PackageManager.INSTALL_SUCCEEDED;
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);
