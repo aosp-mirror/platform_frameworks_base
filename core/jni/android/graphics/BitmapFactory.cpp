@@ -116,7 +116,7 @@ static SkColorType colorTypeForScaledOutput(SkColorType colorType) {
     switch (colorType) {
         case kUnknown_SkColorType:
         case kIndex_8_SkColorType:
-            return kNative_8888_SkColorType;
+            return kN32_SkColorType;
         default:
             break;
     }
