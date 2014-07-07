@@ -17,7 +17,7 @@
 package android.graphics.drawable;
 
 /**
- * Interface that drawables suporting animations should implement.
+ * Interface that drawables supporting animations should implement.
  */
 public interface Animatable {
     /**
