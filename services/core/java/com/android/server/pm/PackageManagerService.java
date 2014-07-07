@@ -3418,7 +3418,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String resolvedType, int flags, int sourceUserId) {
         List<ResolveInfo> resultTargetUser = mActivities.queryIntent(intent,
                 resolvedType, flags, filter.getTargetUserId());
-        if (resultTargetUser != null) {
+        if (resultTargetUser != null && !resultTargetUser.isEmpty()) {
             return createForwardingResolveInfo(filter, sourceUserId, filter.getTargetUserId());
         }
         return null;
