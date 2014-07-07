@@ -744,13 +744,6 @@ public class Notification implements Parcelable
     public static final String EXTRA_PEOPLE = "android.people";
 
     /**
-     * @hide
-     * Extra added by NotificationManagerService to indicate whether
-     * the Notifications's score has been modified.
-     */
-    public static final String EXTRA_SCORE_MODIFIED = "android.scoreModified";
-
-    /**
      * {@link #extras} key: used to provide hints about the appropriateness of
      * displaying this notification as a heads-up notification.
      * @hide
