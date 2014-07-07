@@ -90,13 +90,13 @@ final class SendKeyAction extends FeatureAction {
         // command and terminate the action. Other release events are ignored.
         if (isPressed) {
             if (keycode != mLastKeycode) {
+                sendKeyDown(keycode);
                 if (!HdmiCecKeycode.isRepeatableKey(keycode)) {
                     sendKeyDown(keycode);
                     finish();
                     return;
                 }
                 mActionTimer.clearTimerMessage();
-                sendKeyDown(keycode);
                 addTimer(mState, IRT_MS);
                 mLastKeycode = keycode;
             }
