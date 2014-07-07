@@ -1958,6 +1958,13 @@ final class Settings {
     void writeSigningKeySetsLPr(XmlSerializer serializer,
             PackageKeySetData data) throws IOException {
         if (data.getSigningKeySets() != null) {
+            // Keep track of the original signing-keyset.
+            // Must be recorded first, since it will be read first and wipe the
+            // current signing-keysets for the package when set.
+            long properSigningKeySet = data.getProperSigningKeySet();
+            serializer.startTag(null, "proper-signing-keyset");
+            serializer.attribute(null, "identifier", Long.toString(properSigningKeySet));
+            serializer.endTag(null, "proper-signing-keyset");
             for (long id : data.getSigningKeySets()) {
                 serializer.startTag(null, "signing-keyset");
                 serializer.attribute(null, "identifier", Long.toString(id));
@@ -2917,6 +2924,9 @@ final class Settings {
                 } else if (tagName.equals("perms")) {
                     readGrantedPermissionsLPw(parser, packageSetting.grantedPermissions);
                     packageSetting.permissionsFixed = true;
+                } else if (tagName.equals("proper-signing-keyset")) {
+                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    packageSetting.keySetData.setProperSigningKeySet(id);
                 } else if (tagName.equals("signing-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     packageSetting.keySetData.addSigningKeySet(id);
