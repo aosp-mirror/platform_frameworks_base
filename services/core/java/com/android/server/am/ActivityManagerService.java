@@ -9437,6 +9437,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public boolean isTopOfTask(IBinder token) {
+        synchronized (this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                throw new IllegalArgumentException();
+            }
+            return r.task.getTopActivity() == r;
+        }
+    }
+
     public final void enterSafeMode() {
         synchronized(this) {
             // It only makes sense to do this before the system is ready
@@ -16537,11 +16548,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     cleanUpApplicationRecordLocked(app, false, true, -1);
                     mRemovedProcesses.remove(i);
-                    
+
                     if (app.persistent) {
-                        if (app.persistent) {
-                            addAppLocked(app.info, false, null /* ABI override */);
-                        }
+                        addAppLocked(app.info, false, null /* ABI override */);
                     }
                 }
             }

@@ -302,10 +302,10 @@ public interface IActivityManager extends IInterface {
     
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException;
-    
+
     public void overridePendingTransition(IBinder token, String packageName,
             int enterAnim, int exitAnim) throws RemoteException;
-    
+
     public boolean isUserAMonkey() throws RemoteException;
 
     public void setUserIsMonkey(boolean monkey) throws RemoteException;
@@ -320,12 +320,13 @@ public interface IActivityManager extends IInterface {
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
     public boolean isImmersive(IBinder token) throws RemoteException;
     public boolean isTopActivityImmersive() throws RemoteException;
-    
+    public boolean isTopOfTask(IBinder token) throws RemoteException;
+
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
 
     public String getProviderMimeType(Uri uri, int userId) throws RemoteException;
-    
+
     public IBinder newUriPermissionOwner(String name) throws RemoteException;
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
             Uri uri, int mode, int userId) throws RemoteException;
@@ -748,7 +749,8 @@ public interface IActivityManager extends IInterface {
     int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
     int GET_ACTIVITY_OPTIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+219;
     int GET_APP_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+220;
-    int START_LOCK_TASK_BY_CURRENT = IBinder.FIRST_CALL_TRANSACTION+221;
-    int STOP_LOCK_TASK_BY_CURRENT = IBinder.FIRST_CALL_TRANSACTION+222;
+    int START_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+221;
+    int STOP_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+222;
     int FINISH_VOICE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+223;
+    int IS_TOP_OF_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+224;
 }

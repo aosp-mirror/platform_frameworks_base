@@ -5202,6 +5202,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Indication of whether this is the highest level activity in this task. Can be used to
+     * determine whether an activity launched by this activity was placed in the same task or
+     * another task.
+     *
+     * @return true if this is the topmost, non-finishing activity in its task.
+     * @hide
+     */
+    public boolean isTopOfTask() {
+        try {
+            return ActivityManagerNative.getDefault().isTopOfTask(mToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
      * fullscreen opaque Activity.
      * <p>
