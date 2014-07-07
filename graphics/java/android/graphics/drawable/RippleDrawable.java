@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
@@ -497,8 +498,29 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
+    /**
+     * Populates <code>outline</code> with the first available layer outline,
+     * excluding the mask layer. Returns <code>true</code> if an outline is
+     * available, <code>false</code> otherwise.
+     *
+     * @param outline Outline in which to place the first available layer outline
+     * @return <code>true</code> if an outline is available
+     */
     @Override
-    public void draw(Canvas canvas) {
+    public boolean getOutline(@NonNull Outline outline) {
+        final LayerState state = mLayerState;
+        final ChildDrawable[] children = state.mChildren;
+        final int N = state.mNum;
+        for (int i = 0; i < N; i++) {
+            if (children[i].mId != R.id.mask && children[i].mDrawable.getOutline(outline)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void draw(@NonNull Canvas canvas) {
         final boolean isProjected = isProjected();
         final boolean hasMask = mMask != null;
         final boolean drawNonMaskContent = mLayerState.mNum > (hasMask ? 1 : 0);
