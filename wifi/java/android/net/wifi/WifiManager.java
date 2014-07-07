@@ -1447,6 +1447,14 @@ public class WifiManager {
      */
     public static final int INVALID_ARGS                = 8;
 
+    /**
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed due to user permissions.
+     *
+     * @hide
+     */
+    public static final int NOT_AUTHORIZED              = 9;
+
     /** Interface for callback invocation on an application action */
     public interface ActionListener {
         /** The operation succeeded */
