@@ -422,6 +422,9 @@ public class ShapeDrawable extends Drawable {
         final ShapeState state = mShapeState;
         final Paint paint = state.mPaint;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 

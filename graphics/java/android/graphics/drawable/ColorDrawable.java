@@ -45,7 +45,6 @@ public class ColorDrawable extends Drawable {
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "state_")
     private ColorState mColorState;
-    private ColorStateList mTint;
     private PorterDuffColorFilter mTintFilter;
 
     private boolean mMutated;
@@ -215,42 +214,8 @@ public class ColorDrawable extends Drawable {
         super.inflate(r, parser, attrs, theme);
 
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.ColorDrawable);
-        inflateStateFromTypedArray(a);
+        updateStateFromTypedArray(a);
         a.recycle();
-    }
-
-    /**
-     * Initializes the constant state from the values in the typed array.
-     */
-    private void inflateStateFromTypedArray(TypedArray a) {
-        final ColorState state = mColorState;
-
-        // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        state.mThemeAttrs = themeAttrs;
-
-        if (themeAttrs == null || themeAttrs[R.styleable.ColorDrawable_color] == 0) {
-            final int color = a.getColor(R.styleable.ColorDrawable_color, 0);
-            state.mBaseColor = color;
-            state.mUseColor = color;
-        }
-    }
-
-    @Override
-    public void applyTheme(Theme t) {
-        super.applyTheme(t);
-
-        final ColorState state = mColorState;
-        if (state == null) {
-            throw new RuntimeException("Can't apply theme to <color> with no constant state");
-        }
-
-        final int[] themeAttrs = state.mThemeAttrs;
-        if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.ColorDrawable);
-            updateStateFromTypedArray(a);
-            a.recycle();
-        }
     }
 
     /**
@@ -259,16 +224,32 @@ public class ColorDrawable extends Drawable {
     private void updateStateFromTypedArray(TypedArray a) {
         final ColorState state = mColorState;
 
-        if (a.hasValue(R.styleable.ColorDrawable_color)) {
-            final int color = a.getColor(R.styleable.ColorDrawable_color, 0);
-            state.mBaseColor = color;
-            state.mUseColor = color;
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        state.mBaseColor = a.getColor(R.styleable.ColorDrawable_color, state.mBaseColor);
+        state.mUseColor = state.mBaseColor;
+    }
+
+    @Override
+    public void applyTheme(Theme t) {
+        super.applyTheme(t);
+
+        final ColorState state = mColorState;
+        if (state == null || state.mThemeAttrs == null) {
+            return;
         }
+
+        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ColorDrawable);
+        updateStateFromTypedArray(a);
+        a.recycle();
     }
 
     @Override
     public ConstantState getConstantState() {
-        mColorState.mChangingConfigurations = getChangingConfigurations();
         return mColorState;
     }
 

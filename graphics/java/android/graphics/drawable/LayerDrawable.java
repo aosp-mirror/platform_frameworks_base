@@ -155,9 +155,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private void updateStateFromTypedArray(TypedArray a) {
         final LayerState state = mLayerState;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        state.mThemeAttrs = themeAttrs;
+        state.mThemeAttrs = a.extractThemeAttrs();
 
         mOpacityOverride = a.getInt(R.styleable.LayerDrawable_opacity, mOpacityOverride);
 
@@ -172,7 +174,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     private void inflateLayers(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        TypedArray a;
+        final LayerState state = mLayerState;
+
         final int innerDepth = parser.getDepth() + 1;
         int type;
         int depth;
@@ -186,28 +189,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
-            a = obtainAttributes(r, theme, attrs, R.styleable.LayerDrawableItem);
-
-            final int[] themeAttrs = a.extractThemeAttrs();
-            final int left = a.getDimensionPixelOffset(
-                    R.styleable.LayerDrawableItem_left, 0);
-            final int top = a.getDimensionPixelOffset(
-                    R.styleable.LayerDrawableItem_top, 0);
-            final int right = a.getDimensionPixelOffset(
-                    R.styleable.LayerDrawableItem_right, 0);
-            final int bottom = a.getDimensionPixelOffset(
-                    R.styleable.LayerDrawableItem_bottom, 0);
-            final int drawableRes = a.getResourceId(
-                    R.styleable.LayerDrawableItem_drawable, 0);
-            final int id = a.getResourceId(
-                    R.styleable.LayerDrawableItem_id, View.NO_ID);
-
+            final ChildDrawable layer = new ChildDrawable();
+            final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.LayerDrawableItem);
+            updateLayerFromTypedArray(layer, a);
             a.recycle();
 
-            final Drawable dr;
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes, theme);
-            } else {
+            if (layer.mDrawable == null) {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
                 if (type != XmlPullParser.START_TAG) {
@@ -215,10 +202,39 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                             + ": <item> tag requires a 'drawable' attribute or "
                             + "child tag defining a drawable");
                 }
-                dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
+                layer.mDrawable = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
-            addLayer(dr, themeAttrs, id, left, top, right, bottom);
+            if (layer.mDrawable != null) {
+                state.mChildrenChangingConfigurations |=
+                        layer.mDrawable.getChangingConfigurations();
+                layer.mDrawable.setCallback(this);
+            }
+        }
+    }
+
+    private void updateLayerFromTypedArray(ChildDrawable layer, TypedArray a) {
+        final LayerState state = mLayerState;
+
+        // Account for any configuration changes.
+        state.mChildrenChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        layer.mThemeAttrs = a.extractThemeAttrs();
+
+        layer.mInsetL = a.getDimensionPixelOffset(
+                R.styleable.LayerDrawableItem_left, layer.mInsetL);
+        layer.mInsetT = a.getDimensionPixelOffset(
+                R.styleable.LayerDrawableItem_top, layer.mInsetT);
+        layer.mInsetR = a.getDimensionPixelOffset(
+                R.styleable.LayerDrawableItem_right, layer.mInsetR);
+        layer.mInsetB = a.getDimensionPixelOffset(
+                R.styleable.LayerDrawableItem_bottom, layer.mInsetB);
+        layer.mId = a.getResourceId(R.styleable.LayerDrawableItem_id, layer.mId);
+
+        final Drawable dr = a.getDrawable(R.styleable.LayerDrawableItem_drawable);
+        if (dr != null) {
+            layer.mDrawable = dr;
         }
     }
 
@@ -231,19 +247,23 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             return;
         }
 
-        final int[] themeAttrs = state.mThemeAttrs;
-        if (themeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(themeAttrs, R.styleable.LayerDrawable);
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.LayerDrawable);
             updateStateFromTypedArray(a);
             a.recycle();
         }
-
-        // TODO: Update layer positions from cached typed arrays.
 
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
             final ChildDrawable layer = array[i];
+            if (layer.mThemeAttrs != null) {
+                final TypedArray a = t.resolveAttributes(layer.mThemeAttrs,
+                        R.styleable.LayerDrawableItem);
+                updateLayerFromTypedArray(layer, a);
+                a.recycle();
+            }
+
             final Drawable d = layer.mDrawable;
             if (d.canApplyTheme()) {
                 d.applyTheme(t);
@@ -297,19 +317,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return false;
     }
 
-    /**
-     * Add a new layer to this drawable. The new layer is identified by an id.
-     *
-     * @param layer The drawable to add as a layer.
-     * @param themeAttrs Theme attributes extracted from the layer.
-     * @param id The id of the new layer.
-     * @param left The left padding of the new layer.
-     * @param top The top padding of the new layer.
-     * @param right The right padding of the new layer.
-     * @param bottom The bottom padding of the new layer.
-     */
-    void addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
-            int bottom) {
+    void addLayer(ChildDrawable layer) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
         final int i = st.mNum;
@@ -322,10 +330,25 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             st.mChildren = nu;
         }
 
-        mLayerState.mChildrenChangingConfigurations |= layer.getChangingConfigurations();
+        st.mChildren[i] = layer;
+        st.mNum++;
+        st.invalidateCache();
+    }
 
+    /**
+     * Add a new layer to this drawable. The new layer is identified by an id.
+     *
+     * @param layer The drawable to add as a layer.
+     * @param themeAttrs Theme attributes extracted from the layer.
+     * @param id The id of the new layer.
+     * @param left The left padding of the new layer.
+     * @param top The top padding of the new layer.
+     * @param right The right padding of the new layer.
+     * @param bottom The bottom padding of the new layer.
+     */
+    ChildDrawable addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
+            int bottom) {
         final ChildDrawable childDrawable = new ChildDrawable();
-        st.mChildren[i] = childDrawable;
         childDrawable.mId = id;
         childDrawable.mThemeAttrs = themeAttrs;
         childDrawable.mDrawable = layer;
@@ -334,10 +357,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         childDrawable.mInsetT = top;
         childDrawable.mInsetR = right;
         childDrawable.mInsetB = bottom;
-        st.mNum++;
-        st.invalidateCache();
 
+        addLayer(childDrawable);
+
+        mLayerState.mChildrenChangingConfigurations |= layer.getChangingConfigurations();
         layer.setCallback(this);
+
+        return childDrawable;
     }
 
     /**
@@ -904,7 +930,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         public Drawable mDrawable;
         public int[] mThemeAttrs;
         public int mInsetL, mInsetT, mInsetR, mInsetB;
-        public int mId;
+        public int mId = View.NO_ID;
 
         ChildDrawable() {
             // Default empty constructor.

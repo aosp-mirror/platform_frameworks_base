@@ -358,6 +358,9 @@ public class RippleDrawable extends LayerDrawable {
     private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
         final RippleState state = mState;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
         state.mTouchThemeAttrs = a.extractThemeAttrs();
 

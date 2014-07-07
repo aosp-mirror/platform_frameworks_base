@@ -238,9 +238,9 @@ public abstract class Drawable {
      * may change, requiring that it be re-created.
      *
      * @param configs A mask of the changing configuration parameters, as
-     * defined by {@link android.content.res.Configuration}.
+     * defined by {@link android.content.pm.ActivityInfo}.
      *
-     * @see android.content.res.Configuration
+     * @see android.content.pm.ActivityInfo
      */
     public void setChangingConfigurations(int configs) {
         mChangingConfigurations = configs;
@@ -255,9 +255,9 @@ public abstract class Drawable {
      * drawables they hold.
      *
      * @return Returns a mask of the changing configuration parameters, as
-     * defined by {@link android.content.res.Configuration}.
+     * defined by {@link android.content.pm.ActivityInfo}.
      *
-     * @see android.content.res.Configuration
+     * @see android.content.pm.ActivityInfo
      */
     public int getChangingConfigurations() {
         return mChangingConfigurations;

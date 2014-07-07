@@ -382,9 +382,11 @@ public class NinePatchDrawable extends Drawable {
         final Resources r = a.getResources();
         final NinePatchState state = mNinePatchState;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        state.mThemeAttrs = themeAttrs;
+        state.mThemeAttrs = a.extractThemeAttrs();
 
         state.mDither = a.getBoolean(R.styleable.NinePatchDrawable_dither, state.mDither);
 

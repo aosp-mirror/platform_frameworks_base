@@ -1011,6 +1011,9 @@ public class GradientDrawable extends Drawable {
     private void updateStateFromTypedArray(TypedArray a) {
         final GradientState state = mGradientState;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 
@@ -1152,6 +1155,9 @@ public class GradientDrawable extends Drawable {
     private void updateGradientDrawablePadding(TypedArray a) {
         final GradientState st = mGradientState;
 
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
         st.mAttrPadding = a.extractThemeAttrs();
 
@@ -1169,6 +1175,9 @@ public class GradientDrawable extends Drawable {
 
     private void updateDrawableCorners(TypedArray a) {
         final GradientState st = mGradientState;
+
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
 
         // Extract the theme attributes, if any.
         st.mAttrCorners = a.extractThemeAttrs();
@@ -1201,6 +1210,10 @@ public class GradientDrawable extends Drawable {
     private void updateGradientDrawableStroke(TypedArray a) {
         final GradientState st = mGradientState;
 
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
         st.mAttrStroke = a.extractThemeAttrs();
 
         // We have an explicit stroke defined, so the default stroke width
@@ -1227,7 +1240,13 @@ public class GradientDrawable extends Drawable {
     }
 
     private void updateGradientDrawableSolid(TypedArray a) {
-        mGradientState.mAttrSolid = a.extractThemeAttrs();
+        final GradientState st = mGradientState;
+
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        st.mAttrSolid = a.extractThemeAttrs();
 
         final ColorStateList colorStateList = a.getColorStateList(
                 R.styleable.GradientDrawableSolid_color);
@@ -1239,6 +1258,9 @@ public class GradientDrawable extends Drawable {
     private void updateGradientDrawableGradient(Resources r, TypedArray a)
             throws XmlPullParserException {
         final GradientState st = mGradientState;
+
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
 
         // Extract the theme attributes, if any.
         st.mAttrGradient = a.extractThemeAttrs();
@@ -1350,6 +1372,9 @@ public class GradientDrawable extends Drawable {
 
     private void updateGradientDrawableSize(TypedArray a) {
         final GradientState st = mGradientState;
+
+        // Account for any configuration changes.
+        st.mChangingConfigurations |= a.getChangingConfigurations();
 
         // Extract the theme attributes, if any.
         st.mAttrSize = a.extractThemeAttrs();

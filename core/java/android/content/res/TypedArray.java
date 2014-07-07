@@ -927,6 +927,30 @@ public class TypedArray {
         return attrs;
     }
 
+    /**
+     * Return a mask of the configuration parameters for which the values in
+     * this typed array may change.
+     *
+     * @return Returns a mask of the changing configuration parameters, as
+     *         defined by {@link android.content.pm.ActivityInfo}.
+     * @see android.content.pm.ActivityInfo
+     */
+    public int getChangingConfigurations() {
+        int changingConfig = 0;
+
+        final int[] data = mData;
+        final int N = length();
+        for (int i = 0; i < N; i++) {
+            final int index = i * AssetManager.STYLE_NUM_ENTRIES;
+            final int type = data[index + AssetManager.STYLE_TYPE];
+            if (type == TypedValue.TYPE_NULL) {
+                continue;
+            }
+            changingConfig |= data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS];
+        }
+        return changingConfig;
+    }
+
     private boolean getValueAt(int index, TypedValue outValue) {
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];

@@ -8972,6 +8972,7 @@ package android.content.res {
 
   public class TypedArray {
     method public boolean getBoolean(int, boolean);
+    method public int getChangingConfigurations();
     method public int getColor(int, int);
     method public android.content.res.ColorStateList getColorStateList(int);
     method public float getDimension(int, float);

@@ -31,7 +31,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.ColorDrawable.ColorState;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -712,9 +711,11 @@ public class BitmapDrawable extends Drawable {
         final Resources r = a.getResources();
         final BitmapState state = mBitmapState;
 
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
         // Extract the theme attributes, if any.
-        final int[] themeAttrs = a.extractThemeAttrs();
-        state.mThemeAttrs = themeAttrs;
+        state.mThemeAttrs = a.extractThemeAttrs();
 
         final int srcResId = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
         if (srcResId != 0) {
