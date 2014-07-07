@@ -13025,7 +13025,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Called by UserManagerService */
     void cleanUpUserLILPw(int userHandle) {
         mDirtyUsers.remove(userHandle);
-        mSettings.removeUserLPr(userHandle);
+        mSettings.removeUserLPw(userHandle);
         mPendingBroadcasts.remove(userHandle);
         if (mInstaller != null) {
             // Technically, we shouldn't be doing this with the package lock

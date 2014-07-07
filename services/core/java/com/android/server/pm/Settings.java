@@ -3112,7 +3112,7 @@ final class Settings {
         writePackageRestrictionsLPr(userHandle);
     }
 
-    void removeUserLPr(int userId) {
+    void removeUserLPw(int userId) {
         Set<Entry<String, PackageSetting>> entries = mPackages.entrySet();
         for (Entry<String, PackageSetting> entry : entries) {
             entry.getValue().removeUser(userId);
@@ -3123,6 +3123,7 @@ final class Settings {
         file = getUserPackagesStateBackupFile(userId);
         file.delete();
         removeCrossProfileIntentFiltersToUserLPr(userId);
+        removeCrossProfilePackagesLPw(userId);
     }
 
     void removeCrossProfileIntentFiltersToUserLPr(int targetUserId) {
@@ -3140,6 +3141,27 @@ final class Settings {
             }
             if (needsWriting) {
                 writePackageRestrictionsLPr(sourceUserId);
+            }
+        }
+    }
+
+    public void removeCrossProfilePackagesLPw(int userId) {
+        synchronized(mCrossProfilePackageInfo) {
+            // userId is the source user
+            if (mCrossProfilePackageInfo.get(userId) != null) {
+                mCrossProfilePackageInfo.remove(userId);
+                writePackageRestrictionsLPr(userId);
+            }
+            // userId is the target user
+            int count = mCrossProfilePackageInfo.size();
+            for (int i = 0; i < count; i++) {
+                int sourceUserId = mCrossProfilePackageInfo.keyAt(i);
+                SparseArray<ArrayList<String>> sourceForwardingInfo =
+                        mCrossProfilePackageInfo.valueAt(i);
+                if (sourceForwardingInfo.get(userId) != null) {
+                    sourceForwardingInfo.remove(userId);
+                    writePackageRestrictionsLPr(sourceUserId);
+                }
             }
         }
     }
