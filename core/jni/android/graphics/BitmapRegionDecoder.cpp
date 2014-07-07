@@ -60,7 +60,7 @@ public:
     }
 
     bool decodeRegion(SkBitmap* bitmap, const SkIRect& rect,
-                      SkBitmap::Config pref, int sampleSize) {
+                      SkColorType pref, int sampleSize) {
         fDecoder->setSampleSize(sampleSize);
         return fDecoder->decodeSubset(bitmap, rect, pref);
     }
@@ -175,7 +175,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     jobject tileBitmap = NULL;
     SkImageDecoder *decoder = brd->getDecoder();
     int sampleSize = 1;
-    SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
+    SkColorType prefColorType = kUnknown_SkColorType;
     bool doDither = true;
     bool preferQualityOverSpeed = false;
     bool requireUnpremultiplied = false;
@@ -188,7 +188,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
 
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
-        prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
+        prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
@@ -226,7 +226,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
         adb.reset(bitmap);
     }
 
-    if (!brd->decodeRegion(bitmap, region, prefConfig, sampleSize)) {
+    if (!brd->decodeRegion(bitmap, region, prefColorType, sampleSize)) {
         return nullObjectReturn("decoder->decodeRegion returned false");
     }
 

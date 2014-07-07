@@ -301,18 +301,17 @@ SkBitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
     return b;
 }
 
-SkBitmap::Config GraphicsJNI::getNativeBitmapConfig(JNIEnv* env,
-                                                    jobject jconfig) {
+SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
     SkASSERT(env);
     if (NULL == jconfig) {
-        return SkBitmap::kNo_Config;
+        return kUnknown_SkColorType;
     }
     SkASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
     int c = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
     if (c < 0 || c >= SkBitmap::kConfigCount) {
-        c = SkBitmap::kNo_Config;
+        c = kUnknown_SkColorType;
     }
-    return static_cast<SkBitmap::Config>(c);
+    return SkBitmapConfigToColorType(static_cast<SkBitmap::Config>(c));
 }
 
 SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {

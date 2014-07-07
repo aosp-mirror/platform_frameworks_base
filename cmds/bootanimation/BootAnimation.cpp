@@ -108,7 +108,7 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
         return NO_INIT;
     SkBitmap bitmap;
     SkImageDecoder::DecodeMemory(asset->getBuffer(false), asset->getLength(),
-            &bitmap, SkBitmap::kNo_Config, SkImageDecoder::kDecodePixels_Mode);
+            &bitmap, kUnknown_SkColorType, SkImageDecoder::kDecodePixels_Mode);
     asset->close();
     delete asset;
 
@@ -127,20 +127,20 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     glGenTextures(1, &texture->name);
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
-    switch (bitmap.config()) {
-        case SkBitmap::kA8_Config:
+    switch (bitmap.colorType()) {
+        case kAlpha_8_SkColorType:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, w, h, 0, GL_ALPHA,
                     GL_UNSIGNED_BYTE, p);
             break;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
                     GL_UNSIGNED_SHORT_4_4_4_4, p);
             break;
-        case SkBitmap::kARGB_8888_Config:
+        case kN32_SkColorType:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
                     GL_UNSIGNED_BYTE, p);
             break;
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
                     GL_UNSIGNED_SHORT_5_6_5, p);
             break;
@@ -166,7 +166,7 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
     if (codec) {
         codec->setDitherImage(false);
         codec->decode(&stream, &bitmap,
-                SkBitmap::kARGB_8888_Config,
+                kN32_SkColorType,
                 SkImageDecoder::kDecodePixels_Mode);
         delete codec;
     }
@@ -190,8 +190,8 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
     if (tw < w) tw <<= 1;
     if (th < h) th <<= 1;
 
-    switch (bitmap.config()) {
-        case SkBitmap::kARGB_8888_Config:
+    switch (bitmap.colorType()) {
+        case kN32_SkColorType:
             if (tw != w || th != h) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, 0);
@@ -203,7 +203,7 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
             }
             break;
 
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             if (tw != w || th != h) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
                         GL_UNSIGNED_SHORT_5_6_5, 0);
