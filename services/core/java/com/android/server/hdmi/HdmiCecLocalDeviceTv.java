@@ -16,12 +16,14 @@
 
 package com.android.server.hdmi;
 
+import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioSystem;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -1052,5 +1054,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     boolean isPowerStandbyOrTransient() {
         return mService.isPowerStandbyOrTransient();
+
+    void displayOsd(int messageId) {
+        Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
+        intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
+        mService.getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                HdmiControlService.PERMISSION);
     }
 }
