@@ -190,7 +190,7 @@ public class ColorDrawable extends Drawable {
 
     @Override
     public boolean isStateful() {
-        return mTint != null && mTint.isStateful();
+        return mColorState.mTint != null && mColorState.mTint.isStateful();
     }
 
     @Override
