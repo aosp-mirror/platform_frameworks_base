@@ -34,6 +34,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     TextView mText;
     Button mStartButton;
     Button mConfirmButton;
+    Button mCompleteButton;
     Button mAbortButton;
 
     static final int STATE_IDLE = 0;
@@ -41,6 +42,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     static final int STATE_CONFIRM = 2;
     static final int STATE_COMMAND = 3;
     static final int STATE_ABORT_VOICE = 4;
+    static final int STATE_COMPLETE_VOICE = 5;
 
     int mState = STATE_IDLE;
     Request mPendingRequest;
@@ -64,6 +66,8 @@ public class MainInteractionSession extends VoiceInteractionSession
         mStartButton.setOnClickListener(this);
         mConfirmButton = (Button)mContentView.findViewById(R.id.confirm);
         mConfirmButton.setOnClickListener(this);
+        mCompleteButton = (Button)mContentView.findViewById(R.id.complete);
+        mCompleteButton.setOnClickListener(this);
         mAbortButton = (Button)mContentView.findViewById(R.id.abort);
         mAbortButton.setOnClickListener(this);
         updateState();
@@ -74,6 +78,7 @@ public class MainInteractionSession extends VoiceInteractionSession
         mStartButton.setEnabled(mState == STATE_IDLE);
         mConfirmButton.setEnabled(mState == STATE_CONFIRM || mState == STATE_COMMAND);
         mAbortButton.setEnabled(mState == STATE_ABORT_VOICE);
+        mCompleteButton.setEnabled(mState == STATE_COMPLETE_VOICE);
     }
 
     public void onClick(View v) {
@@ -95,6 +100,11 @@ public class MainInteractionSession extends VoiceInteractionSession
             mPendingRequest = null;
             mState = STATE_IDLE;
             updateState();
+        } else if (v== mCompleteButton) {
+            mPendingRequest.sendCompleteVoiceResult(null);
+            mPendingRequest = null;
+            mState = STATE_IDLE;
+            updateState();
         }
     }
 
@@ -110,6 +120,15 @@ public class MainInteractionSession extends VoiceInteractionSession
         mStartButton.setText("Confirm");
         mPendingRequest = request;
         mState = STATE_CONFIRM;
+        updateState();
+    }
+
+    @Override
+    public void onCompleteVoice(Caller caller, Request request, CharSequence message, Bundle extras) {
+        Log.i(TAG, "onCompleteVoice: message=" + message + " extras=" + extras);
+        mText.setText(message);
+        mPendingRequest = request;
+        mState = STATE_COMPLETE_VOICE;
         updateState();
     }
 

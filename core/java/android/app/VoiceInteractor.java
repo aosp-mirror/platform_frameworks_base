@@ -81,6 +81,16 @@ public class VoiceInteractor {
                         request.clear();
                     }
                     break;
+                case MSG_COMPLETE_VOICE_RESULT:
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
+                    if (DEBUG) Log.d(TAG, "onCompleteVoice: req="
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
+                            + " result=" + args.arg1);
+                    if (request != null) {
+                        ((CompleteVoiceRequest)request).onCompleteResult((Bundle) args.arg2);
+                        request.clear();
+                    }
+                    break;
                 case MSG_ABORT_VOICE_RESULT:
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onAbortVoice: req="
@@ -125,6 +135,12 @@ public class VoiceInteractor {
         }
 
         @Override
+        public void deliverCompleteVoiceResult(IVoiceInteractorRequest request, Bundle result) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(
+                    MSG_COMPLETE_VOICE_RESULT, request, result));
+        }
+
+        @Override
         public void deliverAbortVoiceResult(IVoiceInteractorRequest request, Bundle result) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(
                     MSG_ABORT_VOICE_RESULT, request, result));
@@ -147,9 +163,10 @@ public class VoiceInteractor {
     final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
-    static final int MSG_ABORT_VOICE_RESULT = 2;
-    static final int MSG_COMMAND_RESULT = 3;
-    static final int MSG_CANCEL_RESULT = 4;
+    static final int MSG_COMPLETE_VOICE_RESULT = 2;
+    static final int MSG_ABORT_VOICE_RESULT = 3;
+    static final int MSG_COMMAND_RESULT = 4;
+    static final int MSG_CANCEL_RESULT = 5;
 
     public static abstract class Request {
         IVoiceInteractorRequest mRequestInterface;
@@ -225,6 +242,36 @@ public class VoiceInteractor {
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
                 IVoiceInteractorCallback callback) throws RemoteException {
             return interactor.startConfirmation(packageName, callback, mPrompt, mExtras);
+        }
+    }
+
+    public static class CompleteVoiceRequest extends Request {
+        final CharSequence mMessage;
+        final Bundle mExtras;
+
+        /**
+         * Reports that the current interaction was successfully completed with voice, so the
+         * application can report the final status to the user. When the response comes back, the
+         * voice system has handled the request and is ready to switch; at that point the
+         * application can start a new non-voice activity or finish.  Be sure when starting the new
+         * activity to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+         * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
+         * interaction task.
+         *
+         * @param message Optional message to tell user about the completion status of the task.
+         * @param extras Additional optional information.
+         */
+        public CompleteVoiceRequest(CharSequence message, Bundle extras) {
+            mMessage = message;
+            mExtras = extras;
+        }
+
+        public void onCompleteResult(Bundle result) {
+        }
+
+        IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
+                IVoiceInteractorCallback callback) throws RemoteException {
+            return interactor.startCompleteVoice(packageName, callback, mMessage, mExtras);
         }
     }
 
