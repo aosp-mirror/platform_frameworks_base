@@ -3892,6 +3892,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void finishVoiceTask(IVoiceInteractionSession session) {
+        synchronized(this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mStackSupervisor.finishVoiceTask(session);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+    }
+
+    @Override
     public boolean willActivityBeVisible(IBinder token) {
         synchronized(this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
