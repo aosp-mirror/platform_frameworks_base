@@ -16,6 +16,8 @@
 package android.hardware.hdmi;
 
 import android.annotation.SystemApi;
+import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
+import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -27,7 +29,7 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
-public final class HdmiTvClient {
+public final class HdmiTvClient extends HdmiClient {
     private static final String TAG = "HdmiTvClient";
 
     // Definitions used for setOption(). These should be in sync with the definition
@@ -79,16 +81,18 @@ public final class HdmiTvClient {
     public static final int DISABLED = 0;
     public static final int ENABLED = 1;
 
-    private final IHdmiControlService mService;
-
     HdmiTvClient(IHdmiControlService service) {
-        mService = service;
+        super(service);
     }
 
     // Factory method for HdmiTvClient.
     // Declared package-private. Accessed by HdmiControlManager only.
     static HdmiTvClient create(IHdmiControlService service) {
         return new HdmiTvClient(service);
+    }
+
+    public int getDeviceType() {
+        return HdmiCecDeviceInfo.DEVICE_TV;
     }
 
     /**

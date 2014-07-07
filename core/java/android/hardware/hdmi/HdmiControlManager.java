@@ -130,6 +130,21 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Listener used to get vendor-specific commands.
+     */
+    public interface VendorCommandListener {
+        /**
+         * Called when a vendor command is received.
+         *
+         * @param srcAddress source logical address
+         * @param params vendor-specific parameters
+         * @param hasVendorId {@code true} if the command is &lt;Vendor Command
+         *        With ID&gt;. The first 3 bytes of params is vendor id.
+         */
+        void onReceived(int srcAddress, byte[] params, boolean hasVendorId);
+    }
+
+    /**
      * Adds a listener to get informed of {@link HdmiHotplugEvent}.
      *
      * <p>To stop getting the notification,

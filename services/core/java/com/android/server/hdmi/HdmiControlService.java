@@ -32,6 +32,7 @@ import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
+import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
@@ -138,6 +139,11 @@ public final class HdmiControlService extends SystemService {
     // List of records for device event listener to handle the the caller killed in action.
     @GuardedBy("mLock")
     private final ArrayList<DeviceEventListenerRecord> mDeviceEventListenerRecords =
+            new ArrayList<>();
+
+    // List of records for vendor command listener to handle the the caller killed in action.
+    @GuardedBy("mLock")
+    private final ArrayList<VendorCommandListenerRecord> mVendorCommandListenerRecords =
             new ArrayList<>();
 
     @GuardedBy("mLock")
@@ -608,6 +614,23 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    class VendorCommandListenerRecord implements IBinder.DeathRecipient {
+        private final IHdmiVendorCommandListener mListener;
+        private final int mDeviceType;
+
+        public VendorCommandListenerRecord(IHdmiVendorCommandListener listener, int deviceType) {
+            mListener = listener;
+            mDeviceType = deviceType;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mVendorCommandListenerRecords.remove(this);
+            }
+        }
+    }
+
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -917,6 +940,42 @@ public final class HdmiControlService extends SystemService {
             }
             HdmiControlService.this.setProhibitMode(enabled);
         }
+
+        @Override
+        public void addVendorCommandListener(final IHdmiVendorCommandListener listener,
+                final int deviceType) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.addVendorCommandListener(listener, deviceType);
+                }
+            });
+        }
+
+        @Override
+        public void sendVendorCommand(final int deviceType, final int targetAddress,
+                final byte[] params, final boolean hasVendorId) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
+                    if (device == null) {
+                        Slog.w(TAG, "Local device not available");
+                        return;
+                    }
+                    if (hasVendorId) {
+                        sendCecCommand(HdmiCecMessageBuilder.buildVendorCommandWithId(
+                                device.getDeviceInfo().getLogicalAddress(), targetAddress,
+                                getVendorId(), params));
+                    } else {
+                        sendCecCommand(HdmiCecMessageBuilder.buildVendorCommand(
+                                device.getDeviceInfo().getLogicalAddress(), targetAddress, params));
+                    }
+                }
+            });
+         }
     }
 
     @ServiceThreadOnly
@@ -1195,6 +1254,35 @@ public final class HdmiControlService extends SystemService {
         }
         mStandbyMessageReceived = false;
         mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL, HdmiTvClient.DISABLED);
+    }
+
+    private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
+        VendorCommandListenerRecord record = new VendorCommandListenerRecord(listener, deviceType);
+        try {
+            listener.asBinder().linkToDeath(record, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Listener already died");
+            return;
+        }
+        synchronized (mLock) {
+            mVendorCommandListenerRecords.add(record);
+        }
+    }
+
+    void invokeVendorCommandListeners(int deviceType, int srcAddress, byte[] params,
+            boolean hasVendorId) {
+        synchronized (mLock) {
+            for (VendorCommandListenerRecord record : mVendorCommandListenerRecords) {
+                if (record.mDeviceType != deviceType) {
+                    continue;
+                }
+                try {
+                    record.mListener.onReceived(srcAddress, params, hasVendorId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to notify vendor command reception", e);
+                }
+            }
+        }
     }
 
     boolean isProhibitMode() {

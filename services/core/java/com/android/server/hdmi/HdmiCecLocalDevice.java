@@ -156,6 +156,10 @@ abstract class HdmiCecLocalDevice {
                 return handleSetStreamPath(message);
             case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return handleGiveDevicePowerStatus(message);
+            case Constants.MESSAGE_VENDOR_COMMAND:
+                return handleVendorCommand(message);
+            case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
+                return handleVendorCommandWithId(message);
             default:
                 return false;
         }
@@ -244,10 +248,6 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
-    protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
-        return false;
-    }
-
     protected boolean handleRoutingChange(HdmiCecMessage message) {
         return false;
     }
@@ -334,6 +334,29 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleGiveDevicePowerStatus(HdmiCecMessage message) {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPowerStatus(
                 mAddress, message.getSource(), mService.getPowerStatus()));
+        return true;
+    }
+
+    protected boolean handleVendorCommand(HdmiCecMessage message) {
+        mService.invokeVendorCommandListeners(mDeviceType, message.getSource(),
+                message.getParams(), false);
+        return true;
+    }
+
+    protected boolean handleVendorCommandWithId(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        int vendorId = HdmiUtils.threeBytesToInt(params);
+        if (vendorId == mService.getVendorId()) {
+            mService.invokeVendorCommandListeners(mDeviceType, message.getSource(), params, true);
+        } else if (message.getDestination() != Constants.ADDR_BROADCAST &&
+                message.getSource() != Constants.ADDR_UNREGISTERED) {
+            Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(mAddress,
+                    message.getSource(), Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
+                    Constants.ABORT_UNRECOGNIZED_MODE));
+        } else {
+            Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
+        }
         return true;
     }
 

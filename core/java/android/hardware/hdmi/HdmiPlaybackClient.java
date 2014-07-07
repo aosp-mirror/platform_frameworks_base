@@ -18,7 +18,6 @@ package android.hardware.hdmi;
 
 import android.annotation.SystemApi;
 import android.os.RemoteException;
-
 import android.util.Log;
 
 /**
@@ -30,10 +29,8 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
-public final class HdmiPlaybackClient {
+public final class HdmiPlaybackClient extends HdmiClient {
     private static final String TAG = "HdmiPlaybackClient";
-
-    private final IHdmiControlService mService;
 
     /**
      * Listener used by the client to get the result of one touch play operation.
@@ -66,7 +63,7 @@ public final class HdmiPlaybackClient {
     }
 
     HdmiPlaybackClient(IHdmiControlService service) {
-        mService = service;
+        super(service);
     }
 
     /**
@@ -83,6 +80,10 @@ public final class HdmiPlaybackClient {
         } catch (RemoteException e) {
             Log.e(TAG, "oneTouchPlay threw exception ", e);
         }
+    }
+
+    public int getDeviceType() {
+        return HdmiCecDeviceInfo.DEVICE_PLAYBACK;
     }
 
     /**

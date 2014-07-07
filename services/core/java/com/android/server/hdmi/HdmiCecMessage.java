@@ -172,6 +172,10 @@ public final class HdmiCecMessage implements Parcelable {
                 return "Active Source";
             case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return "Give Device Power Status";
+            case Constants.MESSAGE_VENDOR_COMMAND:
+                return "Vendor Command";
+            case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
+                return "Vendor Command With ID";
             default:
                 return String.format("Opcode: %02X", opcode);
         }

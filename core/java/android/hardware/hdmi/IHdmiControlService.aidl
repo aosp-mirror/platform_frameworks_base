@@ -23,6 +23,7 @@ import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
+import android.hardware.hdmi.IHdmiVendorCommandListener;
 
 import java.util.List;
 
@@ -57,4 +58,7 @@ interface IHdmiControlService {
     oneway void setSystemAudioMute(boolean mute);
     void setInputChangeListener(IHdmiInputChangeListener listener);
     List<HdmiCecDeviceInfo> getInputDevices();
+    void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
+            boolean hasVendorId);
+    void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
 }

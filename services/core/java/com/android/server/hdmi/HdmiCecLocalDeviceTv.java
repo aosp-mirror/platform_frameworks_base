@@ -404,33 +404,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleVendorSpecificCommand(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        List<VendorSpecificAction> actions = Collections.emptyList();
-        // TODO: Call mService.getActions(VendorSpecificAction.class) to get all the actions.
-
-        // We assume that there can be multiple vendor-specific command actions running
-        // at the same time. Pass the message to each action to see if one of them needs it.
-        for (VendorSpecificAction action : actions) {
-            if (action.processCommand(message)) {
-                return true;
-            }
-        }
-        // Handle the message here if it is not already consumed by one of the running actions.
-        // Respond with a appropriate vendor-specific command or <Feature Abort>, or create another
-        // vendor-specific action:
-        //
-        // mService.addAndStartAction(new VendorSpecificAction(mService, mAddress));
-        //
-        // For now, simply reply with <Feature Abort> and mark it consumed by returning true.
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                message.getDestination(), message.getSource(), message.getOpcode(),
-                Constants.ABORT_REFUSED));
-        return true;
-    }
-
-    @Override
-    @ServiceThreadOnly
     protected boolean handleReportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 

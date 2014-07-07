@@ -424,6 +424,37 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, Constants.MESSAGE_STANDBY);
     }
 
+    /**
+     * Build &lt;Vendor Command&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param params vendor-specific parameters
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildVendorCommand(int src, int dest, byte[] params) {
+        return buildCommand(src, dest, Constants.MESSAGE_VENDOR_COMMAND, params);
+    }
+
+    /**
+     * Build &lt;Vendor Command With ID&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param vendorId vendor ID
+     * @param operands vendor-specific parameters
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildVendorCommandWithId(int src, int dest, int vendorId,
+            byte[] operands) {
+        byte[] params = new byte[operands.length + 3];  // parameter plus len(vendorId)
+        params[0] = (byte) ((vendorId >> 16) & 0xFF);
+        params[1] = (byte) ((vendorId >> 8) & 0xFF);
+        params[2] = (byte) (vendorId & 0xFF);
+        System.arraycopy(operands, 0, params, 3, operands.length);
+        return buildCommand(src, dest, Constants.MESSAGE_VENDOR_COMMAND_WITH_ID, params);
+    }
+
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**
