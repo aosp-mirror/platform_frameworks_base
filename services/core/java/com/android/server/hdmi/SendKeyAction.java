@@ -91,7 +91,7 @@ final class SendKeyAction extends FeatureAction {
         if (isPressed) {
             if (keycode != mLastKeycode) {
                 if (!HdmiCecKeycode.isRepeatableKey(keycode)) {
-                    sendKeyUp();
+                    sendKeyDown(keycode);
                     finish();
                     return;
                 }
