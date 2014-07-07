@@ -26,7 +26,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -34,8 +33,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
+import android.phone.PhoneManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -1323,19 +1322,11 @@ public class LockPatternUtils {
      * to indicate what action will be taken.
      *
      * If there's currently a call in progress, the button will take them to the call
-     * @param button the button to update
-     * @param the phone state:
-     *  {@link TelephonyManager#CALL_STATE_IDLE}
-     *  {@link TelephonyManager#CALL_STATE_RINGING}
-     *  {@link TelephonyManager#CALL_STATE_OFFHOOK}
-     * @param shown indicates whether the given screen wants the emergency button to show at all
-     * @param button
-     * @param phoneState
-     * @param shown shown if true; hidden if false
-     * @param upperCase if true, converts button label string to upper case
+     * @param button The button to update
+     * @param shown Indicates whether the given screen wants the emergency button to show at all
+     * @param showIcon Indicates whether to show a phone icon for the button.
      */
-    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown,
-            boolean showIcon) {
+    public void updateEmergencyCallButtonState(Button button, boolean shown, boolean showIcon) {
         if (isEmergencyCallCapable() && shown) {
             button.setVisibility(View.VISIBLE);
         } else {
@@ -1344,7 +1335,7 @@ public class LockPatternUtils {
         }
 
         int textId;
-        if (phoneState == TelephonyManager.CALL_STATE_OFFHOOK) {
+        if (getPhoneManager().isInAPhoneCall()) {
             // show "return to call" text and show phone icon
             textId = R.string.lockscreen_return_to_call;
             int phoneCallIcon = showIcon ? R.drawable.stat_sys_phone_call : 0;
@@ -1362,9 +1353,11 @@ public class LockPatternUtils {
      * on various lockscreens.
      */
     public void resumeCall() {
-        TelephonyManager telephonyManager =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.showCallScreen();
+        getPhoneManager().showCallScreen(false);
+    }
+
+    private PhoneManager getPhoneManager() {
+        return (PhoneManager) mContext.getSystemService(Context.PHONE_SERVICE);
     }
 
     private void finishBiometricWeak() {

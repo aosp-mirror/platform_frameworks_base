@@ -85,4 +85,9 @@ interface ITelecommService {
      * @see PhoneManager#cancelMissedCallsNotification
      */
     void cancelMissedCallsNotification();
+
+    /**
+     * @see PhoneManager#handlePinMmi
+     */
+    boolean handlePinMmi(String dialString);
 }

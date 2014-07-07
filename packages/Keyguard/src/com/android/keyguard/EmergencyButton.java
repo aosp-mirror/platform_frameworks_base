@@ -128,7 +128,7 @@ public class EmergencyButton extends Button {
                 enabled = mLockPatternUtils.isSecure();
             }
         }
-        mLockPatternUtils.updateEmergencyCallButtonState(this, phoneState, enabled, false);
+        mLockPatternUtils.updateEmergencyCallButtonState(this, enabled, false);
     }
 
 }

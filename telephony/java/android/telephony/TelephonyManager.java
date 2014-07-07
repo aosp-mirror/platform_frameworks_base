@@ -2890,30 +2890,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public boolean showCallScreen() {
-        try {
-            getTelecommService().showCallScreen(false);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#showCallScreen", e);
-        }
-        return false;
-    }
-
-    /** @hide */
-    @SystemApi
-    public boolean showCallScreenWithDialpad(boolean showDialpad) {
-        try {
-            getTelecommService().showCallScreen(showDialpad);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#showCallScreen(" + showDialpad + ")", e);
-        }
-        return false;
-    }
-
-    /** @hide */
-    @SystemApi
     public boolean endCall() {
         try {
             return getITelephony().endCall();
