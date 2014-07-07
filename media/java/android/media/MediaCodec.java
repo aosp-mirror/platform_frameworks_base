@@ -166,9 +166,19 @@ import java.util.Map;
 final public class MediaCodec {
     /**
      * Per buffer metadata includes an offset and size specifying
-     * the range of valid data in the associated codec buffer.
+     * the range of valid data in the associated codec (output) buffer.
      */
     public final static class BufferInfo {
+        /**
+         * Update the buffer metadata information.
+         *
+         * @param newOffset the start-offset of the data in the buffer.
+         * @param newSize   the amount of data (in bytes) in the buffer.
+         * @param newTimeUs the presentation timestamp in microseconds.
+         * @param newFlags  buffer flags associated with the buffer.  This
+         * should be a combination of  {@link #BUFFER_FLAG_KEY_FRAME} and
+         * {@link #BUFFER_FLAG_END_OF_STREAM}.
+         */
         public void set(
                 int newOffset, int newSize, long newTimeUs, int newFlags) {
             offset = newOffset;
@@ -177,9 +187,39 @@ final public class MediaCodec {
             flags = newFlags;
         }
 
+        /**
+         * The start-offset of the data in the buffer.
+         */
         public int offset;
+
+        /**
+         * The amount of data (in bytes) in the buffer.  If this is {@code 0},
+         * the buffer has no data in it and can be discarded.  The only
+         * use of a 0-size buffer is to carry the end-of-stream marker.
+         */
         public int size;
+
+        /**
+         * The presentation timestamp in microseconds for the buffer.
+         * This is derived from the presentation timestamp passed in
+         * with the corresponding input buffer.  This should be ignored for
+         * a 0-sized buffer.
+         */
         public long presentationTimeUs;
+
+        /**
+         * Buffer flags associated with the buffer.  A combination of
+         * {@link #BUFFER_FLAG_KEY_FRAME} and {@link #BUFFER_FLAG_END_OF_STREAM}.
+         *
+         * <p>Encoded buffers that are key frames are marked with
+         * {@link #BUFFER_FLAG_KEY_FRAME}.
+         *
+         * <p>The last output buffer corresponding to the input buffer
+         * marked with {@link #BUFFER_FLAG_END_OF_STREAM} will also be marked
+         * with {@link #BUFFER_FLAG_END_OF_STREAM}. In some cases this could
+         * be an empty buffer, whose sole purpose is to carry the end-of-stream
+         * marker.
+         */
         public int flags;
     };
 
@@ -187,10 +227,18 @@ final public class MediaCodec {
     // in MediaCodec.h !
 
     /**
-     * This indicates that the buffer marked as such contains the data
-     * for a sync frame.
+     * This indicates that the (encoded) buffer marked as such contains
+     * the data for a key frame.
+     *
+     * @deprecated Use {@link #BUFFER_FLAG_KEY_FRAME} instead.
      */
-    public static final int BUFFER_FLAG_SYNC_FRAME   = 1;
+    public static final int BUFFER_FLAG_SYNC_FRAME = 1;
+
+    /**
+     * This indicates that the (encoded) buffer marked as such contains
+     * the data for a key frame.
+     */
+    public static final int BUFFER_FLAG_KEY_FRAME = 1;
 
     /**
      * This indicated that the buffer marked as such contains codec
@@ -202,7 +250,7 @@ final public class MediaCodec {
      * This signals the end of stream, i.e. no buffers will be available
      * after this, unless of course, {@link #flush} follows.
      */
-    public static final int BUFFER_FLAG_END_OF_STREAM         = 4;
+    public static final int BUFFER_FLAG_END_OF_STREAM = 4;
 
     private EventHandler mEventHandler;
     private Callback mCallback;
@@ -574,9 +622,13 @@ final public class MediaCodec {
      *              in a call to {@link #dequeueInputBuffer}.
      * @param offset The byte offset into the input buffer at which the data starts.
      * @param size The number of bytes of valid input data.
-     * @param presentationTimeUs The time at which this buffer should be rendered.
-     * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
-     *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @param presentationTimeUs The presentation timestamp in microseconds for this
+     *                           buffer. This is normally the media time at which this
+     *                           buffer should be presented (rendered).
+     * @param flags A bitmask of flags
+     *              {@link #BUFFER_FLAG_CODEC_CONFIG} and {@link #BUFFER_FLAG_END_OF_STREAM}.
+     *              While not prohibited, most codecs do not use the
+     *              {@link #BUFFER_FLAG_KEY_FRAME} flag for input buffers.
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      * @throws CryptoException if a crypto object has been specified in
@@ -675,9 +727,13 @@ final public class MediaCodec {
      * @param offset The byte offset into the input buffer at which the data starts.
      * @param info Metadata required to facilitate decryption, the object can be
      *             reused immediately after this call returns.
-     * @param presentationTimeUs The time at which this buffer should be rendered.
-     * @param flags A bitmask of flags {@link #BUFFER_FLAG_SYNC_FRAME},
-     *              {@link #BUFFER_FLAG_CODEC_CONFIG} or {@link #BUFFER_FLAG_END_OF_STREAM}.
+     * @param presentationTimeUs The presentation timestamp in microseconds for this
+     *                           buffer. This is normally the media time at which this
+     *                           buffer should be presented (rendered).
+     * @param flags A bitmask of flags
+     *              {@link #BUFFER_FLAG_CODEC_CONFIG} and {@link #BUFFER_FLAG_END_OF_STREAM}.
+     *              While not prohibited, most codecs do not use the
+     *              {@link #BUFFER_FLAG_KEY_FRAME} flag for input buffers.
      * @throws IllegalStateException if not in the Executing state.
      * @throws MediaCodec.CodecException upon codec error.
      * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
