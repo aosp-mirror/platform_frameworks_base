@@ -3661,15 +3661,27 @@ package android.app {
     method public void update(android.app.ActivityOptions);
   }
 
+  public class AlarmClockInfo implements android.os.Parcelable {
+    ctor public AlarmClockInfo(long, android.app.PendingIntent);
+    method public int describeContents();
+    method public android.app.PendingIntent getShowIntent();
+    method public long getTriggerTime();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public class AlarmManager {
     method public void cancel(android.app.PendingIntent);
+    method public android.app.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
+    method public void setAlarmClock(android.app.AlarmClockInfo, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
     method public void setTimeZone(java.lang.String);
     method public void setWindow(int, long, long, android.app.PendingIntent);
+    field public static final java.lang.String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
     field public static final long INTERVAL_DAY = 86400000L; // 0x5265c00L
@@ -24745,7 +24757,7 @@ package android.provider {
     field public static final java.lang.String MODE_RINGER_STREAMS_AFFECTED = "mode_ringer_streams_affected";
     field public static final java.lang.String MUTE_STREAMS_AFFECTED = "mute_streams_affected";
     field public static final deprecated java.lang.String NETWORK_PREFERENCE = "network_preference";
-    field public static final java.lang.String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
+    field public static final deprecated java.lang.String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
     field public static final java.lang.String NOTIFICATION_SOUND = "notification_sound";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";

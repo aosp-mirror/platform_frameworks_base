@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.AlarmManager;
 import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.Log;
 
@@ -71,8 +73,8 @@ public class PhoneStatusBarPolicy {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_ALARM_CHANGED)) {
-                updateAlarm(intent);
+            if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
+                updateAlarm();
             }
             else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
                 updateSyncState(intent);
@@ -90,6 +92,9 @@ public class PhoneStatusBarPolicy {
             else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
                 updateTTY(intent);
             }
+            else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                updateAlarm();
+            }
         }
     };
 
@@ -99,13 +104,14 @@ public class PhoneStatusBarPolicy {
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_ALARM_CHANGED);
+        filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // TTY status
@@ -152,8 +158,9 @@ public class PhoneStatusBarPolicy {
         updateVolumeZen();
     }
 
-    private final void updateAlarm(Intent intent) {
-        boolean alarmSet = intent.getBooleanExtra("alarmSet", false);
+    private void updateAlarm() {
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+	boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
         mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet);
     }
 

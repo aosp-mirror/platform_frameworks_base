@@ -47,6 +47,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
+import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
@@ -879,7 +880,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectLastCall().anyTimes();
 
         mAlarmManager.set(eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(),
-                isA(PendingIntent.class), isA(WorkSource.class));
+                isA(PendingIntent.class), isA(WorkSource.class), isA(AlarmClockInfo.class));
         expectLastCall().atLeastOnce();
 
         mNetManager.setGlobalAlert(anyLong());

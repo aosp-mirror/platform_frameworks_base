@@ -1832,7 +1832,10 @@ public final class Settings {
         /**
          * A formatted string of the next alarm that is set, or the empty string
          * if there is no alarm set.
+         *
+         * @deprecated Use {@link android.app.AlarmManager#getNextAlarmClock()}.
          */
+        @Deprecated
         public static final String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
 
         /**
