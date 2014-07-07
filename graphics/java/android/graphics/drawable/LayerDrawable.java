@@ -566,13 +566,24 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Builds an Outline from the first child Drawable, if present.
+     * Populates <code>outline</code> with the first available layer outline.
+     * Returns <code>true</code> if an outline is available, <code>false</code>
+     * otherwise.
+     *
+     * @param outline Outline in which to place the first available layer outline
+     * @return <code>true</code> if an outline is available
      */
     @Override
     public boolean getOutline(@NonNull Outline outline) {
-        if (mLayerState.mNum < 1) return false;
-        final Drawable firstChild = mLayerState.mChildren[0].mDrawable;
-        return firstChild.getOutline(outline);
+        final LayerState state = mLayerState;
+        final ChildDrawable[] children = state.mChildren;
+        final int N = state.mNum;
+        for (int i = 0; i < N; i++) {
+            if (children[i].mDrawable.getOutline(outline)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
