@@ -3326,8 +3326,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mLastY == Integer.MIN_VALUE) {
             rawDeltaY -= mMotionCorrection;
         }
-        if (dispatchNestedPreScroll(0, rawDeltaY, mScrollConsumed, mScrollOffset)) {
-            rawDeltaY -= mScrollConsumed[1];
+        if (dispatchNestedPreScroll(0, -rawDeltaY, mScrollConsumed, mScrollOffset)) {
+            rawDeltaY += mScrollConsumed[1];
             scrollOffsetCorrection -= mScrollOffset[1];
             scrollConsumedCorrection -= mScrollConsumed[1];
             if (vtev != null) {
@@ -3853,7 +3853,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Since we can potentially overfling more than we can overscroll, don't
                     // allow the weird behavior where you can scroll to a boundary then
                     // fling further.
-                    if (Math.abs(initialVelocity) > mMinimumVelocity &&
+                    boolean flingVelocity = Math.abs(initialVelocity) > mMinimumVelocity;
+                    if (flingVelocity &&
                             !((mFirstPosition == 0 &&
                                     firstChildTop == contentTop - mOverscrollDistance) ||
                               (mFirstPosition + childCount == mItemCount &&
@@ -3864,6 +3865,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
 
                         mFlingRunnable.start(-initialVelocity);
+                        dispatchNestedFling(0, -initialVelocity, true);
                     } else {
                         mTouchMode = TOUCH_MODE_REST;
                         reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
@@ -3872,6 +3874,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                         if (mPositionScroller != null) {
                             mPositionScroller.stop();
+                        }
+                        if (flingVelocity) {
+                            dispatchNestedFling(0, -initialVelocity, false);
                         }
                     }
                 }
