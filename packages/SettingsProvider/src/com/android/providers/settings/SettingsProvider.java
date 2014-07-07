@@ -18,7 +18,9 @@ package com.android.providers.settings;
 
 import java.io.FileNotFoundException;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -112,6 +114,9 @@ public class SettingsProvider extends ContentProvider {
     static final HashSet<String> sSecureGlobalKeys;
     static final HashSet<String> sSystemGlobalKeys;
 
+    // Settings that cannot be modified if associated user restrictions are enabled.
+    static final Map<String, String> sRestrictedKeys;
+
     private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
 
     static {
@@ -125,6 +130,18 @@ public class SettingsProvider extends ContentProvider {
         // These must match Settings.System.MOVED_TO_GLOBAL
         sSystemGlobalKeys = new HashSet<String>();
         Settings.System.getNonLegacyMovedKeys(sSystemGlobalKeys);
+
+        sRestrictedKeys = new HashMap<String, String>();
+        sRestrictedKeys.put(Settings.Secure.LOCATION_MODE, UserManager.DISALLOW_SHARE_LOCATION);
+        sRestrictedKeys.put(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                UserManager.DISALLOW_SHARE_LOCATION);
+        sRestrictedKeys.put(Settings.Global.INSTALL_NON_MARKET_APPS,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        sRestrictedKeys.put(Settings.Global.ADB_ENABLED, UserManager.DISALLOW_DEBUGGING_FEATURES);
+        sRestrictedKeys.put(Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                UserManager.ENSURE_VERIFY_APPS);
+        sRestrictedKeys.put(Settings.Global.PREFERRED_NETWORK_MODE,
+                UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
     }
 
     private boolean settingMovedToGlobal(final String name) {
@@ -282,6 +299,15 @@ public class SettingsProvider extends ContentProvider {
             throw new SecurityException(
                     String.format("Permission denial: writing to secure settings requires %1$s",
                                   android.Manifest.permission.WRITE_SECURE_SETTINGS));
+        }
+    }
+
+    private void checkUserRestrictions(String setting) {
+        String userRestriction = sRestrictedKeys.get(setting);
+        if (!TextUtils.isEmpty(userRestriction)
+            && mUserManager.hasUserRestriction(userRestriction)) {
+            throw new SecurityException(
+                    "Permission denial: user is restricted from changing this setting.");
         }
     }
 
@@ -783,6 +809,7 @@ public class SettingsProvider extends ContentProvider {
         try {
             int numValues = values.length;
             for (int i = 0; i < numValues; i++) {
+                checkUserRestrictions(values[i].getAsString(Settings.Secure.NAME));
                 if (db.insert(args.table, null, values[i]) < 0) return 0;
                 SettingsCache.populate(cache, values[i]);
                 if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + values[i]);
@@ -913,6 +940,8 @@ public class SettingsProvider extends ContentProvider {
         // Check write permissions only after determining which table the insert will touch
         checkWritePermissions(args);
 
+        checkUserRestrictions(name);
+
         // The global table is stored under the owner, always
         if (TABLE_GLOBAL.equals(args.table)) {
             desiredUserHandle = UserHandle.USER_OWNER;
@@ -987,6 +1016,7 @@ public class SettingsProvider extends ContentProvider {
             callingUser = UserHandle.USER_OWNER;
         }
         checkWritePermissions(args);
+        checkUserRestrictions(initialValues.getAsString(Settings.Secure.NAME));
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
         mutationCount.incrementAndGet();
