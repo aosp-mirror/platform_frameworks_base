@@ -14,55 +14,23 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/visible_panel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
 
     <FrameLayout
         android:id="@+id/slider_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="64dip"
-        android:layout_toLeftOf="@+id/expand_button_divider" />
+        android:clipChildren="false" />
 
-    <ImageView
-        android:id="@+id/expand_button_divider"
-        android:layout_width="wrap_content"
-        android:layout_height="32dip"
-        android:layout_gravity="top"
-        android:layout_marginBottom="16dip"
-        android:layout_marginTop="16dip"
-        android:layout_toLeftOf="@+id/expand_button"
-        android:scaleType="fitXY"
-        android:src="?android:attr/dividerVertical" />
-
-    <ImageView
-        android:id="@+id/expand_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="top"
-        style="@style/BorderlessButton.Tiny"
-        android:padding="16dip" />
-
-    <ImageView
-        android:id="@+id/zen_panel_divider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/slider_panel"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="16dip"
-        android:scaleType="fitXY"
-        android:src="?android:attr/dividerHorizontal" />
-
-    <ViewStub
+     <ViewStub
         android:id="@+id/zen_panel_stub"
-        android:layout_below="@+id/zen_panel_divider"
-        android:inflatedId="@+id/zen_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inflatedId="@+id/zen_panel"
         android:layout="@layout/zen_mode_panel" />
 
-</RelativeLayout>
+</LinearLayout>

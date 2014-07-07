@@ -16,22 +16,23 @@
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/qs_detail_item_height"
     android:layout_marginLeft="@dimen/zen_mode_condition_detail_button_padding"
-    android:layout_marginRight="@dimen/zen_mode_condition_detail_button_padding" >
+    android:layout_marginRight="@dimen/qs_panel_padding" >
 
     <RadioButton
         android:id="@android:id/checkbox"
         android:layout_width="40dp"
         android:layout_marginStart="2dp"
-        android:layout_height="@dimen/zen_mode_condition_height"
+        android:layout_marginEnd="1dp"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:gravity="center" />
 
     <TextView
         android:id="@android:id/title"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/zen_mode_condition_height"
+        android:layout_height="match_parent"
         android:layout_toEndOf="@android:id/checkbox"
         android:layout_toStartOf="@android:id/button1"
         android:ellipsize="end"
@@ -42,24 +43,24 @@
     <ImageView
         android:id="@android:id/button1"
         style="@style/QSBorderlessButton"
-        android:layout_width="@dimen/zen_mode_condition_height"
-        android:layout_height="@dimen/zen_mode_condition_height"
-        android:layout_alignParentEnd="true"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/zen_mode_condition_height"
+        android:layout_marginEnd="@dimen/qs_panel_padding"
+        android:scaleType="center"
+        android:layout_toStartOf="@android:id/button2"
         android:contentDescription="@string/accessibility_quick_settings_less_time"
-        android:padding="@dimen/zen_mode_condition_detail_button_padding"
         android:src="@drawable/ic_qs_minus" />
 
     <ImageView
         android:id="@android:id/button2"
         style="@style/QSBorderlessButton"
-        android:layout_width="@dimen/zen_mode_condition_height"
-        android:layout_height="@dimen/zen_mode_condition_height"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_alignParentEnd="true"
+          android:scaleType="center"
         android:layout_centerVertical="true"
         android:contentDescription="@string/accessibility_quick_settings_more_time"
-        android:padding="@dimen/zen_mode_condition_detail_button_padding"
         android:src="@drawable/ic_qs_plus" />
 
 </RelativeLayout>

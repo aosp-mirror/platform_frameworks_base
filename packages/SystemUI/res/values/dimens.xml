@@ -169,14 +169,16 @@
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">8dp</dimen>
     <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_detail_item_height_connected">72dp</dimen>
+    <dimen name="qs_detail_item_height_twoline">72dp</dimen>
 
+
+    <dimen name="segmented_button_spacing">4dp</dimen>
+    <dimen name="segmented_button_radius">2dp</dimen>
 
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>
 
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
-    <dimen name="zen_mode_condition_height">48dp</dimen>
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
@@ -287,10 +289,10 @@
     <dimen name="keyguard_min_swipe_amount">75dp</dimen>
 
     <!-- Volume panel dialog y offset -->
-    <dimen name="volume_panel_top">16dp</dimen>
+    <dimen name="volume_panel_top">0dp</dimen>
 
     <!-- Volume panel dialog width -->
-    <dimen name="volume_panel_width">300dp</dimen>
+    <dimen name="volume_panel_width">344dp</dimen>
 
     <!-- Volume panel z depth -->
     <dimen name="volume_panel_z">3dp</dimen>

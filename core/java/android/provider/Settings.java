@@ -6190,18 +6190,21 @@ public final class Settings {
                 "lock_screen_show_notifications";
 
         /**
-         * Defines global zen mode.  ZEN_MODE_OFF or ZEN_MODE_ON.
+         * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+         * or ZEN_MODE_NO_INTERRUPTIONS.
          *
          * @hide
          */
         public static final String ZEN_MODE = "zen_mode";
 
         /** @hide */ public static final int ZEN_MODE_OFF = 0;
-        /** @hide */ public static final int ZEN_MODE_ON = 1;
+        /** @hide */ public static final int ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+        /** @hide */ public static final int ZEN_MODE_NO_INTERRUPTIONS = 2;
 
         /** @hide */ public static String zenModeToString(int mode) {
-            if (mode == ZEN_MODE_OFF) return "ZEN_MODE_OFF";
-            return "ZEN_MODE_ON";
+            if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
+            if (mode == ZEN_MODE_NO_INTERRUPTIONS) return "ZEN_MODE_NO_INTERRUPTIONS";
+            return "ZEN_MODE_OFF";
         }
 
         /**

@@ -12,15 +12,12 @@
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
-     limitations under the License.
+     limitations under the License. ?android:attr/colorControlHighlight"
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/volume_panel_width"
-    android:layout_height="wrap_content"
-    android:background="@drawable/qs_panel_background"
-    android:translationZ="@dimen/volume_panel_z"
-    android:layout_marginBottom="@dimen/volume_panel_z">
 
-        <include layout="@layout/volume_panel" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-</FrameLayout>
+    <item android:state_selected="true" android:color="@android:color/white"/>
+    <item android:color="@color/segmented_button_text_inactive"/>
+
+</selector>

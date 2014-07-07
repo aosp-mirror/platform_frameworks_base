@@ -28,6 +28,7 @@ import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
 import android.util.Slog;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.qs.GlobalSetting;
 
 import java.util.ArrayList;
@@ -44,15 +45,17 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final GlobalSetting mConfigSetting;
     private final INotificationManager mNoMan;
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
+    private final LockPatternUtils mUtils;
 
     private boolean mRequesting;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         mContext = context;
+        mUtils = new LockPatternUtils(mContext);
         mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
             @Override
             protected void handleValueChanged(int value) {
-                fireZenChanged(value != 0);
+                fireZenChanged(value);
             }
         };
         mConfigSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE_CONFIG_ETAG) {
@@ -78,13 +81,13 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     @Override
-    public boolean isZen() {
-        return mModeSetting.getValue() != 0;
+    public int getZen() {
+        return mModeSetting.getValue();
     }
 
     @Override
-    public void setZen(boolean zen) {
-        mModeSetting.setValue(zen ? 1 : 0);
+    public void setZen(int zen) {
+        mModeSetting.setValue(zen);
     }
 
     @Override
@@ -122,7 +125,12 @@ public class ZenModeControllerImpl implements ZenModeController {
         return null;
     }
 
-    private void fireZenChanged(boolean zen) {
+    @Override
+    public boolean hasNextAlarm() {
+        return mUtils.getNextAlarm() != null;
+    }
+
+    private void fireZenChanged(int zen) {
         for (Callback cb : mCallbacks) {
             cb.onZenChanged(zen);
         }
