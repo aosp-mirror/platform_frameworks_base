@@ -330,7 +330,7 @@ public class EdgeEffect {
 
         canvas.clipRect(mBounds);
         canvas.translate(translateX, 0);
-        canvas.drawArc(mArcRect, 45, 90, true, mPaint);
+        canvas.drawArc(mArcRect, 45, 90, false, mPaint);
         canvas.restoreToCount(count);
 
         boolean oneLastFrame = false;
