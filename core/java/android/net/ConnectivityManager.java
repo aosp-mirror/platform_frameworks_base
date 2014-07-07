@@ -1642,28 +1642,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Try to ensure the device stays awake until we connect with the next network.
-     * Actually just holds a wakelock for a number of seconds while we try to connect
-     * to any default networks.  This will expire if the timeout passes or if we connect
-     * to a default after this is called.  For internal use only.
-     *
-     * @param forWhom the name of the network going down for logging purposes
-     * @return {@code true} on success, {@code false} on failure
-     *
-     * <p>This method requires the call to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
-     * {@hide}
-     */
-    public boolean requestNetworkTransitionWakelock(String forWhom) {
-        try {
-            mService.requestNetworkTransitionWakelock(forWhom);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
      * Report network connectivity status.  This is currently used only
      * to alter status bar UI.
      *

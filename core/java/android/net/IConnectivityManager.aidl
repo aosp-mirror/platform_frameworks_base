@@ -99,8 +99,6 @@ interface IConnectivityManager
 
     int setUsbTethering(boolean enable);
 
-    void requestNetworkTransitionWakelock(in String forWhom);
-
     void reportInetCondition(int networkType, int percentage);
 
     void reportBadNetwork(in Network network);
