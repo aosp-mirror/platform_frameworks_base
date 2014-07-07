@@ -16,6 +16,9 @@
 
 package android.net.http;
 
+import com.android.org.conscrypt.SSLParametersImpl;
+import com.android.org.conscrypt.TrustManagerImpl;
+
 import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +40,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Class responsible for all server certificate validation functionality
@@ -60,7 +63,7 @@ public class CertificateChainValidator {
                 .getDefaultHostnameVerifier();
     }
 
-    private X509ExtendedTrustManager mTrustManager;
+    private X509TrustManager mTrustManager;
 
     /**
      * @return The singleton instance of the certificates chain validator
@@ -78,8 +81,8 @@ public class CertificateChainValidator {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("X.509");
             tmf.init((KeyStore) null);
             for (TrustManager tm : tmf.getTrustManagers()) {
-                if (tm instanceof X509ExtendedTrustManager) {
-                    mTrustManager = (X509ExtendedTrustManager) tm;
+                if (tm instanceof X509TrustManager) {
+                    mTrustManager = (X509TrustManager) tm;
                 }
             }
         } catch (NoSuchAlgorithmException e) {
@@ -90,7 +93,7 @@ public class CertificateChainValidator {
 
         if (mTrustManager == null) {
             throw new RuntimeException(
-                    "None of the X.509 TrustManagers are X509ExtendedTrustManager");
+                    "None of the X.509 TrustManagers are X509TrustManager");
         }
     }
 
@@ -225,8 +228,13 @@ public class CertificateChainValidator {
         }
 
         try {
-            getInstance().getTrustManager().checkServerTrusted(chain, authType,
-                    new DelegatingSocketWrapper(domain));
+            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultX509TrustManager();
+            if (x509TrustManager instanceof TrustManagerImpl) {
+                TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
+                trustManager.checkServerTrusted(chain, authType, domain);
+            } else {
+                x509TrustManager.checkServerTrusted(chain, authType);
+            }
             return null;  // No errors.
         } catch (GeneralSecurityException e) {
             if (HttpLog.LOGV) {
@@ -238,9 +246,9 @@ public class CertificateChainValidator {
     }
 
     /**
-     * Returns the platform default {@link X509ExtendedTrustManager}.
+     * Returns the platform default {@link X509TrustManager}.
      */
-    private X509ExtendedTrustManager getTrustManager() {
+    private X509TrustManager getTrustManager() {
         return mTrustManager;
     }
 
