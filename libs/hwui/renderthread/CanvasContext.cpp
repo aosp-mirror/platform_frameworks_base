@@ -260,6 +260,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     // No context means nothing to free
     if (!thread.eglManager().hasEglContext()) return;
 
+    thread.eglManager().requireGlContext();
     if (level >= TRIM_MEMORY_COMPLETE) {
         Caches::getInstance().flush(Caches::kFlushMode_Full);
         thread.eglManager().destroy();
