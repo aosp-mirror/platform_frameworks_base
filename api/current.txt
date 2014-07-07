@@ -10493,6 +10493,7 @@ package android.graphics {
     field public static final int JPEG = 256; // 0x100
     field public static final int NV16 = 16; // 0x10
     field public static final int NV21 = 17; // 0x11
+    field public static final int RAW10 = 37; // 0x25
     field public static final int RAW_SENSOR = 32; // 0x20
     field public static final int RGB_565 = 4; // 0x4
     field public static final int UNKNOWN = 0; // 0x0
