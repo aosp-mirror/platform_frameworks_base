@@ -34241,6 +34241,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo getCollectionItemInfo();
     method public java.lang.CharSequence getContentDescription();
+    method public java.lang.CharSequence getError();
     method public android.os.Bundle getExtras();
     method public int getInputType();
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
@@ -34299,6 +34300,7 @@ package android.view.accessibility {
     method public void setDismissable(boolean);
     method public void setEditable(boolean);
     method public void setEnabled(boolean);
+    method public void setError(java.lang.CharSequence);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
     method public void setInputType(int);

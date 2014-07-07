@@ -8240,6 +8240,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (mEditor.mError != null) {
                 info.setContentInvalid(true);
+                info.setError(mEditor.mError);
             }
         }
 
