@@ -205,8 +205,12 @@ public final class HdmiControlService extends SystemService {
         mCecController = HdmiCecController.create(this);
 
         if (mCecController != null) {
+            // TODO: Remove this as soon as OEM's HAL implementation is corrected.
+            mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE,
+                    HdmiTvClient.ENABLED);
+
             mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL,
-                    HdmiTvClient.DISABLED);
+                    HdmiTvClient.ENABLED);
             initializeLocalDevices(mLocalDevices);
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
