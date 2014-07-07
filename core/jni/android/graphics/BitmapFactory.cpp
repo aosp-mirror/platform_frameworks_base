@@ -201,7 +201,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     int sampleSize = 1;
 
     SkImageDecoder::Mode decodeMode = SkImageDecoder::kDecodePixels_Mode;
-    SkBitmap::Config prefConfig = SkBitmap::kARGB_8888_Config;
+    SkColorType prefColorType = kN32_SkColorType;
 
     bool doDither = true;
     bool isMutable = false;
@@ -223,7 +223,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
 
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
-        prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
+        prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
         isMutable = env->GetBooleanField(options, gOptions_mutableFieldID);
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
@@ -305,7 +305,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
 
     SkBitmap decodingBitmap;
-    if (!decoder->decode(stream, &decodingBitmap, prefConfig, decodeMode)) {
+    if (!decoder->decode(stream, &decodingBitmap, prefColorType, decodeMode)) {
         return nullObjectReturn("decoder->decode returned false");
     }
 

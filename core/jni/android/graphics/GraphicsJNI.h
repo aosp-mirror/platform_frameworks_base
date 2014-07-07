@@ -58,10 +58,10 @@ public:
     // ref to its SkRasterizer* (or NULL).
     static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
 
-    /** Return the corresponding native config from the java Config enum,
-        or kNo_Config if the java object is null.
+    /** Return the corresponding native colorType from the java Config enum,
+        or kUnknown_SkColorType if the java object is null.
     */
-    static SkBitmap::Config getNativeBitmapConfig(JNIEnv*, jobject jconfig);
+    static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
     /** Create a java Bitmap object given the native bitmap (required) and optional
         storage array (may be null).

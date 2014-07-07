@@ -52,11 +52,11 @@ static int64_t getNowUs() {
 int testDecodeBounds(SkImageDecoder* decoder, SkStream* stream,
         SkBitmap* bitmap) {
     int64_t startTime = getNowUs();
-    SkBitmap::Config prefConfig = SkBitmap::kARGB_8888_Config;
+    SkColorType prefColorType = kN32_SkColorType;
     SkImageDecoder::Mode decodeMode = SkImageDecoder::kDecodeBounds_Mode;
 
     // Decode the input stream and then use the bitmap.
-    if (!decoder->decode(stream, bitmap, prefConfig, decodeMode)) {
+    if (!decoder->decode(stream, bitmap, prefColorType, decodeMode)) {
         return nullObjectReturn("decoder->decode returned false");
     } else {
         int64_t delay = getNowUs() - startTime;
@@ -69,11 +69,11 @@ int testDecodeBounds(SkImageDecoder* decoder, SkStream* stream,
 int testDecodePixels(SkImageDecoder* decoder, SkStream* stream,
         SkBitmap* bitmap) {
     int64_t startTime = getNowUs();
-    SkBitmap::Config prefConfig = SkBitmap::kARGB_8888_Config;
+    SkColorType prefColorType = kN32_SkColorType;
     SkImageDecoder::Mode decodeMode = SkImageDecoder::kDecodePixels_Mode;
 
     // Decode the input stream and then use the bitmap.
-    if (!decoder->decode(stream, bitmap, prefConfig, decodeMode)) {
+    if (!decoder->decode(stream, bitmap, prefColorType, decodeMode)) {
         return nullObjectReturn("decoder->decode returned false");
     } else {
         int64_t delay = getNowUs() - startTime;
