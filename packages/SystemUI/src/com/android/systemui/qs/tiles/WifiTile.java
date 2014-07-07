@@ -21,15 +21,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSDetailItems;
+import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
@@ -40,7 +37,6 @@ import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChan
 /** Quick settings tile: Wifi **/
 public class WifiTile extends QSTile<QSTile.SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
-    private static final int MAX_ITEMS = 4; // TODO temporary visual restriction
 
     private final NetworkController mController;
     private final WifiDetailAdapter mDetailAdapter;
@@ -66,7 +62,6 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         if (listening) {
             mController.addNetworkSignalChangedCallback(mCallback);
             mController.addAccessPointCallback(mDetailAdapter);
-            mController.scanForAccessPoints();
         } else {
             mController.removeNetworkSignalChangedCallback(mCallback);
             mController.removeAccessPointCallback(mDetailAdapter);
@@ -108,7 +103,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
         boolean enabledChanging = state.enabled != cb.enabled;
         if (enabledChanging) {
-            mDetailAdapter.postUpdateItems();
+            mDetailAdapter.setItemsVisible(cb.enabled);
             fireToggleStateChanged(cb.enabled);
         }
         state.enabled = cb.enabled;
@@ -204,9 +199,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     };
 
     private final class WifiDetailAdapter implements DetailAdapter,
-            NetworkController.AccessPointCallback {
+            NetworkController.AccessPointCallback, QSDetailItems.Callback {
 
-        private LinearLayout mItems;
+        private QSDetailItems mItems;
         private AccessPoint[] mAccessPoints;
 
         @Override
@@ -232,66 +227,67 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public View createDetailView(Context context, View convertView, ViewGroup parent) {
-            if (convertView != null) return convertView;
-            mItems = new LinearLayout(context);
-            mItems.setOrientation(LinearLayout.VERTICAL);
+            if (DEBUG) Log.d(TAG, "createDetailView convertView=" + (convertView != null));
+            mAccessPoints = null;
+            mController.scanForAccessPoints();
+            fireScanStateChanged(true);
+            mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
+            mItems.setTagSuffix("Wifi");
+            mItems.setCallback(this);
+            mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
+                    R.string.quick_settings_wifi_detail_empty_text);
             updateItems();
+            setItemsVisible(mState.enabled);
             return mItems;
         }
 
         @Override
         public void onAccessPointsChanged(final AccessPoint[] accessPoints) {
-            mUiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mAccessPoints = accessPoints;
-                    updateItems();
-                }
-            });
+            mAccessPoints = accessPoints;
+            updateItems();
+            if (accessPoints != null && accessPoints.length > 0) {
+                fireScanStateChanged(false);
+            }
         }
 
-        public void postUpdateItems() {
-            mUiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateItems();
-                }
-            });
+        @Override
+        public void onDetailItemClick(Item item) {
+            if (item == null || item.tag == null) return;
+            final AccessPoint ap = (AccessPoint) item.tag;
+            if (!ap.isConnected) {
+                mController.connect(ap);
+            }
+            showDetail(false);
+        }
+
+        @Override
+        public void onDetailItemDisconnect(Item item) {
+            // noop
+        }
+
+        public void setItemsVisible(boolean visible) {
+            if (mItems == null) return;
+            mItems.setItemsVisible(visible);
         }
 
         private void updateItems() {
             if (mItems == null) return;
-            mItems.removeAllViews();
-            if (mAccessPoints == null || mAccessPoints.length == 0 || !mState.enabled) return;
-            for (int i = 0; i < mAccessPoints.length; i++) {
-                final AccessPoint ap = mAccessPoints[i];
-                if (ap == null) continue;
-                final View item = LayoutInflater.from(mContext).inflate(R.layout.qs_detail_item,
-                        mItems, false);
-                final ImageView iv = (ImageView) item.findViewById(android.R.id.icon);
-                iv.setImageResource(ap.iconId);
-                final TextView title = (TextView) item.findViewById(android.R.id.title);
-                title.setText(ap.ssid);
-                final TextView summary = (TextView) item.findViewById(android.R.id.summary);
-                if (ap.isConnected) {
-                    item.setMinimumHeight(mContext.getResources()
-                            .getDimensionPixelSize(R.dimen.qs_detail_item_height_twoline));
-                    summary.setText(R.string.quick_settings_connected);
-                } else {
-                    summary.setVisibility(View.GONE);
-                }
-                item.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!ap.isConnected) {
-                            mController.connect(ap);
-                        }
-                        showDetail(false);
+            Item[] items = null;
+            if (mAccessPoints != null) {
+                items = new Item[mAccessPoints.length];
+                for (int i = 0; i < mAccessPoints.length; i++) {
+                    final AccessPoint ap = mAccessPoints[i];
+                    final Item item = new Item();
+                    item.tag = ap;
+                    item.icon = ap.iconId;
+                    item.line1 = ap.ssid;
+                    if (ap.isConnected) {
+                        item.line2 = mContext.getString(R.string.quick_settings_connected);
                     }
-                });
-                mItems.addView(item);
-                if (mItems.getChildCount() == MAX_ITEMS) break;
+                    items[i] = item;
+                }
             }
+            mItems.setItems(items);
         }
     };
 }

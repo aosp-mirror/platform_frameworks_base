@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import java.util.Set;
+
 public interface BluetoothController {
     void addStateChangedCallback(Callback callback);
     void removeStateChangedCallback(Callback callback);
@@ -26,8 +28,32 @@ public interface BluetoothController {
     boolean isBluetoothConnecting();
     String getLastDeviceName();
     void setBluetoothEnabled(boolean enabled);
+    Set<PairedDevice> getPairedDevices();
+    void connect(PairedDevice device);
+    void disconnect(PairedDevice device);
 
     public interface Callback {
         void onBluetoothStateChange(boolean enabled, boolean connecting);
+        void onBluetoothPairedDevicesChanged();
+    }
+
+    public static final class PairedDevice {
+        public static int STATE_DISCONNECTED = 0;
+        public static int STATE_CONNECTING = 1;
+        public static int STATE_CONNECTED = 2;
+        public static int STATE_DISCONNECTING = 3;
+
+        public String id;
+        public String name;
+        public int state = STATE_DISCONNECTED;
+        public Object tag;
+
+        public static String stateToString(int state) {
+            if (state == STATE_DISCONNECTED) return "STATE_DISCONNECTED";
+            if (state == STATE_CONNECTING) return "STATE_CONNECTING";
+            if (state == STATE_CONNECTED) return "STATE_CONNECTED";
+            if (state == STATE_DISCONNECTING) return "STATE_DISCONNECTING";
+            return "UNKNOWN";
+        }
     }
 }

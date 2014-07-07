@@ -168,6 +168,12 @@ public class QSPanel extends ViewGroup {
                     fireToggleStateChanged(state);
                 }
             }
+            @Override
+            public void onScanStateChanged(boolean state) {
+                if (mDetailRecord == r) {
+                    fireScanStateChanged(state);
+                }
+            }
         });
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
@@ -195,6 +201,7 @@ public class QSPanel extends ViewGroup {
             if (mDetailRecord != null) return;  // already showing something in detail
             r.detailAdapter = r.tile.getDetailAdapter();
             if (r.detailAdapter == null) return;
+            mDetailRecord = r;
             r.detailView = r.detailAdapter.createDetailView(mContext, r.detailView, mDetailContent);
             if (r.detailView == null) throw new IllegalStateException("Must return detail view");
             mDetailDoneButton.setOnClickListener(new OnClickListener() {
@@ -211,7 +218,6 @@ public class QSPanel extends ViewGroup {
                     mDetailRecord.tile.mHost.startSettingsActivity(settingsIntent);
                 }
             });
-            mDetailRecord = r;
             mDetailContent.removeAllViews();
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
@@ -312,6 +318,12 @@ public class QSPanel extends ViewGroup {
         }
     }
 
+    private void fireScanStateChanged(boolean state) {
+        if (mCallback != null) {
+            mCallback.onScanStateChanged(state);
+        }
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
@@ -344,5 +356,6 @@ public class QSPanel extends ViewGroup {
     public interface Callback {
         void onShowingDetail(QSTile.DetailAdapter detail);
         void onToggleStateChanged(boolean state);
+        void onScanStateChanged(boolean state);
     }
 }

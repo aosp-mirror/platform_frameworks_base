@@ -486,6 +486,8 @@
     <string name="quick_settings_bluetooth_multiple_devices_label">Bluetooth (<xliff:g id="number">%d</xliff:g> Devices)</string>
     <!-- QuickSettings: Bluetooth (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_off_label">Bluetooth Off</string>
+    <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
@@ -522,6 +524,8 @@
     <string name="quick_settings_wifi_no_network">No Network</string>
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
+    <!-- QuickSettings: Wifi detail panel, text when there are no items [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_detail_empty_text">No saved networks available</string>
     <!-- QuickSettings: Remote display [CHAR LIMIT=NONE] -->
     <string name="quick_settings_remote_display_no_connection_label">Cast screen</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
@@ -538,6 +542,8 @@
     <string name="quick_settings_done">Done</string>
     <!-- QuickSettings: Control panel: Label for connected device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connected">Connected</string>
+    <!-- QuickSettings: Control panel: Label for connecting device. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_connecting">Connecting...</string>
     <!-- QuickSettings: Tethering. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_tethering_label">Tethering</string>
     <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->

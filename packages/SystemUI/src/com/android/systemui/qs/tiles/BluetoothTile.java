@@ -16,29 +16,43 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
+import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.QSDetailItems;
+import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BluetoothController.PairedDevice;
+
+import java.util.Set;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
 
     private final BluetoothController mController;
+    private final BluetoothDetailAdapter mDetailAdapter;
 
     public BluetoothTile(Host host) {
         super(host);
         mController = host.getBluetoothController();
+        mDetailAdapter = new BluetoothDetailAdapter();
     }
 
     @Override
     public boolean supportsDualTargets() {
         return true;
+    }
+
+    @Override
+    public DetailAdapter getDetailAdapter() {
+        return mDetailAdapter;
     }
 
     @Override
@@ -63,7 +77,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleSecondaryClick() {
-        mHost.startSettingsActivity(BLUETOOTH_SETTINGS);
+        if (!mState.value) {
+            mController.setBluetoothEnabled(true);
+        }
+        showDetail(true);
     }
 
     @Override
@@ -83,7 +100,8 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                 state.label = mController.getLastDeviceName();
             } else if (connecting) {
                 state.iconId = R.drawable.ic_qs_bluetooth_connecting;
-                stateContentDescription = mContext.getString(R.string.accessibility_desc_connecting);
+                stateContentDescription =
+                        mContext.getString(R.string.accessibility_desc_connecting);
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             } else {
                 state.iconId = R.drawable.ic_qs_bluetooth_on;
@@ -106,5 +124,100 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         public void onBluetoothStateChange(boolean enabled, boolean connecting) {
             refreshState();
         }
+        @Override
+        public void onBluetoothPairedDevicesChanged() {
+            mUiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mDetailAdapter.updateItems();
+                }
+            });
+        }
     };
+
+    private final class BluetoothDetailAdapter implements DetailAdapter, QSDetailItems.Callback {
+        private QSDetailItems mItems;
+
+        @Override
+        public int getTitle() {
+            return R.string.quick_settings_bluetooth_label;
+        }
+
+        @Override
+        public Boolean getToggleState() {
+            return mState.value;
+        }
+
+        @Override
+        public Intent getSettingsIntent() {
+            return BLUETOOTH_SETTINGS;
+        }
+
+        @Override
+        public void setToggleState(boolean state) {
+            mController.setBluetoothEnabled(state);
+            showDetail(false);
+        }
+
+        @Override
+        public View createDetailView(Context context, View convertView, ViewGroup parent) {
+            mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
+            mItems.setTagSuffix("Bluetooth");
+            mItems.setEmptyState(R.drawable.ic_qs_bluetooth_detail_empty,
+                    R.string.quick_settings_bluetooth_detail_empty_text);
+            mItems.setCallback(this);
+            updateItems();
+            setItemsVisible(mState.value);
+            return mItems;
+        }
+
+        public void setItemsVisible(boolean visible) {
+            if (mItems == null) return;
+            mItems.setItemsVisible(visible);
+        }
+
+        private void updateItems() {
+            if (mItems == null) return;
+            Item[] items = null;
+            final Set<PairedDevice> devices = mController.getPairedDevices();
+            if (devices != null) {
+                items = new Item[devices.size()];
+                int i = 0;
+                for (PairedDevice device : devices) {
+                    final Item item = new Item();
+                    item.icon = R.drawable.ic_qs_bluetooth_on;
+                    item.line1 = device.name;
+                    if (device.state == PairedDevice.STATE_CONNECTED) {
+                        item.icon = R.drawable.ic_qs_bluetooth_connected;
+                        item.line2 = mContext.getString(R.string.quick_settings_connected);
+                        item.canDisconnect = true;
+                    } else if (device.state == PairedDevice.STATE_CONNECTING) {
+                        item.icon = R.drawable.ic_qs_bluetooth_connecting;
+                        item.line2 = mContext.getString(R.string.quick_settings_connecting);
+                    }
+                    item.tag = device;
+                    items[i++] = item;
+                }
+            }
+            mItems.setItems(items);
+        }
+
+        @Override
+        public void onDetailItemClick(Item item) {
+            if (item == null || item.tag == null) return;
+            final PairedDevice device = (PairedDevice) item.tag;
+            if (device != null && device.state == PairedDevice.STATE_DISCONNECTED) {
+                mController.connect(device);
+            }
+        }
+
+        @Override
+        public void onDetailItemDisconnect(Item item) {
+            if (item == null || item.tag == null) return;
+            final PairedDevice device = (PairedDevice) item.tag;
+            if (device != null) {
+                mController.disconnect(device);
+            }
+        }
+    }
 }

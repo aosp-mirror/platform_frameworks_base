@@ -179,6 +179,11 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="TextAppearance.QS.DetailEmpty">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/qs_subhead</item>
+    </style>
+
     <style name="TextAppearance.QS.Subhead">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
