@@ -555,6 +555,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mPackageName;
     private CharSequence mClassName;
     private CharSequence mText;
+    private CharSequence mError;
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
 
@@ -1923,6 +1924,32 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the error text of this node.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param error The error text.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setError(CharSequence error) {
+        enforceNotSealed();
+        mError = error;
+    }
+
+    /**
+     * Gets the error text of this node.
+     *
+     * @return The error text.
+     */
+    public CharSequence getError() {
+        return mError;
+    }
+
+    /**
      * Gets the content description of this node.
      *
      * @return The content description.
@@ -2449,6 +2476,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mPackageName);
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
+        parcel.writeCharSequence(mError);
         parcel.writeCharSequence(mContentDescription);
         parcel.writeString(mViewIdResourceName);
 
@@ -2519,6 +2547,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = other.mPackageName;
         mClassName = other.mClassName;
         mText = other.mText;
+        mError = other.mError;
         mContentDescription = other.mContentDescription;
         mViewIdResourceName = other.mViewIdResourceName;
 
@@ -2614,6 +2643,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = parcel.readCharSequence();
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
+        mError = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
         mViewIdResourceName = parcel.readString();
 
@@ -2675,6 +2705,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = null;
         mClassName = null;
         mText = null;
+        mError = null;
         mContentDescription = null;
         mViewIdResourceName = null;
         if (mActions != null) {
@@ -2879,6 +2910,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; packageName: ").append(mPackageName);
         builder.append("; className: ").append(mClassName);
         builder.append("; text: ").append(mText);
+        builder.append("; error: ").append(mError);
         builder.append("; contentDescription: ").append(mContentDescription);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
 
