@@ -1546,6 +1546,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_TOP_OF_TASK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            final boolean isTopOfTask = isTopOfTask(token);
+            reply.writeNoException();
+            reply.writeInt(isTopOfTask ? 1 : 0);
+            return true;
+        }
+
         case CONVERT_FROM_TRANSLUCENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2129,7 +2138,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case START_LOCK_TASK_BY_CURRENT: {
+        case START_LOCK_TASK_BY_CURRENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             startLockTaskModeOnCurrent();
             reply.writeNoException();
@@ -2143,7 +2152,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case STOP_LOCK_TASK_BY_CURRENT: {
+        case STOP_LOCK_TASK_BY_CURRENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             stopLockTaskModeOnCurrent();
             reply.writeNoException();
@@ -4182,6 +4191,19 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
+    public boolean isTopOfTask(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IS_TOP_OF_TASK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() == 1;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
     public boolean isTopActivityImmersive()
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -4930,7 +4952,7 @@ class ActivityManagerProxy implements IActivityManager
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(START_LOCK_TASK_BY_CURRENT, data, reply, 0);
+        mRemote.transact(START_LOCK_TASK_BY_CURRENT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
@@ -4952,7 +4974,7 @@ class ActivityManagerProxy implements IActivityManager
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(STOP_LOCK_TASK_BY_CURRENT, data, reply, 0);
+        mRemote.transact(STOP_LOCK_TASK_BY_CURRENT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
