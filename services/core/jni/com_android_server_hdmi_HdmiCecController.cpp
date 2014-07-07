@@ -162,8 +162,10 @@ private:
     void propagateHotplugEvent(const hotplug_event_t& event) {
         // Note that this method should be called in service thread.
         JNIEnv* env = AndroidRuntime::getJNIEnv();
+        jint port = event.port;
+        jboolean connected = (jboolean) event.connected;
         env->CallVoidMethod(mController->getCallbacksObj(),
-                gHdmiCecControllerClassInfo.handleHotplug, event.connected);
+                gHdmiCecControllerClassInfo.handleHotplug, port, connected);
 
         checkAndClearExceptionFromCallback(env, __FUNCTION__);
     }
@@ -314,7 +316,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj,
     GET_METHOD_ID(gHdmiCecControllerClassInfo.handleIncomingCecCommand, clazz,
             "handleIncomingCecCommand", "(II[B)V");
     GET_METHOD_ID(gHdmiCecControllerClassInfo.handleHotplug, clazz,
-            "handleHotplug", "(Z)V");
+            "handleHotplug", "(IZ)V");
 
     return reinterpret_cast<jlong>(controller);
 }

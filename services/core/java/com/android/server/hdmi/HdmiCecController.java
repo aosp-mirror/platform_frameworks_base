@@ -57,7 +57,7 @@ final class HdmiCecController {
          *
          * @param deviceType requested device type to allocate logical address
          * @param logicalAddress allocated logical address. If it is
-         *                       {@link Constants.ADDR_UNREGISTERED}, it means that
+         *                       {@link Constants#ADDR_UNREGISTERED}, it means that
          *                       it failed to allocate logical address for the given device type
          */
         void onAllocated(int deviceType, int logicalAddress);
@@ -158,7 +158,7 @@ final class HdmiCecController {
      *
      * @param deviceType type of device to used to determine logical address
      * @param preferredAddress a logical address preferred to be allocated.
-     *                         If sets {@link Constants.ADDR_UNREGISTERED}, scans
+     *                         If sets {@link Constants#ADDR_UNREGISTERED}, scans
      *                         the smallest logical address matched with the given device type.
      *                         Otherwise, scan address will start from {@code preferredAddress}
      * @param callback callback interface to report allocated logical address to caller
@@ -559,10 +559,10 @@ final class HdmiCecController {
     /**
      * Called by native when a hotplug event issues.
      */
-    private void handleHotplug(boolean connected) {
-        // TODO: once add port number to cec HAL interface, pass port number
-        // to the service.
-        mService.onHotplug(0, connected);
+    @ServiceThreadOnly
+    private void handleHotplug(int port, boolean connected) {
+        assertRunOnServiceThread();
+        mService.onHotplug(port, connected);
     }
 
     private static native long nativeInit(HdmiCecController handler, MessageQueue messageQueue);
