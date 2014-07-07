@@ -192,6 +192,12 @@
   </li>
 
   <li class="nav-section">
+  <div class="nav-section-header empty"><a href="<?cs var:toroot ?>google/gcs/index.html">
+        <span class="en">Google Cloud Save</span></a>
+      </div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/dist.html">
       <span class="en">Google Play Distribution</span></a>
     </div>
