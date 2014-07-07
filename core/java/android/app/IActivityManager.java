@@ -444,6 +444,8 @@ public interface IActivityManager extends IInterface {
     public boolean isBackgroundMediaPlaying(IBinder token) throws RemoteException;
     public void mediaResourcesReleased(IBinder token) throws RemoteException;
 
+    public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -750,5 +752,6 @@ public interface IActivityManager extends IInterface {
     int IS_TOP_OF_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+224;
     int SET_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+225;
     int IS_BG_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+226;
-    int MEDIA_RESOURCES_RELEASED = IBinder.FIRST_CALL_TRANSACTION+227;
+    int MEDIA_RESOURCES_RELEASED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+227;
+    int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
 }

@@ -144,6 +144,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 12;
+    static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 13;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -1557,9 +1558,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     break;
             }
         }
-        final int launchBehindFlags = Intent.FLAG_ACTIVITY_LAUNCH_BEHIND |
-                Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-        final boolean affiliateTask = (launchFlags & launchBehindFlags) == launchBehindFlags;
+
+        final boolean launchTaskBehind = r.mLaunchTaskBehind &&
+                (launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
 
         if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
@@ -1709,7 +1710,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 sourceStack.topActivity().task == sourceRecord.task)) {
                             // We really do want to push this one into the
                             // user's face, right now.
-                            if (affiliateTask && sourceRecord != null) {
+                            if (launchTaskBehind && sourceRecord != null) {
                                 intentActivity.setTaskToAffiliateWith(sourceRecord.task);
                             }
                             movedHome = true;
@@ -1886,7 +1887,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean newTask = false;
         boolean keepCurTransition = false;
 
-        TaskRecord taskToAffiliate = affiliateTask && sourceRecord != null ?
+        TaskRecord taskToAffiliate = launchTaskBehind && sourceRecord != null ?
                 sourceRecord.task : null;
 
         // Should this be considered a new task?
@@ -1898,12 +1899,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             newTask = true;
             targetStack = adjustStackFocus(r, newTask);
-            targetStack.moveToFront();
+            if (!launchTaskBehind) {
+                targetStack.moveToFront();
+            }
             if (reuseTask == null) {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
                         newTaskIntent != null ? newTaskIntent : intent,
-                        voiceSession, voiceInteractor, true), taskToAffiliate);
+                        voiceSession, voiceInteractor, !launchTaskBehind /* toTop */),
+                        taskToAffiliate);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
@@ -1997,7 +2001,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         targetStack.mLastPausedActivity = null;
         targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
-        mService.setFocusedActivityLocked(r);
+        if (!launchTaskBehind) {
+            // Don't set focus on an activity that's going to the back.
+            mService.setFocusedActivityLocked(r);
+        }
         return ActivityManager.START_SUCCESS;
     }
 
@@ -2394,7 +2401,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mWindowManager.addAppToken(0, r.appToken, taskId, stackId,
                         r.info.screenOrientation, r.fullscreen,
                         (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                        r.userId, r.info.configChanges, task.voiceSession != null);
+                        r.userId, r.info.configChanges, task.voiceSession != null,
+                        r.mLaunchTaskBehind);
             }
             mWindowManager.addTask(taskId, stackId, false);
         }
@@ -2640,6 +2648,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         } catch (RemoteException e) {
         }
         return true;
+    }
+
+    // Called when WindowManager has finished animating the launchingBehind activity to the back.
+    void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
+        r.mLaunchTaskBehind = false;
+        final TaskRecord task = r.task;
+        task.setLastThumbnail(task.stack.screenshotActivities(r));
+        mService.addRecentTaskLocked(task);
+        mWindowManager.setAppVisibility(r.appToken, false);
+    }
+
+    void scheduleLaunchTaskBehindComplete(IBinder token) {
+        mHandler.obtainMessage(LAUNCH_TASK_BEHIND_COMPLETE, token).sendToTarget();
     }
 
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
@@ -3291,6 +3312,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         Slog.w(TAG, "Timeout waiting for all activities in task to finish. " +
                                 msg.obj);
                         ((ActivityContainer) msg.obj).onTaskListEmptyLocked();
+                    }
+                } break;
+                case LAUNCH_TASK_BEHIND_COMPLETE: {
+                    synchronized (mService) {
+                        ActivityRecord r = ActivityRecord.forToken((IBinder) msg.obj);
+                        if (r != null) {
+                            handleLaunchTaskBehindCompleteLocked(r);
+                        }
                     }
                 } break;
             }

@@ -109,6 +109,8 @@ class AppWindowToken extends WindowToken {
 
     boolean mDeferRemoval;
 
+    boolean mLaunchTaskBehind;
+
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
         super(_service, _token.asBinder(),
