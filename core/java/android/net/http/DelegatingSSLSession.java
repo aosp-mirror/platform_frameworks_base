@@ -24,30 +24,16 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSessionContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
- * This is used when only a {@code hostname} is available but usage of the new API
- * {@link X509ExtendedTrustManager#checkServerTrusted(X509Certificate[], String, Socket)}
- * requires a {@link SSLSocket}.
+ * This is only used when a {@code certificate} is available but usage
+ * requires a {@link SSLSession}.
  *
  * @hide
  */
 public class DelegatingSSLSession implements SSLSession {
     protected DelegatingSSLSession() {
-    }
-
-    public static class HostnameWrap extends DelegatingSSLSession {
-        private final String mHostname;
-
-        public HostnameWrap(String hostname) {
-            mHostname = hostname;
-        }
-
-        @Override
-        public String getPeerHost() {
-            return mHostname;
-        }
     }
 
     public static class CertificateWrap extends DelegatingSSLSession {
