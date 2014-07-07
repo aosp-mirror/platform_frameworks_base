@@ -85,7 +85,9 @@ public class LegacyMetadataMapper {
      * being set to true.
      */
     static final boolean LIE_ABOUT_AE_STATE = true;
+    static final boolean LIE_ABOUT_AE_MAX_REGIONS = true;
     static final boolean LIE_ABOUT_AF = true;
+    static final boolean LIE_ABOUT_AF_MAX_REGIONS = true;
     static final boolean LIE_ABOUT_AWB = true;
 
     /**
@@ -364,12 +366,23 @@ public class LegacyMetadataMapper {
         /*
          * android.control.maxRegions
          */
+        final int AE = 0, AWB = 1, AF = 2;
+
         int[] maxRegions = new int[3];
-        maxRegions[0] = p.getMaxNumMeteringAreas();
-        maxRegions[1] = 0; // AWB regions not supported in API1
-        maxRegions[2] = p.getMaxNumFocusAreas();
+        maxRegions[AE] = p.getMaxNumMeteringAreas();
+        maxRegions[AWB] = 0; // AWB regions not supported in API1
+        maxRegions[AF] = p.getMaxNumFocusAreas();
+
+        if (LIE_ABOUT_AE_MAX_REGIONS) {
+            maxRegions[AE] = 0;
+        }
+        if (LIE_ABOUT_AF_MAX_REGIONS) {
+            maxRegions[AF] = 0;
+        }
+
         m.set(CONTROL_MAX_REGIONS, maxRegions);
-        // TODO
+
+        // TODO rest of control fields
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {

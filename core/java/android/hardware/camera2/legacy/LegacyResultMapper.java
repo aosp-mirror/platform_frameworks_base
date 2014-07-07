@@ -121,6 +121,17 @@ public class LegacyResultMapper {
             // TODO: Implement precapture trigger, after which we can report CONVERGED ourselves
             m.set(CONTROL_AE_STATE, CONTROL_AE_STATE_CONVERGED);
         }
+
+        // control.aeRegions
+
+        /*
+         * TODO: Use the *resulting* crop region to calculate intersection with
+         * metering region
+         *
+         * Report the sensor-relative metering region in the result even
+         * if that's not actually the real thing (similar to how we do it
+         * for zooming)
+         */
     }
 
 
