@@ -675,8 +675,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // In case where <Terminate Arc> is started by <Request ARC Termination>
         // need to clean up RequestArcInitiationAction.
-        // TODO: check conditions of power status by calling is_connected api
-        // to be added soon.
         removeAction(RequestArcTerminationAction.class);
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), false);
@@ -998,6 +996,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!hotplugActions.isEmpty()) {
             // Note that hotplug action is single action running on a machine.
             // "pollAllDevicesNow" cleans up timer and start poll action immediately.
+            // It covers seq #40, #43.
             hotplugActions.get(0).pollAllDevicesNow();
         }
     }
