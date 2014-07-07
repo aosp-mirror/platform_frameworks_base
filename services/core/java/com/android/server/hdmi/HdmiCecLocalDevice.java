@@ -160,6 +160,8 @@ abstract class HdmiCecLocalDevice {
                 return handleVendorCommand(message);
             case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
                 return handleVendorCommandWithId(message);
+            case Constants.MESSAGE_SET_OSD_NAME:
+                return handleSetOsdName(message);
             default:
                 return false;
         }
@@ -357,6 +359,11 @@ abstract class HdmiCecLocalDevice {
         } else {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
         }
+        return true;
+    }
+
+    protected boolean handleSetOsdName(HdmiCecMessage message) {
+        // The default behavior of <Set Osd Name> is doing nothing.
         return true;
     }
 

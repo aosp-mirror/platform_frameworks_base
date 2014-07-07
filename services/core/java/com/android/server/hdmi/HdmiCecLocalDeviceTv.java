@@ -31,6 +31,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -259,7 +260,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         int address = message.getSource();
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         if (getDeviceInfo(address) == null) {
-            handleNewDeviceAtTheTailOfActivePath(address, path);
+            handleNewDeviceAtTheTailOfActivePath(path);
         } else {
             ActiveSourceHandler.create(this, null).process(address, path);
         }
@@ -340,13 +341,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         int address = message.getSource();
         if (!isInDeviceList(path, address)) {
-            handleNewDeviceAtTheTailOfActivePath(address, path);
+            handleNewDeviceAtTheTailOfActivePath(path);
         }
         addAndStartAction(new NewDeviceAction(this, address, path));
         return true;
     }
 
-    private void handleNewDeviceAtTheTailOfActivePath(int address, int path) {
+    private void handleNewDeviceAtTheTailOfActivePath(int path) {
         // Seq #22
         if (isTailOfActivePath(path, getActivePath())) {
             removeAction(RoutingControlAction.class);
@@ -438,6 +439,35 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Currently, it's the same as <Text View On>.
         return handleTextViewOn(message);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetOsdName(HdmiCecMessage message) {
+        int source = message.getSource();
+        HdmiCecDeviceInfo deviceInfo = getDeviceInfo(source);
+        // If the device is not in device list, ignore it.
+        if (deviceInfo == null) {
+            Slog.e(TAG, "No source device info for <Set Osd Name>." + message);
+            return true;
+        }
+        String osdName = null;
+        try {
+            osdName = new String(message.getParams(), "US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            Slog.e(TAG, "Invalid <Set Osd Name> request:" + message, e);
+            return true;
+        }
+
+        if (deviceInfo.getDisplayName().equals(osdName)) {
+            Slog.i(TAG, "Ignore incoming <Set Osd Name> having same osd name:" + message);
+            return true;
+        }
+
+        addCecDevice(new HdmiCecDeviceInfo(deviceInfo.getLogicalAddress(),
+                deviceInfo.getPhysicalAddress(), deviceInfo.getDeviceType(),
+                deviceInfo.getVendorId(), osdName));
+        return true;
     }
 
     @ServiceThreadOnly
@@ -729,7 +759,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      *         that has the same logical address as new one has.
      */
     @ServiceThreadOnly
-    HdmiCecDeviceInfo addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
+    private HdmiCecDeviceInfo addDeviceInfo(HdmiCecDeviceInfo deviceInfo) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo oldDeviceInfo = getDeviceInfo(deviceInfo.getLogicalAddress());
         if (oldDeviceInfo != null) {
@@ -750,7 +780,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @return removed {@link HdmiCecDeviceInfo} it exists. Otherwise, returns {@code null}
      */
     @ServiceThreadOnly
-    HdmiCecDeviceInfo removeDeviceInfo(int logicalAddress) {
+    private HdmiCecDeviceInfo removeDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo deviceInfo = mDeviceInfos.get(logicalAddress);
         if (deviceInfo != null) {
@@ -878,7 +908,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     /**
-     * Called when a device is newly added or a new device is detected.
+     * Called when a device is newly added or a new device is detected or
+     * existing device is updated.
      *
      * @param info device info of a new device.
      */
