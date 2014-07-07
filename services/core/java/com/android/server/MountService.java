@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.hardware.usb.UsbManager;
+import android.app.admin.DevicePolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -47,6 +48,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
@@ -1038,6 +1040,11 @@ class MountService extends IMountService.Stub
             volume = mVolumesByPath.get(path);
         }
 
+        if (!volume.isEmulated() && hasUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA)) {
+            Slog.w(TAG, "User has restriction DISALLOW_MOUNT_PHYSICAL_MEDIA; cannot mount volume.");
+            return StorageResultCode.OperationFailedInternalError;
+        }
+
         if (DEBUG_EVENTS) Slog.i(TAG, "doMountVolume: Mouting " + path);
         try {
             mConnector.execute("volume", "mount", path);
@@ -1234,6 +1241,17 @@ class MountService extends IMountService.Stub
     private void validatePermission(String perm) {
         if (mContext.checkCallingOrSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(String.format("Requires %s permission", perm));
+        }
+    }
+
+    private boolean hasUserRestriction(String restriction) {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        return um.hasUserRestriction(restriction, Binder.getCallingUserHandle());
+    }
+
+    private void validateUserRestriction(String restriction) {
+        if (hasUserRestriction(restriction)) {
+            throw new SecurityException("User has restriction " + restriction);
         }
     }
 
@@ -1559,6 +1577,7 @@ class MountService extends IMountService.Stub
     public void setUsbMassStorageEnabled(boolean enable) {
         waitForReady();
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        validateUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER);
 
         final StorageVolume primary = getPrimaryPhysicalVolume();
         if (primary == null) return;
@@ -1633,7 +1652,6 @@ class MountService extends IMountService.Stub
 
     public int mountVolume(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
-
         waitForReady();
         return doMountVolume(path);
     }
