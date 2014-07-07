@@ -365,7 +365,6 @@ void AssetManager::setLocaleLocked(const char* locale)
         delete[] mLocale;
     }
 
-
     // If we're attempting to set a locale that starts with "fil",
     // we should convert it to "tl" for backwards compatibility since
     // we've been using "tl" instead of "fil" prior to L.
@@ -374,7 +373,10 @@ void AssetManager::setLocaleLocked(const char* locale)
     // instead of attempting a fallback.
     if (strncmp(locale, kFilPrefix, kFilPrefixLen) == 0) {
         Vector<String8> locales;
-        getLocales(&locales);
+        ResTable* res = mResources;
+        if (res != NULL) {
+            res->getLocales(&locales);
+        }
         const size_t localesSize = locales.size();
         bool hasFil = false;
         for (size_t i = 0; i < localesSize; ++i) {
