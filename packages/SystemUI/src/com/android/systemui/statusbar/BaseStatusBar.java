@@ -297,6 +297,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
+                        if (shouldFilterOut(sbn.getNotification())) {
+                            if (DEBUG) Log.d(TAG, "Ignoring notification: " + sbn);
+                            continue;
+                        }
                         addNotification(sbn, currentRanking);
                     }
                 }
@@ -313,16 +317,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Notification n = sbn.getNotification();
                     boolean isUpdate = mNotificationData.findByKey(sbn.getKey()) != null
                             || isHeadsUp(sbn.getKey());
-                    boolean isGroupedChild = n.getGroup() != null
-                            && (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0;
-                    if (isGroupedChild) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Ignoring group child: " + sbn);
-                        }
-                        // Don't show grouped notifications. If this is an
-                        // update, i.e. the notification existed before but
-                        // wasn't a group child, remove the old instance.
-                        // Otherwise just update the ranking.
+                    if (shouldFilterOut(n)) {
+                        if (DEBUG) Log.d(TAG, "Ignoring notification: " + sbn);
+                        // If this is an update, i.e. the notification existed
+                        // before but wasn't filtered out, remove the old
+                        // instance. Otherwise just update the ranking.
                         if (isUpdate) {
                             removeNotification(sbn.getKey(), rankingMap);
                         } else {
@@ -360,6 +359,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                     updateNotificationRanking(rankingMap);
                 }
             });
+        }
+
+        private boolean shouldFilterOut(Notification n) {
+            // Don't accept group children.
+            return n.getGroup() != null
+                    && (n.flags & Notification.FLAG_GROUP_SUMMARY) == 0;
         }
     };
 
