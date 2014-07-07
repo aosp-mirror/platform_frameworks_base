@@ -882,11 +882,11 @@ android {
     buildTypes { ... }
     productFlavors {
         demo {
-            packageName "com.buildsystemexample.app.demo"
+            applicationId "com.buildsystemexample.app.demo"
             versionName "1.0-demo"
         }
         full {
-            packageName "com.buildsystemexample.app.full"
+            applicationId "com.buildsystemexample.app.full"
             versionName "1.0-full"
         }
     }
@@ -896,8 +896,9 @@ android {
 
 <p>The product flavor definitions support the same properties as the <code>defaultConfig</code>
 element. The base configuration for all flavors is specified in <code>defaultConfig</code>, and each
-flavor can override any value. The build file above assigns a different package name to each flavor:
-since each flavor definition creates a different app, they each need a distinct package name.</p>
+flavor can override any value. The build file above uses the <code>applicationId</code> property
+to assign a different package name to each flavor: since each flavor definition creates a
+different app, they each need a distinct package name.</p>
 
 <p class="note"><strong>Note:</strong> To distribute your app using
 <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a> in
