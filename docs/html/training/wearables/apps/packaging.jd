@@ -34,7 +34,7 @@ Android Studio directly to the wearable is required.</p>
 <pre>
 dependencies {
    compile 'com.google.android.gms:play-services:5.0.+@aar'
-   compile files('../../prebuilt-libs/android-support-v4.jar')
+   compile 'com.android.support:support-v4:20.0.+''
    <b>wearApp project(':wearable')</b>
 }
 </pre>
