@@ -568,6 +568,17 @@ public class WifiManager {
     }
 
     /**
+     * @hide
+     */
+    public List<WifiAdapter> getAdaptors() {
+        try {
+            return mService.getAdaptors();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Return a list of all the networks configured in the supplicant.
      * Not all fields of WifiConfiguration are returned. Only the following
      * fields are filled in:
