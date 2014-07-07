@@ -77,6 +77,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SuperNotCalledException;
@@ -1113,6 +1114,11 @@ public final class ActivityThread {
             sendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
         }
 
+        public void scheduleOnNewActivityOptions(IBinder token, ActivityOptions options) {
+            sendMessage(H.ON_NEW_ACTIVITY_OPTIONS,
+                    new Pair<IBinder, ActivityOptions>(token, options));
+        }
+
         public void setProcessState(int state) {
             updateProcessState(state, true);
         }
@@ -1196,6 +1202,7 @@ public final class ActivityThread {
         public static final int REQUEST_ASSIST_CONTEXT_EXTRAS = 143;
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         public static final int INSTALL_PROVIDER        = 145;
+        public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1245,6 +1252,7 @@ public final class ActivityThread {
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                     case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
+                    case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
                 }
             }
             return Integer.toString(code);
@@ -1458,6 +1466,10 @@ public final class ActivityThread {
                     break;
                 case INSTALL_PROVIDER:
                     handleInstallProvider((ProviderInfo) msg.obj);
+                    break;
+                case ON_NEW_ACTIVITY_OPTIONS:
+                    Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
+                    onNewActivityOptions(pair.first, pair.second);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2432,6 +2444,13 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             r.activity.onTranslucentConversionComplete(drawComplete);
+        }
+    }
+
+    public void onNewActivityOptions(IBinder token, ActivityOptions options) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onNewActivityOptions(options);
         }
     }
 

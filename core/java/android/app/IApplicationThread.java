@@ -140,6 +140,8 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
             throws RemoteException;
+    void scheduleOnNewActivityOptions(IBinder token, ActivityOptions options)
+            throws RemoteException;
     void setProcessState(int state) throws RemoteException;
     void scheduleInstallProvider(ProviderInfo provider) throws RemoteException;
     void updateTimePrefs(boolean is24Hour) throws RemoteException;
@@ -176,7 +178,7 @@ public interface IApplicationThread extends IInterface {
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
-
+    int SCHEDULE_ON_NEW_ACTIVITY_OPTIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;

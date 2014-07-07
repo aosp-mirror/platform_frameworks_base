@@ -9370,8 +9370,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return true;
+                } else {
+                    r.task.stack.mReturningActivityOptions = options;
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                    return false;
                 }
-                return false;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
