@@ -126,6 +126,9 @@ bool BaseRenderNodeAnimator::animate(TreeInfo& info) {
     if (mPlayState < RUNNING) {
         return false;
     }
+    if (mPlayState == FINISHED) {
+        return true;
+    }
 
     // If BaseRenderNodeAnimator is handling the delay (not typical), then
     // because the staging properties reflect the final value, we always need
@@ -209,6 +212,10 @@ void RenderPropertyAnimator::onAttached() {
 void RenderPropertyAnimator::onStagingPlayStateChanged() {
     if (mStagingPlayState == RUNNING) {
         (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
+    } else if (mStagingPlayState == FINISHED) {
+        // We're being canceled, so make sure that whatever values the UI thread
+        // is observing for us is pushed over
+        mTarget->setPropertyFieldsDirty(dirtyMask());
     }
 }
 
