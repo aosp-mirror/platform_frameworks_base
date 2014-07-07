@@ -30,7 +30,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.OverScroller;
-import android.widget.ScrollView;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -172,6 +171,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ViewGroup mScrollView;
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
+    private boolean mDisallowScrollingInThisMotion;
 
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -308,7 +308,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         setMaxLayoutHeight(getHeight());
         updateContentHeight();
-        updateScrollPositionIfNecessary();
+        clampScrollPosition();
         requestChildrenUpdate();
     }
 
@@ -390,7 +390,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mStateAnimator.isRunning();
     }
 
-    private void updateScrollPositionIfNecessary() {
+    private void clampScrollPosition() {
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY) {
             mOwnScrollY = scrollRange;
@@ -649,12 +649,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             boolean wasExpandingBefore = mExpandingNotification;
             expandWantsIt = mExpandHelper.onTouchEvent(ev);
-            if (mExpandedInThisMotion && !mExpandingNotification && wasExpandingBefore) {
+            if (mExpandedInThisMotion && !mExpandingNotification && wasExpandingBefore
+                    && !mDisallowScrollingInThisMotion) {
                 dispatchDownEventToScroller(ev);
             }
         }
         boolean scrollerWantsIt = false;
-        if (!mSwipingInProgress && !mExpandingNotification) {
+        if (!mSwipingInProgress && !mExpandingNotification && !mDisallowScrollingInThisMotion) {
             scrollerWantsIt = onScrollTouch(ev);
         }
         boolean horizontalSwipeWantsIt = false;
@@ -1399,6 +1400,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mExpandedInThisMotion = false;
             mOnlyScrollingInThisMotion = !mScroller.isFinished();
+            mDisallowScrollingInThisMotion = false;
         }
     }
 
@@ -1823,9 +1825,26 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onHeightChanged(ExpandableView view) {
         updateContentHeight();
-        updateScrollPositionIfNecessary();
+        updateScrollPositionOnExpandInBottom(view);
+        clampScrollPosition();
         notifyHeightChangeListener(view);
         requestChildrenUpdate();
+    }
+
+    private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (row.isUserLocked()) {
+                // We are actually expanding this view
+                float endPosition = row.getTranslationY() + row.getActualHeight();
+                int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
+                        mBottomStackSlowDownHeight;
+                if (endPosition > stackEnd) {
+                    mOwnScrollY += endPosition - stackEnd;
+                    mDisallowScrollingInThisMotion = true;
+                }
+            }
+        }
     }
 
     public void setOnHeightChangedListener(
