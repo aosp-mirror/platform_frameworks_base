@@ -3721,6 +3721,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Do not allow task to finish in Lock Task mode.
             if (tr == mStackSupervisor.mLockTaskModeTask) {
                 if (rootR == r) {
+                    mStackSupervisor.showLockTaskToast();
                     return false;
                 }
             }
@@ -3875,7 +3876,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Do not allow task to finish in Lock Task mode.
                 if (r.task == mStackSupervisor.mLockTaskModeTask) {
                     if (rootR == r) {
-                        Binder.restoreCallingIdentity(origId);
+                        mStackSupervisor.showLockTaskToast();
                         return false;
                     }
                 }
@@ -7495,6 +7496,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 if (mStackSupervisor.isLockTaskModeViolation(task)) {
+                    mStackSupervisor.showLockTaskToast();
                     Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                     return;
                 }
@@ -7749,7 +7751,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             && ((mFocusedActivity == null) || (task != mFocusedActivity.task))) {
                         throw new IllegalArgumentException("Invalid task, not in foreground");
                     }
-                    mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated);
+                    mStackSupervisor.setLockTaskModeLocked(task, !isSystemInitiated);
                 }
             }
         } finally {

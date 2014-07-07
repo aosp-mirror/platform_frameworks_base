@@ -262,6 +262,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** If non-null then the task specified remains in front and no other tasks may be started
      * until the task exits or #stopLockTaskMode() is called. */
     TaskRecord mLockTaskModeTask;
+    /** Whether lock task has been entered by an authorized app and cannot
+     * be exited. */
+    private boolean mLockTaskIsLocked;
     /**
      * Notifies the user when entering/exiting lock-task.
      */
@@ -1670,6 +1673,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
                     if (isLockTaskModeViolation(intentActivity.task)) {
+                        showLockTaskToast();
                         Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                         return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
                     }
@@ -3028,7 +3032,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return list;
     }
 
-    void setLockTaskModeLocked(TaskRecord task, boolean showHomeRecents) {
+    void showLockTaskToast() {
+        mLockTaskNotify.showToast(mLockTaskIsLocked);
+    }
+
+    void setLockTaskModeLocked(TaskRecord task, boolean isLocked) {
         if (task == null) {
             // Take out of lock task mode if necessary
             if (mLockTaskModeTask != null) {
@@ -3052,7 +3060,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         lockTaskMsg.obj = mLockTaskModeTask.intent.getComponent().getPackageName();
         lockTaskMsg.arg1 = mLockTaskModeTask.userId;
         lockTaskMsg.what = LOCK_TASK_START_MSG;
-        lockTaskMsg.arg2 = showHomeRecents ? 1 : 0;
+        lockTaskMsg.arg2 = !isLocked ? 1 : 0;
         mHandler.sendMessage(lockTaskMsg);
     }
 

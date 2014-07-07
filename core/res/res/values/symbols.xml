@@ -602,6 +602,8 @@
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
+  <java-symbol type="string" name="lock_to_app_toast" />
+  <java-symbol type="string" name="lock_to_app_toast_locked" />
   <java-symbol type="string" name="lock_to_app_title" />
   <java-symbol type="string" name="lock_to_app_description" />
   <java-symbol type="string" name="lock_to_app_negative" />

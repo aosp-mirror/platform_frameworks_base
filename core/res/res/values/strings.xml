@@ -4773,6 +4773,10 @@
     <!-- DO NOT TRANSLATE -->
     <string name="day_of_week_label_typeface">sans-serif</string>
 
+    <!-- Lock-to-app notification toast. The $ is not actually shown or translated, it is a marker of where the recents icon shows up. -->
+    <string name="lock_to_app_toast">You are in Lock-to-App mode. Press and hold the recent apps button to exit $</string>
+    <!-- Notify user that they are locked in lock-to-app mode -->
+    <string name="lock_to_app_toast_locked">You are in Lock-to-App mode.</string>
     <!-- Lock-to-app dialog title. -->
     <string name="lock_to_app_title">Use lock-to-app?</string>
     <!-- Lock-to-app dialog description. The $ is not actually shown or translated, it is a marker of where the recents icon shows up. -->
