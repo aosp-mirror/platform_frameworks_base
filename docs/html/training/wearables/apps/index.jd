@@ -69,6 +69,6 @@ in ADT. The rest of this training assumes you're using Android Studio.
       <dd>Learn how to package a wearable app inside a
       handheld app. This allows the system to install the wearable app automatically when
       users install the companion handheld app from the Google Play store.</dd>
-    <dt><a href="{@docRoot}training/wearables/apps/packaging.html">Debugging over Bluetooth</a></dt>
+    <dt><a href="{@docRoot}training/wearables/apps/bt-debugging.html">Debugging over Bluetooth</a></dt>
       <dd>Learn how to debug your wearable over Bluetooth instead of USB.</dd>
   </dl>

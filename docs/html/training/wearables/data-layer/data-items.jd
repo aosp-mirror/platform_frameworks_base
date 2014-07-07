@@ -120,5 +120,5 @@ public void onDataChanged(DataEventBuffer dataEvents) {
 <p>
 This is just a snippet that requires more implementation details. Learn about
 how to implement a full listener service or activity in
-<a href="{@docRoot}training/wearables/data-layer/listeners.html">Listening for Data Layer Events</a>.
+<a href="{@docRoot}training/wearables/data-layer/events.html">Listening for Data Layer Events</a>.
 </p>
