@@ -17,8 +17,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_detail_item_height"
-    android:layout_marginLeft="@dimen/zen_mode_condition_detail_button_padding"
-    android:layout_marginRight="@dimen/qs_panel_padding" >
+    android:layout_marginStart="@dimen/zen_mode_condition_detail_button_padding"
+    android:layout_marginEnd="@dimen/zen_mode_condition_detail_button_padding" >
 
     <RadioButton
         android:id="@android:id/checkbox"
@@ -43,10 +43,10 @@
     <ImageView
         android:id="@android:id/button1"
         style="@style/QSBorderlessButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/qs_panel_padding"
+        android:layout_marginEnd="@dimen/zen_mode_condition_detail_button_padding"
         android:scaleType="center"
         android:layout_toStartOf="@android:id/button2"
         android:contentDescription="@string/accessibility_quick_settings_less_time"
@@ -55,10 +55,10 @@
     <ImageView
         android:id="@android:id/button2"
         style="@style/QSBorderlessButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_alignParentEnd="true"
-          android:scaleType="center"
+        android:scaleType="center"
         android:layout_centerVertical="true"
         android:contentDescription="@string/accessibility_quick_settings_more_time"
         android:src="@drawable/ic_qs_plus" />
