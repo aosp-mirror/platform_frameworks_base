@@ -136,14 +136,14 @@ public class VectorDrawable extends Drawable {
 
     private static final boolean DBG_VECTOR_DRAWABLE = false;
 
-    private final VectorDrawableState mVectorState;
-
-    private final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
+    private VectorDrawableState mVectorState;
 
     private PorterDuffColorFilter mTintFilter;
 
+    private boolean mMutated;
+
     public VectorDrawable() {
-        mVectorState = new VectorDrawableState(null);
+        mVectorState = new VectorDrawableState();
     }
 
     private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
@@ -159,13 +159,23 @@ public class VectorDrawable extends Drawable {
         mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
     }
 
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mVectorState = new VectorDrawableState(mVectorState);
+            mMutated = true;
+        }
+        return this;
+    }
+
     Object getTargetByName(String name) {
-        return mVGTargetsMap.get(name);
+        return mVectorState.mVPathRenderer.mVGTargetsMap.get(name);
     }
 
     @Override
     public ConstantState getConstantState() {
-        return null;
+        mVectorState.mChangingConfigurations = getChangingConfigurations();
+        return mVectorState;
     }
 
     @Override
@@ -298,7 +308,7 @@ public class VectorDrawable extends Drawable {
         a.recycle();
 
         final VectorDrawableState state = mVectorState;
-        state.mVPathRenderer = inflateInternal(res, parser, attrs, theme);
+        inflateInternal(res, parser, attrs, theme);
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
         state.mVPathRenderer.setColorFilter(mTintFilter);
@@ -324,10 +334,11 @@ public class VectorDrawable extends Drawable {
         }
     }
 
-    private VPathRenderer inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
+    private void inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
             Theme theme) throws XmlPullParserException, IOException {
         final VectorDrawableState state = mVectorState;
         final VPathRenderer pathRenderer = new VPathRenderer();
+        state.mVPathRenderer = pathRenderer;
 
         boolean noSizeTag = true;
         boolean noViewportTag = true;
@@ -349,7 +360,7 @@ public class VectorDrawable extends Drawable {
                     path.inflate(res, attrs, theme);
                     currentGroup.add(path);
                     if (path.getPathName() != null) {
-                        mVGTargetsMap.put(path.getPathName(), path);
+                        pathRenderer.mVGTargetsMap.put(path.getPathName(), path);
                     }
                     noPathTag = false;
                     state.mChangingConfigurations |= path.mChangingConfigurations;
@@ -367,7 +378,8 @@ public class VectorDrawable extends Drawable {
                     currentGroup.mChildGroupList.add(newChildGroup);
                     groupStack.push(newChildGroup);
                     if (newChildGroup.getGroupName() != null) {
-                        mVGTargetsMap.put(newChildGroup.getGroupName(), newChildGroup);
+                        pathRenderer.mVGTargetsMap.put(newChildGroup.getGroupName(),
+                                newChildGroup);
                     }
                     state.mChangingConfigurations |= newChildGroup.mChangingConfigurations;
                 }
@@ -408,8 +420,6 @@ public class VectorDrawable extends Drawable {
 
             throw new XmlPullParserException("no " + tag + " defined");
         }
-
-        return pathRenderer;
     }
 
     private void printGroupTree(VGroup currentGroup, int level) {
@@ -427,6 +437,11 @@ public class VectorDrawable extends Drawable {
         }
     }
 
+    @Override
+    public int getChangingConfigurations() {
+        return super.getChangingConfigurations() | mVectorState.mChangingConfigurations;
+    }
+
     private static class VectorDrawableState extends ConstantState {
         int[] mThemeAttrs;
         int mChangingConfigurations;
@@ -434,15 +449,19 @@ public class VectorDrawable extends Drawable {
         ColorStateList mTint;
         Mode mTintMode;
 
+        // Deep copy for mutate() or implicitly mutate.
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
                 mThemeAttrs = copy.mThemeAttrs;
                 mChangingConfigurations = copy.mChangingConfigurations;
-                // TODO: Make sure the constant state are handled correctly.
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
             }
+        }
+
+        public VectorDrawableState() {
+            mVPathRenderer = new VPathRenderer();
         }
 
         @Override
@@ -479,26 +498,29 @@ public class VectorDrawable extends Drawable {
          *         Path   Path         Path
          *
          */
-        private final VGroup mRootGroup;
-
+        // Variables that only used temporarily inside the draw() call, so there
+        // is no need for deep copying.
         private final Path mPath = new Path();
         private final Path mRenderPath = new Path();
         private static final Matrix IDENTITY_MATRIX = new Matrix();
+        private final Matrix mFinalPathMatrix = new Matrix();
 
         private Paint mStrokePaint;
         private Paint mFillPaint;
         private ColorFilter mColorFilter;
         private PathMeasure mPathMeasure;
 
+        /////////////////////////////////////////////////////
+        // Variables below need to be copied (deep copy if applicable) for mutation.
         private int mChangingConfigurations;
-
+        private final VGroup mRootGroup;
         private float mBaseWidth = 0;
         private float mBaseHeight = 0;
         private float mViewportWidth = 0;
         private float mViewportHeight = 0;
         private int mRootAlpha = 0xFF;
 
-        private final Matrix mFinalPathMatrix = new Matrix();
+        final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
 
         public VPathRenderer() {
             mRootGroup = new VGroup();
@@ -513,12 +535,13 @@ public class VectorDrawable extends Drawable {
         }
 
         public VPathRenderer(VPathRenderer copy) {
-            mRootGroup = copy.mRootGroup;
+            mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
             mViewportWidth = copy.mViewportHeight;
             mViewportHeight = copy.mViewportHeight;
             mChangingConfigurations = copy.mChangingConfigurations;
+            mRootAlpha = copy.mRootAlpha;
         }
 
         public boolean canApplyTheme() {
@@ -742,6 +765,12 @@ public class VectorDrawable extends Drawable {
     }
 
     static class VGroup {
+        // mStackedMatrix is only used temporarily when drawing, it combines all
+        // the parents' local matrices with the current one.
+        private final Matrix mStackedMatrix = new Matrix();
+
+        /////////////////////////////////////////////////////
+        // Variables below need to be copied (deep copy if applicable) for mutation.
         private final ArrayList<VPath> mPathList = new ArrayList<VPath>();
         private final ArrayList<VGroup> mChildGroupList = new ArrayList<VGroup>();
 
@@ -754,16 +783,48 @@ public class VectorDrawable extends Drawable {
         private float mTranslateY = 0;
         private float mGroupAlpha = 1;
 
-        // mLocalMatrix is parsed from the XML.
+        // mLocalMatrix is updated based on the update of transformation information,
+        // either parsed from the XML or by animation.
         private final Matrix mLocalMatrix = new Matrix();
-        // mStackedMatrix is only used when drawing, it combines all the
-        // parents' local matrices with the current one.
-        private final Matrix mStackedMatrix = new Matrix();
-
         private int mChangingConfigurations;
         private int[] mThemeAttrs;
-
         private String mGroupName = null;
+
+        public VGroup(VGroup copy, ArrayMap<String, Object> targetsMap) {
+            mRotate = copy.mRotate;
+            mPivotX = copy.mPivotX;
+            mPivotY = copy.mPivotY;
+            mScaleX = copy.mScaleX;
+            mScaleY = copy.mScaleY;
+            mTranslateX = copy.mTranslateX;
+            mTranslateY = copy.mTranslateY;
+            mGroupAlpha = copy.mGroupAlpha;
+            mThemeAttrs = copy.mThemeAttrs;
+            mGroupName = copy.mGroupName;
+            mChangingConfigurations = copy.mChangingConfigurations;
+            if (mGroupName != null) {
+                targetsMap.put(mGroupName, this);
+            }
+
+            mLocalMatrix.set(copy.mLocalMatrix);
+
+            for (int i = 0; i < copy.mPathList.size(); i ++) {
+                VPath copyPath = copy.mPathList.get(i);
+                VPath newPath = new VPath(copyPath);
+                mPathList.add(newPath);
+                if (newPath.mPathName != null) {
+                    targetsMap.put(copyPath.mPathName, newPath);
+                }
+            }
+
+            for (int i = 0; i < copy.mChildGroupList.size(); i ++) {
+                VGroup currentGroup = copy.mChildGroupList.get(i);
+                mChildGroupList.add(new VGroup(currentGroup, targetsMap));
+            }
+        }
+
+        public VGroup() {
+        }
 
         /* Getter and Setter */
         public float getRotation() {
@@ -931,7 +992,8 @@ public class VectorDrawable extends Drawable {
     }
 
     private static class VPath {
-        private int mChangingConfigurations;
+        /////////////////////////////////////////////////////
+        // Variables below need to be copied (deep copy if applicable) for mutation.
         private int[] mThemeAttrs;
 
         int mStrokeColor = 0;
@@ -949,17 +1011,41 @@ public class VectorDrawable extends Drawable {
         Paint.Join mStrokeLineJoin = Paint.Join.MITER;
         float mStrokeMiterlimit = 4;
 
-        private PathParser.PathDataNode[] mNode = null;
+        private PathParser.PathDataNode[] mNodes = null;
         private String mPathName;
+        private int mChangingConfigurations;
 
         public VPath() {
             // Empty constructor.
         }
 
+        public VPath(VPath copy) {
+            mThemeAttrs = copy.mThemeAttrs;
+
+            mStrokeColor = copy.mStrokeColor;
+            mStrokeWidth = copy.mStrokeWidth;
+            mStrokeOpacity = copy.mStrokeOpacity;
+            mFillColor = copy.mFillColor;
+            mFillRule = copy.mFillRule;
+            mFillOpacity = copy.mFillOpacity;
+            mTrimPathStart = copy.mTrimPathStart;
+            mTrimPathEnd = copy.mTrimPathEnd;
+            mTrimPathOffset = copy.mTrimPathOffset;
+
+            mClip = copy.mClip;
+            mStrokeLineCap = copy.mStrokeLineCap;
+            mStrokeLineJoin = copy.mStrokeLineJoin;
+            mStrokeMiterlimit = copy.mStrokeMiterlimit;
+
+            mNodes = PathParser.deepCopyNodes(copy.mNodes);
+            mPathName = copy.mPathName;
+            mChangingConfigurations = copy.mChangingConfigurations;
+        }
+
         public void toPath(Path path) {
             path.reset();
-            if (mNode != null) {
-                PathParser.PathDataNode.nodesToPath(mNode, path);
+            if (mNodes != null) {
+                PathParser.PathDataNode.nodesToPath(mNodes, path);
             }
         }
 
@@ -996,16 +1082,16 @@ public class VectorDrawable extends Drawable {
         /* Setters and Getters, mostly used by animator from AnimatedVectorDrawable. */
         @SuppressWarnings("unused")
         public PathParser.PathDataNode[] getPathData() {
-            return mNode;
+            return mNodes;
         }
 
         @SuppressWarnings("unused")
-        public void setPathData(PathParser.PathDataNode[] node) {
-            if (!PathParser.canMorph(mNode, node)) {
+        public void setPathData(PathParser.PathDataNode[] nodes) {
+            if (!PathParser.canMorph(mNodes, nodes)) {
                 // This should not happen in the middle of animation.
-                mNode = PathParser.deepCopyNodes(node);
+                mNodes = PathParser.deepCopyNodes(nodes);
             } else {
-                PathParser.updateNodes(mNode, node);
+                PathParser.updateNodes(mNodes, nodes);
             }
         }
 
@@ -1107,9 +1193,11 @@ public class VectorDrawable extends Drawable {
             mThemeAttrs = a.extractThemeAttrs();
 
             mClip = a.getBoolean(R.styleable.VectorDrawablePath_clipToPath, mClip);
+
             mPathName = a.getString(R.styleable.VectorDrawablePath_name);
-            mNode = PathParser.createNodesFromPathData(a.getString(
+            mNodes = PathParser.createNodesFromPathData(a.getString(
                     R.styleable.VectorDrawablePath_pathData));
+
             mFillColor = a.getColor(R.styleable.VectorDrawablePath_fill, mFillColor);
             mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity, mFillOpacity);
             mStrokeLineCap = getStrokeLineCap(a.getInt(

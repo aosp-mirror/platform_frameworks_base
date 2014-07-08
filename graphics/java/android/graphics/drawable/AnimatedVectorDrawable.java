@@ -208,7 +208,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                             R.styleable.AnimatedVectorDrawable_drawable, 0);
                     if (drawableRes != 0) {
                         mAnimatedVectorState.mVectorDrawable = (VectorDrawable) res.getDrawable(
-                                drawableRes, theme);
+                                drawableRes, theme).mutate();
                     }
                     a.recycle();
                 } else if (TARGET.equals(tagName)) {
