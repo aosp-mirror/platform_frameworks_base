@@ -63,7 +63,7 @@ static jintArray nLineBreakOpportunities(JNIEnv* env, jclass, jstring javaLocale
                                         jcharArray inputText, jint length,
                                         jintArray recycle) {
     jintArray ret;
-    std::vector<jint> breaks(16);
+    std::vector<jint> breaks;
 
     ScopedIcuLocale icuLocale(env, javaLocaleName);
     if (icuLocale.valid()) {
@@ -84,7 +84,7 @@ static jintArray nLineBreakOpportunities(JNIEnv* env, jclass, jstring javaLocale
 
     breaks.push_back(-1); // sentinel terminal value
 
-    if (recycle != NULL && env->GetArrayLength(recycle) >= breaks.size()) {
+    if (recycle != NULL && static_cast<size_t>(env->GetArrayLength(recycle)) >= breaks.size()) {
         ret = recycle;
     } else {
         ret = env->NewIntArray(breaks.size());
