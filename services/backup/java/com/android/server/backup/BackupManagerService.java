@@ -2925,7 +2925,8 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         private void writeApkToBackup(PackageInfo pkg, BackupDataOutput output) {
             // Forward-locked apps, system-bundled .apks, etc are filtered out before we get here
-            final String appSourceDir = pkg.applicationInfo.sourceDir;
+            // TODO: handle backing up split APKs
+            final String appSourceDir = pkg.applicationInfo.getBaseCodePath();
             final String apkDir = new File(appSourceDir).getParent();
             FullBackup.backupToTar(pkg.packageName, FullBackup.APK_TREE_TOKEN, null,
                     apkDir, appSourceDir, output);

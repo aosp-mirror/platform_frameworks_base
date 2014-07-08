@@ -719,7 +719,12 @@ public class PackageParser {
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in {@link #collectCertificates(Package, int)}.
+     *
+     * @deprecated external callers should move to
+     *             {@link #parsePackage(File, int)}. Eventually this method will
+     *             be marked private.
      */
+    @Deprecated
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
         final Package pkg = parseBaseApk(apkFile, flags);
         if (pkg == null) {

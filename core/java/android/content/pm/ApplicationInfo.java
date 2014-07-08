@@ -410,10 +410,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int largestWidthLimitDp = 0;
 
+    /** {@hide} */
+    public String scanSourceDir;
+    /** {@hide} */
+    public String scanPublicSourceDir;
+
     /**
      * Full path to the base APK for this application.
      */
-    // TODO: verify that nobody is doing codePath comparisons against this
     public String sourceDir;
 
     /**
@@ -779,11 +783,25 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return true;
         }
     }
-    
+
     /**
      * @hide
      */
     @Override protected ApplicationInfo getApplicationInfo() {
         return this;
     }
+
+    /** {@hide} */ public void setCodePath(String codePath) { scanSourceDir = codePath; }
+    /** {@hide} */ public void setBaseCodePath(String baseCodePath) { sourceDir = baseCodePath; }
+    /** {@hide} */ public void setSplitCodePaths(String[] splitCodePaths) { splitSourceDirs = splitCodePaths; }
+    /** {@hide} */ public void setResourcePath(String resourcePath) { scanPublicSourceDir = resourcePath; }
+    /** {@hide} */ public void setBaseResourcePath(String baseResourcePath) { publicSourceDir = baseResourcePath; }
+    /** {@hide} */ public void setSplitResourcePaths(String[] splitResourcePaths) { splitPublicSourceDirs = splitResourcePaths; }
+
+    /** {@hide} */ public String getCodePath() { return scanSourceDir; }
+    /** {@hide} */ public String getBaseCodePath() { return sourceDir; }
+    /** {@hide} */ public String[] getSplitCodePaths() { return splitSourceDirs; }
+    /** {@hide} */ public String getResourcePath() { return scanPublicSourceDir; }
+    /** {@hide} */ public String getBaseResourcePath() { return publicSourceDir; }
+    /** {@hide} */ public String[] getSplitResourcePaths() { return splitSourceDirs; }
 }
