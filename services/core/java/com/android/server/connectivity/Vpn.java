@@ -114,8 +114,7 @@ public class Vpn extends BaseNetworkStateTracker {
 
     public Vpn(Context context, VpnCallback callback, INetworkManagementService netService,
             IConnectivityManager connService, int userId) {
-        // TODO: create dedicated TYPE_VPN network type
-        super(ConnectivityManager.TYPE_DUMMY);
+        super(ConnectivityManager.TYPE_VPN);
         mContext = context;
         mCallback = callback;
         mConnService = connService;
