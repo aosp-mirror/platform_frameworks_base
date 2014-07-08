@@ -17,6 +17,8 @@
 package android.hardware.hdmi;
 
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 
@@ -35,6 +37,22 @@ import android.os.RemoteException;
 @SystemApi
 public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
+
+    /**
+     * Broadcast Action: Display OSD message.
+     * <p>Send when the service has a message to display on screen for events
+     * that need user's attention such as ARC status change.
+     * <p>Always contains the extra fields {@link #EXTRA_MESSAGE}.
+     * <p>Requires {@link android.Manifest.permission#HDMI_CEC} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
+
+    /**
+     * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the ID of
+     * the message to display on screen.
+     */
+    public static final String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
 
     public static final int POWER_STATUS_UNKNOWN = -1;
     public static final int POWER_STATUS_ON = 0;

@@ -62,8 +62,7 @@ import java.util.List;
 public final class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
 
-    // TODO: Rename the permission to HDMI_CONTROL.
-    private static final String PERMISSION = "android.permission.HDMI_CEC";
+    static final String PERMISSION = "android.permission.HDMI_CEC";
 
     /**
      * Interface to report send result.
