@@ -84,6 +84,7 @@ public class VolumePanel extends Handler {
     private static final int MAX_VOLUME = 100;
     private static final int FREE_DELAY = 10000;
     private static final int TIMEOUT_DELAY = 3000;
+    private static final int TIMEOUT_DELAY_SHORT = 1500;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
@@ -113,6 +114,7 @@ public class VolumePanel extends Handler {
     private boolean mRingIsSilent;
     private boolean mVoiceCapable;
     private boolean mZenModeCapable;
+    private boolean mZenPanelExpanded;
     private int mTimeoutDelay = TIMEOUT_DELAY;
 
     // True if we want to play tones on the system stream when the master stream is specified.
@@ -515,6 +517,7 @@ public class VolumePanel extends Handler {
             mActiveStreamType = activeStreamType;
             active.group.setVisibility(View.VISIBLE);
             updateSlider(active);
+            updateTimeoutDelay();
             setZenPanelVisible(isNotificationOrRing(mActiveStreamType));
         }
     }
@@ -586,6 +589,11 @@ public class VolumePanel extends Handler {
         mCallback = callback;
     }
 
+    private void updateTimeoutDelay() {
+        mTimeoutDelay = mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
+                : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED : TIMEOUT_DELAY;
+    }
+
     private void setZenPanelVisible(boolean visible) {
         if (LOGD) Log.d(mTag, "setZenPanelVisible " + visible + " mZenPanel=" + mZenPanel);
         if (visible) {
@@ -607,7 +615,9 @@ public class VolumePanel extends Handler {
 
                     @Override
                     public void onExpanded(boolean expanded) {
-                        mTimeoutDelay = expanded ? TIMEOUT_DELAY_EXPANDED : TIMEOUT_DELAY;
+                        if (mZenPanelExpanded == expanded) return;
+                        mZenPanelExpanded = expanded;
+                        updateTimeoutDelay();
                         resetTimeout();
                     }
                 });
@@ -618,8 +628,6 @@ public class VolumePanel extends Handler {
             if (mZenPanel != null) {
                 mZenPanel.setVisibility(View.GONE);
             }
-            mTimeoutDelay = TIMEOUT_DELAY;
-            resetTimeout();
         }
     }
 
