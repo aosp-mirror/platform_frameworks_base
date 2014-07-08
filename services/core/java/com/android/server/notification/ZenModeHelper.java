@@ -21,6 +21,7 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
+import android.telecomm.TelecommManager;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -72,17 +74,13 @@ public class ZenModeHelper {
     private final ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
 
+    private ComponentName mDefaultPhoneApp;
     private int mZenMode;
     private ZenModeConfig mConfig;
     private AudioManager mAudioManager;
     private int mPreviousRingerMode = -1;
 
     // temporary, until we update apps to provide metadata
-    private static final Set<String> CALL_PACKAGES = new HashSet<String>(Arrays.asList(
-            "com.google.android.dialer",
-            "com.android.phone",
-            "com.android.example.notificationshowcase"
-            ));
     private static final Set<String> MESSAGE_PACKAGES = new HashSet<String>(Arrays.asList(
             "com.google.android.talk",
             "com.android.mms",
@@ -224,7 +222,7 @@ public class ZenModeHelper {
 
     public boolean allowDisable(int what, IBinder token, String pkg) {
         // TODO(cwren): delete this API before the next release. Bug:15344099
-        if (CALL_PACKAGES.contains(pkg)) {
+        if (isDefaultPhoneApp(pkg)) {
             return mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
         }
         return true;
@@ -236,6 +234,7 @@ public class ZenModeHelper {
         pw.print(prefix); pw.print("mConfig="); pw.println(mConfig);
         pw.print(prefix); pw.print("mDefaultConfig="); pw.println(mDefaultConfig);
         pw.print(prefix); pw.print("mPreviousRingerMode="); pw.println(mPreviousRingerMode);
+        pw.print(prefix); pw.print("mDefaultPhoneApp="); pw.println(mDefaultPhoneApp);
     }
 
     public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -280,7 +279,7 @@ public class ZenModeHelper {
 
     private boolean isSystem(NotificationRecord record) {
         return SYSTEM_PACKAGES.contains(record.sbn.getPackageName())
-                && Notification.CATEGORY_SYSTEM.equals(record.getNotification().category);
+                && record.isCategory(Notification.CATEGORY_SYSTEM);
     }
 
     private boolean isAlarm(NotificationRecord record) {
@@ -288,7 +287,19 @@ public class ZenModeHelper {
     }
 
     private boolean isCall(NotificationRecord record) {
-        return CALL_PACKAGES.contains(record.sbn.getPackageName());
+        return isDefaultPhoneApp(record.sbn.getPackageName())
+                || record.isCategory(Notification.CATEGORY_CALL);
+    }
+
+    private boolean isDefaultPhoneApp(String pkg) {
+        if (mDefaultPhoneApp == null) {
+            final TelecommManager telecomm =
+                    (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
+            mDefaultPhoneApp = telecomm != null ? telecomm.getDefaultPhoneApp() : null;
+            Slog.d(TAG, "Default phone app: " + mDefaultPhoneApp);
+        }
+        return pkg != null && mDefaultPhoneApp != null
+                && pkg.equals(mDefaultPhoneApp.getPackageName());
     }
 
     private boolean isMessage(NotificationRecord record) {
