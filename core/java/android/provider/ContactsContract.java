@@ -1426,6 +1426,19 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "contacts");
 
         /**
+         * Special contacts URI to refer to contacts on the corp profile from the personal
+         * profile.
+         *
+         * It's supported only by a few specific places for referring to contact pictures that
+         * are in the corp provider for enterprise caller-ID.  Contact picture URIs returned from
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} may contain this kind of URI.
+         *
+         * @hide
+         */
+        public static final Uri CORP_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "contacts_corp");
+
+        /**
          * A content:// style URI for this table that should be used to create
          * shortcuts or otherwise create long-term links to contacts. This URI
          * should always be followed by a "/" and the contact's {@link #LOOKUP_KEY}.
@@ -4804,6 +4817,43 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "phone_lookup");
+
+        /**
+         * URI used for the "enterprise caller-id".
+         *
+         * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
+         * columns.  If the device has no corp profile that is linked to the current profile, it
+         * behaves in the exact same way as {@link #CONTENT_FILTER_URI}.  If there is a corp profile
+         * linked to the current profile, it first queries against the personal contact database,
+         * and if no matching contacts are found there, then queries against the
+         * corp contacts database.
+         * <p>
+         * If a result is from the corp profile, it makes the following changes to the data:
+         * <ul>
+         *     <li>The following columns will be set to null, as they don't make sense on a
+         *     different profile:
+         *     {@link #_ID},
+         *     {@link #PHOTO_ID},
+         *     {@link #PHOTO_FILE_ID},
+         *     {@link #LOOKUP_KEY},
+         *     {@link #CUSTOM_RINGTONE},
+         *     {@link #IN_VISIBLE_GROUP},
+         *     and {@link #IN_DEFAULT_DIRECTORY}.
+         *     </li>
+         *     <li>
+         *     {@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
+         *     URIs.  Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
+         *     load pictures from them.
+         *     </li>
+         * </ul>
+         *
+         * <pre>
+         * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
+         *         Uri.encode(phoneNumber));
+         * </pre>
+         */
+        public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "phone_lookup_enterprise");
 
         /**
          * The MIME type of {@link #CONTENT_FILTER_URI} providing a directory of phone lookup rows.

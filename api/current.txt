@@ -23808,6 +23808,7 @@ package android.provider {
 
   public static final class ContactsContract.PhoneLookup implements android.provider.BaseColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.PhoneLookupColumns {
     field public static final android.net.Uri CONTENT_FILTER_URI;
+    field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
     field public static final java.lang.String QUERY_PARAMETER_SIP_ADDRESS = "sip";
   }
 
