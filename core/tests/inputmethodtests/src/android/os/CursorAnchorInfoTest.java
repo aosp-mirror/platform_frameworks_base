@@ -24,6 +24,8 @@ import android.text.TextUtils;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.CursorAnchorInfo.Builder;
 
+import java.util.Objects;
+
 public class CursorAnchorInfoTest extends InstrumentationTestCase {
     // null represents a character that is invisible, for example because it's overlapped by some
     // other UI elements.
@@ -86,9 +88,11 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(INSERTION_MARKER_BOTOM, info.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info.getMatrix());
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, info.getCharacterRect(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, info.getCharacterRect(i));
         }
+        assertNull(info.getCharacterRect(-1));
+        assertNull(info.getCharacterRect(MANY_RECTS.length + 1));
 
         // Make sure that the builder can reproduce the same object.
         final CursorAnchorInfo info2 = builder.build();
@@ -102,9 +106,11 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(INSERTION_MARKER_BOTOM, info2.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info2.getMatrix());
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, info2.getCharacterRect(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, info2.getCharacterRect(i));
         }
+        assertNull(info2.getCharacterRect(-1));
+        assertNull(info2.getCharacterRect(MANY_RECTS.length + 1));
         assertEquals(info, info2);
         assertEquals(info.hashCode(), info2.hashCode());
 
@@ -120,9 +126,11 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(INSERTION_MARKER_BOTOM, info3.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info3.getMatrix());
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, info3.getCharacterRect(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, info3.getCharacterRect(i));
         }
+        assertNull(info3.getCharacterRect(-1));
+        assertNull(info3.getCharacterRect(MANY_RECTS.length + 1));
         assertEquals(info.hashCode(), info3.hashCode());
 
         builder.reset();
@@ -136,6 +144,141 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBottom());
         assertEquals(Matrix.IDENTITY_MATRIX, uninitializedInfo.getMatrix());
+    }
+
+    private static void assertNotEquals(final CursorAnchorInfo reference,
+            final CursorAnchorInfo actual) {
+        assertFalse(Objects.equals(reference, actual));
+    }
+
+    @SmallTest
+    public void testEquality() throws Exception {
+        final Matrix MATRIX1 = new Matrix();
+        MATRIX1.setTranslate(10.0f, 20.0f);
+        final Matrix MATRIX2 = new Matrix();
+        MATRIX2.setTranslate(110.0f, 120.0f);
+        final Matrix NAN_MATRIX = new Matrix();
+        NAN_MATRIX.setValues(new float[]{
+                Float.NaN, Float.NaN, Float.NaN,
+                Float.NaN, Float.NaN, Float.NaN,
+                Float.NaN, Float.NaN, Float.NaN});
+        final int SELECTION_START1 = 2;
+        final int SELECTION_END1 = 7;
+        final String COMPOSING_TEXT1 = "0123456789";
+        final int COMPOSING_TEXT_START1 = 0;
+        final float INSERTION_MARKER_HORIZONTAL1 = 10.5f;
+        final float INSERTION_MARKER_TOP1 = 100.1f;
+        final float INSERTION_MARKER_BASELINE1 = 110.4f;
+        final float INSERTION_MARKER_BOTOM1 = 111.0f;
+        final int SELECTION_START2 = 4;
+        final int SELECTION_END2 = 8;
+        final String COMPOSING_TEXT2 = "9876543210";
+        final int COMPOSING_TEXT_START2 = 3;
+        final float INSERTION_MARKER_HORIZONTAL2 = 14.5f;
+        final float INSERTION_MARKER_TOP2 = 200.1f;
+        final float INSERTION_MARKER_BASELINE2 = 210.4f;
+        final float INSERTION_MARKER_BOTOM2 = 211.0f;
+
+        // Default instance should be equal.
+        assertEquals(new Builder().build(), new Builder().build());
+
+        assertEquals(
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END1).build(),
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END1).build());
+        assertNotEquals(
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END1).build(),
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END2).build());
+        assertNotEquals(
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END1).build(),
+                new Builder().setSelectionRange(SELECTION_START2, SELECTION_END1).build());
+        assertNotEquals(
+                new Builder().setSelectionRange(SELECTION_START1, SELECTION_END1).build(),
+                new Builder().setSelectionRange(SELECTION_START2, SELECTION_END2).build());
+        assertEquals(
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT1).build(),
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT1).build());
+        assertNotEquals(
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT1).build(),
+                new Builder().setComposingText(COMPOSING_TEXT_START2, COMPOSING_TEXT1).build());
+        assertNotEquals(
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT1).build(),
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT2).build());
+        assertNotEquals(
+                new Builder().setComposingText(COMPOSING_TEXT_START1, COMPOSING_TEXT1).build(),
+                new Builder().setComposingText(COMPOSING_TEXT_START2, COMPOSING_TEXT2).build());
+
+        // For insertion marker locations, {@link Float#NaN} is treated as if it was a number.
+        assertEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        Float.NaN, Float.NaN, Float.NaN, Float.NaN).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        Float.NaN, Float.NaN, Float.NaN, Float.NaN).build());
+
+        // Check Matrix.
+        assertEquals(
+                new Builder().setMatrix(MATRIX1).build(),
+                new Builder().setMatrix(MATRIX1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).build(),
+                new Builder().setMatrix(MATRIX2).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).build(),
+                new Builder().setMatrix(NAN_MATRIX).build());
+        // Unlike insertion marker locations, {@link Float#NaN} in the matrix is treated as just a
+        // NaN as usual (NaN == NaN -> false).
+        assertNotEquals(
+                new Builder().setMatrix(NAN_MATRIX).build(),
+                new Builder().setMatrix(NAN_MATRIX).build());
+
+        assertEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        Float.NaN, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL2, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP2,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE2, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL2, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build());
+        assertNotEquals(
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1).build(),
+                new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
+                        INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
+                        INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM2).build());
     }
 
     @SmallTest

@@ -139,6 +139,17 @@ public final class CursorAnchorInfo implements Parcelable {
         return hash;
     }
 
+    /**
+     * Compares two float values. Returns {@code true} if {@code a} and {@code b} are
+     * {@link Float#NaN} at the same time.
+     */
+    private static boolean areSameFloatImpl(final float a, final float b) {
+        if (Float.isNaN(a) && Float.isNaN(b)) {
+            return true;
+        }
+        return a == b;
+    }
+
     @Override
     public boolean equals(Object obj){
         if (obj == null) {
@@ -154,9 +165,17 @@ public final class CursorAnchorInfo implements Parcelable {
         if (hashCode() != that.hashCode()) {
             return false;
         }
-        if (mSelectionStart != that.mSelectionStart
-                || mSelectionEnd != that.mSelectionEnd
-                || mComposingTextStart != that.mComposingTextStart) {
+        if (mSelectionStart != that.mSelectionStart || mSelectionEnd != that.mSelectionEnd) {
+            return false;
+        }
+        if (mComposingTextStart != that.mComposingTextStart
+                || !Objects.equals(mComposingText, that.mComposingText)) {
+            return false;
+        }
+        if (!areSameFloatImpl(mInsertionMarkerHorizontal, that.mInsertionMarkerHorizontal)
+                || !areSameFloatImpl(mInsertionMarkerTop, that.mInsertionMarkerTop)
+                || !areSameFloatImpl(mInsertionMarkerBaseline, that.mInsertionMarkerBaseline)
+                || !areSameFloatImpl(mInsertionMarkerBottom, that.mInsertionMarkerBottom)) {
             return false;
         }
         if (!Objects.equals(mComposingTextStart, that.mComposingTextStart)) {
@@ -355,7 +374,7 @@ public final class CursorAnchorInfo implements Parcelable {
 
     /**
      * Returns the index where the selection starts.
-     * @return -1 if there is no selection.
+     * @return {@code -1} if there is no selection.
      */
     public int getSelectionStart() {
         return mSelectionStart;
@@ -363,7 +382,7 @@ public final class CursorAnchorInfo implements Parcelable {
 
     /**
      * Returns the index where the selection ends.
-     * @return -1 if there is no selection.
+     * @return {@code -1} if there is no selection.
      */
     public int getSelectionEnd() {
         return mSelectionEnd;
@@ -371,7 +390,7 @@ public final class CursorAnchorInfo implements Parcelable {
 
     /**
      * Returns the index where the composing text starts.
-     * @return -1 if there is no composing text.
+     * @return {@code -1} if there is no composing text.
      */
     public int getComposingTextStart() {
         return mComposingTextStart;
@@ -379,7 +398,7 @@ public final class CursorAnchorInfo implements Parcelable {
 
     /**
      * Returns the entire composing text.
-     * @return null if there is no composition.
+     * @return {@code null} if there is no composition.
      */
     public CharSequence getComposingText() {
         return mComposingText;
@@ -435,7 +454,8 @@ public final class CursorAnchorInfo implements Parcelable {
      * @return a new instance of {@link RectF} that represents the location of the character in
      * local coordinates. null if the character is invisible or the application did not provide
      * the location. Note that the {@code left} field can be greater than the {@code right} field
-     * if the character is in RTL text.
+     * if the character is in RTL text. Returns {@code null} if no location information is
+     * available.
      */
     // TODO: Prepare a document about the expected behavior for surrogate pairs, combining
     // characters, and non-graphical chars.
