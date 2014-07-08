@@ -1945,13 +1945,11 @@ public class TextToSpeech {
 
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
             public void onStop(String utteranceId) throws RemoteException {
-                // do nothing
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onDone(utteranceId);
+                }
             };
-
-            @Override
-            public void onFallback(String utteranceId) throws RemoteException {
-                // do nothing
-            }
 
             @Override
             public void onSuccess(String utteranceId) {

@@ -592,13 +592,11 @@ public abstract class TextToSpeechService extends Service {
     }
 
     interface UtteranceProgressDispatcher {
-        public void dispatchOnFallback();
         public void dispatchOnStop();
         public void dispatchOnSuccess();
         public void dispatchOnStart();
         public void dispatchOnError(int errorCode);
     }
-
 
     /** Set of parameters affecting audio output. */
     static class AudioOutputParams {
@@ -766,14 +764,6 @@ public abstract class TextToSpeechService extends Service {
             final String utteranceId = getUtteranceId();
             if (utteranceId != null) {
                 mCallbacks.dispatchOnStop(getCallerIdentity(), utteranceId);
-            }
-        }
-
-        @Override
-        public void dispatchOnFallback() {
-            final String utteranceId = getUtteranceId();
-            if (utteranceId != null) {
-                mCallbacks.dispatchOnFallback(getCallerIdentity(), utteranceId);
             }
         }
 
@@ -1333,16 +1323,6 @@ public abstract class TextToSpeechService extends Service {
                 if (old != null && old != cb) {
                     unregister(old);
                 }
-            }
-        }
-
-        public void dispatchOnFallback(Object callerIdentity, String utteranceId) {
-            ITextToSpeechCallback cb = getCallbackFor(callerIdentity);
-            if (cb == null) return;
-            try {
-                cb.onFallback(utteranceId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Callback onFallback failed: " + e);
             }
         }
 

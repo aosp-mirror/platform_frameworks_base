@@ -43,13 +43,6 @@ oneway interface ITextToSpeechCallback {
     void onStop(String utteranceId);
 
     /**
-     * Tells the client that the synthesis failed, and fallback synthesis will be attempted.
-     *
-     * @param utteranceId Unique id identifying synthesis request.
-     */
-    void onFallback(String utteranceId);
-
-    /**
      * Tells the client that the synthesis has failed.
      *
      * @param utteranceId Unique id identifying synthesis request.
