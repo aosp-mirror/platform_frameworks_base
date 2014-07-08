@@ -279,8 +279,7 @@ public class ZenModePanel extends LinearLayout {
         mZenSubheadCollapsed.setVisibility(!mExpanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
         mZenConditions.setVisibility(!zenOff && mExpanded ? VISIBLE : GONE);
-        mAlarmWarning.setVisibility(zenNone && mExpanded && mController != null
-                && mController.hasNextAlarm() ? VISIBLE : GONE);
+        mAlarmWarning.setVisibility(zenNone && mExpanded ? VISIBLE : GONE);
 
         if (zenNone) {
             mZenSubheadExpanded.setText(R.string.zen_no_interruptions);
