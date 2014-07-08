@@ -614,7 +614,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	framework \
 	framework2 \
-	mms-common \
 	telephony-common \
 	voip-common
 
