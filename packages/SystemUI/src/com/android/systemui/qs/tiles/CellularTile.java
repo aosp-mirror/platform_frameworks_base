@@ -20,13 +20,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.DataUsageGraph;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.DataUsageInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+
+import java.text.DecimalFormat;
 
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTile<QSTile.SignalState> {
@@ -34,15 +42,22 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
     private final NetworkController mController;
+    private final CellularDetailAdapter mDetailAdapter;
 
     public CellularTile(Host host) {
         super(host);
         mController = host.getNetworkController();
+        mDetailAdapter = new CellularDetailAdapter();
     }
 
     @Override
     protected SignalState newTileState() {
         return new SignalState();
+    }
+
+    @Override
+    public DetailAdapter getDetailAdapter() {
+        return mDetailAdapter;
     }
 
     @Override
@@ -61,7 +76,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
-        mHost.startSettingsActivity(CELLULAR_SETTINGS);
+        if (mController.isMobileDataSupported()) {
+            showDetail(true);
+        } else {
+            mHost.startSettingsActivity(CELLULAR_SETTINGS);
+        }
     }
 
     @Override
@@ -157,5 +176,81 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         public void onAirplaneModeChanged(boolean enabled) {
             // noop
         }
+
+        public void onMobileDataEnabled(boolean enabled) {
+            mDetailAdapter.setMobileDataEnabled(enabled);
+        }
     };
+
+    private final class CellularDetailAdapter implements DetailAdapter {
+        private static final double KB = 1024;
+        private static final double MB = 1024 * KB;
+        private static final double GB = 1024 * MB;
+
+        private final DecimalFormat FORMAT = new DecimalFormat("#.##");
+
+        @Override
+        public int getTitle() {
+            return R.string.quick_settings_cellular_detail_title;
+        }
+
+        @Override
+        public Boolean getToggleState() {
+            return mController.isMobileDataSupported() ? mController.isMobileDataEnabled() : null;
+        }
+
+        @Override
+        public Intent getSettingsIntent() {
+            return CELLULAR_SETTINGS;
+        }
+
+        @Override
+        public void setToggleState(boolean state) {
+            mController.setMobileDataEnabled(state);
+        }
+
+        @Override
+        public View createDetailView(Context context, View convertView, ViewGroup parent) {
+            final View v = convertView != null ? convertView : LayoutInflater.from(mContext)
+                    .inflate(R.layout.data_usage, parent, false);
+            final DataUsageInfo info = mController.getDataUsageInfo();
+            if (info == null) return v;
+            final TextView title = (TextView) v.findViewById(android.R.id.title);
+            title.setText(R.string.quick_settings_cellular_detail_data_usage);
+            final TextView usage = (TextView) v.findViewById(R.id.usage_text);
+            usage.setText(formatBytes(info.usageLevel));
+            final DataUsageGraph graph = (DataUsageGraph) v.findViewById(R.id.usage_graph);
+            graph.setLevels(info.maxLevel, info.limitLevel, info.warningLevel, info.usageLevel);
+            final TextView carrier = (TextView) v.findViewById(R.id.usage_carrier_text);
+            carrier.setText(info.carrier);
+            final TextView period = (TextView) v.findViewById(R.id.usage_period_text);
+            period.setText(info.period);
+            final TextView infoTop = (TextView) v.findViewById(R.id.usage_info_top_text);
+            // TODO
+            final TextView infoBottom = (TextView) v.findViewById(R.id.usage_info_bottom_text);
+            // TODO
+            return v;
+        }
+
+        public void setMobileDataEnabled(boolean enabled) {
+            fireToggleStateChanged(enabled);
+        }
+
+        private String formatBytes(long bytes) {
+            final long b = Math.abs(bytes);
+            double val;
+            String suffix;
+            if (b > 100 * MB) {
+                val = b / GB;
+                suffix = "GB";
+            } else if (b > 100 * KB) {
+                val = b / MB;
+                suffix = "MB";
+            } else {
+                val = b / KB;
+                suffix = "KB";
+            }
+            return FORMAT.format(val * (bytes < 0 ? -1 : 1)) + " " + suffix;
+        }
+    }
 }

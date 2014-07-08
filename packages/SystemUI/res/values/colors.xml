@@ -36,12 +36,14 @@
     <color name="qs_batterymeter_frame_color">#FF404040</color>
     <color name="system_primary_color">#ff263238</color>
     <color name="system_secondary_color">#ff384248</color>
-    <color name="system_accent_color">#ff7fcac3</color>
+    <color name="system_accent_color">#ff80CBC4</color><!-- deep teal 200 -->
     <color name="system_error_color">#fff0592b</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_tile_text">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_subhead">#66FFFFFF</color><!-- 40% white -->
-    <color name="status_bar_clock_color">#FFFFFFFF</color>
+    <color name="data_usage_secondary">#99FFFFFF</color><!-- 60% white -->
+    <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
+    <color name="status_bar_clock_color">#33FFFFFF</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
