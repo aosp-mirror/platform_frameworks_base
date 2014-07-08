@@ -52,6 +52,12 @@ public abstract class AdvertiseCallback {
     public static final int ADVERTISE_FAILED_CONTROLLER_FAILURE = 5;
 
     /**
+     * Operation fails due to GATT service failure.
+     * @hide
+     */
+    public static final int ADVERTISE_FAILED_GATT_SERVICE_FAILURE = 6;
+
+    /**
      * Callback when advertising operation succeeds.
      *
      * @param settingsInEffect The actual settings used for advertising, which may be different from

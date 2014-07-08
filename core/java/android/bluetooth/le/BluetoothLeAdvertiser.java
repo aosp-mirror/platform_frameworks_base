@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothGattCallback;
+import android.bluetooth.IBluetoothManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -27,6 +28,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -47,7 +49,7 @@ public final class BluetoothLeAdvertiser {
 
     private static final String TAG = "BluetoothLeAdvertiser";
 
-    private final IBluetoothGatt mBluetoothGatt;
+    private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
     private final Map<AdvertiseCallback, AdvertiseCallbackWrapper>
             mLeAdvertisers = new HashMap<AdvertiseCallback, AdvertiseCallbackWrapper>();
@@ -55,11 +57,11 @@ public final class BluetoothLeAdvertiser {
     /**
      * Use BluetoothAdapter.getLeAdvertiser() instead.
      *
-     * @param bluetoothGatt
+     * @param bluetoothManager
      * @hide
      */
-    public BluetoothLeAdvertiser(IBluetoothGatt bluetoothGatt) {
-        mBluetoothGatt = bluetoothGatt;
+    public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
+        mBluetoothManager = bluetoothManager;
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -102,11 +104,19 @@ public final class BluetoothLeAdvertiser {
             postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED);
             return;
         }
+        IBluetoothGatt gatt;
+        try {
+            gatt = mBluetoothManager.getBluetoothGatt();
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get bluetooth gatt - ", e);
+            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_CONTROLLER_FAILURE);
+            return;
+        }
         AdvertiseCallbackWrapper wrapper = new AdvertiseCallbackWrapper(callback, advertiseData,
-                scanResponse, settings, mBluetoothGatt);
+                scanResponse, settings, gatt);
         UUID uuid = UUID.randomUUID();
         try {
-            mBluetoothGatt.registerClient(new ParcelUuid(uuid), wrapper);
+            gatt.registerClient(new ParcelUuid(uuid), wrapper);
             if (wrapper.advertiseStarted()) {
                 mLeAdvertisers.put(callback, wrapper);
             }
@@ -133,12 +143,19 @@ public final class BluetoothLeAdvertiser {
             return;
         }
         try {
-            mBluetoothGatt.stopMultiAdvertising(wrapper.mLeHandle);
+            IBluetoothGatt gatt = mBluetoothManager.getBluetoothGatt();
+            if (gatt == null) {
+                postCallbackFailure(callback,
+                        AdvertiseCallback.ADVERTISE_FAILED_GATT_SERVICE_FAILURE);
+            }
+            gatt.stopMultiAdvertising(wrapper.mLeHandle);
             if (wrapper.advertiseStopped()) {
                 mLeAdvertisers.remove(callback);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "failed to stop advertising", e);
+            postCallbackFailure(callback,
+                    AdvertiseCallback.ADVERTISE_FAILED_GATT_SERVICE_FAILURE);
         }
     }
 
@@ -214,8 +231,6 @@ public final class BluetoothLeAdvertiser {
                         Log.e(TAG, "fail to start le advertise: " + e);
                         mLeHandle = -1;
                         notifyAll();
-                    } catch (Exception e) {
-                        Log.e(TAG, "fail to start advertise: " + e.getStackTrace());
                     }
                 } else {
                     // registration failed
@@ -358,6 +373,11 @@ public final class BluetoothLeAdvertiser {
 
         @Override
         public void onConnectionCongested(String address, boolean congested) {
+            // no op
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
             // no op
         }
     }

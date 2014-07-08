@@ -16,7 +16,7 @@
 package android.bluetooth;
 
 import android.os.ParcelUuid;
-
+import android.bluetooth.le.ScanResult;
 
 /**
  * Callback definitions for interacting with BLE / GATT
@@ -27,6 +27,7 @@ oneway interface IBluetoothGattCallback {
     void onClientConnectionState(in int status, in int clientIf,
                                  in boolean connected, in String address);
     void onScanResult(in String address, in int rssi, in byte[] advData);
+    void onBatchScanResults(in List<ScanResult> batchResults);
     void onGetService(in String address, in int srvcType, in int srvcInstId,
                       in ParcelUuid srvcUuid);
     void onGetIncludedService(in String address, in int srvcType, in int srvcInstId,

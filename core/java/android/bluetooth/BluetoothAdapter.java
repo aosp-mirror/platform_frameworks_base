@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -504,13 +506,7 @@ public final class BluetoothAdapter {
      */
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
         // TODO: Return null if this feature is not supported by hardware.
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            return new BluetoothLeAdvertiser(iGatt);
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get BluetoothLeAdvertiser, error: " + e);
-            return null;
-        }
+        return new BluetoothLeAdvertiser(mManagerService);
     }
 
     /**
@@ -518,13 +514,7 @@ public final class BluetoothAdapter {
      */
     public BluetoothLeScanner getBluetoothLeScanner() {
         // TODO: Return null if BLE scan is not supported by hardware.
-        try {
-            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
-            return new BluetoothLeScanner(iGatt);
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get BluetoothLeScanner, error: " + e);
-            return null;
-        }
+        return new BluetoothLeScanner(mManagerService);
     }
 
     /**
@@ -2135,6 +2125,11 @@ public final class BluetoothAdapter {
 
         @Override
         public void onConnectionCongested(String address, boolean congested) {
+            // no op
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
             // no op
         }
     }

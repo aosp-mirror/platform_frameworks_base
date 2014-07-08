@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothGattCallback;
+import android.bluetooth.IBluetoothManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -51,15 +52,15 @@ public final class BluetoothLeScanner {
     private static final String TAG = "BluetoothLeScanner";
     private static final boolean DBG = true;
 
-    private final IBluetoothGatt mBluetoothGatt;
+    private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
     private final Map<ScanCallback, BleScanCallbackWrapper> mLeScanClients;
 
     /**
      * @hide
      */
-    public BluetoothLeScanner(IBluetoothGatt bluetoothGatt) {
-        mBluetoothGatt = bluetoothGatt;
+    public BluetoothLeScanner(IBluetoothManager bluetoothManager) {
+        mBluetoothManager = bluetoothManager;
         mHandler = new Handler(Looper.getMainLooper());
         mLeScanClients = new HashMap<ScanCallback, BleScanCallbackWrapper>();
     }
@@ -84,11 +85,21 @@ public final class BluetoothLeScanner {
                 postCallbackError(callback, ScanCallback.SCAN_FAILED_ALREADY_STARTED);
                 return;
             }
-            BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(mBluetoothGatt, filters,
+            IBluetoothGatt gatt;
+            try {
+                gatt = mBluetoothManager.getBluetoothGatt();
+            } catch (RemoteException e) {
+                gatt = null;
+            }
+            if (gatt == null) {
+                postCallbackError(callback, ScanCallback.SCAN_FAILED_GATT_SERVICE_FAILURE);
+                return;
+            }
+            BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(gatt, filters,
                     settings, callback);
             try {
                 UUID uuid = UUID.randomUUID();
-                mBluetoothGatt.registerClient(new ParcelUuid(uuid), wrapper);
+                gatt.registerClient(new ParcelUuid(uuid), wrapper);
                 if (wrapper.scanStarted()) {
                     mLeScanClients.put(callback, wrapper);
                 } else {
@@ -131,18 +142,26 @@ public final class BluetoothLeScanner {
     }
 
     /**
-     * Poll scan results from bluetooth controller. This will return Bluetooth LE scan results
-     * batched on bluetooth controller.
+     * Flush pending batch scan results stored in Bluetooth controller. This will return Bluetooth
+     * LE scan results batched on bluetooth controller. Returns immediately, batch scan results data
+     * will be delivered through the {@code callback}.
      *
      * @param callback Callback of the Bluetooth LE Scan, it has to be the same instance as the one
      *            used to start scan.
-     * @param flush Whether to flush the batch scan buffer. Note the other batch scan clients will
-     *            get batch scan callback if the batch scan buffer is flushed.
-     * @return Batch Scan results.
-     * @hide TODO: unhide when batching is supported in stack.
+     *
+     * @hide
      */
-    public List<ScanResult> getBatchScanResults(ScanCallback callback, boolean flush) {
-        throw new UnsupportedOperationException("not impelemented");
+    public void flushPendingScanResults(ScanCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null!");
+        }
+        synchronized (mLeScanClients) {
+            BleScanCallbackWrapper wrapper = mLeScanClients.get(callback);
+            if (wrapper == null) {
+                return;
+            }
+            wrapper.flushPendingBatchResults();
+        }
     }
 
     /**
@@ -195,10 +214,24 @@ public final class BluetoothLeScanner {
                     mBluetoothGatt.stopScan(mLeHandle, false);
                     mBluetoothGatt.unregisterClient(mLeHandle);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to stop scan and unregister" + e);
+                    Log.e(TAG, "Failed to stop scan and unregister", e);
                 }
                 mLeHandle = -1;
                 notifyAll();
+            }
+        }
+
+        void flushPendingBatchResults() {
+            synchronized (this) {
+                if (mLeHandle <= 0) {
+                    Log.e(TAG, "Error state, mLeHandle: " + mLeHandle);
+                    return;
+                }
+                try {
+                    mBluetoothGatt.flushPendingBatchResults(mLeHandle, false);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to get pending scan results", e);
+                }
             }
         }
 
@@ -256,9 +289,27 @@ public final class BluetoothLeScanner {
             BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
                     address);
             long scanNanos = SystemClock.elapsedRealtimeNanos();
-            ScanResult result = new ScanResult(device, advData, rssi,
+            final ScanResult result = new ScanResult(device, advData, rssi,
                     scanNanos);
-            mScanCallback.onAdvertisementUpdate(result);
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                    @Override
+                public void run() {
+                    mScanCallback.onAdvertisementUpdate(result);
+                }
+            });
+
+        }
+
+        @Override
+        public void onBatchScanResults(final List<ScanResult> results) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                    @Override
+                public void run() {
+                    mScanCallback.onBatchScanResults(results);
+                }
+            });
         }
 
         @Override
