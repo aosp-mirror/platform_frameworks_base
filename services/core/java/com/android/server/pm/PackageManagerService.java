@@ -4110,7 +4110,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         for (File file : files) {
-            if (!isApkFile(file)) {
+            final boolean isPackage = isApkFile(file) || file.isDirectory();
+            if (!isPackage) {
                 // Ignore entries which are not apk's
                 continue;
             }
