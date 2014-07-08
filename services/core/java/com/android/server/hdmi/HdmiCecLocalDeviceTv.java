@@ -21,7 +21,6 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioSystem;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -1084,6 +1083,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     boolean isPowerStandbyOrTransient() {
         return mService.isPowerStandbyOrTransient();
+    }
 
     void displayOsd(int messageId) {
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
