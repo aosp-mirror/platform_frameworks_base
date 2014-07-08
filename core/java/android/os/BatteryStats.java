@@ -2076,7 +2076,7 @@ public abstract class BatteryStats implements Parcelable {
                     if (val != 0) hasData = true;
                 }
                 if (hasData) {
-                    dumpLine(pw, 0 /* uid */, category, USER_ACTIVITY_DATA, args);
+                    dumpLine(pw, uid /* uid */, category, USER_ACTIVITY_DATA, args);
                 }
             }
             
