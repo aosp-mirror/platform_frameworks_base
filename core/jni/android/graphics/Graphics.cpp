@@ -291,6 +291,54 @@ void GraphicsJNI::point_to_jpointf(const SkPoint& r, JNIEnv* env, jobject obj)
     env->SetFloatField(obj, gPointF_yFieldID, SkScalarToFloat(r.fY));
 }
 
+// This enum must keep these int values, to match the int values
+// in the java Bitmap.Config enum.
+enum LegacyBitmapConfig {
+    kNo_LegacyBitmapConfig          = 0,
+    kA8_LegacyBitmapConfig          = 1,
+    kIndex8_LegacyBitmapConfig      = 2,
+    kRGB_565_LegacyBitmapConfig     = 3,
+    kARGB_4444_LegacyBitmapConfig   = 4,
+    kARGB_8888_LegacyBitmapConfig   = 5,
+
+    kLastEnum_LegacyBitmapConfig = kARGB_8888_LegacyBitmapConfig
+};
+
+jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
+    switch (colorType) {
+        case kN32_SkColorType:
+            return kARGB_8888_LegacyBitmapConfig;
+        case kARGB_4444_SkColorType:
+            return kARGB_4444_LegacyBitmapConfig;
+        case kRGB_565_SkColorType:
+            return kRGB_565_LegacyBitmapConfig;
+        case kIndex_8_SkColorType:
+            return kIndex8_LegacyBitmapConfig;
+        case kAlpha_8_SkColorType:
+            return kA8_LegacyBitmapConfig;
+        case kUnknown_SkColorType:
+        default:
+            break;
+    }
+    return kNo_LegacyBitmapConfig;
+}
+
+SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
+    const uint8_t gConfig2ColorType[] = {
+        kUnknown_SkColorType,
+        kAlpha_8_SkColorType,
+        kIndex_8_SkColorType,
+        kRGB_565_SkColorType,
+        kARGB_4444_SkColorType,
+        kN32_SkColorType
+    };
+
+    if (legacyConfig < 0 || legacyConfig > kLastEnum_LegacyBitmapConfig) {
+        legacyConfig = kNo_LegacyBitmapConfig;
+    }
+    return static_cast<SkColorType>(gConfig2ColorType[legacyConfig]);
+}
+
 SkBitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
@@ -308,10 +356,7 @@ SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) 
     }
     SkASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
     int c = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
-    if (c < 0 || c >= SkBitmap::kConfigCount) {
-        c = kUnknown_SkColorType;
-    }
-    return SkBitmapConfigToColorType(static_cast<SkBitmap::Config>(c));
+    return legacyBitmapConfigToColorType(c);
 }
 
 SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {

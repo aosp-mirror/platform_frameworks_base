@@ -285,20 +285,20 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
 
     Caches::getInstance().bindTexture(texture->id);
 
-    switch (bitmap->config()) {
-    case SkBitmap::kA8_Config:
+    switch (bitmap->colorType()) {
+    case kAlpha_8_SkColorType:
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
         texture->blend = true;
         break;
-    case SkBitmap::kRGB_565_Config:
+    case kRGB_565_SkColorType:
         glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         texture->blend = false;
         break;
-    case SkBitmap::kARGB_8888_Config:
+    case kN32_SkColorType:
         glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
@@ -306,14 +306,14 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
         // decoding happened
         texture->blend = !bitmap->isOpaque();
         break;
-    case SkBitmap::kARGB_4444_Config:
-    case SkBitmap::kIndex8_Config:
+    case kARGB_4444_SkColorType:
+    case kIndex_8_SkColorType:
         glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
         texture->blend = !bitmap->isOpaque();
         break;
     default:
-        ALOGW("Unsupported bitmap config: %d", bitmap->config());
+        ALOGW("Unsupported bitmap colorType: %d", bitmap->colorType());
         break;
     }
 
