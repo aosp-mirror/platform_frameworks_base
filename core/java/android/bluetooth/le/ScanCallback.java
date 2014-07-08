@@ -41,6 +41,11 @@ public abstract class ScanCallback {
     public static final int SCAN_FAILED_CONTROLLER_FAILURE = 4;
 
     /**
+     * Fails to start power optimized scan as this feature is not supported.
+     */
+    public static final int SCAN_FAILED_FEATURE_UNSUPPORTED = 5;
+
+    /**
      * Callback when a BLE advertisement is found.
      *
      * @param result A Bluetooth LE scan result.

@@ -6374,6 +6374,7 @@ package android.bluetooth.le {
     method public abstract void onSuccess(android.bluetooth.le.AdvertiseSettings);
     field public static final int ADVERTISE_FAILED_ALREADY_STARTED = 3; // 0x3
     field public static final int ADVERTISE_FAILED_CONTROLLER_FAILURE = 5; // 0x5
+    field public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 7; // 0x7
     field public static final int ADVERTISE_FAILED_NOT_STARTED = 4; // 0x4
     field public static final int ADVERTISE_FAILED_SERVICE_UNKNOWN = 1; // 0x1
     field public static final int ADVERTISE_FAILED_TOO_MANY_ADVERTISERS = 2; // 0x2
@@ -6445,6 +6446,7 @@ package android.bluetooth.le {
     field public static final int SCAN_FAILED_ALREADY_STARTED = 1; // 0x1
     field public static final int SCAN_FAILED_APPLICATION_REGISTRATION_FAILED = 2; // 0x2
     field public static final int SCAN_FAILED_CONTROLLER_FAILURE = 4; // 0x4
+    field public static final int SCAN_FAILED_FEATURE_UNSUPPORTED = 5; // 0x5
     field public static final int SCAN_FAILED_GATT_SERVICE_FAILURE = 3; // 0x3
   }
 

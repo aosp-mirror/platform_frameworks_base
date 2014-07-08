@@ -51,6 +51,7 @@ public final class BluetoothLeAdvertiser {
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
+    private BluetoothAdapter mBluetoothAdapter;
     private final Map<AdvertiseCallback, AdvertiseCallbackWrapper>
             mLeAdvertisers = new HashMap<AdvertiseCallback, AdvertiseCallbackWrapper>();
 
@@ -62,6 +63,7 @@ public final class BluetoothLeAdvertiser {
      */
     public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
         mBluetoothManager = bluetoothManager;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -110,6 +112,10 @@ public final class BluetoothLeAdvertiser {
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get bluetooth gatt - ", e);
             postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_CONTROLLER_FAILURE);
+            return;
+        }
+        if (!mBluetoothAdapter.isMultipleAdvertisementSupported()) {
+            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED);
             return;
         }
         AdvertiseCallbackWrapper wrapper = new AdvertiseCallbackWrapper(callback, advertiseData,

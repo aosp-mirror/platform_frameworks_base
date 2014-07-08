@@ -58,6 +58,12 @@ public abstract class AdvertiseCallback {
     public static final int ADVERTISE_FAILED_GATT_SERVICE_FAILURE = 6;
 
     /**
+     * Operation fails as this feature is not supported
+     */
+    public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 7;
+
+
+    /**
      * Callback when advertising operation succeeds.
      *
      * @param settingsInEffect The actual settings used for advertising, which may be different from

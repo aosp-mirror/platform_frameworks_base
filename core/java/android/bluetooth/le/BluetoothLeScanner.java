@@ -54,6 +54,7 @@ public final class BluetoothLeScanner {
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
+    private BluetoothAdapter mBluetoothAdapter;
     private final Map<ScanCallback, BleScanCallbackWrapper> mLeScanClients;
 
     /**
@@ -61,6 +62,7 @@ public final class BluetoothLeScanner {
      */
     public BluetoothLeScanner(IBluetoothManager bluetoothManager) {
         mBluetoothManager = bluetoothManager;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = new Handler(Looper.getMainLooper());
         mLeScanClients = new HashMap<ScanCallback, BleScanCallbackWrapper>();
     }
@@ -93,6 +95,11 @@ public final class BluetoothLeScanner {
             }
             if (gatt == null) {
                 postCallbackError(callback, ScanCallback.SCAN_FAILED_GATT_SERVICE_FAILURE);
+                return;
+            }
+            if (!isSettingsConfigAllowedForScan(settings)) {
+                postCallbackError(callback,
+                        ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED);
                 return;
             }
             BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(gatt, filters,
@@ -423,5 +430,20 @@ public final class BluetoothLeScanner {
                 callback.onScanFailed(errorCode);
             }
         });
+    }
+
+    private boolean isSettingsConfigAllowedForScan(ScanSettings settings) {
+        boolean ret = true;
+        int callbackType;
+
+        callbackType = settings.getCallbackType();
+        if (((callbackType == ScanSettings.CALLBACK_TYPE_ON_LOST) ||
+                (callbackType == ScanSettings.CALLBACK_TYPE_ON_FOUND) ||
+                (callbackType == ScanSettings.CALLBACK_TYPE_ON_UPDATE &&
+                settings.getReportDelayNanos() > 0) &&
+                (!mBluetoothAdapter.isOffloadedFilteringSupported()))) {
+            ret = false;
+        }
+        return ret;
     }
 }
