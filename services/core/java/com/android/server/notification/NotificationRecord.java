@@ -25,6 +25,7 @@ import android.service.notification.StatusBarNotification;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Holds data about notifications that should not be shared with the
@@ -199,6 +200,10 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean isCategory(String category) {
+        return Objects.equals(category, getNotification().category);
     }
 
     /**
