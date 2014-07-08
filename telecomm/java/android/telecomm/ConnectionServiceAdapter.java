@@ -321,6 +321,21 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Requests that the framework use VOIP audio mode for this connection.
+     *
+     * @param callId The unique ID of the call to set with the given call video provider.
+     * @param isVoip True if the audio mode is VOIP.
+     */
+    void setAudioModeIsVoip(String callId, boolean isVoip) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setAudioModeIsVoip(callId, isVoip);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
     * Set the features associated with the given call.
     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a
     * bit-mask.

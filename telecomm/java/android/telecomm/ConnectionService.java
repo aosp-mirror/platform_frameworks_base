@@ -364,6 +364,12 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConnection.get(c);
             mAdapter.setCallVideoProvider(id, callVideoProvider);
         }
+
+        @Override
+        public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {
+            String id = mIdByConnection.get(c);
+            mAdapter.setAudioModeIsVoip(id, isVoip);
+        }
     };
 
     /** {@inheritDoc} */
