@@ -63,7 +63,8 @@ public final class NetworkCapabilities implements Parcelable {
      * Represents the network's capabilities.  If any are specified they will be satisfied
      * by any Network that matches all of them.
      */
-    private long mNetworkCapabilities = (1 << NET_CAPABILITY_NOT_RESTRICTED);
+    private long mNetworkCapabilities = (1 << NET_CAPABILITY_NOT_RESTRICTED) |
+            (1 << NET_CAPABILITY_TRUSTED);
 
     /**
      * Indicates this is a network that has the ability to reach the
@@ -149,8 +150,17 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_NOT_RESTRICTED = 13;
 
+    /**
+     * Indicates that the user has indicated implicit trust of this network.  This
+     * generally means it's a sim-selected carrier, a plugged in ethernet, a paired
+     * BT device or a wifi the user asked to connect to.  Untrusted networks
+     * are probably limited to unknown wifi AP.  Set by default.
+     */
+    public static final int NET_CAPABILITY_TRUSTED        = 14;
+
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_RESTRICTED;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_TRUSTED;
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
@@ -512,6 +522,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case NET_CAPABILITY_NOT_METERED:    capabilities += "NOT_METERED"; break;
                 case NET_CAPABILITY_INTERNET:       capabilities += "INTERNET"; break;
                 case NET_CAPABILITY_NOT_RESTRICTED: capabilities += "NOT_RESTRICTED"; break;
+                case NET_CAPABILITY_TRUSTED:        capabilities += "TRUSTED"; break;
             }
             if (++i < types.length) capabilities += "&";
         }
