@@ -63,11 +63,12 @@ RenderNode::RenderNode()
         , mDisplayListData(0)
         , mStagingDisplayListData(0)
         , mAnimatorManager(*this)
-        , mLayer(0) {
+        , mLayer(0)
+        , mParentCount(0) {
 }
 
 RenderNode::~RenderNode() {
-    delete mDisplayListData;
+    deleteDisplayListData();
     delete mStagingDisplayListData;
     LayerRenderer::destroyLayerDeferred(mLayer);
 }
@@ -196,27 +197,12 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 void RenderNode::prepareTreeImpl(TreeInfo& info) {
     info.damageAccumulator->pushTransform(this);
 
-    switch (info.mode) {
-    case TreeInfo::MODE_FULL:
+    if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingPropertiesChanges(info);
-        mAnimatorManager.animate(info);
-        break;
-    case TreeInfo::MODE_MAYBE_DETACHING:
-        pushStagingPropertiesChanges(info);
-        break;
-    case TreeInfo::MODE_RT_ONLY:
-        mAnimatorManager.animate(info);
-        break;
-    case TreeInfo::MODE_DESTROY_RESOURCES:
-        // This will also release the hardware layer if we have one as
-        // isRenderable() will return false, thus causing pushLayerUpdate
-        // to recycle the hardware layer
-        setStagingDisplayList(NULL);
-        break;
     }
-
+    mAnimatorManager.animate(info);
     prepareLayer(info);
-    if (info.mode == TreeInfo::MODE_FULL || info.mode == TreeInfo::MODE_DESTROY_RESOURCES) {
+    if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
     }
     prepareSubTree(info, mDisplayListData);
@@ -258,15 +244,28 @@ void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
 void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
     if (mNeedsDisplayListDataSync) {
         mNeedsDisplayListDataSync = false;
-        // Do a push pass on the old tree to handle freeing DisplayListData
-        // that are no longer used
-        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING, info);
-        prepareSubTree(oldTreeInfo, mDisplayListData);
-        delete mDisplayListData;
+        // Make sure we inc first so that we don't fluctuate between 0 and 1,
+        // which would thrash the layer cache
+        if (mStagingDisplayListData) {
+            for (size_t i = 0; i < mStagingDisplayListData->children().size(); i++) {
+                mStagingDisplayListData->children()[i]->mRenderNode->incParentRefCount();
+            }
+        }
+        deleteDisplayListData();
         mDisplayListData = mStagingDisplayListData;
-        mStagingDisplayListData = 0;
+        mStagingDisplayListData = NULL;
         damageSelf(info);
     }
+}
+
+void RenderNode::deleteDisplayListData() {
+    if (mDisplayListData) {
+        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
+            mDisplayListData->children()[i]->mRenderNode->decParentRefCount();
+        }
+    }
+    delete mDisplayListData;
+    mDisplayListData = NULL;
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
@@ -288,6 +287,35 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
             childNode->prepareTreeImpl(info);
             info.damageAccumulator->popTransform();
         }
+    }
+}
+
+void RenderNode::destroyHardwareResources() {
+    if (mLayer) {
+        LayerRenderer::destroyLayer(mLayer);
+        mLayer = NULL;
+    }
+    if (mDisplayListData) {
+        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
+            mDisplayListData->children()[i]->mRenderNode->destroyHardwareResources();
+        }
+        if (mNeedsDisplayListDataSync) {
+            // Next prepare tree we are going to push a new display list, so we can
+            // drop our current one now
+            deleteDisplayListData();
+        }
+    }
+}
+
+void RenderNode::decParentRefCount() {
+    LOG_ALWAYS_FATAL_IF(!mParentCount, "already 0!");
+    mParentCount--;
+    if (!mParentCount) {
+        // If a child of ours is being attached to our parent then this will incorrectly
+        // destroy its hardware resources. However, this situation is highly unlikely
+        // and the failure is "just" that the layer is re-created, so this should
+        // be safe enough
+        destroyHardwareResources();
     }
 }
 

@@ -168,6 +168,7 @@ public:
     }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
+    void destroyHardwareResources();
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
@@ -248,6 +249,10 @@ private:
     void applyLayerPropertiesToLayer(TreeInfo& info);
     void prepareLayer(TreeInfo& info);
     void pushLayerUpdate(TreeInfo& info);
+    void deleteDisplayListData();
+
+    void incParentRefCount() { mParentCount++; }
+    void decParentRefCount();
 
     String8 mName;
 
@@ -256,6 +261,7 @@ private:
     RenderProperties mStagingProperties;
 
     bool mNeedsDisplayListDataSync;
+    // WARNING: Do not delete this directly, you must go through deleteDisplayListData()!
     DisplayListData* mDisplayListData;
     DisplayListData* mStagingDisplayListData;
 
@@ -272,6 +278,14 @@ private:
 
     // for projection surfaces, contains a list of all children items
     Vector<DrawRenderNodeOp*> mProjectedNodes;
+
+    // How many references our parent(s) have to us. Typically this should alternate
+    // between 2 and 1 (when a staging push happens we inc first then dec)
+    // When this hits 0 we are no longer in the tree, so any hardware resources
+    // (specifically Layers) should be released.
+    // This is *NOT* thread-safe, and should therefore only be tracking
+    // mDisplayListData, not mStagingDisplayListData.
+    uint32_t mParentCount;
 }; // class RenderNode
 
 } /* namespace uirenderer */
