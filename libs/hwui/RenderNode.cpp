@@ -211,8 +211,7 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
         // This will also release the hardware layer if we have one as
         // isRenderable() will return false, thus causing pushLayerUpdate
         // to recycle the hardware layer
-        LOG_ALWAYS_FATAL_IF(mStagingDisplayListData || (mDisplayListData && !mNeedsDisplayListDataSync),
-                "View.destroyHardwareResources wasn't called!");
+        setStagingDisplayList(NULL);
         break;
     }
 
@@ -261,11 +260,7 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         mNeedsDisplayListDataSync = false;
         // Do a push pass on the old tree to handle freeing DisplayListData
         // that are no longer used
-        TreeInfo::TraversalMode mode = TreeInfo::MODE_MAYBE_DETACHING;
-        if (CC_UNLIKELY(info.mode == TreeInfo::MODE_DESTROY_RESOURCES)) {
-            mode = TreeInfo::MODE_DESTROY_RESOURCES;
-        }
-        TreeInfo oldTreeInfo(mode, info);
+        TreeInfo oldTreeInfo(TreeInfo::MODE_MAYBE_DETACHING, info);
         prepareSubTree(oldTreeInfo, mDisplayListData);
         delete mDisplayListData;
         mDisplayListData = mStagingDisplayListData;

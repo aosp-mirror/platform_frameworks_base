@@ -127,8 +127,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void destroyHardwareResources(View view) {
         destroyResources(view);
-        // mRootNode belongs to us and not a view, so we need to destroy it
-        mRootNode.destroyDisplayListData();
         nDestroyHardwareResources(mNativeProxy);
     }
 
