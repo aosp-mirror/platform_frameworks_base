@@ -65,7 +65,6 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
-
 import android.telecomm.TelecommManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -84,6 +83,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -3776,6 +3776,11 @@ public class AudioService extends IAudioService.Stub {
                                         AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
                     }
 
+                    if (mHdmiTvClient != null) {
+                        setHdmiSystemAudioSupported(mHdmiSystemAudioSupported,
+                                mHdmiSystemAudioOutputDevice, "");
+                    }
+
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -4754,53 +4759,111 @@ public class AudioService extends IAudioService.Stub {
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
     private HdmiTvClient mHdmiTvClient;
+    private int mHdmiSystemAudioOutputDevice = AudioSystem.DEVICE_NONE;
+    private int[] mSpeakerGains;
 
     @Override
-    public void setHdmiSystemAudioSupported(boolean on, int device, String name) {
+    public int setHdmiSystemAudioSupported(boolean on, int device, String name) {
         if (mHdmiTvClient == null) {
             Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
-            return;
+            return AudioSystem.DEVICE_NONE;
         }
 
-        if ((device & AudioSystem.DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO) == 0) {
-            Log.w(TAG, "Unsupported Hdmi-Cec system audio output:" + device);
-            return;
+        if (on && !checkHdmiSystemAudioOutput(device)) {
+            return AudioSystem.DEVICE_NONE;
         }
-
-        VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
-        int oldStreamDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
-        int oldIndex = streamState.getIndex(oldStreamDevice);
 
         synchronized (mHdmiTvClient) {
+            if (on) {
+                mHdmiSystemAudioOutputDevice = device;
+            }
+            if (mHdmiSystemAudioSupported == on) {
+                return AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+            }
             mHdmiSystemAudioSupported = on;
+            updateHdmiSystemAudioVolumeLocked(on);
+        }
+        return AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+    }
 
-            // TODO: call AudioSystem.setForceUse(FORCE_FOR_MEDIA,
-            //         on ? AudioSystem.FORCE_SYSTEM_AUDIO_XXX : AudioSystem.FORCE_NONE;
+    private boolean checkHdmiSystemAudioOutput(int device) {
+        if ((device & AudioSystem.DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO) == 0) {
+            Log.w(TAG, "Unsupported Hdmi-Cec system audio output:" + device);
+            return false;
         }
 
-        int newStreamDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
-        boolean updateSpeakerVolume = false;
+        int streamDevice = AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+        // If other devices except for system audio and speaker are available,
+        // fails to start system audio mode.
+        if ((streamDevice & ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER) != 0) {
+            Log.w(TAG, "Should turn off other devices before starting system audio:"
+                    + streamDevice);
+            return false;
+        }
+        if (AudioSystem.getDeviceConnectionState(device, "") !=
+            AudioSystem.DEVICE_STATE_AVAILABLE) {
+            Log.w(TAG, "Output device is not connected:" + device);
+            return false;
+        }
+        return true;
+    }
+
+    private void updateHdmiSystemAudioVolumeLocked(boolean on) {
+        AudioDevicePort speaker = findAudioDevicePort(AudioSystem.DEVICE_OUT_SPEAKER);
+        if (speaker == null) {
+            Log.w(TAG, "Has no speaker output.");
+            return;
+        }
+
+        AudioPortConfig portConfig = speaker.activeConfig();
+        AudioGainConfig gainConfig = portConfig.gain();
+        int[] newGains;
+        // When system audio is on, backup original gains and mute all channels of speaker by
+        // setting gains to 0; otherwise, restore gains of speaker.
         if (on) {
-            if ((oldStreamDevice & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
-                // Mute tv speaker. Note that set volume 0 instead of call mute() method because
-                // it's not possible to mute for a specific device.
-                streamState.setIndex(0, AudioSystem.DEVICE_OUT_SPEAKER);
-                updateSpeakerVolume = true;
+            if (gainConfig == null) {
+                Log.w(TAG, "Speaker has no gain control.");
+                return;
             }
+            // Back up original gains.
+            mSpeakerGains = Arrays.copyOf(gainConfig.values(), gainConfig.values().length);
+            // Set all gains to 0.
+            newGains = new int[gainConfig.values().length];
         } else {
-            if ((newStreamDevice & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
-                // Restore speaker volume if exists. As there is no way to mute a device here,
-                // load system audio's volume and set it to speaker.
-                streamState.setIndex(oldIndex, AudioSystem.DEVICE_OUT_SPEAKER);
-                updateSpeakerVolume = true;
+            if (mSpeakerGains == null) {
+                Log.w(TAG, "mSpeakerGains should not be null.");
+                return;
             }
+            newGains = Arrays.copyOf(mSpeakerGains, mSpeakerGains.length);
         }
 
-        if (updateSpeakerVolume) {
-            sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
-                    AudioSystem.DEVICE_OUT_SPEAKER, 0,
-                    streamState, 0);
+        gainConfig = gainConfig.mGain.buildConfig(gainConfig.mode(),
+                gainConfig.channelMask(),
+                newGains,
+                gainConfig.rampDurationMs());
+
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (AudioSystem.SUCCESS !=  audioManager.setAudioPortGain(speaker, gainConfig)) {
+            Log.w(TAG, "Failed to update audio port config.");
         }
+    }
+
+    private AudioDevicePort findAudioDevicePort(int type) {
+        ArrayList<AudioPort> devicePorts = new ArrayList<>();
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        int status = audioManager.listAudioDevicePorts(devicePorts);
+        if (status != AudioSystem.SUCCESS)  {
+            Log.w(TAG, "Failed to list up all audio ports");
+            return null;
+        }
+
+        for (AudioPort port : devicePorts) {
+            AudioDevicePort devicePort = (AudioDevicePort) port;
+            if (devicePort.type() == type) {
+                return devicePort;
+            }
+        }
+        return null;
     }
 
     //==========================================================================================

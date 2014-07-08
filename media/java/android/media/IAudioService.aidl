@@ -198,5 +198,5 @@ interface IAudioService {
 
     void disableSafeMediaVolume();
 
-    oneway void setHdmiSystemAudioSupported(boolean on, int device, String name);
+    int setHdmiSystemAudioSupported(boolean on, int device, String name);
 }
