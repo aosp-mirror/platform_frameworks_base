@@ -27676,13 +27676,14 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle);
-    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, android.os.Bundle);
+    ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle, int);
+    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, android.os.Bundle, int);
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
+    method public int getVideoState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27855,7 +27856,7 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.intent.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
-    field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO = "android.intent.extra.START_CALL_WITH_VIDEO";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
   }
 
   public class VideoCallProfile implements android.os.Parcelable {
