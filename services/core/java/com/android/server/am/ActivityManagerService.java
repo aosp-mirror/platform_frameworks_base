@@ -7945,7 +7945,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 checkedGrants = true;
             }
             userId = handleIncomingUser(callingPid, callingUid, userId,
-                    false, true, "checkContentProviderPermissionLocked " + cpi.authority, null);
+                    false, false, "checkContentProviderPermissionLocked " + cpi.authority, null);
         }
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
                 cpi.applicationInfo.uid, cpi.exported)
