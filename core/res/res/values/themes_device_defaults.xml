@@ -565,8 +565,10 @@ easier.
         <item name="windowIsTranslucent">true</item>
         <item name="windowNoTitle">true</item>
         <item name="windowBackground">@color/transparent</item>
-        <item name="statusBarColor">@color/black</item>
-        <item name="navigationBarColor">@color/black</item>
+        <item name="backgroundDimEnabled">true</item>
+        <item name="windowTranslucentStatus">false</item>
+        <item name="windowTranslucentNavigation">false</item>
+        <item name="windowDrawsSystemBarBackgrounds">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
     </style>

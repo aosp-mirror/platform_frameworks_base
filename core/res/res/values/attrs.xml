@@ -7111,4 +7111,16 @@
             <enum name="passthrough" value="3" />
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="ResolverDrawerLayout">
+        <attr name="maxWidth" />
+        <attr name="maxCollapsedHeight" format="dimension" />
+        <attr name="maxCollapsedHeightSmall" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ResolverDrawerLayout_LayoutParams">
+        <attr name="layout_alwaysShow" format="boolean" />
+        <attr name="layout_ignoreOffset" format="boolean" />
+        <attr name="layout_gravity" />
+    </declare-styleable>
 </resources>

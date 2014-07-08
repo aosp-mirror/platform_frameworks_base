@@ -51,6 +51,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,6 +175,16 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
             mGridView = (GridView) findViewById(R.id.resolver_list);
             mGridView.setVisibility(View.GONE);
+        }
+
+        final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
+        if (rdl != null) {
+            rdl.setOnClickOutsideListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
         }
 
         final TextView titleView = (TextView) findViewById(R.id.title);
