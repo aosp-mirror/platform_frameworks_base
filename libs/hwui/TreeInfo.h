@@ -58,15 +58,6 @@ public:
         // animators, but potentially things like SurfaceTexture updates
         // could be handled by this as well if there are no listeners
         MODE_RT_ONLY,
-        // The subtree is being detached. Maybe. If the RenderNode is present
-        // in both the old and new display list's children then it will get a
-        // MODE_MAYBE_DETACHING followed shortly by a MODE_FULL.
-        // Push any pending display list changes in case it is detached,
-        // but don't evaluate animators and such as if it isn't detached as a
-        // MODE_FULL will follow shortly.
-        MODE_MAYBE_DETACHING,
-        // Destroy all hardware resources, including DisplayListData, in the tree.
-        MODE_DESTROY_RESOURCES,
     };
 
     explicit TreeInfo(TraversalMode mode, RenderState& renderState)
