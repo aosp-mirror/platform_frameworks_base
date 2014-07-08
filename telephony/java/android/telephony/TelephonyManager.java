@@ -2300,7 +2300,7 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return The logical channel id which is negative on error.
@@ -2322,7 +2322,7 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
@@ -2345,7 +2345,7 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -2376,7 +2376,7 @@ public class TelephonyManager {
      * Send ENVELOPE to the SIM and return the response.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#SIM_COMMUNICATION SIM_COMMUNICATION}
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @param content String containing SAT/USAT response in hexadecimal
      *                format starting with command tag. See TS 102 223 for
