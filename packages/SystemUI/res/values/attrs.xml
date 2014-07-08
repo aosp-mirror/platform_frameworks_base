@@ -59,5 +59,8 @@
         <attr name="activeFrameColor" format="color" />
         <attr name="frameColor" />
     </declare-styleable>
+    <declare-styleable name="DateView">
+        <attr name="datePattern" format="string" />
+    </declare-styleable>
 </resources>
 

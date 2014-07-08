@@ -434,7 +434,7 @@ public class NotificationPanelView extends PanelView implements
 
         // Block request when interacting with the scroll view so we can still intercept the
         // scrolling when QS is expanded.
-        if (mScrollView.isDispatchingTouchEvent()) {
+        if (mScrollView.isHandlingTouchEvent()) {
             return;
         }
         super.requestDisallowInterceptTouchEvent(disallowIntercept);

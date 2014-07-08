@@ -128,10 +128,10 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">56dp</dimen>
+    <dimen name="status_bar_header_height">60dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
-    <dimen name="status_bar_header_height_expanded">144dp</dimen>
+    <dimen name="status_bar_header_height_expanded">116dp</dimen>
 
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">40dp</dimen>
@@ -320,6 +320,12 @@
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
 
+    <!-- end margin for multi user switch in collapsed quick settings -->
+    <dimen name="multi_user_switch_collapsed_margin">13dp</dimen>
+
+    <!-- end margin for multi user switch in collapsed quick settings -->
+    <dimen name="multi_user_switch_keyguard_margin">3dp</dimen>
+
     <!-- end margin for system icons if multi user switch is hidden -->
     <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>
 
@@ -327,4 +333,19 @@
     <dimen name="keyguard_user_switcher_border_thickness">2dp</dimen>
 
     <dimen name="data_usage_graph_marker_width">4dp</dimen>
+
+    <!-- The padding bottom of the clock group when QS is expanded. -->
+    <dimen name="clock_expanded_bottom_margin">20dp</dimen>
+
+    <!-- The width of the multi user switch on keyguard and collapsed QS header. -->
+    <dimen name="multi_user_switch_width_collapsed">34dp</dimen>
+
+    <!-- The width of the multi user switch in expanded QS header. -->
+    <dimen name="multi_user_switch_width_expanded">48dp</dimen>
+
+    <!-- The width of user avatar when collapsed -->
+    <dimen name="multi_user_avatar_collapsed_size">22dp</dimen>
+
+    <!-- The font size of the time when collapsed in QS -->
+    <dimen name="qs_time_collapsed_size">14sp</dimen>
 </resources>

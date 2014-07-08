@@ -58,6 +58,7 @@ public class BrightnessController implements ToggleSlider.Listener {
             new ArrayList<BrightnessStateChangeCallback>();
 
     private boolean mAutomatic;
+    private boolean mListening;
 
     public interface BrightnessStateChangeCallback {
         public void onBrightnessLevelChanged();
@@ -159,6 +160,9 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     public void registerCallbacks() {
+        if (mListening) {
+            return;
+        }
         mBrightnessObserver.startObserving();
         mUserTracker.startTracking();
 
@@ -172,6 +176,9 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     /** Unregister all call backs, both to and from the controller */
     public void unregisterCallbacks() {
+        if (!mListening) {
+            return;
+        }
         mBrightnessObserver.stopObserving();
         mChangeCallbacks.clear();
         mUserTracker.stopTracking();

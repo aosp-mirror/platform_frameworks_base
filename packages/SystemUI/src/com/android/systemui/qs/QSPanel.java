@@ -28,9 +28,12 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
+import com.android.systemui.settings.BrightnessController;
+import com.android.systemui.settings.ToggleSlider;
 
 import java.util.ArrayList;
 
@@ -44,6 +47,7 @@ public class QSPanel extends ViewGroup {
     private final ViewGroup mDetailContent;
     private final View mDetailSettingsButton;
     private final View mDetailDoneButton;
+    private final View mBrightnessView;
     private final CircularClipper mClipper;
     private final H mHandler = new H();
 
@@ -59,6 +63,7 @@ public class QSPanel extends ViewGroup {
 
     private TileRecord mDetailRecord;
     private Callback mCallback;
+    private BrightnessController mBrightnessController;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -74,9 +79,16 @@ public class QSPanel extends ViewGroup {
         mDetailDoneButton = mDetail.findViewById(android.R.id.button1);
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
+        mBrightnessView = LayoutInflater.from(context).inflate(
+                R.layout.quick_settings_brightness_dialog, this, false);
         addView(mDetail);
+        addView(mBrightnessView);
         mClipper = new CircularClipper(mDetail);
         updateResources();
+
+        mBrightnessController = new BrightnessController(getContext(),
+                (ImageView) findViewById(R.id.brightness_icon),
+                (ToggleSlider) findViewById(R.id.brightness_slider));
     }
 
     public void setCallback(Callback callback) {
@@ -114,6 +126,11 @@ public class QSPanel extends ViewGroup {
             if (mListening) {
                 r.tile.refreshState();
             }
+        }
+        if (listening) {
+            mBrightnessController.registerCallbacks();
+        } else {
+            mBrightnessController.unregisterCallbacks();
         }
     }
 
@@ -211,6 +228,7 @@ public class QSPanel extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
+        mBrightnessView.measure(exactly(width), MeasureSpec.UNSPECIFIED);
         int r = -1;
         int c = -1;
         int rows = 0;
@@ -238,7 +256,7 @@ public class QSPanel extends ViewGroup {
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
         }
-        int h = rows == 0 ? 0 : (getRowTop(rows) + mPanelPaddingBottom);
+        int h = rows == 0 ? mBrightnessView.getHeight() : (getRowTop(rows) + mPanelPaddingBottom);
         mDetail.measure(exactly(width), exactly(h));
         setMeasuredDimension(width, h);
     }
@@ -250,6 +268,8 @@ public class QSPanel extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getWidth();
+        mBrightnessView.layout(0, 0,
+                mBrightnessView.getMeasuredWidth(), mBrightnessView.getMeasuredHeight());
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
             final int cols = getColumnCount(record.row);
@@ -266,8 +286,9 @@ public class QSPanel extends ViewGroup {
     }
 
     private int getRowTop(int row) {
-        if (row <= 0) return 0;
-        return mLargeCellHeight - mDualTileUnderlap + (row - 1) * mCellHeight;
+        if (row <= 0) return mBrightnessView.getHeight();
+        return mBrightnessView.getHeight()
+                + mLargeCellHeight - mDualTileUnderlap + (row - 1) * mCellHeight;
     }
 
     private int getColumnCount(int row) {
