@@ -14994,6 +14994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
+            invalidateOutline();
         }
 
         // Attempt to use a display list if requested.
