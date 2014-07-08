@@ -615,6 +615,29 @@ public class RenderScript {
         }
     }
 
+    /**
+     * Multi-input code.
+     *
+     */
+
+    // @hide
+    native void rsnScriptForEachMultiClipped(long con, long id, int slot, long[] ains, long aout, byte[] params,
+                                             int xstart, int xend, int ystart, int yend, int zstart, int zend);
+    // @hide
+    native void rsnScriptForEachMultiClipped(long con, long id, int slot, long[] ains, long aout,
+                                             int xstart, int xend, int ystart, int yend, int zstart, int zend);
+
+    // @hide
+    synchronized void nScriptForEachMultiClipped(long id, int slot, long[] ains, long aout, byte[] params,
+                                                 int xstart, int xend, int ystart, int yend, int zstart, int zend) {
+        validate();
+        if (params == null) {
+            rsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, xstart, xend, ystart, yend, zstart, zend);
+        } else {
+            rsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, params, xstart, xend, ystart, yend, zstart, zend);
+        }
+    }
+
     native void rsnScriptInvokeV(long con, long id, int slot, byte[] params);
     synchronized void nScriptInvokeV(long id, int slot, byte[] params) {
         validate();
