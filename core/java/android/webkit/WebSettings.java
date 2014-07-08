@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 
 /**
@@ -1500,6 +1501,7 @@ public abstract class WebSettings {
      * WebView.
      * @hide
      */
+    @SystemApi
     public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean flag);
 
     /**
@@ -1509,5 +1511,6 @@ public abstract class WebSettings {
      * @see #setVideoOverlayForEmbeddedEncryptedVideoEnabled
      * @hide
      */
+    @SystemApi
     public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
 }
