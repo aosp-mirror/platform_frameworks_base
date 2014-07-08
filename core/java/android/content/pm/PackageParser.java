@@ -71,7 +71,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -923,19 +922,17 @@ public class PackageParser {
                             "Package " + apkPath + " has no certificates at entry "
                             + entry.getName());
                 }
+                final Signature[] entrySignatures = convertToSignatures(entryCerts);
 
                 if (pkg.mCertificates == null) {
                     pkg.mCertificates = entryCerts;
-                    pkg.mSignatures = convertToSignatures(entryCerts);
+                    pkg.mSignatures = entrySignatures;
                     pkg.mSigningKeys = new ArraySet<PublicKey>();
                     for (int i=0; i < entryCerts.length; i++) {
                         pkg.mSigningKeys.add(entryCerts[i][0].getPublicKey());
                     }
                 } else {
-                    final boolean certsMatch = (pkg.mCertificates.length == entryCerts.length)
-                            && ArrayUtils.containsAll(pkg.mCertificates, entryCerts)
-                            && ArrayUtils.containsAll(entryCerts, pkg.mCertificates);
-                    if (!certsMatch) {
+                    if (!Signature.areExactMatch(pkg.mSignatures, entrySignatures)) {
                         throw new PackageParserException(
                                 INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES, "Package " + apkPath
                                         + " has mismatched certificates at entry "
@@ -1097,7 +1094,7 @@ public class PackageParser {
             if (splitName.length() == 0) {
                 splitName = null;
             } else {
-                final String error = validateName(splitName, true);
+                final String error = validateName(splitName, false);
                 if (error != null) {
                     throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
                             "Invalid manifest split: " + error);

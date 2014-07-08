@@ -20,6 +20,8 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_WRONLY;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
@@ -37,9 +39,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.ArraySet;
@@ -58,6 +62,10 @@ import java.util.ArrayList;
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstaller";
 
+    // TODO: enforce INSTALL_ALLOW_TEST
+    // TODO: enforce INSTALL_ALLOW_DOWNGRADE
+    // TODO: handle INSTALL_EXTERNAL, INSTALL_INTERNAL
+
     private final PackageInstallerService.Callback mCallback;
     private final PackageManagerService mPm;
     private final Handler mHandler;
@@ -69,7 +77,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public final int installerUid;
     public final PackageInstallerParams params;
     public final long createdMillis;
-    public final File sessionDir;
+    public final File sessionStageDir;
 
     private static final int MSG_INSTALL = 0;
 
@@ -85,6 +93,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     installLocked();
                 } catch (InstallFailedException e) {
                     Slog.e(TAG, "Install failed: " + e);
+                    destroy();
                     try {
                         mRemoteObserver.packageInstalled(mPackageName, null, e.error);
                     } catch (RemoteException ignored) {
@@ -114,7 +123,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public PackageInstallerSession(PackageInstallerService.Callback callback,
             PackageManagerService pm, int sessionId, int userId, String installerPackageName,
-            int installerUid, PackageInstallerParams params, long createdMillis, File sessionDir,
+            int installerUid, PackageInstallerParams params, long createdMillis, File sessionStageDir,
             Looper looper) {
         mCallback = callback;
         mPm = pm;
@@ -126,7 +135,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.installerUid = installerUid;
         this.params = params;
         this.createdMillis = createdMillis;
-        this.sessionDir = sessionDir;
+        this.sessionStageDir = sessionStageDir;
 
         // Check against any explicitly provided signatures
         mSignatures = params.signatures;
@@ -136,6 +145,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (pm.checkPermission(android.Manifest.permission.INSTALL_PACKAGES, installerPackageName)
                 == PackageManager.PERMISSION_GRANTED) {
+            mPermissionsConfirmed = true;
+        }
+        if (installerUid == Process.SHELL_UID || installerUid == 0) {
             mPermissionsConfirmed = true;
         }
     }
@@ -168,10 +180,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(sessionDir, name);
+            final File target = new File(sessionStageDir, name);
 
             final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(),
-                    OsConstants.O_CREAT | OsConstants.O_WRONLY, 00700);
+                    O_CREAT | O_WRONLY, 0644);
+            Os.chmod(target.getAbsolutePath(), 0644);
 
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
@@ -235,7 +248,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!mPermissionsConfirmed) {
             // TODO: async confirm permissions with user
             // when they confirm, we'll kick off another install() pass
-            mPermissionsConfirmed = true;
+            throw new SecurityException("Caller must hold INSTALL permission");
         }
 
         // Inherit any packages and native libraries from existing install that
@@ -258,7 +271,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        mPm.installStage(mPackageName, this.sessionDir, localObserver, params, installerPackageName,
+        mPm.installStage(mPackageName, this.sessionStageDir, localObserver, params, installerPackageName,
                 installerUid, new UserHandle(userId));
     }
 
@@ -271,9 +284,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void validateInstallLocked() throws InstallFailedException {
         mPackageName = null;
         mVersionCode = -1;
-        mSignatures = null;
 
-        final File[] files = sessionDir.listFiles();
+        final File[] files = sessionStageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new InstallFailedException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
@@ -296,11 +308,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             // Use first package to define unknown values
-            if (mPackageName != null) {
+            if (mPackageName == null) {
                 mPackageName = info.packageName;
                 mVersionCode = info.versionCode;
             }
-            if (mSignatures != null) {
+            if (mSignatures == null) {
                 mSignatures = info.signatures;
             }
 
@@ -310,9 +322,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Take this opportunity to enforce uniform naming
             final String name;
             if (info.splitName == null) {
-                name = info.packageName + ".apk";
+                name = "base.apk";
             } else {
-                name = info.packageName + "-" + info.splitName + ".apk";
+                name = "split_" + info.splitName + ".apk";
             }
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new InstallFailedException(INSTALL_FAILED_INVALID_APK,
@@ -382,7 +394,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final File existingDir = new File(app.getBaseCodePath());
 
         try {
-            linkTreeIgnoringExisting(existingDir, sessionDir);
+            linkTreeIgnoringExisting(existingDir, sessionStageDir);
         } catch (ErrnoException e) {
             throw new InstallFailedException(INSTALL_FAILED_INTERNAL_ERROR,
                     "Failed to splice into stage");
@@ -416,8 +428,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             synchronized (mLock) {
                 mInvalid = true;
             }
-            FileUtils.deleteContents(sessionDir);
-            sessionDir.delete();
+            FileUtils.deleteContents(sessionStageDir);
+            sessionStageDir.delete();
         } finally {
             mCallback.onSessionInvalid(this);
         }

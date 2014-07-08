@@ -41,6 +41,8 @@ public class PackageInstallerParams implements Parcelable {
     /** {@hide} */
     public long deltaSize = -1;
     /** {@hide} */
+    public String basePackageName;
+    /** {@hide} */
     public Bitmap icon;
     /** {@hide} */
     public String title;
@@ -48,23 +50,27 @@ public class PackageInstallerParams implements Parcelable {
     public Uri originatingUri;
     /** {@hide} */
     public Uri referrerUri;
+    /** {@hide} */
+    public String abiOverride;
 
     public PackageInstallerParams() {
     }
 
     /** {@hide} */
     public PackageInstallerParams(Parcel source) {
-        this.fullInstall = source.readInt() != 0;
-        this.installFlags = source.readInt();
-        this.installLocation = source.readInt();
-        this.signatures = (Signature[]) source.readParcelableArray(null);
+        fullInstall = source.readInt() != 0;
+        installFlags = source.readInt();
+        installLocation = source.readInt();
+        signatures = (Signature[]) source.readParcelableArray(null);
         deltaSize = source.readLong();
+        basePackageName = source.readString();
         if (source.readInt() != 0) {
             icon = Bitmap.CREATOR.createFromParcel(source);
         }
         title = source.readString();
-        originatingUri = Uri.CREATOR.createFromParcel(source);
-        referrerUri = Uri.CREATOR.createFromParcel(source);
+        originatingUri = source.readParcelable(null);
+        referrerUri = source.readParcelable(null);
+        abiOverride = source.readString();
     }
 
     public void setFullInstall(boolean fullInstall) {
@@ -85,6 +91,10 @@ public class PackageInstallerParams implements Parcelable {
 
     public void setDeltaSize(long deltaSize) {
         this.deltaSize = deltaSize;
+    }
+
+    public void setBasePackageName(String basePackageName) {
+        this.basePackageName = basePackageName;
     }
 
     public void setIcon(Bitmap icon) {
@@ -115,6 +125,7 @@ public class PackageInstallerParams implements Parcelable {
         dest.writeInt(installLocation);
         dest.writeParcelableArray(signatures, flags);
         dest.writeLong(deltaSize);
+        dest.writeString(basePackageName);
         if (icon != null) {
             dest.writeInt(1);
             icon.writeToParcel(dest, flags);
@@ -124,6 +135,7 @@ public class PackageInstallerParams implements Parcelable {
         dest.writeString(title);
         dest.writeParcelable(originatingUri, flags);
         dest.writeParcelable(referrerUri, flags);
+        dest.writeString(abiOverride);
     }
 
     public static final Parcelable.Creator<PackageInstallerParams>

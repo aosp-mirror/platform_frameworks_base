@@ -30,8 +30,11 @@ import android.os.Binder;
 import android.os.FileUtils;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -42,6 +45,8 @@ import com.android.server.IoThread;
 import com.google.android.collect.Sets;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 
 public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String TAG = "PackageInstaller";
@@ -54,8 +59,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private final AppOpsManager mAppOps;
 
     private final File mStagingDir;
+    private final HandlerThread mInstallThread;
 
-    private final HandlerThread mInstallThread = new HandlerThread(TAG);
     private final Callback mCallback = new Callback();
 
     @GuardedBy("mSessions")
@@ -63,27 +68,50 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
 
+    private static final FilenameFilter sStageFilter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.startsWith("vmdl") && name.endsWith(".tmp");
+        }
+    };
+
     public PackageInstallerService(Context context, PackageManagerService pm, File stagingDir) {
         mContext = context;
         mPm = pm;
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
 
         mStagingDir = stagingDir;
-        mStagingDir.mkdirs();
+
+        mInstallThread = new HandlerThread(TAG);
+        mInstallThread.start();
 
         synchronized (mSessions) {
             readSessionsLocked();
 
             // Clean up orphaned staging directories
-            final ArraySet<String> dirs = Sets.newArraySet(mStagingDir.list());
+            final ArraySet<File> stages = Sets.newArraySet(mStagingDir.listFiles(sStageFilter));
             for (int i = 0; i < mSessions.size(); i++) {
-                dirs.remove(Integer.toString(mSessions.keyAt(i)));
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                stages.remove(session.sessionStageDir);
             }
-            for (String dirName : dirs) {
-                Slog.w(TAG, "Deleting orphan session " + dirName);
-                final File dir = new File(mStagingDir, dirName);
-                FileUtils.deleteContents(dir);
-                dir.delete();
+            for (File stage : stages) {
+                Slog.w(TAG, "Deleting orphan stage " + stage);
+                if (stage.isDirectory()) {
+                    FileUtils.deleteContents(stage);
+                }
+                stage.delete();
+            }
+        }
+    }
+
+    @Deprecated
+    public File allocateSessionDir() throws IOException {
+        synchronized (mSessions) {
+            try {
+                final int sessionId = allocateSessionIdLocked();
+                return prepareSessionStageDir(sessionId);
+            } catch (IllegalStateException e) {
+                throw new IOException(e);
             }
         }
     }
@@ -110,11 +138,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public int createSession(int userId, String installerPackageName,
-            PackageInstallerParams params) {
+    public int createSession(String installerPackageName, PackageInstallerParams params,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, false, TAG);
-        mAppOps.checkPackage(callingUid, installerPackageName);
 
         if (mPm.isUserRestricted(UserHandle.getUserId(callingUid),
                 UserManager.DISALLOW_INSTALL_APPS)) {
@@ -124,20 +151,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         if ((callingUid == Process.SHELL_UID) || (callingUid == 0)) {
             params.installFlags |= INSTALL_FROM_ADB;
         } else {
+            mAppOps.checkPackage(callingUid, installerPackageName);
+
             params.installFlags &= ~INSTALL_FROM_ADB;
             params.installFlags &= ~INSTALL_ALL_USERS;
             params.installFlags |= INSTALL_REPLACE_EXISTING;
         }
 
         synchronized (mSessions) {
-            final int sessionId = allocateSessionIdLocked();
             final long createdMillis = System.currentTimeMillis();
-            final File sessionDir = new File(mStagingDir, Integer.toString(sessionId));
-            sessionDir.mkdirs();
+            final int sessionId = allocateSessionIdLocked();
+            final File sessionStageDir = prepareSessionStageDir(sessionId);
 
             final PackageInstallerSession session = new PackageInstallerSession(mCallback, mPm,
                     sessionId, userId, installerPackageName, callingUid, params, createdMillis,
-                    sessionDir, mInstallThread.getLooper());
+                    sessionStageDir, mInstallThread.getLooper());
             mSessions.put(sessionId, session);
 
             writeSessionsAsync();
@@ -166,8 +194,30 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         return mNextSessionId++;
     }
 
+    private File prepareSessionStageDir(int sessionId) {
+        final File file = new File(mStagingDir, "vmdl" + sessionId + ".tmp");
+
+        if (file.exists()) {
+            throw new IllegalStateException();
+        }
+
+        try {
+            Os.mkdir(file.getAbsolutePath(), 0755);
+            Os.chmod(file.getAbsolutePath(), 0755);
+        } catch (ErrnoException e) {
+            // This purposefully throws if directory already exists
+            throw new IllegalStateException("Failed to prepare session dir", e);
+        }
+
+        if (!SELinux.restorecon(file)) {
+            throw new IllegalStateException("Failed to prepare session dir");
+        }
+
+        return file;
+    }
+
     @Override
-    public int[] getSessions(int userId, String installerPackageName) {
+    public int[] getSessions(String installerPackageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, false, TAG);
         mAppOps.checkPackage(callingUid, installerPackageName);
@@ -187,13 +237,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void uninstall(int userId, String basePackageName, IPackageDeleteObserver observer) {
-        mPm.deletePackageAsUser(basePackageName, observer, userId, 0);
+    public void uninstall(String basePackageName, int flags, IPackageDeleteObserver observer,
+            int userId) {
+        mPm.deletePackageAsUser(basePackageName, observer, userId, flags);
     }
 
     @Override
-    public void uninstallSplit(int userId, String basePackageName, String overlayName,
-            IPackageDeleteObserver observer) {
+    public void uninstallSplit(String basePackageName, String overlayName, int flags,
+            IPackageDeleteObserver observer, int userId) {
         // TODO: flesh out once PM has split support
         throw new UnsupportedOperationException();
     }

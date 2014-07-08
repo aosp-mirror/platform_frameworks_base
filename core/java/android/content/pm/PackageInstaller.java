@@ -23,6 +23,7 @@ import android.os.FileBridge;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
+import java.io.Closeable;
 import java.io.OutputStream;
 
 /** {@hide} */
@@ -33,12 +34,12 @@ public class PackageInstaller {
     private final String mInstallerPackageName;
 
     /** {@hide} */
-    public PackageInstaller(PackageManager pm, IPackageInstaller installer, int userId,
-            String installerPackageName) {
+    public PackageInstaller(PackageManager pm, IPackageInstaller installer,
+            String installerPackageName, int userId) {
         mPm = pm;
         mInstaller = installer;
-        mUserId = userId;
         mInstallerPackageName = installerPackageName;
+        mUserId = userId;
     }
 
     public boolean isPackageAvailable(String basePackageName) {
@@ -63,7 +64,7 @@ public class PackageInstaller {
 
     public int createSession(PackageInstallerParams params) {
         try {
-            return mInstaller.createSession(mUserId, mInstallerPackageName, params);
+            return mInstaller.createSession(mInstallerPackageName, params, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -79,7 +80,7 @@ public class PackageInstaller {
 
     public int[] getSessions() {
         try {
-            return mInstaller.getSessions(mUserId, mInstallerPackageName);
+            return mInstaller.getSessions(mInstallerPackageName, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -87,7 +88,7 @@ public class PackageInstaller {
 
     public void uninstall(String basePackageName, PackageUninstallObserver observer) {
         try {
-            mInstaller.uninstall(mUserId, basePackageName, observer.getBinder());
+            mInstaller.uninstall(basePackageName, 0, observer.getBinder(), mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -96,7 +97,7 @@ public class PackageInstaller {
     public void uninstall(String basePackageName, String splitName,
             PackageUninstallObserver observer) {
         try {
-            mInstaller.uninstallSplit(mUserId, basePackageName, splitName, observer.getBinder());
+            mInstaller.uninstallSplit(basePackageName, splitName, 0, observer.getBinder(), mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -114,7 +115,7 @@ public class PackageInstaller {
      * installation (for example, the same split name), the package in this
      * session will replace the existing package.
      */
-    public class Session {
+    public static class Session implements Closeable {
         private IPackageInstallerSession mSession;
 
         /** {@hide} */
@@ -154,6 +155,7 @@ public class PackageInstaller {
             }
         }
 
+        @Override
         public void close() {
             // No resources to release at the moment
         }

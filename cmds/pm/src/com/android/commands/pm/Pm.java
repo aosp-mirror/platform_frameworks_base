@@ -19,15 +19,18 @@ package com.android.commands.pm;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstallerParams;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -46,12 +49,21 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.SizedInputStream;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -61,7 +73,10 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 public final class Pm {
+    private static final String TAG = "Pm";
+
     IPackageManager mPm;
+    IPackageInstaller mInstaller;
     IUserManager mUm;
 
     private WeakHashMap<String, Resources> mResourceCache
@@ -75,10 +90,18 @@ public final class Pm {
         "Error: Could not access the Package Manager.  Is the system running?";
 
     public static void main(String[] args) {
-        new Pm().run(args);
+        try {
+            new Pm().run(args);
+        } catch (Exception e) {
+            Log.e(TAG, "Error", e);
+            System.err.println("Error: " + e);
+            if (e instanceof RemoteException) {
+                System.err.println(PM_NOT_RUNNING_ERR);
+            }
+        }
     }
 
-    public void run(String[] args) {
+    public void run(String[] args) throws IOException, RemoteException {
         boolean validCommand = false;
         if (args.length < 1) {
             showUsage();
@@ -91,6 +114,7 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
             return;
         }
+        mInstaller = mPm.getPackageInstaller();
 
         mArgs = args;
         String op = args[0];
@@ -113,6 +137,31 @@ public final class Pm {
 
         if ("install".equals(op)) {
             runInstall();
+            return;
+        }
+
+        if ("install-create".equals(op)) {
+            runInstallCreate();
+            return;
+        }
+
+        if ("install-write".equals(op)) {
+            runInstallWrite();
+            return;
+        }
+
+        if ("install-commit".equals(op)) {
+            runInstallCommit();
+            return;
+        }
+
+        if ("install-destroy".equals(op)) {
+            runInstallDestroy();
+            return;
+        }
+
+        if ("set-installer".equals(op)) {
+            runSetInstaller();
             return;
         }
 
@@ -697,7 +746,7 @@ public final class Pm {
         ActivityManager.dumpPackageStateStatic(FileDescriptor.out, pkg);
     }
 
-    class PackageInstallObserver extends IPackageInstallObserver2.Stub {
+    class LocalPackageInstallObserver extends PackageInstallObserver {
         boolean finished;
         int result;
         String extraPermission;
@@ -705,7 +754,7 @@ public final class Pm {
 
         @Override
         public void packageInstalled(String name, Bundle extras, int status) {
-            synchronized( this) {
+            synchronized (this) {
                 finished = true;
                 result = status;
                 if (status == PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION) {
@@ -723,7 +772,7 @@ public final class Pm {
      * Converts a failure code into a string by using reflection to find a matching constant
      * in PackageManager.
      */
-    private String installFailureToString(PackageInstallObserver obs) {
+    private String installFailureToString(LocalPackageInstallObserver obs) {
         final int result = obs.result;
         Field[] fields = PackageManager.class.getFields();
         for (Field f: fields) {
@@ -908,12 +957,12 @@ public final class Pm {
             verificationURI = null;
         }
 
-        PackageInstallObserver obs = new PackageInstallObserver();
+        LocalPackageInstallObserver obs = new LocalPackageInstallObserver();
         try {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackage(apkFilePath, obs, installFlags, installerPackageName,
+            mPm.installPackage(apkFilePath, obs.getBinder(), installFlags, installerPackageName,
                     verificationParams, abi);
 
             synchronized (obs) {
@@ -937,35 +986,149 @@ public final class Pm {
         }
     }
 
-    /**
-     * Convert a string containing hex-encoded bytes to a byte array.
-     *
-     * @param input String containing hex-encoded bytes
-     * @return input as an array of bytes
-     */
-    private byte[] hexToBytes(String input) {
-        if (input == null) {
-            return null;
+    private void runInstallCreate() throws RemoteException {
+        String installerPackageName = null;
+
+        final PackageInstallerParams params = new PackageInstallerParams();
+        params.installFlags = PackageManager.INSTALL_ALL_USERS;
+        params.fullInstall = true;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("-l")) {
+                params.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+            } else if (opt.equals("-r")) {
+                params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            } else if (opt.equals("-i")) {
+                installerPackageName = nextArg();
+                if (installerPackageName == null) {
+                    throw new IllegalArgumentException("Missing installer package");
+                }
+            } else if (opt.equals("-t")) {
+                params.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+            } else if (opt.equals("-s")) {
+                params.installFlags |= PackageManager.INSTALL_EXTERNAL;
+            } else if (opt.equals("-f")) {
+                params.installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else if (opt.equals("-d")) {
+                params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-p")) {
+                params.fullInstall = false;
+            } else if (opt.equals("-S")) {
+                params.deltaSize = Long.parseLong(nextOptionData());
+            } else {
+                throw new IllegalArgumentException("Unknown option " + opt);
+            }
         }
 
-        final int inputLength = input.length();
-        if ((inputLength % 2) != 0) {
-            System.err.print("Invalid length; must be multiple of 2");
-            return null;
+        final int sessionId = mInstaller.createSession(installerPackageName, params,
+                UserHandle.USER_OWNER);
+
+        // NOTE: adb depends on parsing this string
+        System.out.println("Success: created install session [" + sessionId + "]");
+    }
+
+    private void runInstallWrite() throws IOException, RemoteException {
+        long sizeBytes = -1;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("-S")) {
+                sizeBytes = Long.parseLong(nextOptionData());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
         }
 
-        final int byteLength = inputLength / 2;
-        final byte[] output = new byte[byteLength];
+        final int sessionId = Integer.parseInt(nextArg());
+        final String splitName = nextArg();
 
-        int inputIndex = 0;
-        int byteIndex = 0;
-        while (inputIndex < inputLength) {
-            output[byteIndex++] = (byte) Integer.parseInt(
-                    input.substring(inputIndex, inputIndex + 2), 16);
-            inputIndex += 2;
+        String path = nextArg();
+        if ("-".equals(path)) {
+            path = null;
+        } else if (path != null) {
+            final File file = new File(path);
+            if (file.isFile()) {
+                sizeBytes = file.length();
+            }
         }
 
-        return output;
+        PackageInstaller.Session session = null;
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+
+            if (path != null) {
+                in = new FileInputStream(path);
+            } else {
+                in = new SizedInputStream(System.in, sizeBytes);
+            }
+            out = session.openWrite(splitName, 0, sizeBytes);
+
+            final int n = Streams.copy(in, out);
+            out.flush();
+
+            System.out.println("Success: streamed " + n + " bytes");
+        } finally {
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private void runInstallCommit() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+
+            final LocalPackageInstallObserver observer = new LocalPackageInstallObserver();
+            session.install(observer);
+
+            synchronized (observer) {
+                while (!observer.finished) {
+                    try {
+                        observer.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                if (observer.result != PackageManager.INSTALL_SUCCEEDED) {
+                    throw new IllegalStateException(
+                            "Failure [" + installFailureToString(observer) + "]");
+                }
+            }
+            System.out.println("Success");
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private void runInstallDestroy() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+            session.destroy();
+            System.out.println("Success");
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private void runSetInstaller() throws RemoteException {
+        final String targetPackage = nextArg();
+        final String installerPackageName = nextArg();
+
+        if (targetPackage == null || installerPackageName == null) {
+            throw new IllegalArgumentException(
+                    "must provide both target and installer package names");
+        }
+
+        mPm.setInstallerPackageName(targetPackage, installerPackageName);
+        System.out.println("Success");
     }
 
     public void runCreateUser() {
@@ -1146,10 +1309,10 @@ public final class Pm {
         }
     }
 
-    private boolean deletePackage(String pkg, int unInstallFlags, int userId) {
+    private boolean deletePackage(String packageName, int flags, int userId) {
         PackageDeleteObserver obs = new PackageDeleteObserver();
         try {
-            mPm.deletePackageAsUser(pkg, obs, userId, unInstallFlags);
+            mInstaller.uninstall(packageName, flags, obs, userId);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -1548,10 +1711,13 @@ public final class Pm {
         System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm dump PACKAGE");
-        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
-        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
-        System.err.println("                  [--originating-uri <URI>] [--referrer <URI>] PATH");
+        System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [PATH]");
+        System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
+        System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
+        System.err.println("       pm install-commit SESSION_ID");
+        System.err.println("       pm install-destroy SESSION_ID");
         System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
+        System.err.println("       pm set-installer PACKAGE INSTALLER");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
@@ -1600,16 +1766,28 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm path: print the path to the .apk of the given PACKAGE.");
         System.err.println("");
-        System.err.println("pm dump: print system state associated w ith the given PACKAGE.");
+        System.err.println("pm dump: print system state associated with the given PACKAGE.");
         System.err.println("");
-        System.err.println("pm install: installs a package to the system.  Options:");
-        System.err.println("    -l: install the package with FORWARD_LOCK.");
-        System.err.println("    -r: reinstall an exisiting app, keeping its data.");
-        System.err.println("    -t: allow test .apks to be installed.");
-        System.err.println("    -i: specify the installer package name.");
-        System.err.println("    -s: install package on sdcard.");
-        System.err.println("    -f: install package on internal flash.");
-        System.err.println("    -d: allow version code downgrade.");
+        System.err.println("pm install: install a single legacy package");
+        System.err.println("pm install-create: create an install session");
+        System.err.println("    -l: forward lock application");
+        System.err.println("    -r: replace existing application");
+        System.err.println("    -t: allow test packages");
+        System.err.println("    -i: specify the installer package name");
+        System.err.println("    -s: install application on sdcard");
+        System.err.println("    -f: install application on internal flash");
+        System.err.println("    -d: allow version code downgrade");
+        System.err.println("    -p: partial application install");
+        System.err.println("    -S: size in bytes of entire session");
+        System.err.println("");
+        System.err.println("pm install-write: write a package into existing session; path may");
+        System.err.println("  be '-' to read from stdin");
+        System.err.println("    -S: size in bytes of package, required for stdin");
+        System.err.println("");
+        System.err.println("pm install-commit: perform install of fully staged session");
+        System.err.println("pm install-destroy: destroy session");
+        System.err.println("");
+        System.err.println("pm set-installer: set installer package name");
         System.err.println("");
         System.err.println("pm uninstall: removes a package from the system. Options:");
         System.err.println("    -k: keep the data and cache directories around after package removal.");
@@ -1643,5 +1821,6 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm remove-user: remove the user with the given USER_IDENTIFIER,");
         System.err.println("  deleting all data associated with that user");
+        System.err.println("");
     }
 }
