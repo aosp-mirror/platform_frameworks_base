@@ -34936,6 +34936,7 @@ package android.view.inputmethod {
     ctor public CursorAnchorInfo(android.os.Parcel);
     method public int describeContents();
     method public android.graphics.RectF getCharacterRect(int);
+    method public int getCharacterRectFlags(int);
     method public java.lang.CharSequence getComposingText();
     method public int getComposingTextStart();
     method public float getInsertionMarkerBaseline();
@@ -34945,17 +34946,24 @@ package android.view.inputmethod {
     method public android.graphics.Matrix getMatrix();
     method public int getSelectionEnd();
     method public int getSelectionStart();
+    method public boolean isInsertionMarkerClipped();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CHARACTER_RECT_TYPE_FULLY_VISIBLE = 1; // 0x1
+    field public static final int CHARACTER_RECT_TYPE_INVISIBLE = 3; // 0x3
+    field public static final int CHARACTER_RECT_TYPE_MASK = 15; // 0xf
+    field public static final int CHARACTER_RECT_TYPE_NOT_FEASIBLE = 4; // 0x4
+    field public static final int CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE = 2; // 0x2
+    field public static final int CHARACTER_RECT_TYPE_UNSPECIFIED = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public static final class CursorAnchorInfo.Builder {
     ctor public CursorAnchorInfo.Builder();
-    method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterRect(int, float, float, float, float);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterRect(int, float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, java.lang.CharSequence);
-    method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, boolean);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
   }
