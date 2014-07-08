@@ -406,6 +406,8 @@ LOCAL_JAR_PACKAGES := \
 # List of packages to exclude along with their descendants.
 # Overrides inclusion.
 LOCAL_JAR_EXCLUDE_PACKAGES := \
+    android.filterfw \
+    android.filterpacks \
     android.hardware
 
 # List of classes and interfaces which should be loaded by the Zygote.
@@ -426,6 +428,8 @@ LOCAL_DX_FLAGS := --core-library
 
 # List of packages to include along with their descendants.
 LOCAL_JAR_PACKAGES := \
+    android.filterfw \
+    android.filterpacks \
     android.hardware \
     com \
     javax
