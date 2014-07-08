@@ -45,7 +45,11 @@ import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
+import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -113,6 +117,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -4006,21 +4011,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         setHdmiPlugged(!mHdmiPlugged);
     }
 
-    /**
-     * @return Whether music is being played right now "locally" (e.g. on the device's speakers
-     *    or wired headphones) or "remotely" (e.g. on a device using the Cast protocol and
-     *    controlled by this device, or through remote submix).
-     */
-    boolean isMusicActive() {
-
-        final AudioManager am = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
-        if (am == null) {
-            Log.w(TAG, "isMusicActive: couldn't get AudioManager reference");
-            return false;
-        }
-        return am.isLocalOrRemoteMusicActive();
-    }
-
     final Object mScreenshotLock = new Object();
     ServiceConnection mScreenshotConnection = null;
 
@@ -4210,7 +4200,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             // the application, just pass it to the session service.
 
                             MediaSessionLegacyHelper.getHelper(mContext)
-                                    .sendMediaButtonEvent(event, true);
+                                    .sendVolumeKeyEvent(event, false);
                             break;
                         }
                     }
@@ -4220,7 +4210,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // handled it send it to the session manager to figure
                         // out.
                         MediaSessionLegacyHelper.getHelper(mContext)
-                                .sendMediaButtonEvent(event, true);
+                                .sendVolumeKeyEvent(event, true);
                         break;
                     }
                 }

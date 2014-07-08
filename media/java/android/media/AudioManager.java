@@ -346,6 +346,12 @@ public class AudioManager {
     public static final int FLAG_HDMI_SYSTEM_AUDIO_VOLUME = 1 << 8;
 
     /**
+     * Indicates that this should only be handled if media is actively playing.
+     * @hide
+     */
+    public static final int FLAG_ACTIVE_MEDIA_ONLY = 1 << 9;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
