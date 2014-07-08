@@ -383,20 +383,20 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         GLenum error = GL_NO_ERROR;
         bool status = false;
 
-        switch (bitmap->config()) {
-            case SkBitmap::kA8_Config:
+        switch (bitmap->colorType()) {
+            case kAlpha_8_SkColorType:
                 format = GL_ALPHA;
                 type = GL_UNSIGNED_BYTE;
                 break;
-            case SkBitmap::kRGB_565_Config:
+            case kRGB_565_SkColorType:
                 format = GL_RGB;
                 type = GL_UNSIGNED_SHORT_5_6_5;
                 break;
-            case SkBitmap::kARGB_4444_Config:
+            case kARGB_4444_SkColorType:
                 format = GL_RGBA;
                 type = GL_UNSIGNED_SHORT_4_4_4_4;
                 break;
-            case SkBitmap::kARGB_8888_Config:
+            case kN32_SkColorType:
             default:
                 format = GL_RGBA;
                 type = GL_UNSIGNED_BYTE;

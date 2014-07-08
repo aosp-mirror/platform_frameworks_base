@@ -316,7 +316,7 @@ static int getPremulBitmapCreateFlags(bool isMutable) {
 static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                               jint offset, jint stride, jint width, jint height,
                               jint configHandle, jboolean isMutable) {
-    SkColorType colorType = SkBitmapConfigToColorType(static_cast<SkBitmap::Config>(configHandle));
+    SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
     if (NULL != jColors) {
         size_t n = env->GetArrayLength(jColors);
         if (n < SkAbs32(stride) * (size_t)height) {
@@ -350,11 +350,11 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
                            jint dstConfigHandle, jboolean isMutable) {
     const SkBitmap* src = reinterpret_cast<SkBitmap*>(srcHandle);
-    SkBitmap::Config dstConfig = static_cast<SkBitmap::Config>(dstConfigHandle);
+    SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
     SkBitmap            result;
     JavaPixelAllocator  allocator(env);
 
-    if (!src->copyTo(&result, SkBitmapConfigToColorType(dstConfig), &allocator)) {
+    if (!src->copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
     return GraphicsJNI::createBitmap(env, new SkBitmap(result), allocator.getStorageObj(),
@@ -389,8 +389,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         jint width, jint height, jint configHandle, jint allocSize,
         jboolean requestPremul) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkBitmap::Config config = static_cast<SkBitmap::Config>(configHandle);
-    SkColorType colorType = SkBitmapConfigToColorType(config);
+    SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
 
     // ARGB_4444 is a deprecated format, convert automatically to 8888
     if (colorType == kARGB_4444_SkColorType) {
@@ -494,7 +493,7 @@ static jint Bitmap_rowBytes(JNIEnv* env, jobject, jlong bitmapHandle) {
 
 static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return static_cast<jint>(bitmap->config());
+    return GraphicsJNI::colorTypeToLegacyBitmapConfig(bitmap->colorType());
 }
 
 static jint Bitmap_getGenerationId(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -810,7 +809,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     const SkBitmap* bm1 = reinterpret_cast<SkBitmap*>(bm1Handle);
     if (bm0->width() != bm1->width() ||
         bm0->height() != bm1->height() ||
-        bm0->config() != bm1->config()) {
+        bm0->colorType() != bm1->colorType()) {
         return JNI_FALSE;
     }
 
@@ -822,7 +821,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
         return JNI_FALSE;
     }
 
-    if (bm0->config() == SkBitmap::kIndex8_Config) {
+    if (bm0->colorType() == kIndex_8_SkColorType) {
         SkColorTable* ct0 = bm0->getColorTable();
         SkColorTable* ct1 = bm1->getColorTable();
         if (NULL == ct0 || NULL == ct1) {

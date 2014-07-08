@@ -58,6 +58,14 @@ public:
     // ref to its SkRasterizer* (or NULL).
     static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
 
+    /*
+     *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
+     *  in Bitmap.Config. Skia no longer supports this config, but has replaced it
+     *  with SkColorType. These routines convert between the two.
+     */
+    static SkColorType legacyBitmapConfigToColorType(jint legacyConfig);
+    static jint colorTypeToLegacyBitmapConfig(SkColorType colorType);
+
     /** Return the corresponding native colorType from the java Config enum,
         or kUnknown_SkColorType if the java object is null.
     */

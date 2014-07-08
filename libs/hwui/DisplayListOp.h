@@ -732,7 +732,7 @@ public:
         deferInfo.mergeable = state.mMatrix.isSimple() && state.mMatrix.positiveScale() &&
                 !state.mClipSideFlags &&
                 OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
-                (mBitmap->config() != SkBitmap::kA8_Config);
+                (mBitmap->colorType() != kAlpha_8_SkColorType);
     }
 
     const SkBitmap* bitmap() { return mBitmap; }

@@ -257,13 +257,13 @@ static jlong jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject di
     return reinterpret_cast<jlong>(sur);
 }
 
-static PixelFormat convertPixelFormat(SkBitmap::Config format)
+static PixelFormat convertPixelFormat(SkColorType format)
 {
     switch (format) {
-    case SkBitmap::kARGB_8888_Config:   return PIXEL_FORMAT_RGBA_8888;
-    case SkBitmap::kARGB_4444_Config:   return PIXEL_FORMAT_RGBA_4444;
-    case SkBitmap::kRGB_565_Config:     return PIXEL_FORMAT_RGB_565;
-    default:                            return PIXEL_FORMAT_NONE;
+    case kN32_SkColorType:         return PIXEL_FORMAT_RGBA_8888;
+    case kARGB_4444_SkColorType:   return PIXEL_FORMAT_RGBA_4444;
+    case kRGB_565_SkColorType:     return PIXEL_FORMAT_RGB_565;
+    default:                       return PIXEL_FORMAT_NONE;
     }
 }
 
@@ -297,7 +297,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     pixmap.width  = nativeBitmap->width();
     pixmap.height = nativeBitmap->height();
     pixmap.stride = nativeBitmap->rowBytes() / nativeBitmap->bytesPerPixel();
-    pixmap.format = convertPixelFormat(nativeBitmap->config());
+    pixmap.format = convertPixelFormat(nativeBitmap->colorType());
     pixmap.data   = (uint8_t*)ref->pixels();
 
     base = beginNativeAttribList(_env, attrib_list);

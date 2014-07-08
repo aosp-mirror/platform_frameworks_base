@@ -1957,7 +1957,7 @@ status_t OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* 
 
     const float x = (int) floorf(bounds.left + 0.5f);
     const float y = (int) floorf(bounds.top + 0.5f);
-    if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
+    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, paint, &vertices[0].x, &vertices[0].u,
                 GL_TRIANGLES, bitmapCount * 6, true,
@@ -1986,7 +1986,7 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float to
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
-    if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
+    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlphaBitmap(texture, left, top, paint);
     } else {
         drawTextureRect(left, top, right, bottom, texture, paint);
@@ -2014,7 +2014,7 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkMatrix& matr
     // to the vertex shader. The save/restore is a bit overkill.
     save(SkCanvas::kMatrix_SaveFlag);
     concatMatrix(matrix);
-    if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
+    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlphaBitmap(texture, 0.0f, 0.0f, paint);
     } else {
         drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
@@ -2037,7 +2037,7 @@ status_t OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, float left, floa
     Texture* texture = mCaches.textureCache.getTransient(bitmap);
     const AutoTexture autoCleanup(texture);
 
-    if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
+    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlphaBitmap(texture, left, top, paint);
     } else {
         drawTextureRect(left, top, right, bottom, texture, paint);
@@ -2232,7 +2232,7 @@ status_t OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
         dstBottom = srcBottom - srcTop;
     }
 
-    if (CC_UNLIKELY(bitmap->config() == SkBitmap::kA8_Config)) {
+    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
                 texture->id, paint,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
