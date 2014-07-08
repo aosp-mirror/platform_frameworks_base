@@ -25,18 +25,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.Console;
+import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
@@ -61,6 +57,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mIsFocused;
+    boolean mIsStub;
     boolean mClipViewInStack;
     Rect mTmpRect = new Rect();
     Paint mLayerPaint = new Paint();
@@ -133,8 +130,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
         // Update the outline
         Outline o = new Outline();
-        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight() -
-                mConfig.taskViewShadowOutlineBottomInsetPx, mConfig.taskViewRoundedCornerRadiusPx);
+        o.setRoundRect(0, 0, getMeasuredWidth(), getMeasuredHeight(),
+                mConfig.taskViewRoundedCornerRadiusPx);
         setOutline(o);
     }
 
@@ -469,6 +466,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         mBarView.disableHwLayers();
     }
 
+    /** Sets the stubbed state of this task view. */
+    void setStubState(boolean isStub) {
+        if (!mIsStub && isStub) {
+            // This is now a stub task view, so clip to the bar height, hide the thumbnail
+            setClipBounds(new Rect(0, 0, getMeasuredWidth(), mBarView.getMeasuredHeight()));
+            mThumbnailView.setVisibility(View.INVISIBLE);
+            // Temporary
+            mBarView.mActivityDescription.setText("Stub");
+        } else if (mIsStub && !isStub) {
+            setClipBounds(null);
+            mThumbnailView.setVisibility(View.VISIBLE);
+        }
+        mIsStub = isStub;
+    }
+
     /**
      * Returns whether this view should be clipped, or any views below should clip against this
      * view.
@@ -573,7 +585,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mThumbnailView.rebindToTask(mTask);
             mBarView.rebindToTask(mTask);
             // Rebind any listeners
-            mBarView.mApplicationIcon.setOnClickListener(this);
+            if (Constants.DebugFlags.App.EnableTaskFiltering) {
+                mBarView.mApplicationIcon.setOnClickListener(this);
+            }
             mBarView.mDismissButton.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 if (mConfig.developerOptionsEnabled) {
@@ -592,7 +606,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             mThumbnailView.unbindFromTask();
             mBarView.unbindFromTask();
             // Unbind any listeners
-            mBarView.mApplicationIcon.setOnClickListener(null);
+            if (Constants.DebugFlags.App.EnableTaskFiltering) {
+                mBarView.mApplicationIcon.setOnClickListener(null);
+            }
             mBarView.mDismissButton.setOnClickListener(null);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mBarView.mApplicationIcon.setOnLongClickListener(null);

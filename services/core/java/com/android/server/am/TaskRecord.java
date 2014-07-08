@@ -57,6 +57,7 @@ final class TaskRecord {
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_TASKTYPE = "task_type";
+    private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
     private static final String ATTR_LASTACTIVETIME = "last_active_time";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
@@ -75,6 +76,7 @@ final class TaskRecord {
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
     ComponentName realActivity; // The actual activity component that started the task.
+    long firstActiveTime;   // First time this task was active.
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
@@ -147,8 +149,8 @@ final class TaskRecord {
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
-            String _lastDescription, ArrayList<ActivityRecord> activities, long _lastActiveTime,
-            long lastTimeMoved, boolean neverRelinquishIdentity,
+            String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
+            long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister.IMAGE_EXTENSION;
@@ -166,6 +168,7 @@ final class TaskRecord {
         taskType = _taskType;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = _userId;
+        firstActiveTime = _firstActiveTime;
         lastActiveTime = _lastActiveTime;
         lastDescription = _lastDescription;
         mActivities = activities;
@@ -176,6 +179,9 @@ final class TaskRecord {
 
     void touchActiveTime() {
         lastActiveTime = android.os.SystemClock.elapsedRealtime();
+        if (firstActiveTime == 0) {
+            firstActiveTime = lastActiveTime;
+        }
     }
 
     long getInactiveDuration() {
@@ -668,6 +674,7 @@ final class TaskRecord {
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
+        out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
         out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
         out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
@@ -719,6 +726,7 @@ final class TaskRecord {
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
         String lastDescription = null;
+        long firstActiveTime = -1;
         long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
@@ -747,6 +755,8 @@ final class TaskRecord {
                 userId = Integer.valueOf(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.valueOf(attrValue);
+            } else if (ATTR_FIRSTACTIVETIME.equals(attrName)) {
+                firstActiveTime = Long.valueOf(attrValue);
             } else if (ATTR_LASTACTIVETIME.equals(attrName)) {
                 lastActiveTime = Long.valueOf(attrValue);
             } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
@@ -795,8 +805,8 @@ final class TaskRecord {
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
-                askedCompatMode, taskType, userId, lastDescription, activities, lastActiveTime,
-                lastTimeOnTop, neverRelinquishIdentity, taskDescription);
+                askedCompatMode, taskType, userId, lastDescription, activities, firstActiveTime,
+                lastActiveTime, lastTimeOnTop, neverRelinquishIdentity, taskDescription);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
@@ -853,6 +863,7 @@ final class TaskRecord {
                 pw.print(" lastThumbnailFile="); pw.print(mLastThumbnailFile);
                 pw.print(" lastDescription="); pw.println(lastDescription);
         pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
+                pw.print(" firstActiveTime="); pw.print(lastActiveTime);
                 pw.print(" lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.misc;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -30,14 +30,17 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -47,7 +50,9 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import com.android.systemui.recents.Constants;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -128,6 +133,7 @@ public class SystemServicesProxy {
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
+                rti.firstActiveTime = rti.lastActiveTime = i;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
                         Bitmap.createBitmap(mDummyIcon),
@@ -208,7 +214,7 @@ public class SystemServicesProxy {
             return thumbnail;
         }
 
-        Bitmap thumbnail = Utilities.getThumbnail(mAm, taskId);
+        Bitmap thumbnail = SystemServicesProxy.getThumbnail(mAm, taskId);
         if (thumbnail != null) {
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
@@ -219,6 +225,25 @@ public class SystemServicesProxy {
                         mBgProtectionPaint);
                 mBgProtectionCanvas.setBitmap(null);
                 Log.e(TAG, "Invalid screenshot detected from getTaskThumbnail()");
+            }
+        }
+        return thumbnail;
+    }
+
+    /**
+     * Returns a task thumbnail from the activity manager
+     */
+    public static Bitmap getThumbnail(ActivityManager activityManager, int taskId) {
+        ActivityManager.TaskThumbnail taskThumbnail = activityManager.getTaskThumbnail(taskId);
+        Bitmap thumbnail = taskThumbnail.mainThumbnail;
+        ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
+        if (thumbnail == null && descriptor != null) {
+            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor());
+        }
+        if (descriptor != null) {
+            try {
+                descriptor.close();
+            } catch (IOException e) {
             }
         }
         return thumbnail;
@@ -371,11 +396,29 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns the window rect.
+     */
+    public Rect getWindowRect() {
+        Rect windowRect = new Rect();
+        if (mWm == null) return windowRect;
+
+        mWm.getDefaultDisplay().getRectSize(windowRect);
+        return windowRect;
+    }
+
+    /**
      * Takes a screenshot of the current surface.
      */
     public Bitmap takeScreenshot() {
         DisplayInfo di = new DisplayInfo();
         mDisplay.getDisplayInfo(di);
         return SurfaceControl.screenshot(di.getNaturalWidth(), di.getNaturalHeight());
+    }
+
+    /**
+     * Takes a screenshot of the current app.
+     */
+    public Bitmap takeAppScreenshot() {
+        return takeScreenshot();
     }
 }

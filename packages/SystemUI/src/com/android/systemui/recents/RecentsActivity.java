@@ -35,6 +35,11 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.DebugTrigger;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.TaskStack;
@@ -50,6 +55,11 @@ import java.util.ArrayList;
 public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
         RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks,
         FullscreenTransitionOverlayView.FullScreenTransitionViewCallbacks {
+
+    final static String EXTRA_TRIGGERED_FROM_ALT_TAB = "extra_triggered_from_alt_tab";
+    final static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
+    final static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+    final static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
     RecentsView mRecentsView;
     SystemBarScrimViews mScrimViews;
@@ -123,8 +133,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Console.log(Constants.Log.App.SystemUIHandshake,
                         "[RecentsActivity|serviceBroadcast]", action, Console.AnsiRed);
             }
-            if (action.equals(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                if (intent.getBooleanExtra(RecentsService.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
+            if (action.equals(ACTION_HIDE_RECENTS_ACTIVITY)) {
+                if (intent.getBooleanExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // Dismiss recents, launching the focused task
                     dismissRecentsIfVisible();
                 } else {
@@ -138,13 +148,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                                 new ViewAnimation.TaskViewExitContext(exitTrigger));
                     }
                 }
-            } else if (action.equals(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            } else if (action.equals(ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // Try and unfilter and filtered stacks
                 if (!mRecentsView.unfilterFilteredStacks()) {
                     // If there are no filtered stacks, dismiss recents and launch the first task
                     dismissRecentsIfVisible();
                 }
-            } else if (action.equals(RecentsService.ACTION_START_ENTER_ANIMATION)) {
+            } else if (action.equals(ACTION_START_ENTER_ANIMATION)) {
                 // Try and start the enter animation (or restart it on configuration changed)
                 ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(
@@ -438,9 +448,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
-        filter.addAction(RecentsService.ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsService.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(RecentsService.ACTION_START_ENTER_ANIMATION);
+        filter.addAction(ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Start listening for widget package changes if there is one bound

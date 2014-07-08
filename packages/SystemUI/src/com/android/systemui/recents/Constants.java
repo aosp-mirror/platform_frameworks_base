@@ -25,10 +25,12 @@ public class Constants {
         public static final boolean Verbose = false;
 
         public static class App {
+            // Enables the simulated task affiliations
+            public static final boolean EnableSimulatedTaskGroups = false;
             // Enables the screenshot app->Recents transition
             public static final boolean EnableScreenshotAppTransition = false;
             // Enables the filtering of tasks according to their grouping
-            public static final boolean EnableTaskFiltering = true;
+            public static final boolean EnableTaskFiltering = false;
             // Enables clipping of tasks against each other
             public static final boolean EnableTaskStackClipping = true;
             // Enables tapping on the TaskBar to launch the task

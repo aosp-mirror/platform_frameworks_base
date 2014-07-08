@@ -17,7 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.graphics.Rect;
-import com.android.systemui.recents.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 /* Common code related to view animations */
 public class ViewAnimation {

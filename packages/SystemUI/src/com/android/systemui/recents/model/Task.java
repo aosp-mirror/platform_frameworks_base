@@ -19,7 +19,7 @@ package com.android.systemui.recents.model;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.misc.Utilities;
 
 
 /**
@@ -39,12 +39,14 @@ public class Task {
         public final int id;
         public final Intent baseIntent;
         public final int userId;
+        public long firstActiveTime;
         public long lastActiveTime;
 
-        public TaskKey(int id, Intent intent, int userId, long lastActiveTime) {
+        public TaskKey(int id, Intent intent, int userId, long firstActiveTime, long lastActiveTime) {
             this.id = id;
             this.baseIntent = intent;
             this.userId = userId;
+            this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
         }
 
@@ -76,6 +78,7 @@ public class Task {
     }
 
     public TaskKey key;
+    public TaskGrouping group;
     public Drawable applicationIcon;
     public Drawable activityIcon;
     public String activityLabel;
@@ -92,8 +95,9 @@ public class Task {
     }
 
     public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                Drawable activityIcon, int colorPrimary, int userId, long lastActiveTime) {
-        this.key = new TaskKey(id, intent, userId, lastActiveTime);
+                Drawable activityIcon, int colorPrimary, int userId, long firstActiveTime,
+                long lastActiveTime) {
+        this.key = new TaskKey(id, intent, userId, firstActiveTime, lastActiveTime);
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.colorPrimary = colorPrimary;
@@ -105,6 +109,14 @@ public class Task {
     /** Set the callbacks */
     public void setCallbacks(TaskCallbacks cb) {
         mCb = cb;
+    }
+
+    /** Set the grouping */
+    public void setGroup(TaskGrouping group) {
+        if (group != null && this.group != null) {
+            throw new RuntimeException("This task is already assigned to a group.");
+        }
+        this.group = group;
     }
 
     /** Notifies the callback listeners that this task has been loaded */
@@ -134,6 +146,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task: " + key.baseIntent.getComponent().getPackageName() + " [" + super.toString() + "]";
+        String groupAffiliation = "no group";
+        if (group != null) {
+            groupAffiliation = group.affiliation;
+        }
+        return "Task (" + groupAffiliation + "): " + key.baseIntent.getComponent().getPackageName() +
+                " [" + super.toString() + "]";
     }
 }

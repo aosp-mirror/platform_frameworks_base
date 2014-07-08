@@ -31,18 +31,19 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
 import com.android.systemui.R;
-import com.android.systemui.recents.Console;
 import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.DozeTrigger;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.ReferenceCountedTrigger;
-import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.DozeTrigger;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 
 
@@ -180,7 +181,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackViewsDirty = true;
     }
 
-    /** Finds the child view given a specific task */
+    /** Returns a mapping of child view to Task. */
+    HashMap<Task, TaskView> getTaskChildViewMap() {
+        HashMap<Task, TaskView> taskViewMap = new HashMap<Task, TaskView>();
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TaskView tv = (TaskView) getChildAt(i);
+            taskViewMap.put(tv.getTask(), tv);
+        }
+        return taskViewMap;
+    }
+
+    /** Finds the child view given a specific task. */
     TaskView getChildViewForTask(Task t) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -225,9 +237,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the stack transforms
+        TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
         for (int i = taskCount - 1; i >= 0; i--) {
-            TaskViewTransform transform = mStackAlgorithm.getStackTransform(i, stackScroll,
-                    taskTransforms.get(i));
+            mStack.getGroupIndexForTask(tasks.get(i), groupTaskIndex);
+            TaskViewTransform transform = mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex,
+                    groupTaskIndex.taskIndex, stackScroll, taskTransforms.get(i));
             if (transform.visible) {
                 if (frontMostVisibleIndex < 0) {
                     frontMostVisibleIndex = i;
@@ -253,6 +267,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (visibleRangeOut != null) {
             visibleRangeOut[0] = frontMostVisibleIndex;
             visibleRangeOut[1] = backMostVisibleIndex;
+            if (Console.Enabled) {
+                Console.log(Constants.Log.TaskStack.SynchronizeViewsWithModel,
+                        "[TaskStackView|updateStackTransforms]",
+                        "Back: " + backMostVisibleIndex + " Front: " + frontMostVisibleIndex);
+            }
         }
     }
 
@@ -278,56 +297,55 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     "mStackViewsDirty: " + mStackViewsDirty, Console.AnsiYellow);
         }
         if (mStackViewsDirty) {
-            // XXX: Consider using TaskViewTransform pool to prevent allocations
-            // XXX: Iterate children views, update transforms and remove all that are not visible
-            //      For all remaining tasks, update transforms and if visible add the view
-
             // Get all the task transforms
-            int[] visibleRange = mTmpVisibleRange;
-            int stackScroll = getStackScroll();
             ArrayList<Task> tasks = mStack.getTasks();
+            int stackScroll = getStackScroll();
+            int[] visibleRange = mTmpVisibleRange;
             updateStackTransforms(mCurrentTaskTransforms, tasks, stackScroll, visibleRange, false);
+            TaskViewTransform tmpTransform = new TaskViewTransform();
+            TaskStack.GroupTaskIndex gti = new TaskStack.GroupTaskIndex();
 
-            // Update the visible state of all the tasks
-            int taskCount = tasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                Task task = tasks.get(i);
-                TaskViewTransform transform = mCurrentTaskTransforms.get(i);
-                TaskView tv = getChildViewForTask(task);
-
-                if (transform.visible) {
-                    if (tv == null) {
-                        tv = mViewPool.pickUpViewFromPool(task, task);
-                        // When we are picking up a new view from the view pool, prepare it for any
-                        // following animation by putting it in a reasonable place
-                        if (mStackViewsAnimationDuration > 0 && i != 0) {
-                            int fromIndex = (transform.t < 0) ?
-                                    Math.max(0, (visibleRange[1] - 1)) :
-                                    Math.min(taskCount - 1, (visibleRange[0] + 1));
-                            tv.updateViewPropertiesToTaskTransform(
-                                    mStackAlgorithm.getStackTransform(fromIndex, stackScroll), 0);
-                        }
-                    }
-                } else {
-                    if (tv != null) {
-                        mViewPool.returnViewToPool(tv);
-                    }
-                }
-            }
-
-            // Update all the remaining view children
-            // NOTE: We have to iterate in reverse where because we are removing views directly
+            // Return all the invisible children to the pool
+            HashMap<Task, TaskView> taskChildViewMap = getTaskChildViewMap();
             int childCount = getChildCount();
             for (int i = childCount - 1; i >= 0; i--) {
                 TaskView tv = (TaskView) getChildAt(i);
                 Task task = tv.getTask();
                 int taskIndex = mStack.indexOfTask(task);
-                if (taskIndex < 0 || !mCurrentTaskTransforms.get(taskIndex).visible) {
+                if (taskIndex < visibleRange[1] || taskIndex > visibleRange[0]) {
+                    taskChildViewMap.remove(task);
                     mViewPool.returnViewToPool(tv);
-                } else {
-                    tv.updateViewPropertiesToTaskTransform(mCurrentTaskTransforms.get(taskIndex),
-                            mStackViewsAnimationDuration);
                 }
+            }
+
+            // Pick up all the newly visible children and update all the existing children
+            boolean isValidVisibleRange = visibleRange[0] != -1 && visibleRange[1] != -1;
+            for (int i = visibleRange[0]; isValidVisibleRange && i >= visibleRange[1]; i--) {
+                Task task = tasks.get(i);
+                TaskViewTransform transform = mCurrentTaskTransforms.get(i);
+                TaskView tv = taskChildViewMap.get(task);
+                int taskIndex = mStack.indexOfTask(task);
+
+                if (tv == null) {
+                    tv = mViewPool.pickUpViewFromPool(task, task);
+                    if (mStackViewsAnimationDuration > 0) {
+                        // For items in the list, put them in start animating them from the
+                        // approriate ends of the list where they are expected to appear
+                        Task fromTask = (transform.t < 0) ?
+                                tasks.get(visibleRange[1]) :
+                                tasks.get(visibleRange[0]);
+                        mStack.getGroupIndexForTask(fromTask, gti);
+                        tmpTransform = mStackAlgorithm.getStackTransform(
+                                (transform.t < 0) ? gti.groupIndex - 1 : gti.groupIndex + 1,
+                                (transform.t < 0) ? gti.taskIndex - 1 : gti.taskIndex + 1,
+                                stackScroll, tmpTransform);
+                        tv.updateViewPropertiesToTaskTransform(tmpTransform, 0);
+                    }
+                }
+
+                // Update and animate the task into place
+                tv.updateViewPropertiesToTaskTransform(mCurrentTaskTransforms.get(taskIndex),
+                        mStackViewsAnimationDuration);
             }
 
             if (Console.Enabled) {
@@ -357,7 +375,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
     /** Computes the initial stack scroll for the stack. */
     int getInitialStackScroll() {
-        if (mStack.getTaskCount() > 2) {
+        if (mStack.getGroupingCount() > 2) {
             return mMaxScroll - mStackAlgorithm.mTaskRect.height() / 2;
         }
         return mMaxScroll;
@@ -477,7 +495,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax) {
         // Compute the min and max scroll values
-        mStackAlgorithm.computeMinMaxScroll(mStack.getTaskCount());
+        mStackAlgorithm.computeMinMaxScroll(mStack.getGroupingCount());
         mMinScroll = mStackAlgorithm.mMinScroll;
         mMaxScroll = mStackAlgorithm.mMaxScroll;
 
@@ -794,30 +812,37 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             return;
         }
 
-        // Animate all the task views into view
-        TaskViewTransform transform = mStackAlgorithm.getStackTransform(mStack.getTaskCount() - 1,
-                getInitialStackScroll());
-        ctx.taskRect = transform.rect;
-        ctx.stackRectSansPeek = mStackAlgorithm.mStackRectSansPeek;
-        int childCount = getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            TaskView tv = (TaskView) getChildAt(i);
-            ctx.stackViewIndex = i;
-            ctx.stackViewCount = childCount;
-            ctx.isFrontMost = (i == (getChildCount() - 1));
-            ctx.transform = mStackAlgorithm.getStackTransform(
-                    mStack.indexOfTask(tv.getTask()), getStackScroll());
-            tv.startEnterRecentsAnimation(ctx);
-        }
-
-        // Add a runnable to the post animation ref counter to clear all the views
-        ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                // Start dozing
-                mUIDozeTrigger.startDozing();
+        if (mStack.getTaskCount() > 0) {
+            // Animate all the task views into view
+            TaskViewTransform transform = new TaskViewTransform();
+            TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
+            mStack.getGroupIndexForTask(mStack.getFrontMostTask(), groupTaskIndex);
+            mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
+                    getInitialStackScroll(), transform);
+            ctx.taskRect = transform.rect;
+            ctx.stackRectSansPeek = mStackAlgorithm.mStackRectSansPeek;
+            int childCount = getChildCount();
+            for (int i = childCount - 1; i >= 0; i--) {
+                TaskView tv = (TaskView) getChildAt(i);
+                ctx.stackViewIndex = i;
+                ctx.stackViewCount = childCount;
+                ctx.isFrontMost = (i == (getChildCount() - 1));
+                ctx.transform = new TaskViewTransform();
+                mStack.getGroupIndexForTask(tv.getTask(), groupTaskIndex);
+                mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
+                        getStackScroll(), ctx.transform);
+                tv.startEnterRecentsAnimation(ctx);
             }
-        });
+
+            // Add a runnable to the post animation ref counter to clear all the views
+            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    // Start dozing
+                    mUIDozeTrigger.startDozing();
+                }
+            });
+        }
     }
 
     /** Requests this task stacks to start it's exit-recents animation. */

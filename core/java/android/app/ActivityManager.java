@@ -677,6 +677,12 @@ public class ActivityManager {
         public int userId;
 
         /**
+         * The first time this task was active.
+         * @hide
+         */
+        public long firstActiveTime;
+
+        /**
          * The last time this task was active.
          * @hide
          */
@@ -719,6 +725,7 @@ public class ActivityManager {
             }
             dest.writeInt(stackId);
             dest.writeInt(userId);
+            dest.writeLong(firstActiveTime);
             dest.writeLong(lastActiveTime);
         }
 
@@ -732,6 +739,7 @@ public class ActivityManager {
                     TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
+            firstActiveTime = source.readLong();
             lastActiveTime = source.readLong();
         }
 

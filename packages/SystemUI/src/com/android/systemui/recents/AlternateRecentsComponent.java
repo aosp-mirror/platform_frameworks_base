@@ -22,126 +22,43 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.View;
-import android.view.WindowManager;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.recents.misc.Console;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.TaskStackView;
+import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
+import com.android.systemui.recents.views.TaskViewTransform;
 
-import java.lang.ref.WeakReference;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A proxy implementation for the recents component */
 public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
-    /** A handler for messages from the recents implementation */
-    class RecentsMessageHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_UPDATE_FOR_CONFIGURATION) {
-                Resources res = mContext.getResources();
-                float statusBarHeight = res.getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height);
-                Bundle replyData = msg.getData().getParcelable(KEY_CONFIGURATION_DATA);
-                mSingleCountFirstTaskRect = replyData.getParcelable(KEY_SINGLE_TASK_STACK_RECT);
-                mSingleCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                mTwoCountFirstTaskRect = replyData.getParcelable(KEY_TWO_TASK_STACK_RECT);
-                mTwoCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                mMultipleCountFirstTaskRect = replyData.getParcelable(KEY_MULTIPLE_TASK_STACK_RECT);
-                mMultipleCountFirstTaskRect.offset(0, (int) statusBarHeight);
-                if (Console.Enabled) {
-                    Console.log(Constants.Log.App.RecentsComponent,
-                            "[RecentsComponent|RecentsMessageHandler|handleMessage]",
-                            "singleTaskRect: " + mSingleCountFirstTaskRect +
-                            " twoTaskRect: " + mTwoCountFirstTaskRect +
-                            " multipleTaskRect: " + mMultipleCountFirstTaskRect);
-                }
-
-                // If we had the update the animation rects as a result of onServiceConnected, then
-                // we check for whether we need to toggle the recents here.
-                if (mToggleRecentsUponServiceBound) {
-                    startRecentsActivity();
-                    mToggleRecentsUponServiceBound = false;
-                }
-            }
-        }
-    }
-
-    /** A service connection to the recents implementation */
-    class RecentsServiceConnection implements ServiceConnection {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            if (Console.Enabled) {
-                Console.log(Constants.Log.App.RecentsComponent,
-                        "[RecentsComponent|ServiceConnection|onServiceConnected]",
-                        "toggleRecents: " + mToggleRecentsUponServiceBound);
-            }
-            mService = new Messenger(service);
-            mServiceIsBound = true;
-
-            if (hasValidTaskRects()) {
-                // Start recents if this new service connection was triggered by hitting recents
-                if (mToggleRecentsUponServiceBound) {
-                    startRecentsActivity();
-                    mToggleRecentsUponServiceBound = false;
-                }
-            } else {
-                // Otherwise, update the animation rects before starting the recents if requested
-                updateAnimationRects();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            if (Console.Enabled) {
-                Console.log(Constants.Log.App.RecentsComponent,
-                        "[RecentsComponent|ServiceConnection|onServiceDisconnected]");
-            }
-            mService = null;
-            mServiceIsBound = false;
-        }
-    }
-
-    final public static int MSG_UPDATE_FOR_CONFIGURATION = 0;
-    final public static int MSG_UPDATE_TASK_THUMBNAIL = 1;
-    final public static int MSG_PRELOAD_TASKS = 2;
-    final public static int MSG_CANCEL_PRELOAD_TASKS = 3;
-    final public static int MSG_SHOW_RECENTS = 4;
-    final public static int MSG_HIDE_RECENTS = 5;
-    final public static int MSG_TOGGLE_RECENTS = 6;
-    final public static int MSG_START_ENTER_ANIMATION = 7;
-
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
     final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
     final public static String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
-    final public static String KEY_CONFIGURATION_DATA = "recents.data.updateForConfiguration";
-    final public static String KEY_WINDOW_RECT = "recents.windowRect";
-    final public static String KEY_SYSTEM_INSETS = "recents.systemInsets";
-    final public static String KEY_SINGLE_TASK_STACK_RECT = "recents.singleCountTaskRect";
-    final public static String KEY_TWO_TASK_STACK_RECT = "recents.twoCountTaskRect";
-    final public static String KEY_MULTIPLE_TASK_STACK_RECT = "recents.multipleCountTaskRect";
+    final public static String EXTRA_TRIGGERED_FROM_TASK_ID = "recents.activeTaskId";
 
     final static int sMinToggleDelay = 425;
 
     final static String sToggleRecentsAction = "com.android.systemui.recents.SHOW_RECENTS";
     final static String sRecentsPackage = "com.android.systemui";
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
-    final static String sRecentsService = "com.android.systemui.recents.RecentsService";
 
     static Bitmap sLastScreenshot;
     static RecentsComponent.Callbacks sRecentsComponentCallbacks;
@@ -150,37 +67,37 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     SystemServicesProxy mSystemServicesProxy;
 
     // Recents service binding
-    Messenger mService = null;
-    Messenger mMessenger;
-    RecentsMessageHandler mHandler;
+    Handler mHandler;
     boolean mBootCompleted = false;
-    boolean mServiceIsBound = false;
-    boolean mToggleRecentsUponServiceBound;
-    RecentsServiceConnection mConnection = new RecentsServiceConnection();
+
+    // Task launching
+    RecentsConfiguration mConfig;
+    Rect mWindowRect;
+    Rect mTaskStackBounds;
+    TaskViewTransform mTmpTransform = new TaskViewTransform();
+    int mStatusBarHeight;
 
     // Variables to keep track of if we need to start recents after binding
     View mStatusBarView;
     boolean mTriggeredFromAltTab;
-
-    Rect mSingleCountFirstTaskRect = new Rect();
-    Rect mTwoCountFirstTaskRect = new Rect();
-    Rect mMultipleCountFirstTaskRect = new Rect();
     long mLastToggleTime;
 
     public AlternateRecentsComponent(Context context) {
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
-        mHandler = new RecentsMessageHandler();
-        mMessenger = new Messenger(mHandler);
+        mHandler = new Handler();
+        mConfig = RecentsConfiguration.reinitialize(context);
+        mWindowRect = mSystemServicesProxy.getWindowRect();
+        mTaskStackBounds = new Rect();
+        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
+        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
     }
 
     public void onStart() {
         if (Console.Enabled) {
             Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|start]");
         }
-
-        // Try to create a long-running connection to the recents service
-        bindToRecentsService(false);
     }
 
     public void onBootCompleted() {
@@ -194,12 +111,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = triggeredFromAltTab;
-        if (!mServiceIsBound) {
-            // Try to create a long-running connection to the recents service before toggling
-            // recents
-            bindToRecentsService(true);
-            return;
-        }
 
         try {
             startRecentsActivity();
@@ -214,18 +125,14 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|hideRecents]");
         }
 
-        if (mServiceIsBound && mBootCompleted) {
-            if (isRecentsTopMost(null)) {
-                // Notify recents to close it
-                try {
-                    Bundle data = new Bundle();
-                    Message msg = Message.obtain(null, MSG_HIDE_RECENTS,
-                            triggeredFromAltTab ? 1 : 0, 0);
-                    msg.setData(data);
-                    mService.send(msg);
-                } catch (RemoteException re) {
-                    re.printStackTrace();
-                }
+        if (mBootCompleted) {
+            if (isRecentsTopMost(getTopMostTask(), null)) {
+                // Notify recents to hide itself
+                Intent intent = new Intent(RecentsActivity.ACTION_HIDE_RECENTS_ACTIVITY);
+                intent.setPackage(mContext.getPackageName());
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                intent.putExtra(RecentsActivity.EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
+                mContext.sendBroadcast(intent);
             }
         }
     }
@@ -237,17 +144,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                     Constants.Log.App.TimeRecentsStartupKey);
             Console.logStartTracingTime(Constants.Log.App.TimeRecentsLaunchTask,
                     Constants.Log.App.TimeRecentsLaunchKey);
-            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]",
-                    "serviceIsBound: " + mServiceIsBound);
+            Console.log(Constants.Log.App.RecentsComponent, "[RecentsComponent|toggleRecents]", "");
         }
         mStatusBarView = statusBarView;
         mTriggeredFromAltTab = false;
-        if (!mServiceIsBound) {
-            // Try to create a long-running connection to the recents service before toggling
-            // recents
-            bindToRecentsService(true);
-            return;
-        }
 
         try {
             toggleRecentsActivity();
@@ -265,94 +165,26 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-        updateAnimationRects();
+        mConfig = RecentsConfiguration.reinitialize(mContext);
+        mWindowRect = mSystemServicesProxy.getWindowRect();
+        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
+        sLastScreenshot = null;
     }
 
-    /** Binds to the recents implementation */
-    private void bindToRecentsService(boolean toggleRecentsUponConnection) {
-        mToggleRecentsUponServiceBound = toggleRecentsUponConnection;
-        Intent intent = new Intent();
-        intent.setClassName(sRecentsPackage, sRecentsService);
-        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    /** Returns whether we have valid task rects to animate to. */
-    boolean hasValidTaskRects() {
-        return mSingleCountFirstTaskRect != null && mSingleCountFirstTaskRect.width() > 0 &&
-                mSingleCountFirstTaskRect.height() > 0 && mTwoCountFirstTaskRect != null &&
-                mTwoCountFirstTaskRect.width() > 0 && mTwoCountFirstTaskRect.height() > 0 &&
-                mMultipleCountFirstTaskRect != null && mMultipleCountFirstTaskRect.width() > 0 &&
-                mMultipleCountFirstTaskRect.height() > 0;
-    }
-
-    /** Updates each of the task animation rects. */
-    void updateAnimationRects() {
-        if (mServiceIsBound) {
-            Resources res = mContext.getResources();
-            int statusBarHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
-            int navBarHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_height);
-            Rect rect = new Rect();
-            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            wm.getDefaultDisplay().getRectSize(rect);
-
-            // Try and update the recents configuration
-            try {
-                Bundle data = new Bundle();
-                data.putParcelable(KEY_WINDOW_RECT, rect);
-                data.putParcelable(KEY_SYSTEM_INSETS, new Rect(0, statusBarHeight, 0, 0));
-                Message msg = Message.obtain(null, MSG_UPDATE_FOR_CONFIGURATION, 0, 0);
-                msg.setData(data);
-                msg.replyTo = mMessenger;
-                mService.send(msg);
-            } catch (RemoteException re) {
-                re.printStackTrace();
-            }
-        }
-    }
-
-    /** Loads the first task thumbnail */
-    Bitmap loadFirstTaskThumbnail() {
+    /** Gets the top task. */
+    ActivityManager.RunningTaskInfo getTopMostTask() {
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RunningTaskInfo> tasks = ssp.getRunningTasks(1);
-
-        for (ActivityManager.RunningTaskInfo t : tasks) {
-            return ssp.getTaskThumbnail(t.id);
+        if (!tasks.isEmpty()) {
+            return tasks.get(0);
         }
         return null;
     }
 
-    /** Returns the proper rect to use for the animation, given the number of tasks. */
-    Rect getAnimationTaskRect(List<ActivityManager.RecentTaskInfo> tasks) {
-        // NOTE: Currently there's no method to get the number of non-home tasks, so we have to
-        // compute this ourselves
-        SystemServicesProxy ssp = mSystemServicesProxy;
-        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            ActivityManager.RecentTaskInfo t = iter.next();
-
-            // Skip tasks in the home stack
-            if (ssp.isInHomeStack(t.persistentId)) {
-                iter.remove();
-                continue;
-            }
-        }
-        if (tasks.size() <= 1) {
-            return mSingleCountFirstTaskRect;
-        } else if (tasks.size() <= 2) {
-            return mTwoCountFirstTaskRect;
-        } else {
-            return mMultipleCountFirstTaskRect;
-        }
-    }
-
     /** Returns whether the recents is currently running */
-    boolean isRecentsTopMost(AtomicBoolean isHomeTopMost) {
+    boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask, AtomicBoolean isHomeTopMost) {
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RunningTaskInfo> tasks = ssp.getRunningTasks(1);
-        if (!tasks.isEmpty()) {
-            ActivityManager.RunningTaskInfo topTask = tasks.get(0);
+        if (topTask != null) {
             ComponentName topActivity = topTask.topActivity;
 
             // Check if the front most activity is recents
@@ -382,39 +214,37 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
         // If Recents is the front most activity, then we should just communicate with it directly
         // to launch the first task or dismiss itself
+        ActivityManager.RunningTaskInfo topTask = getTopMostTask();
         AtomicBoolean isTopTaskHome = new AtomicBoolean();
-        if (isRecentsTopMost(isTopTaskHome)) {
-            // Notify recents to close itself
-            try {
-                Bundle data = new Bundle();
-                Message msg = Message.obtain(null, MSG_TOGGLE_RECENTS, 0, 0);
-                msg.setData(data);
-                mService.send(msg);
+        if (isRecentsTopMost(topTask, isTopTaskHome)) {
+            // Notify recents to toggle itself
+            Intent intent = new Intent(RecentsActivity.ACTION_TOGGLE_RECENTS_ACTIVITY);
+            intent.setPackage(mContext.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            mContext.sendBroadcast(intent);
 
-                // Time this path
-                if (Console.Enabled) {
-                    Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
-                            Constants.Log.App.TimeRecentsStartupKey, "sendToggleRecents");
-                    Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
-                            Constants.Log.App.TimeRecentsLaunchKey, "sendToggleRecents");
-                }
-            } catch (RemoteException re) {
-                re.printStackTrace();
+            // Time this path
+            if (Console.Enabled) {
+                Console.logTraceTime(Constants.Log.App.TimeRecentsStartup,
+                        Constants.Log.App.TimeRecentsStartupKey, "receivedToggleRecents");
+                Console.logTraceTime(Constants.Log.App.TimeRecentsLaunchTask,
+                        Constants.Log.App.TimeRecentsLaunchKey, "receivedToggleRecents");
             }
             mLastToggleTime = System.currentTimeMillis();
             return;
         } else {
             // Otherwise, start the recents activity
-            startRecentsActivity(isTopTaskHome.get());
+            startRecentsActivity(topTask, isTopTaskHome.get());
         }
     }
 
     /** Starts the recents activity if it is not already running */
     void startRecentsActivity() {
         // Check if the top task is in the home stack, and start the recents activity
+        ActivityManager.RunningTaskInfo topTask = getTopMostTask();
         AtomicBoolean isTopTaskHome = new AtomicBoolean();
-        if (!isRecentsTopMost(isTopTaskHome)) {
-            startRecentsActivity(isTopTaskHome.get());
+        if (!isRecentsTopMost(topTask, isTopTaskHome)) {
+            startRecentsActivity(topTask, isTopTaskHome.get());
         }
     }
 
@@ -422,8 +252,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for a unknown state->recents transition.
      */
     ActivityOptions getUnknownTransitionActivityOptions() {
-        // Reset the last screenshot
-        consumeLastScreenshot();
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
                 R.anim.recents_from_unknown_exit, mHandler, this);
@@ -433,8 +261,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for a home->recents transition.
      */
     ActivityOptions getHomeTransitionActivityOptions() {
-        // Reset the last screenshot
-        consumeLastScreenshot();
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
                 R.anim.recents_from_launcher_exit, mHandler, this);
@@ -444,13 +270,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for an app->recents transition.  If this method sets the static
      * screenshot, then we will use that for the transition.
      */
-    ActivityOptions getThumbnailTransitionActivityOptions(Rect taskRect) {
+    ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask) {
         // Recycle the last screenshot
         consumeLastScreenshot();
 
         // Take the full screenshot
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-            sLastScreenshot = mSystemServicesProxy.takeScreenshot();
+            sLastScreenshot = mSystemServicesProxy.takeAppScreenshot();
             if (sLastScreenshot != null) {
                 return ActivityOptions.makeCustomAnimation(mContext,
                         R.anim.recents_from_app_enter,
@@ -459,8 +285,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // If the screenshot fails, then load the first task thumbnail and use that
-        Bitmap firstThumbnail = loadFirstTaskThumbnail();
+        Bitmap firstThumbnail = mSystemServicesProxy.getTaskThumbnail(topTask.id);
         if (firstThumbnail != null) {
+            Rect taskRect = getThumbnailTransitionRect(topTask.id);
+
             // Create the new thumbnail for the animation down
             // XXX: We should find a way to optimize this so we don't need to create a new bitmap
             Bitmap thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
@@ -480,8 +308,46 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         return getUnknownTransitionActivityOptions();
     }
 
+    /** Returns the transition rect for the given task id. */
+    Rect getThumbnailTransitionRect(int runningTaskId) {
+        // Get the stack of tasks that we are animating into
+        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy);
+        TaskStackView tsv = new TaskStackView(mContext, stack);
+        TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
+        tsv.computeRects(mTaskStackBounds.width(), mTaskStackBounds.height() - mStatusBarHeight, 0, 0);
+        tsv.setStackScrollToInitialState();
+
+        // Find the running task in the TaskStack
+        Task task = null;
+        ArrayList<Task> tasks = stack.getTasks();
+        if (runningTaskId != -1) {
+            // Otherwise, try and find the task with the
+            int taskCount = tasks.size();
+            for (int i = taskCount - 1; i >= 0; i--) {
+                Task t = tasks.get(i);
+                if (t.key.id == runningTaskId) {
+                    task = t;
+                    break;
+                }
+            }
+        }
+        if (task == null) {
+            // If no task is specified or we can not find the task just use the front most one
+            task = tasks.get(tasks.size() - 1);
+        }
+
+        // Get the transform for the running task
+        TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
+        stack.getGroupIndexForTask(task, groupTaskIndex);
+        mTmpTransform = algo.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
+                tsv.getStackScroll(), mTmpTransform);
+        mTmpTransform.rect.offset(mTaskStackBounds.left, mTaskStackBounds.top);
+        mTmpTransform.rect.offset(0, mStatusBarHeight);
+        return new Rect(mTmpTransform.rect);
+    }
+
     /** Starts the recents activity */
-    void startRecentsActivity(boolean isTopTaskHome) {
+    void startRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
         // If Recents is not the front-most activity and we should animate into it.  If
         // the activity at the root of the top task stack in the home stack, then we just do a
         // simple transition.  Otherwise, we animate to the rects defined by the Recents service,
@@ -489,34 +355,34 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         SystemServicesProxy ssp = mSystemServicesProxy;
         List<ActivityManager.RecentTaskInfo> recentTasks =
                 ssp.getRecentTasks(3, UserHandle.CURRENT.getIdentifier());
-        Rect taskRect = getAnimationTaskRect(recentTasks);
-        boolean useThumbnailTransition = !isTopTaskHome &&
-                hasValidTaskRects();
+        boolean useThumbnailTransition = !isTopTaskHome;
         boolean hasRecentTasks = !recentTasks.isEmpty();
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptions(taskRect);
+            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask);
             if (opts != null) {
                 if (sLastScreenshot != null) {
-                    startAlternateRecentsActivity(opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
+                    startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
                 } else {
-                    startAlternateRecentsActivity(opts, EXTRA_FROM_APP_THUMBNAIL);
+                    startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL);
                 }
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
             }
-        } else {
+        }
+
+        if (!useThumbnailTransition) {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (hasRecentTasks) {
                 ActivityOptions opts = getHomeTransitionActivityOptions();
-                startAlternateRecentsActivity(opts, EXTRA_FROM_HOME);
+                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME);
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startAlternateRecentsActivity(opts, null);
+                startAlternateRecentsActivity(topTask, opts, null);
             }
         }
 
@@ -528,7 +394,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     /** Starts the recents activity */
-    void startAlternateRecentsActivity(ActivityOptions opts, String extraFlag) {
+    void startAlternateRecentsActivity(ActivityManager.RunningTaskInfo topTask,
+                                       ActivityOptions opts, String extraFlag) {
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -538,6 +405,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             intent.putExtra(extraFlag, true);
         }
         intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
+        intent.putExtra(EXTRA_TRIGGERED_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
                     UserHandle.USER_CURRENT));
@@ -576,11 +444,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     @Override
     public void onAnimationStarted() {
         // Notify recents to start the enter animation
-        try {
-            Message msg = Message.obtain(null, MSG_START_ENTER_ANIMATION, 0, 0);
-            mService.send(msg);
-        } catch (RemoteException re) {
-            re.printStackTrace();
-        }
+        Intent intent = new Intent(RecentsActivity.ACTION_START_ENTER_ANIMATION);
+        intent.setPackage(mContext.getPackageName());
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        mContext.sendBroadcast(intent);
     }
 }

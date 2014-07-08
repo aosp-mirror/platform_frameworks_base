@@ -189,8 +189,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".recents.RecentsService" />
-
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"

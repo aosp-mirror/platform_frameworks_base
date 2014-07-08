@@ -34,7 +34,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-import com.android.systemui.recents.Console;
+import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -438,23 +438,25 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         // Upfront the processing of the thumbnail
-        TaskViewTransform transform;
+        TaskViewTransform transform = new TaskViewTransform();
         View sourceView = tv;
         int offsetX = 0;
         int offsetY = 0;
         int stackScroll = stackView.getStackScroll();
+        TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
+        stack.getGroupIndexForTask(task, groupTaskIndex);
         if (tv == null) {
             // If there is no actual task view, then use the stack view as the source view
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            transform = stackView.getStackAlgorithm().getStackTransform(stack.indexOfTask(task),
-                    stackScroll);
+            transform = stackView.getStackAlgorithm().getStackTransform(groupTaskIndex.groupIndex,
+                    groupTaskIndex.taskIndex, stackScroll, transform);
             offsetX = transform.rect.left;
             offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
         } else {
-            transform = stackView.getStackAlgorithm().getStackTransform(stack.indexOfTask(task),
-                    stackScroll);
+            transform = stackView.getStackAlgorithm().getStackTransform(groupTaskIndex.groupIndex,
+                    groupTaskIndex.taskIndex, stackScroll, transform);
         }
 
         // Compute the thumbnail to scale up from

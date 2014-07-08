@@ -40,7 +40,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.Utilities;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
@@ -200,7 +201,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
         final PackageManager pm = mContext.getPackageManager();
-        final Bitmap thumbnail = Utilities.getThumbnail(am, td.persistentTaskId);
+        final Bitmap thumbnail = SystemServicesProxy.getThumbnail(am, td.persistentTaskId);
         Drawable icon = getFullResIcon(td.resolveInfo, pm);
         if (td.userId != UserHandle.myUserId()) {
             // Need to badge the icon

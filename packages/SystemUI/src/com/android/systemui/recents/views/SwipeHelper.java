@@ -28,7 +28,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import com.android.systemui.recents.Console;
+import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 
 /**

@@ -21,7 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Looper;
 import com.android.internal.content.PackageMonitor;
-import com.android.systemui.recents.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.HashSet;
 import java.util.List;
