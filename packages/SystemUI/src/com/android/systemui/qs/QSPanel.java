@@ -126,6 +126,7 @@ public class QSPanel extends ViewGroup {
     }
 
     private void handleSetTileVisibility(View v, boolean visible) {
+        if (visible == (v.getVisibility() == VISIBLE)) return;
         v.setVisibility(visible ? VISIBLE : GONE);
     }
 

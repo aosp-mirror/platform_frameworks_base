@@ -42,15 +42,17 @@ public final class SignalTileView extends QSTileView {
     public SignalTileView(Context context) {
         super(context);
 
-        mIn = new ImageView(context);
-        mIn.setImageResource(R.drawable.ic_qs_signal_in);
-        mIn.setColorFilter(FILTER);
-        addView(mIn);
+        mIn = addTrafficView(R.drawable.ic_qs_signal_in);
+        mOut = addTrafficView(R.drawable.ic_qs_signal_out);
+    }
 
-        mOut = new ImageView(context);
-        mOut.setImageResource(R.drawable.ic_qs_signal_out);
-        mOut.setColorFilter(FILTER);
-        addView(mOut);
+    private ImageView addTrafficView(int icon) {
+        final ImageView traffic = new ImageView(mContext);
+        traffic.setImageResource(icon);
+        traffic.setColorFilter(FILTER);
+        traffic.setAlpha(0f);
+        addView(traffic);
+        return traffic;
     }
 
     @Override
@@ -102,18 +104,22 @@ public final class SignalTileView extends QSTileView {
         } else {
             mOverlay.setVisibility(GONE);
         }
-        setVisibility(mIn, s.activityIn);
-        setVisibility(mOut, s.activityOut);
+        final boolean shown = isShown();
+        setVisibility(mIn, shown, s.activityIn);
+        setVisibility(mOut, shown, s.activityOut);
     }
 
-    private void setVisibility(View view, boolean visible) {
-        final float newAlpha = visible ? 1 : 0;
-        if (view.getAlpha() != newAlpha) {
+    private void setVisibility(View view, boolean shown, boolean visible) {
+        final float newAlpha = shown && visible ? 1 : 0;
+        if (view.getAlpha() == newAlpha) return;
+        if (shown) {
             view.animate()
                 .setDuration(visible ? SHORT_DURATION : DEFAULT_DURATION)
                 .alpha(newAlpha)
                 .withLayer()
                 .start();
+        } else {
+            view.setAlpha(newAlpha);
         }
     }
 }
