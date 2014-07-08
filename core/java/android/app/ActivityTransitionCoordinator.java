@@ -274,8 +274,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return names;
     }
 
-    public ArrayList<View> getMappedViews() {
-        return mSharedElements;
+    public ArrayList<View> copyMappedViews() {
+        return new ArrayList<View>(mSharedElements);
     }
 
     public ArrayList<String> getAllSharedElementNames() { return mAllSharedElementNames; }
@@ -521,9 +521,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected void clearState() {
         // Clear the state so that we can't hold any references accidentally and leak memory.
         mWindow = null;
-        mAllSharedElementNames.clear();
         mSharedElements.clear();
-        mSharedElementNames.clear();
         mTransitioningViews.clear();
         mResultReceiver = null;
         mPendingTransition = null;

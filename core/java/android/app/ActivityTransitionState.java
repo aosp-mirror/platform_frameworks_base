@@ -240,7 +240,7 @@ class ActivityTransitionState {
             if (!mHasExited) {
                 mHasExited = true;
                 if (mEnterTransitionCoordinator != null) {
-                    mEnterTransitionCoordinator.stop();
+                    mEnterTransitionCoordinator.cancelEnter();
                     mEnterTransitionCoordinator = null;
                 }
                 ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
@@ -268,7 +268,7 @@ class ActivityTransitionState {
                 if (mCalledExitCoordinator != null) {
                     mExitingFrom = mCalledExitCoordinator.getAcceptedNames();
                     mExitingTo = mCalledExitCoordinator.getMappedNames();
-                    mExitingToView = mCalledExitCoordinator.getMappedViews();
+                    mExitingToView = mCalledExitCoordinator.copyMappedViews();
                     mCalledExitCoordinator.startExit();
                 }
             }

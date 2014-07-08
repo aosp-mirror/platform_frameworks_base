@@ -433,6 +433,17 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     public void stop() {
         makeOpaque();
+        mIsCanceled = true;
+        mResultReceiver = null;
+        if (mBackgroundAnimator != null) {
+            mBackgroundAnimator.end();
+            mBackgroundAnimator = null;
+        }
+        mActivity = null;
+        clearState();
+    }
+
+    public void cancelEnter() {
         mHasStopped = true;
         mIsCanceled = true;
         mResultReceiver = null;
@@ -440,6 +451,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             mBackgroundAnimator.cancel();
             mBackgroundAnimator = null;
         }
+        mActivity = null;
+        clearState();
     }
 
     private void makeOpaque() {

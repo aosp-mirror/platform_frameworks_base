@@ -66,6 +66,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private Bundle mExitSharedElementBundle;
 
+    private boolean mIsExitStarted;
+
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
         super(activity.getWindow(), names, getListener(activity, isReturning),
@@ -164,46 +166,52 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void startExit() {
-        startTransition(new Runnable() {
-            @Override
-            public void run() {
-                beginTransitions();
-            }
-        });
-        setViewVisibility(mTransitioningViews, View.INVISIBLE);
+        if (!mIsExitStarted) {
+            mIsExitStarted = true;
+            startTransition(new Runnable() {
+                @Override
+                public void run() {
+                    beginTransitions();
+                }
+            });
+            setViewVisibility(mTransitioningViews, View.INVISIBLE);
+        }
     }
 
     public void startExit(int resultCode, Intent data) {
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                mIsCanceled = true;
-                finish();
-            }
-        };
-        mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
-        if (getDecor().getBackground() == null) {
-            ColorDrawable black = new ColorDrawable(0xFF000000);
-            black.setAlpha(0);
-            getWindow().setBackgroundDrawable(black);
-            black.setAlpha(255);
-        }
-        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
-                mAllSharedElementNames, resultCode, data);
-        mActivity.convertToTranslucent(new Activity.TranslucentConversionListener() {
-            @Override
-            public void onTranslucentConversionComplete(boolean drawComplete) {
-                if (!mIsCanceled) {
-                    fadeOutBackground();
+        if (!mIsExitStarted) {
+            mIsExitStarted = true;
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    mIsCanceled = true;
+                    finish();
                 }
+            };
+            mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+            if (getDecor().getBackground() == null) {
+                ColorDrawable black = new ColorDrawable(0xFF000000);
+                black.setAlpha(0);
+                getWindow().setBackgroundDrawable(black);
+                black.setAlpha(255);
             }
-        }, options);
-        startTransition(new Runnable() {
-            @Override
-            public void run() {
-                startExitTransition();
-            }
-        });
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
+                    mAllSharedElementNames, resultCode, data);
+            mActivity.convertToTranslucent(new Activity.TranslucentConversionListener() {
+                @Override
+                public void onTranslucentConversionComplete(boolean drawComplete) {
+                    if (!mIsCanceled) {
+                        fadeOutBackground();
+                    }
+                }
+            }, options);
+            startTransition(new Runnable() {
+                @Override
+                public void run() {
+                    startExitTransition();
+                }
+            });
+        }
     }
 
     private void startExitTransition() {
@@ -216,20 +224,23 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void fadeOutBackground() {
         if (mBackgroundAnimator == null) {
-            Drawable background = getDecor().getBackground();
-            mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 0);
-            mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mBackgroundAnimator = null;
-                    if (!mIsCanceled) {
-                        mIsBackgroundReady = true;
-                        notifyComplete();
+            ViewGroup decor = getDecor();
+            Drawable background;
+            if (decor != null && (background = decor.getBackground()) != null) {
+                mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 0);
+                mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mBackgroundAnimator = null;
+                        if (!mIsCanceled) {
+                            mIsBackgroundReady = true;
+                            notifyComplete();
+                        }
                     }
-                }
-            });
-            mBackgroundAnimator.setDuration(getFadeDuration());
-            mBackgroundAnimator.start();
+                });
+                mBackgroundAnimator.setDuration(getFadeDuration());
+                mBackgroundAnimator.start();
+            }
         }
     }
 
@@ -346,6 +357,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         if (!mIsReturning && mExitNotified) {
             mActivity = null; // don't need it anymore
+            clearState();
         }
     }
 
