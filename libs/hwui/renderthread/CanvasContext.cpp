@@ -250,8 +250,7 @@ void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mEglManager.hasEglContext()) {
         requireGlContext();
-        TreeInfo info(TreeInfo::MODE_DESTROY_RESOURCES, mRenderThread.renderState());
-        mRootRenderNode->prepareTree(info);
+        mRootRenderNode->destroyHardwareResources();
         Caches::getInstance().flush(Caches::kFlushMode_Layers);
     }
 }
