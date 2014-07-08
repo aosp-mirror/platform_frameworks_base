@@ -6537,10 +6537,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     }
 
                     // Pull the Package Manager metadata from the restore set first
-                    PackageInfo omPackage = new PackageInfo();
-                    omPackage.packageName = PACKAGE_MANAGER_SENTINEL;
+                    mCurrentPackage = new PackageInfo();
+                    mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
                     mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
-                    initiateOneRestore(omPackage, 0,
+                    initiateOneRestore(mCurrentPackage, 0,
                             IBackupAgent.Stub.asInterface(mPmAgent.onBind()));
                     // The PM agent called operationComplete() already, because our invocation
                     // of it is process-local and therefore synchronous.  That means that a
