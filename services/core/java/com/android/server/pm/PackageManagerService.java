@@ -6148,7 +6148,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean bundledApk = isSystemApp(pkg) && !isUpdatedSystemApp(pkg);
         final File codeFile = new File(pkg.applicationInfo.getCodePath());
         final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
-        final String nativeLibraryPath;
+
+        String nativeLibraryPath = null;
         if (bundledApk) {
             // If "/system/lib64/apkname" exists, assume that is the per-package
             // native library directory to use; otherwise use "/system/lib/apkname".
@@ -6158,9 +6159,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             File libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
             nativeLibraryPath = (new File(libDir, apkName)).getAbsolutePath();
         } else {
-            // We're installing an upgrade; use directory found during scan
-            // TODO: consider deriving this based on instructionSet
-            nativeLibraryPath = pkg.applicationInfo.nativeLibraryDir;
+            // Upgraded system app; derive its library path by inspecting.
+            // TODO: pipe through abiOverride
+            String[] abiList = Build.SUPPORTED_ABIS;
+            NativeLibraryHelper.Handle handle = null;
+            try {
+                handle = NativeLibraryHelper.Handle.create(codeFile);
+                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
+                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
+                    abiList = Build.SUPPORTED_32_BIT_ABIS;
+                }
+
+                final int abiIndex = NativeLibraryHelper.findSupportedAbi(handle, abiList);
+                if (abiIndex >= 0) {
+                    final File baseLibFile = new File(codeFile, LIB_DIR_NAME);
+                    final String abi = Build.SUPPORTED_ABIS[abiIndex];
+                    final String instructionSet = VMRuntime.getInstructionSet(abi);
+                    nativeLibraryPath = new File(baseLibFile, instructionSet).getAbsolutePath();
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to detect native libraries", e);
+            } finally {
+                IoUtils.closeQuietly(handle);
+            }
         }
         pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
         // pkgSetting might be null during rescan following uninstall of updates
@@ -9086,7 +9107,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Example topology:
         // /data/app/com.example/base.apk
         // /data/app/com.example/split_foo.apk
-        // /data/app/com.example/native/arm/libfoo.so
+        // /data/app/com.example/lib/arm/libfoo.so
+        // /data/app/com.example/lib/arm64/libfoo.so
         // /data/app/com.example/dalvik/arm/base.apk@classes.dex
 
         /** New install */
