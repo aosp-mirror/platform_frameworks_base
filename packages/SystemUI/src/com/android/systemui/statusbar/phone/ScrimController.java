@@ -71,7 +71,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private boolean mAnimationStarted;
     private boolean mDozing;
     private int mTeasesRemaining;
-
     private final Interpolator mInterpolator = new DecelerateInterpolator();
 
     public ScrimController(View scrimBehind, View scrimInFront) {
@@ -149,7 +148,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void updateScrims() {
-        if ((!mKeyguardShowing && !mBouncerShowing) || mAnimateKeyguardFadingOut) {
+        if (mAnimateKeyguardFadingOut) {
+            setScrimInFrontColor(0f);
+            setScrimBehindColor(0f);
+        }else if (!mKeyguardShowing && !mBouncerShowing) {
             updateScrimNormal();
             setScrimInFrontColor(0);
         } else {

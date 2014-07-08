@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     >
-    <com.android.systemui.statusbar.AlphaImageView
+    <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/camera_button"
         android:layout_height="64dp"
         android:layout_width="64dp"
@@ -32,7 +32,7 @@
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button" />
 
-    <com.android.systemui.statusbar.AlphaImageView
+    <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/phone_button"
         android:layout_height="64dp"
         android:layout_width="64dp"
@@ -52,7 +52,7 @@
         android:textColor="#ffffff"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
-    <com.android.systemui.statusbar.AlphaImageView
+    <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/lock_icon"
         android:layout_width="64dp"
         android:layout_height="64dp"

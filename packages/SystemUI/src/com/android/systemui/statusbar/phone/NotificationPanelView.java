@@ -39,6 +39,7 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.MirrorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -49,7 +50,7 @@ import java.util.ArrayList;
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
-        KeyguardPageSwipeHelper.Callback {
+        KeyguardAffordanceHelper.Callback {
 
     // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
     // changed.
@@ -59,7 +60,7 @@ public class NotificationPanelView extends PanelView implements
     private static final float HEADER_RUBBERBAND_FACTOR = 2.15f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
-    private KeyguardPageSwipeHelper mPageSwiper;
+    private KeyguardAffordanceHelper mAfforanceHelper;
     private StatusBarHeaderView mHeader;
     private View mQsContainer;
     private QSPanel mQsPanel;
@@ -124,7 +125,6 @@ public class NotificationPanelView extends PanelView implements
     private boolean mIsExpanding;
 
     private boolean mBlockTouches;
-    private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
     private int mNotificationScrimWaitDistance;
     private boolean mTwoFingerQsExpand;
     private boolean mTwoFingerQsExpandPossible;
@@ -135,6 +135,10 @@ public class NotificationPanelView extends PanelView implements
      */
     private int mScrollYOverride = -1;
     private boolean mQsAnimatorExpand;
+    private boolean mIsLaunchTransitionFinished;
+    private boolean mIsLaunchTransitionRunning;
+    private Runnable mLaunchAnimationEndRunnable;
+    private boolean mOnlyAffordanceInThisMotion;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -167,9 +171,7 @@ public class NotificationPanelView extends PanelView implements
         mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_linear_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
-        mSwipeTranslationViews.add(mNotificationStackScroller);
-        mSwipeTranslationViews.add(mKeyguardStatusView);
-        mPageSwiper = new KeyguardPageSwipeHelper(this, getContext());
+        mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
     }
 
     @Override
@@ -297,9 +299,10 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void resetViews() {
+        mIsLaunchTransitionFinished = false;
         mBlockTouches = false;
         mUnlockIconActive = false;
-        mPageSwiper.reset();
+        mAfforanceHelper.reset(true);
         closeQs();
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);
@@ -354,6 +357,7 @@ public class NotificationPanelView extends PanelView implements
         if (mBlockTouches) {
             return false;
         }
+        resetDownStates(event);
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
@@ -430,6 +434,12 @@ public class NotificationPanelView extends PanelView implements
         return !mQsExpanded && super.onInterceptTouchEvent(event);
     }
 
+    private void resetDownStates(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mOnlyAffordanceInThisMotion = false;
+        }
+    }
+
     @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
 
@@ -464,15 +474,14 @@ public class NotificationPanelView extends PanelView implements
         if (mBlockTouches) {
             return false;
         }
-        // TODO: Handle doublefinger swipe to notifications again. Look at history for a reference
-        // implementation.
+        resetDownStates(event);
         if ((!mIsExpanding || mHintAnimationRunning)
                 && !mQsExpanded
                 && mStatusBar.getBarState() != StatusBarState.SHADE) {
-            mPageSwiper.onTouchEvent(event);
-            if (mPageSwiper.isSwipingInProgress()) {
-                return true;
-            }
+            mAfforanceHelper.onTouchEvent(event);
+        }
+        if (mOnlyAffordanceInThisMotion) {
+            return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
                 && mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
@@ -951,20 +960,16 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
             boolean active = getMaxPanelHeight() - getExpandedHeight() > mUnlockMoveDistance;
+            KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
             if (active && !mUnlockIconActive && mTracking) {
-                mKeyguardBottomArea.getLockIcon().animate()
-                        .alpha(1f)
-                        .scaleY(LOCK_ICON_ACTIVE_SCALE)
-                        .scaleX(LOCK_ICON_ACTIVE_SCALE)
-                        .setInterpolator(mFastOutLinearInterpolator)
-                        .setDuration(150);
+                lockIcon.setImageAlpha(1.0f, true, 150, mFastOutLinearInterpolator, null);
+                lockIcon.setImageScale(LOCK_ICON_ACTIVE_SCALE, true, 150,
+                        mFastOutLinearInterpolator);
             } else if (!active && mUnlockIconActive && mTracking) {
-                mKeyguardBottomArea.getLockIcon().animate()
-                        .alpha(KeyguardPageSwipeHelper.SWIPE_RESTING_ALPHA_AMOUNT)
-                        .scaleY(1f)
-                        .scaleX(1f)
-                        .setInterpolator(mFastOutLinearInterpolator)
-                        .setDuration(150);
+                lockIcon.setImageAlpha(KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT, true,
+                        150, mFastOutLinearInterpolator, null);
+                lockIcon.setImageScale(1.0f, true, 150,
+                        mFastOutLinearInterpolator);
             }
             mUnlockIconActive = active;
         }
@@ -1093,7 +1098,7 @@ public class NotificationPanelView extends PanelView implements
         super.onTrackingStarted();
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
-            mPageSwiper.animateHideLeftRightIcon();
+            mAfforanceHelper.animateHideLeftRightIcon();
         }
     }
 
@@ -1106,16 +1111,15 @@ public class NotificationPanelView extends PanelView implements
         }
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
-            mPageSwiper.showAllIcons(true);
+            if (!mHintAnimationRunning) {
+                mAfforanceHelper.reset(true);
+            }
         }
         if (!expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
-            mKeyguardBottomArea.getLockIcon().animate()
-                    .alpha(0f)
-                    .scaleX(2f)
-                    .scaleY(2f)
-                    .setInterpolator(mFastOutLinearInterpolator)
-                    .setDuration(100);
+            KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
+            lockIcon.setImageAlpha(0.0f, true, 100, mFastOutLinearInterpolator, null);
+            lockIcon.setImageScale(2.0f, true, 100, mFastOutLinearInterpolator);
         }
     }
 
@@ -1141,7 +1145,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mPageSwiper.onConfigurationChanged();
+        mAfforanceHelper.onConfigurationChanged();
     }
 
     @Override
@@ -1159,6 +1163,8 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void onAnimationToSideStarted(boolean rightPage) {
         boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? rightPage : !rightPage;
+        mIsLaunchTransitionRunning = true;
+        mLaunchAnimationEndRunnable = null;
         if (start) {
             mKeyguardBottomArea.launchPhone();
         } else {
@@ -1168,20 +1174,29 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    public void onAnimationToSideEnded() {
+        mIsLaunchTransitionRunning = false;
+        mIsLaunchTransitionFinished = true;
+        if (mLaunchAnimationEndRunnable != null) {
+            mLaunchAnimationEndRunnable.run();
+            mLaunchAnimationEndRunnable = null;
+        }
+    }
+
+    @Override
     protected void onEdgeClicked(boolean right) {
         if ((right && getRightIcon().getVisibility() != View.VISIBLE)
                 || (!right && getLeftIcon().getVisibility() != View.VISIBLE)) {
             return;
         }
         mHintAnimationRunning = true;
-        mPageSwiper.startHintAnimation(right, new Runnable() {
+        mAfforanceHelper.startHintAnimation(right, new Runnable() {
             @Override
             public void run() {
                 mHintAnimationRunning = false;
                 mStatusBar.onHintFinished();
             }
         });
-        startHighlightIconAnimation(right ? getRightIcon() : getLeftIcon());
         boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? right : !right;
         if (start) {
             mStatusBar.onPhoneHintStarted();
@@ -1199,17 +1214,14 @@ public class NotificationPanelView extends PanelView implements
     /**
      * Starts the highlight (making it fully opaque) animation on an icon.
      */
-    private void startHighlightIconAnimation(final View icon) {
-        icon.animate()
-                .alpha(1.0f)
-                .setDuration(KeyguardPageSwipeHelper.HINT_PHASE1_DURATION)
-                .setInterpolator(mFastOutSlowInInterpolator)
-                .withEndAction(new Runnable() {
+    private void startHighlightIconAnimation(final KeyguardAffordanceView icon) {
+        icon.setImageAlpha(1.0f, true, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
+                mFastOutSlowInInterpolator, new Runnable() {
                     @Override
                     public void run() {
-                        icon.animate().alpha(KeyguardPageSwipeHelper.SWIPE_RESTING_ALPHA_AMOUNT)
-                                .setDuration(KeyguardPageSwipeHelper.HINT_PHASE1_DURATION)
-                                .setInterpolator(mFastOutSlowInInterpolator);
+                        icon.setImageAlpha(KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT,
+                                true, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
+                                mFastOutSlowInInterpolator, null);
                     }
                 });
     }
@@ -1220,27 +1232,28 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public ArrayList<View> getTranslationViews() {
-        return mSwipeTranslationViews;
+    public void onSwipingStarted() {
+        requestDisallowInterceptTouchEvent(true);
+        mOnlyAffordanceInThisMotion = true;
     }
 
     @Override
-    public View getLeftIcon() {
+    public KeyguardAffordanceView getLeftIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getCameraImageView()
-                : mKeyguardBottomArea.getPhoneImageView();
+                ? mKeyguardBottomArea.getCameraView()
+                : mKeyguardBottomArea.getPhoneView();
     }
 
     @Override
-    public View getCenterIcon() {
+    public KeyguardAffordanceView getCenterIcon() {
         return mKeyguardBottomArea.getLockIcon();
     }
 
     @Override
-    public View getRightIcon() {
+    public KeyguardAffordanceView getRightIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getPhoneImageView()
-                : mKeyguardBottomArea.getCameraImageView();
+                ? mKeyguardBottomArea.getPhoneView()
+                : mKeyguardBottomArea.getCameraView();
     }
 
     @Override
@@ -1281,5 +1294,17 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
+    }
+
+    public boolean isLaunchTransitionFinished() {
+        return mIsLaunchTransitionFinished;
+    }
+
+    public boolean isLaunchTransitionRunning() {
+        return mIsLaunchTransitionRunning;
+    }
+
+    public void setLaunchTransitionEndRunnable(Runnable r) {
+        mLaunchAnimationEndRunnable = r;
     }
 }

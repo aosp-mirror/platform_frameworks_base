@@ -53,7 +53,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
@@ -63,6 +62,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -70,6 +70,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -200,6 +201,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
+
+    public static final int FADE_KEYGUARD_START_DELAY = 100;
+    public static final int FADE_KEYGUARD_DURATION = 300;
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -441,6 +445,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
 
     private int mDrawCount;
+    private Runnable mLaunchTransitionEndRunnable;
+    private boolean mLaunchTransitionFadingAway;
 
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
@@ -1728,7 +1734,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private int adjustDisableFlags(int state) {
-        if (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit) {
+        if (!mLaunchTransitionFadingAway
+                && (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit)) {
             state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
             state |= StatusBarManager.DISABLE_SYSTEM_INFO;
         }
@@ -2725,13 +2732,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
             public boolean onDismiss() {
-                try {
-                    // Dismiss the lock screen when Settings starts.
-                    ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-                } catch (RemoteException e) {
-                }
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                AsyncTask.execute(new Runnable() {
+                    public void run() {
+                        try {
+                            intent.setFlags(
+                                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            mContext.startActivityAsUser(
+                                    intent, new UserHandle(UserHandle.USER_CURRENT));
+                            mWindowManagerService.overridePendingAppTransition(null, 0, 0, null);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                });
                 animateCollapsePanels();
 
                 return DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
@@ -2795,9 +2807,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     @Override
-    protected void dismissKeyguardThenExecute(OnDismissAction action) {
+    protected void dismissKeyguardThenExecute(final OnDismissAction action) {
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            mStatusBarKeyguardViewManager.dismissWithAction(action);
+            if (UnlockMethodCache.getInstance(mContext).isMethodInsecure()
+                    && mNotificationPanel.isLaunchTransitionRunning()) {
+                action.onDismiss();
+                mNotificationPanel.setLaunchTransitionEndRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        mStatusBarKeyguardViewManager.dismiss();
+                    }
+                });
+            } else {
+                mStatusBarKeyguardViewManager.dismissWithAction(action);
+            }
         } else {
             action.onDismiss();
         }
@@ -3170,6 +3193,52 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLeaveOpenOnKeyguardHide = false;
     }
 
+    public boolean isInLaunchTransition() {
+        return mNotificationPanel.isLaunchTransitionRunning()
+                || mNotificationPanel.isLaunchTransitionFinished();
+    }
+
+    /**
+     * Fades the content of the keyguard away after the launch transition is done.
+     *
+     * @param beforeFading the runnable to be run when the circle is fully expanded and the fading
+     *                     starts
+     * @param endRunnable the runnable to be run when the transition is done
+     */
+    public void fadeKeyguardAfterLaunchTransition(final Runnable beforeFading,
+            final Runnable endRunnable) {
+        Runnable hideRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mLaunchTransitionFadingAway = true;
+                if (beforeFading != null) {
+                    beforeFading.run();
+                }
+                mNotificationPanel.setAlpha(1);
+                mNotificationPanel.animate()
+                        .alpha(0)
+                        .setStartDelay(FADE_KEYGUARD_START_DELAY)
+                        .setDuration(FADE_KEYGUARD_DURATION)
+                        .withLayer()
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                mNotificationPanel.setAlpha(1);
+                                if (endRunnable != null) {
+                                    endRunnable.run();
+                                }
+                                mLaunchTransitionFadingAway = false;
+                            }
+                        });
+            }
+        };
+        if (mNotificationPanel.isLaunchTransitionRunning()) {
+            mNotificationPanel.setLaunchTransitionEndRunnable(hideRunnable);
+        } else {
+            hideRunnable.run();
+        }
+    }
+
     public void hideKeyguard() {
         setBarState(StatusBarState.SHADE);
         if (mLeaveOpenOnKeyguardHide) {
@@ -3204,8 +3273,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void updatePublicMode() {
         setLockscreenPublicMode(
-                (mStatusBarKeyguardViewManager.isShowing() || 
-                    mStatusBarKeyguardViewManager.isOccluded())
+                (mStatusBarKeyguardViewManager.isShowing() ||
+                        mStatusBarKeyguardViewManager.isOccluded())
                 && mStatusBarKeyguardViewManager.isSecure());
     }
 
@@ -3315,7 +3384,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void showBouncer() {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            mWaitingForKeyguardExit = true;
+            mWaitingForKeyguardExit = mStatusBarKeyguardViewManager.isShowing();
             mStatusBarKeyguardViewManager.dismiss();
         }
     }

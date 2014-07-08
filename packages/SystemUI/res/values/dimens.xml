@@ -295,6 +295,15 @@
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
     <dimen name="keyguard_min_swipe_amount">75dp</dimen>
 
+    <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
+    <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
+
+    <!-- The grow amount for the camera and phone circles when hinting -->
+    <dimen name="hint_grow_amount_sideways">60dp</dimen>
+
+    <!-- The chevron padding to the circle when hinting -->
+    <dimen name="hint_chevron_circle_padding">16dp</dimen>
+
     <!-- Volume panel dialog y offset -->
     <dimen name="volume_panel_top">0dp</dimen>
 
@@ -316,9 +325,6 @@
 
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
-
-    <!-- Move distance for the other hint animations on the lockscreen (phone, camera)-->
-    <dimen name="hint_move_distance_sideways">60dp</dimen>
 
     <!-- The width of the region on the left/right edge of the screen for performing the camera/
          phone hints. -->
