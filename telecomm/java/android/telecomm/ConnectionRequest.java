@@ -34,16 +34,19 @@ public final class ConnectionRequest implements Parcelable {
     private final Uri mHandle;
     private final Bundle mExtras;
     private final PhoneAccount mAccount;
+    private final int mVideoState;
 
-    public ConnectionRequest(String callId, Uri handle, Bundle extras) {
-        this(null, callId, handle, extras);
+    public ConnectionRequest(String callId, Uri handle, Bundle extras, int videoState) {
+        this(null, callId, handle, extras, videoState);
     }
 
-    public ConnectionRequest(PhoneAccount account, String callId, Uri handle, Bundle extras) {
+    public ConnectionRequest(PhoneAccount account, String callId, Uri handle, Bundle extras,
+            int videoState) {
         mCallId = callId;
         mHandle = handle;
         mExtras = extras;
         mAccount = account;
+        mVideoState = videoState;
     }
 
     /**
@@ -68,6 +71,19 @@ public final class ConnectionRequest implements Parcelable {
      */
     public Bundle getExtras() { return mExtras; }
 
+    /**
+     * Determines the video state for the connection.
+     * Valid values: {@link VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link VideoCallProfile#VIDEO_STATE_TX_ENABLED},
+     * {@link VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     *
+     * @return The video state for the connection.
+     */
+    public int getVideoState() {
+        return mVideoState;
+    }
+
     public String toString() {
         return String.format("PhoneConnectionRequest %s %s",
                 mHandle == null
@@ -83,7 +99,8 @@ public final class ConnectionRequest implements Parcelable {
                     String callId = source.readString();
                     Uri handle = (Uri) source.readParcelable(getClass().getClassLoader());
                     Bundle extras = (Bundle) source.readParcelable(getClass().getClassLoader());
-                    return new ConnectionRequest(callId, handle, extras);
+                    int videoState = source.readInt();
+                    return new ConnectionRequest(callId, handle, extras, videoState);
                 }
 
                 @Override
@@ -105,4 +122,6 @@ public final class ConnectionRequest implements Parcelable {
         destination.writeString(mCallId);
         destination.writeParcelable(mHandle, 0);
         destination.writeParcelable(mExtras, 0);
-    }}
+        destination.writeInt(mVideoState);
+    }
+}

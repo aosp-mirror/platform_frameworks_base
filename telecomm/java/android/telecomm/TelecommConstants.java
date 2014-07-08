@@ -58,11 +58,15 @@ public final class TelecommConstants {
             "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
 
     /**
-     * Optional extra for {@link Intent#ACTION_CALL} containing a boolean that determines whether
-     * the call should be started with video, if possible.
+     * Optional extra for {@link Intent#ACTION_CALL} containing an integer that determines the
+     * desired video state for an outgoing call.
+     * Valid options: {@link VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
+     * {@link VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
+     * {@link VideoCallProfile#VIDEO_STATE_RX_ENABLED},
+     * {@link VideoCallProfile#VIDEO_STATE_TX_ENABLED}.
      */
-    public static final String EXTRA_START_CALL_WITH_VIDEO =
-            "android.intent.extra.START_CALL_WITH_VIDEO";
+    public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
+            "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
 
     /**
      * Extra for {@link #ACTION_INCOMING_CALL} containing the {@link CallServiceDescriptor} that
