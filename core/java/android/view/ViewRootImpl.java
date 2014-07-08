@@ -1713,7 +1713,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (hwInitialized ||
                         mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
-                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight,
+                    final Rect shadowInsets = params != null ? params.shadowInsets : null;
+                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, shadowInsets,
                             mAttachInfo.mRootView.getResources().getDisplayMetrics());
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mSurface);
@@ -2211,20 +2212,22 @@ public final class ViewRootImpl implements ViewParent,
         return measureSpec;
     }
 
+    int mHardwareXOffset;
     int mHardwareYOffset;
     int mResizeAlpha;
     final Paint mResizePaint = new Paint();
 
     @Override
     public void onHardwarePreDraw(HardwareCanvas canvas) {
-        canvas.translate(0, -mHardwareYOffset);
+        canvas.translate(-mHardwareXOffset, -mHardwareYOffset);
     }
 
     @Override
     public void onHardwarePostDraw(HardwareCanvas canvas) {
         if (mResizeBuffer != null) {
             mResizePaint.setAlpha(mResizeAlpha);
-            canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
+            canvas.drawHardwareLayer(mResizeBuffer, mHardwareXOffset, mHardwareYOffset,
+                    mResizePaint);
         }
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
@@ -2368,15 +2371,17 @@ public final class ViewRootImpl implements ViewParent,
             attachInfo.mTreeObserver.dispatchOnScrollChanged();
         }
 
-        int yoff;
+        final WindowManager.LayoutParams params = mWindowAttributes;
+        final Rect surfaceInsets = params != null ? params.shadowInsets : null;
         boolean animating = mScroller != null && mScroller.computeScrollOffset();
+        final int curScrollY;
         if (animating) {
-            yoff = mScroller.getCurrY();
+            curScrollY = mScroller.getCurrY();
         } else {
-            yoff = mScrollY;
+            curScrollY = mScrollY;
         }
-        if (mCurScrollY != yoff) {
-            mCurScrollY = yoff;
+        if (mCurScrollY != curScrollY) {
+            mCurScrollY = curScrollY;
             fullRedrawNeeded = true;
         }
 
@@ -2425,11 +2430,14 @@ public final class ViewRootImpl implements ViewParent,
 
         attachInfo.mTreeObserver.dispatchOnDraw();
 
+        final int xOffset = surfaceInsets != null ? -surfaceInsets.left : 0;
+        final int yOffset = curScrollY + (surfaceInsets != null ? -surfaceInsets.top : 0);
         if (!dirty.isEmpty() || mIsAnimating) {
             if (attachInfo.mHardwareRenderer != null && attachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
-                mHardwareYOffset = yoff;
+                mHardwareYOffset = yOffset;
+                mHardwareXOffset = xOffset;
                 mResizeAlpha = resizeAlpha;
 
                 dirty.setEmpty();
@@ -2450,8 +2458,9 @@ public final class ViewRootImpl implements ViewParent,
                         attachInfo.mHardwareRenderer.isRequested()) {
 
                     try {
-                        attachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                mSurface, attachInfo.mRootView.getResources().getDisplayMetrics());
+                        attachInfo.mHardwareRenderer.initializeIfNeeded(
+                                mWidth, mHeight, mSurface, surfaceInsets,
+                                attachInfo.mRootView.getResources().getDisplayMetrics());
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -2462,7 +2471,7 @@ public final class ViewRootImpl implements ViewParent,
                     return;
                 }
 
-                if (!drawSoftware(surface, attachInfo, yoff, scalingRequired, dirty)) {
+                if (!drawSoftware(surface, attachInfo, xOffset, yOffset, scalingRequired, dirty)) {
                     return;
                 }
             }
@@ -2475,9 +2484,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * @return true if drawing was succesfull, false if an error occurred
+     * @return true if drawing was successful, false if an error occurred
      */
-    private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int yoff,
+    private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int xoff, int yoff,
             boolean scalingRequired, Rect dirty) {
 
         // Draw with software renderer.
@@ -2526,7 +2535,7 @@ public final class ViewRootImpl implements ViewParent,
             // If we are applying an offset, we need to clear the area
             // where the offset doesn't appear to avoid having garbage
             // left in the blank areas.
-            if (!canvas.isOpaque() || yoff != 0) {
+            if (!canvas.isOpaque() || yoff != 0 || xoff != 0) {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             }
 
@@ -2542,7 +2551,7 @@ public final class ViewRootImpl implements ViewParent,
                         ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
             }
             try {
-                canvas.translate(0, -yoff);
+                canvas.translate(-xoff, -yoff);
                 if (mTranslator != null) {
                     mTranslator.translateCanvas(canvas);
                 }
@@ -3147,8 +3156,10 @@ public final class ViewRootImpl implements ViewParent,
                         if (mAttachInfo.mHardwareRenderer != null && mSurface.isValid()){
                             mFullRedrawNeeded = true;
                             try {
+                                final WindowManager.LayoutParams lp = mWindowAttributes;
+                                final Rect surfaceInsets = lp != null ? lp.shadowInsets : null;
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mSurface,
+                                        mWidth, mHeight, mSurface, surfaceInsets,
                                         mAttachInfo.mRootView.getResources().getDisplayMetrics());
                             } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);

@@ -2231,6 +2231,7 @@
   <public type="attr" name="buttonBarPositiveButtonStyle" />
   <public type="attr" name="buttonBarNeutralButtonStyle" />
   <public type="attr" name="buttonBarNegativeButtonStyle" />
+  <public type="attr" name="popupElevation" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

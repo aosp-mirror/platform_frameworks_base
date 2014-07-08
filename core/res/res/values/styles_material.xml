@@ -733,6 +733,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.ListPopupWindow" parent="Widget.ListPopupWindow">
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
+        <item name="popupElevation">@dimen/floating_window_z</item>
         <item name="popupAnimationStyle">@style/Animation.Material.Popup</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>

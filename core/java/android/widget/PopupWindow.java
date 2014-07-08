@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -108,6 +109,8 @@ public class PopupWindow {
 
     private int mPopupWidth;
     private int mPopupHeight;
+
+    private float mElevation;
 
     private int[] mDrawingLocation = new int[2];
     private int[] mScreenLocation = new int[2];
@@ -196,6 +199,7 @@ public class PopupWindow {
                 attrs, com.android.internal.R.styleable.PopupWindow, defStyleAttr, defStyleRes);
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
+        mElevation = a.getDimension(R.styleable.PopupWindow_popupElevation, 0);
         mOverlapAnchor = a.getBoolean(R.styleable.PopupWindow_overlapAnchor, false);
 
         final int animStyle = a.getResourceId(R.styleable.PopupWindow_popupAnimationStyle, -1);
@@ -319,22 +323,46 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Return the drawable used as the popup window's background.</p>
+     * Return the drawable used as the popup window's background.
      *
-     * @return the background drawable or null
+     * @return the background drawable or {@code null} if not set
+     * @see #setBackgroundDrawable(Drawable)
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
     public Drawable getBackground() {
         return mBackground;
     }
 
     /**
-     * <p>Change the background drawable for this popup window. The background
-     * can be set to null.</p>
+     * Specifies the background drawable for this popup window. The background
+     * can be set to {@code null}.
      *
      * @param background the popup's background
+     * @see #getBackground()
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
     public void setBackgroundDrawable(Drawable background) {
         mBackground = background;
+    }
+
+    /**
+     * @return the elevation for this popup window in pixels
+     * @see #setElevation(float)
+     * @attr ref android.R.styleable#PopupWindow_popupElevation
+     */
+    public float getElevation() {
+        return mElevation;
+    }
+
+    /**
+     * Specifies the elevation for this popup window.
+     *
+     * @param elevation the popup's elevation in pixels
+     * @see #getElevation()
+     * @attr ref android.R.styleable#PopupWindow_popupElevation
+     */
+    public void setElevation(float elevation) {
+        mElevation = elevation;
     }
 
     /**
@@ -973,7 +1001,7 @@ public class PopupWindow {
     /**
      * <p>Prepare the popup by embedding in into a new ViewGroup if the
      * background drawable is not null. If embedding is required, the layout
-     * parameters' height is mnodified to take into account the background's
+     * parameters' height is modified to take into account the background's
      * padding.</p>
      *
      * @param p the layout parameters of the popup's content view
@@ -998,13 +1026,15 @@ public class PopupWindow {
             PopupViewContainer.LayoutParams listParams = new PopupViewContainer.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, height
             );
-            popupViewContainer.setBackgroundDrawable(mBackground);
+            popupViewContainer.setBackground(mBackground);
             popupViewContainer.addView(mContentView, listParams);
 
             mPopupView = popupViewContainer;
         } else {
             mPopupView = mContentView;
         }
+
+        mPopupView.setElevation(mElevation);
         mPopupViewInitialLayoutDirectionInherited =
                 (mPopupView.getRawLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT);
         mPopupWidth = p.width;
@@ -1065,6 +1095,10 @@ public class PopupWindow {
         p.token = token;
         p.softInputMode = mSoftInputMode;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
+
+        // TODO: Use real shadow insets once that algorithm is finalized.
+        final int shadowInset = (int) Math.ceil(mElevation * 2);
+        p.shadowInsets.set(shadowInset, shadowInset, shadowInset, shadowInset);
 
         return p;
     }
