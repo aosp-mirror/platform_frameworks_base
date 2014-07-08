@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.NO_NATIVE_LIBRARIES;
 
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.util.Slog;
@@ -65,8 +66,15 @@ public class NativeLibraryHelper {
             }
         }
 
+        public static Handle create(Package pkg) throws IOException {
+            return create(pkg.getAllCodePaths());
+        }
+
         public static Handle create(PackageLite lite) throws IOException {
-            final List<String> codePaths = lite.getAllCodePaths();
+            return create(lite.getAllCodePaths());
+        }
+
+        private static Handle create(List<String> codePaths) throws IOException {
             final int size = codePaths.size();
             final long[] apkHandles = new long[size];
             for (int i = 0; i < size; i++) {
