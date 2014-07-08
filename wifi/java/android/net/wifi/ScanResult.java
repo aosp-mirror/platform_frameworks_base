@@ -63,6 +63,20 @@ public class ScanResult implements Parcelable {
      */
     public long seen;
 
+    /** @hide */
+    public static final int ENABLED                                          = 0;
+    /** @hide */
+    public static final int AUTO_ROAM_DISABLED                               = 16;
+    /** @hide */
+    public static final int AUTO_JOIN_DISABLED                               = 32;
+    /** @hide */
+    public static final int AUTHENTICATIO_ERROR                              = 128;
+
+    /**
+     * Status: indicating join status
+     * @hide
+     */
+    public int status;
 
     /**
      * The approximate distance to the AP in centimeter, if available.  Else
@@ -160,6 +174,7 @@ public class ScanResult implements Parcelable {
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
             passpoint = source.passpoint;
+            status = source.status;
         }
     }
 
@@ -194,7 +209,9 @@ public class ScanResult implements Parcelable {
                 append("(cm)");
 
         sb.append(", passpoint: ").append(passpoint != null ? "yes" : "no");
-
+        if (status != 0) {
+            sb.append(", status: ").append(status);
+        }
         return sb.toString();
     }
 
@@ -219,6 +236,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
         dest.writeLong(seen);
+        dest.writeInt(status);
         if (passpoint != null) {
             dest.writeInt(1);
             passpoint.writeToParcel(dest, flags);
@@ -256,6 +274,7 @@ public class ScanResult implements Parcelable {
                     in.readInt()
                 );
                 sr.seen = in.readLong();
+                sr.status = in.readInt();
                 if (in.readInt() == 1) {
                     sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
                 }

@@ -2241,8 +2241,9 @@ public class WifiManager {
     public void enableVerboseLogging (int verbose) {
         try {
             mService.enableVerboseLogging(verbose);
-        } catch (RemoteException e) {
-
+        } catch (Exception e) {
+            //ignore any failure here
+            Log.e(TAG, "enableVerboseLogging " + e.toString());
         }
     }
 
