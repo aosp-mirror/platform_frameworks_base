@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -813,24 +814,47 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         if (mStack.getTaskCount() > 0) {
-            // Animate all the task views into view
-            TaskViewTransform transform = new TaskViewTransform();
             TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
-            mStack.getGroupIndexForTask(mStack.getFrontMostTask(), groupTaskIndex);
-            mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
-                    getInitialStackScroll(), transform);
-            ctx.taskRect = transform.rect;
-            ctx.stackRectSansPeek = mStackAlgorithm.mStackRectSansPeek;
+
+            if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
+                // Find the target task with the specified id
+                ArrayList<Task> tasks = mStack.getTasks();
+                Task targetTask = null;
+                int targetTaskId = mConfig.launchedToTaskId;
+                if (targetTaskId != -1) {
+                    int taskCount = tasks.size();
+                    for (int i = 0; i < taskCount; i++) {
+                        Task t = tasks.get(i);
+                        if (t.key.id == targetTaskId) {
+                            targetTask = t;
+                            break;
+                        }
+                    }
+                }
+
+                // Find the group and task index of the target task
+                if (targetTask != null) {
+                    mStack.getGroupIndexForTask(targetTask, groupTaskIndex);
+                    ctx.targetTaskTransform = new TaskViewTransform();
+                    mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex,
+                            groupTaskIndex.taskIndex, getStackScroll(), ctx.targetTaskTransform);
+                    Rect taskStackBounds = new Rect();
+                    mConfig.getTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(), taskStackBounds);
+                    ctx.targetTaskTransform.rect.offset(taskStackBounds.left, taskStackBounds.top);
+                }
+            }
+
+            // Animate all the task views into view
             int childCount = getChildCount();
             for (int i = childCount - 1; i >= 0; i--) {
                 TaskView tv = (TaskView) getChildAt(i);
-                ctx.stackViewIndex = i;
-                ctx.stackViewCount = childCount;
-                ctx.isFrontMost = (i == (getChildCount() - 1));
-                ctx.transform = new TaskViewTransform();
+                ctx.currentTaskTransform = new TaskViewTransform();
+                ctx.currentStackViewIndex = i;
+                ctx.currentStackViewCount = childCount;
+                ctx.isCurrentTaskFrontMost = (i == (getChildCount() - 1));
                 mStack.getGroupIndexForTask(tv.getTask(), groupTaskIndex);
                 mStackAlgorithm.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
-                        getStackScroll(), ctx.transform);
+                        getStackScroll(), ctx.currentTaskTransform);
                 tv.startEnterRecentsAnimation(ctx);
             }
 

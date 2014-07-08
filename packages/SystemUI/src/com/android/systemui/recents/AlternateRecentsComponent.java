@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.view.View;
 import com.android.systemui.R;
@@ -166,6 +167,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     public void onConfigurationChanged(Configuration newConfig) {
         mConfig = RecentsConfiguration.reinitialize(mContext);
+        mConfig.updateOnConfigurationChange();
         mWindowRect = mSystemServicesProxy.getWindowRect();
         mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mTaskStackBounds);
         sLastScreenshot = null;
@@ -271,11 +273,12 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * screenshot, then we will use that for the transition.
      */
     ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask) {
-        // Recycle the last screenshot
-        consumeLastScreenshot();
 
-        // Take the full screenshot
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
+            // Recycle the last screenshot
+            consumeLastScreenshot();
+
+            // Take the full screenshot
             sLastScreenshot = mSystemServicesProxy.takeAppScreenshot();
             if (sLastScreenshot != null) {
                 return ActivityOptions.makeCustomAnimation(mContext,
@@ -287,21 +290,22 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // If the screenshot fails, then load the first task thumbnail and use that
         Bitmap firstThumbnail = mSystemServicesProxy.getTaskThumbnail(topTask.id);
         if (firstThumbnail != null) {
-            Rect taskRect = getThumbnailTransitionRect(topTask.id);
+            // Update the destination rect
+            Rect toTaskRect = getThumbnailTransitionRect(topTask.id);
 
             // Create the new thumbnail for the animation down
             // XXX: We should find a way to optimize this so we don't need to create a new bitmap
-            Bitmap thumbnail = Bitmap.createBitmap(taskRect.width(), taskRect.height(),
+            Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
                     Bitmap.Config.ARGB_8888);
             int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
             Canvas c = new Canvas(thumbnail);
             c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                    new Rect(0, 0, taskRect.width(), taskRect.height()), null);
+                    new Rect(0, 0, toTaskRect.width(), toTaskRect.height()), null);
             c.setBitmap(null);
             // Recycle the old thumbnail
             firstThumbnail.recycle();
             return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
-                    thumbnail, taskRect.left, taskRect.top, this);
+                    thumbnail, toTaskRect.left, toTaskRect.top, this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition

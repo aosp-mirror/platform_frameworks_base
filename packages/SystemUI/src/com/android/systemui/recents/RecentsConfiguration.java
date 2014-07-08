@@ -100,6 +100,7 @@ public class RecentsConfiguration {
     public boolean launchedFromAppWithThumbnail;
     public boolean launchedFromAppWithScreenshot;
     public boolean launchedFromHome;
+    public int launchedToTaskId;
 
     /** Dev options */
     public boolean developerOptionsEnabled;
@@ -255,6 +256,7 @@ public class RecentsConfiguration {
         launchedFromAppWithThumbnail = false;
         launchedFromAppWithScreenshot = false;
         launchedFromHome = false;
+        launchedToTaskId = -1;
     }
 
     /** Returns whether the search bar app widget exists. */

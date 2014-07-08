@@ -23,16 +23,20 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Console;
 
 
 /**
@@ -43,7 +47,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
 
     /** The FullscreenTransitionOverlayView callbacks */
     public interface FullScreenTransitionViewCallbacks {
-        void onEnterAnimationComplete(boolean canceled);
+        void onEnterAnimationComplete();
     }
 
     RecentsConfiguration mConfig;
@@ -53,6 +57,11 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
     ImageView mScreenshotView;
     Rect mClipRect = new Rect();
     Paint mLayerPaint = new Paint();
+    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.MULTIPLY);
+
+    int mDim;
+    int mMaxDim;
+    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator();
 
     boolean mIsAnimating;
     AnimatorSet mEnterAnimation;
@@ -73,8 +82,10 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
                                            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
+        mMaxDim = mConfig.taskStackMaxDim;
         setClipTop(getClipTop());
         setClipBottom(getClipBottom());
+        setDim(getDim());
         setWillNotDraw(false);
     }
 
@@ -91,7 +102,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
     /** Sets the top clip */
     public void setClipTop(int clip) {
         mClipRect.top = clip;
-        postInvalidateOnAnimation();
+        setClipBounds(mClipRect);
     }
 
     /** Gets the top clip */
@@ -102,7 +113,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
     /** Sets the bottom clip */
     public void setClipBottom(int clip) {
         mClipRect.bottom = clip;
-        postInvalidateOnAnimation();
+        setClipBounds(mClipRect);
     }
 
     /** Gets the top clip */
@@ -110,18 +121,26 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
         return mClipRect.bottom;
     }
 
+    /** Returns the current dim. */
+    public void setDim(int dim) {
+        mDim = dim;
+        /*
+        int inverse = 255 - mDim;
+        mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
+        mLayerPaint.setColorFilter(mDimColorFilter);
+        setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+        */
+    }
+
+    /** Returns the current dim. */
+    public int getDim() {
+        return mDim;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mClipRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        int restoreCount = canvas.save(Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-        canvas.clipRect(mClipRect);
-        super.draw(canvas);
-        canvas.restoreToCount(restoreCount);
     }
 
     @Override
@@ -140,6 +159,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
 
         setClipTop(0);
         setClipBottom(getMeasuredHeight());
+        setDim(0);
         setTranslationY(0f);
         setScaleX(1f);
         setScaleY(1f);
@@ -153,7 +173,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
 
     /** Resets the transition view */
     public void reset() {
-        setVisibility(View.INVISIBLE);
+        setVisibility(View.GONE);
         mScreenshotView.setImageDrawable(null);
     }
 
@@ -172,12 +192,20 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
         }
 
         // Calculate the bottom clip
-        Rect taskRect = ctx.taskRect;
-        float scale = (float) taskRect.width() / getMeasuredWidth();
+        Rect targetTaskRect = ctx.targetTaskTransform.rect;
+        float scale = (float) targetTaskRect.width() / getMeasuredWidth();
         float scaleYOffset = ((1f - scale) * getMeasuredHeight()) / 2;
         float scaledTopInset = (int) (scale * mConfig.systemInsets.top);
-        int translationY = (int) -scaleYOffset + (int) (mConfig.systemInsets.top - scaledTopInset) + taskRect.top;
-        int clipBottom = mConfig.systemInsets.top + (int) (taskRect.height() / scale);
+        int translationY = (int) -scaleYOffset + (int) (mConfig.systemInsets.top - scaledTopInset)
+                + targetTaskRect.top;
+        int clipBottom = mConfig.systemInsets.top + (int) (targetTaskRect.height() / scale);
+
+        // Calculate the dim
+        float minScale = TaskStackViewLayoutAlgorithm.StackPeekMinScale;
+        float scaleRange = 1f - minScale;
+        float dim = (1f - ctx.targetTaskTransform.scale) / scaleRange;
+        dim = mDimInterpolator.getInterpolation(Math.min(dim, 1f));
+        int toDim = Math.max(0, Math.min(mMaxDim, (int) (dim * 255)));
 
         // Enable the HW Layers on the screenshot view
         mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
@@ -187,31 +215,39 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
         mEnterAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                // Notify any callbacks
-                mCb.onEnterAnimationComplete(false);
-                // Run the given post-anim runnable
-                postAnimRunnable.run();
-                // Mark that we are no longer animating
-                mIsAnimating = false;
-                // Disable the HW Layers on this view
-                setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Mark that we are no longer animating
+                        mIsAnimating = false;
+                        // Disable the HW Layers on this view
+                        setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+                        // Notify any callbacks
+                        mCb.onEnterAnimationComplete();
+                        // Run the given post-anim runnable
+                        postAnimRunnable.run();
 
-                if (Console.Enabled) {
-                    Console.logTraceTime(Constants.Log.App.TimeRecentsScreenshotTransition,
-                            Constants.Log.App.TimeRecentsScreenshotTransitionKey, "Completed");
-                }
+                        if (Console.Enabled) {
+                            Console.logTraceTime(Constants.Log.App.TimeRecentsScreenshotTransition,
+                                    Constants.Log.App.TimeRecentsScreenshotTransitionKey, "Completed");
+                        }
+                    }
+                });
             }
         });
+        // XXX: Translation y should be negative initially to simulate moving from the top of the screen?
         mEnterAnimation.setStartDelay(0);
         mEnterAnimation.setDuration(475);
         mEnterAnimation.setInterpolator(mConfig.fastOutSlowInInterpolator);
         mEnterAnimation.playTogether(
-                ObjectAnimator.ofInt(this, "clipTop", mConfig.systemInsets.top),
+                // ObjectAnimator.ofInt(this, "clipTop", mConfig.systemInsets.top),
                 ObjectAnimator.ofInt(this, "clipBottom", clipBottom),
+                ObjectAnimator.ofInt(this, "dim", toDim),
                 ObjectAnimator.ofFloat(this, "translationY", translationY),
                 ObjectAnimator.ofFloat(this, "scaleX", scale),
                 ObjectAnimator.ofFloat(this, "scaleY", scale)
         );
+        setClipTop(mConfig.systemInsets.top);
         mEnterAnimation.start();
 
         mIsAnimating = true;
@@ -226,19 +262,27 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
                 mEnterAnimation.cancel();
             }
 
+            // Enable the HW Layers on the screenshot view
+            mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, mLayerPaint);
+
             // Compose the animation
             mEnterAnimation = new AnimatorSet();
             mEnterAnimation.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    // Notify any callbacks
-                    mCb.onEnterAnimationComplete(true);
-                    // Run the given post-anim runnable
-                    postAnimRunnable.run();
-                    // Mark that we are no longer animating
-                    mIsAnimating = false;
-                    // Disable the HW Layers on the screenshot view
-                    mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Mark that we are no longer animating
+                            mIsAnimating = false;
+                            // Disable the HW Layers on the screenshot view
+                            mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, mLayerPaint);
+                            // Notify any callbacks
+                            mCb.onEnterAnimationComplete();
+                            // Run the given post-anim runnable
+                            postAnimRunnable.run();
+                        }
+                    });
                 }
             });
             mEnterAnimation.setDuration(475);
@@ -246,6 +290,7 @@ public class FullscreenTransitionOverlayView extends FrameLayout {
             mEnterAnimation.playTogether(
                     ObjectAnimator.ofInt(this, "clipTop", 0),
                     ObjectAnimator.ofInt(this, "clipBottom", getMeasuredHeight()),
+                    ObjectAnimator.ofInt(this, "dim", 0),
                     ObjectAnimator.ofFloat(this, "translationY", 0f),
                     ObjectAnimator.ofFloat(this, "scaleX", 1f),
                     ObjectAnimator.ofFloat(this, "scaleY", 1f)

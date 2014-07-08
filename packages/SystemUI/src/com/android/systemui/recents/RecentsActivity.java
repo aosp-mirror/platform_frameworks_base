@@ -206,6 +206,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
+        mConfig.launchedToTaskId = launchIntent.getIntExtra(
+                AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_TASK_ID, -1);
 
         // Add the default no-recents layout
         if (mEmptyView == null) {
@@ -372,11 +374,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Update the recent tasks
         updateRecentsTasks(getIntent());
 
-        // Update if we are getting a configuration change
-        if (savedInstanceState != null) {
-            onConfigurationChange();
-        }
-
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -402,6 +399,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mFullScreenOverlayView.setCallbacks(this);
             mFullScreenOverlayView.prepareAnimateOnEnterRecents(AlternateRecentsComponent.getLastScreenshot());
         }
+
+        // Update if we are getting a configuration change
+        if (savedInstanceState != null) {
+            mConfig.updateOnConfigurationChange();
+            onConfigurationChange();
+        }
     }
 
     void onConfigurationChange() {
@@ -416,6 +419,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
 
         if (Console.Enabled) {
             Console.logDivider(Constants.Log.App.SystemUIHandshake);
@@ -615,18 +619,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**** FullscreenTransitionOverlayView.FullScreenTransitionViewCallbacks Implementation ****/
 
     @Override
-    public void onEnterAnimationComplete(boolean canceled) {
-        if (!canceled) {
-            // Reset the full screenshot transition view
-            if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-                mFullScreenOverlayView.reset();
-            }
+    public void onEnterAnimationComplete() {
+        // Reset the full screenshot transition view
+        if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
+            mFullScreenOverlayView.reset();
 
-            // XXX: We should clean up the screenshot in this case as well, but it needs to happen
-            //      after to animate up
+            // Recycle the full screen screenshot
+            AlternateRecentsComponent.consumeLastScreenshot();
         }
-        // Recycle the full screen screenshot
-        AlternateRecentsComponent.consumeLastScreenshot();
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/

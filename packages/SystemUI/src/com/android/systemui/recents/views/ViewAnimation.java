@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.graphics.Rect;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 /* Common code related to view animations */
@@ -25,25 +24,26 @@ public class ViewAnimation {
     /* The animation context for a task view animation into Recents */
     public static class TaskViewEnterContext {
         // The full screenshot view that we are animating down
-        FullscreenTransitionOverlayView fullScreenshot;
-        // The transform of the current task view
-        TaskViewTransform transform;
-        // The stack rect that the transform is relative to
-        Rect stackRectSansPeek;
-        // The task rect
-        Rect taskRect;
-        // The view index of the current task view
-        int stackViewIndex;
-        // The total number of task views
-        int stackViewCount;
-        // Whether this is the front most task view
-        boolean isFrontMost;
+        FullscreenTransitionOverlayView fullScreenshotView;
+        // The transform of the target task view that we are animating into
+        TaskViewTransform targetTaskTransform;
         // A trigger to run some logic when all the animations complete.  This works around the fact
         // that it is difficult to coordinate ViewPropertyAnimators
         ReferenceCountedTrigger postAnimationTrigger;
 
+        // These following properties are updated for each task view we start the enter animation on
+
+        // The transform of the current task view
+        TaskViewTransform currentTaskTransform;
+        // Whether this is the front most task view
+        boolean isCurrentTaskFrontMost;
+        // The view index of the current task view
+        int currentStackViewIndex;
+        // The total number of task views
+        int currentStackViewCount;
+
         public TaskViewEnterContext(FullscreenTransitionOverlayView fss, ReferenceCountedTrigger t) {
-            fullScreenshot = fss;
+            fullScreenshotView = fss;
             postAnimationTrigger = t;
         }
     }
@@ -53,7 +53,7 @@ public class ViewAnimation {
         // A trigger to run some logic when all the animations complete.  This works around the fact
         // that it is difficult to coordinate ViewPropertyAnimators
         ReferenceCountedTrigger postAnimationTrigger;
-        // The translationY to apply to a TaskView to move it off screen
+        // The translationY to apply to a TaskView to move it off the bottom of the task stack
         int offscreenTranslationY;
 
         public TaskViewExitContext(ReferenceCountedTrigger t) {

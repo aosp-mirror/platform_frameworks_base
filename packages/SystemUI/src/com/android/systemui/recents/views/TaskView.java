@@ -52,7 +52,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     int mDim;
     int mMaxDim;
-    TimeInterpolator mDimInterpolator = new AccelerateInterpolator();
+    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator();
 
     Task mTask;
     boolean mTaskDataLoaded;
@@ -279,12 +279,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Animates this task view as it enters recents */
     public void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
-        TaskViewTransform transform = ctx.transform;
+        TaskViewTransform transform = ctx.currentTaskTransform;
 
         if (mConfig.launchedFromAppWithScreenshot) {
-            if (ctx.isFrontMost) {
+            if (ctx.isCurrentTaskFrontMost) {
                 // Animate the full screenshot down first, before swapping with this task view
-                ctx.fullScreenshot.animateOnEnterRecents(ctx, new Runnable() {
+                ctx.fullScreenshotView.animateOnEnterRecents(ctx, new Runnable() {
                     @Override
                     public void run() {
                         // Animate the task bar of the first task view
@@ -318,7 +318,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             ctx.postAnimationTrigger.increment();
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
-            if (ctx.isFrontMost) {
+            if (ctx.isCurrentTaskFrontMost) {
                 // Animate the task bar of the first task view
                 mBarView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
 
@@ -342,7 +342,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
         } else if (mConfig.launchedFromHome) {
             // Animate the tasks up
-            int frontIndex = (ctx.stackViewCount - ctx.stackViewIndex - 1);
+            int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
             int delay = mConfig.taskBarEnterAnimDelay +
                     frontIndex * mConfig.taskViewEnterFromHomeDelay;
             if (Constants.DebugFlags.App.EnableShadows) {
