@@ -83,7 +83,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:minHeight="64dp">
-        <FrameLayout android:id="@+android:id/custom"
+        <FrameLayout android:id="@+id/custom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layoutDirection="locale">
             <Button android:id="@+id/button3"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarNeutralButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
@@ -112,13 +112,13 @@
                 android:layout_weight="1"
                 android:visibility="invisible" />
             <Button android:id="@+id/button2"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarNegativeButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
             <Button android:id="@+id/button1"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarPositiveButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"

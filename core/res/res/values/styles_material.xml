@@ -415,6 +415,12 @@ please see styles_device_defaults.xml.
         <item name="stateListAnimator">@null</item>
     </style>
 
+    <!-- Colored borderless ink button -->
+    <style name="Widget.Material.Button.Borderless.Colored">
+        <item name="textColor">?attr/colorAccent</item>
+        <item name="stateListAnimator">@anim/disabled_anim_material</item>
+    </style>
+
     <!-- Small borderless ink button -->
     <style name="Widget.Material.Button.Borderless.Small">
         <item name="minHeight">48dip</item>
@@ -837,6 +843,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.Button" parent="Widget.Material.Button"/>
     <style name="Widget.Material.Light.Button.Small" parent="Widget.Material.Button.Small"/>
     <style name="Widget.Material.Light.Button.Borderless" parent="Widget.Material.Button.Borderless"/>
+    <style name="Widget.Material.Light.Button.Borderless.Colored" parent="Widget.Material.Button.Borderless.Colored"/>
     <style name="Widget.Material.Light.Button.Borderless.Small" parent="Widget.Material.Button.Borderless.Small"/>
     <style name="Widget.Material.Light.Button.Inset" parent="Widget.Material.Button.Inset"/>
     <style name="Widget.Material.Light.Button.Toggle" parent="Widget.Material.Button.Toggle" />

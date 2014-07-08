@@ -894,6 +894,15 @@
         <!-- Style for buttons within button bars -->
         <attr name="buttonBarButtonStyle" format="reference" />
 
+        <!-- Style for the "positive" buttons within button bars -->
+        <attr name="buttonBarPositiveButtonStyle" format="reference" />
+
+        <!-- Style for the "negative" buttons within button bars -->
+        <attr name="buttonBarNegativeButtonStyle" format="reference" />
+
+        <!-- Style for the "neutral" buttons within button bars -->
+        <attr name="buttonBarNeutralButtonStyle" format="reference" />
+
         <!-- Style for the search query widget. -->
         <attr name="searchViewStyle" format="reference" />
 
