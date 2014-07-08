@@ -491,11 +491,17 @@ public class ConnectivityManager {
      */
     public static final int TYPE_PROXY = 16;
 
-    /** {@hide} */
-    public static final int MAX_RADIO_TYPE   = TYPE_PROXY;
+    /**
+     * A virtual network using one or more native bearers.
+     * It may or may not be providing security services.
+     */
+    public static final int TYPE_VPN = 17;
 
     /** {@hide} */
-    public static final int MAX_NETWORK_TYPE = TYPE_PROXY;
+    public static final int MAX_RADIO_TYPE   = TYPE_VPN;
+
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_VPN;
 
     /**
      * If you want to set the default network preference,you can directly

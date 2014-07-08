@@ -60,7 +60,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.CaptivePortalTracker;
 import android.net.ConnectivityManager;
-import android.net.DummyDataStateTracker;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
@@ -925,8 +924,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         @Override
         public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config) {
             switch (config.radio) {
-                case TYPE_DUMMY:
-                    return new DummyDataStateTracker(targetNetworkType, config.name);
                 case TYPE_WIMAX:
                     return makeWimaxStateTracker(mContext, mTrackerHandler);
                 case TYPE_PROXY:

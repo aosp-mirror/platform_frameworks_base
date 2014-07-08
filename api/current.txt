@@ -16317,6 +16317,7 @@ package android.net {
     field public static final int TYPE_MOBILE_HIPRI = 5; // 0x5
     field public static final int TYPE_MOBILE_MMS = 2; // 0x2
     field public static final int TYPE_MOBILE_SUPL = 3; // 0x3
+    field public static final int TYPE_VPN = 17; // 0x11
     field public static final int TYPE_WIFI = 1; // 0x1
     field public static final int TYPE_WIMAX = 6; // 0x6
   }
