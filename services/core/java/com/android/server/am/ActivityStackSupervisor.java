@@ -49,7 +49,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -116,6 +115,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_CONTAINERS = DEBUG || false;
     static final boolean DEBUG_IDLE = DEBUG || false;
+    static final boolean DEBUG_MEDIA_VISIBILITY = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
     static final boolean DEBUG_STATES = DEBUG || false;
@@ -2102,7 +2102,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // waiting for the next one to start.
         for (int i = 0; i < NF; i++) {
             r = finishes.get(i);
-            activityRemoved |= r.task.stack.destroyActivityLocked(r, true, false, "finish-idle");
+            activityRemoved |= r.task.stack.destroyActivityLocked(r, true, "finish-idle");
         }
 
         if (booting) {
@@ -2298,6 +2298,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     IBinder getHomeActivityToken() {
+        ActivityRecord homeActivity = getHomeActivity();
+        if (homeActivity != null) {
+            return homeActivity.appToken;
+        }
+        return null;
+    }
+
+    ActivityRecord getHomeActivity() {
         final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = tasks.get(taskNdx);
@@ -2306,7 +2314,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
                     if (r.isHomeActivity()) {
-                        return r.appToken;
+                        return r;
                     }
                 }
             }
@@ -2594,6 +2602,42 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    boolean setMediaPlayingLocked(ActivityRecord r, boolean playing) {
+        final ActivityStack stack = r.task.stack;
+        if (stack == null) {
+            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: r=" + r + " playing=" +
+                    playing + " stack is null");
+            return false;
+        }
+        final boolean isPlaying = stack.isMediaPlaying();
+        if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlayer: r=" + r + " playing=" +
+                playing + " isPlaying=" + isPlaying);
+
+        final ActivityRecord top = topRunningActivityLocked();
+        if (top == null || top == r || (playing == isPlaying)) {
+            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: quick return");
+            stack.setMediaPlayer(playing ? r : null);
+            return true;
+        }
+
+        // A non-top activity is reporting a visibility change.
+        if (top.fullscreen || top.state != ActivityState.RESUMED || top.app == null ||
+                top.app.thread == null) {
+            // Can't carry out this request.
+            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: returning top.fullscreen=" +
+                    top.fullscreen+ " top.state=" + top.state + " top.app=" + top.app +
+                    " top.app.thread=" + top.app.thread);
+            return false;
+        }
+
+        stack.setMediaPlayer(playing ? r : null);
+        try {
+            top.app.thread.scheduleBackgroundMediaPlayingChanged(top.appToken, playing);
+        } catch (RemoteException e) {
+        }
+        return true;
+    }
+
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges) {
         // First the front stacks. In case any are not fullscreen and are in front of home.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
@@ -2612,7 +2656,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                stack.scheduleDestroyActivities(app, false, reason);
+                stack.scheduleDestroyActivities(app, reason);
             }
         }
     }
@@ -2774,7 +2818,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean needSep = false;
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
-            pw.print("Display #"); pw.println(activityDisplay.mDisplayId);
+            pw.print("Display #"); pw.print(activityDisplay.mDisplayId);
+                    pw.println(" (activities from bottom to top):");
             ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
@@ -3584,6 +3629,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
         final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
 
+        ActivityRecord mMediaPlayingActivity;
+
         ActivityDisplay() {
         }
 
@@ -3613,6 +3660,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mDisplay.getDisplayInfo(mDisplayInfo);
             bounds.x = mDisplayInfo.appWidth;
             bounds.y = mDisplayInfo.appHeight;
+        }
+
+        void setMediaPlaying(ActivityRecord r) {
+            mMediaPlayingActivity = r;
+        }
+
+        boolean isMediaPlaying() {
+            return mMediaPlayingActivity != null;
         }
 
         @Override

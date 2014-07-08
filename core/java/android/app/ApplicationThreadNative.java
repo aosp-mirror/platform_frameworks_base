@@ -647,6 +647,25 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case STOP_MEDIA_PLAYING_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder token = data.readStrongBinder();
+            scheduleStopMediaPlaying(token);
+            reply.writeNoException();
+            return true;
+        }
+
+        case BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean enabled = data.readInt() > 0;
+            scheduleBackgroundMediaPlayingChanged(token, enabled);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1302,6 +1321,25 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeByte(is24Hour ? (byte) 1 : (byte) 0);
         mRemote.transact(UPDATE_TIME_PREFS_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void scheduleStopMediaPlaying(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(STOP_MEDIA_PLAYING_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean enabled) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(enabled ? 1 : 0);
+        mRemote.transact(BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }

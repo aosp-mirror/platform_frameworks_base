@@ -203,6 +203,14 @@ final class ActivityRecord {
                     pw.print(" resultWho="); pw.print(resultWho);
                     pw.print(" resultCode="); pw.println(requestCode);
         }
+        if (taskDescription.getIcon() != null || taskDescription.getLabel() != null ||
+                taskDescription.getPrimaryColor() != 0) {
+            pw.print(prefix); pw.print("taskDescription:");
+                    pw.print(" icon="); pw.print(taskDescription.getIcon());
+                    pw.print(" label=\""); pw.print(taskDescription.getLabel()); pw.print("\"");
+                    pw.print(" color=");
+                    pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
+        }
         if (results != null) {
             pw.print(prefix); pw.print("results="); pw.println(results);
         }

@@ -145,6 +145,8 @@ public interface IApplicationThread extends IInterface {
     void setProcessState(int state) throws RemoteException;
     void scheduleInstallProvider(ProviderInfo provider) throws RemoteException;
     void updateTimePrefs(boolean is24Hour) throws RemoteException;
+    void scheduleStopMediaPlaying(IBinder token) throws RemoteException;
+    void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean enabled) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -199,4 +201,6 @@ public interface IApplicationThread extends IInterface {
     int SET_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+49;
     int SCHEDULE_INSTALL_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+50;
     int UPDATE_TIME_PREFS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+51;
+    int STOP_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+52;
+    int BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
 }
