@@ -18,6 +18,7 @@ package android.net.wifi.passpoint;
 
 import android.net.wifi.ScanResult;
 import android.net.wifi.passpoint.WifiPasspointPolicy;
+import android.net.wifi.passpoint.WifiPasspointCredential;
 import android.os.Messenger;
 
 /**
@@ -28,7 +29,17 @@ import android.os.Messenger;
 interface IWifiPasspointManager
 {
     Messenger getMessenger();
+
     int getPasspointState();
+
     List<WifiPasspointPolicy> requestCredentialMatch(in List<ScanResult> requested);
+
+    List<WifiPasspointCredential> getCredentials();
+
+    boolean addCredential(in WifiPasspointCredential cred);
+
+    boolean updateCredential(in WifiPasspointCredential cred);
+
+    boolean removeCredential(in WifiPasspointCredential cred);
 }
 

@@ -333,7 +333,7 @@ public class WifiPasspointCredential implements Parcelable {
      * Set the fully qualified domain name (FQDN) of this Passpoint credential.
      * @param fqdn FQDN
      */
-    public void setFqdn(String fqdn) {
+    public void setHomeFqdn(String fqdn) {
         mHomeSpFqdn = fqdn;
     }
 
