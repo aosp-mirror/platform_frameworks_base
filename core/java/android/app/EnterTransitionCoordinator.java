@@ -58,6 +58,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private Bundle mSharedElementsBundle;
     private boolean mWasOpaque;
     private boolean mAreViewsReady;
+    private boolean mIsViewsTransitionStarted;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning) {
@@ -219,7 +220,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private void cancel() {
         if (!mIsCanceled) {
             mIsCanceled = true;
-            if (getViewsTransition() == null) {
+            if (getViewsTransition() == null || mIsViewsTransitionStarted) {
                 setViewVisibility(mSharedElements, View.VISIBLE);
             } else {
                 mTransitioningViews.addAll(mSharedElements);
@@ -363,6 +364,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 stripOffscreenViews();
             }
         }
+        mIsViewsTransitionStarted = mIsViewsTransitionStarted || startEnterTransition;
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
         if (startSharedElementTransition) {

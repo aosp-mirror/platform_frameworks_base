@@ -116,6 +116,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         setViewVisibility(mTransitioningViews, View.VISIBLE);
         setViewVisibility(mSharedElements, View.VISIBLE);
         mIsHidden = true;
+        clearState();
     }
 
     private void sharedElementExitBack() {
@@ -357,7 +358,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         if (!mIsReturning && mExitNotified) {
             mActivity = null; // don't need it anymore
-            clearState();
         }
     }
 
