@@ -27674,7 +27674,6 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(android.net.Uri, android.os.Bundle);
     ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle);
     ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, android.os.Bundle);
     method public int describeContents();

@@ -35,10 +35,6 @@ public final class ConnectionRequest implements Parcelable {
     private final Bundle mExtras;
     private final PhoneAccount mAccount;
 
-    public ConnectionRequest(Uri handle, Bundle extras) {
-        this(null, handle, extras);
-    }
-
     public ConnectionRequest(String callId, Uri handle, Bundle extras) {
         this(null, callId, handle, extras);
     }
