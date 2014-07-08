@@ -28,6 +28,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.util.MissingResourceException;
+import java.util.Objects;
 
 /**
  * Represents a distinct account, line of service or call placement method that
@@ -42,9 +43,8 @@ public class PhoneAccount implements Parcelable {
     private final ComponentName mComponentName;
     private final String mId;
     private final Uri mHandle;
-    private final int mLabelResId;
-    private final int mShortDescriptionResId;
-    private final int mIconResId;
+    private final String mLabel;
+    private final String mShortDescription;
     private final boolean mIsEnabled;
     private final boolean mIsSystemDefault;
 
@@ -59,9 +59,8 @@ public class PhoneAccount implements Parcelable {
         mComponentName = componentName;
         mId = id;
         mHandle = handle;
-        mLabelResId = 0;  // labelResId;
-        mShortDescriptionResId = 0;  // shortDescriptionResId;
-        mIconResId = 0;  // iconResId;
+        mLabel = label;
+        mShortDescription = shortDescription;
         mIsSystemDefault = isSystemDefault;
         mIsEnabled = isEnabled;
     }
@@ -103,10 +102,12 @@ public class PhoneAccount implements Parcelable {
      *
      * @param context The invoking {@code Context}, used for retrieving resources.
      *
+     * TODO(ihab): If don't need context, remove param
+     *
      * @return A label for this {@code PhoneAccount}.
      */
     public String getLabel(Context context) {
-        return getString(context, mLabelResId);
+        return mLabel;
     }
 
     /**
@@ -114,11 +115,18 @@ public class PhoneAccount implements Parcelable {
      *
      * @param context The invoking {@code Context}, used for retrieving resources.
      *
+     * TODO(ihab): If don't need context, remove param
+     *
      * @return A description for this {@code PhoneAccount}.
      */
     public String getShortDescription(Context context) {
-        return getString(context, mShortDescriptionResId);
+        return mShortDescription;
     }
+
+    // TODO(ihab): Representation of the icons
+    //
+    // Refactor to pass a Bitmap (scale it at runtime), but if they don't pass one, fall
+    // back to the android:icon attr in the manifest (<service /> first, <application /> second)
 
     /**
      * An icon to represent this {@code PhoneAccount} in a user interface.
@@ -128,7 +136,7 @@ public class PhoneAccount implements Parcelable {
      * @return An icon for this {@code PhoneAccount}.
      */
     public Drawable getIcon(Context context) {
-        return getIcon(context, mIconResId, NO_DENSITY);
+        return null;  // TODO(ihab): See above
     }
 
     /**
@@ -140,7 +148,7 @@ public class PhoneAccount implements Parcelable {
      * @return An icon for this {@code PhoneAccount}.
      */
     public Drawable getIcon(Context context, int density) {
-        return getIcon(context, mIconResId, density);
+        return null;  // TODO(ihab): See above
     }
 
     /**
@@ -169,9 +177,8 @@ public class PhoneAccount implements Parcelable {
         out.writeParcelable(mComponentName, flags);
         out.writeString(mId);
         out.writeString(mHandle != null ? mHandle.toString() : "");
-        out.writeInt(mLabelResId);
-        out.writeInt(mShortDescriptionResId);
-        out.writeInt(mIconResId);
+        out.writeString(mLabel);
+        out.writeString(mShortDescription);
         out.writeInt(mIsEnabled ? 1 : 0);
         out.writeInt(mIsSystemDefault ? 1 : 0);
     }
@@ -192,49 +199,22 @@ public class PhoneAccount implements Parcelable {
         mId = in.readString();
         String uriString = in.readString();
         mHandle = uriString.length() > 0 ? Uri.parse(uriString) : null;
-        mLabelResId = in.readInt();
-        mShortDescriptionResId = in.readInt();
-        mIconResId = in.readInt();
+        mLabel = in.readString();
+        mShortDescription = in.readString();
         mIsEnabled = in.readInt() == 1;
         mIsSystemDefault = in.readInt() == 1;
     }
 
-    private String getString(Context context, int resId) {
-        Context packageContext;
-        try {
-            packageContext = context.createPackageContext(mComponentName.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            if (Rlog.isLoggable(LOG_TAG, Log.WARN)) {
-                Rlog.w(LOG_TAG, "Cannot find package " + mComponentName.getPackageName());
-            }
-            return null;
-        }
-        String result = packageContext.getString(resId);
-        if (result == null && Rlog.isLoggable(LOG_TAG, Log.WARN)) {
-            Rlog.w(LOG_TAG, "Cannot find string " + resId + " in package " +
-                    mComponentName.getPackageName());
-        }
-        return result;
+    @Override
+    public boolean equals(Object other) {
+        return
+                other instanceof PhoneAccount &&
+                Objects.equals(mComponentName, ((PhoneAccount) other).mComponentName) &&
+                Objects.equals(mId, ((PhoneAccount) other).mId);
     }
 
-    private Drawable getIcon(Context context, int resId, int density) {
-        Context packageContext;
-        try {
-            packageContext = context.createPackageContext(mComponentName.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            if (Rlog.isLoggable(LOG_TAG, Log.WARN)) {
-                Rlog.w(LOG_TAG, "Cannot find package " + mComponentName.getPackageName());
-            }
-            return null;
-        }
-        try {
-            return density == NO_DENSITY ?
-                    packageContext.getResources().getDrawable(resId) :
-                    packageContext.getResources().getDrawableForDensity(resId, density);
-        } catch (MissingResourceException e) {
-            Rlog.e(LOG_TAG, "Cannot find icon " + resId + " in package " +
-                    mComponentName.getPackageName() + ": " + e.toString());
-            return null;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mComponentName) + Objects.hashCode(mId);
     }
 }
