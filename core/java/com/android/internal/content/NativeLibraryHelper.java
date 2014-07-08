@@ -189,6 +189,7 @@ public class NativeLibraryHelper {
 
     // Convenience method to call removeNativeBinariesFromDirLI(File)
     public static boolean removeNativeBinariesLI(String nativeLibraryPath) {
+        if (nativeLibraryPath == null) return false;
         return removeNativeBinariesFromDirLI(new File(nativeLibraryPath));
     }
 
