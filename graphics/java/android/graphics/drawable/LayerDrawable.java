@@ -210,6 +210,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                         layer.mDrawable.getChangingConfigurations();
                 layer.mDrawable.setCallback(this);
             }
+
+            addLayer(layer);
         }
     }
 
