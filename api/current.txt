@@ -23829,16 +23829,6 @@ package android.provider {
     field public static final int UNPINNED = 2147483647; // 0x7fffffff
   }
 
-  public static final class ContactsContract.Preferences {
-    ctor public ContactsContract.Preferences();
-    field public static final java.lang.String DISPLAY_ORDER = "android.contacts.DISPLAY_ORDER";
-    field public static final int DISPLAY_ORDER_ALTERNATIVE = 2; // 0x2
-    field public static final int DISPLAY_ORDER_PRIMARY = 1; // 0x1
-    field public static final java.lang.String SORT_ORDER = "android.contacts.SORT_ORDER";
-    field public static final int SORT_ORDER_ALTERNATIVE = 2; // 0x2
-    field public static final int SORT_ORDER_PRIMARY = 1; // 0x1
-  }
-
   public static final deprecated class ContactsContract.Presence extends android.provider.ContactsContract.StatusUpdates {
     ctor public ContactsContract.Presence();
   }
