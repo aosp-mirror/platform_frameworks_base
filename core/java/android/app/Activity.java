@@ -3704,9 +3704,6 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      */
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        if (options != null) {
-            mActivityTransitionState.startExitOutTransition(this, options);
-        }
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
@@ -3741,6 +3738,9 @@ public class Activity extends ContextThemeWrapper
                 // existing applications that may have overridden it.
                 mParent.startActivityFromChild(this, intent, requestCode);
             }
+        }
+        if (options != null && !isTopOfTask()) {
+            mActivityTransitionState.startExitOutTransition(this, options);
         }
     }
 
@@ -5207,9 +5207,8 @@ public class Activity extends ContextThemeWrapper
      * another task.
      *
      * @return true if this is the topmost, non-finishing activity in its task.
-     * @hide
      */
-    public boolean isTopOfTask() {
+    private boolean isTopOfTask() {
         try {
             return ActivityManagerNative.getDefault().isTopOfTask(mToken);
         } catch (RemoteException e) {
