@@ -1376,11 +1376,6 @@ public class AudioTrack
             return ERROR_INVALID_OPERATION;
         }
 
-        if (mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
-            Log.e(TAG, "AudioTrack.write(ByteBuffer ...) not yet supported for ENCODING_PCM_FLOAT");
-            return ERROR_INVALID_OPERATION;
-        }
-
         if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
             Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
             return ERROR_BAD_VALUE;
