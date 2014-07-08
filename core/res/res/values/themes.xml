@@ -371,6 +371,9 @@ please see themes_device_defaults.xml.
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
         <item name="buttonBarStyle">@style/ButtonBar</item>
         <item name="buttonBarButtonStyle">?attr/buttonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">?attr/buttonBarButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">?attr/buttonBarButtonStyle</item>
+        <item name="buttonBarNeutralButtonStyle">?attr/buttonBarButtonStyle</item>
         <item name="segmentedButtonStyle">@style/SegmentedButton</item>
 
         <!-- SearchView attributes -->

@@ -347,6 +347,9 @@ package android {
     field public static final int bufferType = 16843086; // 0x101014e
     field public static final int button = 16843015; // 0x1010107
     field public static final int buttonBarButtonStyle = 16843567; // 0x101032f
+    field public static final int buttonBarNegativeButtonStyle = 16843917; // 0x101048d
+    field public static final int buttonBarNeutralButtonStyle = 16843916; // 0x101048c
+    field public static final int buttonBarPositiveButtonStyle = 16843915; // 0x101048b
     field public static final int buttonBarStyle = 16843566; // 0x101032e
     field public static final int buttonStyle = 16842824; // 0x1010048
     field public static final int buttonStyleInset = 16842826; // 0x101004a
@@ -2384,6 +2387,7 @@ package android {
     field public static final int Widget_Material_ButtonBar = 16974439; // 0x1030267
     field public static final int Widget_Material_ButtonBar_AlertDialog = 16974440; // 0x1030268
     field public static final int Widget_Material_Button_Borderless = 16974434; // 0x1030262
+    field public static final int Widget_Material_Button_Borderless_Colored = 16974556; // 0x10302dc
     field public static final int Widget_Material_Button_Borderless_Small = 16974435; // 0x1030263
     field public static final int Widget_Material_Button_Inset = 16974436; // 0x1030264
     field public static final int Widget_Material_Button_Small = 16974437; // 0x1030265
@@ -2417,6 +2421,7 @@ package android {
     field public static final int Widget_Material_Light_ButtonBar = 16974500; // 0x10302a4
     field public static final int Widget_Material_Light_ButtonBar_AlertDialog = 16974501; // 0x10302a5
     field public static final int Widget_Material_Light_Button_Borderless = 16974495; // 0x103029f
+    field public static final int Widget_Material_Light_Button_Borderless_Colored = 16974557; // 0x10302dd
     field public static final int Widget_Material_Light_Button_Borderless_Small = 16974496; // 0x10302a0
     field public static final int Widget_Material_Light_Button_Inset = 16974497; // 0x10302a1
     field public static final int Widget_Material_Light_Button_Small = 16974498; // 0x10302a2

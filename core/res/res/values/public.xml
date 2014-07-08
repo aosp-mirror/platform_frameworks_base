@@ -2228,6 +2228,9 @@
   <public type="attr" name="suggestionRowLayout" />
   <public type="attr" name="queryBackground" />
   <public type="attr" name="submitBackground" />
+  <public type="attr" name="buttonBarPositiveButtonStyle" />
+  <public type="attr" name="buttonBarNeutralButtonStyle" />
+  <public type="attr" name="buttonBarNegativeButtonStyle" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2469,6 +2472,9 @@
   <public type="style" name="TextAppearance.Material.Caption" />
   <public type="style" name="TextAppearance.Material.Menu" />
   <public type="style" name="TextAppearance.Material.Button" />
+
+  <public type="style" name="Widget.Material.Button.Borderless.Colored" />
+  <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
 
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
 
