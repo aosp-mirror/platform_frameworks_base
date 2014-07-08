@@ -32,12 +32,17 @@ public interface NetworkController {
                 boolean activityIn, boolean activityOut,
                 String dataTypeContentDescriptionId, String description, boolean noSim);
         void onAirplaneModeChanged(boolean enabled);
+        void onMobileDataEnabled(boolean enabled);
     }
 
     void addAccessPointCallback(AccessPointCallback callback);
     void removeAccessPointCallback(AccessPointCallback callback);
     void scanForAccessPoints();
     void connect(AccessPoint ap);
+    boolean isMobileDataSupported();
+    boolean isMobileDataEnabled();
+    void setMobileDataEnabled(boolean enabled);
+    DataUsageInfo getDataUsageInfo();
 
     public interface AccessPointCallback {
         void onAccessPointsChanged(AccessPoint[] accessPoints);
@@ -51,5 +56,14 @@ public interface NetworkController {
         public String ssid;
         public boolean isConnected;
         public int level;  // 0 - 5
+    }
+
+    public static class DataUsageInfo {
+        public String carrier;
+        public String period;
+        public long maxLevel;
+        public long limitLevel;
+        public long warningLevel;
+        public long usageLevel;
     }
 }

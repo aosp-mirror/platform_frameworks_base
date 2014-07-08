@@ -192,6 +192,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         public void onAirplaneModeChanged(boolean enabled) {
             // noop
         }
+
+        @Override
+        public void onMobileDataEnabled(boolean enabled) {
+            // noop
+        }
     };
 
     private final class WifiDetailAdapter implements DetailAdapter,

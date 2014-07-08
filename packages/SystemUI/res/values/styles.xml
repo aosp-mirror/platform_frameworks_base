@@ -169,7 +169,7 @@
 
     <style name="TextAppearance.QS.DetailItemSecondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">#7fcac3</item>
+        <item name="android:textColor">@color/system_accent_color</item>
     </style>
 
     <style name="TextAppearance.QS.DetailButton">
@@ -194,6 +194,19 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.QS.DataUsage">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.QS.DataUsage.Usage">
+        <item name="android:textSize">36sp</item>
+        <item name="android:textColor">@color/system_accent_color</item>
+    </style>
+
+    <style name="TextAppearance.QS.DataUsage.Secondary">
+        <item name="android:textColor">@color/data_usage_secondary</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer">

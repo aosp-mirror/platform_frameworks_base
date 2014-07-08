@@ -170,6 +170,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private final WifiAccessPointController mAccessPoints;
+    private final MobileDataController mMobileDataController;
 
     /**
      * Construct this controller object and register for updates.
@@ -240,6 +241,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         mLastLocale = mContext.getResources().getConfiguration().locale;
         mAccessPoints = new WifiAccessPointController(mContext);
+        mMobileDataController = new MobileDataController(mContext);
+        mMobileDataController.setCallback(new MobileDataController.Callback() {
+            @Override
+            public void onMobileDataEnabled(boolean enabled) {
+                notifyMobileDataEnabled(enabled);
+            }
+        });
+    }
+
+    private void notifyMobileDataEnabled(boolean enabled) {
+        for (NetworkSignalChangedCallback cb : mSignalsChangedCallbacks) {
+            cb.onMobileDataEnabled(enabled);
+        }
     }
 
     public boolean hasMobileDataFeature() {
@@ -320,6 +334,28 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 return null;
             }
         }.execute();
+    }
+
+    @Override
+    public DataUsageInfo getDataUsageInfo() {
+        final DataUsageInfo info =  mMobileDataController.getDataUsageInfo();
+        info.carrier = mNetworkName;
+        return info;
+    }
+
+    @Override
+    public boolean isMobileDataSupported() {
+        return mMobileDataController.isMobileDataSupported();
+    }
+
+    @Override
+    public boolean isMobileDataEnabled() {
+        return mMobileDataController.isMobileDataEnabled();
+    }
+
+    @Override
+    public void setMobileDataEnabled(boolean enabled) {
+        mMobileDataController.setMobileDataEnabled(enabled);
     }
 
     public void refreshSignalCluster(SignalCluster cluster) {
