@@ -394,16 +394,21 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserIcon(int userId, Bitmap bitmap) {
         checkManageUsersPermission("update users");
-        synchronized (mPackagesLock) {
-            UserInfo info = mUsers.get(userId);
-            if (info == null || info.partial) {
-                Slog.w(LOG_TAG, "setUserIcon: unknown user #" + userId);
-                return;
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mPackagesLock) {
+                UserInfo info = mUsers.get(userId);
+                if (info == null || info.partial) {
+                    Slog.w(LOG_TAG, "setUserIcon: unknown user #" + userId);
+                    return;
+                }
+                writeBitmapLocked(info, bitmap);
+                writeUserLocked(info);
             }
-            writeBitmapLocked(info, bitmap);
-            writeUserLocked(info);
+            sendUserInfoChangedBroadcast(userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        sendUserInfoChangedBroadcast(userId);
     }
 
     private void sendUserInfoChangedBroadcast(int userId) {
