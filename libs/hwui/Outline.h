@@ -30,7 +30,7 @@ public:
             , mType(kOutlineType_None)
             , mRadius(0) {}
 
-    void setRoundRect(int left, int top, int right, int bottom, int radius) {
+    void setRoundRect(int left, int top, int right, int bottom, float radius) {
         mType = kOutlineType_RoundRect;
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
