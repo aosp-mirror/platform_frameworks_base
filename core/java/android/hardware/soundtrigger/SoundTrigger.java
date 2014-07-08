@@ -16,8 +16,6 @@
 
 package android.hardware.soundtrigger;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -65,7 +63,7 @@ public class SoundTrigger {
         public final int maxSoundModels;
 
         /** Maximum number of key phrases */
-        public final int maxKeyPhrases;
+        public final int maxKeyphrases;
 
         /** Maximum number of users per key phrase */
         public final int maxUsers;
@@ -86,7 +84,7 @@ public class SoundTrigger {
         public final int powerConsumptionMw;
 
         ModuleProperties(int id, String implementor, String description,
-                String uuid, int version, int maxSoundModels, int maxKeyPhrases,
+                String uuid, int version, int maxSoundModels, int maxKeyphrases,
                 int maxUsers, int recognitionModes, boolean supportsCaptureTransition,
                 int maxBufferMs, boolean supportsConcurrentCapture,
                 int powerConsumptionMw) {
@@ -96,7 +94,7 @@ public class SoundTrigger {
             this.uuid = UUID.fromString(uuid);
             this.version = version;
             this.maxSoundModels = maxSoundModels;
-            this.maxKeyPhrases = maxKeyPhrases;
+            this.maxKeyphrases = maxKeyphrases;
             this.maxUsers = maxUsers;
             this.recognitionModes = recognitionModes;
             this.supportsCaptureTransition = supportsCaptureTransition;
@@ -109,7 +107,7 @@ public class SoundTrigger {
     /*****************************************************************************
      * A SoundModel describes the attributes and contains the binary data used by the hardware
      * implementation to detect a particular sound pattern.
-     * A specialized version {@link KeyPhraseSoundModel} is defined for key phrase
+     * A specialized version {@link KeyphraseSoundModel} is defined for key phrase
      * sound models.
      ****************************************************************************/
     public static class SoundModel {
@@ -119,23 +117,30 @@ public class SoundTrigger {
         /** Keyphrase sound model */
         public static final int TYPE_KEYPHRASE = 0;
 
+        /** Unique sound model identifier */
+        public final UUID uuid;
+
         /** Sound model type (e.g. TYPE_KEYPHRASE); */
         public final int type;
 
         /** Opaque data. For use by vendor implementation and enrollment application */
         public final byte[] data;
 
-        public SoundModel(int type, byte[] data) {
+        public SoundModel(UUID uuid, int type, byte[] data) {
+            this.uuid = uuid;
             this.type = type;
             this.data = data;
         }
     }
 
     /*****************************************************************************
-     * A KeyPhrase describes a key phrase that can be detected by a
-     * {@link KeyPhraseSoundModel}
+     * A Keyphrase describes a key phrase that can be detected by a
+     * {@link KeyphraseSoundModel}
      ****************************************************************************/
-    public static class KeyPhrase {
+    public static class Keyphrase {
+        /** Unique identifier for this keyphrase */
+        public final int id;
+
         /** Recognition modes supported for this key phrase in the model */
         public final int recognitionModes;
 
@@ -148,7 +153,8 @@ public class SoundTrigger {
         /** Number of users this key phrase has been trained for */
         public final int numUsers;
 
-        public KeyPhrase(int recognitionModes, String locale, String text, int numUsers) {
+        public Keyphrase(int id, int recognitionModes, String locale, String text, int numUsers) {
+            this.id = id;
             this.recognitionModes = recognitionModes;
             this.locale = locale;
             this.text = text;
@@ -157,17 +163,17 @@ public class SoundTrigger {
     }
 
     /*****************************************************************************
-     * A KeyPhraseSoundModel is a specialized {@link SoundModel} for key phrases.
+     * A KeyphraseSoundModel is a specialized {@link SoundModel} for key phrases.
      * It contains data needed by the hardware to detect a certain number of key phrases
-     * and the list of corresponding {@link KeyPhrase} descriptors.
+     * and the list of corresponding {@link Keyphrase} descriptors.
      ****************************************************************************/
-    public static class KeyPhraseSoundModel extends SoundModel {
+    public static class KeyphraseSoundModel extends SoundModel {
         /** Key phrases in this sound model */
-        public final KeyPhrase[] keyPhrases; // keyword phrases in model
+        public final Keyphrase[] keyphrases; // keyword phrases in model
 
-        public KeyPhraseSoundModel(byte[] data, KeyPhrase[] keyPhrases) {
-            super(TYPE_KEYPHRASE, data);
-            this.keyPhrases = keyPhrases;
+        public KeyphraseSoundModel(UUID id, byte[] data, Keyphrase[] keyphrases) {
+            super(id, TYPE_KEYPHRASE, data);
+            this.keyphrases = keyphrases;
         }
     }
 
@@ -225,10 +231,10 @@ public class SoundTrigger {
     }
 
     /**
-     *  Additional data conveyed by a {@link KeyPhraseRecognitionEvent}
+     *  Additional data conveyed by a {@link KeyphraseRecognitionEvent}
      *  for a key phrase detection.
      */
-    public static class KeyPhraseRecognitionExtra {
+    public static class KeyphraseRecognitionExtra {
         /** Confidence level for each user defined in the key phrase in the same order as
          * users in the key phrase. The confidence level is expressed in percentage (0% -100%) */
         public final int[] confidenceLevels;
@@ -236,7 +242,7 @@ public class SoundTrigger {
         /** Recognition modes matched for this event */
         public final int recognitionModes;
 
-        KeyPhraseRecognitionExtra(int[] confidenceLevels, int recognitionModes) {
+        KeyphraseRecognitionExtra(int[] confidenceLevels, int recognitionModes) {
             this.confidenceLevels = confidenceLevels;
             this.recognitionModes = recognitionModes;
         }
@@ -245,19 +251,19 @@ public class SoundTrigger {
     /**
      *  Specialized {@link RecognitionEvent} for a key phrase detection.
      */
-    public static class KeyPhraseRecognitionEvent extends RecognitionEvent {
+    public static class KeyphraseRecognitionEvent extends RecognitionEvent {
         /** Indicates if the key phrase is present in the buffered audio available for capture */
-        public final KeyPhraseRecognitionExtra[] keyPhraseExtras;
+        public final KeyphraseRecognitionExtra[] keyphraseExtras;
 
         /** Additional data available for each recognized key phrases in the model */
-        public final boolean keyPhraseInCapture;
+        public final boolean keyphraseInCapture;
 
-        KeyPhraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+        KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                int captureSession, int captureDelayMs, byte[] data,
-               boolean keyPhraseInCapture, KeyPhraseRecognitionExtra[] keyPhraseExtras) {
+               boolean keyphraseInCapture, KeyphraseRecognitionExtra[] keyphraseExtras) {
             super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs, data);
-            this.keyPhraseInCapture = keyPhraseInCapture;
-            this.keyPhraseExtras = keyPhraseExtras;
+            this.keyphraseInCapture = keyphraseInCapture;
+            this.keyphraseExtras = keyphraseExtras;
         }
     }
 

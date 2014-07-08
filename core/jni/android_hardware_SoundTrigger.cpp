@@ -37,6 +37,11 @@ static struct {
     jmethodID    add;
 } gArrayListMethods;
 
+static jclass gUUIDClass;
+static struct {
+    jmethodID    toString;
+} gUUIDMethods;
+
 static const char* const kSoundTriggerClassPathName = "android/hardware/soundtrigger/SoundTrigger";
 static jclass gSoundTriggerClass;
 
@@ -57,25 +62,27 @@ static const char* const kSoundModelClassPathName =
                                      "android/hardware/soundtrigger/SoundTrigger$SoundModel";
 static jclass gSoundModelClass;
 static struct {
+    jfieldID    uuid;
     jfieldID    data;
 } gSoundModelFields;
 
-static const char* const kKeyPhraseClassPathName =
-                                     "android/hardware/soundtrigger/SoundTrigger$KeyPhrase";
-static jclass gKeyPhraseClass;
+static const char* const kKeyphraseClassPathName =
+                                     "android/hardware/soundtrigger/SoundTrigger$Keyphrase";
+static jclass gKeyphraseClass;
 static struct {
+    jfieldID id;
     jfieldID recognitionModes;
     jfieldID locale;
     jfieldID text;
     jfieldID numUsers;
-} gKeyPhraseFields;
+} gKeyphraseFields;
 
-static const char* const kKeyPhraseSoundModelClassPathName =
-                                 "android/hardware/soundtrigger/SoundTrigger$KeyPhraseSoundModel";
-static jclass gKeyPhraseSoundModelClass;
+static const char* const kKeyphraseSoundModelClassPathName =
+                                 "android/hardware/soundtrigger/SoundTrigger$KeyphraseSoundModel";
+static jclass gKeyphraseSoundModelClass;
 static struct {
-    jfieldID    keyPhrases;
-} gKeyPhraseSoundModelFields;
+    jfieldID    keyphrases;
+} gKeyphraseSoundModelFields;
 
 
 static const char* const kRecognitionEventClassPathName =
@@ -83,15 +90,15 @@ static const char* const kRecognitionEventClassPathName =
 static jclass gRecognitionEventClass;
 static jmethodID   gRecognitionEventCstor;
 
-static const char* const kKeyPhraseRecognitionEventClassPathName =
-                             "android/hardware/soundtrigger/SoundTrigger$KeyPhraseRecognitionEvent";
-static jclass gKeyPhraseRecognitionEventClass;
-static jmethodID   gKeyPhraseRecognitionEventCstor;
+static const char* const kKeyphraseRecognitionEventClassPathName =
+                             "android/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionEvent";
+static jclass gKeyphraseRecognitionEventClass;
+static jmethodID   gKeyphraseRecognitionEventCstor;
 
-static const char* const kKeyPhraseRecognitionExtraClassPathName =
-                             "android/hardware/soundtrigger/SoundTrigger$KeyPhraseRecognitionExtra";
-static jclass gKeyPhraseRecognitionExtraClass;
-static jmethodID   gKeyPhraseRecognitionExtraCstor;
+static const char* const kKeyphraseRecognitionExtraClassPathName =
+                             "android/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra";
+static jclass gKeyphraseRecognitionExtraClass;
+static jmethodID   gKeyphraseRecognitionExtraCstor;
 
 static Mutex gLock;
 
@@ -170,7 +177,7 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
                 (struct sound_trigger_phrase_recognition_event *)event;
 
         jobjectArray jExtras = env->NewObjectArray(phraseEvent->num_phrases,
-                                                  gKeyPhraseRecognitionExtraClass, NULL);
+                                                  gKeyphraseRecognitionExtraClass, NULL);
         if (jExtras == NULL) {
             return;
         }
@@ -185,8 +192,8 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
                    phraseEvent->phrase_extras[i].confidence_levels,
                    phraseEvent->phrase_extras[i].num_users * sizeof(int));
             env->ReleaseIntArrayElements(jConfidenceLevels, nConfidenceLevels, 0);
-            jobject jNewExtra = env->NewObject(gKeyPhraseRecognitionExtraClass,
-                                               gKeyPhraseRecognitionExtraCstor,
+            jobject jNewExtra = env->NewObject(gKeyphraseRecognitionExtraClass,
+                                               gKeyphraseRecognitionExtraCstor,
                                                jConfidenceLevels,
                                                phraseEvent->phrase_extras[i].recognition_modes);
 
@@ -196,7 +203,7 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
             env->SetObjectArrayElement(jExtras, i, jNewExtra);
 
         }
-        jEvent = env->NewObject(gKeyPhraseRecognitionEventClass, gKeyPhraseRecognitionEventCstor,
+        jEvent = env->NewObject(gKeyphraseRecognitionEventClass, gKeyphraseRecognitionEventCstor,
                                 event->status, event->model, event->capture_available,
                                event->capture_session, event->capture_delay_ms, jData,
                                phraseEvent->key_phrase_in_capture, jExtras);
@@ -381,6 +388,9 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
     sp<IMemory> memory;
     size_t size;
     sound_model_handle_t handle;
+    jobject jUuid;
+    jstring jUuidString;
+    const char *nUuidString;
 
     ALOGV("loadSoundModel");
     sp<SoundTrigger> module = getSoundTrigger(env, thiz);
@@ -404,13 +414,22 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
     }
     size_t offset;
     sound_trigger_sound_model_type_t type;
-    if (env->IsInstanceOf(jSoundModel, gKeyPhraseSoundModelClass)) {
+    if (env->IsInstanceOf(jSoundModel, gKeyphraseSoundModelClass)) {
         offset = sizeof(struct sound_trigger_phrase_sound_model);
         type = SOUND_MODEL_TYPE_KEYPHRASE;
     } else {
         offset = sizeof(struct sound_trigger_sound_model);
         type = SOUND_MODEL_TYPE_UNKNOWN;
     }
+
+    jUuid = env->GetObjectField(jSoundModel, gSoundModelFields.uuid);
+    jUuidString = (jstring)env->CallObjectMethod(jUuid, gUUIDMethods.toString);
+    nUuidString = env->GetStringUTFChars(jUuidString, NULL);
+    sound_trigger_uuid_t nUuid;
+    SoundTrigger::stringToGuid(nUuidString, &nUuid);
+    env->ReleaseStringUTFChars(jUuidString, nUuidString);
+    env->DeleteLocalRef(jUuidString);
+
     jData = (jbyteArray)env->GetObjectField(jSoundModel, gSoundModelFields.data);
     if (jData == NULL) {
         status = SOUNDTRIGGER_STATUS_BAD_VALUE;
@@ -438,6 +457,7 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
     nSoundModel = (struct sound_trigger_sound_model *)memory->pointer();
 
     nSoundModel->type = type;
+    nSoundModel->uuid = nUuid;
     nSoundModel->data_size = size;
     nSoundModel->data_offset = offset;
     memcpy((char *)nSoundModel + offset, nData, size);
@@ -446,7 +466,7 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
                 (struct sound_trigger_phrase_sound_model *)nSoundModel;
 
         jobjectArray jPhrases =
-            (jobjectArray)env->GetObjectField(jSoundModel, gKeyPhraseSoundModelFields.keyPhrases);
+            (jobjectArray)env->GetObjectField(jSoundModel, gKeyphraseSoundModelFields.keyphrases);
         if (jPhrases == NULL) {
             status = SOUNDTRIGGER_STATUS_BAD_VALUE;
             goto exit;
@@ -457,16 +477,18 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
         ALOGV("loadSoundModel numPhrases %d", numPhrases);
         for (size_t i = 0; i < numPhrases; i++) {
             jobject jPhrase = env->GetObjectArrayElement(jPhrases, i);
+            phraseModel->phrases[i].id =
+                                    env->GetIntField(jPhrase,gKeyphraseFields.id);
             phraseModel->phrases[i].recognition_mode =
-                                    env->GetIntField(jPhrase,gKeyPhraseFields.recognitionModes);
+                                    env->GetIntField(jPhrase,gKeyphraseFields.recognitionModes);
             phraseModel->phrases[i].num_users =
-                                    env->GetIntField(jPhrase, gKeyPhraseFields.numUsers);
-            jstring jLocale = (jstring)env->GetObjectField(jPhrase, gKeyPhraseFields.locale);
+                                    env->GetIntField(jPhrase, gKeyphraseFields.numUsers);
+            jstring jLocale = (jstring)env->GetObjectField(jPhrase, gKeyphraseFields.locale);
             const char *nLocale = env->GetStringUTFChars(jLocale, NULL);
             strncpy(phraseModel->phrases[i].locale,
                     nLocale,
                     SOUND_TRIGGER_MAX_LOCALE_LEN);
-            jstring jText = (jstring)env->GetObjectField(jPhrase, gKeyPhraseFields.text);
+            jstring jText = (jstring)env->GetObjectField(jPhrase, gKeyphraseFields.text);
             const char *nText = env->GetStringUTFChars(jText, NULL);
             strncpy(phraseModel->phrases[i].text,
                     nText,
@@ -599,6 +621,10 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
     gArrayListClass = (jclass) env->NewGlobalRef(arrayListClass);
     gArrayListMethods.add = env->GetMethodID(arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
+    jclass uuidClass = env->FindClass("java/util/UUID");
+    gUUIDClass = (jclass) env->NewGlobalRef(uuidClass);
+    gUUIDMethods.toString = env->GetMethodID(uuidClass, "toString", "()Ljava/lang/String;");
+
     jclass lClass = env->FindClass(kSoundTriggerClassPathName);
     gSoundTriggerClass = (jclass) env->NewGlobalRef(lClass);
 
@@ -617,20 +643,22 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
 
     jclass soundModelClass = env->FindClass(kSoundModelClassPathName);
     gSoundModelClass = (jclass) env->NewGlobalRef(soundModelClass);
+    gSoundModelFields.uuid = env->GetFieldID(soundModelClass, "uuid", "Ljava/util/UUID;");
     gSoundModelFields.data = env->GetFieldID(soundModelClass, "data", "[B");
 
-    jclass keyPhraseClass = env->FindClass(kKeyPhraseClassPathName);
-    gKeyPhraseClass = (jclass) env->NewGlobalRef(keyPhraseClass);
-    gKeyPhraseFields.recognitionModes = env->GetFieldID(keyPhraseClass, "recognitionModes", "I");
-    gKeyPhraseFields.locale = env->GetFieldID(keyPhraseClass, "locale", "Ljava/lang/String;");
-    gKeyPhraseFields.text = env->GetFieldID(keyPhraseClass, "text", "Ljava/lang/String;");
-    gKeyPhraseFields.numUsers = env->GetFieldID(keyPhraseClass, "numUsers", "I");
+    jclass keyphraseClass = env->FindClass(kKeyphraseClassPathName);
+    gKeyphraseClass = (jclass) env->NewGlobalRef(keyphraseClass);
+    gKeyphraseFields.id = env->GetFieldID(keyphraseClass, "id", "I");
+    gKeyphraseFields.recognitionModes = env->GetFieldID(keyphraseClass, "recognitionModes", "I");
+    gKeyphraseFields.locale = env->GetFieldID(keyphraseClass, "locale", "Ljava/lang/String;");
+    gKeyphraseFields.text = env->GetFieldID(keyphraseClass, "text", "Ljava/lang/String;");
+    gKeyphraseFields.numUsers = env->GetFieldID(keyphraseClass, "numUsers", "I");
 
-    jclass keyPhraseSoundModelClass = env->FindClass(kKeyPhraseSoundModelClassPathName);
-    gKeyPhraseSoundModelClass = (jclass) env->NewGlobalRef(keyPhraseSoundModelClass);
-    gKeyPhraseSoundModelFields.keyPhrases = env->GetFieldID(keyPhraseSoundModelClass,
-                                         "keyPhrases",
-                                         "[Landroid/hardware/soundtrigger/SoundTrigger$KeyPhrase;");
+    jclass keyphraseSoundModelClass = env->FindClass(kKeyphraseSoundModelClassPathName);
+    gKeyphraseSoundModelClass = (jclass) env->NewGlobalRef(keyphraseSoundModelClass);
+    gKeyphraseSoundModelFields.keyphrases = env->GetFieldID(keyphraseSoundModelClass,
+                                         "keyphrases",
+                                         "[Landroid/hardware/soundtrigger/SoundTrigger$Keyphrase;");
 
 
     jclass recognitionEventClass = env->FindClass(kRecognitionEventClassPathName);
@@ -638,15 +666,15 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
     gRecognitionEventCstor = env->GetMethodID(recognitionEventClass, "<init>",
                                               "(IIZII[B)V");
 
-    jclass keyPhraseRecognitionEventClass = env->FindClass(kKeyPhraseRecognitionEventClassPathName);
-    gKeyPhraseRecognitionEventClass = (jclass) env->NewGlobalRef(keyPhraseRecognitionEventClass);
-    gKeyPhraseRecognitionEventCstor = env->GetMethodID(keyPhraseRecognitionEventClass, "<init>",
-              "(IIZII[BZ[Landroid/hardware/soundtrigger/SoundTrigger$KeyPhraseRecognitionExtra;)V");
+    jclass keyphraseRecognitionEventClass = env->FindClass(kKeyphraseRecognitionEventClassPathName);
+    gKeyphraseRecognitionEventClass = (jclass) env->NewGlobalRef(keyphraseRecognitionEventClass);
+    gKeyphraseRecognitionEventCstor = env->GetMethodID(keyphraseRecognitionEventClass, "<init>",
+              "(IIZII[BZ[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;)V");
 
 
-    jclass keyPhraseRecognitionExtraClass = env->FindClass(kKeyPhraseRecognitionExtraClassPathName);
-    gKeyPhraseRecognitionExtraClass = (jclass) env->NewGlobalRef(keyPhraseRecognitionExtraClass);
-    gKeyPhraseRecognitionExtraCstor = env->GetMethodID(keyPhraseRecognitionExtraClass, "<init>",
+    jclass keyphraseRecognitionExtraClass = env->FindClass(kKeyphraseRecognitionExtraClassPathName);
+    gKeyphraseRecognitionExtraClass = (jclass) env->NewGlobalRef(keyphraseRecognitionExtraClass);
+    gKeyphraseRecognitionExtraCstor = env->GetMethodID(keyphraseRecognitionExtraClass, "<init>",
                                               "([II)V");
 
     int status = AndroidRuntime::registerNativeMethods(env,
