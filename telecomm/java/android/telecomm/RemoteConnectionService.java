@@ -229,7 +229,7 @@ final class RemoteConnectionService implements DeathRecipient {
         if (mConnectionId == null) {
             String id = UUID.randomUUID().toString();
             ConnectionRequest newRequest = new ConnectionRequest(request.getAccount(), id,
-                    request.getHandle(), request.getExtras(), request.getVideoState());
+                    request.getHandle(), request.getExtras());
             try {
                 mConnectionService.call(newRequest);
                 mConnectionId = id;
