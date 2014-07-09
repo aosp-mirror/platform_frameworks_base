@@ -696,6 +696,12 @@ public class ActivityManager {
          */
         public TaskDescription taskDescription;
 
+        /**
+         * Task affiliation for grouping with other tasks.
+         * @hide
+         */
+        public int affiliatedTaskId;
+
         public RecentTaskInfo() {
         }
 
@@ -727,6 +733,7 @@ public class ActivityManager {
             dest.writeInt(userId);
             dest.writeLong(firstActiveTime);
             dest.writeLong(lastActiveTime);
+            dest.writeInt(affiliatedTaskId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -741,6 +748,7 @@ public class ActivityManager {
             userId = source.readInt();
             firstActiveTime = source.readLong();
             lastActiveTime = source.readLong();
+            affiliatedTaskId = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR

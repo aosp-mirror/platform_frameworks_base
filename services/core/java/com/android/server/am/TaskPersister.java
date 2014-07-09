@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Debug;
@@ -151,6 +150,20 @@ public class TaskPersister {
         }
     }
 
+    private TaskRecord taskIdToTask(int taskId, ArrayList<TaskRecord> tasks) {
+        if (taskId < 0) {
+            return null;
+        }
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            if (task.taskId == taskId) {
+                return task;
+            }
+        }
+        Slog.e(TAG, "Restore affiliation error looking for taskId=" + taskId);
+        return null;
+    }
+
     ArrayList<TaskRecord> restoreTasksLocked() {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
@@ -201,7 +214,7 @@ public class TaskPersister {
                     XmlUtils.skipCurrentTag(in);
                 }
             } catch (Exception e) {
-                Slog.wtf(TAG, "Unable to parse " + taskFile + ". Error " + e);
+                Slog.wtf(TAG, "Unable to parse " + taskFile + ". Error ", e);
                 Slog.e(TAG, "Failing file: " + fileToString(taskFile));
                 deleteFile = true;
             } finally {
@@ -220,6 +233,13 @@ public class TaskPersister {
 
         if (!DEBUG) {
             removeObsoleteFiles(recoveredTaskIds);
+        }
+
+        // Fixup task affiliation from taskIds
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            task.setPrevAffiliate(taskIdToTask(task.mPrevAffiliateTaskId, tasks));
+            task.setNextAffiliate(taskIdToTask(task.mNextAffiliateTaskId, tasks));
         }
 
         TaskRecord[] tasksArray = new TaskRecord[tasks.size()];

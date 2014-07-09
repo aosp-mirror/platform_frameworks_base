@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.os.PersistableBundle;
 import android.os.Trace;
@@ -498,7 +497,7 @@ final class ActivityRecord {
         }
     }
 
-    void setTask(TaskRecord newTask, boolean isRoot) {
+    void setTask(TaskRecord newTask, TaskRecord taskToAffiliateWith) {
         if (task != null && task.removeActivity(this)) {
             if (task != newTask) {
                 task.stack.removeTask(task);
@@ -508,6 +507,15 @@ final class ActivityRecord {
             }
         }
         task = newTask;
+        setTaskToAffiliateWith(taskToAffiliateWith);
+    }
+
+    void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
+        if (taskToAffiliateWith != null &&
+                launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE &&
+                launchMode != ActivityInfo.LAUNCH_SINGLE_TASK) {
+            task.setTaskToAffiliateWith(taskToAffiliateWith);
+        }
     }
 
     boolean changeWindowTranslucency(boolean toOpaque) {
@@ -1038,8 +1046,8 @@ final class ActivityRecord {
         return null;
     }
 
-    private static String createImageFilename(ActivityRecord r) {
-        return String.valueOf(r.task.taskId) + ACTIVITY_ICON_SUFFIX + r.createTime +
+    private static String createImageFilename(ActivityRecord r, int taskId) {
+        return String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX + r.createTime +
                 TaskPersister.IMAGE_EXTENSION;
     }
 
@@ -1056,7 +1064,8 @@ final class ActivityRecord {
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
 
         if (taskDescription != null) {
-            task.saveTaskDescription(taskDescription, createImageFilename(this), out);
+            task.saveTaskDescription(taskDescription, createImageFilename(this, task.taskId),
+                    out);
         }
 
         out.startTag(null, TAG_INTENT);
@@ -1148,7 +1157,7 @@ final class ActivityRecord {
         r.persistentState = persistentState;
 
         if (createTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(r)));
+            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(r, taskId)));
         }
         r.taskDescription = taskDescription;
         r.createTime = createTime;

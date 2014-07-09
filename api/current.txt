@@ -7682,6 +7682,7 @@ package android.content {
     field public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 8388608; // 0x800000
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000
+    field public static final int FLAG_ACTIVITY_LAUNCH_BEHIND = 4096; // 0x1000
     field public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 134217728; // 0x8000000
     field public static final int FLAG_ACTIVITY_NEW_DOCUMENT = 524288; // 0x80000
     field public static final int FLAG_ACTIVITY_NEW_TASK = 268435456; // 0x10000000

@@ -1531,11 +1531,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
-        int launchFlags = intent.getFlags();
+        final boolean launchSingleInstance = r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+        final boolean launchSingleTask = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK;
 
+        int launchFlags = intent.getFlags();
         if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
-                (r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
-                        r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK)) {
+                (launchSingleInstance || launchSingleTask)) {
             // We have a conflict between the Intent and the Activity manifest, manifest wins.
             Slog.i(TAG, "Ignoring FLAG_ACTIVITY_NEW_DOCUMENT, launchMode is " +
                     "\"singleInstance\" or \"singleTask\"");
@@ -1556,6 +1557,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     break;
             }
         }
+        final int launchBehindFlags = Intent.FLAG_ACTIVITY_LAUNCH_BEHIND |
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+        final boolean affiliateTask = (launchFlags & launchBehindFlags) == launchBehindFlags;
 
         if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
@@ -1617,8 +1621,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // instance...  this new activity it is starting must go on its
             // own task.
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-        } else if (r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE
-                || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
+        } else if (launchSingleInstance || launchSingleTask) {
             // The activity being started is a single instance...  it always
             // gets launched into its own task.
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1658,8 +1661,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityStack targetStack;
         if (((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (launchFlags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
-                || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
-                || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                || launchSingleInstance || launchSingleTask) {
             // If bring to front is requested, and no result is requested, and
             // we can find a task that was started with this same
             // component, then instead of launching bring that one to the front.
@@ -1668,9 +1670,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // a SINGLE_INSTANCE activity, there can be one and only one
                 // instance of it in the history, and it is always in its own
                 // unique task, so we do a special search.
-                ActivityRecord intentActivity = r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE
-                        ? findTaskLocked(r)
-                        : findActivityLocked(intent, r.info);
+                ActivityRecord intentActivity = !launchSingleInstance ?
+                        findTaskLocked(r) : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
                     if (isLockTaskModeViolation(intentActivity.task)) {
                         showLockTaskToast();
@@ -1708,6 +1709,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 sourceStack.topActivity().task == sourceRecord.task)) {
                             // We really do want to push this one into the
                             // user's face, right now.
+                            if (affiliateTask && sourceRecord != null) {
+                                intentActivity.setTaskToAffiliateWith(sourceRecord.task);
+                            }
                             movedHome = true;
                             targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
                             if ((launchFlags &
@@ -1746,8 +1750,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         reuseTask.performClearTaskLocked();
                         reuseTask.setIntent(r.intent, r.info);
                     } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
-                            || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
-                            || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                            || launchSingleInstance || launchSingleTask) {
                         // In this situation we want to remove all activities
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
@@ -1848,8 +1851,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
                     if (top.app != null && top.app.thread != null) {
                         if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                            || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP
-                            || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
+                            || launchSingleInstance || launchSingleTask) {
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top,
                                     top.task);
                             // For paranoia, make sure we have correctly
@@ -1884,6 +1886,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean newTask = false;
         boolean keepCurTransition = false;
 
+        TaskRecord taskToAffiliate = affiliateTask && sourceRecord != null ?
+                sourceRecord.task : null;
+
         // Should this be considered a new task?
         if (r.resultTo == null && !addingToTask
                 && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
@@ -1898,11 +1903,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
                         newTaskIntent != null ? newTaskIntent : intent,
-                        voiceSession, voiceInteractor, true), true);
+                        voiceSession, voiceInteractor, true), taskToAffiliate);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r + " in new task " +
                         r.task);
             } else {
-                r.setTask(reuseTask, true);
+                r.setTask(reuseTask, taskToAffiliate);
             }
             if (!movedHome) {
                 if ((launchFlags &
@@ -1914,7 +1919,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         } else if (sourceRecord != null) {
-            TaskRecord sourceTask = sourceRecord.task;
+            final TaskRecord sourceTask = sourceRecord.task;
             if (isLockTaskModeViolation(sourceTask)) {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
@@ -1922,8 +1927,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack = sourceTask.stack;
             targetStack.moveToFront();
             mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
-            if (!addingToTask &&
-                    (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
+            if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
@@ -1963,7 +1967,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            r.setTask(sourceTask, false);
+            r.setTask(sourceTask, null);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task + " from source " + sourceRecord);
 
@@ -1975,7 +1979,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack.moveToFront();
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task : targetStack.createTaskRecord(getNextTaskId(),
-                            r.info, intent, null, null, true), true);
+                            r.info, intent, null, null, true), null);
             mWindowManager.moveTaskToTop(r.task.taskId);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);

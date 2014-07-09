@@ -2137,7 +2137,7 @@ final class ActivityStack {
                             + " Callers=" + Debug.getCallers(4));
                     if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
                             + " out to target's task " + target.task);
-                    p.setTask(targetTask, false);
+                    p.setTask(targetTask, null);
                     targetTask.addActivityAtBottom(p);
 
                     mWindowManager.setAppGroupId(p.appToken, targetTaskId);
@@ -2268,7 +2268,7 @@ final class ActivityStack {
                             + start + "-" + i + " to task=" + task + ":" + taskInsertionPoint);
                     for (int srcPos = start; srcPos >= i; --srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
-                        p.setTask(task, false);
+                        p.setTask(task, null);
                         task.addActivityAtIndex(taskInsertionPoint, p);
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Removing and adding activity " + p
@@ -3885,6 +3885,7 @@ final class ActivityStack {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
                 mService.mRecentTasks.remove(task);
+                task.closeRecentsChain();
             }
         }
 

@@ -42,6 +42,7 @@ import android.os.BatteryStats;
 import android.os.PersistableBundle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import android.util.SparseIntArray;
 import com.android.internal.R;
@@ -420,6 +421,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * List of intents that were used to start the most recent tasks.
      */
     ArrayList<TaskRecord> mRecentTasks;
+    ArraySet<TaskRecord> mTmpRecents = new ArraySet<TaskRecord>();
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -3611,7 +3613,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         int maxRecents = task.maxRecents - 1;
         for (int i=0; i<N; i++) {
-            TaskRecord tr = mRecentTasks.get(i);
+            final TaskRecord tr = mRecentTasks.get(i);
             if (task != tr) {
                 if (task.userId != tr.userId) {
                     continue;
@@ -3644,6 +3646,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             // and their maxRecents has been reached.
             tr.disposeThumbnail();
             mRecentTasks.remove(i);
+            if (task != tr) {
+                tr.closeRecentsChain();
+            }
             i--;
             N--;
             if (task.intent == null) {
@@ -3654,7 +3659,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mTaskPersister.notify(tr, false);
         }
         if (N >= MAX_RECENT_TASKS) {
-            mRecentTasks.remove(N-1).disposeThumbnail();
+            final TaskRecord tr = mRecentTasks.remove(N - 1);
+            tr.disposeThumbnail();
+            tr.closeRecentsChain();
         }
         mRecentTasks.add(0, task);
     }
@@ -7280,8 +7287,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         tr.updateTaskDescription();
 
         // Compose the recent task info
-        ActivityManager.RecentTaskInfo rti
-                = new ActivityManager.RecentTaskInfo();
+        ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         rti.id = tr.getTopActivity() == null ? -1 : tr.taskId;
         rti.persistentId = tr.taskId;
         rti.baseIntent = new Intent(tr.getBaseIntent());
@@ -7292,19 +7298,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
         rti.firstActiveTime = tr.firstActiveTime;
         rti.lastActiveTime = tr.lastActiveTime;
+        rti.affiliatedTaskId = tr.mAffiliatedTaskId;
         return rti;
     }
 
     @Override
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
-            int flags, int userId) {
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
                 false, ALLOW_FULL_ONLY, "getRecentTasks", null);
 
+        final boolean includeProfiles = (flags & ActivityManager.RECENT_INCLUDE_PROFILES) != 0;
+        final boolean withExcluded = (flags&ActivityManager.RECENT_WITH_EXCLUDED) != 0;
         synchronized (this) {
-            final boolean allowed = checkCallingPermission(
-                    android.Manifest.permission.GET_TASKS)
+            final boolean allowed = checkCallingPermission(android.Manifest.permission.GET_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
             if (!allowed) {
                 Slog.w(TAG, "getRecentTasks: caller " + callingUid
@@ -7322,12 +7329,60 @@ public final class ActivityManagerService extends ActivityManagerNative
                             maxNum < N ? maxNum : N);
 
             final Set<Integer> includedUsers;
-            if ((flags & ActivityManager.RECENT_INCLUDE_PROFILES) != 0) {
+            if (includeProfiles) {
                 includedUsers = getProfileIdsLocked(userId);
             } else {
                 includedUsers = new HashSet<Integer>();
             }
             includedUsers.add(Integer.valueOf(userId));
+
+            // Regroup affiliated tasks together.
+            for (int i = 0; i < N; ) {
+                TaskRecord task = mRecentTasks.remove(i);
+                if (mTmpRecents.contains(task)) {
+                    continue;
+                }
+                int affiliatedTaskId = task.mAffiliatedTaskId;
+                while (true) {
+                    TaskRecord next = task.mNextAffiliate;
+                    if (next == null) {
+                        break;
+                    }
+                    if (next.mAffiliatedTaskId != affiliatedTaskId) {
+                        Slog.e(TAG, "Error in Recents: next.affiliatedTaskId=" +
+                                next.mAffiliatedTaskId + " affiliatedTaskId=" + affiliatedTaskId);
+                        task.setNextAffiliate(null);
+                        if (next.mPrevAffiliate == task) {
+                            next.setPrevAffiliate(null);
+                        }
+                        break;
+                    }
+                    if (next.mPrevAffiliate != task) {
+                        Slog.e(TAG, "Error in Recents chain prev.mNextAffiliate=" +
+                                next.mPrevAffiliate + " task=" + task);
+                        next.setPrevAffiliate(null);
+                        break;
+                    }
+                    if (!mRecentTasks.contains(next)) {
+                        Slog.e(TAG, "Error in Recents: next=" + next + " not in mRecentTasks");
+                        task.setNextAffiliate(null);
+                        if (next.mPrevAffiliate == task) {
+                            next.setPrevAffiliate(null);
+                        }
+                        break;
+                    }
+                    task = next;
+                }
+                // task is now the end of the list
+                do {
+                    mRecentTasks.remove(task);
+                    mRecentTasks.add(i++, task);
+                    mTmpRecents.add(task);
+                } while ((task = task.mPrevAffiliate) != null);
+            }
+            mTmpRecents.clear();
+            // mRecentTasks is now in sorted, affiliated order.
+
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
                 // Only add calling user or related users recent tasks
@@ -7340,10 +7395,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // we should exclude the entry.
 
                 if (i == 0
-                        || ((flags&ActivityManager.RECENT_WITH_EXCLUDED) != 0)
+                        || withExcluded
                         || (tr.intent == null)
-                        || ((tr.intent.getFlags()
-                                &Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0)) {
+                        || ((tr.intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                                == 0)) {
                     if (!allowed) {
                         // If the caller doesn't have the GET_TASKS permission, then only
                         // allow them to see a small subset of tasks -- their own and home.
@@ -7439,6 +7494,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
         tr.disposeThumbnail();
         mRecentTasks.remove(tr);
+        tr.closeRecentsChain();
         final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);

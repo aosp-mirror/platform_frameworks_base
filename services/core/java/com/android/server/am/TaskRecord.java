@@ -64,6 +64,9 @@ final class TaskRecord {
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
     private static final String ATTR_TASKDESCRIPTIONLABEL = "task_description_label";
     private static final String ATTR_TASKDESCRIPTIONCOLOR = "task_description_color";
+    private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
+    private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
+    private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
     private static final String LAST_ACTIVITY_ICON_SUFFIX = "_last_activity_icon_";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
@@ -132,14 +135,22 @@ final class TaskRecord {
     private final String mFilename;
     CharSequence lastDescription; // Last description captured for this item.
 
+    int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
+    TaskRecord mPrevAffiliate; // previous task in affiliated chain.
+    int mPrevAffiliateTaskId = -1; // previous id for persistence.
+    TaskRecord mNextAffiliate; // next task in affiliated chain.
+    int mNextAffiliateTaskId = -1; // next id for persistence.
+
     final ActivityManagerService mService;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
-        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister.IMAGE_EXTENSION;
+        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
+                TaskPersister.IMAGE_EXTENSION;
         mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
         taskId = _taskId;
+        mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
         mActivities = new ArrayList<ActivityRecord>();
@@ -151,9 +162,11 @@ final class TaskRecord {
             boolean _rootWasReset, boolean _askedCompatMode, int _taskType, int _userId,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
-            ActivityManager.TaskDescription _lastTaskDescription) {
+            ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
+            int prevTaskId, int nextTaskId) {
         mService = service;
-        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister.IMAGE_EXTENSION;
+        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
+                TaskPersister.IMAGE_EXTENSION;
         mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
         taskId = _taskId;
         intent = _intent;
@@ -175,6 +188,9 @@ final class TaskRecord {
         mLastTimeMoved = lastTimeMoved;
         mNeverRelinquishIdentity = neverRelinquishIdentity;
         lastTaskDescription = _lastTaskDescription;
+        mAffiliatedTaskId = taskAffiliation;
+        mPrevAffiliateTaskId = prevTaskId;
+        mNextAffiliateTaskId = nextTaskId;
     }
 
     void touchActiveTime() {
@@ -255,6 +271,50 @@ final class TaskRecord {
 
     int getTaskToReturnTo() {
         return mTaskToReturnTo;
+    }
+
+    void setPrevAffiliate(TaskRecord prevAffiliate) {
+        mPrevAffiliate = prevAffiliate;
+        mPrevAffiliateTaskId = prevAffiliate == null ? -1 : prevAffiliate.taskId;
+    }
+
+    void setNextAffiliate(TaskRecord nextAffiliate) {
+        mNextAffiliate = nextAffiliate;
+        mNextAffiliateTaskId = nextAffiliate == null ? -1 : nextAffiliate.taskId;
+    }
+
+    // Close up recents linked list.
+    void closeRecentsChain() {
+        if (mPrevAffiliate != null) {
+            mPrevAffiliate.setNextAffiliate(mNextAffiliate);
+        }
+        if (mNextAffiliate != null) {
+            mNextAffiliate.setPrevAffiliate(mPrevAffiliate);
+        }
+        setPrevAffiliate(null);
+        setNextAffiliate(null);
+    }
+
+    void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
+        closeRecentsChain();
+        mAffiliatedTaskId = taskToAffiliateWith.mAffiliatedTaskId;
+        // Find the end
+        while (taskToAffiliateWith.mNextAffiliate != null) {
+            final TaskRecord nextRecents = taskToAffiliateWith.mNextAffiliate;
+            if (nextRecents.mAffiliatedTaskId != mAffiliatedTaskId) {
+                Slog.e(TAG, "setTaskToAffiliateWith: nextRecents=" + nextRecents + " affilTaskId="
+                        + nextRecents.mAffiliatedTaskId + " should be " + mAffiliatedTaskId);
+                if (nextRecents.mPrevAffiliate == taskToAffiliateWith) {
+                    nextRecents.setPrevAffiliate(null);
+                }
+                taskToAffiliateWith.setNextAffiliate(null);
+                break;
+            }
+            taskToAffiliateWith = nextRecents;
+        }
+        taskToAffiliateWith.setNextAffiliate(this);
+        setPrevAffiliate(taskToAffiliateWith);
+        setNextAffiliate(null);
     }
 
     void setLastThumbnail(Bitmap thumbnail) {
@@ -681,11 +741,13 @@ final class TaskRecord {
         if (lastDescription != null) {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
-
         if (lastTaskDescription != null) {
             saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
                     LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime, out);
         }
+        out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
+        out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
+        out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -733,6 +795,9 @@ final class TaskRecord {
         int taskId = -1;
         final int outerDepth = in.getDepth();
         ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription();
+        int taskAffiliation = -1;
+        int prevTaskId = -1;
+        int nextTaskId = -1;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -767,6 +832,12 @@ final class TaskRecord {
                 neverRelinquishIdentity = Boolean.valueOf(attrValue);
             } else if (readTaskDescriptionAttribute(taskDescription, attrName, attrValue)) {
                 // Completed in TaskPersister.readTaskDescriptionAttribute()
+            } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
+                taskAffiliation = Integer.valueOf(attrValue);
+            } else if (ATTR_PREV_AFFILIATION.equals(attrName)) {
+                prevTaskId = Integer.valueOf(attrValue);
+            } else if (ATTR_NEXT_AFFILIATION.equals(attrName)) {
+                nextTaskId = Integer.valueOf(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -806,7 +877,8 @@ final class TaskRecord {
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
                 askedCompatMode, taskType, userId, lastDescription, activities, firstActiveTime,
-                lastActiveTime, lastTimeOnTop, neverRelinquishIdentity, taskDescription);
+                lastActiveTime, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
+                taskAffiliation, prevTaskId, nextTaskId);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
@@ -867,6 +939,10 @@ final class TaskRecord {
                 pw.print(" lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");
+        pw.print(prefix); pw.print("isPersistable="); pw.print(isPersistable);
+                pw.print(" affiliation="); pw.print(mAffiliatedTaskId);
+                pw.print(" prevAffiliation="); pw.print(mPrevAffiliateTaskId);
+                pw.print(" nextAffiliation="); pw.println(mNextAffiliateTaskId);
     }
 
     @Override
