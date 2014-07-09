@@ -31,12 +31,15 @@ public final class TextInfo implements Parcelable {
     private final int mCookie;
     private final int mSequenceNumber;
 
+    private static final int DEFAULT_COOKIE = 0;
+    private static final int DEFAULT_SEQUENCE_NUMBER = 0;
+
     /**
      * Constructor.
      * @param text the text which will be input to TextService
      */
     public TextInfo(String text) {
-        this(text, 0, 0, 0, 0);
+        this(text, 0, getStringLengthOrZero(text), DEFAULT_COOKIE, DEFAULT_SEQUENCE_NUMBER);
     }
 
     /**
@@ -46,7 +49,11 @@ public final class TextInfo implements Parcelable {
      * @param sequenceNumber the sequence number for this TextInfo
      */
     public TextInfo(String text, int cookie, int sequenceNumber) {
-        this(text, 0, 0, 0, 0);
+        this(text, 0, getStringLengthOrZero(text), cookie, sequenceNumber);
+    }
+
+    private static int getStringLengthOrZero(final String text) {
+        return TextUtils.isEmpty(text) ? 0 : text.length();
     }
 
     /**
