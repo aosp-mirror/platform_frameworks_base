@@ -979,9 +979,6 @@ public class ActivityChooserModel extends DataSetObservable {
         }
     }
 
-    /**
-     * Command for reading the historical records from a file off the UI thread.
-     */
     private void readHistoricalDataImpl() {
         FileInputStream fis = null;
         try {
