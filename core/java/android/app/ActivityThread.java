@@ -1484,6 +1484,7 @@ public final class ActivityThread {
                 case ON_NEW_ACTIVITY_OPTIONS:
                     Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
                     onNewActivityOptions(pair.first, pair.second);
+                    break;
                 case STOP_MEDIA_PLAYING:
                     handleStopMediaPlaying((IBinder) msg.obj);
                     break;
