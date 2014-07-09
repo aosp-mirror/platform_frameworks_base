@@ -12418,6 +12418,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_TIMESTAMP_CALIBRATION;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_WHITE_LEVEL;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_MAX_ANALOG_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_NOISE_PROFILE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_ORIENTATION;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_REFERENCE_ILLUMINANT1;
     field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_REFERENCE_ILLUMINANT2;

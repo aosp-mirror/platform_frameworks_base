@@ -1717,6 +1717,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sensor.orientation", int.class);
 
     /**
+     * <p>Noise model coefficients for each CFA mosaic channel.</p>
+     * <p>This tag contains two noise model coefficients for each CFA channel
+     * corresponding to the sensor amplification (S) and sensor readout
+     * noise (O).  These are given as pairs of coefficients for each channel
+     * in the same order as channels listed for the CFA layout tag
+     * (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}).  This is
+     * represented as an array of Pair&lt;Double, Double&gt;, where
+     * the first member of the Pair at index n is the S coefficient and the
+     * second member is the O coefficient for the nth color channel in the CFA.</p>
+     * <p>These coefficients are used in a two parameter noise model to describe
+     * the amount of noise present in the image for each CFA channel.  The
+     * noise model used here is:</p>
+     * <p>N(x) = sqrt(Sx + O)</p>
+     * <p>Where x represents the recorded signal of a CFA channel normalized to
+     * the range [0, 1], and S and O are the noise model coeffiecients for
+     * that channel.</p>
+     * <p>A more detailed description of the noise model can be found in the
+     * Adobe DNG specification for the NoiseProfile tag.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     */
+    public static final Key<android.util.Pair<Double,Double>[]> SENSOR_NOISE_PROFILE =
+            new Key<android.util.Pair<Double,Double>[]>("android.sensor.noiseProfile", new TypeReference<android.util.Pair<Double,Double>[]>() {{ }});
+
+    /**
      * <p>Lists the supported sensor test pattern modes for {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode}.</p>
      * <p>Optional. Defaults to [OFF].</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
