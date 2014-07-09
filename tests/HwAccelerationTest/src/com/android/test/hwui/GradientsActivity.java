@@ -223,12 +223,11 @@ public class GradientsActivity extends Activity {
             float left = 40.0f;
             float bottom = 40.0f + mDrawHeight;
 
-            mPaint.setShader(mGradient);
-
             mMatrix.setScale(1, mDrawWidth);
             mMatrix.postRotate(90);
             mMatrix.postTranslate(right, top);
             mGradient.setLocalMatrix(mMatrix);
+            mPaint.setShader(mGradient);
             canvas.drawRect(right - mDrawWidth, top, right, top + mDrawHeight, mPaint);
 
             top += 40.0f + mDrawHeight;
@@ -237,6 +236,7 @@ public class GradientsActivity extends Activity {
             mMatrix.setScale(1, mDrawHeight);
             mMatrix.postTranslate(left, top);
             mGradient.setLocalMatrix(mMatrix);
+            mPaint.setShader(mGradient);
             canvas.drawRect(left, top, right, top + mDrawHeight, mPaint);
 
             left += 40.0f + mDrawWidth;
@@ -248,6 +248,7 @@ public class GradientsActivity extends Activity {
             mMatrix.postRotate(180);
             mMatrix.postTranslate(left, bottom);
             mGradient.setLocalMatrix(mMatrix);
+            mPaint.setShader(mGradient);
             canvas.drawRect(left, bottom - mDrawHeight, right, bottom, mPaint);
 
             top += 40.0f + mDrawHeight;
@@ -257,6 +258,7 @@ public class GradientsActivity extends Activity {
             mMatrix.postRotate(-90);
             mMatrix.postTranslate(left, top);
             mGradient.setLocalMatrix(mMatrix);
+            mPaint.setShader(mGradient);
             canvas.drawRect(left, top, left + mDrawWidth, bottom, mPaint);
 
             right = left + mDrawWidth;
@@ -264,12 +266,11 @@ public class GradientsActivity extends Activity {
             top = bottom + 20.0f;
             bottom = top + 50.0f;
 
-            mPaint.setShader(mGradientStops);
-
             mMatrix.setScale(1, mDrawWidth);
             mMatrix.postRotate(90);
             mMatrix.postTranslate(right, top);
             mGradientStops.setLocalMatrix(mMatrix);
+            mPaint.setShader(mGradientStops);
             canvas.drawRect(left, top, right, bottom, mPaint);
             
             canvas.restore();
