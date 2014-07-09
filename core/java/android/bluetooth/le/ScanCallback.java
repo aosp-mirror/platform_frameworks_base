@@ -19,64 +19,53 @@ package android.bluetooth.le;
 import java.util.List;
 
 /**
- * Callback of Bluetooth LE scans. The results of the scans will be delivered through the callbacks.
+ * Bluetooth LE scan callbacks.
+ * Scan results are reported using these callbacks.
+ *
+ * {@see BluetoothLeScanner#startScan}
  */
 public abstract class ScanCallback {
-
     /**
      * Fails to start scan as BLE scan with the same settings is already started by the app.
      */
     public static final int SCAN_FAILED_ALREADY_STARTED = 1;
+
     /**
      * Fails to start scan as app cannot be registered.
      */
     public static final int SCAN_FAILED_APPLICATION_REGISTRATION_FAILED = 2;
+
     /**
-     * Fails to start scan due to gatt service failure.
+     * Fails to start scan due an internal error
      */
-    public static final int SCAN_FAILED_GATT_SERVICE_FAILURE = 3;
-    /**
-     * Fails to start scan due to controller failure.
-     */
-    public static final int SCAN_FAILED_CONTROLLER_FAILURE = 4;
+    public static final int SCAN_FAILED_INTERNAL_ERROR = 3;
 
     /**
      * Fails to start power optimized scan as this feature is not supported.
      */
-    public static final int SCAN_FAILED_FEATURE_UNSUPPORTED = 5;
+    public static final int SCAN_FAILED_FEATURE_UNSUPPORTED = 4;
 
     /**
-     * Callback when a BLE advertisement is found.
+     * Callback when a BLE advertisement has been found.
      *
+     * @param callbackType Determines if this callback was triggered because of first match,
+     *    a lost match indication or a regular scan result.
      * @param result A Bluetooth LE scan result.
      */
-    public abstract void onAdvertisementUpdate(ScanResult result);
-
-    /**
-     * Callback when the BLE advertisement is found for the first time.
-     *
-     * @param result The Bluetooth LE scan result when the onFound event is triggered.
-     */
-    public abstract void onAdvertisementFound(ScanResult result);
-
-    /**
-     * Callback when the BLE advertisement was lost. Note a device has to be "found" before it's
-     * lost.
-     *
-     * @param result The Bluetooth scan result that was last found.
-     */
-    public abstract void onAdvertisementLost(ScanResult result);
+    public void onScanResult(int callbackType, ScanResult result) {
+    }
 
     /**
      * Callback when batch results are delivered.
      *
      * @param results List of scan results that are previously scanned.
-     * @hide
      */
-    public abstract void onBatchScanResults(List<ScanResult> results);
+    public void onBatchScanResults(List<ScanResult> results) {
+    }
 
     /**
-     * Callback when scan failed.
+     * Callback when scan could not be started.
      */
-    public abstract void onScanFailed(int errorCode);
+    public void onScanFailed(int errorCode) {
+    }
 }

@@ -16,4 +16,4 @@
 
 package android.bluetooth.le;
 
-parcelable AdvertisementData;
+parcelable AdvertiseData;

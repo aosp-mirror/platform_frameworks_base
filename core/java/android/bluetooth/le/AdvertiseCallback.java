@@ -17,64 +17,58 @@
 package android.bluetooth.le;
 
 /**
- * Callback of Bluetooth LE advertising, which is used to deliver advertising operation status.
+ * Bluetooth LE advertising callbacks, used to deliver advertising operation status.
  */
 public abstract class AdvertiseCallback {
 
     /**
-     * The operation is success.
-     *
+     * The requested operation was successful.
      * @hide
      */
-    public static final int SUCCESS = 0;
+    public static final int ADVERTISE_SUCCESS = 0;
+
     /**
-     * Fails to start advertising as the advertisement data contains services that are not added to
-     * the local bluetooth GATT server.
+     * Failed to start advertising as the advertisement data contains services that are not
+     * added to the local Bluetooth GATT server.
      */
     public static final int ADVERTISE_FAILED_SERVICE_UNKNOWN = 1;
+
     /**
-     * Fails to start advertising as system runs out of quota for advertisers.
+     * Failed to start advertising because no advertising instance is available.
      */
     public static final int ADVERTISE_FAILED_TOO_MANY_ADVERTISERS = 2;
 
     /**
-     * Fails to start advertising as the advertising is already started.
+     * Failed to start advertising as the advertising is already started.
      */
     public static final int ADVERTISE_FAILED_ALREADY_STARTED = 3;
+
     /**
-     * Fails to stop advertising as the advertising is not started.
+     * Operation failed due to an internal error.
      */
-    public static final int ADVERTISE_FAILED_NOT_STARTED = 4;
+    public static final int ADVERTISE_FAILED_INTERNAL_ERROR = 4;
 
     /**
-     * Operation fails due to bluetooth controller failure.
+     * This feature is not supported on this platform.
      */
-    public static final int ADVERTISE_FAILED_CONTROLLER_FAILURE = 5;
-
-    /**
-     * Operation fails due to GATT service failure.
-     * @hide
-     */
-    public static final int ADVERTISE_FAILED_GATT_SERVICE_FAILURE = 6;
-
-    /**
-     * Operation fails as this feature is not supported
-     */
-    public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 7;
+    public static final int ADVERTISE_FAILED_FEATURE_UNSUPPORTED = 5;
 
 
     /**
-     * Callback when advertising operation succeeds.
+     * Callback triggered in response to {@link BluetoothLeAdvertiser#startAdvertising} indicating
+     * that the advertising has been started successfully.
      *
      * @param settingsInEffect The actual settings used for advertising, which may be different from
-     *            what the app asks.
+     *            what has been requested.
      */
-    public abstract void onSuccess(AdvertiseSettings settingsInEffect);
+    public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+    }
 
     /**
-     * Callback when advertising operation fails.
+     * Callback when advertising could not be started.
      *
-     * @param errorCode Error code for failures.
+     * @param errorCode Error code (see ADVERTISE_FAILED_* constants) for
      */
-    public abstract void onFailure(int errorCode);
+    public void onStartFailure(int errorCode) {
+    }
 }

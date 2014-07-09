@@ -36,14 +36,14 @@ import java.util.UUID;
 
 /**
  * This class provides methods to perform scan related operations for Bluetooth LE devices. An
- * application can scan for a particular type of BLE devices using {@link ScanFilter}. It can also
- * request different types of callbacks for delivering the result.
+ * application can scan for a particular type of Bluetotoh LE devices using {@link ScanFilter}.
+ * It can also request different types of callbacks for delivering the result.
  * <p>
  * Use {@link BluetoothAdapter#getBluetoothLeScanner()} to get an instance of
  * {@link BluetoothLeScanner}.
  * <p>
- * Note most of the scan methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
- * permission.
+ * <b>Note:</b> Most of the scan methods here require
+ * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
  * @see ScanFilter
  */
@@ -58,6 +58,8 @@ public final class BluetoothLeScanner {
     private final Map<ScanCallback, BleScanCallbackWrapper> mLeScanClients;
 
     /**
+     * Use {@link BluetoothAdapter#getBluetoothLeScanner()} instead.
+     * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
      * @hide
      */
     public BluetoothLeScanner(IBluetoothManager bluetoothManager) {
@@ -68,13 +70,29 @@ public final class BluetoothLeScanner {
     }
 
     /**
+     * Start Bluetooth LE scan with default parameters and no filters.
+     * The scan results will be delivered through {@code callback}.
+     * <p>
+     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     *
+     * @param callback Callback used to deliver scan results.
+     * @throws IllegalArgumentException If {@code callback} is null.
+     */
+    public void startScan(final ScanCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback is null");
+        }
+        this.startScan(null, new ScanSettings.Builder().build(), callback);
+    }
+
+    /**
      * Start Bluetooth LE scan. The scan results will be delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param filters {@link ScanFilter}s for finding exact BLE devices.
-     * @param settings Settings for ble scan.
-     * @param callback Callback when scan results are delivered.
+     * @param settings Settings for the scan.
+     * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code settings} or {@code callback} is null.
      */
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
@@ -94,7 +112,7 @@ public final class BluetoothLeScanner {
                 gatt = null;
             }
             if (gatt == null) {
-                postCallbackError(callback, ScanCallback.SCAN_FAILED_GATT_SERVICE_FAILURE);
+                postCallbackError(callback, ScanCallback.SCAN_FAILED_INTERNAL_ERROR);
                 return;
             }
             if (!isSettingsConfigAllowedForScan(settings)) {
@@ -116,7 +134,7 @@ public final class BluetoothLeScanner {
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "GATT service exception when starting scan", e);
-                postCallbackError(callback, ScanCallback.SCAN_FAILED_GATT_SERVICE_FAILURE);
+                postCallbackError(callback, ScanCallback.SCAN_FAILED_INTERNAL_ERROR);
             }
         }
     }
@@ -139,24 +157,12 @@ public final class BluetoothLeScanner {
     }
 
     /**
-     * Returns available storage size for batch scan results. It's recommended not to use batch scan
-     * if available storage size is small (less than 1k bytes, for instance).
-     *
-     * @hide TODO: unhide when batching is supported in stack.
-     */
-    public int getAvailableBatchStorageSizeBytes() {
-        throw new UnsupportedOperationException("not impelemented");
-    }
-
-    /**
      * Flush pending batch scan results stored in Bluetooth controller. This will return Bluetooth
      * LE scan results batched on bluetooth controller. Returns immediately, batch scan results data
      * will be delivered through the {@code callback}.
      *
      * @param callback Callback of the Bluetooth LE Scan, it has to be the same instance as the one
      *            used to start scan.
-     *
-     * @hide
      */
     public void flushPendingScanResults(ScanCallback callback) {
         if (callback == null) {
@@ -302,7 +308,7 @@ public final class BluetoothLeScanner {
             handler.post(new Runnable() {
                     @Override
                 public void run() {
-                    mScanCallback.onAdvertisementUpdate(result);
+                    mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, result);
                 }
             });
 
@@ -435,9 +441,9 @@ public final class BluetoothLeScanner {
             ScanResult result = new ScanResult(device, advData, rssi,
                     scanNanos);
             if (onFound) {
-                mScanCallback.onAdvertisementFound(result);
+                mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_FIRST_MATCH, result);
             } else {
-                mScanCallback.onAdvertisementLost(result);
+                mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_MATCH_LOST, result);
             }
         }
     }
@@ -452,17 +458,13 @@ public final class BluetoothLeScanner {
     }
 
     private boolean isSettingsConfigAllowedForScan(ScanSettings settings) {
-        boolean ret = true;
-        int callbackType;
-
-        callbackType = settings.getCallbackType();
-        if (((callbackType == ScanSettings.CALLBACK_TYPE_ON_LOST) ||
-                (callbackType == ScanSettings.CALLBACK_TYPE_ON_FOUND) ||
-                (callbackType == ScanSettings.CALLBACK_TYPE_ON_UPDATE &&
-                settings.getReportDelayNanos() > 0) &&
-                (!mBluetoothAdapter.isOffloadedFilteringSupported()))) {
-            ret = false;
+        final int callbackType = settings.getCallbackType();
+        if ((  callbackType != ScanSettings.CALLBACK_TYPE_ALL_MATCHES
+           || (callbackType == ScanSettings.CALLBACK_TYPE_ALL_MATCHES
+           && settings.getReportDelaySeconds() > 0))
+           && !mBluetoothAdapter.isOffloadedFilteringSupported()) {
+            return false;
         }
-        return ret;
+        return true;
     }
 }

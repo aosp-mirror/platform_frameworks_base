@@ -66,7 +66,7 @@ public final class ScanRecord {
     private final int mTxPowerLevel;
 
     // Local name of the Bluetooth LE device.
-    private final String mLocalName;
+    private final String mDeviceName;
 
     /**
      * Returns the advertising flags indicating the discoverable mode and capability of the device.
@@ -77,7 +77,7 @@ public final class ScanRecord {
     }
 
     /**
-     * Returns a list of service uuids within the advertisement that are used to identify the
+     * Returns a list of service UUIDs within the advertisement that are used to identify the
      * bluetooth gatt services.
      */
     public List<ParcelUuid> getServiceUuids() {
@@ -94,22 +94,21 @@ public final class ScanRecord {
 
     /**
      * Returns the manufacturer specific data which is the content of manufacturer specific data
-     * field. The first 2 bytes of the data contain the company id.
+     * field.
      */
     public byte[] getManufacturerSpecificData() {
         return mManufacturerSpecificData;
     }
 
     /**
-     * Returns a 16 bit uuid of the service that the service data is associated with.
+     * Returns a 16-bit UUID of the service that the service data is associated with.
      */
     public ParcelUuid getServiceDataUuid() {
         return mServiceDataUuid;
     }
 
     /**
-     * Returns service data. The first two bytes should be a 16 bit service uuid associated with the
-     * service data.
+     * Returns service data.
      */
     public byte[] getServiceData() {
         return mServiceData;
@@ -130,8 +129,8 @@ public final class ScanRecord {
      * Returns the local name of the BLE device. The is a UTF-8 encoded string.
      */
     @Nullable
-    public String getLocalName() {
-        return mLocalName;
+    public String getDeviceName() {
+        return mDeviceName;
     }
 
     private ScanRecord(List<ParcelUuid> serviceUuids,
@@ -144,7 +143,7 @@ public final class ScanRecord {
         mManufacturerSpecificData = manufacturerSpecificData;
         mServiceDataUuid = serviceDataUuid;
         mServiceData = serviceData;
-        mLocalName = localName;
+        mDeviceName = localName;
         mAdvertiseFlags = advertiseFlags;
         mTxPowerLevel = txPowerLevel;
     }
@@ -155,7 +154,7 @@ public final class ScanRecord {
                 + ", mManufacturerId=" + mManufacturerId + ", mManufacturerSpecificData="
                 + Arrays.toString(mManufacturerSpecificData) + ", mServiceDataUuid="
                 + mServiceDataUuid + ", mServiceData=" + Arrays.toString(mServiceData)
-                + ", mTxPowerLevel=" + mTxPowerLevel + ", mLocalName=" + mLocalName + "]";
+                + ", mTxPowerLevel=" + mTxPowerLevel + ", mDeviceName=" + mDeviceName + "]";
     }
 
     /**
@@ -223,7 +222,7 @@ public final class ScanRecord {
                         break;
                     case DATA_TYPE_SERVICE_DATA:
                         serviceData = extractBytes(scanRecord, currentPos, dataLength);
-                        // The first two bytes of the service data are service data uuid.
+                        // The first two bytes of the service data are service data UUID.
                         int serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT;
                         byte[] serviceDataUuidBytes = extractBytes(scanRecord, currentPos,
                                 serviceUuidLength);
@@ -256,7 +255,7 @@ public final class ScanRecord {
         }
     }
 
-    // Parse service uuids.
+    // Parse service UUIDs.
     private static int parseServiceUuid(byte[] scanRecord, int currentPos, int dataLength,
             int uuidLength, List<ParcelUuid> serviceUuids) {
         while (dataLength > 0) {

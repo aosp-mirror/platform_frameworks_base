@@ -56,20 +56,20 @@ public class ScanFilterTest extends TestCase {
 
     @SmallTest
     public void testsetNameFilter() {
-        ScanFilter filter = mFilterBuilder.setName("Ped").build();
+        ScanFilter filter = mFilterBuilder.setDeviceName("Ped").build();
         assertTrue("setName filter fails", filter.matches(mScanResult));
 
-        filter = mFilterBuilder.setName("Pem").build();
+        filter = mFilterBuilder.setDeviceName("Pem").build();
         assertFalse("setName filter fails", filter.matches(mScanResult));
 
     }
 
     @SmallTest
     public void testDeviceFilter() {
-        ScanFilter filter = mFilterBuilder.setMacAddress(DEVICE_MAC).build();
+        ScanFilter filter = mFilterBuilder.setDeviceAddress(DEVICE_MAC).build();
         assertTrue("device filter fails", filter.matches(mScanResult));
 
-        filter = mFilterBuilder.setMacAddress("11:22:33:44:55:66").build();
+        filter = mFilterBuilder.setDeviceAddress("11:22:33:44:55:66").build();
         assertFalse("device filter fails", filter.matches(mScanResult));
     }
 
@@ -134,10 +134,10 @@ public class ScanFilterTest extends TestCase {
         ScanFilter filter = mFilterBuilder.build();
         testReadWriteParcelForFilter(filter);
 
-        filter = mFilterBuilder.setName("Ped").build();
+        filter = mFilterBuilder.setDeviceName("Ped").build();
         testReadWriteParcelForFilter(filter);
 
-        filter = mFilterBuilder.setMacAddress("11:22:33:44:55:66").build();
+        filter = mFilterBuilder.setDeviceAddress("11:22:33:44:55:66").build();
         testReadWriteParcelForFilter(filter);
 
         filter = mFilterBuilder.setServiceUuid(
