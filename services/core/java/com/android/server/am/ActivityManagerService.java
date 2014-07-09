@@ -15952,7 +15952,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int changes = 0;
 
         if (app.curAdj != app.setAdj) {
-            ProcessList.setOomAdj(app.pid, app.curAdj);
+            ProcessList.setOomAdj(app.pid, app.info.uid, app.curAdj);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
                 TAG, "Set " + app.pid + " " + app.processName +
                 " adj " + app.curAdj + ": " + app.adjType);
