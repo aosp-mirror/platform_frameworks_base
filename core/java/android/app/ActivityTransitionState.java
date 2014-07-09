@@ -95,6 +95,8 @@ class ActivityTransitionState {
      */
     private int mExitTransitionCoordinatorsKey = 1;
 
+    private boolean mIsEnterTriggered;
+
     public ActivityTransitionState() {
     }
 
@@ -142,8 +144,10 @@ class ActivityTransitionState {
     public void setEnterActivityOptions(Activity activity, ActivityOptions options) {
         if (activity.getWindow().hasFeature(Window.FEATURE_CONTENT_TRANSITIONS)
                 && options != null && mEnterActivityOptions == null
+                && mEnterTransitionCoordinator == null
                 && options.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
             mEnterActivityOptions = options;
+            mIsEnterTriggered = false;
             if (mEnterActivityOptions.isReturning()) {
                 int result = mEnterActivityOptions.getResultCode();
                 if (result != 0) {
@@ -154,9 +158,10 @@ class ActivityTransitionState {
     }
 
     public void enterReady(Activity activity) {
-        if (mEnterActivityOptions == null) {
+        if (mEnterActivityOptions == null || mIsEnterTriggered) {
             return;
         }
+        mIsEnterTriggered = true;
         mHasExited = false;
         ArrayList<String> sharedElementNames = mEnterActivityOptions.getSharedElementNames();
         ResultReceiver resultReceiver = mEnterActivityOptions.getResultReceiver();
@@ -259,6 +264,7 @@ class ActivityTransitionState {
             return;
         }
         ActivityOptions activityOptions = new ActivityOptions(options);
+        mEnterTransitionCoordinator = null;
         if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
             int key = activityOptions.getExitCoordinatorKey();
             int index = mExitTransitionCoordinators.indexOfKey(key);
