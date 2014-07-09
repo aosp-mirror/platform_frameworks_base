@@ -59,6 +59,11 @@ public interface WebViewFactoryProvider {
          */
         void clearClientCertPreferences(Runnable onCleared);
 
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#optOutDataReductionProxy() }
+         */
+        void optOutDataReductionProxy();
     }
 
     Statics getStatics();

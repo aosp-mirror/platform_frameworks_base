@@ -1805,6 +1805,21 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Sets whether the application wants to opt out from using the Data Reduction Proxy
+     * service.
+     * Data reduction proxy can only be enabled by the user and will almost always be
+     * transparent to the application. In rare cases where using the proxy interferes
+     * with the app, the application developer can use this API to opt out from using the
+     * proxy. Note that this may increase network bandwidth usage.
+     *
+     * See <a href=http://developer.chrome.com/multidevice/data-compression>
+     * Data Compression Proxy</a>
+     */
+    public static void optOutDataReductionProxy() {
+        getFactory().getStatics().optOutDataReductionProxy();
+    }
+
+    /**
      * Gets the list of currently loaded plugins.
      *
      * @return the list of currently loaded plugins
