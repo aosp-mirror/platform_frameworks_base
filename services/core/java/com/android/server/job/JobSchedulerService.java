@@ -140,12 +140,10 @@ public class JobSchedulerService extends com.android.server.SystemService
      * This cancels the job if it's already been scheduled, and replaces it with the one provided.
      * @param job JobInfo object containing execution parameters
      * @param uId The package identifier of the application this job is for.
-     * @param canPersistJob Whether or not the client has the appropriate permissions for
-     *                       persisting this job.
      * @return Result of this operation. See <code>JobScheduler#RESULT_*</code> return codes.
      */
-    public int schedule(JobInfo job, int uId, boolean canPersistJob) {
-        JobStatus jobStatus = new JobStatus(job, uId, canPersistJob);
+    public int schedule(JobInfo job, int uId) {
+        JobStatus jobStatus = new JobStatus(job, uId);
         cancelJob(uId, job.getId());
         startTrackingJob(jobStatus);
         return JobScheduler.RESULT_SUCCESS;
@@ -668,11 +666,16 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int uid = Binder.getCallingUid();
 
             enforceValidJobRequest(uid, job);
-            final boolean canPersist = canPersistJobs(pid, uid);
+            if (job.isPersisted()) {
+                if (!canPersistJobs(pid, uid)) {
+                    throw new IllegalArgumentException("Error: requested job be persisted without"
+                            + " holding RECEIVE_BOOT_COMPLETED permission.");
+                }
+            }
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.schedule(job, uid, canPersist);
+                return JobSchedulerService.this.schedule(job, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

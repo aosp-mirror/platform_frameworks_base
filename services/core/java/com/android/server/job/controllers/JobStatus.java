@@ -43,9 +43,6 @@ public class JobStatus {
     final JobInfo job;
     final int uId;
 
-    /** At reschedule time we need to know whether to update job on disk. */
-    final boolean persisted;
-
     // Constraints.
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean timeDelayConstraintSatisfied = new AtomicBoolean();
@@ -72,16 +69,15 @@ public class JobStatus {
         return uId;
     }
 
-    private JobStatus(JobInfo job, int uId, boolean persisted, int numFailures) {
+    private JobStatus(JobInfo job, int uId, int numFailures) {
         this.job = job;
         this.uId = uId;
         this.numFailures = numFailures;
-        this.persisted = persisted;
     }
 
     /** Create a newly scheduled job. */
-    public JobStatus(JobInfo job, int uId, boolean persisted) {
-        this(job, uId, persisted, 0);
+    public JobStatus(JobInfo job, int uId) {
+        this(job, uId, 0);
 
         final long elapsedNow = SystemClock.elapsedRealtime();
 
@@ -105,7 +101,7 @@ public class JobStatus {
      */
     public JobStatus(JobInfo job, int uId, long earliestRunTimeElapsedMillis,
                       long latestRunTimeElapsedMillis) {
-        this(job, uId, true, 0);
+        this(job, uId, 0);
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
@@ -114,7 +110,7 @@ public class JobStatus {
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
-        this(rescheduling.job, rescheduling.getUid(), rescheduling.isPersisted(), backoffAttempt);
+        this(rescheduling.job, rescheduling.getUid(), backoffAttempt);
 
         earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
         latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
@@ -172,6 +168,10 @@ public class JobStatus {
         return job.isRequireDeviceIdle();
     }
 
+    public boolean isPersisted() {
+        return job.isPersisted();
+    }
+
     public long getEarliestRunTime() {
         return earliestRunTimeElapsedMillis;
     }
@@ -180,9 +180,6 @@ public class JobStatus {
         return latestRunTimeElapsedMillis;
     }
 
-    public boolean isPersisted() {
-        return persisted;
-    }
     /**
      * @return Whether or not this job is ready to run, based on its requirements.
      */

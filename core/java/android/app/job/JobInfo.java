@@ -64,7 +64,6 @@ public class JobInfo implements Parcelable {
     }
 
     private final int jobId;
-    // TODO: Change this to use PersistableBundle when that lands in master.
     private final PersistableBundle extras;
     private final ComponentName service;
     private final boolean requireCharging;
@@ -75,6 +74,7 @@ public class JobInfo implements Parcelable {
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
+    private final boolean isPersisted;
     private final long intervalMillis;
     private final long initialBackoffMillis;
     private final int backoffPolicy;
@@ -145,6 +145,13 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * @return Whether or not this job should be persisted across device reboots.
+     */
+    public boolean isPersisted() {
+        return isPersisted;
+    }
+
+    /**
      * Set to the interval between occurrences of this job. This value is <b>not</b> set if the
      * job does not recur periodically.
      */
@@ -197,6 +204,7 @@ public class JobInfo implements Parcelable {
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
+        isPersisted = in.readInt() == 1;
         intervalMillis = in.readLong();
         initialBackoffMillis = in.readLong();
         backoffPolicy = in.readInt();
@@ -214,6 +222,7 @@ public class JobInfo implements Parcelable {
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
+        isPersisted = b.mIsPersisted;
         intervalMillis = b.mIntervalMillis;
         initialBackoffMillis = b.mInitialBackoffMillis;
         backoffPolicy = b.mBackoffPolicy;
@@ -237,6 +246,7 @@ public class JobInfo implements Parcelable {
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
+        out.writeInt(isPersisted ? 1 : 0);
         out.writeLong(intervalMillis);
         out.writeLong(initialBackoffMillis);
         out.writeInt(backoffPolicy);
@@ -265,6 +275,7 @@ public class JobInfo implements Parcelable {
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
         private int mNetworkCapabilities;
+        private boolean mIsPersisted;
         // One-off parameters.
         private long mMinLatencyMillis;
         private long mMaxExecutionDelayMillis;
@@ -342,11 +353,6 @@ public class JobInfo implements Parcelable {
          * Specify that this job should recur with the provided interval, not more than once per
          * period. You have no control over when within this interval this job will be executed,
          * only the guarantee that it will be executed at most once within this interval.
-         * A periodic job will be repeated until the phone is turned off, however it will only be
-         * persisted beyond boot if the client app has declared the
-         * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission. You can schedule
-         * periodic jobs without this permission, they simply will cease to exist after the phone
-         * restarts.
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
          * @param intervalMillis Millisecond interval for which this job will repeat.
@@ -403,6 +409,19 @@ public class JobInfo implements Parcelable {
             mBackoffPolicySet = true;
             mInitialBackoffMillis = initialBackoffMillis;
             mBackoffPolicy = backoffPolicy;
+            return this;
+        }
+
+        /**
+         * Set whether or not to persist this job across device reboots. This will only have an
+         * effect if your application holds the permission
+         * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED}. Otherwise an exception will
+         * be thrown.
+         * @param isPersisted True to indicate that the job will be written to disk and loaded at
+         *                    boot.
+         */
+        public Builder setIsPersisted(boolean isPersisted) {
+            mIsPersisted = isPersisted;
             return this;
         }
 
