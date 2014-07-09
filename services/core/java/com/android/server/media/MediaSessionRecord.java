@@ -682,16 +682,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     || state.getState() == PlaybackState.STATE_FAST_FORWARDING
                     || state.getState() == PlaybackState.STATE_REWINDING) {
                 long updateTime = state.getLastPositionUpdateTime();
+                long currentTime = SystemClock.elapsedRealtime();
                 if (updateTime > 0) {
-                    long position = (long) (state.getPlaybackRate()
-                            * (SystemClock.elapsedRealtime() - updateTime)) + state.getPosition();
+                    long position = (long) (state.getPlaybackSpeed()
+                            * (currentTime - updateTime)) + state.getPosition();
                     if (duration >= 0 && position > duration) {
                         position = duration;
                     } else if (position < 0) {
                         position = 0;
                     }
-                    result = new PlaybackState(state);
-                    result.setState(state.getState(), position, state.getPlaybackRate());
+                    PlaybackState.Builder builder = new PlaybackState.Builder(state);
+                    builder.setState(state.getState(), position, state.getPlaybackSpeed(),
+                            currentTime);
+                    result = builder.build();
                 }
             }
         }

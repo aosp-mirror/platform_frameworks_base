@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.onemedia.playback.LocalRenderer;
@@ -60,9 +61,9 @@ public class OneMediaRouteProvider extends RouteProviderService {
         mRouteId = UUID.randomUUID().toString();
         mRenderer = new LocalRenderer(this, null);
         mRenderListener = new RenderListener();
-        mPlaybackState = new PlaybackState();
-        mPlaybackState.setActions(PlaybackState.ACTION_PAUSE
-                | PlaybackState.ACTION_PLAY);
+        PlaybackState.Builder bob = new PlaybackState.Builder();
+        bob.setActions(PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_PLAY);
+        mPlaybackState = bob.build();
 
         mRenderer.registerListener(mRenderListener);
 
@@ -155,36 +156,41 @@ public class OneMediaRouteProvider extends RouteProviderService {
 
         @Override
         public void onStateChanged(int newState) {
-            if (newState != Renderer.STATE_ERROR) {
-                mPlaybackState.setErrorMessage(null);
-            }
             long position = -1;
             if (mRenderer != null) {
                 position = mRenderer.getSeekPosition();
             }
+            int pbState;
+            float rate = 0;
+            String errorMsg = null;
             switch (newState) {
                 case Renderer.STATE_ENDED:
                 case Renderer.STATE_STOPPED:
-                    mPlaybackState.setState(PlaybackState.STATE_STOPPED, position, 0);
+                    pbState = PlaybackState.STATE_STOPPED;
                     break;
                 case Renderer.STATE_INIT:
                 case Renderer.STATE_PREPARING:
-                    mPlaybackState.setState(PlaybackState.STATE_BUFFERING, position, 0);
+                    pbState = PlaybackState.STATE_BUFFERING;
                     break;
                 case Renderer.STATE_ERROR:
-                    mPlaybackState.setState(PlaybackState.STATE_ERROR, position, 0);
+                    pbState = PlaybackState.STATE_ERROR;
                     break;
                 case Renderer.STATE_PAUSED:
-                    mPlaybackState.setState(PlaybackState.STATE_PAUSED, position, 0);
+                    pbState = PlaybackState.STATE_PAUSED;
                     break;
                 case Renderer.STATE_PLAYING:
-                    mPlaybackState.setState(PlaybackState.STATE_PLAYING, position, 1);
+                    pbState = PlaybackState.STATE_PLAYING;
+                    rate = 1;
                     break;
                 default:
-                    mPlaybackState.setState(PlaybackState.STATE_ERROR, position, 0);
-                    mPlaybackState.setErrorMessage("unkown state");
+                    pbState = PlaybackState.STATE_ERROR;
+                    errorMsg = "unknown state";
                     break;
             }
+            PlaybackState.Builder bob = new PlaybackState.Builder(mPlaybackState);
+            bob.setState(pbState, position, rate, SystemClock.elapsedRealtime());
+            bob.setErrorMessage(errorMsg);
+            mPlaybackState = bob.build();
 
             mControls.sendPlaybackChangeEvent(mPlaybackState.getState());
         }
@@ -195,8 +201,9 @@ public class OneMediaRouteProvider extends RouteProviderService {
 
         @Override
         public void onFocusLost() {
-            Log.d(TAG, "Focus lost, changing state to " + Renderer.STATE_PAUSED);
-            mPlaybackState.setState(PlaybackState.STATE_PAUSED, mRenderer.getSeekPosition(), 0);
+            Log.d(TAG, "Focus lost, pausing");
+            // Don't update state here, we'll get a separate call to
+            // onStateChanged when it pauses
             mRenderer.onPause();
         }
 
