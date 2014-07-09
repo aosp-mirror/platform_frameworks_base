@@ -20,6 +20,7 @@ package android.provider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
@@ -85,6 +86,27 @@ public class CallLog {
          * @hide
          */
         public static final String ALLOW_VOICEMAILS_PARAM_KEY = "allow_voicemails";
+
+        /**
+         * An optional extra used with {@link #CONTENT_TYPE Calls.CONTENT_TYPE} and
+         * {@link Intent#ACTION_VIEW} to specify that the presented list of calls should be
+         * filtered for a particular call type.
+         *
+         * Applications implementing a call log UI should check for this extra, and display a
+         * filtered list of calls based on the specified call type. If not applicable within the
+         * application's UI, it should be silently ignored.
+         *
+         * <p>
+         * The following example brings up the call log, showing only missed calls.
+         * <pre>
+         * Intent intent = new Intent(Intent.ACTION_VIEW);
+         * intent.setType(CallLog.Calls.CONTENT_TYPE);
+         * intent.putExtra(CallLog.Calls.EXTRA_CALL_TYPE_FILTER, CallLog.Calls.MISSED_TYPE);
+         * startActivity(intent);
+         * </pre>
+         * </p>
+         */
+        public static final String EXTRA_CALL_TYPE_FILTER = "extra_call_type_filter";
 
         /**
          * Content uri used to access call log entries, including voicemail records. You must have
