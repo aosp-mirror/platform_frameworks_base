@@ -2375,6 +2375,24 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to switch the specified user to the foreground.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle the user to switch to; null will switch to primary.
+     * @return {@code true} if the switch was successful, {@code false} otherwise.
+     *
+     * @see Intent#ACTION_USER_FOREGROUND
+     */
+    public boolean switchUser(ComponentName admin, UserHandle userHandle) {
+        try {
+            return mService.switchUser(admin, userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not switch user ", re);
+            return false;
+        }
+    }
+
+    /**
      * Called by a profile or device owner to get the application restrictions for a given target
      * application running in the managed profile.
      *
