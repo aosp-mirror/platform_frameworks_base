@@ -49,6 +49,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
                     Log.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);
+                } catch (SecurityException e) {
+                    Slog.e(TAG, "Can't perform master clear/factory reset", e);
                 }
             }
         };
