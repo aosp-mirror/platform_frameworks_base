@@ -7,7 +7,16 @@ page.title=Android Wear
 is substantially different than designing for phones or
 tablets: different strengths and weaknesses, different use cases, different ergonomics.
 To get started, you should understand the overall vision for the Android Wear experience,
-and how apps fit into and enhance this experience.</p>
+and how apps fit into and enhance this experience. We've also provided source files for UI resources
+that you can use in your own apps in the
+<a href="{@docRoot}design/downloads/index.html#Wear">Downloads</a> section.</p>
+
+<a class="notice-designers" style="clear:none" href="{@docRoot}design/downloads/index.html#Wear">
+  <div>
+    <h3>Downloads</h3>
+    <p>UI Toolkit, Flows, and Mocks</p>
+  </div>
+</a>
 
 <p>A new form factor deserves a new UI model. At a high level, the Android Wear UI consists of two
 main spaces centered around the core functions of <strong>Suggest</strong> and
