@@ -187,7 +187,6 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
  */
 bool ShadowTessellator::isClockwise(const Vector2* polygon, int len) {
     if (len < 2 || polygon == NULL) {
-        ALOGW("Invalid polygon %p, length is %d @ isClockwise()", polygon, len);
         return true;
     }
     double sum = 0;
