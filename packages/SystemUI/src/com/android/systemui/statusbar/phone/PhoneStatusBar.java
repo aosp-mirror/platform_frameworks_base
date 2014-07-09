@@ -264,9 +264,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int[] mPositionTmp = new int[2];
     boolean mExpandedVisible;
 
-    // the date view
-    DateView mDateView;
-
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -618,7 +615,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIndicationController = new KeyguardIndicationController(mContext,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                         R.id.keyguard_indication_text));
-        mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
         mDateTimeView = mHeader.findViewById(R.id.datetime);
         if (mDateTimeView != null) {

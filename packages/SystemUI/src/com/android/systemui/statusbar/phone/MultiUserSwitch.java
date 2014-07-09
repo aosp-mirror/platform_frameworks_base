@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.android.systemui.R;
@@ -35,10 +36,9 @@ import com.android.systemui.settings.UserSwitcherHostView;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
- * Image button for the multi user switcher.
+ * Container for image of the multi user switcher (tappable).
  */
-public class MultiUserSwitch extends ImageButton implements View.OnClickListener,
-        UserInfoController.OnUserInfoChangedListener {
+public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
     private ViewGroup mOverlayParent;
 
@@ -77,14 +77,5 @@ public class MultiUserSwitch extends ImageButton implements View.OnClickListener
                     ContactsContract.QuickContact.MODE_LARGE, null);
             getContext().startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         }
-    }
-
-    public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(this);
-    }
-
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture) {
-        setImageDrawable(picture);
     }
 }

@@ -31,24 +31,23 @@
     android:focusable="true"
     >
 
-    <View android:id="@+id/header_spacer"
-        android:layout_height="8dp"
-        android:layout_width="0dp" />
-
     <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
-        android:layout_width="40dp"
+        android:layout_width="@dimen/multi_user_switch_width_collapsed"
         android:layout_height="@dimen/status_bar_header_height"
         android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple_drawable"
-        android:scaleType="centerInside"
-        android:padding="8dp"/>
+        android:background="@drawable/ripple_drawable">
+        <ImageView android:id="@+id/multi_user_avatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:scaleType="centerInside"/>
+    </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
     <ImageButton android:id="@+id/settings_button"
         style="@android:style/Widget.Material.Button.Borderless"
         android:layout_toStartOf="@id/multi_user_switch"
         android:layout_width="48dp"
         android:layout_height="@dimen/status_bar_header_height"
-        android:layout_marginRight="4dp"
         android:background="@drawable/ripple_drawable"
         android:src="@drawable/ic_settings_24dp"
         android:contentDescription="@string/accessibility_desc_quick_settings"/>
@@ -77,26 +76,23 @@
 
     <TextView
         android:id="@+id/header_emergency_calls_only"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/status_bar_header_height"
         android:layout_width="wrap_content"
-        android:layout_below="@id/header_spacer"
         android:layout_alignParentStart="true"
         android:layout_toStartOf="@id/system_icons_super_container"
-        android:paddingTop="12dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:visibility="gone"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
-        android:text="@*android:string/emergency_calls_only" />
+        android:text="@*android:string/emergency_calls_only"
+        android:gravity="center_vertical" />
 
     <RelativeLayout
         android:id="@+id/datetime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:layout_below="@id/header_emergency_calls_only"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
+        android:paddingTop="4dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:background="?android:attr/selectableItemBackground"
@@ -111,12 +107,21 @@
             systemui:amPmStyle="normal"
             />
 
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
             android:layout_below="@id/clock"
+            />
+
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+            android:layout_below="@id/clock"
+            systemui:datePattern="eeeeMMMMd"
             />
     </RelativeLayout>
     <com.android.keyguard.CarrierText
@@ -134,13 +139,6 @@
     <include
         android:id="@+id/qs_detail_header"
         layout="@layout/qs_detail_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        />
-    <include
-        android:id="@+id/brightness_container"
-        layout="@layout/quick_settings_brightness_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
