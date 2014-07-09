@@ -430,9 +430,9 @@ public class AppOpsManager {
      * null to specify it is not affected by any user restriction.
      */
     private static String[] sOpRestrictions = new String[] {
-            null, //COARSE_LOCATION
-            null, //FINE_LOCATION
-            null, //GPS
+            UserManager.DISALLOW_SHARE_LOCATION, //COARSE_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //FINE_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //GPS
             null, //VIBRATE
             null, //READ_CONTACTS
             null, //WRITE_CONTACTS
@@ -440,7 +440,7 @@ public class AppOpsManager {
             null, //WRITE_CALL_LOG
             null, //READ_CALENDAR
             null, //WRITE_CALENDAR
-            null, //WIFI_SCAN
+            UserManager.DISALLOW_SHARE_LOCATION, //WIFI_SCAN
             null, //POST_NOTIFICATION
             null, //NEIGHBORING_CELLS
             null, //CALL_PHONE
@@ -471,8 +471,8 @@ public class AppOpsManager {
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_NOTIFICATION_VOLUME
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_BLUETOOTH_VOLUME
             null, //WAKE_LOCK
-            null, //MONITOR_LOCATION
-            null, //MONITOR_HIGH_POWER_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_LOCATION
+            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_HIGH_POWER_LOCATION
             null, //GET_USAGE_STATS
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
@@ -493,7 +493,7 @@ public class AppOpsManager {
             false, //WRITE_CALL_LOG
             false, //READ_CALENDAR
             false, //WRITE_CALENDAR
-            false, //WIFI_SCAN
+            true, //WIFI_SCAN
             false, //POST_NOTIFICATION
             false, //NEIGHBORING_CELLS
             false, //CALL_PHONE
