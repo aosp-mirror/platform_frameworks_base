@@ -1487,6 +1487,9 @@
     <!-- default window inset isRound property -->
     <bool name="config_windowIsRound">false</bool>
 
+    <!-- default device has recents property -->
+    <bool name="config_hasRecents">true</bool>
+
     <!-- Defines the default set of global actions. Actions may still be disabled or hidden based
          on the current state of the device.
          Each item must be one of the following strings:
