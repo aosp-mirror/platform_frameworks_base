@@ -190,6 +190,7 @@ please see themes_device_defaults.xml.
         <item name="statusBarColor">@color/black</item>
         <item name="navigationBarColor">@color/black</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_action_bar</item>
+        <item name="windowContentTransitions">false</item>
 
         <!-- Define these here; ContextThemeWrappers around themes that define them should
              always clear these values. -->
@@ -821,6 +822,7 @@ please see themes_device_defaults.xml.
         <item name="windowBackground">@color/transparent</item>
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
+        <item name="windowContentTransitions">false</item>
         <item name="textAppearance">@style/TextAppearance.Theme.Dialog.AppError</item>
         <item name="windowCloseOnTouchOutside">false</item>
     </style>
@@ -833,6 +835,7 @@ please see themes_device_defaults.xml.
         <item name="windowAnimationStyle">@style/Animation.RecentApplications</item>
         <item name="textColor">@color/secondary_text_nofocus</item>
         <item name="windowCloseOnTouchOutside">false</item>
+        <item name="windowContentTransitions">false</item>
     </style>
 
     <!-- Theme for a window that looks like a toast. -->
@@ -841,6 +844,7 @@ please see themes_device_defaults.xml.
         <item name="windowAnimationStyle">@style/Animation.Toast</item>
         <item name="backgroundDimEnabled">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
+        <item name="windowContentTransitions">false</item>
     </style>
 
 </resources>
