@@ -372,7 +372,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Computes the initial stack scroll for the stack. */
     int getInitialStackScroll() {
         if (mStack.getTaskCount() > 2) {
-            return mMaxScroll - mStackAlgorithm.mTaskRect.height() / 2;
+            return mMaxScroll - (int) (mStackAlgorithm.mTaskRect.height() * (3f/4f));
         }
         return mMaxScroll;
     }
