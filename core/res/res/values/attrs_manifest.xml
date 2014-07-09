@@ -387,6 +387,17 @@
          with that application.  The activity is re-parented to the task
          with the same {@link android.R.attr#taskAffinity} as it has. -->
     <attr name="allowTaskReparenting" format="boolean" />
+
+    <!-- Declare that code from this application will need to be loaded into other
+         applications' processes. On devices that support multiple instruction sets,
+         this implies the code might be loaded into a process that's using any of the devices
+         supported instruction sets.
+         
+         <p> The system might treat such applications specially, for eg., by
+         extracting the application's native libraries for all supported instruction
+         sets or by compiling the application's dex code for all supported instruction
+         sets. -->
+    <attr name="multiArch" format ="boolean" />
     
     <!-- Specify whether a component is allowed to have multiple instances
          of itself running in different processes.  Use with the activity
@@ -1114,6 +1125,7 @@
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
         <attr name="isGame" />
+        <attr name="multiArch" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be

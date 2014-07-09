@@ -334,22 +334,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
 
     /**
-     * Value for {@link #flags}: set to {@code true} if the application
-     * is permitted to hold privileged permissions.
-     *
+     * Value for {@link #flags}: true if the application is blocked via restrictions and for
+     * most purposes is considered as not installed.
      * {@hide}
      */
-    public static final int FLAG_PRIVILEGED = 1<<30;
-
-    /**
-     * Value for {@link #flags}: Set to true if the application has been
-     * installed using the forward lock option.
-     *
-     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
-     * 
-     * {@hide}
-     */
-    public static final int FLAG_FORWARD_LOCK = 1<<29;
+    public static final int FLAG_BLOCKED = 1<<27;
 
     /**
      * Value for {@link #flags}: set to <code>true</code> if the application
@@ -365,11 +354,35 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_CANT_SAVE_STATE = 1<<28;
 
     /**
-     * Value for {@link #flags}: true if the application is blocked via restrictions and for
-     * most purposes is considered as not installed.
+     * Value for {@link #flags}: Set to true if the application has been
+     * installed using the forward lock option.
+     *
+     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
+     * 
      * {@hide}
      */
-    public static final int FLAG_BLOCKED = 1<<27;
+    public static final int FLAG_FORWARD_LOCK = 1<<29;
+
+    /**
+     * Value for {@link #flags}: set to {@code true} if the application
+     * is permitted to hold privileged permissions.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_PRIVILEGED = 1<<30;
+
+    /**
+     * Value for {@link #flags}: true if code from this application will need to be
+     * loaded into other applications' processes. On devices that support multiple
+     * instruction sets, this implies the code might be loaded into a process that's
+     * using any of the devices supported instruction sets.
+     *
+     * <p> The system might treat such applications specially, for eg., by
+     * extracting the application's native libraries for all supported instruction
+     * sets or by compiling the application's dex code for all supported instruction
+     * sets.
+     */
+    public static final int FLAG_MULTIARCH  = 1 << 31;
 
     /**
      * Flags associated with the application.  Any combination of

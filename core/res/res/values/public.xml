@@ -2507,4 +2507,5 @@
   <!-- A transition that moves views in or out of the scene to or from the left edge when
        a view visibility changes. -->
   <public type="transition" name="slide_left"/>
+  <public type="attr" name="multiArch" />
 </resources>

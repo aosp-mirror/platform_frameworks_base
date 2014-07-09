@@ -852,6 +852,7 @@ package android {
     field public static final int mirrorForRtl = 16843726; // 0x10103ce
     field public static final int mode = 16843134; // 0x101017e
     field public static final int moreIcon = 16843061; // 0x1010135
+    field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
     field public static final int navigationBarColor = 16843860; // 0x1010454
@@ -8204,6 +8205,7 @@ package android.content.pm {
     field public static final int FLAG_IS_GAME = 33554432; // 0x2000000
     field public static final int FLAG_KILL_AFTER_RESTORE = 65536; // 0x10000
     field public static final int FLAG_LARGE_HEAP = 1048576; // 0x100000
+    field public static final int FLAG_MULTIARCH = -2147483648; // 0x80000000
     field public static final int FLAG_PERSISTENT = 8; // 0x8
     field public static final int FLAG_RESIZEABLE_FOR_SCREENS = 4096; // 0x1000
     field public static final int FLAG_RESTORE_ANY_VERSION = 131072; // 0x20000
