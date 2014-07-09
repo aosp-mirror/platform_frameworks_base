@@ -27,14 +27,13 @@ import android.graphics.Matrix;
  * @hide
  */
 public class GhostView extends View {
-    private final Matrix mMatrix = new Matrix();
     private final View mView;
 
-    private GhostView(View view, ViewGroup host) {
+    private GhostView(View view, ViewGroup host, Matrix matrix) {
         super(view.getContext());
         mView = view;
-        setMatrix(host);
         mView.mGhostView = this;
+        mRenderNode.setAnimationMatrix(matrix);
         final ViewGroup parent = (ViewGroup) mView.getParent();
         setLeft(0);
         setTop(0);
@@ -49,15 +48,16 @@ public class GhostView extends View {
     protected void onDraw(Canvas canvas) {
         if (canvas instanceof HardwareCanvas) {
             HardwareCanvas hwCanvas = (HardwareCanvas) canvas;
-            int saveCount = hwCanvas.save(Canvas.MATRIX_SAVE_FLAG);
-            canvas.concat(mMatrix);
             mView.mRecreateDisplayList = true;
             RenderNode renderNode = mView.getDisplayList();
             if (renderNode.isValid()) {
                 hwCanvas.drawRenderNode(renderNode);
             }
-            hwCanvas.restoreToCount(saveCount);
         }
+    }
+
+    public void setMatrix(Matrix matrix) {
+        mRenderNode.setAnimationMatrix(matrix);
     }
 
     @Override
@@ -79,18 +79,21 @@ public class GhostView extends View {
         setGhostedVisibility(View.VISIBLE);
         mView.mGhostView = null;
         final ViewGroup parent = (ViewGroup) mView.getParent();
-        parent.mRecreateDisplayList = true;
-        parent.getDisplayList();
+        if (parent != null) {
+            parent.mRecreateDisplayList = true;
+            parent.getDisplayList();
+        }
     }
 
-    private void setMatrix(ViewGroup host) {
-        host.transformMatrixToLocal(mMatrix);
-        ViewGroup parent = (ViewGroup) mView.getParent();
-        parent.transformMatrixToGlobal(mMatrix);
-        mMatrix.postTranslate(-parent.getScrollX(), -parent.getScrollY());
+    public static void calculateMatrix(View view, ViewGroup host, Matrix matrix) {
+        ViewGroup parent = (ViewGroup) view.getParent();
+        matrix.reset();
+        parent.transformMatrixToGlobal(matrix);
+        matrix.preTranslate(-parent.getScrollX(), -parent.getScrollY());
+        host.transformMatrixToLocal(matrix);
     }
 
-    public static GhostView addGhost(View view, ViewGroup viewGroup) {
+    public static GhostView addGhost(View view, ViewGroup viewGroup, Matrix matrix) {
         if (!(view.getParent() instanceof ViewGroup)) {
             throw new IllegalArgumentException("Ghosted views must be parented by a ViewGroup");
         }
@@ -105,10 +108,18 @@ public class GhostView extends View {
             }
         }
         if (ghostView == null) {
-            ghostView = new GhostView(view, (ViewGroup) overlayViewGroup.mHostView);
+            if (matrix == null) {
+                matrix = new Matrix();
+                calculateMatrix(view, viewGroup, matrix);
+            }
+            ghostView = new GhostView(view, (ViewGroup) overlayViewGroup.mHostView, matrix);
             overlay.add(ghostView);
         }
         return ghostView;
+    }
+
+    public static GhostView addGhost(View view, ViewGroup viewGroup) {
+        return addGhost(view, viewGroup, null);
     }
 
     public static void removeGhost(View view) {
