@@ -29,11 +29,11 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -44,15 +44,14 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.ManifestDigest;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -1112,47 +1111,36 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
-        try {
-            mPM.installPackageEtc(packageURI, observer, null, flags, installerPackageName);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(null, null,
+                null, VerificationParams.NO_UID, null);
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, null);
     }
 
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerificationEtc(packageURI, observer, null, flags,
-                    installerPackageName, verificationURI, manifestDigest, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
+                null, VerificationParams.NO_UID, manifestDigest);
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, encryptionParams);
     }
 
     @Override
     public void installPackageWithVerificationAndEncryption(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null,
-                    flags, installerPackageName, verificationParams, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
+                installerPackageName, verificationParams, encryptionParams);
     }
 
-    // Expanded observer-API versions
     @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName) {
-        try {
-            mPM.installPackageEtc(packageURI, null, observer.getBinder(),
-                    flags, installerPackageName);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(null, null,
+                null, VerificationParams.NO_UID, null);
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null);
     }
 
     @Override
@@ -1160,24 +1148,35 @@ final class ApplicationPackageManager extends PackageManager {
             PackageInstallObserver observer, int flags, String installerPackageName,
             Uri verificationURI, ManifestDigest manifestDigest,
             ContainerEncryptionParams encryptionParams) {
-        try {
-            mPM.installPackageWithVerificationEtc(packageURI, null, observer.getBinder(), flags,
-                    installerPackageName, verificationURI, manifestDigest, encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
+        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
+                null, VerificationParams.NO_UID, manifestDigest);
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
+                encryptionParams);
     }
 
     @Override
     public void installPackageWithVerificationAndEncryption(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
+                encryptionParams);
+    }
+
+    private void installCommon(Uri packageURI,
+            PackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        if (!"file".equals(packageURI.getScheme())) {
+            throw new UnsupportedOperationException("Only file:// URIs are supported");
+        }
+        if (encryptionParams != null) {
+            throw new UnsupportedOperationException("ContainerEncryptionParams not supported");
+        }
+
+        final String originPath = packageURI.getPath();
         try {
-            mPM.installPackageWithVerificationAndEncryptionEtc(packageURI, null,
-                    observer.getBinder(), flags, installerPackageName, verificationParams,
-                    encryptionParams);
-        } catch (RemoteException e) {
-            // Should never happen!
+            mPM.installPackage(originPath, observer.getBinder(), flags, installerPackageName,
+                    verificationParams, null);
+        } catch (RemoteException ignored) {
         }
     }
 
@@ -1521,6 +1520,22 @@ final class ApplicationPackageManager extends PackageManager {
                     new UserHandle(mContext.getUserId()));
         }
         return dr;
+    }
+
+    private static class LegacyPackageInstallObserver extends PackageInstallObserver {
+        private final IPackageInstallObserver mLegacy;
+
+        public LegacyPackageInstallObserver(IPackageInstallObserver legacy) {
+            mLegacy = legacy;
+        }
+
+        @Override
+        public void packageInstalled(String basePackageName, Bundle extras, int returnCode) {
+            try {
+                mLegacy.packageInstalled(basePackageName, returnCode);
+            } catch (RemoteException ignored) {
+            }
+        }
     }
 
     private final ContextImpl mContext;

@@ -189,18 +189,12 @@ interface IPackageManager {
     List<InstrumentationInfo> queryInstrumentation(
             String targetPackage, int flags);
 
-    /**
-     * Install a package.
-     *
-     * @param packageURI The location of the package file to install.
-     * @param observer a callback to use to notify when the package installation in finished.
-     * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
-     * {@link #REPLACE_EXISITING_PACKAGE}
-     * @param installerPackageName Optional package name of the application that is performing the
-     * installation. This identifies which market the package came from.
-     */
-    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags,
-            in String installerPackageName);
+    void installPackage(in String originPath,
+            in IPackageInstallObserver2 observer,
+            int flags,
+            in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride);
 
     void finishPackageInstall(int token);
 
@@ -411,37 +405,6 @@ interface IPackageManager {
 
     boolean setInstallLocation(int loc);
     int getInstallLocation();
-
-    void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
-            int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationAndEncryption(in Uri packageURI,
-            in IPackageInstallObserver observer, int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams);
-
-    /** Expanded observer versions */
-    void installPackageEtc(in Uri packageURI, IPackageInstallObserver observer,
-            IPackageInstallObserver2 observer2, int flags, in String installerPackageName);
-
-    void installPackageWithVerificationEtc(in Uri packageURI,
-            in IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-            int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationAndEncryptionEtc(in Uri packageURI,
-            in IPackageInstallObserver observer, in IPackageInstallObserver2 observer2,
-            int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams);
-
-    void installPackageWithVerificationEncryptionAndAbiOverrideEtc(in Uri packageURI,
-            in IPackageInstallObserver observer, in IPackageInstallObserver2 observer2,
-            int flags, in String installerPackageName,
-            in VerificationParams verificationParams,
-            in ContainerEncryptionParams encryptionParams,
-        in String packageAbiOverride);
 
     int installExistingPackageAsUser(String packageName, int userId);
 
