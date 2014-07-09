@@ -193,6 +193,14 @@ final class RemoteConnectionService implements DeathRecipient {
                 mConnection.setFeatures(features);
             }
         }
+
+        /** ${inheritDoc} */
+        @Override
+        public final void setAudioModeIsVoip(String connectionId, boolean isVoip) {
+            if (isCurrentConnection(connectionId)) {
+                mConnection.setAudioModeIsVoip(isVoip);
+            }
+        }
     };
 
     RemoteConnectionService(ComponentName componentName, IConnectionService connectionService)

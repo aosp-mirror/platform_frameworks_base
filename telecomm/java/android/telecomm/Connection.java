@@ -44,6 +44,7 @@ public abstract class Connection {
         void onConferenceCapableChanged(Connection c, boolean isConferenceCapable);
         void onParentConnectionChanged(Connection c, Connection parent);
         void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
+        void onSetAudioModeIsVoip(Connection c, boolean isVoip);
     }
 
     /** @hide */
@@ -81,6 +82,9 @@ public abstract class Connection {
 
         @Override
         public void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider) {}
+
+        @Override
+        public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {}
     }
 
     public final class State {
@@ -104,6 +108,7 @@ public abstract class Connection {
     private boolean mRequestingRingback = false;
     private boolean mIsConferenceCapable = false;
     private Connection mParentConnection;
+    private boolean mAudioModeIsVoip;
 
     /**
      * Create a new Connection.
@@ -162,6 +167,13 @@ public abstract class Connection {
      */
     public final boolean isConferenceConnection() {
         return !mChildConnections.isEmpty();
+    }
+
+    /**
+     * @return True if the connection's audio mode is VOIP.
+     */
+    public final boolean getAudioModeIsVoip() {
+        return mAudioModeIsVoip;
     }
 
     /**
@@ -404,6 +416,18 @@ public abstract class Connection {
     public final void setSignal(Bundle details) {
         for (Listener l : mListeners) {
             l.onSignalChanged(this, details);
+        }
+    }
+
+    /**
+     * Requests that the framework use VOIP audio mode for this connection.
+     *
+     * @param isVoip True if the audio mode is VOIP.
+     */
+    public final void setAudioModeIsVoip(boolean isVoip) {
+        mAudioModeIsVoip = isVoip;
+        for (Listener l : mListeners) {
+            l.onSetAudioModeIsVoip(this, isVoip);
         }
     }
 

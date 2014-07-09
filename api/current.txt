@@ -27611,6 +27611,7 @@ package android.telecomm {
 
   public abstract class Connection {
     ctor protected Connection();
+    method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
     method public final int getFeatures();
@@ -27635,6 +27636,7 @@ package android.telecomm {
     method protected void onStopDtmfTone();
     method protected void onUnhold();
     method public final void setActive();
+    method public final void setAudioModeIsVoip(boolean);
     method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
     method public final void setDestroyed();
     method public final void setDialing();
@@ -27795,6 +27797,7 @@ package android.telecomm {
     method public void addListener(android.telecomm.RemoteConnection.Listener);
     method public void answer();
     method public void disconnect();
+    method public boolean getAudioModeIsVoip();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
     method public int getFeatures();
@@ -27815,6 +27818,7 @@ package android.telecomm {
     method public abstract void onFeaturesChanged(android.telecomm.RemoteConnection, int);
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
+    method public abstract void onSetAudioModeIsVoip(android.telecomm.RemoteConnection, boolean);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
   }
 
