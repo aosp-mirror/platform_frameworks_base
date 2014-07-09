@@ -299,11 +299,10 @@ public class VectorDrawable extends Drawable {
         return color;
     }
 
-
     @Override
     public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-        final TypedArray a = obtainAttributes(res, theme,  attrs,R.styleable.VectorDrawable);
+        final TypedArray a = obtainAttributes(res, theme, attrs, R.styleable.VectorDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
 
@@ -358,7 +357,7 @@ public class VectorDrawable extends Drawable {
                 if (SHAPE_PATH.equals(tagName)) {
                     final VPath path = new VPath();
                     path.inflate(res, attrs, theme);
-                    currentGroup.add(path);
+                    currentGroup.mChildren.add(path);
                     if (path.getPathName() != null) {
                         pathRenderer.mVGTargetsMap.put(path.getPathName(), path);
                     }
@@ -375,7 +374,7 @@ public class VectorDrawable extends Drawable {
                 } else if (SHAPE_GROUP.equals(tagName)) {
                     VGroup newChildGroup = new VGroup();
                     newChildGroup.inflate(res, attrs, theme);
-                    currentGroup.mChildGroupList.add(newChildGroup);
+                    currentGroup.mChildren.add(newChildGroup);
                     groupStack.push(newChildGroup);
                     if (newChildGroup.getGroupName() != null) {
                         pathRenderer.mVGTargetsMap.put(newChildGroup.getGroupName(),
@@ -424,16 +423,19 @@ public class VectorDrawable extends Drawable {
 
     private void printGroupTree(VGroup currentGroup, int level) {
         String indent = "";
-        for (int i = 0 ; i < level ; i++) {
+        for (int i = 0; i < level; i++) {
             indent += "    ";
         }
         // Print the current node
-        Log.v(LOGTAG, indent + "current group is :" +  currentGroup.getGroupName()
+        Log.v(LOGTAG, indent + "current group is :" + currentGroup.getGroupName()
                 + " rotation is " + currentGroup.mRotate);
-        Log.v(LOGTAG, indent + "matrix is :" +  currentGroup.getLocalMatrix().toString());
-        // Then print all the children
-        for (int i = 0 ; i < currentGroup.mChildGroupList.size(); i++) {
-            printGroupTree(currentGroup.mChildGroupList.get(i), level + 1);
+        Log.v(LOGTAG, indent + "matrix is :" + currentGroup.getLocalMatrix().toString());
+        // Then print all the children groups
+        for (int i = 0; i < currentGroup.mChildren.size(); i++) {
+            Object child = currentGroup.mChildren.get(i);
+            if (child instanceof VGroup) {
+                printGroupTree((VGroup) child, level + 1);
+            }
         }
     }
 
@@ -552,21 +554,21 @@ public class VectorDrawable extends Drawable {
         private boolean recursiveCanApplyTheme(VGroup currentGroup) {
             // We can do a tree traverse here, if there is one path return true,
             // then we return true for the whole tree.
-            final ArrayList<VPath> paths = currentGroup.mPathList;
-            for (int j = paths.size() - 1; j >= 0; j--) {
-                final VPath path = paths.get(j);
-                if (path.canApplyTheme()) {
-                    return true;
-                }
-            }
+            final ArrayList<Object> children = currentGroup.mChildren;
 
-            final ArrayList<VGroup> childGroups = currentGroup.mChildGroupList;
-
-            for (int i = 0; i < childGroups.size(); i++) {
-                VGroup childGroup = childGroups.get(i);
-                if (childGroup.canApplyTheme()
-                        || recursiveCanApplyTheme(childGroup)) {
-                    return true;
+            for (int i = 0; i < children.size(); i++) {
+                Object child = children.get(i);
+                if (child instanceof VGroup) {
+                    VGroup childGroup = (VGroup) child;
+                    if (childGroup.canApplyTheme()
+                            || recursiveCanApplyTheme(childGroup)) {
+                        return true;
+                    }
+                } else if (child instanceof VPath) {
+                    VPath childPath = (VPath) child;
+                    if (childPath.canApplyTheme()) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -580,24 +582,22 @@ public class VectorDrawable extends Drawable {
         private void recursiveApplyTheme(VGroup currentGroup, Theme t) {
             // We can do a tree traverse here, apply theme to all paths which
             // can apply theme.
-            final ArrayList<VPath> paths = currentGroup.mPathList;
-            for (int j = paths.size() - 1; j >= 0; j--) {
-                final VPath path = paths.get(j);
-                if (path.canApplyTheme()) {
-                    path.applyTheme(t);
+            final ArrayList<Object> children = currentGroup.mChildren;
+            for (int i = 0; i < children.size(); i++) {
+                Object child = children.get(i);
+                if (child instanceof VGroup) {
+                    VGroup childGroup = (VGroup) child;
+                    if (childGroup.canApplyTheme()) {
+                        childGroup.applyTheme(t);
+                    }
+                    recursiveApplyTheme(childGroup, t);
+                } else if (child instanceof VPath) {
+                    VPath childPath = (VPath) child;
+                    if (childPath.canApplyTheme()) {
+                        childPath.applyTheme(t);
+                    }
                 }
             }
-
-            final ArrayList<VGroup> childGroups = currentGroup.mChildGroupList;
-
-            for (int i = 0; i < childGroups.size(); i++) {
-                VGroup childGroup = childGroups.get(i);
-                if (childGroup.canApplyTheme()) {
-                    childGroup.applyTheme(t);
-                }
-                recursiveApplyTheme(childGroup, t);
-            }
-
         }
 
         public void setColorFilter(ColorFilter colorFilter) {
@@ -624,11 +624,18 @@ public class VectorDrawable extends Drawable {
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
             float stackedAlpha = currentAlpha * currentGroup.mGroupAlpha;
-            drawPath(currentGroup, stackedAlpha, canvas, w, h);
-            // Draw the group tree in post order.
-            for (int i = 0 ; i < currentGroup.mChildGroupList.size(); i++) {
-                drawGroupTree(currentGroup.mChildGroupList.get(i),
-                        currentGroup.mStackedMatrix, stackedAlpha, canvas, w, h);
+
+            // Draw the group tree in the same order as the XML file.
+            for (int i = 0; i < currentGroup.mChildren.size(); i++) {
+                Object child = currentGroup.mChildren.get(i);
+                if (child instanceof VGroup) {
+                    VGroup childGroup = (VGroup) child;
+                    drawGroupTree(childGroup, currentGroup.mStackedMatrix,
+                            stackedAlpha, canvas, w, h);
+                } else if (child instanceof VPath) {
+                    VPath childPath = (VPath) child;
+                    drawPath(currentGroup, childPath, stackedAlpha, canvas, w, h);
+                }
             }
         }
 
@@ -637,7 +644,8 @@ public class VectorDrawable extends Drawable {
             drawGroupTree(mRootGroup, IDENTITY_MATRIX, ((float) mRootAlpha) / 0xFF, canvas, w, h);
         }
 
-        private void drawPath(VGroup vGroup, float stackedAlpha, Canvas canvas, int w, int h) {
+        private void drawPath(VGroup vGroup, VPath vPath, float stackedAlpha,
+                Canvas canvas, int w, int h) {
             final float scale = Math.min(h / mViewportHeight, w / mViewportWidth);
 
             mFinalPathMatrix.set(vGroup.mStackedMatrix);
@@ -645,75 +653,71 @@ public class VectorDrawable extends Drawable {
             mFinalPathMatrix.postTranslate(
                     w / 2f - mViewportWidth / 2f, h / 2f - mViewportHeight / 2f);
 
-            ArrayList<VPath> paths = vGroup.getPaths();
-            for (int i = 0; i < paths.size(); i++) {
-                VPath vPath = paths.get(i);
-                vPath.toPath(mPath);
-                final Path path = mPath;
+            vPath.toPath(mPath);
+            final Path path = mPath;
 
-                if (vPath.mTrimPathStart != 0.0f || vPath.mTrimPathEnd != 1.0f) {
-                    float start = (vPath.mTrimPathStart + vPath.mTrimPathOffset) % 1.0f;
-                    float end = (vPath.mTrimPathEnd + vPath.mTrimPathOffset) % 1.0f;
+            if (vPath.mTrimPathStart != 0.0f || vPath.mTrimPathEnd != 1.0f) {
+                float start = (vPath.mTrimPathStart + vPath.mTrimPathOffset) % 1.0f;
+                float end = (vPath.mTrimPathEnd + vPath.mTrimPathOffset) % 1.0f;
 
-                    if (mPathMeasure == null) {
-                        mPathMeasure = new PathMeasure();
+                if (mPathMeasure == null) {
+                    mPathMeasure = new PathMeasure();
+                }
+                mPathMeasure.setPath(mPath, false);
+
+                float len = mPathMeasure.getLength();
+                start = start * len;
+                end = end * len;
+                path.reset();
+                if (start > end) {
+                    mPathMeasure.getSegment(start, len, path, true);
+                    mPathMeasure.getSegment(0f, end, path, true);
+                } else {
+                    mPathMeasure.getSegment(start, end, path, true);
+                }
+                path.rLineTo(0, 0); // fix bug in measure
+            }
+
+            mRenderPath.reset();
+
+            mRenderPath.addPath(path, mFinalPathMatrix);
+
+            if (vPath.mClip) {
+                canvas.clipPath(mRenderPath, Region.Op.REPLACE);
+            } else {
+                if (vPath.mFillColor != 0) {
+                    if (mFillPaint == null) {
+                        mFillPaint = new Paint();
+                        mFillPaint.setColorFilter(mColorFilter);
+                        mFillPaint.setStyle(Paint.Style.FILL);
+                        mFillPaint.setAntiAlias(true);
                     }
-                    mPathMeasure.setPath(mPath, false);
-
-                    float len = mPathMeasure.getLength();
-                    start = start * len;
-                    end = end * len;
-                    path.reset();
-                    if (start > end) {
-                        mPathMeasure.getSegment(start, len, path, true);
-                        mPathMeasure.getSegment(0f, end, path, true);
-                    } else {
-                        mPathMeasure.getSegment(start, end, path, true);
-                    }
-                    path.rLineTo(0, 0); // fix bug in measure
+                    mFillPaint.setColor(applyAlpha(vPath.mFillColor, stackedAlpha));
+                    canvas.drawPath(mRenderPath, mFillPaint);
                 }
 
-                mRenderPath.reset();
-
-                mRenderPath.addPath(path, mFinalPathMatrix);
-
-                if (vPath.mClip) {
-                    canvas.clipPath(mRenderPath, Region.Op.REPLACE);
-                } else {
-                   if (vPath.mFillColor != 0) {
-                        if (mFillPaint == null) {
-                            mFillPaint = new Paint();
-                            mFillPaint.setColorFilter(mColorFilter);
-                            mFillPaint.setStyle(Paint.Style.FILL);
-                            mFillPaint.setAntiAlias(true);
-                        }
-                        mFillPaint.setColor(applyAlpha(vPath.mFillColor, stackedAlpha));
-                        canvas.drawPath(mRenderPath, mFillPaint);
+                if (vPath.mStrokeColor != 0) {
+                    if (mStrokePaint == null) {
+                        mStrokePaint = new Paint();
+                        mStrokePaint.setColorFilter(mColorFilter);
+                        mStrokePaint.setStyle(Paint.Style.STROKE);
+                        mStrokePaint.setAntiAlias(true);
                     }
 
-                    if (vPath.mStrokeColor != 0) {
-                        if (mStrokePaint == null) {
-                            mStrokePaint = new Paint();
-                            mStrokePaint.setColorFilter(mColorFilter);
-                            mStrokePaint.setStyle(Paint.Style.STROKE);
-                            mStrokePaint.setAntiAlias(true);
-                        }
-
-                        final Paint strokePaint = mStrokePaint;
-                        if (vPath.mStrokeLineJoin != null) {
-                            strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
-                        }
-
-                        if (vPath.mStrokeLineCap != null) {
-                            strokePaint.setStrokeCap(vPath.mStrokeLineCap);
-                        }
-
-                        strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
-
-                        strokePaint.setColor(applyAlpha(vPath.mStrokeColor, stackedAlpha));
-                        strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
-                        canvas.drawPath(mRenderPath, strokePaint);
+                    final Paint strokePaint = mStrokePaint;
+                    if (vPath.mStrokeLineJoin != null) {
+                        strokePaint.setStrokeJoin(vPath.mStrokeLineJoin);
                     }
+
+                    if (vPath.mStrokeLineCap != null) {
+                        strokePaint.setStrokeCap(vPath.mStrokeLineCap);
+                    }
+
+                    strokePaint.setStrokeMiter(vPath.mStrokeMiterlimit * scale);
+
+                    strokePaint.setColor(applyAlpha(vPath.mStrokeColor, stackedAlpha));
+                    strokePaint.setStrokeWidth(vPath.mStrokeWidth * scale);
+                    canvas.drawPath(mRenderPath, strokePaint);
                 }
             }
         }
@@ -742,7 +746,7 @@ public class VectorDrawable extends Drawable {
         }
 
         private void parseSize(Resources r, AttributeSet attrs)
-                throws XmlPullParserException  {
+                throws XmlPullParserException {
             final TypedArray a = r.obtainAttributes(attrs, R.styleable.VectorDrawableSize);
 
             // Account for any configuration changes.
@@ -771,8 +775,7 @@ public class VectorDrawable extends Drawable {
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
-        private final ArrayList<VPath> mPathList = new ArrayList<VPath>();
-        private final ArrayList<VGroup> mChildGroupList = new ArrayList<VGroup>();
+        final ArrayList<Object> mChildren = new ArrayList<Object>();
 
         private float mRotate = 0;
         private float mPivotX = 0;
@@ -808,18 +811,20 @@ public class VectorDrawable extends Drawable {
 
             mLocalMatrix.set(copy.mLocalMatrix);
 
-            for (int i = 0; i < copy.mPathList.size(); i ++) {
-                VPath copyPath = copy.mPathList.get(i);
-                VPath newPath = new VPath(copyPath);
-                mPathList.add(newPath);
-                if (newPath.mPathName != null) {
-                    targetsMap.put(copyPath.mPathName, newPath);
+            final ArrayList<Object> children = copy.mChildren;
+            for (int i = 0; i < children.size(); i++) {
+                Object copyChild = children.get(i);
+                if (copyChild instanceof VGroup) {
+                    VGroup copyGroup = (VGroup) copyChild;
+                    mChildren.add(new VGroup(copyGroup, targetsMap));
+                } else if (copyChild instanceof VPath) {
+                    VPath copyPath = (VPath) copyChild;
+                    VPath newPath = new VPath(copyPath);
+                    mChildren.add(newPath);
+                    if (newPath.mPathName != null) {
+                        targetsMap.put(newPath.mPathName, newPath);
+                    }
                 }
-            }
-
-            for (int i = 0; i < copy.mChildGroupList.size(); i ++) {
-                VGroup currentGroup = copy.mChildGroupList.get(i);
-                mChildGroupList.add(new VGroup(currentGroup, targetsMap));
             }
         }
 
@@ -922,10 +927,6 @@ public class VectorDrawable extends Drawable {
             return mLocalMatrix;
         }
 
-        public void add(VPath path) {
-            mPathList.add(path);
-         }
-
         public boolean canApplyTheme() {
             return mThemeAttrs != null;
         }
@@ -980,15 +981,6 @@ public class VectorDrawable extends Drawable {
             mLocalMatrix.postRotate(mRotate, 0, 0);
             mLocalMatrix.postTranslate(mTranslateX + mPivotX, mTranslateY + mPivotY);
         }
-
-        /**
-         * Must return in order of adding
-         * @return ordered list of paths
-         */
-        public ArrayList<VPath> getPaths() {
-            return mPathList;
-        }
-
     }
 
     private static class VPath {
@@ -1012,7 +1004,7 @@ public class VectorDrawable extends Drawable {
         float mStrokeMiterlimit = 4;
 
         private PathParser.PathDataNode[] mNodes = null;
-        private String mPathName;
+        String mPathName;
         private int mChangingConfigurations;
 
         public VPath() {
