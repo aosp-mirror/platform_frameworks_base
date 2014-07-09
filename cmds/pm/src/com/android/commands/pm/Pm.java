@@ -21,7 +21,6 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -48,23 +47,18 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.internal.content.PackageHelper;
+import com.android.internal.util.ArrayUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.android.internal.content.PackageHelper;
-import com.android.internal.util.ArrayUtils;
 
 public final class Pm {
     IPackageManager mPm;
@@ -816,13 +810,6 @@ public final class Pm {
 
         String opt;
 
-        String algo = null;
-        byte[] iv = null;
-        byte[] key = null;
-
-        String macAlgo = null;
-        byte[] macKey = null;
-        byte[] tag = null;
         String originatingUriString = null;
         String referrer = null;
         String abi = null;
@@ -848,42 +835,6 @@ public final class Pm {
                 installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
-            } else if (opt.equals("--algo")) {
-                algo = nextOptionData();
-                if (algo == null) {
-                    System.err.println("Error: must supply argument for --algo");
-                    return;
-                }
-            } else if (opt.equals("--iv")) {
-                iv = hexToBytes(nextOptionData());
-                if (iv == null) {
-                    System.err.println("Error: must supply argument for --iv");
-                    return;
-                }
-            } else if (opt.equals("--key")) {
-                key = hexToBytes(nextOptionData());
-                if (key == null) {
-                    System.err.println("Error: must supply argument for --key");
-                    return;
-                }
-            } else if (opt.equals("--macalgo")) {
-                macAlgo = nextOptionData();
-                if (macAlgo == null) {
-                    System.err.println("Error: must supply argument for --macalgo");
-                    return;
-                }
-            } else if (opt.equals("--mackey")) {
-                macKey = hexToBytes(nextOptionData());
-                if (macKey == null) {
-                    System.err.println("Error: must supply argument for --mackey");
-                    return;
-                }
-            } else if (opt.equals("--tag")) {
-                tag = hexToBytes(nextOptionData());
-                if (tag == null) {
-                    System.err.println("Error: must supply argument for --tag");
-                    return;
-                }
             } else if (opt.equals("--originating-uri")) {
                 originatingUriString = nextOptionData();
                 if (originatingUriString == null) {
@@ -924,43 +875,6 @@ public final class Pm {
             }
         }
 
-        final ContainerEncryptionParams encryptionParams;
-        if (algo != null || iv != null || key != null || macAlgo != null || macKey != null
-                || tag != null) {
-            if (algo == null || iv == null || key == null) {
-                System.err.println("Error: all of --algo, --iv, and --key must be specified");
-                return;
-            }
-
-            if (macAlgo != null || macKey != null || tag != null) {
-                if (macAlgo == null || macKey == null || tag == null) {
-                    System.err.println("Error: all of --macalgo, --mackey, and --tag must "
-                            + "be specified");
-                    return;
-                }
-            }
-
-            try {
-                final SecretKey encKey = new SecretKeySpec(key, "RAW");
-
-                final SecretKey macSecretKey;
-                if (macKey == null || macKey.length == 0) {
-                    macSecretKey = null;
-                } else {
-                    macSecretKey = new SecretKeySpec(macKey, "RAW");
-                }
-
-                encryptionParams = new ContainerEncryptionParams(algo, new IvParameterSpec(iv),
-                        encKey, macAlgo, null, macSecretKey, tag, -1, -1, -1);
-            } catch (InvalidAlgorithmParameterException e) {
-                e.printStackTrace();
-                return;
-            }
-        } else {
-            encryptionParams = null;
-        }
-
-        final Uri apkURI;
         final Uri verificationURI;
         final Uri originatingURI;
         final Uri referrerURI;
@@ -980,9 +894,7 @@ public final class Pm {
         // Populate apkURI, must be present
         final String apkFilePath = nextArg();
         System.err.println("\tpkg: " + apkFilePath);
-        if (apkFilePath != null) {
-            apkURI = Uri.fromFile(new File(apkFilePath));
-        } else {
+        if (apkFilePath == null) {
             System.err.println("Error: no package specified");
             return;
         }
@@ -1001,9 +913,8 @@ public final class Pm {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackageWithVerificationEncryptionAndAbiOverrideEtc(apkURI, null,
-                    obs, installFlags, installerPackageName, verificationParams,
-                    encryptionParams, abi);
+            mPm.installPackage(apkFilePath, obs, installFlags, installerPackageName,
+                    verificationParams, abi);
 
             synchronized (obs) {
                 while (!obs.finished) {

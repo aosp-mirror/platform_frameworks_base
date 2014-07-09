@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
+import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
@@ -87,7 +88,6 @@ import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -1093,15 +1093,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         if (args.observer != null) {
                             try {
-                                args.observer.packageInstalled(res.name, res.returnCode);
-                            } catch (RemoteException e) {
-                                Slog.i(TAG, "Observer no longer exists.");
-                            }
-                        }
-                        if (args.observer2 != null) {
-                            try {
                                 Bundle extras = extrasForInstallResult(res);
-                                args.observer2.packageInstalled(res.name, extras, res.returnCode);
+                                args.observer.packageInstalled(res.name, extras, res.returnCode);
                             } catch (RemoteException e) {
                                 Slog.i(TAG, "Observer no longer exists.");
                             }
@@ -7617,104 +7610,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final boolean mIsPrivileged;
     }
 
-    /*
-     * The old-style observer methods all just trampoline to the newer signature with
-     * expanded install observer API.  The older API continues to work but does not
-     * supply the additional details of the Observer2 API.
-     */
-
-    /* Called when a downloaded package installation has been confirmed by the user */
-    public void installPackage(
-            final Uri packageURI, final IPackageInstallObserver observer, final int flags) {
-        installPackageEtc(packageURI, observer, null, flags, null);
-    }
-
-    /* Called when a downloaded package installation has been confirmed by the user */
     @Override
-    public void installPackage(
-            final Uri packageURI, final IPackageInstallObserver observer, final int flags,
-            final String installerPackageName) {
-        installPackageWithVerificationEtc(packageURI, observer, null, flags,
-                installerPackageName, null, null, null);
-    }
-
-    @Override
-    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-        VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
-                VerificationParams.NO_UID, manifestDigest);
-        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null, flags,
-                installerPackageName, verificationParams, encryptionParams);
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, null, flags,
-                installerPackageName, verificationParams, encryptionParams);
-    }
-
-    /*
-     * And here are the "live" versions that take both observer arguments
-     */
-    public void installPackageEtc(
-            final Uri packageURI, final IPackageInstallObserver observer,
-            IPackageInstallObserver2 observer2, final int flags) {
-        installPackageEtc(packageURI, observer, observer2, flags, null);
-    }
-
-    public void installPackageEtc(
-            final Uri packageURI, final IPackageInstallObserver observer,
-            final IPackageInstallObserver2 observer2, final int flags,
-            final String installerPackageName) {
-        installPackageWithVerificationEtc(packageURI, observer, observer2, flags,
-                installerPackageName, null, null, null);
-    }
-
-    @Override
-    public void installPackageWithVerificationEtc(Uri packageURI, IPackageInstallObserver observer,
-            IPackageInstallObserver2 observer2,
-            int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-        VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
-                VerificationParams.NO_UID, manifestDigest);
-        installPackageWithVerificationAndEncryptionEtc(packageURI, observer, observer2, flags,
-                installerPackageName, verificationParams, encryptionParams);
-    }
-
-    /*
-     * All of the installPackage...*() methods redirect to this one for the master implementation
-     */
-    public void installPackageWithVerificationAndEncryptionEtc(Uri packageURI,
-            IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-            int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        if (observer == null && observer2 == null) {
-            throw new IllegalArgumentException("No install observer supplied");
-        }
-        installPackageWithVerificationEncryptionAndAbiOverrideEtc(packageURI, observer, observer2,
-                flags, installerPackageName, verificationParams, encryptionParams, null);
-    }
-
-    @Override
-    public void installPackageWithVerificationEncryptionAndAbiOverrideEtc(Uri packageURI,
-            IPackageInstallObserver observer, IPackageInstallObserver2 observer2,
-            int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
+    public void installPackage(String originPath, IPackageInstallObserver2 observer, int flags,
+            String installerPackageName, VerificationParams verificationParams,
             String packageAbiOverride) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 null);
 
+        final File originFile = new File(originPath);
         final int uid = Binder.getCallingUid();
         if (isUserRestricted(UserHandle.getUserId(uid), UserManager.DISALLOW_INSTALL_APPS)) {
             try {
                 if (observer != null) {
-                    observer.packageInstalled("", PackageManager.INSTALL_FAILED_USER_RESTRICTED);
-                }
-                if (observer2 != null) {
-                    observer2.packageInstalled("", null, PackageManager.INSTALL_FAILED_USER_RESTRICTED);
+                    observer.packageInstalled("", null, INSTALL_FAILED_USER_RESTRICTED);
                 }
             } catch (RemoteException re) {
             }
@@ -7729,7 +7637,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final int filteredFlags;
-
         if (uid == Process.SHELL_UID || uid == 0) {
             if (DEBUG_INSTALL) {
                 Slog.v(TAG, "Install from ADB");
@@ -7741,18 +7648,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         verificationParams.setInstallerUid(uid);
 
-        if (!"file".equals(packageURI.getScheme())) {
-            throw new UnsupportedOperationException("Only file:// URIs are supported");
-        }
-        final File fromFile = new File(packageURI.getPath());
-
-        if (encryptionParams != null) {
-            throw new UnsupportedOperationException("ContainerEncryptionParams not supported");
-        }
-
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(fromFile, observer, observer2, filteredFlags,
-                installerPackageName, verificationParams, user, packageAbiOverride);
+        msg.obj = new InstallParams(originFile, observer, filteredFlags, installerPackageName,
+                verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -8469,8 +8367,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         boolean originTrusted;
 
-        final IPackageInstallObserver observer;
-        final IPackageInstallObserver2 observer2;
+        final IPackageInstallObserver2 observer;
         int flags;
         final String installerPackageName;
         final VerificationParams verificationParams;
@@ -8479,14 +8376,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageAbiOverride;
         final String packageInstructionSetOverride;
 
-        InstallParams(File originFile, IPackageInstallObserver observer,
-                IPackageInstallObserver2 observer2, int flags, String installerPackageName,
-                VerificationParams verificationParams, UserHandle user, String packageAbiOverride) {
+        InstallParams(File originFile, IPackageInstallObserver2 observer, int flags,
+                String installerPackageName, VerificationParams verificationParams, UserHandle user,
+                String packageAbiOverride) {
             super(user);
             this.originFile = Preconditions.checkNotNull(originFile);
             this.originTrusted = false;
             this.observer = observer;
-            this.observer2 = observer2;
             this.flags = flags;
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
@@ -9018,8 +8914,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // TODO: define inherit location
 
-        final IPackageInstallObserver observer;
-        final IPackageInstallObserver2 observer2;
+        final IPackageInstallObserver2 observer;
         // Always refers to PackageManager flags only
         final int flags;
         final String installerPackageName;
@@ -9028,15 +8923,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String instructionSet;
         final String abiOverride;
 
-        InstallArgs(File originFile, boolean originTrusted, IPackageInstallObserver observer,
-                IPackageInstallObserver2 observer2, int flags, String installerPackageName,
-                ManifestDigest manifestDigest, UserHandle user, String instructionSet,
-                String abiOverride) {
+        InstallArgs(File originFile, boolean originTrusted, IPackageInstallObserver2 observer,
+                int flags, String installerPackageName, ManifestDigest manifestDigest,
+                UserHandle user, String instructionSet, String abiOverride) {
             this.originFile = originFile;
             this.originTrusted = originTrusted;
             this.flags = flags;
             this.observer = observer;
-            this.observer2 = observer2;
             this.installerPackageName = installerPackageName;
             this.manifestDigest = manifestDigest;
             this.user = user;
@@ -9113,10 +9006,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install */
         FileInstallArgs(InstallParams params) {
-            super(params.originFile, params.originTrusted, params.observer, params.observer2,
-                    params.flags, params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), params.packageInstructionSetOverride,
-                    params.packageAbiOverride);
+            super(params.originFile, params.originTrusted, params.observer, params.flags,
+                    params.installerPackageName, params.getManifestDigest(), params.getUser(),
+                    params.packageInstructionSetOverride, params.packageAbiOverride);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
             }
@@ -9125,7 +9017,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String nativeLibraryPath,
                 String instructionSet) {
-            super(null, false, null, null, 0, null, null, null, instructionSet, null);
+            super(null, false, null, 0, null, null, null, instructionSet, null);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
             this.nativeLibraryFile = (nativeLibraryPath != null) ? new File(nativeLibraryPath) : null;
@@ -9133,7 +9025,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install from existing */
         FileInstallArgs(File originFile, String instructionSet) {
-            super(originFile, true, null, null, 0, null, null, null, instructionSet, null);
+            super(originFile, true, null, 0, null, null, null, instructionSet, null);
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
@@ -9393,16 +9285,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install */
         AsecInstallArgs(InstallParams params) {
-            super(params.originFile, params.originTrusted, params.observer, params.observer2,
-                    params.flags, params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), params.packageInstructionSetOverride,
-                    params.packageAbiOverride);
+            super(params.originFile, params.originTrusted, params.observer, params.flags,
+                    params.installerPackageName, params.getManifestDigest(), params.getUser(),
+                    params.packageInstructionSetOverride, params.packageAbiOverride);
         }
 
         /** Existing install */
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
                 String instructionSet, boolean isExternal, boolean isForwardLocked) {
-            super(null, false, null, null, (isExternal ? INSTALL_EXTERNAL : 0)
+            super(null, false, null, (isExternal ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSet, null);
             // Extract cid from fullCodePath
@@ -9414,7 +9305,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         AsecInstallArgs(String cid, String instructionSet, boolean isForwardLocked) {
-            super(null, false, null, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
+            super(null, false, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSet, null);
             this.cid = cid;
@@ -9424,7 +9315,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install from existing */
         AsecInstallArgs(File originPackageFile, String cid, String instructionSet,
                 boolean isExternal, boolean isForwardLocked) {
-            super(originPackageFile, true, null, null, (isExternal ? INSTALL_EXTERNAL : 0)
+            super(originPackageFile, true, null, (isExternal ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSet, null);
             this.cid = cid;
