@@ -86,9 +86,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /** A write operation exceeds the maximum length of the attribute */
     public static final int GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
 
-    /** A remote device connection is congested.
-     * @hide
-     */
+    /** A remote device connection is congested. */
     public static final int GATT_CONNECTION_CONGESTED = 0x8f;
 
     /** A GATT operation failed, errors other than the above */
@@ -1263,7 +1261,6 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return true, if the new MTU value has been requested successfully
-     * @hide
      */
     public boolean configureMTU(int mtu) {
         if (DBG) Log.d(TAG, "configureMTU() - device: " + mDevice.getAddress()
