@@ -900,8 +900,8 @@ status_t updatePreProcessedCache(Bundle* bundle)
     return 0;
 }
 
-status_t generateAndroidManifestForSplit(const String16& package, const sp<ApkSplit>& split,
-        sp<AaptFile>& outFile) {
+status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& assets,
+        const sp<ApkSplit>& split, sp<AaptFile>& outFile, ResourceTable* table) {
     const String8 filename("AndroidManifest.xml");
     const String16 androidPrefix("android");
     const String16 androidNSUri("http://schemas.android.com/apk/res/android");
@@ -910,8 +910,19 @@ status_t generateAndroidManifestForSplit(const String16& package, const sp<ApkSp
     // Build the <manifest> tag
     sp<XMLNode> manifest = XMLNode::newElement(filename, String16(), String16("manifest"));
 
-    // Add the 'package' attribute which is set to the original package name.
-    manifest->addAttribute(String16(), String16("package"), package);
+    // Add the 'package' attribute which is set to the package name.
+    const char* packageName = assets->getPackage();
+    const char* manifestPackageNameOverride = bundle->getManifestPackageNameOverride();
+    if (manifestPackageNameOverride != NULL) {
+        packageName = manifestPackageNameOverride;
+    }
+    manifest->addAttribute(String16(), String16("package"), String16(packageName));
+
+    // Add the 'versionCode' attribute which is set to the original version code.
+    if (!addTagAttribute(manifest, RESOURCES_ANDROID_NAMESPACE, "versionCode",
+            bundle->getVersionCode(), true, true)) {
+        return UNKNOWN_ERROR;
+    }
 
     // Add the 'split' attribute which describes the configurations included.
     String8 splitName("config_");
@@ -923,8 +934,8 @@ status_t generateAndroidManifestForSplit(const String16& package, const sp<ApkSp
     manifest->addChild(app);
     root->addChild(manifest);
 
-    status_t err = root->flatten(outFile, true, true);
-    if (err != NO_ERROR) {
+    int err = compileXmlFile(assets, root, outFile, table);
+    if (err < NO_ERROR) {
         return err;
     }
     outFile->setCompressionMethod(ZipEntry::kCompressDeflated);
@@ -1371,8 +1382,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             } else {
                 sp<AaptFile> generatedManifest = new AaptFile(String8("AndroidManifest.xml"),
                         AaptGroupEntry(), String8());
-                err = generateAndroidManifestForSplit(String16(assets->getPackage()), split,
-                        generatedManifest);
+                err = generateAndroidManifestForSplit(bundle, assets, split,
+                        generatedManifest, &table);
                 if (err != NO_ERROR) {
                     fprintf(stderr, "Failed to generate AndroidManifest.xml for split '%s'\n",
                             split->getPrintableName().string());
