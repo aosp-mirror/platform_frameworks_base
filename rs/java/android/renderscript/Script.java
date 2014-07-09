@@ -182,6 +182,54 @@ public class Script extends BaseObj {
         mRS.nScriptForEachClipped(getID(mRS), slot, in_id, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
     }
 
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     * @hide
+     */
+    protected void forEach(int slot, Allocation[] ains, Allocation aout, FieldPacker v) {
+        forEach(slot, ains, aout, v, new LaunchOptions());
+    }
+
+    /**
+     * Only intended for use by generated reflected code.
+     *
+     * @hide
+     */
+    protected void forEach(int slot, Allocation[] ains, Allocation aout, FieldPacker v, LaunchOptions sc) {
+        mRS.validate();
+
+        for (Allocation ain : ains) {
+          mRS.validateObject(ain);
+        }
+
+        mRS.validateObject(aout);
+        if (ains == null && aout == null) {
+            throw new RSIllegalArgumentException(
+                "At least one of ain or aout is required to be non-null.");
+        }
+
+        if (sc == null) {
+            forEach(slot, ains, aout, v);
+            return;
+        }
+
+        long[] in_ids = new long[ains.length];
+        for (int index = 0; index < ains.length; ++index) {
+            in_ids[index] = ains[index].getID(mRS);
+        }
+
+        long out_id = 0;
+        if (aout != null) {
+            out_id = aout.getID(mRS);
+        }
+        byte[] params = null;
+        if (v != null) {
+            params = v.getData();
+        }
+        mRS.nScriptForEachMultiClipped(getID(mRS), slot, in_ids, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
+    }
+
     Script(long id, RenderScript rs) {
         super(id, rs);
     }
@@ -477,4 +525,3 @@ public class Script extends BaseObj {
 
     }
 }
-
