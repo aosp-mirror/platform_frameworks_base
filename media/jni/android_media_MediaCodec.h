@@ -44,6 +44,8 @@ struct JMediaCodec : public AHandler {
     void registerSelf();
     void release();
 
+    status_t setCallback(jobject cb);
+
     status_t configure(
             const sp<AMessage> &format,
             const sp<IGraphicBufferProducer> &bufferProducer,
@@ -99,12 +101,11 @@ protected:
     virtual ~JMediaCodec();
 
     virtual void onMessageReceived(const sp<AMessage> &msg);
+    void handleCallback(const sp<AMessage> &msg);
 
 private:
     enum {
-        kWhatActivityNotify,
-        kWhatRequestActivityNotifications,
-        kWhatStopActivityNotifications,
+        kWhatCallbackNotify,
     };
 
     jclass mClass;
@@ -114,11 +115,7 @@ private:
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
 
-    sp<AMessage> mActivityNotification;
-    int32_t mGeneration;
-    bool mRequestedActivityNotification;
-
-    void requestActivityNotification();
+    sp<AMessage> mCallbackNotification;
 
     DISALLOW_EVIL_CONSTRUCTORS(JMediaCodec);
 };

@@ -205,9 +205,15 @@ final public class MediaCodec {
     public static final int BUFFER_FLAG_END_OF_STREAM         = 4;
 
     private EventHandler mEventHandler;
-    private volatile NotificationCallback mNotificationCallback;
+    private Callback mCallback;
 
-    static final int EVENT_NOTIFY = 1;
+    private static final int EVENT_CALLBACK = 1;
+    private static final int EVENT_SET_CALLBACK = 2;
+
+    private static final int CB_INPUT_AVAILABLE = 1;
+    private static final int CB_OUTPUT_AVAILABLE = 2;
+    private static final int CB_ERROR = 3;
+    private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
@@ -220,12 +226,60 @@ final public class MediaCodec {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case EVENT_NOTIFY:
+                case EVENT_CALLBACK:
                 {
-                    NotificationCallback cb = mNotificationCallback;
-                    if (cb != null) {
-                        cb.onCodecNotify(mCodec);
-                    }
+                    handleCallback(msg);
+                    break;
+                }
+                case EVENT_SET_CALLBACK:
+                {
+                    mCallback = (MediaCodec.Callback) msg.obj;
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+        }
+
+        private void handleCallback(Message msg) {
+            if (mCallback == null) {
+                return;
+            }
+
+            switch (msg.arg1) {
+                case CB_INPUT_AVAILABLE:
+                {
+                    mCallback.onInputBufferAvailable(mCodec, msg.arg2 /* index */);
+                    break;
+                }
+
+                case CB_OUTPUT_AVAILABLE:
+                {
+                    mCallback.onOutputBufferAvailable(
+                            mCodec,
+                            msg.arg2 /* index */,
+                            (MediaCodec.BufferInfo) msg.obj);
+                    break;
+                }
+
+                case CB_ERROR:
+                {
+                    mCallback.onError(mCodec,
+                            msg.arg2 /* error */, (Integer) msg.obj /* actionCode */);
+                    break;
+                }
+
+                case CB_OUTPUT_FORMAT_CHANGE:
+                {
+                    mCallback.onOutputFormatChanged(mCodec,
+                            new MediaFormat((Map<String, Object>) msg.obj));
+                    break;
+                }
+
+                default:
+                {
                     break;
                 }
             }
@@ -360,6 +414,8 @@ final public class MediaCodec {
         native_configure(keys, values, surface, crypto, flags);
     }
 
+    private native final void native_setCallback(Callback cb);
+
     private native final void native_configure(
             String[] keys, Object[] values,
             Surface surface, MediaCrypto crypto, int flags);
@@ -398,7 +454,8 @@ final public class MediaCodec {
         native_stop();
 
         if (mEventHandler != null) {
-            mEventHandler.removeMessages(EVENT_NOTIFY);
+            mEventHandler.removeMessages(EVENT_CALLBACK);
+            mEventHandler.removeMessages(EVENT_SET_CALLBACK);
         }
     }
 
@@ -855,44 +912,72 @@ final public class MediaCodec {
     }
 
     /**
-     * Sets the codec listener for actionable MediaCodec events.
-     * <p>Call this method with a null listener to stop receiving event notifications.
+     * Sets an asynchronous callback for actionable MediaCodec events.
      *
-     * @param cb The listener that will run.
+     * If the client intends to use the component in asynchronous mode,
+     * a valid callback should be provided before {@link #configure} is called.
      *
-     * @hide
+     * When asynchronous callback is enabled, the client should not call
+     * {@link #dequeueInputBuffer(long)} or {@link #dequeueOutputBuffer(BufferInfo, long)}
+     *
+     * @param cb The callback that will run.
      */
-    public void setNotificationCallback(NotificationCallback cb) {
-        mNotificationCallback = cb;
+    public void setCallback(/* MediaCodec. */ Callback cb) {
+        if (mEventHandler != null) {
+            // set java callback on handler
+            Message msg = mEventHandler.obtainMessage(EVENT_SET_CALLBACK, 0, 0, cb);
+            mEventHandler.sendMessage(msg);
+
+            // set native handler here, don't post to handler because
+            // it may cause the callback to be delayed and set in a wrong state,
+            // and MediaCodec is already doing it on looper.
+            native_setCallback(cb);
+        }
     }
 
     /**
-     * MediaCodec listener interface.  Used to notify the user of MediaCodec
-     * when there are available input and/or output buffers, a change in
-     * configuration or when a codec error happened.
-     *
-     * @hide
+     * MediaCodec callback interface. Used to notify the user asynchronously
+     * of various MediaCodec events.
      */
-    public static abstract class NotificationCallback {
+    public static abstract class Callback {
         /**
-         * Called on the listener to notify that there is an actionable
-         * MediaCodec event.  The application should call {@link #dequeueOutputBuffer}
-         * to receive the configuration change event, codec error or an
-         * available output buffer.  It should also call  {@link #dequeueInputBuffer}
-         * to receive any available input buffer.  For best performance, it
-         * is recommended to exhaust both available input and output buffers in
-         * the handling of a single callback, by calling the dequeue methods
-         * repeatedly with a zero timeout until {@link #INFO_TRY_AGAIN_LATER} is returned.
+         * Called when an input buffer becomes available.
          *
-         * @param codec the MediaCodec instance that has an actionable event.
-         *
+         * @param codec The MediaCodec object.
+         * @param index The index of the available input buffer.
          */
-        public abstract void onCodecNotify(MediaCodec codec);
+        public abstract void onInputBufferAvailable(MediaCodec codec, int index);
+
+        /**
+         * Called when an output buffer becomes available.
+         *
+         * @param codec The MediaCodec object.
+         * @param index The index of the available output buffer.
+         * @param info Info regarding the available output buffer {@link MediaCodec.BufferInfo}.
+         */
+        public abstract void onOutputBufferAvailable(MediaCodec codec, int index, BufferInfo info);
+
+        /**
+         * Called when the MediaCodec encountered an error
+         *
+         * @param codec The MediaCodec object.
+         * @param error a device specific error code.
+         * @param actionCode a value for use in {@link MediaCodec.CodecException}.
+         */
+        public abstract void onError(MediaCodec codec, int error, int actionCode);
+
+        /**
+         * Called when the output format has changed
+         *
+         * @param codec The MediaCodec object.
+         * @param format The new output format.
+         */
+        public abstract void onOutputFormatChanged(MediaCodec codec, MediaFormat format);
     }
 
     private void postEventFromNative(
             int what, int arg1, int arg2, Object obj) {
-        if (mEventHandler != null && mNotificationCallback != null) {
+        if (mEventHandler != null) {
             Message msg = mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mEventHandler.sendMessage(msg);
         }
