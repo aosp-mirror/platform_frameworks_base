@@ -16,7 +16,6 @@
 
 package android.graphics;
 
-
 /**
  * The NinePatch class permits drawing a bitmap in nine or more sections.
  * Essentially, it allows the creation of custom graphics that will scale the
@@ -32,6 +31,39 @@ package android.graphics;
  * </p>
  */
 public class NinePatch {
+    /**
+     * Struct of inset information attached to a 9 patch bitmap.
+     *
+     * Present on a 9 patch bitmap if it optical insets were manually included,
+     * or if outline insets were automatically included by aapt.
+     *
+     * @hide
+     */
+    public static class InsetStruct {
+        @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
+        InsetStruct(int opticalLeft, int opticalTop, int opticalRight, int opticalBottom,
+                int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
+                float outlineRadius, boolean outlineFilled, float decodeScale) {
+            opticalRect = new Rect(opticalLeft, opticalTop, opticalRight, opticalBottom);
+            outlineRect = new Rect(outlineLeft, outlineTop, outlineRight, outlineBottom);
+
+            if (decodeScale != 1.0f) {
+                // if bitmap was scaled when decoded, scale the insets from the metadata values
+                opticalRect.scale(decodeScale);
+
+                // round inward while scaling outline, as the outline should always be conservative
+                outlineRect.scaleRoundIn(decodeScale);
+            }
+            this.outlineRadius = outlineRadius * decodeScale;
+            this.outlineFilled = outlineFilled;
+        }
+
+        public final Rect opticalRect;
+        public final Rect outlineRect;
+        public final float outlineRadius;
+        public final boolean outlineFilled;
+    }
+
     private final Bitmap mBitmap;
 
     /**

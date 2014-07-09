@@ -73,8 +73,8 @@ public final class Bitmap implements Parcelable {
      */
     private boolean mRequestPremultiplied;
 
-    private byte[] mNinePatchChunk;   // may be null
-    private int[] mOpticalInsets;     // may be null
+    private byte[] mNinePatchChunk; // may be null
+    private NinePatch.InsetStruct mNinePatchInsets; // may be null
     private int mWidth;
     private int mHeight;
     private boolean mRecycled;
@@ -111,7 +111,7 @@ public final class Bitmap implements Parcelable {
     @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
     Bitmap(long nativeBitmap, byte[] buffer, int width, int height, int density,
             boolean isMutable, boolean requestPremultiplied,
-            byte[] ninePatchChunk, int[] opticalInsets) {
+            byte[] ninePatchChunk, NinePatch.InsetStruct ninePatchInsets) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
@@ -126,7 +126,7 @@ public final class Bitmap implements Parcelable {
         mFinalizer = new BitmapFinalizer(nativeBitmap);
 
         mNinePatchChunk = ninePatchChunk;
-        mOpticalInsets = opticalInsets;
+        mNinePatchInsets = ninePatchInsets;
         if (density >= 0) {
             mDensity = density;
         }
@@ -946,14 +946,16 @@ public final class Bitmap implements Parcelable {
      * @hide
      */
     public void getOpticalInsets(@NonNull Rect outInsets) {
-        if (mOpticalInsets == null) {
+        if (mNinePatchInsets == null) {
             outInsets.setEmpty();
         } else {
-            outInsets.left = mOpticalInsets[0];
-            outInsets.top = mOpticalInsets[1];
-            outInsets.right = mOpticalInsets[2];
-            outInsets.bottom = mOpticalInsets[3];
+            outInsets.set(mNinePatchInsets.opticalRect);
         }
+    }
+
+    /** @hide */
+    public NinePatch.InsetStruct getNinePatchInsets() {
+        return mNinePatchInsets;
     }
 
     /**
