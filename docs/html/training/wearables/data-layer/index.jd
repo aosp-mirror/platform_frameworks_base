@@ -76,7 +76,7 @@ channel.
     <dt><a href="{@docRoot}training/wearables/data-layer/assets.html">Transferring Assets</a></dt>
       <dd>Assets are binary blobs of data that you typically use to transfer images or media.</dd>
 
-    <dt><a href="{@docRoot}training/wearables/data-layer/stacks.html">Sending and Receiving Messages</a></dt>
+    <dt><a href="{@docRoot}training/wearables/data-layer/messages.html">Sending and Receiving Messages</a></dt>
       <dd>Messages are designed for fire-and-forget messages that you can send back and forth
       between the wearable and handheld.</dd>
 
