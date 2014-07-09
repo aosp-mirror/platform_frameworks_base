@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,6 +43,7 @@ import java.util.concurrent.CountDownLatch;
  * .WIFI_SCANNING_SERVICE)}.
  * @hide
  */
+@SystemApi
 public class WifiScanner {
 
     /** no band specified; use channel list instead */
@@ -78,6 +80,7 @@ public class WifiScanner {
      * Generic action callback invocation interface
      *  @hide
      */
+    @SystemApi
     public static interface ActionListener {
         public void onSuccess();
         public void onFailure(int reason, String description);
@@ -313,6 +316,7 @@ public class WifiScanner {
     }
 
     /** @hide */
+    @SystemApi
     public static class WifiChangeSettings implements Parcelable {
         public int rssiSampleSize;                          /* sample size for RSSI averaging */
         public int lostApSampleSize;                        /* samples to confirm AP's loss */
@@ -443,6 +447,7 @@ public class WifiScanner {
     }
 
     /** @hide */
+    @SystemApi
     public void configureWifiChange(WifiChangeSettings settings) {
         validateChannel();
         sAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
@@ -457,6 +462,7 @@ public class WifiScanner {
     }
 
     /** @hide */
+    @SystemApi
     public static class HotlistSettings implements Parcelable {
         public HotspotInfo[] hotspotInfos;
         public int apLostThreshold;

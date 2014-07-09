@@ -2422,6 +2422,7 @@ public abstract class Context {
      * @see android.net.wifi.WifiScanner
      * @hide
      */
+    @SystemApi
     public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
 
     /**
