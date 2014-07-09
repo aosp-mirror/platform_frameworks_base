@@ -713,6 +713,10 @@ public final class TvInputManagerService extends SystemService {
         // Remove the session state from the global session state map of the current user.
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
+        if (sessionState == null) {
+            return;
+        }
+
         // Close the open log entry, if any.
         if (sessionState.mLogUri != null) {
             SomeArgs args = SomeArgs.obtain();
@@ -2150,6 +2154,7 @@ public final class TvInputManagerService extends SystemService {
                     args.arg1 = logUri;
                     args.arg2 = channelId;
                     args.arg3 = endTime;
+                    args.arg4 = sessionState;
                     Message msg = obtainMessage(LogHandler.MSG_UPDATE_ENTRY, args);
                     sendMessageDelayed(msg, endTime - System.currentTimeMillis());
                 }
@@ -2162,49 +2167,64 @@ public final class TvInputManagerService extends SystemService {
 
         private void onUpdateEntry(Uri uri, long channelId, long time, SessionState sessionState) {
             String[] projection = {
-                    TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.COLUMN_TITLE,
-                    TvContract.WatchedPrograms.COLUMN_START_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS,
-                    TvContract.WatchedPrograms.COLUMN_DESCRIPTION
+                    TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS
             };
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(uri, projection, null, null, null);
                 if (cursor != null && cursor.moveToNext()) {
-                    long watchStartTime = cursor.getLong(0);
-                    long watchEndTime = cursor.getLong(1);
-                    String title = cursor.getString(2);
-                    long startTime = cursor.getLong(3);
-                    long endTime = cursor.getLong(4);
-                    String description = cursor.getString(5);
-
+                    long watchEndTime = cursor.getLong(0);
                     // Do nothing if the current log entry is already closed.
                     if (watchEndTime > 0) {
                         return;
                     }
 
-                    // The current program has just ended. Create a (complete) log entry off the
-                    // current entry.
+                    // Update the watch end time for the current log entry.
                     ContentValues values = new ContentValues();
-                    values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
-                            watchStartTime);
                     values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, time);
+                    int c = mContentResolver.update(uri, values, null, null);
+                } else {
+                    // The record has been deleted.
+                    synchronized (mLock) {
+                        if (!uri.equals(sessionState.mLogUri)) {
+                            // If the deleted record is not for the current channel, do not re-open
+                            // a log entry for the next program.
+                            return;
+                        }
+                    }
+                }
+                if (cursor != null) {
+                    cursor.close();
+                    cursor = null;
+                }
+
+                // The current program has just ended. Create a new log entry for the next program.
+                uri = ContentUris.withAppendedId(TvContract.Channels.CONTENT_URI, channelId);
+                projection = new String[] {
+                        TvContract.Channels.COLUMN_PACKAGE_NAME
+                };
+                cursor = mContentResolver.query(uri, projection, null, null, null);
+                if (cursor != null && cursor.moveToNext()) {
+                    ContentValues values = new ContentValues();
+                    values.put(TvContract.WatchedPrograms.COLUMN_PACKAGE_NAME, cursor.getString(0));
+                    values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS, time);
+                    values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, 0);
                     values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
-                    values.put(TvContract.WatchedPrograms.COLUMN_TITLE, title);
-                    values.put(TvContract.WatchedPrograms.COLUMN_START_TIME_UTC_MILLIS, startTime);
-                    values.put(TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS, endTime);
-                    values.put(TvContract.WatchedPrograms.COLUMN_DESCRIPTION, description);
-                    mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
+                    Uri newUri = mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI,
+                            values);
+
+                    synchronized (mLock) {
+                        sessionState.mLogUri = newUri;
+                    }
+
+                    // Re-open the current log entry with the next program information.
+                    onOpenEntry(newUri, channelId, time, sessionState);
                 }
             } finally {
                 if (cursor != null) {
                     cursor.close();
                 }
             }
-            // Re-open the current log entry with the next program information.
-            onOpenEntry(uri, channelId, time, sessionState);
         }
 
         private void onCloseEntry(Uri uri, long watchEndTime) {
