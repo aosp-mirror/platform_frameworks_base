@@ -48,6 +48,12 @@ public final class HdmiCecDeviceInfo implements Parcelable {
     /** Audio system device type. */
     public static final int DEVICE_AUDIO_SYSTEM = 5;
 
+    /** @hide Pure CEC switch device type. */
+    public static final int DEVICE_PURE_CEC_SWITCH = 6;
+
+    /** @hide Video processor device type. */
+    public static final int DEVICE_VIDEO_PROCESSOR = 7;
+
     // Value indicating the device is not an active source.
     public static final int DEVICE_INACTIVE = -1;
 

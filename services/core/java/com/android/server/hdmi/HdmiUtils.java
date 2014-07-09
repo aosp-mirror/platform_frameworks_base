@@ -68,20 +68,6 @@ final class HdmiUtils {
     private HdmiUtils() { /* cannot be instantiated */ }
 
     /**
-     * Check if the given type is valid. A valid type is one of the actual
-     * logical device types defined in the standard ({@link #DEVICE_TV},
-     * {@link #DEVICE_PLAYBACK}, {@link #DEVICE_TUNER}, {@link #DEVICE_RECORDER},
-     * and {@link #DEVICE_AUDIO_SYSTEM}).
-     *
-     * @param type device type
-     * @return true if the given type is valid
-     */
-    static boolean isValidType(int type) {
-        return (HdmiCecDeviceInfo.DEVICE_TV <= type && type <= HdmiCecDeviceInfo.DEVICE_AUDIO_SYSTEM)
-                && type != HdmiCecDeviceInfo.DEVICE_RESERVED;
-    }
-
-    /**
      * Check if the given logical address is valid. A logical address is valid
      * if it is one allocated for an actual device which allows communication
      * with other logical devices.
@@ -162,9 +148,7 @@ final class HdmiUtils {
      * @return true if the given parameter has [ON] value
      */
     static boolean parseCommandParamSystemAudioStatus(HdmiCecMessage cmd) {
-        // TODO: Handle the exception when the length is wrong.
-        return cmd.getParams().length > 0
-                && cmd.getParams()[0] == Constants.SYSTEM_AUDIO_STATUS_ON;
+        return cmd.getParams()[0] == Constants.SYSTEM_AUDIO_STATUS_ON;
     }
 
     /**

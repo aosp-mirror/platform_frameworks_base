@@ -124,12 +124,12 @@ final class DeviceSelectAction extends FeatureAction {
 
         switch (mState) {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
-                if (opcode == Constants.MESSAGE_REPORT_POWER_STATUS && params.length == 1) {
+                if (opcode == Constants.MESSAGE_REPORT_POWER_STATUS) {
                     return handleReportPowerStatus(params[0]);
                 }
                 return false;
             case STATE_WAIT_FOR_ACTIVE_SOURCE:
-                if (opcode == Constants.MESSAGE_ACTIVE_SOURCE && params.length == 2) {
+                if (opcode == Constants.MESSAGE_ACTIVE_SOURCE) {
                     int activePath = HdmiUtils.twoBytesToInt(params);
                     ActiveSourceHandler
                             .create((HdmiCecLocalDeviceTv) localDevice(), mCallback)

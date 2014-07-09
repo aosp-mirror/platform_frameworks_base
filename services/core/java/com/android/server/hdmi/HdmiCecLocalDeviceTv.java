@@ -390,10 +390,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Seq #21
         byte[] params = message.getParams();
-        if (params.length != 4) {
-            Slog.w(TAG, "Wrong parameter: " + message);
-            return true;
-        }
         int currentPath = HdmiUtils.twoBytesToInt(params);
         if (HdmiUtils.isAffectingActiveRoutingPath(getActivePath(), currentPath)) {
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
@@ -410,10 +406,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
 
         byte params[] = message.getParams();
-        if (params.length < 1) {
-            Slog.w(TAG, "Invalide <Report Audio Status> message:" + message);
-            return true;
-        }
         int mute = params[0] & 0x80;
         int volume = params[0] & 0x7F;
         setAudioStatus(mute == 0x80, volume);

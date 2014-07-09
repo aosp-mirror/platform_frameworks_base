@@ -183,6 +183,8 @@ public final class HdmiControlService extends SystemService {
     // from being modified.
     private List<HdmiPortInfo> mPortInfo;
 
+    private HdmiCecMessageValidator mMessageValidator;
+
     private final PowerStateReceiver mPowerStateReceiver = new PowerStateReceiver();
 
     @ServiceThreadOnly
@@ -220,6 +222,7 @@ public final class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
         mPortInfo = initPortInfo();
+        mMessageValidator = new HdmiCecMessageValidator(this);
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
         // Register broadcast receiver for power state change.
@@ -473,6 +476,9 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!mMessageValidator.isValid(message)) {
+            return false;
+        }
         return dispatchMessageToLocalDevice(message);
     }
 

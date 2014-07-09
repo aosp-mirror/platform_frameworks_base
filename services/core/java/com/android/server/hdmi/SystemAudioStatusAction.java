@@ -94,21 +94,15 @@ final class SystemAudioStatusAction extends FeatureAction {
 
     private void handleReportAudioStatus(HdmiCecMessage cmd) {
         byte[] params = cmd.getParams();
-        if (params.length > 0) {
-            boolean mute = (params[0] & 0x80) == 0x80;
-            int volume = params[0] & 0x7F;
-            tv().setAudioStatus(mute, volume);
+        boolean mute = (params[0] & 0x80) == 0x80;
+        int volume = params[0] & 0x7F;
+        tv().setAudioStatus(mute, volume);
 
-            if ((tv().getSystemAudioMode() && mute) || (!tv().getSystemAudioMode() && !mute)) {
-                // Toggle AVR's mute status to match with the system audio status.
-                sendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode.CEC_KEYCODE_MUTE);
-            }
-            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-        } else {
-            Slog.e(TAG, "Invalid <Report Audio Status> message:" + cmd);
-            handleSendGiveAudioStatusFailure();
-            return;
+        if ((tv().getSystemAudioMode() && mute) || (!tv().getSystemAudioMode() && !mute)) {
+            // Toggle AVR's mute status to match with the system audio status.
+            sendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode.CEC_KEYCODE_MUTE);
         }
+        finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
     }
 
     private void finishWithCallback(int returnCode) {

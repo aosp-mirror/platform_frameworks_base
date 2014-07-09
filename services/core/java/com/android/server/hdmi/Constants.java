@@ -141,12 +141,15 @@ final class Constants {
     static final int MESSAGE_VENDOR_COMMAND_WITH_ID = 0xA0;
     static final int MESSAGE_CLEAR_EXTERNAL_TIMER = 0xA1;
     static final int MESSAGE_SET_EXTERNAL_TIMER = 0xA2;
+    static final int MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR = 0xA3;
+    static final int MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR = 0xA4;
     static final int MESSAGE_INITIATE_ARC = 0xC0;
     static final int MESSAGE_REPORT_ARC_INITIATED = 0xC1;
     static final int MESSAGE_REPORT_ARC_TERMINATED = 0xC2;
     static final int MESSAGE_REQUEST_ARC_INITIATION = 0xC3;
     static final int MESSAGE_REQUEST_ARC_TERMINATION = 0xC4;
     static final int MESSAGE_TERMINATE_ARC = 0xC5;
+    static final int MESSAGE_CDC_MESSAGE = 0xF8;
     static final int MESSAGE_ABORT = 0xFF;
 
     static final int UNKNOWN_VENDOR_ID = 0xFFFFFF;
@@ -168,6 +171,7 @@ final class Constants {
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
+    static final int ROUTING_PATH_TOP_SHIFT = 12;
 
     static final int INVALID_PORT_ID = -1;
     static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;

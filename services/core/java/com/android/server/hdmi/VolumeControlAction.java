@@ -18,8 +18,6 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.IRT_MS;
 
-import android.util.Slog;
-
 import com.android.internal.util.Preconditions;
 
 /**
@@ -168,11 +166,6 @@ final class VolumeControlAction extends FeatureAction {
 
     private void handleReportAudioStatus(HdmiCecMessage cmd) {
         byte[] params = cmd.getParams();
-        if (params.length != 1) {
-            Slog.e(TAG, "Invalid <Report Audio Status> message:" + cmd);
-            return;
-        }
-
         int volume = params[0] & 0x7F;
         // Update volume with new value.
         // Note that it will affect system volume change.
