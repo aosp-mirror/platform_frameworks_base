@@ -66,7 +66,19 @@ public class AudioDevice {
         return mConfig.port().address();
     }
 
+    /** @hide */
+    public static int convertDeviceTypeToInternalDevice(int deviceType) {
+        return EXT_TO_INT_DEVICE_MAPPING.get(deviceType, AudioSystem.DEVICE_NONE);
+    }
+
+    /** @hide */
+    public static int convertInternalDeviceToDeviceType(int intDevice) {
+        return INT_TO_EXT_DEVICE_MAPPING.get(intDevice, DEVICE_TYPE_UNKNOWN);
+    }
+
     private static final SparseIntArray INT_TO_EXT_DEVICE_MAPPING;
+
+    private static final SparseIntArray EXT_TO_INT_DEVICE_MAPPING;
 
     static {
         INT_TO_EXT_DEVICE_MAPPING = new SparseIntArray();
@@ -110,6 +122,27 @@ public class AudioDevice {
         // not covered here, legacy
         //AudioSystem.DEVICE_OUT_REMOTE_SUBMIX
         //AudioSystem.DEVICE_IN_REMOTE_SUBMIX
+
+        // privileges mapping to output device
+        EXT_TO_INT_DEVICE_MAPPING = new SparseIntArray();
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_BUILTIN_EARPIECE, AudioSystem.DEVICE_OUT_EARPIECE);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_BUILTIN_SPEAKER, AudioSystem.DEVICE_OUT_SPEAKER);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_WIRED_HEADSET, AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_WIRED_HEADPHONES, AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_LINE_ANALOG, AudioSystem.DEVICE_OUT_LINE);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_LINE_DIGITAL, AudioSystem.DEVICE_OUT_SPDIF);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_BLUETOOTH_SCO, AudioSystem.DEVICE_OUT_BLUETOOTH_SCO);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_BLUETOOTH_A2DP, AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_HDMI, AudioSystem.DEVICE_OUT_HDMI);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_HDMI_ARC, AudioSystem.DEVICE_OUT_HDMI_ARC);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_USB_DEVICE, AudioSystem.DEVICE_OUT_USB_DEVICE);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_USB_ACCESSORY, AudioSystem.DEVICE_OUT_USB_ACCESSORY);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_DOCK, AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_FM, AudioSystem.DEVICE_OUT_FM);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_BUILTIN_MIC, AudioSystem.DEVICE_IN_BUILTIN_MIC);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_FM_TUNER, AudioSystem.DEVICE_IN_FM_TUNER);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_TV_TUNER, AudioSystem.DEVICE_IN_TV_TUNER);
+        EXT_TO_INT_DEVICE_MAPPING.put(DEVICE_TYPE_TELEPHONY, AudioSystem.DEVICE_OUT_TELEPHONY_TX);
     }
 }
 

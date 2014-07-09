@@ -16,9 +16,13 @@
 
 package android.media.audiofx;
 
+import android.media.AudioDevice;
+import android.media.AudioFormat;
 import android.media.audiofx.AudioEffect;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.StringTokenizer;
 
 
@@ -44,8 +48,10 @@ import java.util.StringTokenizer;
 public class Virtualizer extends AudioEffect {
 
     private final static String TAG = "Virtualizer";
+    private final static boolean DEBUG = false;
 
-    // These constants must be synchronized with those in frameworks/base/include/media/EffectVirtualizerApi.h
+    // These constants must be synchronized with those in
+    //        system/media/audio_effects/include/audio_effects/effect_virtualizer.h
     /**
      * Is strength parameter supported by virtualizer engine. Parameter ID for getParameter().
      */
@@ -55,6 +61,21 @@ public class Virtualizer extends AudioEffect {
      * {@link android.media.audiofx.Virtualizer.OnParameterChangeListener}
      */
     public static final int PARAM_STRENGTH = 1;
+    /**
+     * @hide
+     * Parameter ID to query the virtual speaker angles for a channel mask / device configuration.
+     */
+    public static final int PARAM_VIRTUAL_SPEAKER_ANGLES = 2;
+    /**
+     * @hide
+     * Parameter ID to force the virtualization mode to be that of a specific device
+     */
+    public static final int PARAM_FORCE_VIRTUALIZATION_MODE = 3;
+    /**
+     * @hide
+     * Parameter ID to query the current virtualization mode.
+     */
+    public static final int PARAM_VIRTUALIZATION_MODE = 4;
 
     /**
      * Indicates if strength parameter is supported by the virtualizer engine
@@ -142,6 +163,223 @@ public class Virtualizer extends AudioEffect {
         short[] value = new short[1];
         checkStatus(getParameter(PARAM_STRENGTH, value));
         return value[0];
+    }
+
+    /**
+     * Checks if a configuration is supported, and query the virtual speaker angles.
+     * @param inputChannelMask
+     * @param deviceType
+     * @param angles if non-null: array in which the angles will be written. If null, no angles
+     *    are returned
+     * @return true if the combination of channel mask and output device type is supported, false
+     *    otherwise
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    private boolean getAnglesInt(int inputChannelMask, int deviceType, int[] angles)
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        // parameter check
+        if (inputChannelMask == AudioFormat.CHANNEL_INVALID) {
+            throw (new IllegalArgumentException(
+                    "Virtualizer: illegal CHANNEL_INVALID channel mask"));
+        }
+        int channelMask = inputChannelMask == AudioFormat.CHANNEL_OUT_DEFAULT ?
+                AudioFormat.CHANNEL_OUT_STEREO : inputChannelMask;
+        int nbChannels = AudioFormat.channelCountFromOutChannelMask(channelMask);
+        if ((angles != null) && (angles.length < (nbChannels * 3))) {
+            Log.e(TAG, "Size of array for angles cannot accomodate number of channels in mask ("
+                    + nbChannels + ")");
+            throw (new IllegalArgumentException(
+                    "Virtualizer: array for channel / angle pairs is too small: is " + angles.length
+                    + ", should be " + (nbChannels * 3)));
+        }
+
+        ByteBuffer paramsConverter = ByteBuffer.allocate(3 /* param + mask + device*/ * 4);
+        paramsConverter.order(ByteOrder.nativeOrder());
+        paramsConverter.putInt(PARAM_VIRTUAL_SPEAKER_ANGLES);
+        // convert channel mask to internal native representation
+        paramsConverter.putInt(AudioFormat.convertChannelOutMaskToNativeMask(channelMask));
+        // convert Java device type to internal representation
+        paramsConverter.putInt(AudioDevice.convertDeviceTypeToInternalDevice(deviceType));
+        // allocate an array to store the results
+        byte[] result = new byte[nbChannels * 4/*int to byte*/ * 3/*for mask, azimuth, elevation*/];
+
+        // call into the effect framework
+        int status = getParameter(paramsConverter.array(), result);
+        if (DEBUG) {
+            Log.v(TAG, "getAngles(0x" + Integer.toHexString(inputChannelMask) + ", 0x"
+                    + Integer.toHexString(deviceType) + ") returns " + status);
+        }
+
+        if (status >= 0) {
+            if (angles != null) {
+                // convert and copy the results
+                ByteBuffer resultConverter = ByteBuffer.wrap(result);
+                resultConverter.order(ByteOrder.nativeOrder());
+                for (int i = 0 ; i < nbChannels ; i++) {
+                    // write the channel mask
+                    angles[3 * i] = AudioFormat.convertNativeChannelMaskToOutMask(
+                            resultConverter.getInt((i * 4 * 3)));
+                    // write the azimuth
+                    angles[3 * i + 1] = resultConverter.getInt(i * 4 * 3 + 4);
+                    // write the elevation
+                    angles[3 * i + 2] = resultConverter.getInt(i * 4 * 3 + 8);
+                    if (DEBUG) {
+                        Log.v(TAG, "channel 0x" + Integer.toHexString(angles[3*i]).toUpperCase()
+                                + " at az=" + angles[3*i+1] + "deg"
+                                + " elev="  + angles[3*i+2] + "deg");
+                    }
+                }
+            }
+            return true;
+        } else if (status == AudioEffect.ERROR_BAD_VALUE) {
+            // a BAD_VALUE return from getParameter indicates the configuration is not supported
+            // don't throw an exception, just return false
+            return false;
+        } else {
+            // something wrong may have happened
+            checkStatus(status);
+        }
+        // unexpected virtualizer behavior
+        Log.e(TAG, "unexpected status code " + status
+                + " after getParameter(PARAM_VIRTUAL_SPEAKER_ANGLES)");
+        return false;
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Checks if the combination of a channel mask and device type is supported by this virtualizer.
+     * Some virtualizer implementations may only support binaural processing (i.e. only support
+     * headphone output), some may support transaural processing (i.e. for speaker output) for the
+     * built-in speakers. Use this method to query the virtualizer implementation capabilities.
+     * @param inputChannelMask the channel mask of the content to virtualize.
+     * @param deviceType the device type for which virtualization processing is to be performed.
+     *    Valid values are the device types defined in {@link AudioDevice}.
+     * @return true if the combination of channel mask and output device type is supported, false
+     *    otherwise.
+     *    <br>An indication that a certain channel mask is not supported doesn't necessarily mean
+     *    you cannot play content with that channel mask, it more likely implies the content will
+     *    be downmixed before being virtualized. For instance a virtualizer that only supports a
+     *    mask such as {@link AudioFormat#CHANNEL_OUT_STEREO}
+     *    will still be able to process content with a mask of
+     *    {@link AudioFormat#CHANNEL_OUT_5POINT1}, but will downmix the content to stereo first, and
+     *    then will virtualize, as opposed to virtualizing each channel individually.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public boolean canVirtualize(int inputChannelMask, int deviceType)
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        return getAnglesInt(inputChannelMask, deviceType, null);
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Queries the virtual speaker angles (azimuth and elevation) for a combination of a channel
+     * mask and device type.
+     * If the virtualization configuration (mask and device) is supported (see
+     * {@link #canVirtualize(int, int)}, the array angles will contain upon return the
+     * definition of each virtual speaker and its azimuth and elevation angles relative to the
+     * listener.
+     * <br>Note that in some virtualizer implementations, the angles may be strength-dependent.
+     * @param inputChannelMask the channel mask of the content to virtualize.
+     * @param deviceType the device type for which virtualization processing is to be performed.
+     *    Valid values are the device types defined in {@link AudioDevice}.
+     * @param angles a non-null array whose length is 3 times the number of channels in the channel
+     *    mask.
+     *    If the method indicates the configuration is supported, the array will contain upon return
+     *    triplets of values: for each channel <code>i</code> among the channels of the mask:
+     *    <ul>
+     *      <li>the element at index <code>3*i</code> in the array contains the speaker
+     *          identification (e.g. {@link AudioFormat#CHANNEL_OUT_FRONT_LEFT}),</li>
+     *      <li>the element at index <code>3*i+1</code> contains its corresponding azimuth angle
+     *          expressed in degrees, where 0 is the direction the listener faces, 180 is behind
+     *          the listener, and -90 is to her/his left,</li>
+     *      <li>the element at index <code>3*i+2</code> contains its corresponding elevation angle
+     *          where +90 is directly above the listener, 0 is the horizontal plane, and -90 is
+     *          directly below the listener.</li>
+     * @return true if the combination of channel mask and output device type is supported, false
+     *    otherwise.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public boolean getSpeakerAngles(int inputChannelMask, int deviceType, int[] angles)
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        if (angles == null) {
+            throw (new IllegalArgumentException(
+                    "Virtualizer: illegal null channel / angle array"));
+        }
+
+        return getAnglesInt(inputChannelMask, deviceType, angles);
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Forces the virtualizer effect to use the processing mode used for the given device type.
+     * The effect must be enabled for the forced mode to be applied.
+     * @param deviceType one of the device types defined in {@link AudioDevice}.
+     *     Use {@link AudioDevice#DEVICE_TYPE_UNKNOWN} to return to the non-forced mode.
+     * @return true if the processing mode for the device type is supported, and it is successfully
+     *     set, or forcing was successfully disabled with {@link AudioDevice#DEVICE_TYPE_UNKNOWN},
+     *     false otherwise.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
+    public boolean forceVirtualizationMode(int deviceType)
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+        // convert Java device type to internal representation
+        int internalDevice = AudioDevice.convertDeviceTypeToInternalDevice(deviceType);
+
+        int status = setParameter(PARAM_FORCE_VIRTUALIZATION_MODE, internalDevice);
+
+        if (status >= 0) {
+            return true;
+        } else if (status == AudioEffect.ERROR_BAD_VALUE) {
+            // a BAD_VALUE return from setParameter indicates the mode can't be forced to that
+            // of this device, don't throw an exception, just return false
+            return false;
+        } else {
+            // something wrong may have happened
+            checkStatus(status);
+        }
+        // unexpected virtualizer behavior
+        Log.e(TAG, "unexpected status code " + status
+                + " after setParameter(PARAM_FORCE_VIRTUALIZATION_MODE)");
+        return false;
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Return the device type which reflects the virtualization mode being used, if any.
+     * @return a device type (as defined in {@link AudioDevice}) which reflects the virtualization
+     *     mode being used.
+     *     If virtualization is not active, the device type will be
+     *     {@link AudioDevice#DEVICE_TYPE_UNKNOWN}. Virtualization may not be active either because
+     *     the effect is not enabled or because the current output device is not compatible with
+     *     this virtualization implementation.
+     */
+    public int getVirtualizationMode() {
+        int[] value = new int[1];
+        int status = getParameter(PARAM_VIRTUALIZATION_MODE, value);
+        if (status >= 0) {
+            return AudioDevice.convertInternalDeviceToDeviceType(value[0]);
+        } else if (status == AudioEffect.ERROR_BAD_VALUE) {
+            return AudioDevice.DEVICE_TYPE_UNKNOWN;
+        } else {
+            // something wrong may have happened
+            checkStatus(status);
+        }
+        // unexpected virtualizer behavior
+        Log.e(TAG, "unexpected status code " + status
+                + " after getParameter(PARAM_VIRTUALIZATION_MODE)");
+        return AudioDevice.DEVICE_TYPE_UNKNOWN;
     }
 
     /**
