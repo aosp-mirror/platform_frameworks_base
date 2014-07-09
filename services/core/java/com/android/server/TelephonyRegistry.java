@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.telephony.CellLocation;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.PhoneStateListener;
@@ -46,7 +47,6 @@ import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
 import android.text.TextUtils;
-import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,7 +177,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_SWITCHED: {
-                    Slog.d(TAG, "MSG_USER_SWITCHED userId=" + msg.arg1);
+                    log("MSG_USER_SWITCHED userId=" + msg.arg1);
                     int numPhones = TelephonyManager.getDefault().getPhoneCount();
                     for (int sub = 0; sub < numPhones; sub++) {
                         TelephonyRegistry.this.notifyCellLocationUsingSubId(sub, mCellLocation[sub]);
@@ -185,7 +185,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     break;
                 }
                 case MSG_UPDATE_DEFAULT_SUB: {
-                    Slog.d(TAG, "MSG_UPDATE_DEFAULT_SUB subid=" + mDefaultSubId);
+                    log("MSG_UPDATE_DEFAULT_SUB subid=" + mDefaultSubId);
                     // Default subscription id changed, update the changed default subscription
                     // id in  all the legacy application listener records.
                     synchronized (mRecords) {
@@ -206,15 +206,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Slog.d(TAG, "mBroadcastReceiver: action=" + action);
+            log("mBroadcastReceiver: action=" + action);
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                if (DBG) Slog.d(TAG, "onReceive: userHandle=" + userHandle);
+                if (DBG) log("onReceive: userHandle=" + userHandle);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED, userHandle, 0));
             } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
                 mDefaultSubId = intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY,
                         SubscriptionManager.getDefaultSubId());
-                if (DBG) Slog.d(TAG, "onReceive: mDefaultSubId=" + mDefaultSubId);
+                if (DBG) log("onReceive: mDefaultSubId=" + mDefaultSubId);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB, 0, 0));
             }
         }
@@ -238,7 +238,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDefaultSubId = SubscriptionManager.getDefaultSubId();
 
         int numPhones = TelephonyManager.getDefault().getPhoneCount();
-        if (DBG) Slog.d(TAG, "TelephonyRegistor: ctor numPhones=" + numPhones);
+        if (DBG) log("TelephonyRegistor: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
         mCallState = new int[numPhones];
         mDataActivity = new int[numPhones];
@@ -288,7 +288,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED);
-        Slog.d(TAG, "systemRunning register for intents");
+        log("systemRunning register for intents");
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -308,8 +308,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             boolean notifyNow, long subId, boolean isLegacyApp) {
         int callerUid = UserHandle.getCallingUserId();
         int myUid = UserHandle.myUserId();
-        if (VDBG) {
-            Slog.d(TAG, "listen: E pkg=" + pkgForDebug + " events=0x" + Integer.toHexString(events)
+        if (true /*VDBG*/) {
+            log("listen: E pkg=" + pkgForDebug + " events=0x" + Integer.toHexString(events)
                 + " notifyNow=" + notifyNow + " subId=" + subId
                 + " isLegacyApp=" + isLegacyApp
                 + " myUid=" + myUid
@@ -347,14 +347,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (r.subId == SubscriptionManager.DEFAULT_SUB_ID) {
                         r.subId = mDefaultSubId;
                         r.isLegacyApp = true; // r.subId is to be update when default changes.
-                        if (DBG) Slog.i(TAG, "listen: DEFAULT_SUB_ID");
+                        if (true/*DBG*/) log("listen: DEFAULT_SUB_ID");
                     }
                     mRecords.add(r);
-                    if (DBG) Slog.i(TAG, "listen: add new record");
+                    if (true/*DBG*/) log("listen: add new record");
                 }
                 int phoneId = SubscriptionManager.getPhoneId(subId);
                 r.events = events;
-                if (DBG) Slog.i(TAG, "listen: set events record=" + r);
+                if (true/*DBG*/) log("listen: set events record=" + r);
                 if (notifyNow && validatePhoneId(phoneId)) {
                     if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
                         try {
@@ -392,7 +392,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION)) {
                         try {
-                            if (DBG_LOC) Slog.d(TAG, "listen: mCellLocation = "
+                            if (DBG_LOC) log("listen: mCellLocation = "
                                     + mCellLocation[phoneId]);
                             r.callback.onCellLocationChanged(
                                     new Bundle(mCellLocation[phoneId]));
@@ -439,7 +439,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO)) {
                         try {
-                            if (DBG_LOC) Slog.d(TAG, "listen: mCellInfo[" + phoneId + "] = "
+                            if (DBG_LOC) log("listen: mCellInfo[" + phoneId + "] = "
                                     + mCellInfo.get(phoneId));
                             r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
                         } catch (RemoteException ex) {
@@ -512,8 +512,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
-        if (VDBG) {
-            Slog.d(TAG, "notifyCallStateUsingSubId: subId=" + subId
+        if (true /*VDBG*/) {
+            log("notifyCallStateUsingSubId: subId=" + subId
                 + " state=" + state + " incomingNumber=" + incomingNumber);
         }
         synchronized (mRecords) {
@@ -548,10 +548,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         if (subId == SubscriptionManager.DEFAULT_SUB_ID) {
             subId = mDefaultSubId;
-            Slog.d(TAG, "notifyServiceStateUsingSubId: using mDefaultSubId=" + mDefaultSubId);
+            log("notifyServiceStateUsingSubId: using mDefaultSubId=" + mDefaultSubId);
         }
-        if (VDBG) {
-            Slog.d(TAG, "notifyServiceStateUsingSubId: subId=" + subId
+        if (true/*VDBG*/) {
+            log("notifyServiceStateUsingSubId: subId=" + subId
                 + " state=" + state);
         }
         synchronized (mRecords) {
@@ -559,10 +559,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
                 for (Record r : mRecords) {
+                    // log("notifyServiceStateUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId + " state=" + state);
                     // FIXME: use DEFAULT_SUB_ID instead??
                     if (((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) &&
                             (r.subId == subId)) {
                         try {
+                            log("notifyServiceStateUsingSubId: call onSSC subId=" + subId
+                                    + " state=" + state);
                             r.callback.onServiceStateChanged(new ServiceState(state));
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
@@ -570,7 +573,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                Slog.d(TAG, "notifyServiceStateUsingSubId: INVALID phoneId=" + phoneId);
+                log("notifyServiceStateUsingSubId: INVALID phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
@@ -585,18 +588,21 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifySignalStrength()")) {
             return;
         }
-        if (VDBG) {
-            Slog.d(TAG, "notifySignalStrengthUsingSubId: subId=" + subId
+        if (true/*VDBG*/) {
+            log("notifySignalStrengthUsingSubId: subId=" + subId
                 + " signalStrength=" + signalStrength);
         }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
+                log("notifySignalStrengthUsingSubId: valid phoneId=" + phoneId);
                 mSignalStrength[phoneId] = signalStrength;
                 for (Record r : mRecords) {
+                    //log("notifySignalStrengthUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId);
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) &&
                         (r.subId == subId)){
                         try {
+                            log("notifySignalStrengthUsingSubId: callback.onSsS ss=" + signalStrength);
                             r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
@@ -606,13 +612,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         (r.subId == subId)) {
                         try {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
-                            r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
-                                    : gsmSignalStrength));
+                            int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
+                            log("notifySignalStrengthUsingSubId: callback.onSS gsmSS=" + gsmSignalStrength + " ss=" + ss);
+                            r.callback.onSignalStrengthChanged(ss);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
                     }
                 }
+            } else {
+                log("notifySignalStrengthUsingSubId: invalid phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
@@ -628,7 +637,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            Slog.d(TAG, "notifyCellInfoUsingSubId: subId=" + subId
+            log("notifyCellInfoUsingSubId: subId=" + subId
                 + " cellInfo=" + cellInfo);
         }
 
@@ -641,7 +650,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             && r.subId == subId) {
                         try {
                             if (DBG_LOC) {
-                                Slog.d(TAG, "notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
+                                log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
                             }
                             r.callback.onCellInfoChanged(cellInfo);
                         } catch (RemoteException ex) {
@@ -666,7 +675,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         PhoneStateListener.LISTEN_DATA_CONNECTION_REAL_TIME_INFO)) {
                     try {
                         if (DBG_LOC) {
-                            Slog.d(TAG, "notifyDataConnectionRealTimeInfo: mDcRtInfo="
+                            log("notifyDataConnectionRealTimeInfo: mDcRtInfo="
                                     + mDcRtInfo + " r=" + r);
                         }
                         r.callback.onDataConnectionRealTimeInfoChanged(mDcRtInfo);
@@ -688,7 +697,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            Slog.d(TAG, "notifyMessageWaitingChangedUsingSubId: subId=" + subId
+            log("notifyMessageWaitingChangedUsingSubId: subId=" + subId
                 + " mwi=" + mwi);
         }
         synchronized (mRecords) {
@@ -719,7 +728,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            Slog.d(TAG, "notifyCallForwardingChangedUsingSubId: subId=" + subId
+            log("notifyCallForwardingChangedUsingSubId: subId=" + subId
                 + " cfi=" + cfi);
         }
         synchronized (mRecords) {
@@ -781,7 +790,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            Slog.i(TAG, "notifyDataConnectionUsingSubId: subId=" + subId
+            log("notifyDataConnectionUsingSubId: subId=" + subId
                 + " state=" + state + " isDataConnectivityPossible=" + isDataConnectivityPossible
                 + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
@@ -820,14 +829,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             if (modified) {
                 if (DBG) {
-                    Slog.d(TAG, "onDataConnectionStateChanged(" + mDataConnectionState[phoneId]
+                    log("onDataConnectionStateChanged(" + mDataConnectionState[phoneId]
                         + ", " + mDataConnectionNetworkType[phoneId] + ")");
                 }
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) &&
                             (r.subId == subId)) {
                         try {
-                            Slog.d(TAG,"Notify data connection state changed on sub: " +
+                            log("Notify data connection state changed on sub: " +
                                     subId);
                             r.callback.onDataConnectionStateChanged(mDataConnectionState[phoneId],
                                     mDataConnectionNetworkType[phoneId]);
@@ -867,7 +876,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            Slog.d(TAG, "notifyDataConnectionFailedUsingSubId: subId=" + subId
+            log("notifyDataConnectionFailedUsingSubId: subId=" + subId
                 + " reason=" + reason + " apnType=" + apnType);
         }
         synchronized (mRecords) {
@@ -895,13 +904,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellLocationUsingSubId(long subId, Bundle cellLocation) {
-        Slog.d(TAG, "notifyCellLocationUsingSubId: subId=" + subId
+        log("notifyCellLocationUsingSubId: subId=" + subId
                 + " cellLocation=" + cellLocation);
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
         if (VDBG) {
-            Slog.d(TAG, "notifyCellLocationUsingSubId: subId=" + subId
+            log("notifyCellLocationUsingSubId: subId=" + subId
                 + " cellLocation=" + cellLocation);
         }
         synchronized (mRecords) {
@@ -913,7 +922,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             && r.subId == subId) {
                         try {
                             if (DBG_LOC) {
-                                Slog.d(TAG, "notifyCellLocation: cellLocation=" + cellLocation
+                                log("notifyCellLocation: cellLocation=" + cellLocation
                                         + " r=" + r);
                             }
                             r.callback.onCellLocationChanged(new Bundle(cellLocation));
@@ -1221,7 +1230,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         String msg = "Modify Phone State Permission Denial: " + method + " from pid="
                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
-        if (DBG) Slog.w(TAG, msg);
+        if (DBG) log(msg);
         return false;
     }
 
@@ -1267,7 +1276,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             foregroundUser = ActivityManager.getCurrentUser();
             valid = r.callerUid ==  foregroundUser && (r.events & events) != 0;
             if (DBG | DBG_LOC) {
-                Slog.d(TAG, "validateEventsAndUserLocked: valid=" + valid
+                log("validateEventsAndUserLocked: valid=" + valid
                         + " r.callerUid=" + r.callerUid + " foregroundUser=" + foregroundUser
                         + " r.events=" + r.events + " events=" + events);
             }
@@ -1279,7 +1288,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean validatePhoneId(int phoneId) {
         boolean valid = (phoneId >= 0) && (phoneId < mNumPhones);
-        if (VDBG) Slog.d(TAG, "validatePhoneId: " + valid);
+        if (VDBG) log("validatePhoneId: " + valid);
         return valid;
+    }
+
+    private static void log(String s) {
+        Rlog.d(TAG, s);
     }
 }
