@@ -384,3 +384,6 @@ redirects:
 
 - from: /edu
   to: /distribute/googleplay/edu/index.html
+
+- from: /preview/google-play-services-wear.html
+  to: /training/building-wearables.html
