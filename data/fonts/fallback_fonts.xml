@@ -264,11 +264,6 @@
     </family>
     <family>
         <fileset>
-            <file>AndroidEmoji.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
             <file>NotoColorEmoji.ttf</file>
         </fileset>
     </family>

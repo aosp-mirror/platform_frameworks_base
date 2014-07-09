@@ -39,7 +39,6 @@ PRODUCT_PACKAGES := \
     RobotoCondensed-Light.ttf \
     RobotoCondensed-LightItalic.ttf \
     DroidSansMono.ttf \
-    AndroidEmoji.ttf \
     Clockopia.ttf \
     AndroidClock.ttf \
     AndroidClock_Highlight.ttf \
