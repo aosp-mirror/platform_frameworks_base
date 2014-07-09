@@ -326,4 +326,5 @@
     <!-- The thickness of the colored border around the current user. -->
     <dimen name="keyguard_user_switcher_border_thickness">2dp</dimen>
 
+    <dimen name="data_usage_graph_marker_width">4dp</dimen>
 </resources>

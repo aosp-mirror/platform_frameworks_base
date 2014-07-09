@@ -25,6 +25,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
+import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
@@ -49,6 +51,7 @@ public class MobileDataController {
     private final TelephonyManager mTelephonyManager;
     private final ConnectivityManager mConnectivityManager;
     private final INetworkStatsService mStatsService;
+    private final NetworkPolicyManager mPolicyManager;
 
     private INetworkStatsSession mSession;
     private Callback mCallback;
@@ -59,6 +62,8 @@ public class MobileDataController {
         mConnectivityManager = ConnectivityManager.from(context);
         mStatsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        mPolicyManager = NetworkPolicyManager.from(mContext);
+
         try {
             mSession = mStatsService.openSession();
         } catch (RemoteException e) {
@@ -85,6 +90,7 @@ public class MobileDataController {
             return warn("no stats session");
         }
         final NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        final NetworkPolicy policy = findNetworkPolicy(template);
         try {
             final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELDS);
             final long now = System.currentTimeMillis();
@@ -105,10 +111,28 @@ public class MobileDataController {
             usage.maxLevel = (long) (totalBytes / .4);
             usage.usageLevel = totalBytes;
             usage.period = MMM_D.format(new Date(start)) + " - " + MMM_D.format(new Date(end));
+            if (policy != null) {
+                usage.limitLevel = policy.limitBytes > 0 ? policy.limitBytes : 0;
+                usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
+            }
             return usage;
         } catch (RemoteException e) {
             return warn("remote call failed");
         }
+    }
+
+    private NetworkPolicy findNetworkPolicy(NetworkTemplate template) {
+        if (mPolicyManager == null || template == null) return null;
+        final NetworkPolicy[] policies = mPolicyManager.getNetworkPolicies();
+        if (policies == null) return null;
+        final int N = policies.length;
+        for (int i = 0; i < N; i++) {
+            final NetworkPolicy policy = policies[i];
+            if (policy != null && template.equals(policy.template)) {
+                return policy;
+            }
+        }
+        return null;
     }
 
     private static String historyEntryToString(NetworkStatsHistory.Entry entry) {

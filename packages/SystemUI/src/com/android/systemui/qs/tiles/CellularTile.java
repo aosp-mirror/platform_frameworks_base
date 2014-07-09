@@ -215,10 +215,36 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                     .inflate(R.layout.data_usage, parent, false);
             final DataUsageInfo info = mController.getDataUsageInfo();
             if (info == null) return v;
+            final Resources res = mContext.getResources();
+            int titleId;
+            long bytes;
+            int usageColor = R.color.system_accent_color;
+            String top = null, bottom = null;
+            if (info.limitLevel <= 0) { // no limit
+                titleId = R.string.quick_settings_cellular_detail_data_usage;
+                bytes = info.usageLevel;
+            } else if (info.usageLevel <= info.limitLevel) { // under limit
+                titleId = R.string.quick_settings_cellular_detail_remaining_data;
+                bytes = info.limitLevel - info.usageLevel;
+                top = res.getString(R.string.quick_settings_cellular_detail_data_used,
+                        formatBytes(info.usageLevel));
+                bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
+                        formatBytes(info.limitLevel));
+            } else { // over limit
+                titleId = R.string.quick_settings_cellular_detail_over_limit;
+                bytes = info.usageLevel - info.limitLevel;
+                top = res.getString(R.string.quick_settings_cellular_detail_data_used,
+                        formatBytes(info.usageLevel));
+                bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
+                        formatBytes(info.limitLevel));
+                usageColor = R.color.system_warning_color;
+            }
+
             final TextView title = (TextView) v.findViewById(android.R.id.title);
-            title.setText(R.string.quick_settings_cellular_detail_data_usage);
+            title.setText(titleId);
             final TextView usage = (TextView) v.findViewById(R.id.usage_text);
-            usage.setText(formatBytes(info.usageLevel));
+            usage.setText(formatBytes(bytes));
+            usage.setTextColor(res.getColor(usageColor));
             final DataUsageGraph graph = (DataUsageGraph) v.findViewById(R.id.usage_graph);
             graph.setLevels(info.maxLevel, info.limitLevel, info.warningLevel, info.usageLevel);
             final TextView carrier = (TextView) v.findViewById(R.id.usage_carrier_text);
@@ -226,9 +252,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             final TextView period = (TextView) v.findViewById(R.id.usage_period_text);
             period.setText(info.period);
             final TextView infoTop = (TextView) v.findViewById(R.id.usage_info_top_text);
-            // TODO
+            infoTop.setVisibility(top != null ? View.VISIBLE : View.GONE);
+            infoTop.setText(top);
             final TextView infoBottom = (TextView) v.findViewById(R.id.usage_info_bottom_text);
-            // TODO
+            infoBottom.setVisibility(bottom != null ? View.VISIBLE : View.GONE);
+            infoBottom.setText(bottom);
             return v;
         }
 

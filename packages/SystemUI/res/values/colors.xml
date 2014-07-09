@@ -37,7 +37,7 @@
     <color name="system_primary_color">#ff263238</color>
     <color name="system_secondary_color">#ff384248</color>
     <color name="system_accent_color">#ff80CBC4</color><!-- deep teal 200 -->
-    <color name="system_error_color">#fff0592b</color>
+    <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_tile_text">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_subhead">#66FFFFFF</color><!-- 40% white -->

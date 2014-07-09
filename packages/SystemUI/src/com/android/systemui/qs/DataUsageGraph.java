@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -28,7 +29,10 @@ import com.android.systemui.R;
 public class DataUsageGraph extends View {
 
     private final int mBackgroundColor;
+    private final int mTrackColor;
     private final int mUsageColor;
+    private final int mOverlimitColor;
+    private final int mMarkerWidth;
     private final RectF mTmpRect = new RectF();
     private final Paint mTmpPaint = new Paint();
 
@@ -39,8 +43,12 @@ public class DataUsageGraph extends View {
 
     public DataUsageGraph(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mBackgroundColor = context.getResources().getColor(R.color.data_usage_graph_track);
-        mUsageColor = context.getResources().getColor(R.color.system_accent_color);
+        final Resources res = context.getResources();
+        mBackgroundColor = res.getColor(R.color.system_primary_color);
+        mTrackColor = res.getColor(R.color.data_usage_graph_track);
+        mUsageColor = res.getColor(R.color.system_accent_color);
+        mOverlimitColor = res.getColor(R.color.system_warning_color);
+        mMarkerWidth = res.getDimensionPixelSize(R.dimen.data_usage_graph_marker_width);
     }
 
     public void setLevels(long maxLevel, long limitLevel, long warningLevel, long usageLevel) {
@@ -60,14 +68,38 @@ public class DataUsageGraph extends View {
         final int w = getWidth();
         final int h = getHeight();
 
-        // draw background
+        // draw track
         r.set(0, 0, w, h);
-        p.setColor(mBackgroundColor);
+        p.setColor(mTrackColor);
         canvas.drawRect(r, p);
 
+        final boolean hasLimit = mLimitLevel > 0;
+        final boolean overLimit = hasLimit && mUsageLevel > mLimitLevel;
+
+        final long maxLevel = hasLimit ? Math.max(mUsageLevel, mLimitLevel) : mMaxLevel;
+        final long usageLevel = hasLimit ? Math.min(mUsageLevel, mLimitLevel) : mUsageLevel;
+        float usageRight = w * (usageLevel / (float) maxLevel);
+        if (overLimit) {
+            usageRight -= (mMarkerWidth / 2);
+            usageRight = Math.min(usageRight, w - mMarkerWidth * 2);
+            usageRight = Math.max(usageRight, mMarkerWidth);
+        }
+
         // draw usage
-        r.set(0, 0, w * mUsageLevel / (float) mMaxLevel, h);
+        r.set(0, 0, usageRight, h);
         p.setColor(mUsageColor);
         canvas.drawRect(r, p);
+
+        if (overLimit) {
+            // draw gap
+            r.set(usageRight, 0, usageRight + mMarkerWidth, h);
+            p.setColor(mBackgroundColor);
+            canvas.drawRect(r, p);
+
+            // draw overlimit
+            r.set(usageRight + mMarkerWidth, 0, w, h);
+            p.setColor(mOverlimitColor);
+            canvas.drawRect(r, p);
+        }
     }
 }
