@@ -1775,6 +1775,46 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device/profile owner to set whether the screen capture is disabled.
+     *
+     * <p>The calling device admin must be a device or profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public void setScreenCaptureDisabled(ComponentName admin, boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setScreenCaptureDisabled(admin, UserHandle.myUserId(), disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Determine whether or not screen capture has been disabled by the current
+     * admin, if specified, or all admins.
+     * @param admin The name of the admin component to check, or null to check if any admins
+     * have disabled screen capture.
+     */
+    public boolean getScreenCaptureDisabled(ComponentName admin) {
+        return getScreenCaptureDisabled(admin, UserHandle.myUserId());
+    }
+
+    /** @hide per-user version */
+    public boolean getScreenCaptureDisabled(ComponentName admin, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getScreenCaptureDisabled(admin, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by an application that is administering the device to disable keyguard customizations,
      * such as widgets. After setting this, keyguard features will be disabled according to the
      * provided feature list.

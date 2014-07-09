@@ -5355,6 +5355,7 @@ package android.app.admin {
     method public int getPasswordMinimumSymbols(android.content.ComponentName);
     method public int getPasswordMinimumUpperCase(android.content.ComponentName);
     method public int getPasswordQuality(android.content.ComponentName);
+    method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
     method public boolean hasAnyCaCertsInstalled();
@@ -5399,6 +5400,7 @@ package android.app.admin {
     method public void setProfileName(android.content.ComponentName, java.lang.String);
     method public void setRecommendedGlobalProxy(android.content.ComponentName, android.net.ProxyInfo);
     method public void setRestrictionsProvider(android.content.ComponentName, android.content.ComponentName);
+    method public void setScreenCaptureDisabled(android.content.ComponentName, boolean);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
