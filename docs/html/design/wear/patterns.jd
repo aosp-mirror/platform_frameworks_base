@@ -112,10 +112,10 @@ page.title=UI Patterns for Android Wear
   </div>
 </a>
 
-
 <h2 id="2DPicker" style="clear:both">2D Picker</h2>
 
-<p>A 2D Picker component in your app can be invoked from the cue card or from an action button. It allows users to choose from a list of items, and optionally select an attribute of each item. For example, in response to a voice action to “buy tickets to a movie tonight,” you could show a 2D Picker with a vertical list of movies playing, with each movie having a horizontal list of showtimes.</p>
+<p>A 2D Picker component in your app can be invoked from the cue card or from an action button. It allows users to choose from a list of items, and optionally select an attribute of each item. For example, for a social check-in app, you could show a 2D Picker with a vertical list of places
+to check-in to.</p>
 
 <img src="{@docRoot}design/media/wear/2D_picker_action.png" width="500" alt="">
 
