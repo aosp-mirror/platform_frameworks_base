@@ -102,22 +102,23 @@ if you are using another IDE or another method of building.
 </p>
 
 <ol>
-  <li>Copy the signed wearable app into your handheld project's <code>assets/</code> directory,
-  referred to as <code>path/to/wearable_app.apk</code>.</li>
+  <li>Copy the signed wearable app to your handheld project's <code>res/raw</code> directory. We'll
+  refer to the APK as <code>wearable_app.apk</code>.</li>
   <li>Create a <code>res/xml/wearable_app_desc.xml</code> file that contains the version and
   path information of the wearable app:
 <pre>
 &lt;wearableApp package="com.google.android.wearable.myapp"&gt;
-  &lt;versionCode>1&lt;/versionCode&gt;
-  &lt;versionName>1.0&lt;/versionName&gt;
-  &lt;path>path/to/wearable_app.apk&lt;/path&gt;
+  &lt;versionCode&gt;1&lt;/versionCode&gt;
+  &lt;versionName&gt;1.0&lt;/versionName&gt;
+  &lt;rawPathResId>wearable_app&lt;/rawPathResId&gt; <!-- Do not include the .apk extension -->
 &lt;/wearableApp&gt;
 </pre>
+
 <p>
 The <code>package</code>, <code>versionCode</code>, and <code>versionName</code> are the
-same as values specified in the wearable app's <code>AndroidManifest.xml</code> file. 
-The path is the full path of <code>wearable_app.apk</code>, relative to the <code>assets/</code>
-directory.
+same values specified in the wearable app's <code>AndroidManifest.xml</code> file. 
+The <code>rawPathResId</code> is the static variable name of the APK resource. For example, 
+for <code>wearable_app.apk</code>, the static variable name is <code>wearable_app</code>.
 </p>
 </li>
 <li>
