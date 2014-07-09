@@ -4858,6 +4858,8 @@ public final class ContactsContract {
          *     load pictures from them.
          *     </li>
          * </ul>
+         * <p>
+         * This URI does NOT support selection nor order-by.
          *
          * <pre>
          * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
