@@ -276,6 +276,12 @@ final class HdmiCecController {
         nativeClearLogicalAddress(mNativePtr);
     }
 
+    @ServiceThreadOnly
+    void clearLocalDevices() {
+        assertRunOnServiceThread();
+        mLocalDevices.clear();
+    }
+
     /**
      * Return the physical address of the device.
      *

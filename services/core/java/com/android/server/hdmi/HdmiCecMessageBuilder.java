@@ -274,7 +274,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildInactiveSource(int src, int physicalAddress) {
-        return buildCommand(src, Constants.ADDR_BROADCAST,
+        return buildCommand(src, Constants.ADDR_TV,
                 Constants.MESSAGE_INACTIVE_SOURCE, physicalAddressToParam(physicalAddress));
     }
 

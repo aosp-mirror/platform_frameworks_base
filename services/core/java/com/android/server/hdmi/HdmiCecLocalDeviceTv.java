@@ -1034,19 +1034,58 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onTransitionToStandby(boolean initiatedByCec) {
+    protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
+        super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         // Remove any repeated working actions.
         // HotplugDetectionAction will be reinstated during the wake up process.
         // HdmiControlService.onWakeUp() -> initializeLocalDevices() ->
         //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
+        removeAction(DeviceDiscoveryAction.class);
         removeAction(HotplugDetectionAction.class);
+
+        disableSystemAudioIfExist();
+        disableArcIfExist();
         checkIfPendingActionsCleared();
+    }
+
+    @ServiceThreadOnly
+    private void disableSystemAudioIfExist() {
+        assertRunOnServiceThread();
+        if (getAvrDeviceInfo() == null) {
+            return;
+        }
+
+        // Seq #31.
+        removeAction(SystemAudioActionFromAvr.class);
+        removeAction(SystemAudioActionFromTv.class);
+        removeAction(SystemAudioAutoInitiationAction.class);
+        removeAction(SystemAudioStatusAction.class);
+        removeAction(VolumeControlAction.class);
+
+        // Once adding additional param which describes whether to record it to NVM or not to this
+        // method, put "false" for it.
+        setSystemAudioMode(false);
+    }
+
+    @ServiceThreadOnly
+    private void disableArcIfExist() {
+        assertRunOnServiceThread();
+        HdmiCecDeviceInfo avr = getAvrDeviceInfo();
+        if (avr == null) {
+            return;
+        }
+
+        // Seq #44.
+        removeAction(RequestArcInitiationAction.class);
+        if (!hasAction(RequestArcTerminationAction.class) && isArcEstabilished()) {
+            addAndStartAction(new RequestArcTerminationAction(this, avr.getLogicalAddress()));
+        }
     }
 
     @Override
     @ServiceThreadOnly
-    protected void onStandBy(boolean initiatedByCec) {
+    protected void onStandby(boolean initiatedByCec) {
         assertRunOnServiceThread();
         // Seq #11
         if (!mService.isControlEnabled()) {

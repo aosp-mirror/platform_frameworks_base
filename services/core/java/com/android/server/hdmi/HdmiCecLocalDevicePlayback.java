@@ -141,7 +141,9 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onTransitionToStandby(boolean initiatedByCec) {
+    protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
+        super.disableDevice(initiatedByCec, callback);
+
         assertRunOnServiceThread();
         if (!initiatedByCec && mIsActiveSource) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(

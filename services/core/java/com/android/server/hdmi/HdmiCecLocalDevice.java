@@ -17,7 +17,9 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCecDeviceInfo;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -34,6 +36,11 @@ import java.util.List;
  */
 abstract class HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDevice";
+
+    private static final int MSG_DISABLE_DEVICE_TIMEOUT = 1;
+    // Timeout in millisecond for device clean up (5s).
+    // Normal actions timeout is 2s but some of them would have several sequence of timeout.
+    private static final int DEVICE_CLEANUP_TIMEOUT = 5000;
 
     protected final HdmiControlService mService;
     protected final int mDeviceType;
@@ -57,6 +64,27 @@ abstract class HdmiCecLocalDevice {
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
     private final LinkedList<FeatureAction> mActions = new LinkedList<>();
+
+    private Handler mHandler = new Handler () {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_DISABLE_DEVICE_TIMEOUT:
+                    handleDisableDeviceTimeout();
+                    break;
+            }
+        }
+    };
+
+    /**
+     * A callback interface to get notified when all pending action is cleared.
+     * It can be called when timeout happened.
+     */
+    interface PendingActionClearedCallback {
+        void onCleared(HdmiCecLocalDevice device);
+    }
+
+    protected PendingActionClearedCallback mPendingActionClearedCallback;
 
     protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
         mService = service;
@@ -482,10 +510,11 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected void checkIfPendingActionsCleared() {
-        if (mActions.isEmpty()) {
-            mService.onPendingActionsCleared();
+        if (mActions.isEmpty() && mPendingActionClearedCallback != null) {
+            mPendingActionClearedCallback.onCleared(this);
         }
     }
+
     protected void assertRunOnServiceThread() {
         if (Looper.myLooper() != mService.getServiceLooper()) {
             throw new IllegalStateException("Should run on service thread.");
@@ -578,28 +607,45 @@ abstract class HdmiCecLocalDevice {
     }
 
     /**
-     * Called when the system started transition to standby mode.
-     *
-     * @param initiatedByCec true if this power sequence is initiated
-     *         by the reception the CEC messages like &lt;StandBy&gt;
-     */
-    protected void onTransitionToStandby(boolean initiatedByCec) {
-        // If there are no outstanding actions, we'll go to STANDBY state.
-        checkIfPendingActionsCleared();
-    }
-
-    /**
      * Called when the system goes to standby mode.
      *
      * @param initiatedByCec true if this power sequence is initiated
-     *         by the reception the CEC messages like &lt;StandBy&gt;
+     *         by the reception the CEC messages like &lt;Standby&gt;
      */
-    protected void onStandBy(boolean initiatedByCec) {}
+    protected void onStandby(boolean initiatedByCec) {}
+
+    /**
+     * Disable device. {@code callback} is used to get notified when all pending
+     * actions are completed or timeout is issued.
+     *
+     * @param initiatedByCec true if this sequence is initiated
+     *         by the reception the CEC messages like &lt;Standby&gt;
+     * @param callback callback interface to get notified when all pending actions are cleared
+     */
+    protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
+        mPendingActionClearedCallback = callback;
+        mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_DISABLE_DEVICE_TIMEOUT),
+                DEVICE_CLEANUP_TIMEOUT);
+    }
+
+    @ServiceThreadOnly
+    private void handleDisableDeviceTimeout() {
+        assertRunOnServiceThread();
+
+        // If all actions are not cleared in DEVICE_CLEANUP_TIMEOUT, enforce to finish them.
+        // onCleard will be called at the last action's finish method.
+        Iterator<FeatureAction> iter = mActions.iterator();
+        while (iter.hasNext()) {
+            FeatureAction action = iter.next();
+            action.finish();
+            iter.remove();
+        }
+    }
 
     /**
      * Send a key event to other device.
      *
-     * @param keyCode key code defined in {@link android.os.KeyEvent}
+     * @param keyCode key code defined in {@link android.view.KeyEvent}
      * @param isPressed {@code true} for key down event
      */
     protected void sendKeyEvent(int keyCode, boolean isPressed) {

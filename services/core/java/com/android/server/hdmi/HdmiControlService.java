@@ -50,6 +50,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
+import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,9 +73,11 @@ public final class HdmiControlService extends SystemService {
          * Called when {@link HdmiControlService#sendCecCommand} is completed.
          *
          * @param error result of send request.
-         * @see {@link #SEND_RESULT_SUCCESS}
-         * @see {@link #SEND_RESULT_NAK}
-         * @see {@link #SEND_RESULT_FAILURE}
+         * <ul>
+         * <li>{@link Constants#SEND_RESULT_SUCCESS}
+         * <li>{@link Constants#SEND_RESULT_NAK}
+         * <li>{@link Constants#SEND_RESULT_FAILURE}
+         * </ul>
          */
         void onSendCompleted(int error);
     }
@@ -839,27 +842,11 @@ public final class HdmiControlService extends SystemService {
         @Override
         public void setControlEnabled(final boolean enabled) {
             enforceAccessPermission();
-            synchronized (mLock) {
-                mHdmiControlEnabled = enabled;
-            }
-            // TODO: Stop the running actions when disabled, and start
-            //       address allocation/device discovery when enabled.
-            if (!enabled) {
-                return;
-            }
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    HdmiCecLocalDeviceTv tv = tv();
-                    if (tv == null) {
-                        return;
-                    }
-                    int value = enabled ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED;
-                    mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE, value);
-                    if (mMhlController != null) {
-                        mMhlController.setOption(HdmiTvClient.OPTION_MHL_ENABLE, value);
-                    }
-                    tv.launchRoutingControl(false);
+                    handleHdmiControlStatusChanged(enabled);
+
                 }
             });
         }
@@ -1239,25 +1226,48 @@ public final class HdmiControlService extends SystemService {
     private void onStandby() {
         assertRunOnServiceThread();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
+
+        final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
+        disableDevices(new PendingActionClearedCallback() {
+            @Override
+            public void onCleared(HdmiCecLocalDevice device) {
+                Slog.v(TAG, "On standby-action cleared:" + device.mDeviceType);
+                devices.remove(device);
+                if (devices.isEmpty()) {
+                    clearLocalDevices();
+                    onStandbyCompleted();
+                }
+            }
+        });
+    }
+
+    private void disableDevices(PendingActionClearedCallback callback) {
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-            device.onTransitionToStandby(mStandbyMessageReceived);
+            device.disableDevice(mStandbyMessageReceived, callback);
         }
     }
 
-    /**
-     * Called when there are the outstanding actions in the local devices.
-     * This callback is used to wait for when the action queue is empty
-     * during the power state transition to standby.
-     */
     @ServiceThreadOnly
-    void onPendingActionsCleared() {
+    private void clearLocalDevices() {
         assertRunOnServiceThread();
+        if (mCecController == null) {
+            return;
+        }
+        mCecController.clearLogicalAddress();
+        mCecController.clearLocalDevices();
+    }
+
+    @ServiceThreadOnly
+    private void onStandbyCompleted() {
+        assertRunOnServiceThread();
+        Slog.v(TAG, "onStandbyCompleted");
+
         if (mPowerStatus != HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY) {
             return;
         }
         mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-            device.onStandBy(mStandbyMessageReceived);
+            device.onStandby(mStandbyMessageReceived);
         }
         mStandbyMessageReceived = false;
         mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL, HdmiTvClient.DISABLED);
@@ -1301,6 +1311,38 @@ public final class HdmiControlService extends SystemService {
     void setProhibitMode(boolean enabled) {
         synchronized (mLock) {
             mProhibitMode = enabled;
+        }
+    }
+
+    @ServiceThreadOnly
+    private void handleHdmiControlStatusChanged(boolean enabled) {
+        assertRunOnServiceThread();
+
+        int value = enabled ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED;
+        mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE, value);
+        if (mMhlController != null) {
+            mMhlController.setOption(HdmiTvClient.OPTION_MHL_ENABLE, value);
+        }
+
+        synchronized (mLock) {
+            mHdmiControlEnabled = enabled;
+        }
+
+        if (enabled) {
+            // TODO: call initalizedLocalDevice with additional param once putting
+            // it to address allocation result.
+            HdmiCecLocalDeviceTv tv = tv();
+            if (tv != null) {
+                tv.launchRoutingControl(false);
+            }
+        } else {
+            disableDevices(new PendingActionClearedCallback() {
+                @Override
+                public void onCleared(HdmiCecLocalDevice device) {
+                    assertRunOnServiceThread();
+                    clearLocalDevices();
+                }
+            });
         }
     }
 }
