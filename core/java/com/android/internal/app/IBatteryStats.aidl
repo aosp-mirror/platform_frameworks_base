@@ -44,6 +44,10 @@ interface IBatteryStats {
 
     void noteEvent(int code, String name, int uid);
 
+    void noteProcessStart(String name, int uid);
+    void noteProcessState(String name, int uid, int state);
+    void noteProcessFinish(String name, int uid);
+
     void noteStartWakelock(int uid, int pid, String name, String historyName,
             int type, boolean unimportantForLogging);
     void noteStopWakelock(int uid, int pid, String name, String historyName, int type);

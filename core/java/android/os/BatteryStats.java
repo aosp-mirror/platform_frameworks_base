@@ -115,6 +115,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int WIFI_BATCHED_SCAN = 11;
 
     /**
+     * A constant indicating a process state timer
+     */
+    public static final int PROCESS_STATE = 12;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -150,6 +155,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
     private static final String FOREGROUND_DATA = "fg";
+    private static final String STATE_TIME_DATA = "st";
     private static final String WAKELOCK_DATA = "wl";
     private static final String KERNEL_WAKELOCK_DATA = "kwl";
     private static final String WAKEUP_REASON_DATA = "wr";
@@ -278,7 +284,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @return a Map from Integer sensor ids to Uid.Sensor objects.
          */
-        public abstract Map<Integer, ? extends Sensor> getSensorStats();
+        public abstract SparseArray<? extends Sensor> getSensorStats();
 
         /**
          * Returns a mapping containing active process data.
@@ -328,6 +334,22 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getAudioTurnedOnTime(long elapsedRealtimeUs, int which);
         public abstract long getVideoTurnedOnTime(long elapsedRealtimeUs, int which);
         public abstract Timer getForegroundActivityTimer();
+
+        // Time this uid has any processes in foreground state.
+        public static final int PROCESS_STATE_FOREGROUND = 0;
+        // Time this uid has any process in active state (not cached).
+        public static final int PROCESS_STATE_ACTIVE = 1;
+        // Time this uid has any processes running at all.
+        public static final int PROCESS_STATE_RUNNING = 2;
+        // Total number of process states we track.
+        public static final int NUM_PROCESS_STATE = 3;
+
+        static final String[] PROCESS_STATE_NAMES = {
+            "Foreground", "Active", "Running"
+        };
+
+        public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);
+
         public abstract Timer getVibratorOnTimer();
 
         public static final int NUM_WIFI_BATCHED_SCAN_BINS = 5;
@@ -2082,22 +2104,20 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
             }
-                
-            Map<Integer, ? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
-            if (sensors.size() > 0)  {
-                for (Map.Entry<Integer, ? extends BatteryStats.Uid.Sensor> ent
-                        : sensors.entrySet()) {
-                    Uid.Sensor se = ent.getValue();
-                    int sensorNumber = ent.getKey();
-                    Timer timer = se.getSensorTime();
-                    if (timer != null) {
-                        // Convert from microseconds to milliseconds with rounding
-                        long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
-                        int count = timer.getCountLocked(which);
-                        if (totalTime != 0) {
-                            dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count);
-                        }
-                    } 
+
+            SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
+            int NSE = sensors.size();
+            for (int ise=0; ise<NSE; ise++) {
+                Uid.Sensor se = sensors.valueAt(ise);
+                int sensorNumber = sensors.keyAt(ise);
+                Timer timer = se.getSensorTime();
+                if (timer != null) {
+                    // Convert from microseconds to milliseconds with rounding
+                    long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                    int count = timer.getCountLocked(which);
+                    if (totalTime != 0) {
+                        dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count);
+                    }
                 }
             }
 
@@ -2119,6 +2139,16 @@ public abstract class BatteryStats implements Parcelable {
                 if (totalTime != 0) {
                     dumpLine(pw, uid, category, FOREGROUND_DATA, totalTime, count);
                 }
+            }
+
+            Object[] stateTimes = new Object[Uid.NUM_PROCESS_STATE];
+            long totalStateTime = 0;
+            for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
+                totalStateTime += u.getProcessStateTime(ips, rawRealtime, which);
+                stateTimes[ips] = (totalStateTime + 500) / 1000;
+            }
+            if (totalStateTime > 0) {
+                dumpLine(pw, uid, category, STATE_TIME_DATA, stateTimes);
             }
 
             Map<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
@@ -2968,45 +2998,43 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
 
-            Map<Integer, ? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
-            if (sensors.size() > 0) {
-                for (Map.Entry<Integer, ? extends BatteryStats.Uid.Sensor> ent
-                    : sensors.entrySet()) {
-                    Uid.Sensor se = ent.getValue();
-                    int sensorNumber = ent.getKey();
-                    sb.setLength(0);
-                    sb.append(prefix);
-                    sb.append("    Sensor ");
-                    int handle = se.getHandle();
-                    if (handle == Uid.Sensor.GPS) {
-                        sb.append("GPS");
-                    } else {
-                        sb.append(handle);
-                    }
-                    sb.append(": ");
+            SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
+            int NSE = sensors.size();
+            for (int ise=0; ise<NSE; ise++) {
+                Uid.Sensor se = sensors.valueAt(ise);
+                int sensorNumber = sensors.keyAt(ise);
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Sensor ");
+                int handle = se.getHandle();
+                if (handle == Uid.Sensor.GPS) {
+                    sb.append("GPS");
+                } else {
+                    sb.append(handle);
+                }
+                sb.append(": ");
 
-                    Timer timer = se.getSensorTime();
-                    if (timer != null) {
-                        // Convert from microseconds to milliseconds with rounding
-                        long totalTime = (timer.getTotalTimeLocked(
-                                rawRealtime, which) + 500) / 1000;
-                        int count = timer.getCountLocked(which);
-                        //timer.logState();
-                        if (totalTime != 0) {
-                            formatTimeMs(sb, totalTime);
-                            sb.append("realtime (");
-                            sb.append(count);
-                            sb.append(" times)");
-                        } else {
-                            sb.append("(not used)");
-                        }
+                Timer timer = se.getSensorTime();
+                if (timer != null) {
+                    // Convert from microseconds to milliseconds with rounding
+                    long totalTime = (timer.getTotalTimeLocked(
+                            rawRealtime, which) + 500) / 1000;
+                    int count = timer.getCountLocked(which);
+                    //timer.logState();
+                    if (totalTime != 0) {
+                        formatTimeMs(sb, totalTime);
+                        sb.append("realtime (");
+                        sb.append(count);
+                        sb.append(" times)");
                     } else {
                         sb.append("(not used)");
                     }
-
-                    pw.println(sb.toString());
-                    uidActivity = true;
+                } else {
+                    sb.append("(not used)");
                 }
+
+                pw.println(sb.toString());
+                uidActivity = true;
             }
 
             Timer vibTimer = u.getVibratorOnTimer();
@@ -3042,6 +3070,22 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("realtime (");
                     sb.append(count);
                     sb.append(" times)");
+                    pw.println(sb.toString());
+                    uidActivity = true;
+                }
+            }
+
+            long totalStateTime = 0;
+            for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
+                long time = u.getProcessStateTime(ips, rawRealtime, which);
+                if (time > 0) {
+                    totalStateTime += time;
+                    sb.setLength(0);
+                    sb.append(prefix);
+                    sb.append("    ");
+                    sb.append(Uid.PROCESS_STATE_NAMES[ips]);
+                    sb.append(" for: ");
+                    formatTimeMs(sb, (totalStateTime + 500) / 1000);
                     pw.println(sb.toString());
                     uidActivity = true;
                 }

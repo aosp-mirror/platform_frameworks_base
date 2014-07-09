@@ -138,7 +138,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -2997,12 +2996,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, null);
 
-            BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
-            synchronized (bs) {
-                if (bs.isOnBattery()) {
-                    bs.getProcessStatsLocked(app.uid, app.processName).incStartsLocked();
-                }
+            if (app.isolated) {
+                mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
             }
+            mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
 
             EventLog.writeEvent(EventLogTags.AM_PROC_START,
                     UserHandle.getUserId(uid), startResult.pid, uid,
@@ -3052,14 +3049,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.sendMessageDelayed(msg, startResult.usingWrapper
                         ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_START,
-                    app.processName, app.info.uid);
-            if (app.isolated) {
-                mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
-            }
         } catch (RuntimeException e) {
             // XXX do better error recovery.
             app.setPid(0);
+            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+            }
             Slog.e(TAG, "Failure starting process " + app.processName, e);
         }
     }
@@ -5121,8 +5117,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
-                    app.processName, app.info.uid);
+            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
@@ -5166,8 +5161,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mHeavyWeightProcess.userId, 0));
                 mHeavyWeightProcess = null;
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
-                    app.processName, app.info.uid);
+            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
@@ -13285,8 +13279,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_PROC_FINISH,
-                    app.processName, app.info.uid);
+            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
@@ -16039,7 +16032,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.notCachedSinceIdle = false;
             }
             if (!doingAll) {
-                setProcessTrackerState(app, mProcessStats.getMemFactorLocked(), now);
+                setProcessTrackerStateLocked(app, mProcessStats.getMemFactorLocked(), now);
             } else {
                 app.procStateChanged = true;
             }
@@ -16092,9 +16085,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         return success;
     }
 
-    private final void setProcessTrackerState(ProcessRecord proc, int memFactor, long now) {
-        if (proc.thread != null && proc.baseProcessTracker != null) {
-            proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
+    private final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
+        if (proc.thread != null) {
+            if (proc.baseProcessTracker != null) {
+                proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
+            }
+            if (proc.repProcState >= 0) {
+                mBatteryStatsService.noteProcessState(proc.processName, proc.info.uid,
+                        proc.repProcState);
+            }
         }
     }
 
@@ -16149,7 +16148,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityRecord act = mStackSupervisor.resumedAppLocked();
         String pkg;
         int uid;
-        if (act != null && !act.sleeping) {
+        if (act != null) {
             pkg = act.packageName;
             uid = act.info.applicationInfo.uid;
         } else {
@@ -16430,7 +16429,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    setProcessTrackerState(app, trackerMemFactor, now);
+                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
                     app.procStateChanged = false;
                 }
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
@@ -16521,7 +16520,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    setProcessTrackerState(app, trackerMemFactor, now);
+                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
                     app.procStateChanged = false;
                 }
                 if ((app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND

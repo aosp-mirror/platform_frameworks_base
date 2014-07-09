@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
 import android.util.PrintWriterPrinter;
@@ -89,7 +91,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 108 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 109 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2328,6 +2330,38 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
     }
 
+    public void noteProcessStartLocked(String name, int uid) {
+        uid = mapUid(uid);
+        if (isOnBattery()) {
+            Uid u = getUidStatsLocked(uid);
+            u.getProcessStatsLocked(name).incStartsLocked();
+        }
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_PROC_START, name, uid, 0)) {
+            return;
+        }
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PROC_START, name, uid);
+    }
+
+    public void noteProcessStateLocked(String name, int uid, int state) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        getUidStatsLocked(uid).updateProcessStateLocked(name, state, elapsedRealtime);
+    }
+
+    public void noteProcessFinishLocked(String name, int uid) {
+        uid = mapUid(uid);
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_PROC_FINISH, name, uid, 0)) {
+            return;
+        }
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PROC_FINISH, name, uid);
+        getUidStatsLocked(uid).updateProcessStateLocked(name, Uid.PROCESS_STATE_NONE,
+                elapsedRealtime);
+    }
+
     private void requestWakelockCpuUpdate() {
         if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
             Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
@@ -3765,7 +3799,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         boolean mWifiScanStarted;
         StopwatchTimer mWifiScanTimer;
 
-        private static final int NO_BATCHED_SCAN_STARTED = -1;
+        static final int NO_BATCHED_SCAN_STARTED = -1;
         int mWifiBatchedScanBinStarted = NO_BATCHED_SCAN_STARTED;
         StopwatchTimer[] mWifiBatchedScanTimer;
 
@@ -3780,6 +3814,10 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         StopwatchTimer mForegroundActivityTimer;
 
+        static final int PROCESS_STATE_NONE = NUM_PROCESS_STATE;
+        int mProcessState = PROCESS_STATE_NONE;
+        StopwatchTimer[] mProcessStateTimer;
+
         BatchTimer mVibratorOnTimer;
 
         Counter[] mUserActivityCounters;
@@ -3792,22 +3830,22 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics we have collected for this uid's wake locks.
          */
-        final HashMap<String, Wakelock> mWakelockStats = new HashMap<String, Wakelock>();
+        final ArrayMap<String, Wakelock> mWakelockStats = new ArrayMap<String, Wakelock>();
 
         /**
          * The statistics we have collected for this uid's sensor activations.
          */
-        final HashMap<Integer, Sensor> mSensorStats = new HashMap<Integer, Sensor>();
+        final SparseArray<Sensor> mSensorStats = new SparseArray<Sensor>();
 
         /**
          * The statistics we have collected for this uid's processes.
          */
-        final HashMap<String, Proc> mProcessStats = new HashMap<String, Proc>();
+        final ArrayMap<String, Proc> mProcessStats = new ArrayMap<String, Proc>();
 
         /**
          * The statistics we have collected for this uid's processes.
          */
-        final HashMap<String, Pkg> mPackageStats = new HashMap<String, Pkg>();
+        final ArrayMap<String, Pkg> mPackageStats = new ArrayMap<String, Pkg>();
 
         /**
          * The transient wake stats we have collected for this uid's pids.
@@ -3825,6 +3863,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiBatchedScanTimer = new StopwatchTimer[NUM_WIFI_BATCHED_SCAN_BINS];
             mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
                     mWifiMulticastTimers, mOnBatteryTimeBase);
+            mProcessStateTimer = new StopwatchTimer[NUM_PROCESS_STATE];
         }
 
         @Override
@@ -3833,7 +3872,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public Map<Integer, ? extends BatteryStats.Uid.Sensor> getSensorStats() {
+        public SparseArray<? extends BatteryStats.Uid.Sensor> getSensorStats() {
             return mSensorStats;
         }
 
@@ -4035,6 +4074,21 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        void updateUidProcessStateLocked(int state, long elapsedRealtimeMs) {
+            if (mProcessState == state) return;
+
+            if (mProcessState != PROCESS_STATE_NONE) {
+                mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtimeMs);
+            }
+            mProcessState = state;
+            if (state != PROCESS_STATE_NONE) {
+                if (mProcessStateTimer[state] == null) {
+                    makeProcessState(state, null);
+                }
+                mProcessStateTimer[state].startRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
         public BatchTimer createVibratorOnTimerLocked() {
             if (mVibratorOnTimer == null) {
                 mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON, mOnBatteryTimeBase);
@@ -4112,6 +4166,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         @Override
         public Timer getForegroundActivityTimer() {
             return mForegroundActivityTimer;
+        }
+
+        void makeProcessState(int i, Parcel in) {
+            if (i < 0 || i >= NUM_PROCESS_STATE) return;
+
+            if (in == null) {
+                mProcessStateTimer[i] = new StopwatchTimer(this, PROCESS_STATE, null,
+                        mOnBatteryTimeBase);
+            } else {
+                mProcessStateTimer[i] = new StopwatchTimer(this, PROCESS_STATE, null,
+                        mOnBatteryTimeBase, in);
+            }
+        }
+
+        @Override
+        public long getProcessStateTime(int state, long elapsedRealtimeUs, int which) {
+            if (state < 0 || state >= NUM_PROCESS_STATE) return 0;
+            if (mProcessStateTimer[state] == null) {
+                return 0;
+            }
+            return mProcessStateTimer[state].getTotalTimeLocked(elapsedRealtimeUs, which);
         }
 
         @Override
@@ -4281,6 +4356,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mForegroundActivityTimer != null) {
                 active |= !mForegroundActivityTimer.reset(false);
             }
+            if (mProcessStateTimer != null) {
+                for (int i = 0; i < NUM_PROCESS_STATE; i++) {
+                    if (mProcessStateTimer[i] != null) {
+                        active |= !mProcessStateTimer[i].reset(false);
+                    }
+                }
+                active |= (mProcessState != PROCESS_STATE_NONE);
+            }
             if (mVibratorOnTimer != null) {
                 if (mVibratorOnTimer.reset(false)) {
                     mVibratorOnTimer.detach();
@@ -4305,37 +4388,30 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mMobileRadioActiveCount.reset(false);
             }
 
-            if (mWakelockStats.size() > 0) {
-                Iterator<Map.Entry<String, Wakelock>> it = mWakelockStats.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<String, Wakelock> wakelockEntry = it.next();
-                    Wakelock wl = wakelockEntry.getValue();
-                    if (wl.reset()) {
-                        it.remove();
-                    } else {
-                        active = true;
-                    }
+            for (int iw=mWakelockStats.size()-1; iw>=0; iw--) {
+                Wakelock wl = mWakelockStats.valueAt(iw);
+                if (wl.reset()) {
+                    mWakelockStats.removeAt(iw);
+                } else {
+                    active = true;
                 }
             }
-            if (mSensorStats.size() > 0) {
-                Iterator<Map.Entry<Integer, Sensor>> it = mSensorStats.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, Sensor> sensorEntry = it.next();
-                    Sensor s = sensorEntry.getValue();
-                    if (s.reset()) {
-                        it.remove();
-                    } else {
-                        active = true;
-                    }
+            for (int ise=mSensorStats.size()-1; ise>=0; ise--) {
+                Sensor s = mSensorStats.valueAt(ise);
+                if (s.reset()) {
+                    mSensorStats.removeAt(ise);
+                } else {
+                    active = true;
                 }
             }
-            if (mProcessStats.size() > 0) {
-                Iterator<Map.Entry<String, Proc>> it = mProcessStats.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<String, Proc> procEntry = it.next();
-                    procEntry.getValue().detach();
+            for (int ip=mProcessStats.size()-1; ip>=0; ip--) {
+                Proc proc = mProcessStats.valueAt(ip);
+                if (proc.mProcessState == PROCESS_STATE_NONE) {
+                    proc.detach();
+                    mProcessStats.removeAt(ip);
+                } else {
+                    active = true;
                 }
-                mProcessStats.clear();
             }
             if (mPids.size() > 0) {
                 for (int i=mPids.size()-1; i>=0; i--) {
@@ -4413,24 +4489,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
-            out.writeInt(mWakelockStats.size());
-            for (Map.Entry<String, Uid.Wakelock> wakelockEntry : mWakelockStats.entrySet()) {
-                out.writeString(wakelockEntry.getKey());
-                Uid.Wakelock wakelock = wakelockEntry.getValue();
+            int NW = mWakelockStats.size();
+            out.writeInt(NW);
+            for (int iw=0; iw<NW; iw++) {
+                out.writeString(mWakelockStats.keyAt(iw));
+                Uid.Wakelock wakelock = mWakelockStats.valueAt(iw);
                 wakelock.writeToParcelLocked(out, elapsedRealtimeUs);
             }
 
-            out.writeInt(mSensorStats.size());
-            for (Map.Entry<Integer, Uid.Sensor> sensorEntry : mSensorStats.entrySet()) {
-                out.writeInt(sensorEntry.getKey());
-                Uid.Sensor sensor = sensorEntry.getValue();
+            int NSE = mSensorStats.size();
+            out.writeInt(NSE);
+            for (int ise=0; ise<NSE; ise++) {
+                out.writeInt(mSensorStats.keyAt(ise));
+                Uid.Sensor sensor = mSensorStats.valueAt(ise);
                 sensor.writeToParcelLocked(out, elapsedRealtimeUs);
             }
 
-            out.writeInt(mProcessStats.size());
-            for (Map.Entry<String, Uid.Proc> procEntry : mProcessStats.entrySet()) {
-                out.writeString(procEntry.getKey());
-                Uid.Proc proc = procEntry.getValue();
+            int NP = mProcessStats.size();
+            out.writeInt(NP);
+            for (int ip=0; ip<NP; ip++) {
+                out.writeString(mProcessStats.keyAt(ip));
+                Uid.Proc proc = mProcessStats.valueAt(ip);
                 proc.writeToParcelLocked(out);
             }
 
@@ -4490,6 +4569,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mForegroundActivityTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
+            }
+            for (int i = 0; i < NUM_PROCESS_STATE; i++) {
+                if (mProcessStateTimer[i] != null) {
+                    out.writeInt(1);
+                    mProcessStateTimer[i].writeToParcel(out, elapsedRealtimeUs);
+                } else {
+                    out.writeInt(0);
+                }
             }
             if (mVibratorOnTimer != null) {
                 out.writeInt(1);
@@ -4613,6 +4700,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                         Uid.this, FOREGROUND_ACTIVITY, null, mOnBatteryTimeBase, in);
             } else {
                 mForegroundActivityTimer = null;
+            }
+            mProcessState = PROCESS_STATE_NONE;
+            for (int i = 0; i < NUM_PROCESS_STATE; i++) {
+                if (in.readInt() != 0) {
+                    makeProcessState(i, in);
+                } else {
+                    mProcessStateTimer[i] = null;
+                }
             }
             if (in.readInt() != 0) {
                 mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON, mOnBatteryTimeBase, in);
@@ -4870,6 +4965,11 @@ public final class BatteryStatsImpl extends BatteryStats {
              * The number of times the process has started before unplugged.
              */
             int mUnpluggedStarts;
+
+            /**
+             * Current process state.
+             */
+            int mProcessState = PROCESS_STATE_NONE;
 
             SamplingCounter[] mSpeedBins;
 
@@ -5483,6 +5583,49 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             return ps;
+        }
+
+        public void updateProcessStateLocked(String procName, int state, long elapsedRealtimeMs) {
+            int procState;
+            if (state <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                procState = PROCESS_STATE_FOREGROUND;
+            } else if (state <= ActivityManager.PROCESS_STATE_RECEIVER) {
+                procState = PROCESS_STATE_ACTIVE;
+            } else {
+                procState = PROCESS_STATE_RUNNING;
+            }
+            updateRealProcessStateLocked(procName, procState, elapsedRealtimeMs);
+        }
+
+        public void updateRealProcessStateLocked(String procName, int procState,
+                long elapsedRealtimeMs) {
+            Proc proc = getProcessStatsLocked(procName);
+            if (proc.mProcessState != procState) {
+                boolean changed;
+                if (procState < proc.mProcessState) {
+                    // Has this process become more important?  If so,
+                    // we may need to change the uid if the currrent uid proc state
+                    // is not as important as what we are now setting.
+                    changed = mProcessState > procState;
+                } else {
+                    // Has this process become less important?  If so,
+                    // we may need to change the uid if the current uid proc state
+                    // is the same importance as the old setting.
+                    changed = mProcessState == proc.mProcessState;
+                }
+                proc.mProcessState = procState;
+                if (changed) {
+                    // uid's state may have changed; compute what the new state should be.
+                    int uidProcState = PROCESS_STATE_NONE;
+                    for (int ip=mProcessStats.size()-1; ip>=0; ip--) {
+                        proc = mProcessStats.valueAt(ip);
+                        if (proc.mProcessState < uidProcState) {
+                            uidProcState = proc.mProcessState;
+                        }
+                    }
+                    updateUidProcessStateLocked(uidProcState, elapsedRealtimeMs);
+                }
+            }
         }
 
         public SparseArray<? extends Pid> getPidStats() {
@@ -6782,7 +6925,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         Uid wifiUid = mUidStats.get(Process.WIFI_UID);
         if (wifiUid != null) {
             long uSecTime = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which);
-            for (Uid.Proc proc : wifiUid.mProcessStats.values()) {
+            for (int ip=wifiUid.mProcessStats.size()-1; ip>=0; ip--) {
+                Uid.Proc proc = wifiUid.mProcessStats.valueAt(ip);
                 long totalRunningTime = getGlobalWifiRunningTime(uSecTime, which);
                 for (int i=0; i<mUidStats.size(); i++) {
                     Uid uid = mUidStats.valueAt(i);
@@ -7239,6 +7383,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (in.readInt() != 0) {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
             }
+            u.mProcessState = Uid.PROCESS_STATE_NONE;
+            for (int i = 0; i < Uid.NUM_PROCESS_STATE; i++) {
+                if (in.readInt() != 0) {
+                    u.makeProcessState(i, null);
+                    u.mProcessStateTimer[i].readSummaryFromParcelLocked(in);
+                }
+            }
             if (in.readInt() != 0) {
                 u.createVibratorOnTimerLocked().readSummaryFromParcelLocked(in);
             }
@@ -7505,6 +7656,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 out.writeInt(0);
             }
+            for (int i = 0; i < Uid.NUM_PROCESS_STATE; i++) {
+                if (u.mProcessStateTimer[i] != null) {
+                    out.writeInt(1);
+                    u.mProcessStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
+                }
+            }
             if (u.mVibratorOnTimer != null) {
                 out.writeInt(1);
                 u.mVibratorOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -7535,71 +7694,62 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             int NW = u.mWakelockStats.size();
             out.writeInt(NW);
-            if (NW > 0) {
-                for (Map.Entry<String, BatteryStatsImpl.Uid.Wakelock> ent
-                        : u.mWakelockStats.entrySet()) {
-                    out.writeString(ent.getKey());
-                    Uid.Wakelock wl = ent.getValue();
-                    if (wl.mTimerFull != null) {
-                        out.writeInt(1);
-                        wl.mTimerFull.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-                    } else {
-                        out.writeInt(0);
-                    }
-                    if (wl.mTimerPartial != null) {
-                        out.writeInt(1);
-                        wl.mTimerPartial.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-                    } else {
-                        out.writeInt(0);
-                    }
-                    if (wl.mTimerWindow != null) {
-                        out.writeInt(1);
-                        wl.mTimerWindow.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-                    } else {
-                        out.writeInt(0);
-                    }
+            for (int iw=0; iw<NW; iw++) {
+                out.writeString(u.mWakelockStats.keyAt(iw));
+                Uid.Wakelock wl = u.mWakelockStats.valueAt(iw);
+                if (wl.mTimerFull != null) {
+                    out.writeInt(1);
+                    wl.mTimerFull.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
+                }
+                if (wl.mTimerPartial != null) {
+                    out.writeInt(1);
+                    wl.mTimerPartial.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
+                }
+                if (wl.mTimerWindow != null) {
+                    out.writeInt(1);
+                    wl.mTimerWindow.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
                 }
             }
 
             int NSE = u.mSensorStats.size();
             out.writeInt(NSE);
-            if (NSE > 0) {
-                for (Map.Entry<Integer, BatteryStatsImpl.Uid.Sensor> ent
-                        : u.mSensorStats.entrySet()) {
-                    out.writeInt(ent.getKey());
-                    Uid.Sensor se = ent.getValue();
-                    if (se.mTimer != null) {
-                        out.writeInt(1);
-                        se.mTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-                    } else {
-                        out.writeInt(0);
-                    }
+            for (int ise=0; ise<NSE; ise++) {
+                out.writeInt(u.mSensorStats.keyAt(ise));
+                Uid.Sensor se = u.mSensorStats.valueAt(ise);
+                if (se.mTimer != null) {
+                    out.writeInt(1);
+                    se.mTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                } else {
+                    out.writeInt(0);
                 }
             }
 
             int NP = u.mProcessStats.size();
             out.writeInt(NP);
-            if (NP > 0) {
-                for (Map.Entry<String, BatteryStatsImpl.Uid.Proc> ent
-                    : u.mProcessStats.entrySet()) {
-                    out.writeString(ent.getKey());
-                    Uid.Proc ps = ent.getValue();
-                    out.writeLong(ps.mUserTime);
-                    out.writeLong(ps.mSystemTime);
-                    out.writeLong(ps.mForegroundTime);
-                    out.writeInt(ps.mStarts);
-                    final int N = ps.mSpeedBins.length;
-                    out.writeInt(N);
-                    for (int i=0; i<N; i++) {
-                        if (ps.mSpeedBins[i] != null) {
-                            out.writeInt(1);
-                            ps.mSpeedBins[i].writeSummaryFromParcelLocked(out);
-                        } else {
-                            out.writeInt(0);
-                        }
+            for (int ip=0; ip<NP; ip++) {
+                out.writeString(u.mProcessStats.keyAt(ip));
+                Uid.Proc ps = u.mProcessStats.valueAt(ip);
+                out.writeLong(ps.mUserTime);
+                out.writeLong(ps.mSystemTime);
+                out.writeLong(ps.mForegroundTime);
+                out.writeInt(ps.mStarts);
+                final int N = ps.mSpeedBins.length;
+                out.writeInt(N);
+                for (int i=0; i<N; i++) {
+                    if (ps.mSpeedBins[i] != null) {
+                        out.writeInt(1);
+                        ps.mSpeedBins[i].writeSummaryFromParcelLocked(out);
+                    } else {
+                        out.writeInt(0);
                     }
-                    ps.writeExcessivePowerToParcelLocked(out);
                 }
+                ps.writeExcessivePowerToParcelLocked(out);
             }
 
             NP = u.mPackageStats.size();
