@@ -68,6 +68,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private boolean mIsExitStarted;
 
+    private boolean mSharedElementsHidden;
+
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
         super(activity.getWindow(), names, getListener(activity, isReturning),
@@ -113,8 +115,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void resetViews() {
-        setViewVisibility(mTransitioningViews, View.VISIBLE);
-        setViewVisibility(mSharedElements, View.VISIBLE);
+        setTransitionAlpha(mTransitioningViews, 1);
+        setTransitionAlpha(mSharedElements, 1);
         mIsHidden = true;
         clearState();
     }
@@ -161,8 +163,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void hideSharedElements() {
         if (!mIsHidden) {
-            setViewVisibility(mSharedElements, View.INVISIBLE);
+            setTransitionAlpha(mSharedElements, 0);
         }
+        mSharedElementsHidden = true;
         finishIfNecessary();
     }
 
@@ -175,7 +178,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     beginTransitions();
                 }
             });
-            setViewVisibility(mTransitioningViews, View.INVISIBLE);
         }
     }
 
@@ -219,7 +221,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = getExitTransition();
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
-            setViewVisibility(mTransitioningViews, View.INVISIBLE);
+            mTransitioningViews.get(0).invalidate();
         }
     }
 
@@ -241,6 +243,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
                 mBackgroundAnimator.setDuration(getFadeDuration());
                 mBackgroundAnimator.start();
+            } else {
+                mIsBackgroundReady = true;
             }
         }
     }
@@ -259,7 +263,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     transition.removeListener(this);
                     exitTransitionComplete();
                     if (mIsHidden) {
-                        setViewVisibility(mTransitioningViews, View.VISIBLE);
+                        setTransitionAlpha(mTransitioningViews, 1);
                     }
                 }
 
@@ -268,6 +272,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     super.onTransitionCancel(transition);
                 }
             });
+            viewsTransition.forceVisibility(View.INVISIBLE, false);
         }
         return viewsTransition;
     }
@@ -286,7 +291,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     transition.removeListener(this);
                     sharedElementTransitionComplete();
                     if (mIsHidden) {
-                        setViewVisibility(mSharedElements, View.VISIBLE);
+                        setTransitionAlpha(mSharedElements, 1);
                     }
                 }
             });
@@ -302,6 +307,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
         if (transition != null) {
             TransitionManager.beginDelayedTransition(getDecor(), transition);
+            getDecor().invalidate();
         }
     }
 
@@ -353,7 +359,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void finishIfNecessary() {
         if (mIsReturning && mExitNotified && mActivity != null && (mSharedElements.isEmpty() ||
-                mSharedElements.get(0).getVisibility() == View.INVISIBLE)) {
+                mSharedElementsHidden)) {
             finish();
         }
         if (!mIsReturning && mExitNotified) {

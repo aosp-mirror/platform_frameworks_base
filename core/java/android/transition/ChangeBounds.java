@@ -310,7 +310,8 @@ public class ChangeBounds extends Transition {
                 Canvas canvas = new Canvas(bitmap);
                 view.draw(canvas);
                 final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-                view.setVisibility(View.INVISIBLE);
+                final float transitionAlpha = view.getTransitionAlpha();
+                view.setTransitionAlpha(0);
                 sceneRoot.getOverlay().add(drawable);
                 Path topLeftPath = getPathMotion().getPath(startX - tempLocation[0],
                         startY - tempLocation[1], endX - tempLocation[0], endY - tempLocation[1]);
@@ -321,7 +322,7 @@ public class ChangeBounds extends Transition {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         sceneRoot.getOverlay().remove(drawable);
-                        view.setVisibility(View.VISIBLE);
+                        view.setTransitionAlpha(transitionAlpha);
                     }
                 });
                 return anim;

@@ -78,6 +78,9 @@ public abstract class Visibility extends Transition {
 
     private int mMode = IN | OUT;
 
+    private int mForcedStartVisibility = -1;
+    private int mForcedEndVisibility = -1;
+
     public Visibility() {}
 
     public Visibility(Context context, AttributeSet attrs) {
@@ -121,8 +124,13 @@ public abstract class Visibility extends Transition {
         return sTransitionProperties;
     }
 
-    private void captureValues(TransitionValues transitionValues) {
-        int visibility = transitionValues.view.getVisibility();
+    private void captureValues(TransitionValues transitionValues, int forcedVisibility) {
+        int visibility;
+        if (forcedVisibility != -1) {
+            visibility = forcedVisibility;
+        } else {
+            visibility = transitionValues.view.getVisibility();
+        }
         transitionValues.values.put(PROPNAME_VISIBILITY, visibility);
         transitionValues.values.put(PROPNAME_PARENT, transitionValues.view.getParent());
         int[] loc = new int[2];
@@ -132,12 +140,22 @@ public abstract class Visibility extends Transition {
 
     @Override
     public void captureStartValues(TransitionValues transitionValues) {
-        captureValues(transitionValues);
+        captureValues(transitionValues, mForcedStartVisibility);
     }
 
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
-        captureValues(transitionValues);
+        captureValues(transitionValues, mForcedEndVisibility);
+    }
+
+    /** @hide */
+    @Override
+    public void forceVisibility(int visibility, boolean isStartValue) {
+        if (isStartValue) {
+            mForcedStartVisibility = visibility;
+        } else {
+            mForcedEndVisibility = visibility;
+        }
     }
 
     /**
@@ -402,26 +420,29 @@ public abstract class Visibility extends Transition {
         }
 
         if (viewToKeep != null) {
-            int originalVisibility = viewToKeep.getVisibility();
-            viewToKeep.setVisibility(View.VISIBLE);
+            int originalVisibility = -1;
+            final boolean isForcedVisibility = mForcedStartVisibility != -1 ||
+                    mForcedEndVisibility != -1;
+            if (!isForcedVisibility) {
+                originalVisibility = viewToKeep.getVisibility();
+                viewToKeep.setVisibility(View.VISIBLE);
+            }
             Animator animator = onDisappear(sceneRoot, viewToKeep, startValues, endValues);
-            if (animator == null) {
-                viewToKeep.setVisibility(originalVisibility);
-            } else {
+            if (animator != null) {
                 final View finalViewToKeep = viewToKeep;
                 animator.addListener(new AnimatorListenerAdapter() {
                     boolean mCanceled = false;
 
                     @Override
                     public void onAnimationPause(Animator animation) {
-                        if (!mCanceled) {
+                        if (!mCanceled && !isForcedVisibility) {
                             finalViewToKeep.setVisibility(finalVisibility);
                         }
                     }
 
                     @Override
                     public void onAnimationResume(Animator animation) {
-                        if (!mCanceled) {
+                        if (!mCanceled && !isForcedVisibility) {
                             finalViewToKeep.setVisibility(View.VISIBLE);
                         }
                     }
@@ -434,10 +455,16 @@ public abstract class Visibility extends Transition {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (!mCanceled) {
-                            finalViewToKeep.setVisibility(finalVisibility);
+                            if (isForcedVisibility) {
+                                finalViewToKeep.setTransitionAlpha(0);
+                            } else {
+                                finalViewToKeep.setVisibility(finalVisibility);
+                            }
                         }
                     }
                 });
+            } else if (!isForcedVisibility) {
+                viewToKeep.setVisibility(originalVisibility);
             }
             return animator;
         }

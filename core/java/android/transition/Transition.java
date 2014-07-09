@@ -2037,6 +2037,9 @@ public abstract class Transition implements Cloneable {
         return mNameOverrides;
     }
 
+    /** @hide */
+    public void forceVisibility(int visibility, boolean isStartValue) {}
+
     @Override
     public String toString() {
         return toString("");

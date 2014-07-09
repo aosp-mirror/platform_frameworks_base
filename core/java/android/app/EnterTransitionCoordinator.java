@@ -104,9 +104,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
             send(MSG_SEND_SHARED_ELEMENT_DESTINATION, null);
         }
-        setViewVisibility(mSharedElements, View.INVISIBLE);
+        setTransitionAlpha(mSharedElements, 0);
         if (getViewsTransition() != null) {
-            setViewVisibility(mTransitioningViews, View.INVISIBLE);
+            setTransitionAlpha(mTransitioningViews, 0);
         }
         if (mSharedElementsBundle != null) {
             onTakeSharedElements();
@@ -221,7 +221,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (!mIsCanceled) {
             mIsCanceled = true;
             if (getViewsTransition() == null || mIsViewsTransitionStarted) {
-                setViewVisibility(mSharedElements, View.VISIBLE);
+                setTransitionAlpha(mSharedElements, 1);
             } else {
                 mTransitioningViews.addAll(mSharedElements);
             }
@@ -281,7 +281,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         // Now start shared element transition
         ArrayList<View> sharedElementSnapshots = createSnapshots(sharedElementState,
                 mSharedElementNames);
-        setViewVisibility(mSharedElements, View.VISIBLE);
+        setTransitionAlpha(mSharedElements, 1);
         ArrayMap<ImageView, Pair<ImageView.ScaleType, Matrix>> originalImageViewState =
                 setSharedElementState(sharedElementState, sharedElementSnapshots);
         requestLayoutForSharedElements();
@@ -312,13 +312,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             });
         }
-    }
-
-    @Override
-    protected void stripOffscreenViews() {
-        setViewVisibility(mTransitioningViews, View.VISIBLE);
-        super.stripOffscreenViews();
-        setViewVisibility(mTransitioningViews, View.INVISIBLE);
     }
 
     private void onTakeSharedElements() {
@@ -362,6 +355,8 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             viewsTransition = configureTransition(getViewsTransition(), true);
             if (viewsTransition != null) {
                 stripOffscreenViews();
+                viewsTransition.forceVisibility(View.INVISIBLE, true);
+                setTransitionAlpha(mTransitioningViews, 1);
             }
         }
         mIsViewsTransitionStarted = mIsViewsTransitionStarted || startEnterTransition;
@@ -405,7 +400,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void startEnterTransition(Transition transition) {
-        setViewVisibility(mTransitioningViews, View.VISIBLE);
         if (!mIsReturning) {
             Drawable background = getDecor().getBackground();
             if (background != null) {

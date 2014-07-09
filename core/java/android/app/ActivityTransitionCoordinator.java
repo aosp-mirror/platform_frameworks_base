@@ -280,14 +280,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     public ArrayList<String> getAllSharedElementNames() { return mAllSharedElementNames; }
 
-    public static void setViewVisibility(Collection<View> views, int visibility) {
-        if (views != null) {
-            for (View view : views) {
-                view.setVisibility(visibility);
-            }
-        }
-    }
-
     protected Transition setTargets(Transition transition, boolean add) {
         if (transition == null || (add &&
                 (mTransitioningViews == null || mTransitioningViews.isEmpty()))) {
@@ -529,6 +521,13 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected long getFadeDuration() {
         return getWindow().getTransitionBackgroundFadeDuration();
+    }
+
+    protected static void setTransitionAlpha(ArrayList<View> views, float alpha) {
+        int numSharedElements = views.size();
+        for (int i = 0; i < numSharedElements; i++) {
+            views.get(i).setTransitionAlpha(alpha);
+        }
     }
 
     /**
