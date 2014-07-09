@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.utils;
 
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Size;
@@ -45,7 +46,9 @@ public class ParamsUtils {
 
     /**
      * Create a {@link Rect} from a {@code RectF} by creating a new rectangle with
-     * each corner (left, top, right, bottom) rounded towards the nearest integer value.
+     * each corner (left, top, right, bottom) rounded towards the nearest integer bounding box.
+     *
+     * <p>In particular (left, top) is floored, and (right, bottom) is ceiled.</p>
      *
      * @param size a non-{@code null} rect
      *
@@ -57,9 +60,31 @@ public class ParamsUtils {
         checkNotNull(rect, "rect must not be null");
 
         Rect r = new Rect();
-        rect.round(r);
+        rect.roundOut(r);
 
         return r;
+    }
+
+    /**
+     * Map the rectangle in {@code rect} with the transform in {@code transform} into
+     * a new rectangle, with each corner (left, top, right, bottom) rounded towards the nearest
+     * integer bounding box.
+     *
+     * <p>None of the arguments are mutated.</p>
+     *
+     * @param transform a non-{@code null} transformation matrix
+     * @param rect a non-{@code null} rectangle
+     * @return a new rectangle that was transformed by {@code transform}
+     *
+     * @throws NullPointerException if any of the args were {@code null}
+     */
+    public static Rect mapRect(Matrix transform, Rect rect) {
+        checkNotNull(transform, "transform must not be null");
+        checkNotNull(rect, "rect must not be null");
+
+        RectF rectF = new RectF(rect);
+        transform.mapRect(rectF);
+        return createRect(rectF);
     }
 
     /**
@@ -79,10 +104,10 @@ public class ParamsUtils {
     }
 
     /**
-     * Convert an integral rectangle ({@code size}) to a floating point rectangle
+     * Convert an integral rectangle ({@code source}) to a floating point rectangle
      * ({@code destination}) in-place.
      *
-     * @param size the originating integer rectangle will be read from here
+     * @param source the originating integer rectangle will be read from here
      * @param destination the resulting floating point rectangle will be written out to here
      *
      * @throws NullPointerException if {@code rect} was {@code null}

@@ -41,12 +41,6 @@ public class LegacyRequestMapper {
     private static final String TAG = "LegacyRequestMapper";
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
-    /** The default normalized camera area spans the entire size of the preview viewport */
-    private static final Camera.Area CAMERA_AREA_DEFAULT =
-            new Camera.Area(
-                    new Rect(/*left*/-1000, /*top*/-1000, /*right*/1000, /*bottom*/1000),
-                    /*weight*/1);
-
     /**
      * Set the legacy parameters using the {@link LegacyRequest legacy request}.
      *
@@ -61,40 +55,20 @@ public class LegacyRequestMapper {
         Size previewSize = legacyRequest.previewSize;
         Camera.Parameters params = legacyRequest.parameters;
 
+        Rect activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+
         /*
          * scaler.cropRegion
          */
+        ParameterUtils.ZoomData zoomData;
         {
-            Rect activeArraySize = characteristics.get(
-                    CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-            Rect activeArraySizeOnly = new Rect(
-                    /*left*/0, /*top*/0,
-                    activeArraySize.width(), activeArraySize.height());
+            zoomData = ParameterUtils.convertScalerCropRegion(activeArray,
+                    request.get(SCALER_CROP_REGION),
+                    previewSize,
+                    params);
 
-            Rect userCropRegion = request.get(SCALER_CROP_REGION);
-
-            if (userCropRegion == null) {
-                userCropRegion = activeArraySizeOnly;
-            }
-
-            if (VERBOSE) {
-                Log.v(TAG, "convertRequestToMetadata - user crop region was " + userCropRegion);
-            }
-
-            Rect reportedCropRegion = new Rect();
-            Rect previewCropRegion = new Rect();
-            int zoomIndex = ParameterUtils.getClosestAvailableZoomCrop(params, activeArraySizeOnly,
-                    previewSize, userCropRegion,
-                    /*out*/reportedCropRegion, /*out*/previewCropRegion);
-
-            if (VERBOSE) {
-                Log.v(TAG, "convertRequestToMetadata - zoom calculated to: " +
-                        "zoomIndex = " + zoomIndex +
-                        ", reported crop region = " + reportedCropRegion +
-                        ", preview crop region = " + previewCropRegion);
-            }
             if (params.isZoomSupported()) {
-                params.setZoom(zoomIndex);
+                params.setZoom(zoomData.zoomIndex);
             } else if (VERBOSE) {
                 Log.v(TAG, "convertRequestToMetadata - zoom is not supported");
             }
@@ -126,49 +100,29 @@ public class LegacyRequestMapper {
         }
 
         /*
-         * control.aeRegions
-         * -- ORDER OF EXECUTION MATTERS:
-         * -- This must be done after the crop region (zoom) was already set in the parameters
+         * control.aeRegions, afRegions
          */
         {
-            MeteringRectangle[] aeRegions = request.get(CONTROL_AE_REGIONS);
-            int maxNumMeteringAreas = params.getMaxNumMeteringAreas();
-            if (aeRegions !=  null && maxNumMeteringAreas > 0) {
-                // Add all non-zero weight regions to the list
-                List<MeteringRectangle> meteringRectangleList = new ArrayList<>();
-                for (MeteringRectangle rect : aeRegions) {
-                    if (rect.getMeteringWeight() != MeteringRectangle.METERING_WEIGHT_DONT_CARE) {
-                        meteringRectangleList.add(rect);
-                    }
-                }
-
-                // Ignore any regions beyond our maximum supported count
-                int countMeteringAreas =
-                        Math.min(maxNumMeteringAreas, meteringRectangleList.size());
-                List<Camera.Area> meteringAreaList = new ArrayList<>(countMeteringAreas);
-                Rect activeArray = characteristics.get(
-                        CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-
-                for (int i = 0; i < countMeteringAreas; ++i) {
-                    MeteringRectangle rect = meteringRectangleList.get(i);
-
-                    Camera.Area area = convertMeteringRectangleToLegacy(activeArray, rect);
-                    meteringAreaList.add(area);
-                }
+            // aeRegions
+            {
+                MeteringRectangle[] aeRegions = request.get(CONTROL_AE_REGIONS);
+                int maxNumMeteringAreas = params.getMaxNumMeteringAreas();
+                List<Camera.Area> meteringAreaList = convertMeteringRegionsToLegacy(
+                        activeArray, zoomData, aeRegions, maxNumMeteringAreas,
+                        /*regionName*/"AE");
 
                 params.setMeteringAreas(meteringAreaList);
+            }
 
-                if (maxNumMeteringAreas < meteringRectangleList.size()) {
-                    Log.w(TAG,
-                            "convertRequestToMetadata - Too many requested AE regions, "
-                                    + "ignoring all beyond the first " + maxNumMeteringAreas);
-                }
-            } else {
-                if (maxNumMeteringAreas > 0) {
-                    params.setMeteringAreas(Arrays.asList(CAMERA_AREA_DEFAULT));
-                } else {
-                    params.setMeteringAreas(null);
-                }
+            // afRegions
+            {
+                MeteringRectangle[] afRegions = request.get(CONTROL_AF_REGIONS);
+                int maxNumFocusAreas = params.getMaxNumFocusAreas();
+                List<Camera.Area> focusAreaList = convertMeteringRegionsToLegacy(
+                        activeArray, zoomData, afRegions, maxNumFocusAreas,
+                        /*regionName*/"AF");
+
+                params.setFocusAreas(focusAreaList);
             }
         }
 
@@ -206,6 +160,52 @@ public class LegacyRequestMapper {
         Boolean awbLock = request.get(CONTROL_AWB_LOCK);
         params.setAutoWhiteBalanceLock(awbLock == null ? false : awbLock);
 
+    }
+
+    private static List<Camera.Area> convertMeteringRegionsToLegacy(
+            Rect activeArray, ParameterUtils.ZoomData zoomData,
+            MeteringRectangle[] meteringRegions, int maxNumMeteringAreas, String regionName) {
+        if (meteringRegions == null || maxNumMeteringAreas <= 0) {
+            if (maxNumMeteringAreas > 0) {
+                return Arrays.asList(ParameterUtils.CAMERA_AREA_DEFAULT);
+            } else {
+                return null;
+            }
+        }
+
+        // Add all non-zero weight regions to the list
+        List<MeteringRectangle> meteringRectangleList = new ArrayList<>();
+        for (MeteringRectangle rect : meteringRegions) {
+            if (rect.getMeteringWeight() != MeteringRectangle.METERING_WEIGHT_DONT_CARE) {
+                meteringRectangleList.add(rect);
+            }
+        }
+
+        // Ignore any regions beyond our maximum supported count
+        int countMeteringAreas =
+                Math.min(maxNumMeteringAreas, meteringRectangleList.size());
+        List<Camera.Area> meteringAreaList = new ArrayList<>(countMeteringAreas);
+
+        for (int i = 0; i < countMeteringAreas; ++i) {
+            MeteringRectangle rect = meteringRectangleList.get(i);
+
+            ParameterUtils.MeteringData meteringData =
+                    ParameterUtils.convertMeteringRectangleToLegacy(activeArray, rect, zoomData);
+            meteringAreaList.add(meteringData.meteringArea);
+        }
+
+        if (maxNumMeteringAreas < meteringRectangleList.size()) {
+            Log.w(TAG,
+                    "convertMeteringRegionsToLegacy - Too many requested " + regionName +
+                            " regions, ignoring all beyond the first " + maxNumMeteringAreas);
+        }
+
+        if (VERBOSE) {
+            Log.v(TAG, "convertMeteringRegionsToLegacy - " + regionName + " areas = "
+                    + ParameterUtils.stringFromAreaList(meteringAreaList));
+        }
+
+        return meteringAreaList;
     }
 
     private static void mapAeAndFlashMode(CaptureRequest r, /*out*/Parameters p) {
@@ -273,21 +273,6 @@ public class LegacyRequestMapper {
         legacyFps[Parameters.PREVIEW_FPS_MIN_INDEX] = fpsRange.getLower();
         legacyFps[Parameters.PREVIEW_FPS_MAX_INDEX] = fpsRange.getUpper();
         return legacyFps;
-    }
-
-    private static Camera.Area convertMeteringRectangleToLegacy(
-            Rect activeArray, MeteringRectangle meteringRect) {
-        // TODO: use matrix transform magic here
-
-        Rect rect = new Rect();
-
-        // TODO: Take the cropRegion (zooming) into account here
-
-        // TODO: crop to be within [-1000, 1000] range for both X and Y if the values end up too big
-        //return new Camera.Area(rect, meteringRect.getMeteringWeight());
-
-        Log.w(TAG, "convertMeteringRectangleToLegacy - TODO: support metering rects");
-        return CAMERA_AREA_DEFAULT;
     }
 
     private static <T> T getOrDefault(CaptureRequest r, CaptureRequest.Key<T> key, T defaultValue) {
