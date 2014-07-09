@@ -3309,6 +3309,7 @@ package android.app {
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.LoaderManager getLoaderManager();
     method public java.lang.String getLocalClassName();
+    method public final android.media.session.MediaController getMediaController();
     method public android.view.MenuInflater getMenuInflater();
     method public final android.app.Activity getParent();
     method public android.content.Intent getParentActivityIntent();
@@ -3432,6 +3433,7 @@ package android.app {
     method public void setFinishOnTouchOutside(boolean);
     method public void setImmersive(boolean);
     method public void setIntent(android.content.Intent);
+    method public final void setMediaController(android.media.session.MediaController);
     method public boolean setMediaPlaying(boolean);
     method public final void setProgress(int);
     method public final void setProgressBarIndeterminate(boolean);
@@ -34276,6 +34278,7 @@ package android.view {
     method protected final int getForcedWindowFlags();
     method public abstract android.view.LayoutInflater getLayoutInflater();
     method protected final int getLocalFeatures();
+    method public android.media.session.MediaController getMediaController();
     method public abstract int getNavigationBarColor();
     method public android.transition.Transition getSharedElementEnterTransition();
     method public android.transition.Transition getSharedElementExitTransition();
@@ -34332,6 +34335,7 @@ package android.view {
     method public void setLayout(int, int);
     method public void setLocalFocus(boolean, boolean);
     method public void setLogo(int);
+    method public void setMediaController(android.media.session.MediaController);
     method public abstract void setNavigationBarColor(int);
     method public void setSharedElementEnterTransition(android.transition.Transition);
     method public void setSharedElementExitTransition(android.transition.Transition);
