@@ -12,6 +12,7 @@ import android.util.Log;
  *
  * @hide
  */
+@SystemApi
 public abstract class HdmiClient {
     private static final String TAG = "HdmiClient";
 
