@@ -157,7 +157,9 @@ class TaskBarView extends FrameLayout {
         } else if (t.applicationIcon != null) {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
         }
-        mActivityDescription.setText(t.activityLabel);
+        if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
+            mActivityDescription.setText(t.activityLabel);
+        }
         // Try and apply the system ui tint
         setBackgroundColor(t.colorPrimary);
         mActivityDescription.setTextColor(Utilities.getIdealColorForBackgroundColorGreyscale(
@@ -171,7 +173,6 @@ class TaskBarView extends FrameLayout {
     void unbindFromTask() {
         mTask = null;
         mApplicationIcon.setImageDrawable(null);
-        mActivityDescription.setText("");
     }
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the

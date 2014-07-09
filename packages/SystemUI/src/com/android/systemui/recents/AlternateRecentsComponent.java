@@ -292,20 +292,21 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (firstThumbnail != null) {
             // Update the destination rect
             Rect toTaskRect = getThumbnailTransitionRect(topTask.id);
-
-            // Create the new thumbnail for the animation down
-            // XXX: We should find a way to optimize this so we don't need to create a new bitmap
-            Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
-                    Bitmap.Config.ARGB_8888);
-            int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
-            Canvas c = new Canvas(thumbnail);
-            c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                    new Rect(0, 0, toTaskRect.width(), toTaskRect.height()), null);
-            c.setBitmap(null);
-            // Recycle the old thumbnail
-            firstThumbnail.recycle();
-            return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
-                    thumbnail, toTaskRect.left, toTaskRect.top, this);
+            if (toTaskRect.width() > 0 && toTaskRect.height() > 0) {
+                // Create the new thumbnail for the animation down
+                // XXX: We should find a way to optimize this so we don't need to create a new bitmap
+                Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
+                        Bitmap.Config.ARGB_8888);
+                int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
+                Canvas c = new Canvas(thumbnail);
+                c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
+                        new Rect(0, 0, toTaskRect.width(), toTaskRect.height()), null);
+                c.setBitmap(null);
+                // Recycle the old thumbnail
+                firstThumbnail.recycle();
+                return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
+                        thumbnail, toTaskRect.left, toTaskRect.top, this);
+            }
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition

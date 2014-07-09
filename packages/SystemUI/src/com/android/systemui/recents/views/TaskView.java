@@ -535,6 +535,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         }
     }
 
+    @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        if (mIsStub && (child == mThumbnailView)) {
+            // Skip the thumbnail view if we are in stub mode
+            return false;
+        }
+        return super.drawChild(canvas, child, drawingTime);
+    }
+
     /**
      * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
      * if the view is not currently visible, or we are in touch state (where we still want to keep
