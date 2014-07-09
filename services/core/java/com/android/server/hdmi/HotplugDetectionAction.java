@@ -228,7 +228,12 @@ final class HotplugDetectionAction extends FeatureAction {
     }
 
     private void mayCancelOneTouchRecord(int address) {
-        // TODO: implement this.
+        List<OneTouchRecordAction> actions = getActions(OneTouchRecordAction.class);
+        for (OneTouchRecordAction action : actions) {
+            if (action.getRecorderAddress() == address) {
+                removeAction(action);
+            }
+        }
     }
 
     private void mayDisableSystemAudioAndARC(int address) {
