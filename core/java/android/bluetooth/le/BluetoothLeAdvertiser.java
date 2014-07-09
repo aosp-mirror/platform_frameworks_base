@@ -386,6 +386,12 @@ public final class BluetoothLeAdvertiser {
         public void onBatchScanResults(List<ScanResult> results) {
             // no op
         }
+
+        @Override
+        public void onFoundOrLost(boolean onFound, String address, int rssi,
+                byte[] advData) {
+            // no op
+        }
     }
 
     private void postCallbackFailure(final AdvertiseCallback callback, final int error) {

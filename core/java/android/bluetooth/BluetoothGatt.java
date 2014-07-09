@@ -631,6 +631,15 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onBatchScanResults(List<ScanResult> results) {
                 // no op
             }
+
+            /**
+             * @hide
+             */
+            @Override
+            public void onFoundOrLost(boolean onFound, String address, int rssi,
+                    byte[] advData) {
+                // no op.
+            }
         };
 
     /*package*/ BluetoothGatt(Context context, IBluetoothGatt iGatt, BluetoothDevice device,

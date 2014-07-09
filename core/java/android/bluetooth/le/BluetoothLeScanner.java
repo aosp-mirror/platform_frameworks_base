@@ -421,6 +421,25 @@ public final class BluetoothLeScanner {
         public void onConnectionCongested(String address, boolean congested) {
             // no op
         }
+
+        @Override
+        public void onFoundOrLost(boolean onFound, String address, int rssi,
+                byte[] advData) {
+            if (DBG) {
+                Log.d(TAG, "onFoundOrLost() - Device=" + address);
+            }
+            // ToDo: Fix issue with underlying reporting from chipset
+            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+                    address);
+            long scanNanos = SystemClock.elapsedRealtimeNanos();
+            ScanResult result = new ScanResult(device, advData, rssi,
+                    scanNanos);
+            if (onFound) {
+                mScanCallback.onAdvertisementFound(result);
+            } else {
+                mScanCallback.onAdvertisementLost(result);
+            }
+        }
     }
 
     private void postCallbackError(final ScanCallback callback, final int errorCode) {

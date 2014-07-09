@@ -56,7 +56,6 @@ public abstract class ScanCallback {
      * Callback when the BLE advertisement is found for the first time.
      *
      * @param result The Bluetooth LE scan result when the onFound event is triggered.
-     * @hide
      */
     public abstract void onAdvertisementFound(ScanResult result);
 
@@ -65,7 +64,6 @@ public abstract class ScanCallback {
      * lost.
      *
      * @param result The Bluetooth scan result that was last found.
-     * @hide
      */
     public abstract void onAdvertisementLost(ScanResult result);
 

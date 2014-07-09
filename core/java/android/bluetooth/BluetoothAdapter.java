@@ -2132,5 +2132,11 @@ public final class BluetoothAdapter {
         public void onBatchScanResults(List<ScanResult> results) {
             // no op
         }
+
+        @Override
+        public void onFoundOrLost(boolean onFound, String address,int rssi,
+                byte[] advData) {
+            // no op
+        }
     }
 }

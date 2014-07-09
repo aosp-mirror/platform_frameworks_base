@@ -6448,6 +6448,8 @@ package android.bluetooth.le {
 
   public abstract class ScanCallback {
     ctor public ScanCallback();
+    method public abstract void onAdvertisementFound(android.bluetooth.le.ScanResult);
+    method public abstract void onAdvertisementLost(android.bluetooth.le.ScanResult);
     method public abstract void onAdvertisementUpdate(android.bluetooth.le.ScanResult);
     method public abstract void onScanFailed(int);
     field public static final int SCAN_FAILED_ALREADY_STARTED = 1; // 0x1
@@ -6518,6 +6520,8 @@ package android.bluetooth.le {
     method public int getScanMode();
     method public int getScanResultType();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CALLBACK_TYPE_ON_FOUND = 1; // 0x1
+    field public static final int CALLBACK_TYPE_ON_LOST = 2; // 0x2
     field public static final int CALLBACK_TYPE_ON_UPDATE = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
