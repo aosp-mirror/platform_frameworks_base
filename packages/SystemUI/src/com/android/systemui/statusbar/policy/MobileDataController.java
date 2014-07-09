@@ -63,13 +63,19 @@ public class MobileDataController {
         mStatsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
+    }
 
-        try {
-            mSession = mStatsService.openSession();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to open stats session");
-            mSession = null;
+    private INetworkStatsSession getSession() {
+        if (mSession == null) {
+            try {
+                mSession = mStatsService.openSession();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to open stats session", e);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Failed to open stats session", e);
+            }
         }
+        return mSession;
     }
 
     public void setCallback(Callback callback) {
@@ -86,7 +92,8 @@ public class MobileDataController {
         if (subscriberId == null) {
             return warn("no subscriber id");
         }
-        if (mSession == null) {
+        final INetworkStatsSession session = getSession();
+        if (session == null) {
             return warn("no stats session");
         }
         final NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
