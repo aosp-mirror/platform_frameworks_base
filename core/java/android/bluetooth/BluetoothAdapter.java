@@ -1031,7 +1031,6 @@ public final class BluetoothAdapter {
     /**
      * Return true if the multi advertisement is supported by the chipset
      *
-     * @hide
      * @return true if Multiple Advertisement feature is supported
      */
     public boolean isMultipleAdvertisementSupported() {
@@ -1047,7 +1046,6 @@ public final class BluetoothAdapter {
     /**
      * Return true if offloaded filters are supported
      *
-     * @hide
      * @return true if chipset supports on-chip filtering
      */
     public boolean isOffloadedFilteringSupported() {
@@ -1063,7 +1061,6 @@ public final class BluetoothAdapter {
     /**
      * Return true if offloaded scan batching is supported
      *
-     * @hide
      * @return true if chipset supports on-chip scan batching
      */
     public boolean isOffloadedScanBatchingSupported() {
