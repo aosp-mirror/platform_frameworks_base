@@ -559,7 +559,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
                 for (Record r : mRecords) {
-                    // log("notifyServiceStateUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId + " state=" + state);
+                    log("notifyServiceStateUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId + " state=" + state);
                     // FIXME: use DEFAULT_SUB_ID instead??
                     if (((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) &&
                             (r.subId == subId)) {
@@ -598,7 +598,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log("notifySignalStrengthUsingSubId: valid phoneId=" + phoneId);
                 mSignalStrength[phoneId] = signalStrength;
                 for (Record r : mRecords) {
-                    //log("notifySignalStrengthUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId);
+                    log("notifySignalStrengthUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId);
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) &&
                         (r.subId == subId)){
                         try {
