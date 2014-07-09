@@ -2666,6 +2666,10 @@ public class AudioManager {
      * The audio input device code for a S/PDIF digital connection
      */
     public static final int DEVICE_IN_SPDIF = AudioSystem.DEVICE_IN_SPDIF;
+    /** @hide
+     * The audio input device code for audio loopback
+     */
+    public static final int DEVICE_IN_LOOPBACK = AudioSystem.DEVICE_IN_LOOPBACK;
 
     /**
      * Return true if the device code corresponds to an output device.
