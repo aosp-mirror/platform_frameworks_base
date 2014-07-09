@@ -72,6 +72,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
+import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
@@ -947,6 +948,10 @@ public final class SystemServer {
             }
 
             mSystemServiceManager.startService(LauncherAppsService.class);
+        }
+
+        if (!disableNonCoreServices) {
+            mSystemServiceManager.startService(MediaProjectionManagerService.class);
         }
 
         // Before things start rolling, be sure we have decided whether

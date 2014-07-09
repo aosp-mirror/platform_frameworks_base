@@ -109,6 +109,9 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Screen Capturing -->
+    <uses-permission android:name="android.permission.CREATE_MEDIA_PROJECTION" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -243,6 +246,15 @@
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
             android:taskAffinity="com.android.systemui.net"
+            android:excludeFromRecents="true" />
+
+        <!-- started from MediaProjectionManager -->
+        <activity
+            android:name=".media.MediaProjectionPermissionActivity"
+            android:exported="true"
+            android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleTop"
             android:excludeFromRecents="true" />
 
         <!-- platform logo easter egg activity -->

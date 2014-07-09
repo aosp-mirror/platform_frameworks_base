@@ -2771,6 +2771,13 @@
         android:description="@string/permdesc_accessDrmCertificates"
         android:protectionLevel="signature|system" />
 
+    <!-- Api Allows an application to create media projection sessions.
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.CREATE_MEDIA_PROJECTION"
+        android:label="@string/permlab_createMediaProjection"
+        android:description="@string/permdesc_createMediaProjection"
+        android:protectionLevel="signature" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

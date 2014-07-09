@@ -16,7 +16,10 @@
 
 package android.hardware.display;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
@@ -188,6 +191,22 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 1 << 3;
 
+
+    /**
+     * Virtual display flag: Indicates that the display is being created for
+     * the purpose of screen sharing.  This implies
+     * VIRTUAL_DISPLAY_FLAG_PRIVATE.  Other flags are not allowed (especially
+     * not VIRTUAL_DISPLAY_FLAG_PUBLIC or PRESENTATION).
+     *
+     * Requires screen share permission for use.
+     *
+     * While a display of this type exists, the system will show some sort of
+     * notification to the user indicating that the screen is being shared.
+     *
+     * @see #createVirtualDisplay
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE = 1 << 4;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;
@@ -303,7 +322,7 @@ public final class DisplayManager {
     }
 
     /**
-     * Unregisters an input device listener.
+     * Unregisters a display listener.
      *
      * @param listener The listener to unregister.
      *
@@ -425,6 +444,16 @@ public final class DisplayManager {
 
     /**
      * Creates a virtual display.
+     *
+     * @see #createVirtualDisplay(String, int, int, int, Surface, int, VirtualDisplay.Callbacks)
+     */
+    public VirtualDisplay createVirtualDisplay(@NonNull String name,
+            int width, int height, int densityDpi, @Nullable Surface surface, int flags) {
+        return createVirtualDisplay(name, width, height, densityDpi, surface, flags, null, null);
+    }
+
+    /**
+     * Creates a virtual display.
      * <p>
      * The content of a virtual display is rendered to a {@link Surface} provided
      * by the application.
@@ -455,17 +484,28 @@ public final class DisplayManager {
      * be rendered, or null if there is none initially.
      * @param flags A combination of virtual display flags:
      * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
-     * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, or {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
+     * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
+     * or {@link #VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE}.
+     * @param callbacks Callbacks to call when the state of the {@link VirtualDisplay} changes
      * @return The newly created virtual display, or null if the application could
      * not create the virtual display.
      *
      * @throws SecurityException if the caller does not have permission to create
      * a virtual display with the specified flags.
      */
-    public VirtualDisplay createVirtualDisplay(String name,
-            int width, int height, int densityDpi, Surface surface, int flags) {
-        return mGlobal.createVirtualDisplay(mContext,
-                name, width, height, densityDpi, surface, flags);
+    public VirtualDisplay createVirtualDisplay(@NonNull String name,
+            int width, int height, int densityDpi, @Nullable Surface surface, int flags,
+            @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
+        return createVirtualDisplay(null,
+                name, width, height, densityDpi, surface, flags, callbacks, handler);
+    }
+
+    /** @hide */
+    public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
+            @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
+            int flags, @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
+        return mGlobal.createVirtualDisplay(mContext, projection,
+                name, width, height, densityDpi, surface, flags, callbacks, handler);
     }
 
     /**
