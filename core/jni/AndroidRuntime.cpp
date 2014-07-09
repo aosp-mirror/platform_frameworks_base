@@ -440,6 +440,82 @@ void AndroidRuntime::parseExtraOpts(char* extraOptsBuf, const char* quotingArg)
 }
 
 /*
+ * Reads a "property" into "buffer" with a default of "defaultArg". If
+ * the property is non-empty, it is treated as a runtime option such
+ * as "-Xmx32m".
+ *
+ * The "runtimeArg" is a prefix for the option such as "-Xms" or "-Xmx".
+ *
+ * If an argument is found, it is added to mOptions.
+ *
+ * If an option is found, it is added to mOptions and true is
+ * returned. Otherwise false is returned.
+ */
+bool AndroidRuntime::parseRuntimeOption(const char* property,
+                                        char* buffer,
+                                        const char* runtimeArg,
+                                        const char* defaultArg)
+{
+    strcpy(buffer, runtimeArg);
+    size_t runtimeArgLen = strlen(runtimeArg);
+    property_get(property, buffer+runtimeArgLen, defaultArg);
+    if (buffer[runtimeArgLen] == '\0') {
+        return false;
+    }
+
+    JavaVMOption opt;
+    memset(&opt, 0, sizeof(opt));
+
+    opt.optionString = buffer;
+    mOptions.add(opt);
+
+    return true;
+}
+
+/*
+ * Reads a "property" into "buffer". If the property is non-empty, it
+ * is treated as a dex2oat compiler runtime option that should be
+ * passed as a quoted option, e.g. "-Ximage-compiler-option
+ * --runtime-arg -Ximage-compiler-option -Xmx32m".
+ *
+ * The "runtimeArg" is a prefix for the option such as "-Xms" or "-Xmx".
+ *
+ * The "quotingArg" should be "-Ximage-compiler-option" or "-Xcompiler-option".
+ *
+ * If an option is found, it is added to mOptions and true is
+ * returned. Otherwise false is returned.
+ */
+bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
+                                                char* buffer,
+                                                const char* runtimeArg,
+                                                const char* quotingArg)
+{
+    strcpy(buffer, runtimeArg);
+    size_t runtimeArgLen = strlen(runtimeArg);
+    property_get(property, buffer+runtimeArgLen, "");
+    if (buffer[runtimeArgLen] == '\0') {
+        return false;
+    }
+
+    JavaVMOption opt;
+    memset(&opt, 0, sizeof(opt));
+
+    opt.optionString = quotingArg;
+    mOptions.add(opt);
+
+    opt.optionString = "--runtime-arg";
+    mOptions.add(opt);
+
+    opt.optionString = quotingArg;
+    mOptions.add(opt);
+
+    opt.optionString = buffer;
+    mOptions.add(opt);
+
+    return true;
+}
+
+/*
  * Start the Dalvik Virtual Machine.
  *
  * Various arguments, most determined by system properties, are passed in.
@@ -461,7 +537,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     JavaVMInitArgs initArgs;
     JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
-    char stackTraceFileBuf[PROPERTY_VALUE_MAX];
+    char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
     char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
@@ -475,33 +551,35 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
     char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
     char dalvikVmLibBuf[PROPERTY_VALUE_MAX];
+    char dex2oatXmsImageFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatXmsFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatXmxFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
-    char* stackTraceFile = NULL;
-    bool checkJni = false;
-    bool checkDexSum = false;
-    bool logStdio = false;
     enum {
       kEMDefault,
       kEMIntPortable,
       kEMIntFast,
       kEMJitCompiler,
     } executionMode = kEMDefault;
-    char profile_period[sizeof("-Xprofile-period:") + PROPERTY_VALUE_MAX];
-    char profile_duration[sizeof("-Xprofile-duration:") + PROPERTY_VALUE_MAX];
-    char profile_interval[sizeof("-Xprofile-interval:") + PROPERTY_VALUE_MAX];
-    char profile_backoff[sizeof("-Xprofile-backoff:") + PROPERTY_VALUE_MAX];
-    char profile_top_k_threshold[sizeof("-Xprofile-top-k-threshold:") + PROPERTY_VALUE_MAX];
-    char profile_top_k_change_threshold[sizeof("-Xprofile-top-k-change-threshold:") + PROPERTY_VALUE_MAX];
-    char profile_type[sizeof("-Xprofile-type:") + PROPERTY_VALUE_MAX];
-    char profile_max_stack_depth[sizeof("-Xprofile-max-stack-depth:")+PROPERTY_VALUE_MAX];
+    char profilePeriod[sizeof("-Xprofile-period:")-1 + PROPERTY_VALUE_MAX];
+    char profileDuration[sizeof("-Xprofile-duration:")-1 + PROPERTY_VALUE_MAX];
+    char profileInterval[sizeof("-Xprofile-interval:")-1 + PROPERTY_VALUE_MAX];
+    char profileBackoff[sizeof("-Xprofile-backoff:")-1 + PROPERTY_VALUE_MAX];
+    char profileTopKThreshold[sizeof("-Xprofile-top-k-threshold:")-1 + PROPERTY_VALUE_MAX];
+    char profileTopKChangeThreshold[sizeof("-Xprofile-top-k-change-threshold:")-1 +
+                                    PROPERTY_VALUE_MAX];
+    char profileType[sizeof("-Xprofile-type:")-1 + PROPERTY_VALUE_MAX];
+    char profileMaxStackDepth[sizeof("-Xprofile-max-stack-depth:")-1 + PROPERTY_VALUE_MAX];
     char langOption[sizeof("-Duser.language=") + 3];
     char regionOption[sizeof("-Duser.region=") + 3];
-    char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:") + sizeof(propBuf)];
-    char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
-    char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
+    char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
+    char jitOpBuf[sizeof("-Xjitop:")-1 + PROPERTY_VALUE_MAX];
+    char jitMethodBuf[sizeof("-Xjitmethod:")-1 + PROPERTY_VALUE_MAX];
 
+    bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
         checkJni = true;
@@ -511,6 +589,20 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         if (propBuf[0] == '1') {
             checkJni = true;
         }
+    }
+    ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
+    if (checkJni) {
+        /* extended JNI checking */
+        opt.optionString = "-Xcheck:jni";
+        mOptions.add(opt);
+
+        /* set a cap on JNI global references */
+        opt.optionString = "-Xjnigreflimit:2000";
+        mOptions.add(opt);
+
+        /* with -Xcheck:jni, this provides a JNI function call trace */
+        //opt.optionString = "-verbose:jni";
+        //mOptions.add(opt);
     }
 
     property_get("dalvik.vm.execution-mode", propBuf, "");
@@ -522,23 +614,39 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         executionMode = kEMJitCompiler;
     }
 
-    property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
+    parseRuntimeOption("dalvik.vm.stack-trace-file", stackTraceFileBuf, "-Xstacktracefile:");
 
     property_get("dalvik.vm.check-dex-sum", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
-        checkDexSum = true;
+        /* perform additional DEX checksum tests */
+        opt.optionString = "-Xcheckdexsum";
+        mOptions.add(opt);
     }
 
     property_get("log.redirect-stdio", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
-        logStdio = true;
+        /* convert stdout/stderr to log messages */
+        opt.optionString = "-Xlog-stdio";
+        mOptions.add(opt);
     }
 
     strcpy(enableAssertBuf, "-ea:");
-    property_get("dalvik.vm.enableassertions", enableAssertBuf+4, "");
+    property_get("dalvik.vm.enableassertions", enableAssertBuf+sizeof("-ea:")-1, "");
+    if (enableAssertBuf[sizeof("-ea:")-1] != '\0') {
+        /* accept "all" to mean "all classes and packages" */
+        if (strcmp(enableAssertBuf+sizeof("-ea:")-1, "all") == 0)
+            enableAssertBuf[3] = '\0'; // truncate to "-ea"
+        ALOGI("Assertions enabled: '%s'\n", enableAssertBuf);
+        opt.optionString = enableAssertBuf;
+        mOptions.add(opt);
+    } else {
+        ALOGV("Assertions disabled\n");
+    }
 
     strcpy(jniOptsBuf, "-Xjniopts:");
-    property_get("dalvik.vm.jniopts", jniOptsBuf+10, "");
+    if (parseRuntimeOption("dalvik.vm.jniopts", jniOptsBuf, "-Xjniopts:")) {
+        ALOGI("JNI options: '%s'\n", jniOptsBuf);
+    }
 
     /* route exit() to our handler */
     opt.extraInfo = (void*) runtime_exit;
@@ -567,54 +675,24 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * The default starting and maximum size of the heap.  Larger
      * values should be specified in a product property override.
      */
-    strcpy(heapstartsizeOptsBuf, "-Xms");
-    property_get("dalvik.vm.heapstartsize", heapstartsizeOptsBuf+4, "4m");
-    opt.optionString = heapstartsizeOptsBuf;
-    mOptions.add(opt);
-    strcpy(heapsizeOptsBuf, "-Xmx");
-    property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
-    opt.optionString = heapsizeOptsBuf;
-    mOptions.add(opt);
+    parseRuntimeOption("dalvik.vm.heapstartsize", heapstartsizeOptsBuf, "-Xms", "4m");
+    parseRuntimeOption("dalvik.vm.heapsize", heapsizeOptsBuf, "-Xmx", "16m");
 
     // Increase the main thread's interpreter stack size for bug 6315322.
     opt.optionString = "-XX:mainThreadStackSize=24K";
     mOptions.add(opt);
 
     // Set the max jit code cache size.  Note: size of 0 will disable the JIT.
-    strcpy(jitcodecachesizeOptsBuf, "-Xjitcodecachesize:");
-    property_get("dalvik.vm.jit.codecachesize", jitcodecachesizeOptsBuf+19,  NULL);
-    if (jitcodecachesizeOptsBuf[19] != '\0') {
-      opt.optionString = jitcodecachesizeOptsBuf;
-      mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.jit.codecachesize",
+                       jitcodecachesizeOptsBuf,
+                       "-Xjitcodecachesize:");
 
-    strcpy(heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
-    property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
-    if (heapgrowthlimitOptsBuf[20] != '\0') {
-        opt.optionString = heapgrowthlimitOptsBuf;
-        mOptions.add(opt);
-    }
-
-    strcpy(heapminfreeOptsBuf, "-XX:HeapMinFree=");
-    property_get("dalvik.vm.heapminfree", heapminfreeOptsBuf+16, "");
-    if (heapminfreeOptsBuf[16] != '\0') {
-        opt.optionString = heapminfreeOptsBuf;
-        mOptions.add(opt);
-    }
-
-    strcpy(heapmaxfreeOptsBuf, "-XX:HeapMaxFree=");
-    property_get("dalvik.vm.heapmaxfree", heapmaxfreeOptsBuf+16, "");
-    if (heapmaxfreeOptsBuf[16] != '\0') {
-        opt.optionString = heapmaxfreeOptsBuf;
-        mOptions.add(opt);
-    }
-
-    strcpy(heaptargetutilizationOptsBuf, "-XX:HeapTargetUtilization=");
-    property_get("dalvik.vm.heaptargetutilization", heaptargetutilizationOptsBuf+26, "");
-    if (heaptargetutilizationOptsBuf[26] != '\0') {
-        opt.optionString = heaptargetutilizationOptsBuf;
-        mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
+    parseRuntimeOption("dalvik.vm.heapminfree", heapminfreeOptsBuf, "-XX:HeapMinFree=");
+    parseRuntimeOption("dalvik.vm.heapmaxfree", heapmaxfreeOptsBuf, "-XX:HeapMaxFree=");
+    parseRuntimeOption("dalvik.vm.heaptargetutilization",
+                       heaptargetutilizationOptsBuf,
+                       "-XX:HeapTargetUtilization=");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -622,19 +700,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       mOptions.add(opt);
     }
 
-    strcpy(gctypeOptsBuf, "-Xgc:");
-    property_get("dalvik.vm.gctype", gctypeOptsBuf+5, "");
-    if (gctypeOptsBuf[5] != '\0') {
-        opt.optionString = gctypeOptsBuf;
-        mOptions.add(opt);
-    }
-
-    strcpy(backgroundgcOptsBuf, "-XX:BackgroundGC=");
-    property_get("dalvik.vm.backgroundgctype", backgroundgcOptsBuf+sizeof("-XX:BackgroundGC=")-1, "");
-    if (backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1] != '\0') {
-        opt.optionString = backgroundgcOptsBuf;
-        mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
+    parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
 
     /*
      * Enable or disable dexopt features, such as bytecode verification and
@@ -693,46 +760,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         "-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y";
     mOptions.add(opt);
 
-    ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
-    if (checkJni) {
-        /* extended JNI checking */
-        opt.optionString = "-Xcheck:jni";
-        mOptions.add(opt);
-
-        /* set a cap on JNI global references */
-        opt.optionString = "-Xjnigreflimit:2000";
-        mOptions.add(opt);
-
-        /* with -Xcheck:jni, this provides a JNI function call trace */
-        //opt.optionString = "-verbose:jni";
-        //mOptions.add(opt);
-    }
-
-    property_get("dalvik.vm.lockprof.threshold", propBuf, "");
-    if (strlen(propBuf) > 0) {
-      strcpy(lockProfThresholdBuf, "-Xlockprofthreshold:");
-      strcat(lockProfThresholdBuf, propBuf);
-      opt.optionString = lockProfThresholdBuf;
-      mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.lockprof.threshold",
+                       lockProfThresholdBuf,
+                       "-Xlockprofthreshold:");
 
     /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
-    property_get("dalvik.vm.jit.op", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        strcpy(jitOpBuf, "-Xjitop:");
-        strcat(jitOpBuf, propBuf);
-        opt.optionString = jitOpBuf;
-        mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.jit.op", jitOpBuf, "-Xjitop:");
 
     /* Force interpreter-only mode for selected methods */
-    property_get("dalvik.vm.jit.method", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        strcpy(jitMethodBuf, "-Xjitmethod:");
-        strcat(jitMethodBuf, propBuf);
-        opt.optionString = jitMethodBuf;
-        mOptions.add(opt);
-    }
+    parseRuntimeOption("dalvik.vm.jit.method", jitMethodBuf, "-Xjitmethod:");
 
     if (executionMode == kEMIntPortable) {
         opt.optionString = "-Xint:portable";
@@ -745,58 +781,26 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
-    if (checkDexSum) {
-        /* perform additional DEX checksum tests */
-        opt.optionString = "-Xcheckdexsum";
-        mOptions.add(opt);
-    }
-
-    if (logStdio) {
-        /* convert stdout/stderr to log messages */
-        opt.optionString = "-Xlog-stdio";
-        mOptions.add(opt);
-    }
-
-    if (enableAssertBuf[4] != '\0') {
-        /* accept "all" to mean "all classes and packages" */
-        if (strcmp(enableAssertBuf+4, "all") == 0)
-            enableAssertBuf[3] = '\0';
-        ALOGI("Assertions enabled: '%s'\n", enableAssertBuf);
-        opt.optionString = enableAssertBuf;
-        mOptions.add(opt);
-    } else {
-        ALOGV("Assertions disabled\n");
-    }
-
-    if (jniOptsBuf[10] != '\0') {
-        ALOGI("JNI options: '%s'\n", jniOptsBuf);
-        opt.optionString = jniOptsBuf;
-        mOptions.add(opt);
-    }
-
-    if (stackTraceFileBuf[0] != '\0') {
-        static const char* stfOptName = "-Xstacktracefile:";
-
-        stackTraceFile = (char*) malloc(strlen(stfOptName) +
-            strlen(stackTraceFileBuf) +1);
-        strcpy(stackTraceFile, stfOptName);
-        strcat(stackTraceFile, stackTraceFileBuf);
-        opt.optionString = stackTraceFile;
-        mOptions.add(opt);
-    }
-
     // libart tolerates libdvm flags, but not vice versa, so only pass some options if libart.
     property_get("persist.sys.dalvik.vm.lib.2", dalvikVmLibBuf, "libart.so");
     bool libart = (strncmp(dalvikVmLibBuf, "libart", 6) == 0);
 
     if (libart) {
-        // Extra options for DexClassLoader.
-        property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
-        parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
-
         // Extra options for boot.art/boot.oat image generation.
+        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
+                                   "-Xms", "-Ximage-compiler-option");
+        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
+                                   "-Xmx", "-Ximage-compiler-option");
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
+
+        // Extra options for DexClassLoader.
+        parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xms", dex2oatXmsFlagsBuf,
+                                   "-Xms", "-Xcompiler-option");
+        parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xmx", dex2oatXmxFlagsBuf,
+                                   "-Xmx", "-Xcompiler-option");
+        property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
+        parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
     }
 
     /* extra options; parse this late so it overrides others */
@@ -835,63 +839,42 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         }
 
         // Number of seconds during profile runs.
-        strcpy(profile_period, "-Xprofile-period:");
-        if (property_get("dalvik.vm.profile.period-secs", profile_period+17, NULL) > 0) {
-           opt.optionString = profile_period;
-           mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profile.period-secs", profilePeriod, "-Xprofile-period:");
 
         // Length of each profile run (seconds).
-        strcpy(profile_duration, "-Xprofile-duration:");
-        if (property_get("dalvik.vm.profile.duration-secs", profile_duration+19, NULL) > 0) {
-            opt.optionString = profile_duration;
-            mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profile.duration-secs",
+                           profileDuration,
+                           "-Xprofile-duration:");
 
         // Polling interval during profile run (microseconds).
-        strcpy(profile_interval, "-Xprofile-interval:");
-        if (property_get("dalvik.vm.profile.interval-us", profile_interval+19, NULL) > 0) {
-            opt.optionString = profile_interval;
-            mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profile.interval-us", profileInterval, "-Xprofile-interval:");
 
         // Coefficient for period backoff.  The the period is multiplied
         // by this value after each profile run.
-        strcpy(profile_backoff, "-Xprofile-backoff:");
-        if (property_get("dalvik.vm.profile.backoff-coeff", profile_backoff+18, NULL) > 0) {
-            opt.optionString = profile_backoff;
-            mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profile.backoff-coeff", profileBackoff, "-Xprofile-backoff:");
 
-        // Top K% of samples that are considered relevant when deciding if the app should be recompiled.
-        strcpy(profile_top_k_threshold, "-Xprofile-top-k-threshold:");
-        if (property_get("dalvik.vm.profile.top-k-thr", profile_top_k_threshold+26, NULL) > 0) {
-            opt.optionString = profile_top_k_threshold;
-            mOptions.add(opt);
-        }
+        // Top K% of samples that are considered relevant when
+        // deciding if the app should be recompiled.
+        parseRuntimeOption("dalvik.vm.profile.top-k-thr",
+                           profileTopKThreshold,
+                           "-Xprofile-top-k-threshold:");
 
-        // The threshold after which a change in the structure of the top K% profiled samples becomes significant
-        // and triggers recompilation. A change in profile is considered significant if X% (top-k-change-threshold)
-        // of the top K% (top-k-threshold property) samples has changed.
-        strcpy(profile_top_k_change_threshold, "-Xprofile-top-k-change-threshold:");
-        if (property_get("dalvik.vm.profile.top-k-ch-thr", profile_top_k_change_threshold+33, NULL) > 0) {
-            opt.optionString = profile_top_k_change_threshold;
-            mOptions.add(opt);
-        }
+        // The threshold after which a change in the structure of the
+        // top K% profiled samples becomes significant and triggers
+        // recompilation. A change in profile is considered
+        // significant if X% (top-k-change-threshold) of the top K%
+        // (top-k-threshold property) samples has changed.
+        parseRuntimeOption("dalvik.vm.profile.top-k-ch-thr",
+                           profileTopKChangeThreshold,
+                           "-Xprofile-top-k-change-threshold:");
 
         // Type of profile data.
-        strcpy(profile_type, "-Xprofile-type:");
-        if (property_get("dalvik.vm.profiler.type", profile_type+15, NULL) > 0) {
-            opt.optionString = profile_type;
-            mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profiler.type", profileType, "-Xprofile-type:");
 
         // Depth of bounded stack data
-        strcpy(profile_max_stack_depth, "-Xprofile-max-stack-depth:");
-        if (property_get("dalvik.vm.profile.max-stack-depth", profile_max_stack_depth+26, NULL) > 0) {
-           opt.optionString = profile_max_stack_depth;
-           mOptions.add(opt);
-        }
+        parseRuntimeOption("dalvik.vm.profile.max-stack-depth",
+                           profileMaxStackDepth,
+                           "-Xprofile-max-stack-depth:");
     }
 
     initArgs.version = JNI_VERSION_1_4;
@@ -914,7 +897,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     result = 0;
 
 bail:
-    free(stackTraceFile);
     return result;
 }
 
