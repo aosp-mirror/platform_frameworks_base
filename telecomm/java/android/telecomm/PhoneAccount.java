@@ -34,7 +34,7 @@ import java.util.Objects;
  * Represents a distinct account, line of service or call placement method that
  * the system can use to place phone calls.
  */
-public class PhoneAccount implements Parcelable {
+public final class PhoneAccount implements Parcelable {
 
     private static final int NO_DENSITY = -1;
 
@@ -169,10 +169,12 @@ public class PhoneAccount implements Parcelable {
         return mIsSystemDefault;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mComponentName, flags);
         out.writeString(mId);

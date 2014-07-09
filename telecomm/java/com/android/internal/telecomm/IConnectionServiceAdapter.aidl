@@ -17,6 +17,7 @@
 package com.android.internal.telecomm;
 
 import android.telecomm.ConnectionRequest;
+import android.telecomm.StatusHints;
 
 import com.android.internal.telecomm.ICallVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
@@ -66,4 +67,6 @@ oneway interface IConnectionServiceAdapter {
     void setFeatures(String callId, int features);
 
     void setAudioModeIsVoip(String callId, boolean isVoip);
+
+    void setStatusHints(String callId, in StatusHints statusHints);
 }

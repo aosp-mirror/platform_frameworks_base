@@ -335,6 +335,15 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    void setStatusHints(String callId, StatusHints statusHints) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setStatusHints(callId, statusHints);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     /**
     * Set the features associated with the given call.
     * Features are defined in {@link android.telecomm.CallFeatures} and are passed in as a

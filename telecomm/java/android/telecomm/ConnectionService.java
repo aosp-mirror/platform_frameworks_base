@@ -370,6 +370,12 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConnection.get(c);
             mAdapter.setAudioModeIsVoip(id, isVoip);
         }
+
+        @Override
+        public void onSetStatusHints(Connection c, StatusHints statusHints) {
+            String id = mIdByConnection.get(c);
+            mAdapter.setStatusHints(id, statusHints);
+        }
     };
 
     /** {@inheritDoc} */

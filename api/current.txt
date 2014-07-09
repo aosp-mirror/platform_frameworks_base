@@ -27618,6 +27618,7 @@ package android.telecomm {
     method public final android.net.Uri getHandle();
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
+    method public final android.telecomm.StatusHints getStatusHints();
     method public final boolean isConferenceCapable();
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
@@ -27650,6 +27651,7 @@ package android.telecomm {
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
     method public final void setSignal(android.os.Bundle);
+    method public final void setStatusHints(android.telecomm.StatusHints);
     method public static java.lang.String stateToString(int);
   }
 
@@ -27734,6 +27736,7 @@ package android.telecomm {
     method public android.net.Uri getHandle();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
+    method public android.telecomm.StatusHints getStatusHints();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -27751,7 +27754,7 @@ package android.telecomm {
     method protected abstract void updateCall(android.telecomm.InCallCall);
   }
 
-  public class PhoneAccount implements android.os.Parcelable {
+  public final class PhoneAccount implements android.os.Parcelable {
     ctor public PhoneAccount(android.content.ComponentName, java.lang.String, android.net.Uri, java.lang.String, java.lang.String, boolean, boolean);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
@@ -27802,6 +27805,7 @@ package android.telecomm {
     method public java.lang.String getDisconnectMessage();
     method public int getFeatures();
     method public int getState();
+    method public android.telecomm.StatusHints getStatusHints();
     method public void hold();
     method public void playDtmf(char);
     method public void postDialContinue(boolean);
@@ -27819,6 +27823,7 @@ package android.telecomm {
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
     method public abstract void onSetAudioModeIsVoip(android.telecomm.RemoteConnection, boolean);
+    method public abstract void onSetStatusHints(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
   }
 
@@ -27830,6 +27835,17 @@ package android.telecomm {
   public abstract interface SimpleResponse {
     method public abstract void onError(IN);
     method public abstract void onResult(IN, OUT);
+  }
+
+  public final class StatusHints implements android.os.Parcelable {
+    ctor public StatusHints(android.content.ComponentName, java.lang.String, int);
+    method public int describeContents();
+    method public android.content.ComponentName getComponentName();
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public int getIconId();
+    method public java.lang.String getLabel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class TelecommConstants {

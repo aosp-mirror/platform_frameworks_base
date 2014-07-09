@@ -45,6 +45,7 @@ public abstract class Connection {
         void onParentConnectionChanged(Connection c, Connection parent);
         void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
         void onSetAudioModeIsVoip(Connection c, boolean isVoip);
+        void onSetStatusHints(Connection c, StatusHints statusHints);
     }
 
     /** @hide */
@@ -85,6 +86,9 @@ public abstract class Connection {
 
         @Override
         public void onSetAudioModeIsVoip(Connection c, boolean isVoip) {}
+
+        @Override
+        public void onSetStatusHints(Connection c, StatusHints statusHints) {}
     }
 
     public final class State {
@@ -109,6 +113,7 @@ public abstract class Connection {
     private boolean mIsConferenceCapable = false;
     private Connection mParentConnection;
     private boolean mAudioModeIsVoip;
+    private StatusHints mStatusHints;
 
     /**
      * Create a new Connection.
@@ -174,6 +179,13 @@ public abstract class Connection {
      */
     public final boolean getAudioModeIsVoip() {
         return mAudioModeIsVoip;
+    }
+
+    /**
+     * @return The status hints for this connection.
+     */
+    public final StatusHints getStatusHints() {
+        return mStatusHints;
     }
 
     /**
@@ -428,6 +440,18 @@ public abstract class Connection {
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
             l.onSetAudioModeIsVoip(this, isVoip);
+        }
+    }
+
+    /**
+     * Sets the label and icon status to display in the in-call UI.
+     *
+     * @param statusHints The status label and icon to set.
+     */
+    public final void setStatusHints(StatusHints statusHints) {
+        mStatusHints = statusHints;
+        for (Listener l : mListeners) {
+            l.onSetStatusHints(this, statusHints);
         }
     }
 

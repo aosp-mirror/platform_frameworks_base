@@ -38,6 +38,7 @@ public final class RemoteConnection {
         void onPostDialWait(RemoteConnection connection, String remainingDigits);
         void onFeaturesChanged(RemoteConnection connection, int features);
         void onSetAudioModeIsVoip(RemoteConnection connection, boolean isVoip);
+        void onSetStatusHints(RemoteConnection connection, StatusHints statusHints);
         void onDestroyed(RemoteConnection connection);
     }
 
@@ -52,6 +53,7 @@ public final class RemoteConnection {
     private boolean mConnected;
     private int mFeatures;
     private boolean mAudioModeIsVoip;
+    private StatusHints mStatusHints;
 
     /**
      * @hide
@@ -89,6 +91,10 @@ public final class RemoteConnection {
 
     public boolean getAudioModeIsVoip() {
         return mAudioModeIsVoip;
+    }
+
+    public StatusHints getStatusHints() {
+        return mStatusHints;
     }
 
     public void abort() {
@@ -264,6 +270,14 @@ public final class RemoteConnection {
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
             l.onSetAudioModeIsVoip(this, isVoip);
+        }
+    }
+
+    /** @hide */
+    void setStatusHints(StatusHints statusHints) {
+        mStatusHints = statusHints;
+        for (Listener l : mListeners) {
+            l.onSetStatusHints(this, statusHints);
         }
     }
 }
