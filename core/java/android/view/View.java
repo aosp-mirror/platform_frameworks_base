@@ -19392,14 +19392,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * To be removed before L release.
-     * @hide
-     */
-    public final void setViewName(String transitionName) {
-        setTransitionName(transitionName);
-    }
-
-    /**
      * Returns the name of the View to be used to identify Views in Transitions.
      * Names should be unique in the View hierarchy.
      *
@@ -19411,12 +19403,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public String getTransitionName() {
         return mTransitionName;
     }
-
-    /**
-     * To be removed before L release.
-     * @hide
-     */
-    public String getViewName() { return getTransitionName(); }
 
     /**
      * Interface definition for a callback to be invoked when a hardware key event is

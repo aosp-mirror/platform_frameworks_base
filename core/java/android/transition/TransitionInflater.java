@@ -149,8 +149,6 @@ public class TransitionInflater {
                 transition = new Slide(mContext, attrs);
             } else if ("explode".equals(name)) {
                 transition = new Explode(mContext, attrs);
-            } else if ("moveImage".equals(name)) {
-                transition = new MoveImage(mContext, attrs);
             } else if ("changeImageTransform".equals(name)) {
                 transition = new ChangeImageTransform(mContext, attrs);
             } else if ("changeTransform".equals(name)) {
