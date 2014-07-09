@@ -33,7 +33,7 @@ A minimal <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleA
 
 <p class="note"><b>Note:</b> For now, this minimal client is enough to get started. However, see
 <a href="{@docRoot}google/auth/api-client.html">Accessing Google Play services APIs</a>
-for more information about creating a<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>,
+for more information about creating a <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>,
 implementing its callbacks, and handling error cases.</p>
 
 <pre style="clear:right">
@@ -42,6 +42,7 @@ GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
                 &#64;Override
                 public void onConnected(Bundle connectionHint) {
                     Log.d(TAG, "onConnected: " + connectionHint);
+                    // Now you can use the data layer API
                 }
                 &#64;Override
                 public void onConnectionSuspended(int cause) {
@@ -57,3 +58,10 @@ GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
         .addApi(Wearable.API)
         .build();
 </pre>
+
+<p>Before you use the data layer API, start a connection on your client by calling the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a>
+method, as described in
+<a href="{@docRoot}google/auth/api-client.html#Starting">Accessing Google Play services APIs</a>.
+When the system invokes the <code>onConnected()</code> callback for your client, you're ready
+to use the data layer API.</p>
