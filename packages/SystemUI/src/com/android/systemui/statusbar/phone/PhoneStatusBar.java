@@ -61,7 +61,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -73,6 +72,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.HardwareCanvas;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -82,6 +82,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -119,7 +120,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
-import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
+import com.android.systemui.statusbar.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -382,6 +383,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private long mLastVisibilityReportUptimeMs;
 
     private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
+
+    private int mDrawCount;
 
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
@@ -723,7 +726,32 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
+        startGlyphRasterizeHack();
         return mStatusBarView;
+    }
+
+    /**
+     * Hack to improve glyph rasterization for scaled text views.
+     */
+    private void startGlyphRasterizeHack() {
+        mStatusBarView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                if (mDrawCount == 1) {
+                    mStatusBarView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    HardwareCanvas.setProperty("extraRasterBucket",
+                            Float.toString(StackScrollAlgorithm.DIMMED_SCALE));
+                    HardwareCanvas.setProperty("extraRasterBucket", Float.toString(
+                            mContext.getResources().getDimensionPixelSize(
+                                    R.dimen.qs_time_collapsed_size)
+                            / mContext.getResources().getDimensionPixelSize(
+                                    R.dimen.qs_time_expanded_size)));
+                }
+                mDrawCount++;
+                return true;
+            }
+        });
     }
 
     @Override

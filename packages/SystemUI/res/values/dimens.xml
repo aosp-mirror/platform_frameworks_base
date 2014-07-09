@@ -351,4 +351,7 @@
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
+
+    <!-- The font size of the time when expanded in QS -->
+    <dimen name="qs_time_expanded_size">20sp</dimen>
 </resources>
