@@ -764,7 +764,16 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
-    /** {@hide} */
+    /**
+     * Activity Action: Show the regulatory information screen for the device.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String
             ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
