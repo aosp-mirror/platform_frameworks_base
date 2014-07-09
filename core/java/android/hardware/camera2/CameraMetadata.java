@@ -317,12 +317,19 @@ public abstract class CameraMetadata<TKey> {
      * <li>android.lens.info.shadingMapSize</li>
      * </ul>
      * </li>
+     * <li>Manual aberration correction control (if aberration correction is supported)<ul>
+     * <li>{@link CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE android.colorCorrection.aberrationCorrectionMode}</li>
+     * <li>{@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES android.colorCorrection.availableAberrationCorrectionModes}</li>
+     * </ul>
+     * </li>
      * </ul>
      * <p>If auto white balance is enabled, then the camera device
      * will accurately report the values applied by AWB in the result.</p>
      * <p>A given camera device may also support additional post-processing
      * controls, but this capability only covers the above list of controls.</p>
      *
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#SHADING_MODE
@@ -662,6 +669,30 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      */
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+    //
+
+    /**
+     * <p>No aberration correction is applied.</p>
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF = 0;
+
+    /**
+     * <p>Aberration correction will not slow down capture rate
+     * relative to sensor raw output.</p>
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST = 1;
+
+    /**
+     * <p>Aberration correction operates at improved quality but reduced
+     * capture rate (relative to sensor raw output).</p>
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY = 2;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_AE_ANTIBANDING_MODE

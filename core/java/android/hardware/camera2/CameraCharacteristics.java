@@ -289,6 +289,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
 
     /**
+     * <p>The set of aberration correction modes supported by this camera device.</p>
+     * <p>This metadata lists the valid modes for {@link CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE android.colorCorrection.aberrationCorrectionMode}.
+     * If no aberration correction modes are available for a device, this list will solely include
+     * OFF mode.</p>
+     * <p>For FULL capability device ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL), OFF must be
+     * included.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES =
+            new Key<int[]>("android.colorCorrection.availableAberrationCorrectionModes", int[].class);
+
+    /**
      * <p>The set of auto-exposure antibanding modes that are
      * supported by this camera device.</p>
      * <p>Not all of the auto-exposure anti-banding modes may be

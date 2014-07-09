@@ -403,6 +403,29 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<android.hardware.camera2.params.RggbChannelVector>("android.colorCorrection.gains", android.hardware.camera2.params.RggbChannelVector.class);
 
     /**
+     * <p>Mode of operation for the chromatic aberration correction algorithm.</p>
+     * <p>This must be set to a valid mode from
+     * {@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES android.colorCorrection.availableAberrationCorrectionModes}.</p>
+     * <p>Chromatic (color) aberration is caused by the fact that different wavelengths of light
+     * can not focus on the same point after exiting from the lens. This metadata defines
+     * the high level control of chromatic aberration correction algorithm, which aims to
+     * minimize the chromatic artifacts that may occur along the object boundaries in an
+     * image.</p>
+     * <p>FAST/HIGH_QUALITY both mean that camera device determined aberration
+     * correction will be applied. HIGH_QUALITY mode indicates that the camera device will
+     * use the highest-quality aberration correction algorithms, even if it slows down
+     * capture rate. FAST means the camera device will not slow down capture rate when
+     * applying aberration correction.</p>
+     *
+     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES
+     * @see #COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF
+     * @see #COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST
+     * @see #COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY
+     */
+    public static final Key<Integer> COLOR_CORRECTION_ABERRATION_CORRECTION_MODE =
+            new Key<Integer>("android.colorCorrection.aberrationCorrectionMode", int.class);
+
+    /**
      * <p>The desired setting for the camera device's auto-exposure
      * algorithm's antibanding compensation.</p>
      * <p>Some kinds of lighting fixtures, such as some fluorescent
