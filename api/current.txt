@@ -28110,18 +28110,27 @@ package android.telecomm {
     method protected abstract void updateCall(android.telecomm.InCallCall);
   }
 
-  public final class PhoneAccount implements android.os.Parcelable {
-    ctor public PhoneAccount(android.content.ComponentName, java.lang.String, android.net.Uri, java.lang.String, java.lang.String, boolean, boolean);
+  public class PhoneAccount implements android.os.Parcelable {
+    ctor public PhoneAccount(android.content.ComponentName, java.lang.String, android.net.Uri, int);
     method public int describeContents();
+    method public int getCapabilities();
     method public android.content.ComponentName getComponentName();
     method public android.net.Uri getHandle();
-    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
-    method public android.graphics.drawable.Drawable getIcon(android.content.Context, int);
     method public java.lang.String getId();
-    method public java.lang.String getLabel(android.content.Context);
-    method public java.lang.String getShortDescription(android.content.Context);
-    method public boolean isEnabled();
-    method public boolean isSystemDefault();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
+    field public static final int CAPABILITY_SIM_CALL_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class PhoneAccountMetadata implements android.os.Parcelable {
+    ctor public PhoneAccountMetadata(android.telecomm.PhoneAccount, int, java.lang.String, java.lang.String);
+    method public int describeContents();
+    method public android.telecomm.PhoneAccount getAccount();
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public java.lang.String getLabel();
+    method public java.lang.String getShortDescription();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -28662,7 +28671,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public java.util.List<android.telecomm.PhoneAccount> getAccounts();
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
@@ -28711,7 +28719,6 @@ package android.telephony {
     field public static final int DATA_CONNECTING = 1; // 0x1
     field public static final int DATA_DISCONNECTED = 0; // 0x0
     field public static final int DATA_SUSPENDED = 3; // 0x3
-    field public static final java.lang.String EXTRA_ACCOUNT = "account";
     field public static final java.lang.String EXTRA_INCOMING_NUMBER = "incoming_number";
     field public static final java.lang.String EXTRA_STATE = "state";
     field public static final java.lang.String EXTRA_STATE_IDLE;

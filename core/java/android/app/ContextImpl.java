@@ -558,9 +558,7 @@ class ContextImpl extends Context {
 
         registerService(TELECOMM_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(TELECOMM_SERVICE);
-                    return new TelecommManager(ctx.getOuterContext(),
-                            ITelecommService.Stub.asInterface(b));
+                    return new TelecommManager(ctx.getOuterContext());
                 }});
 
         registerService(PHONE_SERVICE, new ServiceFetcher() {
