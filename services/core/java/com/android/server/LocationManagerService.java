@@ -2319,6 +2319,53 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             return mMockProviders.containsKey(provider);
         }
+
+    }
+
+    private Location screenLocationLocked(Location location, String provider) {
+
+        if (false == provider.equals(LocationManager.NETWORK_PROVIDER)) {
+            return location;
+        }
+
+        Bundle extras = location.getExtras();
+        if (extras == null) {
+            extras = new Bundle();
+        }
+
+        if (!extras.containsKey("com.qualcomm.location.nlp:ready")) {
+            // see if com.qualcomm.location is a passive listener
+            ArrayList<UpdateRecord> records =
+                mRecordsByProvider.get(LocationManager.PASSIVE_PROVIDER);
+            if (records != null) {
+                for (UpdateRecord r : records) {
+                    if (r.mReceiver.mPackageName.equals("com.qualcomm.location")) {
+                        extras.putBoolean("com.qualcomm.location.nlp:screen", true);
+                        // send location to com.qualcomm.location for screening
+                        if (!r.mReceiver.callLocationChangedLocked(location)) {
+                            Slog.w(TAG, "RemoteException calling onLocationChanged on "
+                                   + r.mReceiver);
+                        } else {
+                            if (D) {
+                                Log.d(TAG, "Sending location for screening");
+                            }
+                        }
+                        return null;
+                    }
+                }
+            }
+            if (D) {
+                Log.d(TAG, "Not screening locations");
+            }
+        } else {
+            if (D) {
+                Log.d(TAG, "This location is marked as ready for broadcast");
+            }
+            // clear the ready marker
+            extras.remove("com.qualcomm.location.nlp:ready");
+        }
+
+        return location;
     }
 
     private void handleLocationChanged(Location location, boolean passive) {
@@ -2337,6 +2384,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             if (isAllowedByCurrentUserSettingsLocked(provider)) {
                 if (!passive) {
+                    location = screenLocationLocked(location, provider);
+                    if (location == null) {
+                        return;
+                    }
                     // notify passive provider of the new location
                     mPassiveProvider.updateLocation(myLocation);
                 }
