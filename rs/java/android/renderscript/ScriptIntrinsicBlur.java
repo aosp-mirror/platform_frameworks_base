@@ -84,7 +84,7 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
      *             type.
      */
     public void forEach(Allocation aout) {
-        forEach(aout, null);
+        forEach(0, (Allocation) null, aout, null);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
      * @param opt LaunchOptions for clipping
      */
     public void forEach(Allocation aout, Script.LaunchOptions opt) {
-        forEach(0, null, aout, null, opt);
+        forEach(0, (Allocation) null, aout, null, opt);
     }
 
 
@@ -118,4 +118,3 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
         return createFieldID(1, null);
     }
 }
-
