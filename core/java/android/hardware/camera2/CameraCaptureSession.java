@@ -660,8 +660,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * <p>Due to the asynchronous nature of the camera device, not all submitted captures
          * are immediately processed. It is possible to clear out the pending requests
-         * by a variety of operations such as {@link CameraDevice#stopRepeating} or
-         * {@link CameraDevice#flush}. When such an event happens,
+         * by a variety of operations such as {@link CameraCaptureSession#stopRepeating} or
+         * {@link CameraCaptureSession#abortCaptures}. When such an event happens,
          * {@link #onCaptureSequenceCompleted} will not be called.</p>
          *
          * <p>The default implementation does nothing.</p>

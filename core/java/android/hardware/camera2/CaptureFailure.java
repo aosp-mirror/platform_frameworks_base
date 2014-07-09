@@ -36,7 +36,8 @@ public class CaptureFailure {
     public static final int REASON_ERROR = 0;
 
     /**
-     * The capture has failed due to a {@link CameraDevice#flush} call from the application.
+     * The capture has failed due to a {@link CameraCaptureSession#abortCaptures} call from the
+     * application.
      *
      * @see #getReason()
      */
@@ -64,7 +65,7 @@ public class CaptureFailure {
      * Get the request associated with this failed capture.
      *
      * <p>Whenever a request is unsuccessfully captured, with
-     * {@link CameraDevice.CaptureListener#onCaptureFailed},
+     * {@link CameraCaptureSession.CaptureListener#onCaptureFailed},
      * the {@code failed capture}'s {@code getRequest()} will return that {@code request}.
      * </p>
      *
@@ -127,7 +128,7 @@ public class CaptureFailure {
 
     /**
      * The sequence ID for this failed capture that was returned by the
-     * {@link CameraDevice#capture} family of functions.
+     * {@link CameraCaptureSession#capture} family of functions.
      *
      * <p>The sequence ID is a unique monotonically increasing value starting from 0,
      * incremented every time a new group of requests is submitted to the CameraDevice.</p>

@@ -133,6 +133,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Set up a new output set of Surfaces for the camera device.</p>
      *
      * @deprecated Use {@link #createCaptureSession} instead
+     * @hide
      */
     @Deprecated
     public abstract void configureOutputs(List<Surface> outputs) throws CameraAccessException;
@@ -278,6 +279,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Submit a request for an image to be captured by this CameraDevice.</p>
      *
      * @deprecated Use {@link CameraCaptureSession#capture} instead
+     * @hide
      */
     @Deprecated
     public abstract int capture(CaptureRequest request, CaptureListener listener, Handler handler)
@@ -287,6 +289,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * Submit a list of requests to be captured in sequence as a burst.
      *
      * @deprecated Use {@link CameraCaptureSession#captureBurst} instead
+     * @hide
      */
     @Deprecated
     public abstract int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
@@ -296,6 +299,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * Request endlessly repeating capture of images by this CameraDevice.
      *
      * @deprecated Use {@link CameraCaptureSession#setRepeatingRequest} instead
+     * @hide
      */
     @Deprecated
     public abstract int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
@@ -306,6 +310,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * CameraDevice.</p>
      *
      * @deprecated Use {@link CameraCaptureSession#setRepeatingBurst} instead
+     * @hide
      */
     @Deprecated
     public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
@@ -317,6 +322,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link #setRepeatingBurst}.
      *
      * @deprecated Use {@link CameraCaptureSession#stopRepeating} instead
+     * @hide
      */
     @Deprecated
     public abstract void stopRepeating() throws CameraAccessException;
@@ -326,6 +332,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * possible.
      *
      * @deprecated Use {@link CameraCaptureSession#abortCaptures} instead
+     * @hide
      */
     @Deprecated
     public abstract void flush() throws CameraAccessException;
@@ -353,6 +360,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * submitted to the camera device.</p>
      *
      * @deprecated Use {@link CameraCaptureSession.CaptureListener} instead
+     * @hide
      */
     @Deprecated
     public static abstract class CaptureListener {
@@ -537,6 +545,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * The method called when a camera device has no outputs configured.
          *
          * @deprecated Use {@link #onOpened} instead.
+         * @hide
          */
         @Deprecated
         public void onUnconfigured(CameraDevice camera) {
@@ -548,6 +557,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * {@link CaptureRequest capture requests}.
          *
          * @deprecated Use {@link CameraCaptureSession.StateListener#onActive} instead.
+         * @hide
          */
         @Deprecated
         public void onActive(CameraDevice camera) {
@@ -558,6 +568,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * The method called when a camera device is busy.
          *
          * @deprecated Use {@link CameraCaptureSession.StateListener#onConfigured} instead.
+         * @hide
          */
         @Deprecated
         public void onBusy(CameraDevice camera) {
@@ -584,6 +595,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * submitted capture requests and has reached an idle state.
          *
          * @deprecated Use {@link CameraCaptureSession.StateListener#onReady} instead.
+         * @hide
          */
         @Deprecated
         public void onIdle(CameraDevice camera) {

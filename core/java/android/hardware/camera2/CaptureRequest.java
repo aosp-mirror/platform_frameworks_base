@@ -245,7 +245,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This tag is not used for anything by the camera device, but can be
      * used by an application to easily identify a CaptureRequest when it is
      * returned by
-     * {@link CameraDevice.CaptureListener#onCaptureCompleted CaptureListener.onCaptureCompleted}
+     * {@link CameraCaptureSession.CaptureListener#onCaptureCompleted CaptureListener.onCaptureCompleted}
      * </p>
      *
      * @return the last tag Object set on this request, or {@code null} if
@@ -435,7 +435,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * <p>This tag is not used for anything by the camera device, but can be
          * used by an application to easily identify a CaptureRequest when it is
          * returned by
-         * {@link CameraDevice.CaptureListener#onCaptureCompleted CaptureListener.onCaptureCompleted}
+         * {@link CameraCaptureSession.CaptureListener#onCaptureCompleted CaptureListener.onCaptureCompleted}
          *
          * @param tag an arbitrary Object to store with this request
          * @see CaptureRequest#getTag
