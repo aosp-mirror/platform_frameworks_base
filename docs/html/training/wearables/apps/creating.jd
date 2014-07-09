@@ -48,7 +48,7 @@ types of screen shapes, which is useful for testing.</p>
   <li>Click <b>Create...</b>.</li>
   <li>Fill in the following details for the AVD you want to specify and leave the rest
   of the fields with their default values:
-    <ol>
+    <ul>
       <li><b>AVD Name</b> - A name for your AVD</li>
       <li><b>Device</b> - Android Wear Round or Square device types</li>
       <li><b>Target</b> - Android 4.4W - API Level 20</li>
@@ -57,7 +57,7 @@ types of screen shapes, which is useful for testing.</p>
       <li><b>Skin</b> - AndroidWearRound or AndroidWearSquare depending on the selected device type</li>
       <li><b>Snapshot</b> - Not selected</li>
       <li><b>Use Host GPU</b> - Selected, to support custom activities for wearable notifications</li>
-    </ol>
+    </ul>
   </li>
   <li>Click <b>OK</b>.</li>
 <li>Start the emulator:
@@ -119,8 +119,8 @@ Project</a>. As you follow the wizard, enter the following information:</p>
     </ul>
   </li>
   <li>In the first <b>Add an Activity</b> window, add a blank activity for mobile.</li>
-  <li>In the second <b>Add an Activity</b> window, add a blank activity for Wear.
-
+  <li>In the second <b>Add an Activity</b> window, add a blank activity for Wear.</li>
+</ol>
   <p>When the wizard completes, Android Studio creates a new project with two modules, <b>mobile</b> and
   <b>wear</b>. You now have a project for both your handheld and wearable apps that you can create activities,
   services, custom layouts, and much more in. On the handheld app, you do most of the heavy lifting,
@@ -135,7 +135,7 @@ Project</a>. As you follow the wizard, enter the following information:</p>
   by the <a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">wearable support library</a>.</p>
 </li>
 
-<h2 id="Install">Install the Wearable app</h2>
+<h2 id="Install">Install the Wearable App</h2>
 
 <p>When developing, you install apps directly to the wearable like with handheld apps. Use
 either <code>adb install</code> or the <b>Play</b> button on Android Studio.</p>
@@ -178,12 +178,13 @@ you need the latest version of
 If you're not using these APIs, remove the dependency from both modules.</p>
 
 <b>Wearable UI support library</b>
-<p>This is an unofficial library that includes UI widgets designed for wearables. We encourage you
-to use them in your apps, because they exemplify best practices, but they can still
-change at any time. However, if the libraries are updated, your apps won't break since they are compiled
-into your app. To get new features from an updated library, you just need to
-statically link the new version and update your app accordingly.
-This library is only applicable if you create wearable apps.
+<p>This is an unofficial library that includes
+<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">UI widgets designed for
+wearables</a>. We encourage you to use them in your apps, because they exemplify best practices,
+but they can still change at any time. However, if the libraries are updated, your apps won't
+break since they are compiled into your app. To get new features from an updated library, you just
+need to statically link the new version and update your app accordingly. This library is only
+applicable if you create wearable apps.
 </p>
 
 <p>In the next lessons, you'll learn how to create layouts designed for wearables as well as how
