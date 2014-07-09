@@ -6151,8 +6151,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             File packLib64 = new File(lib64, apkName);
             File libDir = (packLib64.exists()) ? lib64 : new File(apkRoot, LIB_DIR_NAME);
             nativeLibraryPath = (new File(libDir, apkName)).getAbsolutePath();
+        } else if (isApkFile(codeFile)) {
+            // Monolithic install
+            nativeLibraryPath = (new File(mAppLibInstallDir, apkName)).getAbsolutePath();
         } else {
-            // Upgraded system app; derive its library path by inspecting.
+            // Cluster install
             // TODO: pipe through abiOverride
             String[] abiList = Build.SUPPORTED_ABIS;
             NativeLibraryHelper.Handle handle = null;
