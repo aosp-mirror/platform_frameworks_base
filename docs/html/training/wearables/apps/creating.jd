@@ -89,9 +89,15 @@ types of screen shapes, which is useful for testing.</p>
   <li>Install the Android Wear app, available on Google Play, on your handheld.</li>
   <li>Follow the app's instructions to pair your handheld with your wearable.
   This allows you to test out synced handheld notifications, if you're building them.</li>
+  <li>Leave the Android Wear app open on your phone.</li>
   <li>Connect the wearable to your machine through USB, so you can install apps directly to it
-  as you develop.</li>
+  as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
+  <li>On the Android Wear app, check <strong>Always allow from this computer</strong> and tap
+  <strong>OK</strong>.</li>
 </ol>
+
+<p>The <strong>Android</strong> tool window on Android Studio shows the system log from the wearable.
+The wearable should also be listed when you run the <code>adb devices</code> command.</p>
 
 <h2 id="CreateProject">Create a Project</h2>
 
