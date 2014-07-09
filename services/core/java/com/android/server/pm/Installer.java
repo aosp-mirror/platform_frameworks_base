@@ -322,6 +322,13 @@ public final class Installer extends SystemService {
         return execute(builder.toString());
     }
 
+    public int createUserConfig(int userId) {
+        StringBuilder builder = new StringBuilder("mkuserconfig");
+        builder.append(' ');
+        builder.append(userId);
+        return execute(builder.toString());
+    }
+
     public int removeUserDataDirs(int userId) {
         StringBuilder builder = new StringBuilder("rmuser");
         builder.append(' ');
