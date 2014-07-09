@@ -116,6 +116,14 @@ public:
 
 private:
     static int startReg(JNIEnv* env);
+    bool parseRuntimeOption(const char* property,
+                            char* buffer,
+                            const char* runtimeArg,
+                            const char* defaultArg = "");
+    bool parseCompilerRuntimeOption(const char* property,
+                                    char* buffer,
+                                    const char* runtimeArg,
+                                    const char* quotingArg);
     void parseExtraOpts(char* extraOptsBuf, const char* quotingArg);
     int startVm(JavaVM** pJavaVM, JNIEnv** pEnv);
 
