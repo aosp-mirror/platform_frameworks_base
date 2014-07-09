@@ -21,6 +21,7 @@ import android.os.Bundle;
 import com.android.ims.ImsCallForwardInfo;
 import com.android.ims.ImsSsInfo;
 import com.android.ims.internal.IImsUt;
+import com.android.ims.ImsReasonInfo;
 
 /**
  * {@hide}
@@ -30,13 +31,13 @@ interface IImsUtListener {
      * Notifies the result of the supplementary service configuration udpate.
      */
     void utConfigurationUpdated(in IImsUt ut, int id);
-    void utConfigurationUpdateFailed(in IImsUt ut, int id, int errorCode);
+    void utConfigurationUpdateFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     /**
      * Notifies the result of the supplementary service configuration query.
      */
     void utConfigurationQueried(in IImsUt ut, int id, in Bundle ssInfo);
-    void utConfigurationQueryFailed(in IImsUt ut, int id, int errorCode);
+    void utConfigurationQueryFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     /**
      * Notifies the status of the call barring supplementary service.
