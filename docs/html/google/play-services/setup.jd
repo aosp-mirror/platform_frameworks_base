@@ -51,7 +51,7 @@ to <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</
 
 
 <div class="select-ide studio">
-
+<p>To make the Google Play services APIs available to your app:</p>
 <ol>
   <li>Open the <code>build.gradle</code> file inside your application module directory.
       <p class="note"><strong>Note:</strong> Android Studio projects contain a top-level
@@ -91,38 +91,67 @@ element:
 
 </div><!-- end studio -->
 
+<div class="select-ide eclipse">
 
-
-<div class="select-ide eclipse other">
-
-<p>To make the Google Play services APIs available to your app, you must reference the library
-project you created in step 4 of the <a href="#Install">installation instructions</a>.</p>
-<p>See the <a href="{@docRoot}tools/projects/projects-eclipse.html#ReferencingLibraryProject"
->Referencing a Library Project for Eclipse</a> or <a
-href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing a
-Library Project on the Command Line</a> for more information on how to do this.</p>
-
-<p class="note"><strong>Note:</strong>
-You should be referencing a copy of the library that you copied to your development
-workspace&mdash;you should not reference the library directly from the Android SDK directory.</p>
-
-<p>After you've added the Google Play services library as a dependency for your app project,
-open your app's manifest file and add the following tag as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
+<p>To make the Google Play services APIs available to your app:</p>
+<ol>
+  <li>Copy the library project at <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code> to the location where you maintain your Android app projects.</li>
+  <li>Import the library project into your Eclipse workspace. Click
+    <b>File > Import</b>, select <b>Android > Existing Android Code into
+Workspace</b>, and browse to the copy of the library project to import it.</li>
+  <li>In your app project, reference Google Play services library project. See
+    <a href="{@docRoot}tools/projects/projects-eclipse.html#ReferencingLibraryProject">Referencing a Library Project for Eclipse</a> for more information on how to
+    do this.
+  <p class="note"><strong>Note:</strong> You should be referencing a copy of the
+    library that you copied to your development workspace&mdash;you should not
+    reference the library directly from the Android SDK directory.</p>
+  </li>
+  <li>After you've added the Google Play services library as a dependency for your app project,
+    open your app's manifest file and add the following tag as a child of the
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
 element:
-<pre>
+    <pre>
 &lt;meta-data android:name="com.google.android.gms.version"
-           android:value="&#64;integer/google_play_services_version" />
-</pre>
-
+        android:value="&#64;integer/google_play_services_version" />
+    </pre>
+  </li>
+</ol>
 
 <p>Once you've set up your project to reference the library project,
 you can begin developing features with the
 <a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
 
-</div><!-- end eclipse and other -->
+</div><!-- end eclipse -->
 
+<div class="select-ide other">
 
+<p>To make the Google Play services APIs available to your app:</p>
+<ol>
+  <li>Copy the library project at <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code> to the location where you maintain your Android app projects.</li>
+
+  <li>In your app project, reference Google Play services library project. See
+    <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing
+    a Library Project on the Command Line</a> for more information on how to do this.
+    <p class="note"><strong>Note:</strong>
+You should be referencing a copy of the library that you copied to your development
+workspace&mdash;you should not reference the library directly from the Android SDK directory.</p>
+  </li>
+  <li>After you've added the Google Play services library as a dependency for
+    your app project, open your app's manifest file and add the following tag as
+    a child of the
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a> element:
+    <pre>
+&lt;meta-data android:name="com.google.android.gms.version"
+        android:value="&#64;integer/google_play_services_version" />
+    </pre>
+  </li>
+</ol>
+
+<p>Once you've set up your project to reference the library project,
+you can begin developing features with the
+<a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
+
+</div><!-- end other -->
 
 
 <h2 id="Proguard">Create a Proguard Exception</h2>
