@@ -18,6 +18,7 @@ package com.android.internal.telecomm;
 
 import android.content.ComponentName;
 import android.telecomm.PhoneAccount;
+import android.telecomm.PhoneAccountMetadata;
 
 /**
  * Interface used to interact with Telecomm. Mostly this is used by TelephonyManager for passing
@@ -33,22 +34,32 @@ interface ITelecommService {
     void showCallScreen(boolean showDialpad);
 
     /**
-     * Gets a list of accounts.
+     * @see TelecommManager#getEnabledPhoneAccounts
      */
-    List<PhoneAccount> getAccounts();
+    List<PhoneAccount> getEnabledPhoneAccounts();
 
     /**
-     * Sets the enabled state of a given account.
+     * @see TelecommManager#getPhoneAccountMetadata
      */
-    void setEnabled(in PhoneAccount account, boolean enabled);
+    PhoneAccountMetadata getPhoneAccountMetadata(in PhoneAccount account);
 
     /**
-     * Sets a given account as the system default.
+     * @see TelecommManager#registerPhoneAccount
      */
-    void setSystemDefault(in PhoneAccount account);
+    void registerPhoneAccount(in PhoneAccount account, in PhoneAccountMetadata metadata);
 
     /**
-     * Returns the component name of the default phone application.
+     * @see TelecommManager#unregisterPhoneAccount
+     */
+    void unregisterPhoneAccount(in PhoneAccount account);
+
+    /**
+     * @see TelecommManager#clearAccounts
+     */
+    void clearAccounts(String packageName);
+
+    /**
+     * @see TelecommManager#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
 

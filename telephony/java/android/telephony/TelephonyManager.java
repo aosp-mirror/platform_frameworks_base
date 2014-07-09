@@ -298,17 +298,6 @@ public class TelephonyManager {
     public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
 
     /**
-     * The lookup key used with an {@link android.content.Intent#ACTION_CALL} or
-     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} for a {@link PhoneAccount}
-     * object indicating a preference when making a phone connection.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String)}.
-     */
-    public static final String EXTRA_ACCOUNT = "account";
-
-    /**
      * Broadcast intent action indicating that a precise call state
      * (cellular) on the device has changed.
      *
@@ -3204,42 +3193,6 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
         }
         return false;
-    }
-
-    /**
-     * Return a list of Accounts that can be used to indicate a preference when making
-     * a phone call.
-     *
-     * @see #EXTRA_ACCOUNT
-     * @return A list of {@code Accouint} objects.
-     */
-    public List<PhoneAccount> getAccounts() {
-        try {
-            return getTelecommService().getAccounts();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getAccounts", e);
-        }
-        return null;
-    }
-
-    /** @hide */
-    @SystemApi
-    public void setEnabled(PhoneAccount account, boolean enabled) {
-        try {
-            getTelecommService().setEnabled(account, enabled);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setEnabled", e);
-        }
-    }
-
-    /** @hide */
-    @SystemApi
-    public void setSystemDefault(PhoneAccount account) {
-        try {
-            getTelecommService().setSystemDefault(account);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setSystemDefault", e);
-        }
     }
 
     /**
