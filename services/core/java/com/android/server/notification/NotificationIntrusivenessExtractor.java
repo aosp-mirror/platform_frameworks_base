@@ -63,4 +63,9 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
             }
         };
     }
+
+    @Override
+    public void setConfig(RankingConfig config) {
+        // ignore: config has no relevant information yet.
+    }
 }

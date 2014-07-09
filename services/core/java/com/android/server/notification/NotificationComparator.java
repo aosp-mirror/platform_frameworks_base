@@ -28,6 +28,12 @@ public class NotificationComparator
         if (lhs.isRecentlyIntrusive() != rhs.isRecentlyIntrusive()) {
             return lhs.isRecentlyIntrusive() ? -1 : 1;
         }
+        final int leftPackagePriority = lhs.getPackagePriority();
+        final int rightPackagePriority = rhs.getPackagePriority();
+        if (leftPackagePriority != rightPackagePriority) {
+            // by priority, high to low
+            return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
+        }
         final int leftScore = lhs.sbn.getScore();
         final int rightScore = rhs.sbn.getScore();
         if (leftScore != rightScore) {
