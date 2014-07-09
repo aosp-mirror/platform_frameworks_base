@@ -85,7 +85,8 @@ public class RecentsConfiguration {
     public int taskBarViewDarkTextColor;
     public int taskBarViewHighlightColor;
 
-    /** Task bar animations */
+    /** Task bar size & animations */
+    public int taskBarHeight;
     public int taskBarEnterAnimDuration;
     public int taskBarEnterAnimDelay;
     public int taskBarExitAnimDuration;
@@ -214,7 +215,8 @@ public class RecentsConfiguration {
         taskBarViewHighlightColor =
                 res.getColor(R.color.recents_task_bar_highlight_color);
 
-        // Task bar animations
+        // Task bar size & animations
+        taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
         taskBarEnterAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
         taskBarEnterAnimDelay =

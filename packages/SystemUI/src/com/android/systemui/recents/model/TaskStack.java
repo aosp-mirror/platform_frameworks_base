@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -174,7 +175,6 @@ public class TaskStack {
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<TaskGrouping>();
     HashMap<String, TaskGrouping> mAffinitiesGroups = new HashMap<String, TaskGrouping>();
-    HashMap<TaskGrouping, Integer> mGroupsIndices = new HashMap<TaskGrouping, Integer>();
 
     /** Sets the callbacks for this task stack */
     public void setCallbacks(TaskStackCallbacks cb) {
@@ -295,39 +295,16 @@ public class TaskStack {
     public void addGroup(TaskGrouping group) {
         mGroups.add(group);
         mAffinitiesGroups.put(group.affiliation, group);
-        updateTaskGroupingIndices();
     }
 
     public void removeGroup(TaskGrouping group) {
-        // XXX: Ensure that there are no more tasks in this group
         mGroups.remove(group);
         mAffinitiesGroups.remove(group.affiliation);
-        mGroupsIndices.remove(group);
-        updateTaskGroupingIndices();
-    }
-
-    /** Adds a mapping from a task to a group. */
-    public void addTaskToGroup(TaskGrouping group, Task task) {
-        if (!mAffinitiesGroups.containsKey(group.affiliation)) {
-            throw new RuntimeException("Unexpected group");
-        }
-        group.addTask(task);
     }
 
     /** Returns the group with the specified affiliation. */
     public TaskGrouping getGroupWithAffiliation(String affiliation) {
         return mAffinitiesGroups.get(affiliation);
-    }
-
-    /** Returns the number of groups. */
-    public int getGroupingCount() {
-        return mGroups.size();
-    }
-
-    /** Returns the group and task indices for a given task. */
-    public void getGroupIndexForTask(Task task, GroupTaskIndex indices) {
-        indices.groupIndex = mGroupsIndices.get(task.group);
-        indices.taskIndex = task.group.indexOf(task);
     }
 
     /**
@@ -349,18 +326,23 @@ public class TaskStack {
             int taskCount = tasks.size();
             String prevPackage = "";
             String prevAffiliation = "";
+            Random r = new Random();
+            int groupCountDown = 1000;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 String packageName = t.key.baseIntent.getComponent().getPackageName();
+                packageName = "pkg";
                 TaskGrouping group;
-                if (packageName.equals(prevPackage)) {
+                if (packageName.equals(prevPackage) && groupCountDown > 0) {
                     group = getGroupWithAffiliation(prevAffiliation);
+                    groupCountDown--;
                 } else {
                     String affiliation = counter.nextName();
                     group = new TaskGrouping(affiliation);
                     addGroup(group);
                     prevAffiliation = affiliation;
                     prevPackage = packageName;
+                    groupCountDown = 1000;
                 }
                 group.addTask(t);
                 taskMap.put(t.key, t);
@@ -373,7 +355,6 @@ public class TaskStack {
                             taskGrouping2.latestActiveTimeInGroup);
                 }
             });
-            updateTaskGroupingIndices();
             // Sort group tasks by increasing firstActiveTime of the task, and also build a new list of
             // tasks
             int taskIndex = 0;
@@ -405,16 +386,6 @@ public class TaskStack {
                 addGroup(group);
                 group.addTask(t);
             }
-        }
-    }
-
-    /** Updates the mapping of tasks to indices. */
-    private void updateTaskGroupingIndices() {
-        mGroupsIndices.clear();
-        int groupsCount = mGroups.size();
-        for (int i = 0; i < groupsCount; i++) {
-            TaskGrouping g = mGroups.get(i);
-            mGroupsIndices.put(g, i);
         }
     }
 

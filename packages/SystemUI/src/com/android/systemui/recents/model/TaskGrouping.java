@@ -1,6 +1,7 @@
 package com.android.systemui.recents.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /** Represents a grouping of tasks witihin a stack. */
 public class TaskGrouping {
@@ -9,6 +10,7 @@ public class TaskGrouping {
     long latestActiveTimeInGroup;
 
     ArrayList<Task.TaskKey> mTasks = new ArrayList<Task.TaskKey>();
+    HashMap<Task.TaskKey, Integer> mTaskIndices = new HashMap<Task.TaskKey, Integer>();
 
     /** Creates a group with a specified affiliation. */
     public TaskGrouping(String affiliation) {
@@ -22,6 +24,7 @@ public class TaskGrouping {
             latestActiveTimeInGroup = t.key.lastActiveTime;
         }
         t.setGroup(this);
+        updateTaskIndices();
     }
 
     /** Removes a task from this group. */
@@ -36,6 +39,7 @@ public class TaskGrouping {
             }
         }
         t.setGroup(null);
+        updateTaskIndices();
     }
 
     /** Gets the front task */
@@ -45,9 +49,19 @@ public class TaskGrouping {
 
     /** Finds the index of a given task in a group. */
     public int indexOf(Task t) {
-        return mTasks.indexOf(t.key);
+        return mTaskIndices.get(t.key);
     }
 
     /** Returns the number of tasks in this group. */
     public int getTaskCount() { return mTasks.size(); }
+
+    /** Updates the mapping of tasks to indices. */
+    private void updateTaskIndices() {
+        mTaskIndices.clear();
+        int taskCount = mTasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task.TaskKey k = mTasks.get(i);
+            mTaskIndices.put(k, i);
+        }
+    }
 }

@@ -20,6 +20,10 @@ import android.graphics.Rect;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.Task;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /* The layout logic for a TaskStackView */
 public class TaskStackViewLayoutAlgorithm {
@@ -42,12 +46,14 @@ public class TaskStackViewLayoutAlgorithm {
     int mMinScroll;
     int mMaxScroll;
 
+    HashMap<Task.TaskKey, Integer> mTaskOffsetMap = new HashMap<Task.TaskKey, Integer>();
+
     public TaskStackViewLayoutAlgorithm(RecentsConfiguration config) {
         mConfig = config;
     }
 
     /** Computes the stack and task rects */
-    public void computeRects(int width, int height, int insetLeft, int insetBottom) {
+    public void computeRects(ArrayList<Task> tasks, int width, int height, int insetLeft, int insetBottom) {
         // Note: We let the stack view be the full height because we want the cards to go under the
         //       navigation bar if possible.  However, the stack rects which we use to calculate
         //       max scroll, etc. need to take the nav bar into account
@@ -76,29 +82,31 @@ public class TaskStackViewLayoutAlgorithm {
         int left = mStackRect.left + (mStackRect.width() - size) / 2;
         mTaskRect.set(left, mStackRectSansPeek.top,
                 left + size, mStackRectSansPeek.top + size);
+
+        // Update the task offsets once the size changes
+        updateTaskOffsets(tasks);
     }
 
-    void computeMinMaxScroll(int taskCount) {
+    void computeMinMaxScroll(ArrayList<Task> tasks) {
         // Compute the min and max scroll values
-        int numTasks = Math.max(1, taskCount);
+        int numTasks = Math.max(1, tasks.size());
         int taskHeight = mTaskRect.height();
         int stackHeight = mStackRectSansPeek.height();
-        int maxScrollHeight = taskHeight + getStackScrollForTaskIndex(numTasks - 1);
 
         if (numTasks <= 1) {
             // If there is only one task, then center the task in the stack rect (sans peek)
             mMinScroll = mMaxScroll = -(stackHeight - taskHeight) / 2;
         } else {
+            int maxScrollHeight = taskHeight + getStackScrollForTaskIndex(tasks.get(tasks.size() - 1));
             mMinScroll = Math.min(stackHeight, maxScrollHeight) - stackHeight;
             mMaxScroll = maxScrollHeight - stackHeight;
         }
     }
 
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(int groupIndexInStack, int taskIndexInGroup,
-                                               int stackScroll, TaskViewTransform transformOut) {
+    public TaskViewTransform getStackTransform(Task task, int stackScroll, TaskViewTransform transformOut) {
         // Return early if we have an invalid index
-        if (groupIndexInStack < 0) {
+        if (task == null) {
             transformOut.reset();
             return transformOut;
         }
@@ -107,7 +115,7 @@ public class TaskStackViewLayoutAlgorithm {
         int numPeekCards = StackPeekNumCards;
         float overlapHeight = StackOverlapPct * mTaskRect.height();
         float peekHeight = StackPeekHeightPct * mStackRect.height();
-        float t = ((groupIndexInStack * overlapHeight) - stackScroll) / overlapHeight;
+        float t = (getStackScrollForTaskIndex(task) - stackScroll) / overlapHeight;
         float boundedT = Math.max(t, -(numPeekCards + 1));
 
         // Set the scale relative to its position
@@ -118,6 +126,8 @@ public class TaskStackViewLayoutAlgorithm {
         float scale = Math.max(minScale, Math.min(1f, minScale + 
             ((boundedT + (numPeekCards + 1)) * scaleInc)));
         float scaleYOffset = ((1f - scale) * mTaskRect.height()) / 2;
+        // Account for the bar offsets being scaled?
+        float scaleBarYOffset = (1f - scale) * mConfig.taskBarHeight;
         transformOut.scale = scale;
 
         // Set the y translation
@@ -125,9 +135,8 @@ public class TaskStackViewLayoutAlgorithm {
             transformOut.translationY = (int) ((Math.max(-numPeekCards, boundedT) /
                     numPeekCards) * peekHeight - scaleYOffset);
         } else {
-            transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset);
+            transformOut.translationY = (int) (boundedT * overlapHeight - scaleYOffset - scaleBarYOffset);
         }
-        transformOut.translationY += 100 * taskIndexInGroup;
 
         // Set the z translation
         int minZ = mConfig.taskViewTranslationZMinPx;
@@ -161,8 +170,26 @@ public class TaskStackViewLayoutAlgorithm {
      * Returns the scroll to such that the task transform at that index will have t=0. (If the scroll
      * is not bounded)
      */
-    int getStackScrollForTaskIndex(int i) {
-        return (int) (i * getTaskOverlapHeight());
+    int getStackScrollForTaskIndex(Task t) {
+        return mTaskOffsetMap.get(t.key);
+    }
+
+    /**
+     * Updates the cache of tasks to offsets.
+     */
+    void updateTaskOffsets(ArrayList<Task> tasks) {
+        mTaskOffsetMap.clear();
+        int offset = 0;
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task t = tasks.get(i);
+            mTaskOffsetMap.put(t.key, offset);
+            if (t.group.isFrontMostTask(t)) {
+                offset += getTaskOverlapHeight();
+            } else {
+                offset += mConfig.taskBarHeight;
+            }
+        }
     }
 
 }

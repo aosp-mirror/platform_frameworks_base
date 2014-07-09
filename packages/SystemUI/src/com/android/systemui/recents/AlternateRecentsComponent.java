@@ -341,10 +341,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // Get the transform for the running task
-        TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
-        stack.getGroupIndexForTask(task, groupTaskIndex);
-        mTmpTransform = algo.getStackTransform(groupTaskIndex.groupIndex, groupTaskIndex.taskIndex,
-                tsv.getStackScroll(), mTmpTransform);
+        mTmpTransform = algo.getStackTransform(task, tsv.getStackScroll(), mTmpTransform);
         mTmpTransform.rect.offset(mTaskStackBounds.left, mTaskStackBounds.top);
         mTmpTransform.rect.offset(0, mStatusBarHeight);
         return new Rect(mTmpTransform.rect);

@@ -443,20 +443,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int offsetX = 0;
         int offsetY = 0;
         int stackScroll = stackView.getStackScroll();
-        TaskStack.GroupTaskIndex groupTaskIndex = new TaskStack.GroupTaskIndex();
-        stack.getGroupIndexForTask(task, groupTaskIndex);
         if (tv == null) {
             // If there is no actual task view, then use the stack view as the source view
             // and then offset to the expected transform rect, but bound this to just
             // outside the display rect (to ensure we don't animate from too far away)
             sourceView = stackView;
-            transform = stackView.getStackAlgorithm().getStackTransform(groupTaskIndex.groupIndex,
-                    groupTaskIndex.taskIndex, stackScroll, transform);
+            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform);
             offsetX = transform.rect.left;
             offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
         } else {
-            transform = stackView.getStackAlgorithm().getStackTransform(groupTaskIndex.groupIndex,
-                    groupTaskIndex.taskIndex, stackScroll, transform);
+            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform);
         }
 
         // Compute the thumbnail to scale up from

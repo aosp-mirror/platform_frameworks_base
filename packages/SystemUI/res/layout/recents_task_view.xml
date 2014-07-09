@@ -25,7 +25,7 @@
     <com.android.systemui.recents.views.TaskBarView
         android:id="@+id/task_view_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/recents_task_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:background="@color/recents_task_bar_default_background_color">
         <ImageView

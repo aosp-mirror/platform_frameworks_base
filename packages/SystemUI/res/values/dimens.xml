@@ -210,6 +210,9 @@
     <!-- The amount of highlight to make on each task view. -->
     <dimen name="recents_task_view_highlight">1dp</dimen>
 
+    <!-- The height of a task view bar. -->
+    <dimen name="recents_task_bar_height">56dp</dimen>
+
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 
