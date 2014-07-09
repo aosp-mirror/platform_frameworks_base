@@ -1075,6 +1075,13 @@
     <permission android:name="android.permission.TV_INPUT_HARDWARE"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- @hide Allows enabling/disabling OEM unlock
+   <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.OEM_UNLOCK_STATE"
+                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+                android:protectionLevel="signature" />
+
+
     <!-- =========================================== -->
     <!-- Permissions associated with audio capture -->
     <!-- =========================================== -->

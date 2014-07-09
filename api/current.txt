@@ -47731,7 +47731,6 @@ package java.util {
     ctor public Locale(java.lang.String, java.lang.String);
     ctor public Locale(java.lang.String, java.lang.String, java.lang.String);
     method public java.lang.Object clone();
-    method public static java.util.Locale forLanguageTag(java.lang.String);
     method public static java.util.Locale[] getAvailableLocales();
     method public java.lang.String getCountry();
     method public static java.util.Locale getDefault();
@@ -47741,24 +47740,15 @@ package java.util {
     method public java.lang.String getDisplayLanguage(java.util.Locale);
     method public final java.lang.String getDisplayName();
     method public java.lang.String getDisplayName(java.util.Locale);
-    method public java.lang.String getDisplayScript();
-    method public java.lang.String getDisplayScript(java.util.Locale);
     method public final java.lang.String getDisplayVariant();
     method public java.lang.String getDisplayVariant(java.util.Locale);
-    method public java.lang.String getExtension(char);
-    method public java.util.Set<java.lang.Character> getExtensionKeys();
     method public java.lang.String getISO3Country();
     method public java.lang.String getISO3Language();
     method public static java.lang.String[] getISOCountries();
     method public static java.lang.String[] getISOLanguages();
     method public java.lang.String getLanguage();
-    method public java.lang.String getScript();
-    method public java.util.Set<java.lang.String> getUnicodeLocaleAttributes();
-    method public java.util.Set<java.lang.String> getUnicodeLocaleKeys();
-    method public java.lang.String getUnicodeLocaleType(java.lang.String);
     method public java.lang.String getVariant();
     method public static synchronized void setDefault(java.util.Locale);
-    method public java.lang.String toLanguageTag();
     method public final java.lang.String toString();
     field public static final java.util.Locale CANADA;
     field public static final java.util.Locale CANADA_FRENCH;
@@ -47776,31 +47766,12 @@ package java.util {
     field public static final java.util.Locale KOREA;
     field public static final java.util.Locale KOREAN;
     field public static final java.util.Locale PRC;
-    field public static final char PRIVATE_USE_EXTENSION = 120; // 0x0078 'x'
     field public static final java.util.Locale ROOT;
     field public static final java.util.Locale SIMPLIFIED_CHINESE;
     field public static final java.util.Locale TAIWAN;
     field public static final java.util.Locale TRADITIONAL_CHINESE;
     field public static final java.util.Locale UK;
-    field public static final char UNICODE_LOCALE_EXTENSION = 117; // 0x0075 'u'
     field public static final java.util.Locale US;
-  }
-
-  public static final class Locale.Builder {
-    ctor public Locale.Builder();
-    method public java.util.Locale.Builder addUnicodeLocaleAttribute(java.lang.String);
-    method public java.util.Locale build();
-    method public java.util.Locale.Builder clear();
-    method public java.util.Locale.Builder clearExtensions();
-    method public java.util.Locale.Builder removeUnicodeLocaleAttribute(java.lang.String);
-    method public java.util.Locale.Builder setExtension(char, java.lang.String);
-    method public java.util.Locale.Builder setLanguage(java.lang.String);
-    method public java.util.Locale.Builder setLanguageTag(java.lang.String);
-    method public java.util.Locale.Builder setLocale(java.util.Locale);
-    method public java.util.Locale.Builder setRegion(java.lang.String);
-    method public java.util.Locale.Builder setScript(java.lang.String);
-    method public java.util.Locale.Builder setUnicodeLocaleKeyword(java.lang.String, java.lang.String);
-    method public java.util.Locale.Builder setVariant(java.lang.String);
   }
 
   public abstract interface Map {

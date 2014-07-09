@@ -20,6 +20,8 @@ import android.net.wifi.IWifiScanner;
 import android.net.wifi.WifiScanner;
 import android.os.Build;
 
+import android.service.persistentdata.IPersistentDataBlockService;
+import android.service.persistentdata.PersistentDataBlockManager;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
@@ -733,7 +735,14 @@ class ContextImpl extends Context {
             public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(JOB_SCHEDULER_SERVICE);
                 return new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b));
-            }});
+        }});
+
+        registerService(PERSISTENT_DATA_BLOCK_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(PERSISTENT_DATA_BLOCK_SERVICE);
+                return new PersistentDataBlockManager(
+                        IPersistentDataBlockService.Stub.asInterface(b));
+        }});
     }
 
     static ContextImpl getImpl(Context context) {
