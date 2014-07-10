@@ -682,13 +682,9 @@ public class RemoteControlClient
                 // USE_SESSIONS
                 if (mSession != null) {
                     int pbState = PlaybackState.getStateFromRccState(state);
-                    long position = hasPosition ? mPlaybackPositionMs
-                            : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
-
-                    PlaybackState.Builder bob = new PlaybackState.Builder(mSessionPlaybackState);
-                    bob.setState(pbState, position, playbackSpeed, SystemClock.elapsedRealtime());
-                    bob.setErrorMessage(null);
-                    mSessionPlaybackState = bob.build();
+                    mSessionPlaybackState.setState(pbState, hasPosition ?
+                            mPlaybackPositionMs : PlaybackState.PLAYBACK_POSITION_UNKNOWN,
+                            playbackSpeed);
                     mSession.setPlaybackState(mSessionPlaybackState);
                 }
             }
@@ -749,9 +745,8 @@ public class RemoteControlClient
 
             // USE_SESSIONS
             if (mSession != null) {
-                PlaybackState.Builder bob = new PlaybackState.Builder(mSessionPlaybackState);
-                bob.setActions(PlaybackState.getActionsFromRccControlFlags(transportControlFlags));
-                mSessionPlaybackState = bob.build();
+                mSessionPlaybackState.setActions(PlaybackState
+                        .getActionsFromRccControlFlags(transportControlFlags));
                 mSession.setPlaybackState(mSessionPlaybackState);
             }
         }
@@ -951,7 +946,7 @@ public class RemoteControlClient
     /**
      * Cache for the current playback state using Session APIs.
      */
-    private PlaybackState mSessionPlaybackState = null;
+    private final PlaybackState mSessionPlaybackState = new PlaybackState();
 
     /**
      * Cache for metadata using Session APIs. This is re-initialized in apply().

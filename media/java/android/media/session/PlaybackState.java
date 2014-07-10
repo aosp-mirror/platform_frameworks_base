@@ -183,29 +183,41 @@ public final class PlaybackState implements Parcelable {
      */
     public final static long PLAYBACK_POSITION_UNKNOWN = -1;
 
-    private final int mState;
-    private final long mPosition;
-    private final long mBufferPosition;
-    private final float mSpeed;
-    private final long mActions;
-    private final CharSequence mErrorMessage;
-    private final long mUpdateTime;
+    private int mState;
+    private long mPosition;
+    private long mBufferPosition;
+    private float mRate;
+    private long mActions;
+    private CharSequence mErrorMessage;
+    private long mUpdateTime;
 
-    private PlaybackState(int state, long position, long updateTime, float speed,
-            long bufferPosition, long actions, CharSequence error) {
-        mState = state;
-        mPosition = position;
-        mSpeed = speed;
-        mUpdateTime = updateTime;
-        mBufferPosition = bufferPosition;
-        mActions = actions;
-        mErrorMessage = error;
+    /**
+     * Create an empty PlaybackState. At minimum a state and actions should be
+     * set before publishing a PlaybackState.
+     */
+    public PlaybackState() {
+    }
+
+    /**
+     * Create a new PlaybackState from an existing PlaybackState. All fields
+     * will be copied to the new state.
+     *
+     * @param from The PlaybackState to duplicate
+     */
+    public PlaybackState(PlaybackState from) {
+        mState = from.mState;
+        mPosition = from.mPosition;
+        mRate = from.mRate;
+        mUpdateTime = from.mUpdateTime;
+        mBufferPosition = from.mBufferPosition;
+        mActions = from.mActions;
+        mErrorMessage = from.mErrorMessage;
     }
 
     private PlaybackState(Parcel in) {
         mState = in.readInt();
         mPosition = in.readLong();
-        mSpeed = in.readFloat();
+        mRate = in.readFloat();
         mUpdateTime = in.readLong();
         mBufferPosition = in.readLong();
         mActions = in.readLong();
@@ -219,7 +231,7 @@ public final class PlaybackState implements Parcelable {
         bob.append("state=").append(mState);
         bob.append(", position=").append(mPosition);
         bob.append(", buffered position=").append(mBufferPosition);
-        bob.append(", speed=").append(mSpeed);
+        bob.append(", rate=").append(mRate);
         bob.append(", updated=").append(mUpdateTime);
         bob.append(", actions=").append(mActions);
         bob.append(", error=").append(mErrorMessage);
@@ -236,7 +248,7 @@ public final class PlaybackState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mState);
         dest.writeLong(mPosition);
-        dest.writeFloat(mSpeed);
+        dest.writeFloat(mRate);
         dest.writeLong(mUpdateTime);
         dest.writeLong(mBufferPosition);
         dest.writeLong(mActions);
@@ -258,6 +270,41 @@ public final class PlaybackState implements Parcelable {
     public int getState() {
         return mState;
     }
+
+    /**
+     * Set the current state of playback.
+     * <p>
+     * The position must be in ms and indicates the current playback position
+     * within the track. If the position is unknown use
+     * {@link #PLAYBACK_POSITION_UNKNOWN}.
+     * <p>
+     * The rate is a multiple of normal playback and should be 0 when paused and
+     * negative when rewinding. Normal playback rate is 1.0.
+     * <p>
+     * The state must be one of the following:
+     * <ul>
+     * <li> {@link PlaybackState#STATE_NONE}</li>
+     * <li> {@link PlaybackState#STATE_STOPPED}</li>
+     * <li> {@link PlaybackState#STATE_PLAYING}</li>
+     * <li> {@link PlaybackState#STATE_PAUSED}</li>
+     * <li> {@link PlaybackState#STATE_FAST_FORWARDING}</li>
+     * <li> {@link PlaybackState#STATE_REWINDING}</li>
+     * <li> {@link PlaybackState#STATE_BUFFERING}</li>
+     * <li> {@link PlaybackState#STATE_ERROR}</li>
+     * </ul>
+     *
+     * @param state The current state of playback.
+     * @param position The position in the current track in ms.
+     * @param playbackRate The current rate of playback as a multiple of normal
+     *            playback.
+     */
+    public void setState(int state, long position, float playbackRate) {
+        this.mState = state;
+        this.mPosition = position;
+        this.mRate = playbackRate;
+        mUpdateTime = SystemClock.elapsedRealtime();
+    }
+
     /**
      * Get the current playback position in ms.
      */
@@ -275,14 +322,23 @@ public final class PlaybackState implements Parcelable {
     }
 
     /**
-     * Get the current playback speed as a multiple of normal playback. This
+     * Set the current buffer position in ms. This is the farthest playback
+     * point that can be reached from the current position using only buffered
+     * content.
+     */
+    public void setBufferPosition(long bufferPosition) {
+        mBufferPosition = bufferPosition;
+    }
+
+    /**
+     * Get the current playback rate as a multiple of normal playback. This
      * should be negative when rewinding. A value of 1 means normal playback and
      * 0 means paused.
      *
-     * @return The current speed of playback.
+     * @return The current rate of playback.
      */
-    public float getPlaybackSpeed() {
-        return mSpeed;
+    public float getPlaybackRate() {
+        return mRate;
     }
 
     /**
@@ -305,6 +361,25 @@ public final class PlaybackState implements Parcelable {
     }
 
     /**
+     * Set the current capabilities available on this session. This should use a
+     * bitmask of the available capabilities.
+     * <ul>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_PREVIOUS}</li>
+     * <li> {@link PlaybackState#ACTION_REWIND}</li>
+     * <li> {@link PlaybackState#ACTION_PLAY}</li>
+     * <li> {@link PlaybackState#ACTION_PAUSE}</li>
+     * <li> {@link PlaybackState#ACTION_STOP}</li>
+     * <li> {@link PlaybackState#ACTION_FAST_FORWARD}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
+     * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
+     * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
+     * </ul>
+     */
+    public void setActions(long capabilities) {
+        mActions = capabilities;
+    }
+
+    /**
      * Get a user readable error message. This should be set when the state is
      * {@link PlaybackState#STATE_ERROR}.
      */
@@ -317,9 +392,18 @@ public final class PlaybackState implements Parcelable {
      * position has never been set this will return 0;
      *
      * @return The last time the position was updated.
+     * @hide
      */
     public long getLastPositionUpdateTime() {
         return mUpdateTime;
+    }
+
+    /**
+     * Set a user readable error message. This should be set when the state is
+     * {@link PlaybackState#STATE_ERROR}.
+     */
+    public void setErrorMessage(CharSequence errorMessage) {
+        mErrorMessage = errorMessage;
     }
 
     /**
@@ -489,175 +573,4 @@ public final class PlaybackState implements Parcelable {
             return new PlaybackState[size];
         }
     };
-
-    /**
-     * Builder for {@link PlaybackState} objects.
-     */
-    public static final class Builder {
-        private int mState;
-        private long mPosition;
-        private long mBufferPosition;
-        private float mSpeed;
-        private long mActions;
-        private CharSequence mErrorMessage;
-        private long mUpdateTime;
-
-        /**
-         * Creates an initially empty state builder.
-         */
-        public Builder() {
-        }
-
-        /**
-         * Creates a builder with the same initial values as those in the from
-         * state.
-         *
-         * @param from The state to use for initializing the builder.
-         */
-        public Builder(PlaybackState from) {
-            if (from == null) {
-                return;
-            }
-            mState = from.mState;
-            mPosition = from.mPosition;
-            mBufferPosition = from.mBufferPosition;
-            mSpeed = from.mSpeed;
-            mActions = from.mActions;
-            mErrorMessage = from.mErrorMessage;
-            mUpdateTime = from.mUpdateTime;
-        }
-
-        /**
-         * Set the current state of playback.
-         * <p>
-         * The position must be in ms and indicates the current playback
-         * position within the track. If the position is unknown use
-         * {@link #PLAYBACK_POSITION_UNKNOWN}. When not using an unknown
-         * position the time at which the position was updated must be provided.
-         * It is okay to use {@link SystemClock#elapsedRealtime()} if the
-         * current position was just retrieved.
-         * <p>
-         * The speed is a multiple of normal playback and should be 0 when
-         * paused and negative when rewinding. Normal playback speed is 1.0.
-         * <p>
-         * The state must be one of the following:
-         * <ul>
-         * <li> {@link PlaybackState#STATE_NONE}</li>
-         * <li> {@link PlaybackState#STATE_STOPPED}</li>
-         * <li> {@link PlaybackState#STATE_PLAYING}</li>
-         * <li> {@link PlaybackState#STATE_PAUSED}</li>
-         * <li> {@link PlaybackState#STATE_FAST_FORWARDING}</li>
-         * <li> {@link PlaybackState#STATE_REWINDING}</li>
-         * <li> {@link PlaybackState#STATE_BUFFERING}</li>
-         * <li> {@link PlaybackState#STATE_ERROR}</li>
-         * </ul>
-         *
-         * @param state The current state of playback.
-         * @param position The position in the current track in ms.
-         * @param playbackSpeed The current speed of playback as a multiple of
-         *            normal playback.
-         * @param updateTime The time in the {@link SystemClock#elapsedRealtime}
-         *            timebase that the position was updated at.
-         * @return this
-         */
-        public Builder setState(int state, long position, float playbackSpeed, long updateTime) {
-            mState = state;
-            mPosition = position;
-            mUpdateTime = updateTime;
-            mSpeed = playbackSpeed;
-            return this;
-        }
-
-        /**
-         * Set the current state of playback.
-         * <p>
-         * The position must be in ms and indicates the current playback
-         * position within the track. If the position is unknown use
-         * {@link #PLAYBACK_POSITION_UNKNOWN}. The update time will be set to
-         * the current {@link SystemClock#elapsedRealtime()}.
-         * <p>
-         * The speed is a multiple of normal playback and should be 0 when
-         * paused and negative when rewinding. Normal playback speed is 1.0.
-         * <p>
-         * The state must be one of the following:
-         * <ul>
-         * <li> {@link PlaybackState#STATE_NONE}</li>
-         * <li> {@link PlaybackState#STATE_STOPPED}</li>
-         * <li> {@link PlaybackState#STATE_PLAYING}</li>
-         * <li> {@link PlaybackState#STATE_PAUSED}</li>
-         * <li> {@link PlaybackState#STATE_FAST_FORWARDING}</li>
-         * <li> {@link PlaybackState#STATE_REWINDING}</li>
-         * <li> {@link PlaybackState#STATE_BUFFERING}</li>
-         * <li> {@link PlaybackState#STATE_ERROR}</li>
-         * </ul>
-         *
-         * @param state The current state of playback.
-         * @param position The position in the current track in ms.
-         * @param playbackSpeed The current speed of playback as a multiple of
-         *            normal playback.
-         * @return this
-         */
-        public Builder setState(int state, long position, float playbackSpeed) {
-            return setState(state, position, playbackSpeed, SystemClock.elapsedRealtime());
-        }
-
-        /**
-         * Set the current actions available on this session. This should use a
-         * bitmask of possible actions.
-         * <ul>
-         * <li> {@link PlaybackState#ACTION_SKIP_TO_PREVIOUS}</li>
-         * <li> {@link PlaybackState#ACTION_REWIND}</li>
-         * <li> {@link PlaybackState#ACTION_PLAY}</li>
-         * <li> {@link PlaybackState#ACTION_PAUSE}</li>
-         * <li> {@link PlaybackState#ACTION_STOP}</li>
-         * <li> {@link PlaybackState#ACTION_FAST_FORWARD}</li>
-         * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
-         * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
-         * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
-         * </ul>
-         *
-         * @param actions The set of actions allowed.
-         * @return this
-         */
-        public Builder setActions(long actions) {
-            mActions = actions;
-            return this;
-        }
-
-        /**
-         * Set the current buffer position in ms. This is the farthest playback
-         * point that can be reached from the current position using only
-         * buffered content.
-         *
-         * @param bufferPosition The position in ms that playback is buffered
-         *            to.
-         * @return this
-         */
-        public Builder setBufferPosition(long bufferPosition) {
-            mBufferPosition = bufferPosition;
-            return this;
-        }
-
-        /**
-         * Set a user readable error message. This should be set when the state
-         * is {@link PlaybackState#STATE_ERROR}.
-         *
-         * @param error The error message for display to the user.
-         * @return this
-         */
-        public Builder setErrorMessage(CharSequence error) {
-            mErrorMessage = error;
-            return this;
-        }
-
-        /**
-         * Build and return the PlaybackState instance with these values.
-         *
-         * @return A new state instance.
-         */
-        public PlaybackState build() {
-            return new PlaybackState(mState, mPosition, mUpdateTime, mSpeed, mBufferPosition,
-                    mActions, mErrorMessage);
-        }
-    }
 }
