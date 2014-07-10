@@ -27466,6 +27466,8 @@ package android.telecomm {
     field public static final int MERGE_CALLS = 4; // 0x4
     field public static final int MUTE = 64; // 0x40
     field public static final int RESPOND_VIA_TEXT = 32; // 0x20
+    field public static final int SUPPORTS_VT_LOCAL = 256; // 0x100
+    field public static final int SUPPORTS_VT_REMOTE = 512; // 0x200
     field public static final int SUPPORT_HOLD = 2; // 0x2
     field public static final int SWAP_CALLS = 8; // 0x8
   }

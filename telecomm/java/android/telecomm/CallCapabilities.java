@@ -42,6 +42,12 @@ public final class CallCapabilities {
     /** Call supports generic conference mode. */
     public static final int GENERIC_CONFERENCE = 0x00000080;
 
+    /** Local device supports video telephony. */
+    public static final int SUPPORTS_VT_LOCAL  = 0x00000100;
+
+    /** Remote device supports video telephony. */
+    public static final int SUPPORTS_VT_REMOTE = 0x00000200;
+
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CALLS | SWAP_CALLS | ADD_CALL
             | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE;
 
@@ -71,6 +77,12 @@ public final class CallCapabilities {
         }
         if ((capabilities & GENERIC_CONFERENCE) != 0) {
             builder.append(" GENERIC_CONFERENCE");
+        }
+        if ((capabilities & SUPPORTS_VT_LOCAL) != 0) {
+            builder.append(" SUPPORTS_VT_LOCAL");
+        }
+        if ((capabilities & SUPPORTS_VT_REMOTE) != 0) {
+            builder.append(" SUPPORTS_VT_REMOTE");
         }
         builder.append("]");
         return builder.toString();
