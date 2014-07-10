@@ -16579,6 +16579,7 @@ package android.net {
     method public android.net.NetworkRequest build();
     method public android.net.NetworkRequest.Builder removeCapability(int);
     method public android.net.NetworkRequest.Builder removeTransportType(int);
+    method public android.net.NetworkRequest.Builder setNetworkSpecifier(java.lang.String);
   }
 
   public abstract interface PSKKeyManager {

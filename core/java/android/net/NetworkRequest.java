@@ -153,6 +153,25 @@ public class NetworkRequest implements Parcelable {
             mNetworkCapabilities.setLinkDownstreamBandwidthKbps(downKbps);
             return this;
         }
+
+        /**
+         * Sets the optional bearer specific network specifier.
+         * This has no meaning if a single transport is also not specified, so calling
+         * this without a single transport set will generate an exception, as will
+         * subsequently adding or removing transports after this is set.
+         * </p>
+         * The interpretation of this {@code String} is bearer specific and bearers that use
+         * it should document their particulars.  For example, Bluetooth may use some sort of
+         * device id while WiFi could used ssid and/or bssid.  Cellular may use carrier spn.
+         *
+         * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
+         *                         specific network specifier where the bearer has a choice of
+         *                         networks.
+         */
+        public Builder setNetworkSpecifier(String networkSpecifier) {
+            mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
+            return this;
+        }
     }
 
     // implement the Parcelable interface

@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.lang.IllegalArgumentException;
@@ -303,6 +304,7 @@ public final class NetworkCapabilities implements Parcelable {
             throw new IllegalArgumentException("TransportType out of range");
         }
         mTransportTypes |= 1 << transportType;
+        setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
         return this;
     }
 
@@ -318,6 +320,7 @@ public final class NetworkCapabilities implements Parcelable {
             throw new IllegalArgumentException("TransportType out of range");
         }
         mTransportTypes &= ~(1 << transportType);
+        setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
         return this;
     }
 
@@ -437,6 +440,61 @@ public final class NetworkCapabilities implements Parcelable {
                 this.mLinkDownBandwidthKbps == nc.mLinkDownBandwidthKbps);
     }
 
+    private String mNetworkSpecifier;
+    /**
+     * Sets the optional bearer specific network specifier.
+     * This has no meaning if a single transport is also not specified, so calling
+     * this without a single transport set will generate an exception, as will
+     * subsequently adding or removing transports after this is set.
+     * </p>
+     * The interpretation of this {@code String} is bearer specific and bearers that use
+     * it should document their particulars.  For example, Bluetooth may use some sort of
+     * device id while WiFi could used ssid and/or bssid.  Cellular may use carrier spn.
+     *
+     * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
+     *                         specific network specifier where the bearer has a choice of
+     *                         networks.
+     * @hide
+     */
+    public void setNetworkSpecifier(String networkSpecifier) {
+        if (TextUtils.isEmpty(networkSpecifier) == false && Long.bitCount(mTransportTypes) != 1) {
+            throw new IllegalStateException("Must have a single transport specified to use " +
+                    "setNetworkSpecifier");
+        }
+        mNetworkSpecifier = networkSpecifier;
+    }
+
+    /**
+     * Gets the optional bearer specific network specifier.
+     *
+     * @return The optional {@code String} specifying the bearer specific network specifier.
+     *         See {@link #setNetworkSpecifier}.
+     * @hide
+     */
+    public String getNetworkSpecifier() {
+        return mNetworkSpecifier;
+    }
+
+    private void combineSpecifiers(NetworkCapabilities nc) {
+        String otherSpecifier = nc.getNetworkSpecifier();
+        if (TextUtils.isEmpty(otherSpecifier)) return;
+        if (TextUtils.isEmpty(mNetworkSpecifier) == false) {
+            throw new IllegalStateException("Can't combine two networkSpecifiers");
+        }
+        setNetworkSpecifier(otherSpecifier);
+    }
+    private boolean satisfiedBySpecifier(NetworkCapabilities nc) {
+        return (TextUtils.isEmpty(mNetworkSpecifier) ||
+                mNetworkSpecifier.equals(nc.mNetworkSpecifier));
+    }
+    private boolean equalsSpecifier(NetworkCapabilities nc) {
+        if (TextUtils.isEmpty(mNetworkSpecifier)) {
+            return TextUtils.isEmpty(nc.mNetworkSpecifier);
+        } else {
+            return mNetworkSpecifier.equals(nc.mNetworkSpecifier);
+        }
+    }
+
     /**
      * Combine a set of Capabilities to this one.  Useful for coming up with the complete set
      * {@hide}
@@ -445,6 +503,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineNetCapabilities(nc);
         combineTransportTypes(nc);
         combineLinkBandwidths(nc);
+        combineSpecifiers(nc);
     }
 
     /**
@@ -455,7 +514,8 @@ public final class NetworkCapabilities implements Parcelable {
         return (nc != null &&
                 satisfiedByNetCapabilities(nc) &&
                 satisfiedByTransportTypes(nc) &&
-                satisfiedByLinkBandwidths(nc));
+                satisfiedByLinkBandwidths(nc) &&
+                satisfiedBySpecifier(nc));
     }
 
     @Override
@@ -464,7 +524,8 @@ public final class NetworkCapabilities implements Parcelable {
         NetworkCapabilities that = (NetworkCapabilities)obj;
         return (equalsNetCapabilities(that) &&
                 equalsTransportTypes(that) &&
-                equalsLinkBandwidths(that));
+                equalsLinkBandwidths(that) &&
+                equalsSpecifier(that));
     }
 
     @Override
@@ -474,7 +535,8 @@ public final class NetworkCapabilities implements Parcelable {
                 ((int)(mTransportTypes & 0xFFFFFFFF) * 5) +
                 ((int)(mTransportTypes >> 32) * 7) +
                 (mLinkUpBandwidthKbps * 11) +
-                (mLinkDownBandwidthKbps * 13));
+                (mLinkDownBandwidthKbps * 13) +
+                (TextUtils.isEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.hashCode() * 17));
     }
 
     public int describeContents() {
@@ -485,6 +547,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeLong(mTransportTypes);
         dest.writeInt(mLinkUpBandwidthKbps);
         dest.writeInt(mLinkDownBandwidthKbps);
+        dest.writeString(mNetworkSpecifier);
     }
     public static final Creator<NetworkCapabilities> CREATOR =
         new Creator<NetworkCapabilities>() {
@@ -495,6 +558,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mTransportTypes = in.readLong();
                 netCap.mLinkUpBandwidthKbps = in.readInt();
                 netCap.mLinkDownBandwidthKbps = in.readInt();
+                netCap.mNetworkSpecifier = in.readString();
                 return netCap;
             }
             public NetworkCapabilities[] newArray(int size) {
@@ -545,6 +609,9 @@ public final class NetworkCapabilities implements Parcelable {
         String dnBand = ((mLinkDownBandwidthKbps > 0) ? " LinkDnBandwidth>=" +
                 mLinkDownBandwidthKbps + "Kbps" : "");
 
-        return "[" + transports + capabilities + upBand + dnBand + "]";
+        String specifier = (mNetworkSpecifier == null ?
+                "" : " Specifier: <" + mNetworkSpecifier + ">");
+
+        return "[" + transports + capabilities + upBand + dnBand + specifier + "]";
     }
 }
