@@ -144,8 +144,10 @@ final class RemoteConnectionService implements DeathRecipient {
 
         /** ${inheritDoc} */
         @Override
-        public void setCanConference(String connectionId, boolean canConference) {
-            // not supported for remote connections.
+        public void setCallCapabilities(String connectionId, int callCapabilities) {
+            if (isCurrentConnection(connectionId)) {
+                mConnection.setCallCapabilities(callCapabilities);
+            }
         }
 
         /** ${inheritDoc} */

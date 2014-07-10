@@ -35,6 +35,7 @@ public final class RemoteConnection {
         void onStateChanged(RemoteConnection connection, int state);
         void onDisconnected(RemoteConnection connection, int cause, String message);
         void onRequestingRingback(RemoteConnection connection, boolean ringback);
+        void onCallCapabilitiesChanged(RemoteConnection connection, int callCapabilities);
         void onPostDialWait(RemoteConnection connection, String remainingDigits);
         void onFeaturesChanged(RemoteConnection connection, int features);
         void onSetAudioModeIsVoip(RemoteConnection connection, boolean isVoip);
@@ -51,6 +52,7 @@ public final class RemoteConnection {
     private String mDisconnectMessage;
     private boolean mRequestingRingback;
     private boolean mConnected;
+    private int mCallCapabilities;
     private int mFeatures;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
@@ -83,6 +85,10 @@ public final class RemoteConnection {
 
     public String getDisconnectMessage() {
         return mDisconnectMessage;
+    }
+
+    public int getCallCapabilities() {
+        return mCallCapabilities;
     }
 
     public int getFeatures() {
@@ -223,6 +229,16 @@ public final class RemoteConnection {
             for (Listener l : mListeners) {
                 l.onRequestingRingback(this, ringback);
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setCallCapabilities(int callCapabilities) {
+        mCallCapabilities = callCapabilities;
+        for (Listener l : mListeners) {
+            l.onCallCapabilitiesChanged(this, callCapabilities);
         }
     }
 

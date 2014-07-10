@@ -41,7 +41,7 @@ public abstract class Connection {
         void onPostDialWait(Connection c, String remaining);
         void onRequestingRingback(Connection c, boolean ringback);
         void onDestroyed(Connection c);
-        void onConferenceCapableChanged(Connection c, boolean isConferenceCapable);
+        void onCallCapabilitiesChanged(Connection c, int callCapabilities);
         void onParentConnectionChanged(Connection c, Connection parent);
         void onSetCallVideoProvider(Connection c, CallVideoProvider callVideoProvider);
         void onSetAudioModeIsVoip(Connection c, boolean isVoip);
@@ -76,7 +76,7 @@ public abstract class Connection {
         public void onRequestingRingback(Connection c, boolean ringback) {}
 
         @Override
-        public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {}
+        public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
 
         @Override
         public void onParentConnectionChanged(Connection c, Connection parent) {}
@@ -110,7 +110,7 @@ public abstract class Connection {
     private CallAudioState mCallAudioState;
     private Uri mHandle;
     private boolean mRequestingRingback = false;
-    private boolean mIsConferenceCapable = false;
+    private int mCallCapabilities;
     private Connection mParentConnection;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
@@ -279,10 +279,10 @@ public abstract class Connection {
     }
 
     /**
-     * Returns whether this connection is capable of being conferenced.
+     * Returns the connection's {@link CallCapabilities}
      */
-    public final boolean isConferenceCapable() {
-        return mIsConferenceCapable;
+    public final int getCallCapabilities() {
+        return mCallCapabilities;
     }
 
     /**
@@ -394,13 +394,15 @@ public abstract class Connection {
     }
 
     /**
-     * TODO(santoscordon): Needs documentation.
+     * Sets the connection's {@link CallCapabilities}.
+     *
+     * @param callCapabilities The new call capabilities.
      */
-    public final void setIsConferenceCapable(boolean isConferenceCapable) {
-        if (mIsConferenceCapable != isConferenceCapable) {
-            mIsConferenceCapable = isConferenceCapable;
+    public final void setCallCapabilities(int callCapabilities) {
+        if (mCallCapabilities != callCapabilities) {
+            mCallCapabilities = callCapabilities;
             for (Listener l : mListeners) {
-                l.onConferenceCapableChanged(this, mIsConferenceCapable);
+                l.onCallCapabilitiesChanged(this, mCallCapabilities);
             }
         }
     }
