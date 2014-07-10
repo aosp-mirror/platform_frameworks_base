@@ -65,7 +65,7 @@ public class SearchIndexablesContract {
     public static final String NON_INDEXABLES_KEYS_PATH = SETTINGS + "/" + NON_INDEXABLES_KEYS;
 
     /**
-     * Indexable xml resources colums.
+     * Indexable xml resources columns.
      */
     public static final String[] INDEXABLES_XML_RES_COLUMNS = new String[] {
             XmlResource.COLUMN_RANK,                    // 0
@@ -78,7 +78,7 @@ public class SearchIndexablesContract {
     };
 
     /**
-     * Indexable xml resources colums indices.
+     * Indexable xml resources columns indices.
      */
     public static final int COLUMN_INDEX_XML_RES_RANK = 0;
     public static final int COLUMN_INDEX_XML_RES_RESID = 1;
@@ -89,7 +89,7 @@ public class SearchIndexablesContract {
     public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_CLASS = 6;
 
     /**
-     * Indexable raw data colums.
+     * Indexable raw data columns.
      */
     public static final String[] INDEXABLES_RAW_COLUMNS = new String[] {
             RawData.COLUMN_RANK,                    // 0
@@ -105,10 +105,11 @@ public class SearchIndexablesContract {
             RawData.COLUMN_INTENT_TARGET_PACKAGE,   // 10
             RawData.COLUMN_INTENT_TARGET_CLASS,     // 11
             RawData.COLUMN_KEY,                     // 12
+            RawData.COLUMN_USER_ID,                 // 13
     };
 
     /**
-     * Indexable raw data colums indices.
+     * Indexable raw data columns indices.
      */
     public static final int COLUMN_INDEX_RAW_RANK = 0;
     public static final int COLUMN_INDEX_RAW_TITLE = 1;
@@ -123,16 +124,17 @@ public class SearchIndexablesContract {
     public static final int COLUMN_INDEX_RAW_INTENT_TARGET_PACKAGE = 10;
     public static final int COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11;
     public static final int COLUMN_INDEX_RAW_KEY = 12;
+    public static final int COLUMN_INDEX_RAW_USER_ID = 13;
 
     /**
-     * Indexable raw data colums.
+     * Indexable raw data columns.
      */
     public static final String[] NON_INDEXABLES_KEYS_COLUMNS = new String[] {
             NonIndexableKey.COLUMN_KEY_VALUE      // 0
     };
 
     /**
-     * Non indexable data keys colums indices.
+     * Non indexable data keys columns indices.
      */
     public static final int COLUMN_INDEX_NON_INDEXABLE_KEYS_KEY_VALUE = 0;
 
@@ -204,6 +206,11 @@ public class SearchIndexablesContract {
          * Key associated with the raw data. The key needs to be unique.
          */
         public static final String COLUMN_KEY = "key";
+
+        /**
+         * UserId associated with the raw data.
+         */
+        public static final String COLUMN_USER_ID = "user_id";
     }
 
     /**
