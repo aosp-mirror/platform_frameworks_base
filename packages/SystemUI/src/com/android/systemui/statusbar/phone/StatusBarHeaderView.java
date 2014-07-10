@@ -484,6 +484,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         return !mKeyguardShowing || mExpanded;
     }
 
+    @Override
+    protected void dispatchSetPressed(boolean pressed) {
+        // We don't want that everything lights up when we click on the header, so block the request
+        // here.
+    }
+
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
         @Override
         public void onToggleStateChanged(final boolean state) {
