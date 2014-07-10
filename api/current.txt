@@ -27850,6 +27850,62 @@ package android.system {
 
 package android.telecomm {
 
+  public final class Call {
+    method public void addListener(android.telecomm.Call.Listener);
+    method public void answer();
+    method public void conference();
+    method public void disconnect();
+    method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider();
+    method public java.util.List<java.lang.String> getCannedTextResponses();
+    method public java.util.List<android.telecomm.Call> getChildren();
+    method public android.telecomm.Call.Details getDetails();
+    method public android.telecomm.Call getParent();
+    method public java.lang.String getRemainingPostDialSequence();
+    method public int getState();
+    method public void hold();
+    method public void phoneAccountClicked();
+    method public void playDtmfTone(char);
+    method public void postDialContinue(boolean);
+    method public void reject(boolean, java.lang.String);
+    method public void removeListener(android.telecomm.Call.Listener);
+    method public void splitFromConference();
+    method public void stopDtmfTone();
+    method public void swapWithBackgroundCall();
+    method public void unhold();
+    field public static final int STATE_ACTIVE = 4; // 0x4
+    field public static final int STATE_DIALING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 7; // 0x7
+    field public static final int STATE_HOLDING = 3; // 0x3
+    field public static final int STATE_NEW = 0; // 0x0
+    field public static final int STATE_RINGING = 2; // 0x2
+  }
+
+  public static class Call.Details {
+    method public android.telecomm.PhoneAccount getAccount();
+    method public java.lang.String getCallerDisplayName();
+    method public int getCallerDisplayNamePresentation();
+    method public int getCapabilities();
+    method public long getConnectTimeMillis();
+    method public int getDisconnectCauseCode();
+    method public java.lang.String getDisconnectCauseMsg();
+    method public android.telecomm.GatewayInfo getGatewayInfo();
+    method public android.net.Uri getHandle();
+    method public int getHandlePresentation();
+  }
+
+  public static abstract class Call.Listener {
+    ctor public Call.Listener();
+    method public void onCallDestroyed(android.telecomm.Call);
+    method public void onCallVideoProviderChanged(android.telecomm.Call, android.telecomm.RemoteCallVideoProvider);
+    method public void onCannedTextResponsesLoaded(android.telecomm.Call, java.util.List<java.lang.String>);
+    method public void onChildrenChanged(android.telecomm.Call, java.util.List<android.telecomm.Call>);
+    method public void onDetailsChanged(android.telecomm.Call, android.telecomm.Call.Details);
+    method public void onParentChanged(android.telecomm.Call, android.telecomm.Call);
+    method public void onPostDial(android.telecomm.Call, java.lang.String);
+    method public void onPostDialWait(android.telecomm.Call, java.lang.String);
+    method public void onStateChanged(android.telecomm.Call, int);
+  }
+
   public final class CallAudioState implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -27936,8 +27992,6 @@ package android.telecomm {
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
     enum_constant public static final android.telecomm.CallState NEW;
     enum_constant public static final android.telecomm.CallState ON_HOLD;
-    enum_constant public static final android.telecomm.CallState POST_DIAL;
-    enum_constant public static final android.telecomm.CallState POST_DIAL_WAIT;
     enum_constant public static final android.telecomm.CallState RINGING;
   }
 
@@ -28112,17 +28166,29 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class InCallService extends android.app.Service {
+  public abstract class InCallService {
     ctor protected InCallService();
-    method protected abstract void addCall(android.telecomm.InCallCall);
-    method protected abstract void bringToForeground(boolean);
-    method protected final android.telecomm.InCallAdapter getAdapter();
-    method protected void onAdapterAttached(android.telecomm.InCallAdapter);
-    method protected abstract void onAudioStateChanged(android.telecomm.CallAudioState);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract void setPostDial(java.lang.String, java.lang.String);
-    method protected abstract void setPostDialWait(java.lang.String, java.lang.String);
-    method protected abstract void updateCall(android.telecomm.InCallCall);
+    method public final android.os.IBinder getBinder();
+    method public android.telecomm.Phone getPhone();
+    method public void onPhoneCreated(android.telecomm.Phone);
+    method public void onPhoneDestroyed(android.telecomm.Phone);
+  }
+
+  public final class Phone {
+    method public final void addListener(android.telecomm.Phone.Listener);
+    method public final android.telecomm.CallAudioState getAudioState();
+    method public final java.util.List<android.telecomm.Call> getCalls();
+    method public final void removeListener(android.telecomm.Phone.Listener);
+    method public final void setAudioRoute(int);
+    method public final void setMuted(boolean);
+  }
+
+  public static abstract class Phone.Listener {
+    ctor public Phone.Listener();
+    method public void onAudioStateChanged(android.telecomm.Phone, android.telecomm.CallAudioState);
+    method public void onBringToForeground(android.telecomm.Phone, boolean);
+    method public void onCallAdded(android.telecomm.Phone, android.telecomm.Call);
+    method public void onCallRemoved(android.telecomm.Phone, android.telecomm.Call);
   }
 
   public final class PhoneAccount implements android.os.Parcelable {
@@ -28151,18 +28217,17 @@ package android.telecomm {
     method public void updatePeerDimensions(int, int) throws android.os.RemoteException;
   }
 
-  public class RemoteCallVideoProvider implements android.os.IBinder.DeathRecipient {
-    method public void binderDied();
-    method public void requestCallDataUsage() throws android.os.RemoteException;
-    method public void requestCameraCapabilities() throws android.os.RemoteException;
-    method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
-    method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile) throws android.os.RemoteException;
-    method public void setCallVideoClient(android.telecomm.CallVideoClient) throws android.os.RemoteException;
+  public class RemoteCallVideoProvider {
+    method public void requestCallDataUsage();
+    method public void requestCameraCapabilities();
+    method public void sendSessionModifyRequest(android.telecomm.VideoCallProfile);
+    method public void sendSessionModifyResponse(android.telecomm.VideoCallProfile);
+    method public void setCallVideoClient(android.telecomm.CallVideoClient);
     method public void setCamera(java.lang.String) throws android.os.RemoteException;
-    method public void setDeviceOrientation(int) throws android.os.RemoteException;
-    method public void setDisplaySurface(android.view.Surface) throws android.os.RemoteException;
-    method public void setPauseImage(java.lang.String) throws android.os.RemoteException;
-    method public void setPreviewSurface(android.view.Surface) throws android.os.RemoteException;
+    method public void setDeviceOrientation(int);
+    method public void setDisplaySurface(android.view.Surface);
+    method public void setPauseImage(java.lang.String);
+    method public void setPreviewSurface(android.view.Surface);
     method public void setZoom(float) throws android.os.RemoteException;
   }
 
