@@ -408,7 +408,7 @@ public class CallLog {
                 values.put(CACHED_NUMBER_LABEL, ci.numberLabel);
             }
 
-            if ((ci != null) && (ci.person_id > 0)) {
+            if ((ci != null) && (ci.contactIdOrZero > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
                 // contacts may have the same number.
@@ -422,7 +422,8 @@ public class CallLog {
                     cursor = resolver.query(Phone.CONTENT_URI,
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
-                            new String[] { String.valueOf(ci.person_id), normalizedPhoneNumber},
+                            new String[] { String.valueOf(ci.contactIdOrZero),
+                                    normalizedPhoneNumber},
                             null);
                 } else {
                     final String phoneNumber = ci.phoneNumber != null ? ci.phoneNumber : number;
@@ -431,7 +432,7 @@ public class CallLog {
                                     Uri.encode(phoneNumber)),
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =?",
-                            new String[] { String.valueOf(ci.person_id) },
+                            new String[] { String.valueOf(ci.contactIdOrZero) },
                             null);
                 }
 

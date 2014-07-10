@@ -376,51 +376,14 @@ public class CallerInfoAsyncQuery {
 
         // Construct the URI object and query params, and start the query.
 
-        Uri contactRef;
-        String selection;
-        String[] selectionArgs;
-
-        if (PhoneNumberUtils.isUriNumber(number)) {
-            // "number" is really a SIP address.
-            if (DBG) Rlog.d(LOG_TAG, "  - Treating number as a SIP address: " + /*number*/ "xxxxxxx");
-
-            // We look up SIP addresses directly in the Data table:
-            contactRef = Data.CONTENT_URI;
-
-            // Note Data.DATA1 and SipAddress.SIP_ADDRESS are equivalent.
-            //
-            // Also note we use "upper(data1)" in the WHERE clause, and
-            // uppercase the incoming SIP address, in order to do a
-            // case-insensitive match.
-            //
-            // TODO: need to confirm that the use of upper() doesn't
-            // prevent us from using the index!  (Linear scan of the whole
-            // contacts DB can be very slow.)
-            //
-            // TODO: May also need to normalize by adding "sip:" as a
-            // prefix, if we start storing SIP addresses that way in the
-            // database.
-
-            selection = "upper(" + Data.DATA1 + ")=?"
-                    + " AND "
-                    + Data.MIMETYPE + "='" + SipAddress.CONTENT_ITEM_TYPE + "'";
-            selectionArgs = new String[] { number.toUpperCase() };
-
-        } else {
-            // "number" is a regular phone number.  Use the PhoneLookup table:
-            contactRef = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-            selection = null;
-            selectionArgs = null;
-        }
+        final Uri contactRef = PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI.buildUpon()
+                .appendPath(number)
+                .appendQueryParameter(PhoneLookup.QUERY_PARAMETER_SIP_ADDRESS,
+                        String.valueOf(PhoneNumberUtils.isUriNumber(number)))
+                .build();
 
         if (DBG) {
             Rlog.d(LOG_TAG, "==> contactRef: " + sanitizeUriToString(contactRef));
-            Rlog.d(LOG_TAG, "==> selection: " + selection);
-            if (selectionArgs != null) {
-                for (int i = 0; i < selectionArgs.length; i++) {
-                    Rlog.d(LOG_TAG, "==> selectionArgs[" + i + "]: " + selectionArgs[i]);
-                }
-            }
         }
 
         CallerInfoAsyncQuery c = new CallerInfoAsyncQuery();
@@ -446,8 +409,8 @@ public class CallerInfoAsyncQuery {
                               cw,  // cookie
                               contactRef,  // uri
                               null,  // projection
-                              selection,  // selection
-                              selectionArgs,  // selectionArgs
+                              null,  // selection
+                              null,  // selectionArgs
                               null);  // orderBy
         return c;
     }
