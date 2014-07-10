@@ -47,8 +47,10 @@ import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
 import android.text.TextUtils;
+import android.text.format.Time;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -354,10 +356,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 int phoneId = SubscriptionManager.getPhoneId(subId);
                 r.events = events;
-                if (true/*DBG*/) log("listen: set events record=" + r);
+                if (true/*DBG*/) log("listen: set events record=" + r + " subId=" + subId + " phoneId=" + phoneId);
+                toStringLogSSC("listen");
                 if (notifyNow && validatePhoneId(phoneId)) {
                     if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
                         try {
+                            log("listen: call onSSC state=" + mServiceState[phoneId]);
                             r.callback.onServiceStateChanged(
                                     new ServiceState(mServiceState[phoneId]));
                         } catch (RemoteException ex) {
@@ -550,14 +554,17 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             subId = mDefaultSubId;
             log("notifyServiceStateUsingSubId: using mDefaultSubId=" + mDefaultSubId);
         }
-        if (true/*VDBG*/) {
-            log("notifyServiceStateUsingSubId: subId=" + subId
-                + " state=" + state);
-        }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
+            if (true/*VDBG*/) {
+                log("notifyServiceStateUsingSubId: subId=" + subId + " phoneId=" + phoneId
+                    + " state=" + state);
+            }
             if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
+                logServiceStateChanged("notifyServiceStateUsingSubId", subId, phoneId, state);
+                toStringLogSSC("notifyServiceStateUsingSubId");
+
                 for (Record r : mRecords) {
                     log("notifyServiceStateUsingSubId: r.events=0x" + Integer.toHexString(r.events) + " r.subId=" + r.subId + " subId=" + subId + " state=" + state);
                     // FIXME: use DEFAULT_SUB_ID instead??
@@ -591,6 +598,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (true/*VDBG*/) {
             log("notifySignalStrengthUsingSubId: subId=" + subId
                 + " signalStrength=" + signalStrength);
+            toStringLogSSC("notifySignalStrengthUsingSubId");
         }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
@@ -1294,5 +1302,60 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private static void log(String s) {
         Rlog.d(TAG, s);
+    }
+
+    private static class LogSSC {
+        private Time mTime;
+        private String mS;
+        private long mSubId;
+        private int mPhoneId;
+        private ServiceState mState;
+
+        public void set(Time t, String s, long subId, int phoneId, ServiceState state) {
+            mTime = t; mS = s; mSubId = subId; mPhoneId = phoneId; mState = state;
+        }
+
+        @Override
+        public String toString() {
+            return mS + " " + mTime.toString() + " " + mSubId + " " + mPhoneId + " " + mState;
+        }
+    }
+
+    private LogSSC logSSC [] = new LogSSC[10];
+    private int next = 0;
+
+    private void logServiceStateChanged(String s, long subId, int phoneId, ServiceState state) {
+        if (logSSC == null || logSSC.length == 0) {
+            return;
+        }
+        if (logSSC[next] == null) {
+            logSSC[next] = new LogSSC();
+        }
+        Time t = new Time();
+        t.setToNow();
+        logSSC[next].set(t, s, subId, phoneId, state);
+        if (++next >= logSSC.length) {
+            next = 0;
+        }
+    }
+
+    private void toStringLogSSC(String prompt) {
+        if (logSSC == null || logSSC.length == 0 || (next == 0 && logSSC[next] == null)) {
+            log(prompt + ": logSSC is empty");
+        } else {
+            // There is at least one element
+            log(prompt + ": logSSC.length=" + logSSC.length + " next=" + next);
+            int i = next;
+            if (logSSC[i] == null) {
+                // logSSC is not full so back to the beginning
+                i = 0;
+            }
+            do {
+                log(logSSC[i].toString());
+                if (++i >= logSSC.length) {
+                    i = 0;
+                }
+            } while (i != next);
+        }
     }
 }
