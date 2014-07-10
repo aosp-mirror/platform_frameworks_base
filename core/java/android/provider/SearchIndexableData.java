@@ -58,6 +58,12 @@ public abstract class SearchIndexableData {
     public String key;
 
     /**
+     * The UserID for the data (in a multi user context). This is application specific and -1 is the
+     * default non initialized value.
+     */
+    public int userId = -1;
+
+    /**
      * The class name associated with the data. Generally this is a Fragment class name for
      * referring where the data is coming from and for launching the associated Fragment for
      * displaying the data. This is used only when the data is provided "locally".
@@ -146,6 +152,9 @@ public abstract class SearchIndexableData {
         sb.append(", ");
         sb.append("key: ");
         sb.append(key);
+        sb.append(", ");
+        sb.append("userId: ");
+        sb.append(userId);
         sb.append(", ");
         sb.append("className: ");
         sb.append(className);
