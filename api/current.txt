@@ -16850,6 +16850,7 @@ package android.net {
     method public android.net.VpnService.Builder addRoute(java.net.InetAddress, int);
     method public android.net.VpnService.Builder addRoute(java.lang.String, int);
     method public android.net.VpnService.Builder addSearchDomain(java.lang.String);
+    method public android.net.VpnService.Builder allowBypass();
     method public android.net.VpnService.Builder allowFamily(int);
     method public android.os.ParcelFileDescriptor establish();
     method public android.net.VpnService.Builder setConfigureIntent(android.app.PendingIntent);

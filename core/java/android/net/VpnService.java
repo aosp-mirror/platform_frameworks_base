@@ -553,6 +553,21 @@ public class VpnService extends Service {
         }
 
         /**
+         * Allows all apps to bypass this VPN connection.
+         *
+         * By default, all traffic from apps is forwarded through the VPN interface and it is not
+         * possible for apps to side-step the VPN. If this method is called, apps may use methods
+         * such as {@link ConnectivityManager#setProcessDefaultNetwork} to instead send/receive
+         * directly over the underlying network or any other network they have permissions for.
+         *
+         * @return this {@link Builder} object to facilitate chaining of method calls.
+         */
+        public Builder allowBypass() {
+            // TODO
+            return this;
+        }
+
+        /**
          * Create a VPN interface using the parameters supplied to this
          * builder. The interface works on IP packets, and a file descriptor
          * is returned for the application to access them. Each read
