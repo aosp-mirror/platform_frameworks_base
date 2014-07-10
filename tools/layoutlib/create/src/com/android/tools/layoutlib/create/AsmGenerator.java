@@ -216,21 +216,21 @@ public class AsmGenerator {
             String name = classToEntryPath(clazz);
             InputStream is = ClassLoader.getSystemResourceAsStream(name);
             ClassReader cr = new ClassReader(is);
-            byte[] b = transform(cr, true /* stubNativesOnly */);
+            byte[] b = transform(cr, true);
             name = classNameToEntryPath(transformName(cr.getClassName()));
             all.put(name, b);
         }
 
         for (Entry<String, ClassReader> entry : mDeps.entrySet()) {
             ClassReader cr = entry.getValue();
-            byte[] b = transform(cr, true /* stubNativesOnly */);
+            byte[] b = transform(cr, true);
             String name = classNameToEntryPath(transformName(cr.getClassName()));
             all.put(name, b);
         }
 
         for (Entry<String, ClassReader> entry : mKeep.entrySet()) {
             ClassReader cr = entry.getValue();
-            byte[] b = transform(cr, true /* stubNativesOnly */);
+            byte[] b = transform(cr, true);
             String name = classNameToEntryPath(transformName(cr.getClassName()));
             all.put(name, b);
         }
@@ -282,7 +282,7 @@ public class AsmGenerator {
 
     /**
      * Utility method to get the JAR entry path from a Class name.
-     * e.g. it returns someting like "com/foo/OuterClass$InnerClass1$InnerClass2.class"
+     * e.g. it returns something like "com/foo/OuterClass$InnerClass1$InnerClass2.class"
      */
     private String classToEntryPath(Class<?> clazz) {
         String name = "";
@@ -345,10 +345,8 @@ public class AsmGenerator {
             cv = new RenameClassAdapter(cv, className, newName);
         }
 
-        cv = new TransformClassAdapter(mLog, mStubMethods,
-                mDeleteReturns.get(className),
-                newName, cv,
-                stubNativesOnly, stubNativesOnly || hasNativeMethods);
+        cv = new TransformClassAdapter(mLog, mStubMethods, mDeleteReturns.get(className),
+                newName, cv, stubNativesOnly);
 
         Set<String> delegateMethods = mDelegateMethods.get(className);
         if (delegateMethods != null && !delegateMethods.isEmpty()) {
@@ -361,7 +359,7 @@ public class AsmGenerator {
             }
         }
 
-        cr.accept(cv, 0 /* flags */);
+        cr.accept(cv, 0);
         return cw.toByteArray();
     }
 
@@ -395,7 +393,7 @@ public class AsmGenerator {
      */
     boolean hasNativeMethods(ClassReader cr) {
         ClassHasNativeVisitor cv = new ClassHasNativeVisitor();
-        cr.accept(cv, 0 /* flags */);
+        cr.accept(cv, 0);
         return cv.hasNativeMethods();
     }
 

@@ -49,7 +49,6 @@ import java.util.Set;
 public class Main {
 
     public static class Options {
-        public boolean generatePublicAccess = true;
         public boolean listAllDeps = false;
         public boolean listOnlyMissingDeps = false;
     }
@@ -196,8 +195,6 @@ public class Main {
         for (String s : args) {
             if (s.equals("-v")) {
                 log.setVerbose(true);
-            } else if (s.equals("-p")) {
-                sOptions.generatePublicAccess = false;
             } else if (s.equals("--list-deps")) {
                 sOptions.listAllDeps = true;
                 needs_dest = false;
@@ -224,8 +221,6 @@ public class Main {
             log.error("Missing parameter: path to output jar");
             return false;
         }
-
-        sOptions.generatePublicAccess = false;
 
         return true;
     }

@@ -130,7 +130,7 @@ public class DelegateClassAdapterTest {
     }
 
     /**
-     * {@link DelegateMethodAdapter2} does not support overriding constructors yet,
+     * {@link DelegateMethodAdapter} does not support overriding constructors yet,
      * so this should fail with an {@link UnsupportedOperationException}.
      *
      * Although not tested here, the message of the exception should contain the
@@ -258,9 +258,8 @@ public class DelegateClassAdapterTest {
                     // Check the inner class. Since it's not a static inner class, we need
                     // to use the hidden constructor that takes the outer class as first parameter.
                     Class<?> innerClazz2 = loadClass(INNER_CLASS_NAME);
-                    Constructor<?> innerCons = innerClazz2.getConstructor(
-                                                                new Class<?>[] { outerClazz2 });
-                    Object i2 = innerCons.newInstance(new Object[] { o2 });
+                    Constructor<?> innerCons = innerClazz2.getConstructor(outerClazz2);
+                    Object i2 = innerCons.newInstance(o2);
                     assertNotNull(i2);
 
                     // The original Inner.get returns 3+10+20,
@@ -344,10 +343,10 @@ public class DelegateClassAdapterTest {
          */
         public int callGet(Object instance, int a, long b) throws Exception {
             Method m = instance.getClass().getMethod("get",
-                    new Class<?>[] { int.class, long.class } );
+                    int.class, long.class);
 
-            Object result = m.invoke(instance, new Object[] { a, b });
-            return ((Integer) result).intValue();
+            Object result = m.invoke(instance, a, b);
+            return (Integer) result;
         }
 
         /**
@@ -356,10 +355,10 @@ public class DelegateClassAdapterTest {
          */
         public int callGet_Original(Object instance, int a, long b) throws Exception {
             Method m = instance.getClass().getMethod("get_Original",
-                    new Class<?>[] { int.class, long.class } );
+                    int.class, long.class);
 
-            Object result = m.invoke(instance, new Object[] { a, b });
-            return ((Integer) result).intValue();
+            Object result = m.invoke(instance, a, b);
+            return (Integer) result;
         }
 
         /**
@@ -388,10 +387,10 @@ public class DelegateClassAdapterTest {
          */
         public int callAdd(Object instance, int a, int b) throws Exception {
             Method m = instance.getClass().getMethod("add",
-                    new Class<?>[] { int.class, int.class });
+                    int.class, int.class);
 
-            Object result = m.invoke(instance, new Object[] { a, b });
-            return ((Integer) result).intValue();
+            Object result = m.invoke(instance, a, b);
+            return (Integer) result;
         }
 
         /**
@@ -401,10 +400,10 @@ public class DelegateClassAdapterTest {
         public int callCallNativeInstance(Object instance, int a, double d, Object[] o)
                 throws Exception {
             Method m = instance.getClass().getMethod("callNativeInstance",
-                    new Class<?>[] { int.class, double.class, Object[].class });
+                    int.class, double.class, Object[].class);
 
-            Object result = m.invoke(instance, new Object[] { a, d, o });
-            return ((Integer) result).intValue();
+            Object result = m.invoke(instance, a, d, o);
+            return (Integer) result;
         }
 
         public abstract void testModifiedInstance() throws Exception;
@@ -442,8 +441,8 @@ public class DelegateClassAdapterTest {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 // next 2 lines do: TraceClassVisitor tcv = new TraceClassVisitor(pw);
-                Constructor<?> cons = tcvClass.getConstructor(new Class<?>[] { pw.getClass() });
-                Object tcv = cons.newInstance(new Object[] { pw });
+                Constructor<?> cons = tcvClass.getConstructor(pw.getClass());
+                Object tcv = cons.newInstance(pw);
                 ClassReader cr2 = new ClassReader(bytes);
                 cr2.accept((ClassVisitor) tcv, 0 /* flags */);
 
@@ -452,8 +451,7 @@ public class DelegateClassAdapterTest {
             }
 
             // Re-throw exception with new message
-            RuntimeException ex = new RuntimeException(sb.toString(), t);
-            return ex;
+            return new RuntimeException(sb.toString(), t);
         } catch (Throwable ignore) {
             // In case of problem, just throw the original exception as-is.
             return t;

@@ -71,7 +71,7 @@ import java.util.ArrayList;
  * Instances of this class are not re-usable.
  * The class adapter creates a new instance for each method.
  */
-class DelegateMethodAdapter2 extends MethodVisitor {
+class DelegateMethodAdapter extends MethodVisitor {
 
     /** Suffix added to delegate classes. */
     public static final String DELEGATE_SUFFIX = "_Delegate";
@@ -97,10 +97,10 @@ class DelegateMethodAdapter2 extends MethodVisitor {
     private Object[] mDelegateLineNumber;
 
     /**
-     * Creates a new {@link DelegateMethodAdapter2} that will transform this method
+     * Creates a new {@link DelegateMethodAdapter} that will transform this method
      * into a delegate call.
      * <p/>
-     * See {@link DelegateMethodAdapter2} for more details.
+     * See {@link DelegateMethodAdapter} for more details.
      *
      * @param log The logger object. Must not be null.
      * @param mvOriginal The parent method writer to copy of the original method.
@@ -114,7 +114,7 @@ class DelegateMethodAdapter2 extends MethodVisitor {
      *          {@link Type#getArgumentTypes(String)})
      * @param isStatic True if the method is declared static.
      */
-    public DelegateMethodAdapter2(Log log,
+    public DelegateMethodAdapter(Log log,
             MethodVisitor mvOriginal,
             MethodVisitor mvDelegate,
             String className,
@@ -138,7 +138,7 @@ class DelegateMethodAdapter2 extends MethodVisitor {
      * (since they have no code to visit).
      * <p/>
      * Otherwise for non-native methods the {@link DelegateClassAdapter} simply needs to
-     * return this instance of {@link DelegateMethodAdapter2} and let the normal visitor pattern
+     * return this instance of {@link DelegateMethodAdapter} and let the normal visitor pattern
      * invoke it as part of the {@link ClassReader#accept(ClassVisitor, int)} workflow and then
      * this method will be invoked from {@link MethodVisitor#visitEnd()}.
      */

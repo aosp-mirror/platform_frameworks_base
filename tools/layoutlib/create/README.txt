@@ -236,7 +236,7 @@ method as-is from the reader. This step is omitted if the method is native, sinc
 implementation.
 b- A brand new implementation of SomeClass.MethodName() which calls to a non-existing static method
 named SomeClass_Delegate.MethodName(). The implementation of this 'delegate' method is done in
-layoutlib_brigde.
+layoutlib_bridge.
 
 The delegate method is a static method. If the original method is non-static, the delegate method
 receives the original 'this' as its first argument. If the original method is an inner non-static

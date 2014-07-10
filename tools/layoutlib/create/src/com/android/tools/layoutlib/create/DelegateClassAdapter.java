@@ -32,10 +32,10 @@ public class DelegateClassAdapter extends ClassVisitor {
 
     /** Suffix added to original methods. */
     private static final String ORIGINAL_SUFFIX = "_Original";
-    private static String CONSTRUCTOR = "<init>";
-    private static String CLASS_INIT = "<clinit>";
+    private static final String CONSTRUCTOR = "<init>";
+    private static final String CLASS_INIT = "<clinit>";
 
-    public final static String ALL_NATIVES = "<<all_natives>>";
+    public static final String ALL_NATIVES = "<<all_natives>>";
 
     private final String mClassName;
     private final Set<String> mDelegateMethods;
@@ -78,19 +78,16 @@ public class DelegateClassAdapter extends ClassVisitor {
                               mDelegateMethods.contains(name);
 
         if (!useDelegate) {
-            // Not creating a delegate for this method, pass it as-is from the reader
-            // to the writer.
+            // Not creating a delegate for this method, pass it as-is from the reader to the writer.
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
 
-        if (useDelegate) {
-            if (CONSTRUCTOR.equals(name) || CLASS_INIT.equals(name)) {
-                // We don't currently support generating delegates for constructors.
-                throw new UnsupportedOperationException(
-                    String.format(
-                        "Delegate doesn't support overriding constructor %1$s:%2$s(%3$s)",  //$NON-NLS-1$
-                        mClassName, name, desc));
-            }
+        if (CONSTRUCTOR.equals(name) || CLASS_INIT.equals(name)) {
+            // We don't currently support generating delegates for constructors.
+            throw new UnsupportedOperationException(
+                String.format(
+                    "Delegate doesn't support overriding constructor %1$s:%2$s(%3$s)",  //$NON-NLS-1$
+                    mClassName, name, desc));
         }
 
         if (isNative) {
@@ -98,8 +95,8 @@ public class DelegateClassAdapter extends ClassVisitor {
             access = access & ~Opcodes.ACC_NATIVE;
             MethodVisitor mwDelegate = super.visitMethod(access, name, desc, signature, exceptions);
 
-            DelegateMethodAdapter2 a = new DelegateMethodAdapter2(
-                    mLog, null /*mwOriginal*/, mwDelegate, mClassName, name, desc, isStatic);
+            DelegateMethodAdapter a = new DelegateMethodAdapter(
+                    mLog, null, mwDelegate, mClassName, name, desc, isStatic);
 
             // A native has no code to visit, so we need to generate it directly.
             a.generateDelegateCode();
@@ -112,22 +109,16 @@ public class DelegateClassAdapter extends ClassVisitor {
         //   The content is the original method as-is from the reader.
         // - A brand new implementation of SomeClass.MethodName() which calls to a
         //   non-existing method named SomeClass_Delegate.MethodName().
-        //   The implementation of this 'delegate' method is done in layoutlib_brigde.
+        //   The implementation of this 'delegate' method is done in layoutlib_bridge.
 
         int accessDelegate = access;
-        // change access to public for the original one
-        if (Main.sOptions.generatePublicAccess) {
-            access &= ~(Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
-            access |= Opcodes.ACC_PUBLIC;
-        }
 
         MethodVisitor mwOriginal = super.visitMethod(access, name + ORIGINAL_SUFFIX,
                                                      desc, signature, exceptions);
         MethodVisitor mwDelegate = super.visitMethod(accessDelegate, name,
                                                      desc, signature, exceptions);
 
-        DelegateMethodAdapter2 a = new DelegateMethodAdapter2(
+        return new DelegateMethodAdapter(
                 mLog, mwOriginal, mwDelegate, mClassName, name, desc, isStatic);
-        return a;
     }
 }
