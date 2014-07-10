@@ -1019,9 +1019,6 @@ public abstract class Drawable {
             drawable = new StateListDrawable();
         } else if (name.equals("animated-selector")) {
             drawable = new AnimatedStateListDrawable();
-        } else if (name.equals("material-progress")) {
-            // TODO: Replace this with something less ridiculous.
-            drawable = new MaterialProgressDrawable();
         } else if (name.equals("level-list")) {
             drawable = new LevelListDrawable();
         } else if (name.equals("layer-list")) {
