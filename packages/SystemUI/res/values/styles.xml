@@ -185,11 +185,6 @@
         <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
-    <style name="TextAppearance.QS.Warning">
-        <item name="android:textSize">12sp</item>
-        <item name="android:textColor">@color/qs_subhead</item>
-    </style>
-
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">12sp</item>
         <item name="android:textAllCaps">true</item>

@@ -595,8 +595,8 @@
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
-    <!-- Zen mode: Alarm warning. [CHAR LIMIT=40] -->
-    <string name="zen_alarm_warning">You won\'t hear alarms or timers</string>
+    <!-- Zen mode: No interruptions title, with a warning about alarms and timers. [CHAR LIMIT=60] -->
+    <string name="zen_no_interruptions_with_warning">No interruptions, including alarms and timers</string>
 
     <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
     <string name="zen_no_interruptions">No interruptions</string>
