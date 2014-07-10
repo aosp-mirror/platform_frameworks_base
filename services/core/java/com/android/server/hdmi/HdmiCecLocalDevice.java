@@ -306,7 +306,6 @@ abstract class HdmiCecLocalDevice {
     private static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
-                && params.length == 1
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
@@ -315,7 +314,6 @@ abstract class HdmiCecLocalDevice {
     private static boolean isPowerOffOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
-                && params.length == 1
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_OFF_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);

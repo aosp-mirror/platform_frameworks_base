@@ -127,11 +127,7 @@ final class NewDeviceAction extends FeatureAction {
             }
         } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
             if (opcode == Constants.MESSAGE_DEVICE_VENDOR_ID) {
-                if (params.length == 3) {
-                    mVendorId = HdmiUtils.threeBytesToInt(params);
-                } else {
-                    Slog.e(TAG, "Failed to get device vendor ID: ");
-                }
+                mVendorId = HdmiUtils.threeBytesToInt(params);
                 addDeviceInfo();
                 finish();
                 return true;

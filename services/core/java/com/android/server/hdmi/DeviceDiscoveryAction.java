@@ -253,18 +253,11 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         byte params[] = cmd.getParams();
-        if (params.length == 3) {
-            current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
-            current.mDeviceType = params[2] & 0xFF;
+        current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
+        current.mDeviceType = params[2] & 0xFF;
 
-            increaseProcessedDeviceCount();
-            checkAndProceedStage();
-        } else {
-            // Physical address is a critical element in device info.
-            // If failed, remove device from device list and proceed to the next device.
-            removeDevice(mProcessedDeviceCount);
-            checkAndProceedStage();
-        }
+        increaseProcessedDeviceCount();
+        checkAndProceedStage();
     }
 
     private void handleSetOsdName(HdmiCecMessage cmd) {
@@ -301,12 +294,8 @@ final class DeviceDiscoveryAction extends FeatureAction {
         }
 
         byte[] params = cmd.getParams();
-        if (params.length == 3) {
-            int vendorId = HdmiUtils.threeBytesToInt(params);
-            current.mVendorId = vendorId;
-        } else {
-            Slog.w(TAG, "Invalid vendor id: " + cmd.toString());
-        }
+        int vendorId = HdmiUtils.threeBytesToInt(params);
+        current.mVendorId = vendorId;
         increaseProcessedDeviceCount();
         checkAndProceedStage();
     }
