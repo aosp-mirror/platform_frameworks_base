@@ -27634,13 +27634,13 @@ package android.telecomm {
     ctor protected Connection();
     method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
+    method public final int getCallCapabilities();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
     method public final int getFeatures();
     method public final android.net.Uri getHandle();
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
-    method public final boolean isConferenceCapable();
     method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
     method protected void onAbort();
@@ -27659,13 +27659,13 @@ package android.telecomm {
     method protected void onUnhold();
     method public final void setActive();
     method public final void setAudioModeIsVoip(boolean);
+    method public final void setCallCapabilities(int);
     method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
     method public final void setDestroyed();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
     method public final void setFeatures(int);
     method public final void setHandle(android.net.Uri);
-    method public final void setIsConferenceCapable(boolean);
     method public final void setOnHold();
     method public final void setParentConnection(android.telecomm.Connection);
     method public final void setPostDialWait(java.lang.String);
@@ -27822,6 +27822,7 @@ package android.telecomm {
     method public void answer();
     method public void disconnect();
     method public boolean getAudioModeIsVoip();
+    method public int getCallCapabilities();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
     method public int getFeatures();
@@ -27838,6 +27839,7 @@ package android.telecomm {
   }
 
   public static abstract interface RemoteConnection.Listener {
+    method public abstract void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
     method public abstract void onDestroyed(android.telecomm.RemoteConnection);
     method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
     method public abstract void onFeaturesChanged(android.telecomm.RemoteConnection, int);

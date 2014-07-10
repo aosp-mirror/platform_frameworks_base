@@ -50,7 +50,7 @@ oneway interface IConnectionServiceAdapter {
 
     void setRequestingRingback(String callId, boolean ringing);
 
-    void setCanConference(String callId, boolean canConference);
+    void setCallCapabilities(String callId, int callCapabilities);
 
     void setIsConferenced(String callId, String conferenceCallId);
 

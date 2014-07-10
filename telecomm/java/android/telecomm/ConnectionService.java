@@ -346,9 +346,9 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onConferenceCapableChanged(Connection c, boolean isConferenceCapable) {
+        public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {
             String id = mIdByConnection.get(c);
-            mAdapter.setCanConference(id, isConferenceCapable);
+            mAdapter.setCallCapabilities(id, callCapabilities);
         }
 
         /** ${inheritDoc} */

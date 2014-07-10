@@ -221,16 +221,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    /**
-     * Indicates that the specified call can conference with any of the specified list of calls.
-     *
-     * @param callId The unique ID of the call.
-     * @param canConference Specified whether or not the call can be conferenced.
-     */
-    void setCanConference(String callId, boolean canConference) {
+    void setCallCapabilities(String callId, int capabilities) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setCanConference(callId, canConference);
+                adapter.setCallCapabilities(callId, capabilities);
             } catch (RemoteException ignored) {
             }
         }
