@@ -5112,6 +5112,61 @@ public final class Settings {
        public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
 
        /**
+        * Whether HDMI control shall be enabled. If disabled, no CEC/MHL command will be
+        * sent or processed. (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
+
+       /**
+        * Whether HDMI system audio is enabled. If enabled, TV internal speaker is muted,
+        * and the output is redirected to AV Receiver connected via
+        * {@Global#HDMI_SYSTEM_AUDIO_OUTPUT}.
+        * @hide
+        */
+       public static final String HDMI_SYSTEM_AUDIO_ENABLED = "hdmi_system_audio_enabled";
+
+       /**
+        * Output of the audio to be used for system audio mode, as defined in AudioSystem.java.
+        * <ul>
+        * <li>DEVICE_OUT_SPDIF</li>
+        * <li>DEVICE_OUT_HDMI_ARC</li>
+        * <li>DEVICE_OUT_LINE</li>
+        * </ul>
+        * @hide
+        */
+       public static final String HDMI_SYSTEM_AUDIO_OUTPUT = "hdmi_system_audio_output";
+
+       /**
+        * Whether TV will automatically turn on upon reception of the CEC command
+        * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String HDMI_CONTROL_AUTO_WAKEUP_ENABLED =
+               "hdmi_control_auto_wakeup_enabled";
+
+       /**
+        * Whether TV will also turn off other CEC devices when it goes to standby mode.
+        * (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
+               "hdmi_control_auto_device_off_enabled";
+
+       /**
+        * Whether TV will switch to MHL port when a mobile device is plugged in.
+        * (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String MHL_INPUT_SWITCHING_ENABLED = "mhl_input_switching_enabled";
+
+       /**
+        * Whether TV will charge the mobile device connected at MHL port. (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String MHL_POWER_CHARGE_ENABLED = "mhl_power_charge_enabled";
+
+       /**
         * Whether mobile data connections are allowed by the user.  See
         * ConnectivityManager for more info.
         * @hide
