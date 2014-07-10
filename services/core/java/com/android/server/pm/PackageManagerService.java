@@ -4822,7 +4822,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Fix that up here.
         if (isSystemApp(pkg)) {
             PackageSetting ps = mSettings.mPackages.get(pkg.applicationInfo.packageName);
-            setBundledAppAbisAndRoots(pkg, ps);
+            if (!isUpdatedSystemApp(pkg)) {
+                setBundledAppAbisAndRoots(pkg, ps);
+            }
         }
 
         if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
