@@ -440,11 +440,11 @@ public class BatteryStatsHelper {
             }
 
             // Process Sensor usage
-            Map<Integer, ? extends BatteryStats.Uid.Sensor> sensorStats = u.getSensorStats();
-            for (Map.Entry<Integer, ? extends BatteryStats.Uid.Sensor> sensorEntry
-                    : sensorStats.entrySet()) {
-                Uid.Sensor sensor = sensorEntry.getValue();
-                int sensorHandle = sensor.getHandle();
+            SparseArray<? extends BatteryStats.Uid.Sensor> sensorStats = u.getSensorStats();
+            int NSE = sensorStats.size();
+            for (int ise=0; ise<NSE; ise++) {
+                Uid.Sensor sensor = sensorStats.valueAt(ise);
+                int sensorHandle = sensorStats.keyAt(ise);
                 BatteryStats.Timer timer = sensor.getSensorTime();
                 long sensorTime = timer.getTotalTimeLocked(mRawRealtime, which) / 1000;
                 double multiplier = 0;

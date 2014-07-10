@@ -33,7 +33,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -163,6 +162,27 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteEventLocked(code, name, uid);
+        }
+    }
+
+    public void noteProcessStart(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteProcessStartLocked(name, uid);
+        }
+    }
+
+    public void noteProcessState(String name, int uid, int state) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteProcessStateLocked(name, uid, state);
+        }
+    }
+
+    public void noteProcessFinish(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteProcessFinishLocked(name, uid);
         }
     }
 
