@@ -126,6 +126,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mBlockTouches;
     private ArrayList<View> mSwipeTranslationViews = new ArrayList<>();
     private int mNotificationScrimWaitDistance;
+    private boolean mTwoFingerQsExpand;
+    private boolean mTwoFingerQsExpandPossible;
 
     /**
      * If we are in a panel collapsing motion, we reset scrollY of our scroll view but still
@@ -487,7 +489,7 @@ public class NotificationPanelView extends PanelView implements
         if (mExpandedHeight != 0) {
             handleQsDown(event);
         }
-        if (mQsTracking || mQsExpanded) {
+        if (!mTwoFingerQsExpand && (mQsTracking || mQsExpanded)) {
             onQsTouch(event);
             if (!mConflictingQsExpansionGesture) {
                 return true;
@@ -496,6 +498,15 @@ public class NotificationPanelView extends PanelView implements
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || event.getActionMasked() == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mExpandedHeight == 0) {
+            mTwoFingerQsExpandPossible = true;
+        }
+        if (mTwoFingerQsExpandPossible && event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN
+                && event.getPointerCount() == 2
+                && event.getY(event.getActionIndex()) < mStatusBarMinHeight) {
+            mTwoFingerQsExpand = true;
+            requestPanelHeightUpdate();
         }
         super.onTouchEvent(event);
         return true;
@@ -842,7 +853,7 @@ public class NotificationPanelView extends PanelView implements
             min = Math.max(min, minHeight);
         }
         int maxHeight;
-        if (mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted) {
+        if (mTwoFingerQsExpand || mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted) {
             maxHeight = (int) calculatePanelHeightQsExpanded();
         } else {
             int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
@@ -863,7 +874,7 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpanded) {
             positionClockAndNotifications();
         }
-        if (mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
+        if (mTwoFingerQsExpand || mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
                 && !mQsExpansionFromOverscroll) {
             float panelHeightQsCollapsed = mNotificationStackScroller.getIntrinsicPadding()
                     + mNotificationStackScroller.getMinStackHeight()
@@ -1049,6 +1060,8 @@ public class NotificationPanelView extends PanelView implements
             mHeader.setListening(true);
             mQsPanel.setListening(true);
         }
+        mTwoFingerQsExpand = false;
+        mTwoFingerQsExpandPossible = false;
     }
 
     @Override
@@ -1060,7 +1073,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void setOverExpansion(float overExpansion, boolean isPixels) {
-        if (mConflictingQsExpansionGesture) {
+        if (mConflictingQsExpansionGesture || mTwoFingerQsExpand) {
             return;
         }
         if (mStatusBar.getBarState() != StatusBarState.KEYGUARD) {
