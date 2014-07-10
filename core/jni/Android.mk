@@ -179,6 +179,7 @@ LOCAL_C_INCLUDES += \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
 	$(TOP)/system/netd/include \
+	external/icu/icu4c/source/common \
 	external/pdfium/core/include/fpdfapi \
 	external/pdfium/core/include/fpdfdoc \
 	external/pdfium/fpdfsdk/include \
@@ -190,8 +191,6 @@ LOCAL_C_INCLUDES += \
 	external/expat/lib \
 	external/openssl/include \
 	external/tremor/Tremor \
-	external/icu4c/i18n \
-	external/icu4c/common \
 	external/jpeg \
 	external/harfbuzz_ng/src \
 	external/zlib \
