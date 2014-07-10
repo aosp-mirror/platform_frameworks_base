@@ -16814,12 +16814,14 @@ package android.net {
 
   public class VpnService extends android.app.Service {
     ctor public VpnService();
+    method public boolean addAddress(java.net.InetAddress, int);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onRevoke();
     method public static android.content.Intent prepare(android.content.Context);
     method public boolean protect(int);
     method public boolean protect(java.net.Socket);
     method public boolean protect(java.net.DatagramSocket);
+    method public boolean removeAddress(java.net.InetAddress, int);
     field public static final java.lang.String SERVICE_INTERFACE = "android.net.VpnService";
   }
 

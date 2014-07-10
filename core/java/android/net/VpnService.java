@@ -202,6 +202,44 @@ public class VpnService extends Service {
     }
 
     /**
+     * Adds a network address to the VPN interface.
+     *
+     * Both IPv4 and IPv6 addresses are supported. The VPN must already be established. Fails if the
+     * address is already in use or cannot be assigned to the interface for any other reason.
+     *
+     * @throws {@link IllegalArgumentException} if the address is invalid.
+     *
+     * @param address The IP address (IPv4 or IPv6) to assign to the VPN interface.
+     * @param prefixLength The prefix length of the address.
+     *
+     * @return {@code true} on success.
+     * @see Builder#addAddress
+     */
+    public boolean addAddress(InetAddress address, int prefixLength) {
+        // TODO
+        return true;
+    }
+
+    /**
+     * Removes a network address from the VPN interface.
+     *
+     * Both IPv4 and IPv6 addresses are supported. The VPN must already be established. Fails if the
+     * address is not assigned to the VPN interface, or if it is the only address assigned (thus
+     * cannot be removed), or if the address cannot be removed for any other reason.
+     *
+     * @throws {@link IllegalArgumentException} if the address is invalid.
+     *
+     * @param address The IP address (IPv4 or IPv6) to assign to the VPN interface.
+     * @param prefixLength The prefix length of the address.
+     *
+     * @return {@code true} on success.
+     */
+    public boolean removeAddress(InetAddress address, int prefixLength) {
+        // TODO
+        return true;
+    }
+
+    /**
      * Return the communication interface to the service. This method returns
      * {@code null} on {@link Intent}s other than {@link #SERVICE_INTERFACE}
      * action. Applications overriding this method must identify the intent
