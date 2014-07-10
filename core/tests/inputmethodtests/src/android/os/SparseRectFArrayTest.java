@@ -52,14 +52,22 @@ public class SparseRectFArrayTest extends InstrumentationTestCase {
     @SmallTest
     public void testBuilder() throws Exception {
         final RectF TEMP_RECT = new RectF(10.0f, 20.0f, 30.0f, 40.0f);
+        final int TEMP_FLAGS = 0x1234;
 
         final SparseRectFArrayBuilder builder = new SparseRectFArrayBuilder();
-        builder.append(100, TEMP_RECT.left, TEMP_RECT.top, TEMP_RECT.right, TEMP_RECT.bottom);
+        builder.append(100, TEMP_RECT.left, TEMP_RECT.top, TEMP_RECT.right, TEMP_RECT.bottom,
+                TEMP_FLAGS);
         assertNull(builder.build().get(-1));
         assertNull(builder.build().get(0));
         assertNull(builder.build().get(99));
+        assertEquals(0, builder.build().getFlags(99, 0 /* valueIfKeyNotFound */));
+        assertEquals(1, builder.build().getFlags(99, 1 /* valueIfKeyNotFound */));
         assertEquals(TEMP_RECT, builder.build().get(100));
+        assertEquals(TEMP_FLAGS, builder.build().getFlags(100, 0 /* valueIfKeyNotFound */));
+        assertEquals(TEMP_FLAGS, builder.build().getFlags(100, 1 /* valueIfKeyNotFound */));
         assertNull(builder.build().get(101));
+        assertEquals(0, builder.build().getFlags(101, 0 /* valueIfKeyNotFound */));
+        assertEquals(1, builder.build().getFlags(101, 1 /* valueIfKeyNotFound */));
 
         // Test if {@link SparseRectFArrayBuilder#reset} resets its internal state.
         builder.reset();
@@ -69,28 +77,49 @@ public class SparseRectFArrayTest extends InstrumentationTestCase {
         for (int i = 0; i < MANY_RECTS.length; i++) {
             final RectF rect = MANY_RECTS[i];
             if (rect != null) {
-                builder.append(i, rect.left, rect.top, rect.right, rect.bottom);
+                builder.append(i, rect.left, rect.top, rect.right, rect.bottom, i);
             }
         }
         final SparseRectFArray array = builder.build();
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, array.get(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, array.get(i));
+            if (expectedRect != null) {
+                assertEquals(i, array.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(i, array.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            } else {
+                assertEquals(0x1234, array.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(0x4321, array.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            }
         }
 
         // Make sure the builder reproduces an equivalent object.
         final SparseRectFArray array2 = builder.build();
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, array2.get(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, array2.get(i));
+            if (expectedRect != null) {
+                assertEquals(i, array2.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(i, array2.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            } else {
+                assertEquals(0x1234, array2.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(0x4321, array2.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            }
         }
         assertEqualRects(array, array2);
 
         // Make sure the instance can be marshaled via {@link Parcel}.
         final SparseRectFArray array3 = cloneViaParcel(array);
         for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
-            assertEquals(rect, array3.get(i));
+            final RectF expectedRect = MANY_RECTS[i];
+            assertEquals(expectedRect, array3.get(i));
+            if (expectedRect != null) {
+                assertEquals(i, array3.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(i, array3.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            } else {
+                assertEquals(0x1234, array3.getFlags(i, 0x1234 /* valueIfKeyNotFound */));
+                assertEquals(0x4321, array3.getFlags(i, 0x4321 /* valueIfKeyNotFound */));
+            }
         }
         assertEqualRects(array, array3);
 
@@ -106,87 +135,93 @@ public class SparseRectFArrayTest extends InstrumentationTestCase {
                 new SparseRectFArrayBuilder().build());
 
         assertEqualRects(
-                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f).build(),
-                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f).build());
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 1).build(),
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 1).build());
+        assertEqualRects(
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0).build(),
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0).build());
         assertNotEqualRects(
-                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f).build(),
-                new SparseRectFArrayBuilder().append(100, 2.0f, 2.0f, 3.0f, 4.0f).build());
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0).build(),
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 1).build());
         assertNotEqualRects(
-                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f).build(),
-                new SparseRectFArrayBuilder().append(101, 1.0f, 2.0f, 3.0f, 4.0f).build());
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 1).build(),
+                new SparseRectFArrayBuilder().append(100, 2.0f, 2.0f, 3.0f, 4.0f, 1).build());
+        assertNotEqualRects(
+                new SparseRectFArrayBuilder().append(100, 1.0f, 2.0f, 3.0f, 4.0f, 1).build(),
+                new SparseRectFArrayBuilder().append(101, 1.0f, 2.0f, 3.0f, 4.0f, 1).build());
 
         assertEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0).build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 1.0f, 0.0f, 0.0f, 0.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 1.0f, 0.0f, 0.0f, 0.0f, 0).build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 1.0f, 0.0f, 0.0f, 0.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 1.0f, 0.0f, 0.0f, 0.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f).build(),
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(101, 0.0f, 0.0f, 0.0f, 0.0f, 0).build(),
                 new SparseRectFArrayBuilder()
-                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(102, 0.0f, 0.0f, 0.0f, 0.0f).build());
+                        .append(100, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(102, 0.0f, 0.0f, 0.0f, 0.0f, 0).build());
 
         assertEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f)
-                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
                         .build(),
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f)
-                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
                         .build());
 
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f)
-                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
                         .build(),
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
                         .build());
         assertNotEqualRects(
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f)
-                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(1000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
                         .build(),
                 new SparseRectFArrayBuilder()
-                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f)
-                        .append(1000, 1.0f, 0.0f, 0.0f, 0.0f)
-                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f)
+                        .append(1, 1.0f, 2.0f, 3.0f, 4.0f, 0)
+                        .append(1000, 1.0f, 0.0f, 0.0f, 0.0f, 0)
+                        .append(100000000, 0.0f, 0.0f, 0.0f, 0.0f, 0)
                         .build());
     }
 
@@ -194,13 +229,17 @@ public class SparseRectFArrayTest extends InstrumentationTestCase {
     public void testBuilderAppend() throws Exception {
         // Key should be appended in ascending order.
         try {
-            new SparseRectFArrayBuilder().append(10, 0, 0, 0, 0).append(0, 1, 2, 3, 4);
+            new SparseRectFArrayBuilder()
+                    .append(10, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                    .append(0, 1.0f, 2.0f, 3.0f, 4.0f, 0);
         } catch (IllegalArgumentException ex) {
             assertTrue(true);
         }
 
         try {
-            new SparseRectFArrayBuilder().append(10, 0, 0, 0, 0).append(10, 1, 2, 3, 4);
+            new SparseRectFArrayBuilder()
+                    .append(10, 0.0f, 0.0f, 0.0f, 0.0f, 0)
+                    .append(10, 1.0f, 2.0f, 3.0f, 4.0f, 0);
         } catch (IllegalArgumentException ex) {
             assertTrue(true);
         }

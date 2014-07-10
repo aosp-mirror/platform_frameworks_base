@@ -3088,13 +3088,22 @@ public class Editor {
                     final float bottom = layout.getLineBottom(line)
                             + viewportToContentVerticalOffset;
                     // Take TextView's padding and scroll into account.
-                    if (isPositionVisible(left, top) && isPositionVisible(right, bottom)) {
-                        // Here offset is the index in Java chars.
-                        // TODO: We must have a well-defined specification. For example, how
-                        // RTL, surrogate pairs, and composition letters are handled must be
-                        // documented.
-                        builder.addCharacterRect(offset, left, top, right, bottom);
+                    // TODO: Check right-top and left-bottom as well.
+                    final boolean leftTopVisible = isPositionVisible(left, top);
+                    final boolean rightBottomVisible = isPositionVisible(right, bottom);
+                    final int characterRectFlags;
+                    if (leftTopVisible && rightBottomVisible) {
+                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_FULLY_VISIBLE;
+                    } else if (leftTopVisible || rightBottomVisible) {
+                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE;
+                    } else {
+                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_INVISIBLE;
                     }
+                    // Here offset is the index in Java chars.
+                    // TODO: We must have a well-defined specification. For example, how
+                    // RTL, surrogate pairs, and composition letters are handled must be
+                    // documented.
+                    builder.addCharacterRect(offset, left, top, right, bottom, characterRectFlags);
                 }
             }
 
@@ -3111,11 +3120,10 @@ public class Editor {
                 final float insertionMarkerBottom = layout.getLineBottom(line)
                         + viewportToContentVerticalOffset;
                 // Take TextView's padding and scroll into account.
-                if (isPositionVisible(insertionMarkerX, insertionMarkerTop) &&
-                        isPositionVisible(insertionMarkerX, insertionMarkerBottom)) {
-                    builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
-                            insertionMarkerBaseline, insertionMarkerBottom);
-                }
+                final boolean isClipped = !isPositionVisible(insertionMarkerX, insertionMarkerTop)
+                        || !isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
+                        insertionMarkerBaseline, insertionMarkerBottom, isClipped);
             }
 
             imm.updateCursorAnchorInfo(mTextView, builder.build());

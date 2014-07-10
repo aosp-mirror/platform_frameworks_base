@@ -50,9 +50,15 @@ public final class SparseRectFArray implements Parcelable {
      */
     private final float[] mCoordinates;
 
+    /**
+     * Stores visibility information.
+     */
+    private final int[] mFlagsArray;
+
     public SparseRectFArray(final Parcel source) {
         mKeys = source.createIntArray();
         mCoordinates = source.createFloatArray();
+        mFlagsArray = source.createIntArray();
     }
 
     /**
@@ -65,6 +71,7 @@ public final class SparseRectFArray implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeIntArray(mKeys);
         dest.writeFloatArray(mCoordinates);
+        dest.writeIntArray(mFlagsArray);
     }
 
     @Override
@@ -79,6 +86,8 @@ public final class SparseRectFArray implements Parcelable {
             hash *= 31;
             hash += mCoordinates[i];
         }
+        hash *= 31;
+        hash += mFlagsArray[0];
         return hash;
     }
 
@@ -95,12 +104,13 @@ public final class SparseRectFArray implements Parcelable {
         }
         final SparseRectFArray that = (SparseRectFArray) obj;
 
-        return Arrays.equals(mKeys, that.mKeys) && Arrays.equals(mCoordinates, that.mCoordinates);
+        return Arrays.equals(mKeys, that.mKeys) && Arrays.equals(mCoordinates, that.mCoordinates)
+                && Arrays.equals(mFlagsArray, that.mFlagsArray);
     }
 
     @Override
     public String toString() {
-        if (mKeys == null || mCoordinates == null) {
+        if (mKeys == null || mCoordinates == null || mFlagsArray == null) {
             return "SparseRectFArray{}";
         }
         final StringBuilder sb = new StringBuilder();
@@ -119,7 +129,8 @@ public final class SparseRectFArray implements Parcelable {
             sb.append(mCoordinates[baseIndex + 2]);
             sb.append(",");
             sb.append(mCoordinates[baseIndex + 3]);
-            sb.append("]");
+            sb.append("]:flagsArray=");
+            sb.append(mFlagsArray[i]);
         }
         sb.append("}");
         return sb.toString();
@@ -153,6 +164,9 @@ public final class SparseRectFArray implements Parcelable {
             if (mCoordinates == null) {
                 mCoordinates = new float[INITIAL_SIZE * 4];
             }
+            if (mFlagsArray == null) {
+                mFlagsArray = new int[INITIAL_SIZE];
+            }
             final int requiredIndexArraySize = mCount + 1;
             if (mKeys.length <= requiredIndexArraySize) {
                 final int[] newArray = new int[requiredIndexArraySize * 2];
@@ -165,6 +179,12 @@ public final class SparseRectFArray implements Parcelable {
                 System.arraycopy(mCoordinates, 0, newArray, 0, mCount * 4);
                 mCoordinates = newArray;
             }
+            final int requiredFlagsArraySize = requiredIndexArraySize;
+            if (mFlagsArray.length <= requiredFlagsArraySize) {
+                final int[] newArray = new int[requiredFlagsArraySize * 2];
+                System.arraycopy(mFlagsArray, 0, newArray, 0, mCount);
+                mFlagsArray = newArray;
+            }
         }
 
         /**
@@ -175,11 +195,13 @@ public final class SparseRectFArray implements Parcelable {
          * @param top top of the rectangle.
          * @param right right of the rectangle.
          * @param bottom bottom of the rectangle.
+         * @param flags an arbitrary integer value to be associated with this rectangle.
          * @return the receiver object itself for chaining method calls.
          * @throws IllegalArgumentException If the index is not greater than all of existing keys.
          */
         public SparseRectFArrayBuilder append(final int key,
-                final float left, final float top, final float right, final float bottom) {
+                final float left, final float top, final float right, final float bottom,
+                final int flags) {
             checkIndex(key);
             ensureBufferSize();
             final int baseCoordinatesIndex = mCount * 4;
@@ -187,6 +209,8 @@ public final class SparseRectFArray implements Parcelable {
             mCoordinates[baseCoordinatesIndex + 1] = top;
             mCoordinates[baseCoordinatesIndex + 2] = right;
             mCoordinates[baseCoordinatesIndex + 3] = bottom;
+            final int flagsIndex = mCount;
+            mFlagsArray[flagsIndex] = flags;
             mKeys[mCount] = key;
             ++mCount;
             return this;
@@ -194,6 +218,7 @@ public final class SparseRectFArray implements Parcelable {
         private int mCount = 0;
         private int[] mKeys = null;
         private float[] mCoordinates = null;
+        private int[] mFlagsArray = null;
         private static int INITIAL_SIZE = 16;
 
         public boolean isEmpty() {
@@ -211,6 +236,7 @@ public final class SparseRectFArray implements Parcelable {
             if (mCount == 0) {
                 mKeys = null;
                 mCoordinates = null;
+                mFlagsArray = null;
             }
             mCount = 0;
         }
@@ -220,11 +246,14 @@ public final class SparseRectFArray implements Parcelable {
         if (builder.mCount == 0) {
             mKeys = null;
             mCoordinates = null;
+            mFlagsArray = null;
         } else {
             mKeys = new int[builder.mCount];
             mCoordinates = new float[builder.mCount * 4];
+            mFlagsArray = new int[builder.mCount];
             System.arraycopy(builder.mKeys, 0, mKeys, 0, builder.mCount);
             System.arraycopy(builder.mCoordinates, 0, mCoordinates, 0, builder.mCount * 4);
+            System.arraycopy(builder.mFlagsArray, 0, mFlagsArray, 0, builder.mCount);
         }
     }
 
@@ -244,6 +273,20 @@ public final class SparseRectFArray implements Parcelable {
                 mCoordinates[baseCoordIndex + 1],
                 mCoordinates[baseCoordIndex + 2],
                 mCoordinates[baseCoordIndex + 3]);
+    }
+
+    public int getFlags(final int index, final int valueIfKeyNotFound) {
+        if (mKeys == null) {
+            return valueIfKeyNotFound;
+        }
+        if (index < 0) {
+            return valueIfKeyNotFound;
+        }
+        final int arrayIndex = Arrays.binarySearch(mKeys, index);
+        if (arrayIndex < 0) {
+            return valueIfKeyNotFound;
+        }
+        return mFlagsArray[arrayIndex];
     }
 
     /**
