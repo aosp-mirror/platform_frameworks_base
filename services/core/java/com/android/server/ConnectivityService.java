@@ -5038,8 +5038,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         setAlarm(samplingIntervalInSeconds * 1000, mSampleIntervalElapsedIntent);
     }
 
+    /**
+     * Sets a network sampling alarm.
+     */
     void setAlarm(int timeoutInMilliseconds, PendingIntent intent) {
         long wakeupTime = SystemClock.elapsedRealtime() + timeoutInMilliseconds;
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime, intent);
+        int alarmType;
+        if (Resources.getSystem().getBoolean(
+                R.bool.config_networkSamplingWakesDevice)) {
+            alarmType = AlarmManager.ELAPSED_REALTIME_WAKEUP;
+        } else {
+            alarmType = AlarmManager.ELAPSED_REALTIME;
+        }
+        mAlarmManager.set(alarmType, wakeupTime, intent);
     }
 }
