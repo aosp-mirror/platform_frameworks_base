@@ -619,39 +619,36 @@ public final class BridgeContext extends Context {
             }
 
             if (value != null) {
-                if ((value.getFirst() == ResourceType.STYLE)
-                        || (value.getFirst() == ResourceType.ATTR)) {
-                    // look for the style in the current theme, and its parent:
-                    ResourceValue item = mRenderResources.findItemInTheme(value.getSecond(),
+                if ((value.getFirst() == ResourceType.STYLE)) {
+                    // look for the style in all resources:
+                    StyleResourceValue item = mRenderResources.getStyle(value.getSecond(),
                             isFrameworkRes);
                     if (item != null) {
-                        if (item instanceof StyleResourceValue) {
-                            if (defaultPropMap != null) {
-                                defaultPropMap.put("style", item.getName());
-                            }
-
-                            defStyleValues = (StyleResourceValue)item;
+                        if (defaultPropMap != null) {
+                            defaultPropMap.put("style", item.getName());
                         }
+
+                        defStyleValues = item;
                     } else {
                         Bridge.getLog().error(null,
                                 String.format(
                                         "Style with id 0x%x (resolved to '%s') does not exist.",
                                         defStyleRes, value.getSecond()),
-                                null /*data*/);
+                                null);
                     }
                 } else {
                     Bridge.getLog().error(null,
                             String.format(
-                                    "Resouce id 0x%x is not of type STYLE (instead %s)",
+                                    "Resource id 0x%x is not of type STYLE (instead %s)",
                                     defStyleRes, value.getFirst().toString()),
-                            null /*data*/);
+                            null);
                 }
             } else {
                 Bridge.getLog().error(null,
                         String.format(
                                 "Failed to find style with id 0x%x in current theme",
                                 defStyleRes),
-                        null /*data*/);
+                        null);
             }
         }
 
