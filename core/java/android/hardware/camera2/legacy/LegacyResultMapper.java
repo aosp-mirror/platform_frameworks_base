@@ -28,7 +28,9 @@ import android.hardware.camera2.legacy.ParameterUtils.WeightedRectangle;
 import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
+import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
+import android.util.Rational;
 import android.util.Size;
 
 import java.util.ArrayList;
@@ -125,6 +127,17 @@ public class LegacyResultMapper {
             m.set(CONTROL_AE_ANTIBANDING_MODE, antiBandingMode);
         }
 
+        // control.aeExposureCompensation
+        {
+            m.set(CONTROL_AE_EXPOSURE_COMPENSATION, p.getExposureCompensation());
+        }
+
+        // control.aeLock
+        {
+            boolean lock = p.isAutoExposureLockSupported() ? p.getAutoExposureLock() : false;
+            m.set(CONTROL_AE_LOCK, lock);
+        }
+
         // control.aeMode, flash.mode
         mapAeAndFlashMode(m, p);
 
@@ -159,6 +172,13 @@ public class LegacyResultMapper {
                     zoomData, p.getFocusAreas(), "AF");
 
             m.set(CONTROL_AF_REGIONS, meteringRectArray);
+        }
+
+        // control.awbLock
+        {
+            boolean lock = p.isAutoWhiteBalanceLockSupported() ?
+                    p.getAutoWhiteBalanceLock() : false;
+            m.set(CONTROL_AWB_LOCK, lock);
         }
     }
 

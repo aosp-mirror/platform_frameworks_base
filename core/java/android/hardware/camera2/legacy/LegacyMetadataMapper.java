@@ -355,6 +355,25 @@ public class LegacyMetadataMapper {
             // Note that AE_MODE_OFF is never available.
             m.set(CONTROL_AE_AVAILABLE_MODES, aeAvail);
         }
+
+        /*
+         * control.aeCompensationRanges
+         */
+        {
+            int min = p.getMinExposureCompensation();
+            int max = p.getMaxExposureCompensation();
+
+            m.set(CONTROL_AE_COMPENSATION_RANGE, Range.create(min, max));
+        }
+
+        /*
+         * control.aeCompensationStep
+         */
+        {
+            float step = p.getExposureCompensationStep();
+
+            m.set(CONTROL_AE_COMPENSATION_STEP, ParamsUtils.createRational(step));
+        }
     }
 
     private static void mapControlAwb(CameraMetadataNative m, Camera.Parameters p) {
