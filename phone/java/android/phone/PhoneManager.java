@@ -30,20 +30,17 @@ public final class PhoneManager {
     private static final String TAG = PhoneManager.class.getSimpleName();
 
     private final Context mContext;
-    private final ITelecommService mService;
 
     /**
      * @hide
      */
-    public PhoneManager(Context context, ITelecommService service) {
+    public PhoneManager(Context context) {
         Context appContext = context.getApplicationContext();
         if (appContext != null) {
             mContext = appContext;
         } else {
             mContext = context;
         }
-
-        mService = service;
     }
 
     /**
@@ -56,10 +53,13 @@ public final class PhoneManager {
      * @return True if the digits were processed as an MMI code, false otherwise.
      */
     public boolean handlePinMmi(String dialString) {
-        try {
-            return mService.handlePinMmi(dialString);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#handlePinMmi", e);
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                return service.handlePinMmi(dialString);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService()#handlePinMmi", e);
+            }
         }
         return false;
     }
@@ -71,10 +71,13 @@ public final class PhoneManager {
      * </p>
      */
     public void cancelMissedCallsNotification() {
-        try {
-            mService.cancelMissedCallsNotification();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#cancelMissedCallNotification", e);
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                service.cancelMissedCallsNotification();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService()#cancelMissedCallNotification", e);
+            }
         }
     }
 
@@ -89,10 +92,13 @@ public final class PhoneManager {
      * @param showDialpad Brings up the in-call dialpad as part of showing the in-call screen.
      */
     public void showCallScreen(boolean showDialpad) {
-        try {
-            mService.showCallScreen(showDialpad);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#showCallScreen", e);
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                service.showCallScreen(showDialpad);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService()#showCallScreen", e);
+            }
         }
     }
 
@@ -103,11 +109,19 @@ public final class PhoneManager {
      * </p>
      */
     public boolean isInAPhoneCall() {
-        try {
-            return mService.isInAPhoneCall();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error caling ITelecommService#isInAPhoneCall", e);
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                return service.isInAPhoneCall();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error caling ITelecommService()#isInAPhoneCall", e);
+            }
         }
         return false;
+    }
+
+    private ITelecommService getTelecommService() {
+        return ITelecommService.Stub.asInterface(
+                ServiceManager.getService(Context.TELECOMM_SERVICE));
     }
 }
