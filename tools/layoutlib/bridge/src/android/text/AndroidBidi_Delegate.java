@@ -40,10 +40,10 @@ public class AndroidBidi_Delegate {
         case 1: // Layout.DIR_REQUEST_RTL
             break;  // No change.
         case -1:
-            dir = Bidi.LEVEL_DEFAULT_LTR;
+            dir = Bidi.LEVEL_DEFAULT_RTL;
             break;
         case -2:
-            dir = Bidi.LEVEL_DEFAULT_RTL;
+            dir = Bidi.LEVEL_DEFAULT_LTR;
             break;
         default:
             // Invalid code. Log error, assume LEVEL_DEFAULT_LTR and continue.
