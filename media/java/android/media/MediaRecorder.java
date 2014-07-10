@@ -299,6 +299,9 @@ public class MediaRecorder
 
         /** @hide H.264/AAC data encapsulated in MPEG2/TS */
         public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+
+        /** VP8/VORBIS data in a WEBM container */
+        public static final int WEBM = 9;
     };
 
     /**
@@ -321,6 +324,8 @@ public class MediaRecorder
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
+        /** Ogg Vorbis audio codec */
+        public static final int VORBIS = 6;
     }
 
     /**
@@ -336,6 +341,7 @@ public class MediaRecorder
         public static final int H263 = 1;
         public static final int H264 = 2;
         public static final int MPEG_4_SP = 3;
+        public static final int VP8 = 4;
     }
 
     /**
