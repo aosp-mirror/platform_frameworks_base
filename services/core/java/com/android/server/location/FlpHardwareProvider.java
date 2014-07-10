@@ -420,9 +420,8 @@ public class FlpHardwareProvider {
                 return GeofenceHardware.GEOFENCE_SUCCESS;
             case FLP_RESULT_ERROR:
                 return GeofenceHardware.GEOFENCE_FAILURE;
-            // TODO: uncomment this once the ERROR definition is marked public
-            //case FLP_RESULT_INSUFFICIENT_MEMORY:
-            //    return GeofenceHardware.GEOFENCE_ERROR_INSUFFICIENT_MEMORY;
+            case FLP_RESULT_INSUFFICIENT_MEMORY:
+                return GeofenceHardware.GEOFENCE_ERROR_INSUFFICIENT_MEMORY;
             case FLP_RESULT_TOO_MANY_GEOFENCES:
                 return GeofenceHardware.GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
             case FLP_RESULT_ID_EXISTS:

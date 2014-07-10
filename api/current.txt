@@ -12988,12 +12988,14 @@ package android.hardware.location {
     field public static final int GEOFENCE_ENTERED = 1; // 0x1
     field public static final int GEOFENCE_ERROR_ID_EXISTS = 2; // 0x2
     field public static final int GEOFENCE_ERROR_ID_UNKNOWN = 3; // 0x3
+    field public static final int GEOFENCE_ERROR_INSUFFICIENT_MEMORY = 6; // 0x6
     field public static final int GEOFENCE_ERROR_INVALID_TRANSITION = 4; // 0x4
     field public static final int GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 1; // 0x1
     field public static final int GEOFENCE_EXITED = 2; // 0x2
     field public static final int GEOFENCE_FAILURE = 5; // 0x5
     field public static final int GEOFENCE_SUCCESS = 0; // 0x0
     field public static final int GEOFENCE_UNCERTAIN = 4; // 0x4
+    field public static final int MONITORING_TYPE_FUSED_HARDWARE = 1; // 0x1
     field public static final int MONITORING_TYPE_GPS_HARDWARE = 0; // 0x0
     field public static final int MONITOR_CURRENTLY_AVAILABLE = 0; // 0x0
     field public static final int MONITOR_CURRENTLY_UNAVAILABLE = 1; // 0x1
