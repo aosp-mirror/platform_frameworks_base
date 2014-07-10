@@ -131,8 +131,8 @@ valid StackMapTable. As a side benefit of this, we can continue to support Java 
 Mac has horrible font rendering support.
 
 ReplaceMethodCallsAdapter replaces calls to certain methods. Currently, it only rewrites calls to
-java.lang.System.arraycopy([CI[CII)V, which is not part of the Desktop VM to call the more general
-method java.lang.System.arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V.
+specialized versions of java.lang.System.arraycopy(), which are not part of the Desktop VM to call
+the more general method java.lang.System.arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V.
 
 The ClassAdapters are chained together to achieve the desired output. (Look at section 2.2.7
 Transformation chains in the asm user guide, link in the References.) The order of execution of
