@@ -58,7 +58,7 @@ public final class PhoneManager {
             try {
                 return service.handlePinMmi(dialString);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error calling ITelecommService()#handlePinMmi", e);
+                Log.e(TAG, "Error calling ITelecommService#handlePinMmi", e);
             }
         }
         return false;
@@ -76,7 +76,7 @@ public final class PhoneManager {
             try {
                 service.cancelMissedCallsNotification();
             } catch (RemoteException e) {
-                Log.e(TAG, "Error calling ITelecommService()#cancelMissedCallNotification", e);
+                Log.e(TAG, "Error calling ITelecommService#cancelMissedCallsNotification", e);
             }
         }
     }
@@ -97,7 +97,7 @@ public final class PhoneManager {
             try {
                 service.showCallScreen(showDialpad);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error calling ITelecommService()#showCallScreen", e);
+                Log.e(TAG, "Error calling ITelecommService#showCallScreen", e);
             }
         }
     }
@@ -114,7 +114,7 @@ public final class PhoneManager {
             try {
                 return service.isInAPhoneCall();
             } catch (RemoteException e) {
-                Log.e(TAG, "Error caling ITelecommService()#isInAPhoneCall", e);
+                Log.e(TAG, "Error caling ITelecommService#isInAPhoneCall", e);
             }
         }
         return false;
