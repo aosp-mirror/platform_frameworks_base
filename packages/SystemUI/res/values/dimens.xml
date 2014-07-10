@@ -354,4 +354,7 @@
 
     <!-- The font size of the time when expanded in QS -->
     <dimen name="qs_time_expanded_size">20sp</dimen>
+
+    <!-- Battery level padding end when in expanded QS (but not on Keyguard) -->
+    <dimen name="battery_level_padding_end">4dp</dimen>
 </resources>

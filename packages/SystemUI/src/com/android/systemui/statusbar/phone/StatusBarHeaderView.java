@@ -46,6 +46,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private boolean mListening;
     private boolean mOverscrolled;
     private boolean mKeyguardShowing;
+    private boolean mCharging;
 
     private ViewGroup mSystemIconsContainer;
     private View mSystemIconsSuperContainer;
@@ -80,6 +81,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private int mClockMarginBottomExpanded;
     private int mMultiUserSwitchWidthCollapsed;
     private int mMultiUserSwitchWidthExpanded;
+    private int mBatteryPaddingEnd;
 
     /**
      * In collapsed QS, the clock and avatar are scaled down a bit post-layout to allow for a nice
@@ -164,6 +166,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mClockCollapsedScaleFactor =
                 getResources().getDimensionPixelSize(R.dimen.qs_time_collapsed_size)
                 / mClock.getTextSize();
+        mBatteryPaddingEnd =
+                getResources().getDimensionPixelSize(R.dimen.battery_level_padding_end);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -210,6 +214,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateClockScale();
             updateAvatarScale();
             updateClockLp();
+            updateBatteryLevelPaddingEnd();
         }
     }
 
@@ -273,12 +278,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 ? VISIBLE : GONE);
         mMultiUserSwitch.setVisibility(mExpanded || !mKeyguardUserSwitcherShowing
                 ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(mExpanded && !mOverscrolled ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility(mKeyguardShowing && mCharging || mExpanded && !mOverscrolled
+                ? View.VISIBLE : View.GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp = (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
-        lp.addRule(RelativeLayout.START_OF, mExpanded
+        lp.addRule(RelativeLayout.START_OF, mExpanded && !mOverscrolled
                 ? mSettingsButton.getId()
                 : mMultiUserSwitch.getId());
         lp.removeRule(ALIGN_PARENT_START);
@@ -318,9 +324,19 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
+    private void updateBatteryLevelPaddingEnd() {
+        mBatteryLevel.setPaddingRelative(0, 0,
+                mKeyguardShowing && !mExpanded ? 0 : mBatteryPaddingEnd, 0);
+    }
+
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
+        boolean changed = mCharging != charging;
+        mCharging = charging;
+        if (changed) {
+            updateVisibilities();
+        }
     }
 
     private void updateClickTargets() {
@@ -361,14 +377,16 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateMultiUserSwitch() {
         int marginEnd;
-        if (mExpanded) {
+        if (mExpanded && !mOverscrolled) {
             marginEnd = mMultiUserExpandedMargin;
         } else if (mKeyguardShowing) {
             marginEnd = mMultiUserKeyguardMargin;
         } else {
             marginEnd = mMultiUserCollapsedMargin;
         }
-        int width = mExpanded ? mMultiUserSwitchWidthExpanded : mMultiUserSwitchWidthCollapsed;
+        int width = mExpanded && !mOverscrolled
+                ? mMultiUserSwitchWidthExpanded
+                : mMultiUserSwitchWidthCollapsed;
         MarginLayoutParams lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
         if (marginEnd != lp.getMarginEnd() || lp.width != width) {
             lp.setMarginEnd(marginEnd);
@@ -421,6 +439,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updatePadding();
         updateMultiUserSwitch();
         updateClickTargets();
+        updateBatteryLevelPaddingEnd();
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
