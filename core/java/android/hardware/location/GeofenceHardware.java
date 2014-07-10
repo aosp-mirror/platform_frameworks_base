@@ -56,8 +56,6 @@ public final class GeofenceHardware {
 
     /**
      * Constant for geofence monitoring done by the Fused hardware.
-     *
-     * @hide
      */
     public static final int MONITORING_TYPE_FUSED_HARDWARE = 1;
 
@@ -128,8 +126,6 @@ public final class GeofenceHardware {
 
     /**
      * The constant used to indicate that the operation failed due to insufficient memory.
-     *
-     * @hide
      */
     public static final int GEOFENCE_ERROR_INSUFFICIENT_MEMORY = 6;
 
