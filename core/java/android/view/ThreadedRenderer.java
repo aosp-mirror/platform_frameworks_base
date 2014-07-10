@@ -19,6 +19,7 @@ package android.view;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -67,7 +68,16 @@ public class ThreadedRenderer extends HardwareRenderer {
         PROFILE_PROPERTY_VISUALIZE_BARS,
     };
 
+    // Size of the rendered content.
     private int mWidth, mHeight;
+
+    // Actual size of the drawing surface.
+    private int mSurfaceWidth, mSurfaceHeight;
+
+    // Insets between the drawing surface and rendered content. These are
+    // applied as translation when updating the root render node.
+    private int mInsetTop, mInsetLeft;
+
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
@@ -154,11 +164,23 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height, float lightX, float lightY, float lightZ, float lightRadius) {
+    void setup(int width, int height, Rect surfaceInsets, float lightX, float lightY, float lightZ,
+            float lightRadius) {
         mWidth = width;
         mHeight = height;
-        mRootNode.setLeftTopRightBottom(0, 0, mWidth, mHeight);
-        nSetup(mNativeProxy, width, height, lightX, lightY, lightZ, lightRadius);
+        if (surfaceInsets != null) {
+            mInsetLeft = surfaceInsets.left;
+            mInsetTop = surfaceInsets.top;
+            mSurfaceWidth = width + mInsetLeft + surfaceInsets.right;
+            mSurfaceHeight = height + mInsetTop + surfaceInsets.bottom;
+        } else {
+            mInsetLeft = 0;
+            mInsetTop = 0;
+            mSurfaceWidth = width;
+            mSurfaceHeight = height;
+        }
+        mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
+        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, lightX, lightY, lightZ, lightRadius);
     }
 
     @Override
@@ -214,9 +236,10 @@ public class ThreadedRenderer extends HardwareRenderer {
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-        HardwareCanvas canvas = mRootNode.start(mWidth, mHeight);
+        HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
         try {
             canvas.save();
+            canvas.translate(mInsetLeft, mInsetTop);
             callbacks.onHardwarePreDraw(canvas);
             canvas.drawRenderNode(view.getDisplayList());
             callbacks.onHardwarePostDraw(canvas);

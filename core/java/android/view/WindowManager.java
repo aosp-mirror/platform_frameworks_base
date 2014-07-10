@@ -19,7 +19,9 @@ package android.view;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1290,6 +1292,13 @@ public interface WindowManager extends ViewManager {
          * field is added with {@link #y} to supply the <var>yAdj</var> parameter.
          */
         public float verticalMargin;
+
+        /**
+         * Positive insets between the drawing surface and window content.
+         *
+         * @hide
+         */
+        public Rect shadowInsets = new Rect();
     
         /**
          * The desired bitmap format.  May be one of the constants in
@@ -1571,6 +1580,10 @@ public interface WindowManager extends ViewManager {
             out.writeInt(hasSystemUiListeners ? 1 : 0);
             out.writeInt(inputFeatures);
             out.writeLong(userActivityTimeout);
+            out.writeInt(shadowInsets.left);
+            out.writeInt(shadowInsets.top);
+            out.writeInt(shadowInsets.right);
+            out.writeInt(shadowInsets.bottom);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1613,6 +1626,7 @@ public interface WindowManager extends ViewManager {
             hasSystemUiListeners = in.readInt() != 0;
             inputFeatures = in.readInt();
             userActivityTimeout = in.readLong();
+            shadowInsets.set(in.readInt(), in.readInt(), in.readInt(), in.readInt());
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1643,6 +1657,8 @@ public interface WindowManager extends ViewManager {
         public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<18;
         /** {@hide} */
         public static final int TRANSLUCENT_FLAGS_CHANGED = 1<<19;
+        /** {@hide} */
+        public static final int SHADOW_INSETS_CHANGED = 1<<20;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1778,6 +1794,11 @@ public interface WindowManager extends ViewManager {
                 changes |= USER_ACTIVITY_TIMEOUT_CHANGED;
             }
 
+            if (!shadowInsets.equals(o.shadowInsets)) {
+                shadowInsets.set(o.shadowInsets);
+                changes |= SHADOW_INSETS_CHANGED;
+            }
+
             return changes;
         }
     
@@ -1876,6 +1897,9 @@ public interface WindowManager extends ViewManager {
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
+            }
+            if (!shadowInsets.equals(Insets.NONE)) {
+                sb.append(" shadowInsets=").append(shadowInsets);
             }
             sb.append('}');
             return sb.toString();

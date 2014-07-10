@@ -918,6 +918,7 @@ package android {
     field public static final int popupAnimationStyle = 16843465; // 0x10102c9
     field public static final int popupBackground = 16843126; // 0x1010176
     field public static final int popupCharacters = 16843332; // 0x1010244
+    field public static final int popupElevation = 16843918; // 0x101048e
     field public static final int popupKeyboard = 16843331; // 0x1010243
     field public static final int popupLayout = 16843323; // 0x101023b
     field public static final int popupMenuStyle = 16843520; // 0x1010300
@@ -37281,6 +37282,7 @@ package android.widget {
     method public int getAnimationStyle();
     method public android.graphics.drawable.Drawable getBackground();
     method public android.view.View getContentView();
+    method public float getElevation();
     method public int getHeight();
     method public int getInputMethodMode();
     method public int getMaxAvailableHeight(android.view.View);
@@ -37298,6 +37300,7 @@ package android.widget {
     method public void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setClippingEnabled(boolean);
     method public void setContentView(android.view.View);
+    method public void setElevation(float);
     method public void setFocusable(boolean);
     method public void setHeight(int);
     method public void setIgnoreCheekPress();

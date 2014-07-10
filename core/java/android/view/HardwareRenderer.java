@@ -18,6 +18,7 @@ package android.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.Surface.OutOfResourcesException;
 
@@ -247,21 +248,24 @@ public abstract class HardwareRenderer {
     abstract void detachSurfaceTexture(long hardwareLayer);
 
     /**
-     * Setup the hardware renderer for drawing. This is called whenever the
-     * size of the target surface changes or when the surface is first created.
+     * Setup the hardware renderer for drawing. This is called whenever the size
+     * of the target surface changes or when the surface is first created.
      *
      * @param width Width of the drawing surface.
      * @param height Height of the drawing surface.
+     * @param surfaceInsets Insets between the drawing surface and actual
+     *            surface bounds.
      * @param lightX X position of the shadow casting light
      * @param lightY Y position of the shadow casting light
      * @param lightZ Z position of the shadow casting light
      * @param lightRadius radius of the shadow casting light
      */
-    abstract void setup(int width, int height, float lightX, float lightY, float lightZ, float lightRadius);
+    abstract void setup(int width, int height, Rect surfaceInsets, float lightX, float lightY,
+            float lightZ, float lightRadius);
 
     /**
      * Gets the current width of the surface. This is the width that the surface
-     * was last set to in a call to {@link #setup(int, int, float, float, float, float)}.
+     * was last set to in a call to {@link #setup(int, int, Rect, float, float, float, float)}.
      *
      * @return the current width of the surface
      */
@@ -269,7 +273,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Gets the current height of the surface. This is the height that the surface
-     * was last set to in a call to {@link #setup(int, int, float, float, float, float)}.
+     * was last set to in a call to {@link #setup(int, int, Rect, float, float, float, float)}.
      *
      * @return the current width of the surface
      */
@@ -344,7 +348,6 @@ public abstract class HardwareRenderer {
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
-     * @param dirty The dirty rectangle to update, can be null.
      */
     abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks);
 
@@ -369,17 +372,18 @@ public abstract class HardwareRenderer {
      * @param height The height of the drawing surface.
      * @param surface The surface to hardware accelerate
      * @param metrics The display metrics used to draw the output.
+     * @param surfaceInsets The drawing surface insets to apply
      *
      * @return true if the surface was initialized, false otherwise. Returning
      *         false might mean that the surface was already initialized.
      */
-    boolean initializeIfNeeded(int width, int height, Surface surface, DisplayMetrics metrics)
+    boolean initializeIfNeeded(int width, int height, Surface surface, Rect surfaceInsets, DisplayMetrics metrics)
             throws OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
                 if (initialize(surface)) {
-                    setup(width, height, metrics);
+                    setup(width, height, surfaceInsets, metrics);
                     return true;
                 }
             }
@@ -387,12 +391,12 @@ public abstract class HardwareRenderer {
         return false;
     }
 
-    void setup(int width, int height, DisplayMetrics metrics) {
+    void setup(int width, int height, Rect surfaceInsets, DisplayMetrics metrics) {
         float lightX = width / 2.0f;
         float lightY = -400 * metrics.density;
         float lightZ = 800 * metrics.density;
         float lightRadius = 800 * metrics.density;
-        setup(width, height, lightX, lightY, lightZ, lightRadius);
+        setup(width, height, surfaceInsets, lightX, lightY, lightZ, lightRadius);
     }
 
     /**
