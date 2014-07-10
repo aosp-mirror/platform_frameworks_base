@@ -3592,6 +3592,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean switchUser(ComponentName who, UserHandle userHandle) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                int userId = UserHandle.USER_OWNER;
+                if (userHandle != null) {
+                    userId = userHandle.getIdentifier();
+                }
+                return ActivityManagerNative.getDefault().switchUser(userId);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Couldn't switch user", e);
+                return false;
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+    }
+
+    @Override
     public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
 
