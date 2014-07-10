@@ -146,7 +146,7 @@ public final class RggbChannelVector {
      */
     public void copyTo(final float[] destination, final int offset) {
         checkNotNull(destination, "destination must not be null");
-        if (destination.length + offset < COUNT) {
+        if (destination.length - offset < COUNT) {
             throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
         }
 
@@ -167,11 +167,9 @@ public final class RggbChannelVector {
     public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
-        }
-        if (this == obj) {
+        } else if (this == obj) {
             return true;
-        }
-        if (obj instanceof RggbChannelVector) {
+        } else if (obj instanceof RggbChannelVector) {
             final RggbChannelVector other = (RggbChannelVector) obj;
             return mRed == other.mRed &&
                     mGreenEven == other.mGreenEven &&
