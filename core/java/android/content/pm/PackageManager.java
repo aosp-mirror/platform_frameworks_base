@@ -17,9 +17,9 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,13 +29,12 @@ import android.content.IntentSender;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.util.AndroidException;
-import android.util.DisplayMetrics;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -750,7 +749,7 @@ public abstract class PackageManager {
      * permission that is already defined by some existing package.
      *
      * <p>The package name of the app which has already defined the permission is passed to
-     * a {@link IPackageInstallObserver2}, if any, as the {@link #EXTRA_EXISTING_PACKAGE}
+     * a {@link PackageInstallObserver}, if any, as the {@link #EXTRA_EXISTING_PACKAGE}
      * string extra; and the name of the permission being redefined is passed in the
      * {@link #EXTRA_EXISTING_PERMISSION} string extra.
      * @hide
@@ -1544,7 +1543,7 @@ public abstract class PackageManager {
             = "android.content.pm.extra.PERMISSION_LIST";
 
     /**
-     * String extra for {@link IPackageInstallObserver2} in the 'extras' Bundle in case of
+     * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
      * {@link #INSTALL_FAILED_DUPLICATE_PERMISSION}.  This extra names the package which provides
      * the existing definition for the permission.
      * @hide
@@ -1553,7 +1552,7 @@ public abstract class PackageManager {
             = "android.content.pm.extra.FAILURE_EXISTING_PACKAGE";
 
     /**
-     * String extra for {@link IPackageInstallObserver2} in the 'extras' Bundle in case of
+     * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
      * {@link #INSTALL_FAILED_DUPLICATE_PERMISSION}.  This extra names the permission that is
      * being redundantly defined by the package being installed.
      * @hide
@@ -2941,26 +2940,29 @@ public abstract class PackageManager {
     }
 
     /**
-     * @hide
-     *
-     * Install a package. Since this may take a little while, the result will
-     * be posted back to the given observer.  An installation will fail if the calling context
-     * lacks the {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if the
-     * package named in the package file's manifest is already installed, or if there's no space
-     * available on the device.
-     *
-     * @param packageURI The location of the package file to install.  This can be a 'file:' or a
-     * 'content:' URI.
-     * @param observer An observer callback to get notified when the package installation is
-     * complete. {@link IPackageInstallObserver#packageInstalled(String, int)} will be
-     * called when that happens.  This parameter must not be null.
+     * @hide Install a package. Since this may take a little while, the result
+     *       will be posted back to the given observer. An installation will
+     *       fail if the calling context lacks the
+     *       {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if
+     *       the package named in the package file's manifest is already
+     *       installed, or if there's no space available on the device.
+     * @param packageURI The location of the package file to install. This can
+     *            be a 'file:' or a 'content:' URI.
+     * @param observer An observer callback to get notified when the package
+     *            installation is complete.
+     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
+     *            will be called when that happens. This parameter must not be
+     *            null.
      * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     * {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that is performing the
-     * installation. This identifies which market the package came from.
-     * @deprecated Use {@link #installPackage(Uri, IPackageInstallObserver2, int, String)}
-     * instead.  This method will continue to be supported but the older observer interface
-     * will not get additional failure details.
+     *            {@link #INSTALL_REPLACE_EXISTING},
+     *            {@link #INSTALL_ALLOW_TEST}.
+     * @param installerPackageName Optional package name of the application that
+     *            is performing the installation. This identifies which market
+     *            the package came from.
+     * @deprecated Use {@link #installPackage(Uri, PackageInstallObserver, int,
+     *             String)} instead. This method will continue to be supported
+     *             but the older observer interface will not get additional
+     *             failure details.
      */
     // @SystemApi
     public abstract void installPackage(
@@ -2977,9 +2979,11 @@ public abstract class PackageManager {
      * @param observer An observer callback to get notified when the package
      *            installation is complete.
      *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. This parameter must not be null.
+     *            will be called when that happens. This parameter must not be
+     *            null.
      * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
+     *            {@link #INSTALL_REPLACE_EXISTING},
+     *            {@link #INSTALL_ALLOW_TEST}.
      * @param installerPackageName Optional package name of the application that
      *            is performing the installation. This identifies which market
      *            the package came from.
@@ -2992,10 +2996,11 @@ public abstract class PackageManager {
      *            these parameters describing the encryption and authentication
      *            used. May be {@code null}.
      * @hide
-     * @deprecated Use {@link #installPackageWithVerification(Uri, IPackageInstallObserver2,
-     * int, String, Uri, ManifestDigest, ContainerEncryptionParams)} instead.  This method will
-     * continue to be supported but the older observer interface will not get additional failure
-     * details.
+     * @deprecated Use {@link #installPackageWithVerification(Uri,
+     *             PackageInstallObserver, int, String, Uri, ManifestDigest,
+     *             ContainerEncryptionParams)} instead. This method will
+     *             continue to be supported but the older observer interface
+     *             will not get additional failure details.
      */
     // @SystemApi
     public abstract void installPackageWithVerification(Uri packageURI,
@@ -3013,9 +3018,11 @@ public abstract class PackageManager {
      * @param observer An observer callback to get notified when the package
      *            installation is complete.
      *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. This parameter must not be null.
+     *            will be called when that happens. This parameter must not be
+     *            null.
      * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
+     *            {@link #INSTALL_REPLACE_EXISTING},
+     *            {@link #INSTALL_ALLOW_TEST}.
      * @param installerPackageName Optional package name of the application that
      *            is performing the installation. This identifies which market
      *            the package came from.
@@ -3024,12 +3031,12 @@ public abstract class PackageManager {
      * @param encryptionParams if the package to be installed is encrypted,
      *            these parameters describing the encryption and authentication
      *            used. May be {@code null}.
-     *
      * @hide
      * @deprecated Use {@link #installPackageWithVerificationAndEncryption(Uri,
-     * IPackageInstallObserver2, int, String, VerificationParams,
-     * ContainerEncryptionParams)} instead.  This method will continue to be
-     * supported but the older observer interface will not get additional failure details.
+     *             PackageInstallObserver, int, String, VerificationParams,
+     *             ContainerEncryptionParams)} instead. This method will
+     *             continue to be supported but the older observer interface
+     *             will not get additional failure details.
      */
     @Deprecated
     public abstract void installPackageWithVerificationAndEncryption(Uri packageURI,

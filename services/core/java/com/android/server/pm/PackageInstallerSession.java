@@ -26,7 +26,8 @@ import static android.system.OsConstants.O_WRONLY;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
-import android.content.pm.PackageInstallerParams;
+import android.content.pm.InstallSessionInfo;
+import android.content.pm.InstallSessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
@@ -75,7 +76,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public final String installerPackageName;
     /** UID not persisted */
     public final int installerUid;
-    public final PackageInstallerParams params;
+    public final InstallSessionParams params;
     public final long createdMillis;
     public final File sessionStageDir;
 
@@ -95,7 +96,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     Slog.e(TAG, "Install failed: " + e);
                     destroy();
                     try {
-                        mRemoteObserver.packageInstalled(mPackageName, null, e.error);
+                        mRemoteObserver.packageInstalled(mPackageName, null, e.error,
+                                e.getMessage());
                     } catch (RemoteException ignored) {
                     }
                 }
@@ -123,7 +125,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public PackageInstallerSession(PackageInstallerService.Callback callback,
             PackageManagerService pm, int sessionId, int userId, String installerPackageName,
-            int installerUid, PackageInstallerParams params, long createdMillis, File sessionStageDir,
+            int installerUid, InstallSessionParams params, long createdMillis, File sessionStageDir,
             Looper looper) {
         mCallback = callback;
         mPm = pm;
@@ -150,6 +152,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (installerUid == Process.SHELL_UID || installerUid == 0) {
             mPermissionsConfirmed = true;
         }
+    }
+
+    public InstallSessionInfo generateInfo() {
+        final InstallSessionInfo info = new InstallSessionInfo();
+
+        info.sessionId = sessionId;
+        info.installerPackageName = installerPackageName;
+        info.progress = mProgress;
+
+        info.fullInstall = params.fullInstall;
+        info.packageName = params.packageName;
+        info.icon = params.icon;
+        info.title = params.title;
+
+        return info;
     }
 
     @Override
@@ -264,15 +281,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final IPackageInstallObserver2 remoteObserver = mRemoteObserver;
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
             @Override
-            public void packageInstalled(String basePackageName, Bundle extras, int returnCode)
-                    throws RemoteException {
+            public void packageInstalled(String basePackageName, Bundle extras, int returnCode,
+                    String msg) throws RemoteException {
                 destroy();
-                remoteObserver.packageInstalled(basePackageName, extras, returnCode);
+                remoteObserver.packageInstalled(basePackageName, extras, returnCode, msg);
             }
         };
 
-        mPm.installStage(mPackageName, this.sessionStageDir, localObserver, params, installerPackageName,
-                installerUid, new UserHandle(userId));
+        mPm.installStage(mPackageName, this.sessionStageDir, localObserver, params,
+                installerPackageName, installerUid, new UserHandle(userId));
     }
 
     /**

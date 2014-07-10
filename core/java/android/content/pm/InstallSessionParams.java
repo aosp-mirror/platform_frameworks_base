@@ -21,12 +21,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Parameters that define an installation session.
- *
- * {@hide}
- */
-public class PackageInstallerParams implements Parcelable {
+/** {@hide} */
+public class InstallSessionParams implements Parcelable {
 
     // TODO: extend to support remaining VerificationParams
 
@@ -41,11 +37,11 @@ public class PackageInstallerParams implements Parcelable {
     /** {@hide} */
     public long deltaSize = -1;
     /** {@hide} */
-    public String basePackageName;
+    public String packageName;
     /** {@hide} */
     public Bitmap icon;
     /** {@hide} */
-    public String title;
+    public CharSequence title;
     /** {@hide} */
     public Uri originatingUri;
     /** {@hide} */
@@ -53,20 +49,18 @@ public class PackageInstallerParams implements Parcelable {
     /** {@hide} */
     public String abiOverride;
 
-    public PackageInstallerParams() {
+    public InstallSessionParams() {
     }
 
     /** {@hide} */
-    public PackageInstallerParams(Parcel source) {
+    public InstallSessionParams(Parcel source) {
         fullInstall = source.readInt() != 0;
         installFlags = source.readInt();
         installLocation = source.readInt();
         signatures = (Signature[]) source.readParcelableArray(null);
         deltaSize = source.readLong();
-        basePackageName = source.readString();
-        if (source.readInt() != 0) {
-            icon = Bitmap.CREATOR.createFromParcel(source);
-        }
+        packageName = source.readString();
+        icon = source.readParcelable(null);
         title = source.readString();
         originatingUri = source.readParcelable(null);
         referrerUri = source.readParcelable(null);
@@ -93,8 +87,8 @@ public class PackageInstallerParams implements Parcelable {
         this.deltaSize = deltaSize;
     }
 
-    public void setBasePackageName(String basePackageName) {
-        this.basePackageName = basePackageName;
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 
     public void setIcon(Bitmap icon) {
@@ -102,7 +96,7 @@ public class PackageInstallerParams implements Parcelable {
     }
 
     public void setTitle(CharSequence title) {
-        this.title = (title != null) ? title.toString() : null;
+        this.title = title;
     }
 
     public void setOriginatingUri(Uri originatingUri) {
@@ -125,29 +119,24 @@ public class PackageInstallerParams implements Parcelable {
         dest.writeInt(installLocation);
         dest.writeParcelableArray(signatures, flags);
         dest.writeLong(deltaSize);
-        dest.writeString(basePackageName);
-        if (icon != null) {
-            dest.writeInt(1);
-            icon.writeToParcel(dest, flags);
-        } else {
-            dest.writeInt(0);
-        }
-        dest.writeString(title);
+        dest.writeString(packageName);
+        dest.writeParcelable(icon, flags);
+        dest.writeString(title != null ? title.toString() : null);
         dest.writeParcelable(originatingUri, flags);
         dest.writeParcelable(referrerUri, flags);
         dest.writeString(abiOverride);
     }
 
-    public static final Parcelable.Creator<PackageInstallerParams>
-            CREATOR = new Parcelable.Creator<PackageInstallerParams>() {
+    public static final Parcelable.Creator<InstallSessionParams>
+            CREATOR = new Parcelable.Creator<InstallSessionParams>() {
                 @Override
-                public PackageInstallerParams createFromParcel(Parcel p) {
-                    return new PackageInstallerParams(p);
+                public InstallSessionParams createFromParcel(Parcel p) {
+                    return new InstallSessionParams(p);
                 }
 
                 @Override
-                public PackageInstallerParams[] newArray(int size) {
-                    return new PackageInstallerParams[size];
+                public InstallSessionParams[] newArray(int size) {
+                    return new InstallSessionParams[size];
                 }
             };
 }
