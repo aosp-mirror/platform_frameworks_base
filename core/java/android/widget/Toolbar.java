@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.widget;
 
 import android.annotation.NonNull;
@@ -27,16 +26,15 @@ import android.os.Parcelable;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.CollapsibleActionView;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.Window;
+
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
@@ -103,6 +101,12 @@ public class Toolbar extends ViewGroup {
     private Drawable mCollapseIcon;
     private ImageButton mCollapseButtonView;
     View mExpandedActionView;
+
+    /** Context against which to inflate popup menus. */
+    private Context mPopupContext;
+
+    /** Theme resource against which to inflate popup menus. */
+    private int mPopupTheme;
 
     private int mTitleTextAppearance;
     private int mSubtitleTextAppearance;
@@ -230,6 +234,36 @@ public class Toolbar extends ViewGroup {
             setSubtitle(subtitle);
         }
         a.recycle();
+
+        mPopupContext = context;
+        mPopupTheme = 0;
+    }
+
+    /**
+     * Specifies the theme to use when inflating popup menus. By default, uses
+     * the same theme as the toolbar itself.
+     *
+     * @param resId theme used to inflate popup menus
+     * @see #getPopupTheme()
+     */
+    public void setPopupTheme(int resId) {
+        if (mPopupTheme != resId) {
+            mPopupTheme = resId;
+            if (resId == 0) {
+                mPopupContext = mContext;
+            } else {
+                mPopupContext = new ContextThemeWrapper(mContext, resId);
+            }
+        }
+    }
+
+    /**
+     * @return resource identifier of the theme used to inflate popup menus, or
+     *         0 if menus are inflated against the toolbar theme
+     * @see #setPopupTheme(int)
+     */
+    public int getPopupTheme() {
+        return mPopupTheme;
     }
 
     @Override
@@ -306,22 +340,21 @@ public class Toolbar extends ViewGroup {
             oldMenu.removeMenuPresenter(mExpandedMenuPresenter);
         }
 
-        final Context context = getContext();
-
         if (mExpandedMenuPresenter == null) {
             mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
         }
 
         outerPresenter.setExpandedActionViewsExclusive(true);
         if (menu != null) {
-            menu.addMenuPresenter(outerPresenter);
-            menu.addMenuPresenter(mExpandedMenuPresenter);
+            menu.addMenuPresenter(outerPresenter, mPopupContext);
+            menu.addMenuPresenter(mExpandedMenuPresenter, mPopupContext);
         } else {
-            outerPresenter.initForMenu(context, null);
-            mExpandedMenuPresenter.initForMenu(context, null);
+            outerPresenter.initForMenu(mPopupContext, null);
+            mExpandedMenuPresenter.initForMenu(mPopupContext, null);
             outerPresenter.updateMenuView(true);
             mExpandedMenuPresenter.updateMenuView(true);
         }
+        mMenuView.setPopupTheme(mPopupTheme);
         mMenuView.setPresenter(outerPresenter);
         mOuterActionMenuPresenter = outerPresenter;
     }
@@ -768,13 +801,14 @@ public class Toolbar extends ViewGroup {
                 mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
             }
             mMenuView.setExpandedActionViewsExclusive(true);
-            menu.addMenuPresenter(mExpandedMenuPresenter);
+            menu.addMenuPresenter(mExpandedMenuPresenter, mPopupContext);
         }
     }
 
     private void ensureMenuView() {
         if (mMenuView == null) {
             mMenuView = new ActionMenuView(getContext());
+            mMenuView.setPopupTheme(mPopupTheme);
             mMenuView.setOnMenuItemClickListener(mMenuViewItemClickListener);
             final LayoutParams lp = generateDefaultLayoutParams();
             lp.gravity = Gravity.END | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);

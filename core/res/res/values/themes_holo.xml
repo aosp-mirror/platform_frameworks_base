@@ -341,6 +341,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Holo.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@null</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_holo_dark</item>

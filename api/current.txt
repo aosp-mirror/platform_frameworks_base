@@ -244,6 +244,7 @@ package android {
     field public static final int action = 16842797; // 0x101002d
     field public static final int actionBarDivider = 16843675; // 0x101039b
     field public static final int actionBarItemBackground = 16843676; // 0x101039c
+    field public static final int actionBarPopupTheme = 16843918; // 0x101048e
     field public static final int actionBarSize = 16843499; // 0x10102eb
     field public static final int actionBarSplitStyle = 16843656; // 0x1010388
     field public static final int actionBarStyle = 16843470; // 0x10102ce
@@ -36101,11 +36102,13 @@ package android.widget {
     ctor public ActionMenuView(android.content.Context, android.util.AttributeSet);
     method public void dismissPopupMenus();
     method public android.view.Menu getMenu();
+    method public int getPopupTheme();
     method public boolean hideOverflowMenu();
     method public boolean isOverflowMenuShowing();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onDetachedFromWindow();
     method public void setOnMenuItemClickListener(android.widget.ActionMenuView.OnMenuItemClickListener);
+    method public void setPopupTheme(int);
     method public boolean showOverflowMenu();
   }
 
@@ -38333,6 +38336,7 @@ package android.widget {
     method public android.view.Menu getMenu();
     method public java.lang.CharSequence getNavigationContentDescription();
     method public android.graphics.drawable.Drawable getNavigationIcon();
+    method public int getPopupTheme();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
     method public boolean hasExpandedActionView();
@@ -38354,6 +38358,7 @@ package android.widget {
     method public void setNavigationIcon(android.graphics.drawable.Drawable);
     method public void setNavigationOnClickListener(android.view.View.OnClickListener);
     method public void setOnMenuItemClickListener(android.widget.Toolbar.OnMenuItemClickListener);
+    method public void setPopupTheme(int);
     method public void setSubtitle(int);
     method public void setSubtitle(java.lang.CharSequence);
     method public void setSubtitleTextAppearance(android.content.Context, int);

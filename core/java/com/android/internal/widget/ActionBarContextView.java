@@ -16,6 +16,9 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
+
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.widget.ActionMenuPresenter;
 import android.widget.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
@@ -231,7 +234,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         if (!mSplitActionBar) {
-            menu.addMenuPresenter(mActionMenuPresenter);
+            menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             mMenuView.setBackgroundDrawable(null);
             addView(mMenuView, layoutParams);
@@ -244,7 +247,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = mContentHeight;
-            menu.addMenuPresenter(mActionMenuPresenter);
+            menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             mMenuView.setBackgroundDrawable(mSplitBackground);
             mSplitView.addView(mMenuView, layoutParams);

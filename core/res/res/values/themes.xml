@@ -362,6 +362,7 @@ please see themes_device_defaults.xml.
         <item name="actionMenuTextAppearance">@style/TextAppearance.Holo.Widget.ActionBar.Menu</item>
         <item name="actionMenuTextColor">?attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@null</item>
         <item name="actionBarDivider">?attr/dividerVertical</item>
         <item name="actionBarItemBackground">?attr/selectableItemBackground</item>

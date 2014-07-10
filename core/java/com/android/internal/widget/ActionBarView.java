@@ -29,7 +29,9 @@ import android.os.Parcelable;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.CollapsibleActionView;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -435,11 +437,11 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
 
     private void configPresenters(MenuBuilder builder) {
         if (builder != null) {
-            builder.addMenuPresenter(mActionMenuPresenter);
-            builder.addMenuPresenter(mExpandedMenuPresenter);
+            builder.addMenuPresenter(mActionMenuPresenter, mPopupContext);
+            builder.addMenuPresenter(mExpandedMenuPresenter, mPopupContext);
         } else {
-            mActionMenuPresenter.initForMenu(mContext, null);
-            mExpandedMenuPresenter.initForMenu(mContext, null);
+            mActionMenuPresenter.initForMenu(mPopupContext, null);
+            mExpandedMenuPresenter.initForMenu(mPopupContext, null);
             mActionMenuPresenter.updateMenuView(true);
             mExpandedMenuPresenter.updateMenuView(true);
         }

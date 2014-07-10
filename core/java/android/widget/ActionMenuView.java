@@ -18,6 +18,7 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +29,6 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
-import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 
 /**
@@ -44,6 +44,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     static final int GENERATED_ITEM_PADDING = 4; // dips
 
     private MenuBuilder mMenu;
+
+    /** Context against which to inflate popup menus. */
+    private Context mPopupContext;
+
+    /** Theme resource against which to inflate popup menus. */
+    private int mPopupTheme;
 
     private boolean mReserveOverflow;
     private ActionMenuPresenter mPresenter;
@@ -64,9 +70,41 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final float density = context.getResources().getDisplayMetrics().density;
         mMinCellSize = (int) (MIN_CELL_SIZE * density);
         mGeneratedItemPadding = (int) (GENERATED_ITEM_PADDING * density);
+        mPopupContext = context;
+        mPopupTheme = 0;
     }
 
-    /** @hide */
+    /**
+     * Specifies the theme to use when inflating popup menus. By default, uses
+     * the same theme as the action menu view itself.
+     *
+     * @param resId theme used to inflate popup menus
+     * @see #getPopupTheme()
+     */
+    public void setPopupTheme(int resId) {
+        if (mPopupTheme != resId) {
+            mPopupTheme = resId;
+            if (resId == 0) {
+                mPopupContext = mContext;
+            } else {
+                mPopupContext = new ContextThemeWrapper(mContext, resId);
+            }
+        }
+    }
+
+    /**
+     * @return resource identifier of the theme used to inflate popup menus, or
+     *         0 if menus are inflated against the action menu view theme
+     * @see #setPopupTheme(int)
+     */
+    public int getPopupTheme() {
+        return mPopupTheme;
+    }
+
+    /**
+     * @param presenter Menu presenter used to display popup menu
+     * @hide
+     */
     public void setPresenter(ActionMenuPresenter presenter) {
         mPresenter = presenter;
         mPresenter.setMenuView(this);
@@ -571,7 +609,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             mMenu.setCallback(new MenuBuilderCallback());
             mPresenter = new ActionMenuPresenter(context);
             mPresenter.setCallback(new ActionMenuPresenterCallback());
-            mMenu.addMenuPresenter(mPresenter);
+            mMenu.addMenuPresenter(mPresenter, mPopupContext);
             mPresenter.setMenuView(this);
         }
 
