@@ -182,6 +182,10 @@ public class LegacyRequestMapper {
                 params.setAutoExposureLock(aeLock);
             }
 
+            if (VERBOSE) {
+                Log.v(TAG, "convertRequestToMetadata - control.aeLock set to " + aeLock);
+            }
+
             // TODO: Don't add control.aeLock to availableRequestKeys if it's not supported
         }
 

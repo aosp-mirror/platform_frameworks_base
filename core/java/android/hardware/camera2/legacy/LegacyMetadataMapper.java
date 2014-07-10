@@ -84,10 +84,11 @@ public class LegacyMetadataMapper {
      * TODO: Remove these constants and strip out any code that previously relied on them
      * being set to true.
      */
-    static final boolean LIE_ABOUT_AE_STATE = true;
+    static final boolean LIE_ABOUT_AE_STATE = false;
     static final boolean LIE_ABOUT_AE_MAX_REGIONS = false;
     static final boolean LIE_ABOUT_AF = true;
     static final boolean LIE_ABOUT_AF_MAX_REGIONS = true;
+    static final boolean LIE_ABOUT_AWB_STATE = false;
     static final boolean LIE_ABOUT_AWB = true;
 
     /**
@@ -330,16 +331,17 @@ public class LegacyMetadataMapper {
             List<String> flashModes = p.getSupportedFlashModes();
 
             String[] flashModeStrings = new String[] {
+                    Camera.Parameters.FLASH_MODE_OFF,
                     Camera.Parameters.FLASH_MODE_AUTO,
                     Camera.Parameters.FLASH_MODE_ON,
                     Camera.Parameters.FLASH_MODE_RED_EYE,
                     // Map these manually
                     Camera.Parameters.FLASH_MODE_TORCH,
-                    Camera.Parameters.FLASH_MODE_OFF,
             };
             int[] flashModeInts = new int[] {
                     CONTROL_AE_MODE_ON,
                     CONTROL_AE_MODE_ON_AUTO_FLASH,
+                    CONTROL_AE_MODE_ON_ALWAYS_FLASH,
                     CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
             };
             int[] aeAvail = ArrayUtils.convertStringListToIntArray(
