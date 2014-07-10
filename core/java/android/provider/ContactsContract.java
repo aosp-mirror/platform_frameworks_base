@@ -1670,6 +1670,24 @@ public final class ContactsContract {
          */
         public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
 
+
+        /**
+         * Mimimal ID for corp contacts returned from
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
+         *
+         * @hide
+         */
+        public static long CORP_CONTACT_ID_BASE = 1000000000; // slightly smaller than 2 ** 30
+
+        /**
+         * Return TRUE if a contact ID is from the contacts provider on the corp profile.
+         *
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} may return such a contact.
+         */
+        public static boolean isCorpContactId(long contactId) {
+            return (contactId >= CORP_CONTACT_ID_BASE) && (contactId < Profile.MIN_ID);
+        }
+
         /**
          * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link ContactsContract.Data} rows.  This directory can be used either
@@ -4842,20 +4860,15 @@ public final class ContactsContract {
          * <p>
          * If a result is from the corp profile, it makes the following changes to the data:
          * <ul>
-         *     <li>The following columns will be set to null, as they don't make sense on a
-         *     different profile:
-         *     {@link #_ID},
-         *     {@link #PHOTO_ID},
-         *     {@link #PHOTO_FILE_ID},
-         *     {@link #LOOKUP_KEY},
-         *     {@link #CUSTOM_RINGTONE},
-         *     {@link #IN_VISIBLE_GROUP},
-         *     and {@link #IN_DEFAULT_DIRECTORY}.
-         *     </li>
          *     <li>
          *     {@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
          *     URIs.  Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
          *     load pictures from them.
+         *     {@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null.  Do not use them.
+         *     </li>
+         *     <li>
+         *     Corp contacts will get artificial {@link #_ID}s.  In order to tell whether a contact
+         *     is from the corp profile, use {@link ContactsContract.Contacts#isCorpContactId(long)}.
          *     </li>
          * </ul>
          * <p>

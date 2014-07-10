@@ -23581,6 +23581,7 @@ package android.provider {
   public static class ContactsContract.Contacts implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns {
     method public static android.net.Uri getLookupUri(android.content.ContentResolver, android.net.Uri);
     method public static android.net.Uri getLookupUri(long, java.lang.String);
+    method public static boolean isCorpContactId(long);
     method public static android.net.Uri lookupContact(android.content.ContentResolver, android.net.Uri);
     method public static deprecated void markAsContacted(android.content.ContentResolver, long);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri, boolean);
