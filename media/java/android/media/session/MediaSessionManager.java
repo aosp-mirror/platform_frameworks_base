@@ -64,42 +64,15 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Creates a new session.
+     * Create a new session in the system and get the binder for it.
      *
      * @param tag A short name for debugging purposes.
-     * @return A {@link MediaSession} for the new session.
-     */
-    public @NonNull MediaSession createSession(@NonNull String tag) {
-        return createSessionAsUser(tag, UserHandle.myUserId());
-    }
-
-    /**
-     * Creates a new session as the specified user. To create a session as a
-     * user other than your own you must hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
-     * permission.
-     *
-     * @param tag A short name for debugging purposes.
-     * @param userId The user id to create the session as.
-     * @return A {@link MediaSession} for the new session.
+     * @return The binder object from the system
      * @hide
      */
-    public @NonNull MediaSession createSessionAsUser(@NonNull String tag, int userId) {
-        if (TextUtils.isEmpty(tag)) {
-            throw new IllegalArgumentException("tag must not be null or empty");
-        }
-
-        try {
-            MediaSession.CallbackStub cbStub = new MediaSession.CallbackStub();
-            MediaSession session = new MediaSession(mService
-                    .createSession(mContext.getPackageName(), cbStub, tag, userId), cbStub);
-            cbStub.setMediaSession(session);
-
-            return session;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to create session: ", e);
-            return null;
-        }
+    public @NonNull ISession createSession(@NonNull MediaSession.CallbackStub cbStub,
+            @NonNull String tag, int userId) throws RemoteException {
+        return mService.createSession(mContext.getPackageName(), cbStub, tag, userId);
     }
 
     /**
@@ -142,7 +115,7 @@ public final class MediaSessionManager {
             List<IBinder> binders = mService.getSessions(notificationListener, userId);
             int size = binders.size();
             for (int i = 0; i < size; i++) {
-                MediaController controller = MediaController.fromBinder(ISessionController.Stub
+                MediaController controller = new MediaController(ISessionController.Stub
                         .asInterface(binders.get(i)));
                 controllers.add(controller);
             }
@@ -295,7 +268,7 @@ public final class MediaSessionManager {
                 ArrayList<MediaController> controllers = new ArrayList<MediaController>();
                 int size = tokens.size();
                 for (int i = 0; i < size; i++) {
-                    controllers.add(MediaController.fromToken(tokens.get(i)));
+                    controllers.add(new MediaController(tokens.get(i)));
                 }
                 SessionListener.this.onActiveSessionsChanged(controllers);
             }

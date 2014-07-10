@@ -28,6 +28,7 @@ import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.support.media.protocols.MediaPlayerProtocol;
 import android.support.media.protocols.MediaPlayerProtocol.MediaStatus;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -84,7 +85,7 @@ public class PlayerSession {
                 .build());
         mRouter.setRoutingCallback(new RoutingCallback(), null);
 
-        mSession = man.createSession("OneMedia");
+        mSession = new MediaSession(mContext, "OneMedia");
         mSession.addCallback(mCallback);
         mSession.addTransportControlsCallback(new TransportCallback());
         mSession.setPlaybackState(mPlaybackState);
