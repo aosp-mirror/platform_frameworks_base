@@ -17047,22 +17047,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             Intent intent;
             if (oldUserId >= 0) {
-                intent = new Intent(Intent.ACTION_USER_BACKGROUND);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, oldUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        false, false, MY_PID, Process.SYSTEM_UID, oldUserId);
+                // Send USER_BACKGROUND broadcast to all profiles of the outgoing user
+                List<UserInfo> profiles = mUserManager.getProfiles(oldUserId, false);
+                int count = profiles.size();
+                for (int i = 0; i < count; i++) {
+                    int profileUserId = profiles.get(i).id;
+                    intent = new Intent(Intent.ACTION_USER_BACKGROUND);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                            false, false, MY_PID, Process.SYSTEM_UID, profileUserId);
+                }
             }
             if (newUserId >= 0) {
-                intent = new Intent(Intent.ACTION_USER_FOREGROUND);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        false, false, MY_PID, Process.SYSTEM_UID, newUserId);
+                // Send USER_FOREGROUND broadcast to all profiles of the incoming user
+                List<UserInfo> profiles = mUserManager.getProfiles(newUserId, false);
+                int count = profiles.size();
+                for (int i = 0; i < count; i++) {
+                    int profileUserId = profiles.get(i).id;
+                    intent = new Intent(Intent.ACTION_USER_FOREGROUND);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                            false, false, MY_PID, Process.SYSTEM_UID, profileUserId);
+                }
                 intent = new Intent(Intent.ACTION_USER_SWITCHED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);

@@ -3136,6 +3136,9 @@ final class Settings {
         FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
                 | FileUtils.S_IXOTH, -1, -1);
         for (PackageSetting ps : mPackages.values()) {
+            if (ps.pkg == null || ps.pkg.applicationInfo == null) {
+                continue;
+            }
             // Only system apps are initially installed.
             ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
             // Need to create a data directory for all apps under this user.
