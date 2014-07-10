@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
+import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -474,8 +475,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            if (DEBUG) {
-                Log.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength +
+            if (true/*DEBUG*/) {
+                Rlog.d(TAG, "onSignalStrengthsChanged signalStrength=" + signalStrength +
                     ((signalStrength == null) ? "" : (" level=" + signalStrength.getLevel())));
             }
             mSignalStrength = signalStrength;
@@ -485,8 +486,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         @Override
         public void onServiceStateChanged(ServiceState state) {
-            if (DEBUG) {
-                Log.d(TAG, "onServiceStateChanged voiceState=" + state.getVoiceRegState()
+            if (true/*DEBUG*/) {
+                Rlog.d(TAG, "onServiceStateChanged voiceState=" + state.getVoiceRegState()
                         + " dataState=" + state.getDataRegState());
             }
             mServiceState = state;
@@ -498,8 +499,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            if (DEBUG) {
-                Log.d(TAG, "onCallStateChanged state=" + state);
+            if (true/*DEBUG*/) {
+                Rlog.d(TAG, "onCallStateChanged state=" + state);
             }
             // In cdma, if a voice call is made, RSSI should switch to 1x.
             if (isCdma()) {
@@ -510,8 +511,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
-            if (DEBUG) {
-                Log.d(TAG, "onDataConnectionStateChanged: state=" + state
+            if (true/*DEBUG*/) {
+                Rlog.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
             mDataState = state;
@@ -523,8 +524,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         @Override
         public void onDataActivity(int direction) {
-            if (DEBUG) {
-                Log.d(TAG, "onDataActivity: direction=" + direction);
+            if (true/*DEBUG*/) {
+                Rlog.d(TAG, "onDataActivity: direction=" + direction);
             }
             mDataActivity = direction;
             updateDataIcon();
@@ -555,6 +556,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else {
             mSimState = IccCardConstants.State.UNKNOWN;
         }
+        Rlog.d(TAG, "updateSimState: mSimState=" + mSimState);
     }
 
     private boolean isCdma() {
@@ -562,6 +564,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private boolean hasService() {
+        boolean retVal;
         if (mServiceState != null) {
             // Consider the device to be in service if either voice or data service is available.
             // Some SIM cards are marketed as data-only and do not support voice service, and on
@@ -569,16 +572,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
             // service" or "emergency calls only" text that indicates that voice is not available.
             switch(mServiceState.getVoiceRegState()) {
                 case ServiceState.STATE_POWER_OFF:
-                    return false;
+                    retVal = false;
                 case ServiceState.STATE_OUT_OF_SERVICE:
                 case ServiceState.STATE_EMERGENCY_ONLY:
-                    return mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
+                    retVal = mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
                 default:
-                    return true;
+                    retVal = true;
             }
         } else {
-            return false;
+            retVal = false;
         }
+        Rlog.d(TAG, "hasService: mServiceState=" + mServiceState + " retVal=" + retVal);
+        return retVal;
     }
 
     private void updateAirplaneMode() {
@@ -591,14 +596,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private final void updateTelephonySignalStrength() {
-        if (!hasService()) {
+        Rlog.d(TAG, "updateTelephonySignalStrength: hasService=" + hasService() + " ss=" + mSignalStrength);
+        if (false/*!hasService()*/) {
             if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
             mDataSignalIconId = R.drawable.stat_sys_signal_null;
         } else {
             if (mSignalStrength == null) {
-                if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
+                if (true/*CHATTY*/) Rlog.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
                 mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
                 mDataSignalIconId = R.drawable.stat_sys_signal_null;
@@ -609,7 +615,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 int[] iconList;
                 if (isCdma() && mAlwaysShowCdmaRssi) {
                     mLastSignalLevel = iconLevel = mSignalStrength.getCdmaLevel();
-                    if(DEBUG) Log.d(TAG, "mAlwaysShowCdmaRssi=" + mAlwaysShowCdmaRssi
+                    if(true/*DEBUG*/) Rlog.d(TAG, "updateTelephonySignalStrength: mAlwaysShowCdmaRssi=" + mAlwaysShowCdmaRssi
                             + " set to cdmaLevel=" + mSignalStrength.getCdmaLevel()
                             + " instead of level=" + mSignalStrength.getLevel());
                 } else {
@@ -636,6 +642,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[iconLevel]);
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
+                Rlog.d(TAG, "updateTelephonySignalStrength: iconLevel=" + iconLevel);
             }
         }
     }
