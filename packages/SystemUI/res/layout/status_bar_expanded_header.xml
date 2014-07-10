@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
-            android:paddingEnd="4dp"
+            android:paddingEnd="@dimen/battery_level_padding_end"
             android:textColor="#ffffff"
             android:textSize="12sp"/>
     </LinearLayout>
