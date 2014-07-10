@@ -22969,10 +22969,14 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final android.net.Uri CONTENT_URI_WITH_VOICEMAIL;
     field public static final java.lang.String COUNTRY_ISO = "countryiso";
+    field public static final java.lang.String DATA_USAGE = "data_usage";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EXTRA_CALL_TYPE_FILTER = "extra_call_type_filter";
+    field public static final java.lang.String FEATURES = "features";
+    field public static final int FEATURES_NONE = 0; // 0x0
+    field public static final int FEATURES_VIDEO = 1; // 0x1
     field public static final java.lang.String GEOCODED_LOCATION = "geocoded_location";
     field public static final int INCOMING_TYPE = 1; // 0x1
     field public static final java.lang.String IS_READ = "is_read";

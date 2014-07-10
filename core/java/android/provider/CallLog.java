@@ -149,6 +149,18 @@ public class CallLog {
         public static final int VOICEMAIL_TYPE = 4;
 
         /**
+         * Bit-mask describing features of the call (e.g. video).
+         *
+         * <P>Type: INTEGER (int)</P>
+         */
+        public static final String FEATURES = "features";
+
+        /** Call had no associated features (e.g. voice-only). */
+        public static final int FEATURES_NONE = 0x0;
+        /** Call had video. */
+        public static final int FEATURES_VIDEO = 0x1;
+
+        /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
          */
@@ -200,6 +212,12 @@ public class CallLog {
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DURATION = "duration";
+
+        /**
+         * The data usage of the call in bytes.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String DATA_USAGE = "data_usage";
 
         /**
          * Whether or not the call has been acknowledged
@@ -324,14 +342,18 @@ public class CallLog {
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
          * @param account The account object describing the provider of the call
          * @param start time stamp for the call in milliseconds
          * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
          *
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                int presentation, int callType, PhoneAccount account, long start, int duration) {
+                int presentation, int callType, int features, PhoneAccount account, long start,
+                int duration, Long dataUsage) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -368,8 +390,12 @@ public class CallLog {
             values.put(NUMBER, number);
             values.put(NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
             values.put(TYPE, Integer.valueOf(callType));
+            values.put(FEATURES, features);
             values.put(DATE, Long.valueOf(start));
             values.put(DURATION, Long.valueOf(duration));
+            if (dataUsage != null) {
+                values.put(DATA_USAGE, dataUsage);
+            }
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(NEW, Integer.valueOf(1));
