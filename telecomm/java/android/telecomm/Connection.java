@@ -112,6 +112,7 @@ public abstract class Connection {
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
     private Connection mParentConnection;
+    private CallVideoProvider mCallVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
 
@@ -349,9 +350,14 @@ public abstract class Connection {
      * @param callVideoProvider The call video provider.
      */
     public final void setCallVideoProvider(CallVideoProvider callVideoProvider) {
+        mCallVideoProvider = callVideoProvider;
         for (Listener l : mListeners) {
             l.onSetCallVideoProvider(this, callVideoProvider);
         }
+    }
+
+    public final CallVideoProvider getCallVideoProvider() {
+        return mCallVideoProvider;
     }
 
     /**

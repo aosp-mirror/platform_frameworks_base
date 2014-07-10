@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.telecomm.CallVideoProvider;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.IConnectionService;
@@ -688,6 +689,12 @@ public abstract class ConnectionService extends Service {
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
         onConnectionAdded(connection);
+
+        // Trigger listeners for properties set before connection listener was added.
+        CallVideoProvider callVideoProvider = connection.getCallVideoProvider();
+        if (callVideoProvider != null) {
+            connection.setCallVideoProvider(callVideoProvider);
+        }
     }
 
     private void removeConnection(Connection connection) {
