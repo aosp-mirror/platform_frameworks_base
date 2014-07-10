@@ -93,9 +93,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException if the request targets Surfaces that are not configured as
-     *                                  outputs for this session. Or if the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
+     * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
+     *                                  configured as outputs for this session. Or if the handler is
+     *                                  null, the listener is not null, and the calling thread has
+     *                                  no looper.
      *
      * @see #captureBurst
      * @see #setRepeatingRequest
@@ -137,9 +138,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests target Surfaces not currently configured as
-     *                                  outputs. Or if the handler is null, the listener is not
-     *                                  null, and the calling thread has no looper.
+     * @throws IllegalArgumentException If the requests target no Surfaces or Surfaces not currently
+     *                                  configured as outputs. Or if the handler is null, the
+     *                                  listener is not null, and the calling thread has no looper.
      *
      * @see #capture
      * @see #setRepeatingRequest
@@ -191,10 +192,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests reference Surfaces that are not currently
-     *                                  configured as outputs. Or if the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
-     *                                  Or if no requests were passed in.
+     * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces that are
+     *                                  not currently configured as outputs. Or if the handler is
+     *                                  null, the listener is not null, and the calling thread has
+     *                                  no looper. Or if no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -251,10 +252,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests reference Surfaces not currently configured
-     *                                  as outputs. Or if the handler is null, the listener is not
-     *                                  null, and the calling thread has no looper. Or if no
-     *                                  requests were passed in.
+     * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces not
+     *                                  currently configured as outputs. Or if the handler is null,
+     *                                  the listener is not null, and the calling thread has no
+     *                                  looper. Or if no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
