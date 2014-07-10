@@ -910,7 +910,9 @@ public final class SystemServer {
 
             mSystemServiceManager.startService(MediaSessionService.class);
 
-            mSystemServiceManager.startService(HdmiControlService.class);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
+                mSystemServiceManager.startService(HdmiControlService.class);
+            }
 
             mSystemServiceManager.startService(TvInputManagerService.class);
 
