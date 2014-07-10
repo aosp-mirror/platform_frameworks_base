@@ -3188,6 +3188,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     handleLingerComplete(nai);
                     break;
                 }
+                case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
+                        break;
+                    }
+                    setProvNotificationVisibleIntent(msg.arg1 != 0, nai.networkInfo.getType(),
+                            nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
+                    break;
+                }
                 case NetworkStateTracker.EVENT_STATE_CHANGED: {
                     info = (NetworkInfo) msg.obj;
                     NetworkInfo.State state = info.getState();
@@ -5100,6 +5110,40 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             log("setProvNotificationVisible: E visible=" + visible + " networkType=" + networkType
                 + " extraInfo=" + extraInfo + " url=" + url);
         }
+        Intent intent = null;
+        PendingIntent pendingIntent = null;
+        if (visible) {
+            switch (networkType) {
+                case ConnectivityManager.TYPE_WIFI:
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+                    break;
+                case ConnectivityManager.TYPE_MOBILE:
+                case ConnectivityManager.TYPE_MOBILE_HIPRI:
+                    intent = new Intent(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
+                    intent.putExtra("EXTRA_URL", url);
+                    intent.setFlags(0);
+                    pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                    break;
+                default:
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+                    break;
+            }
+        }
+        setProvNotificationVisibleIntent(visible, networkType, extraInfo, pendingIntent);
+    }
+
+    private void setProvNotificationVisibleIntent(boolean visible, int networkType,
+            String extraInfo, PendingIntent intent) {
+        if (DBG) {
+            log("setProvNotificationVisibleIntent: E visible=" + visible + " networkType=" +
+                networkType + " extraInfo=" + extraInfo);
+        }
 
         Resources r = Resources.getSystem();
         NotificationManager notificationManager = (NotificationManager) mContext
@@ -5109,7 +5153,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             CharSequence title;
             CharSequence details;
             int icon;
-            Intent intent;
             Notification notification = new Notification();
             switch (networkType) {
                 case ConnectivityManager.TYPE_WIFI:
@@ -5117,10 +5160,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             extraInfo);
                     icon = R.drawable.stat_notify_wifi_in_range;
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                            Intent.FLAG_ACTIVITY_NEW_TASK);
-                    notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
                     break;
                 case ConnectivityManager.TYPE_MOBILE:
                 case ConnectivityManager.TYPE_MOBILE_HIPRI:
@@ -5129,20 +5168,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // name has been added to it
                     details = mTelephonyManager.getNetworkOperatorName();
                     icon = R.drawable.stat_notify_rssi_in_range;
-                    intent = new Intent(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
-                    intent.putExtra("EXTRA_URL", url);
-                    intent.setFlags(0);
-                    notification.contentIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
                     break;
                 default:
                     title = r.getString(R.string.network_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             extraInfo);
                     icon = R.drawable.stat_notify_rssi_in_range;
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                            Intent.FLAG_ACTIVITY_NEW_TASK);
-                    notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
                     break;
             }
 
@@ -5151,6 +5182,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             notification.flags = Notification.FLAG_AUTO_CANCEL;
             notification.tickerText = title;
             notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
+            notification.contentIntent = intent;
 
             try {
                 notificationManager.notify(NOTIFICATION_ID, networkType, notification);
