@@ -24,6 +24,29 @@ public abstract class HdmiClient {
         mService = service;
     }
 
+    /**
+     * Send a key event to other logical device.
+     *
+     * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
+     * @param isPressed true if this is key press event
+     */
+    public void sendKeyEvent(int keyCode, boolean isPressed) {
+        try {
+            mService.sendKeyEvent(getDeviceType(), keyCode, isPressed);
+        } catch (RemoteException e) {
+            Log.e(TAG, "queryDisplayStatus threw exception ", e);
+        }
+    }
+
+    /**
+     * Send vendor-specific command.
+     *
+     * @param targetAddress address of the target device
+     * @param params vendor-specific parameter. For &lt;Vendor Command With ID&gt; do not
+     *               include the first 3 bytes (vendor ID).
+     * @param hasVendorId {@code true} if the command type will be &lt;Vendor Command With ID&gt;.
+     *                    {@code false} if the command will be &lt;Vendor Command&gt;
+     */
     public void sendVendorCommand(int targetAddress, byte[] params, boolean hasVendorId) {
         try {
             mService.sendVendorCommand(getDeviceType(), targetAddress, params, hasVendorId);
@@ -32,6 +55,11 @@ public abstract class HdmiClient {
         }
     }
 
+    /**
+     * Add a listener used to receive incoming vendor-specific command.
+     *
+     * @param listener listener object
+     */
     public void addVendorCommandListener(VendorCommandListener listener) {
         try {
             mService.addVendorCommandListener(getListenerWrapper(listener), getDeviceType());

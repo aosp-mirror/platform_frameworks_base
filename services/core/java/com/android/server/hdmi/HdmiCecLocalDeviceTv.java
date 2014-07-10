@@ -224,10 +224,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Sends key to a target CEC device.
      *
      * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
-     * @param isPressed true if this is keypress event
+     * @param isPressed true if this is key press event
      */
+    @Override
     @ServiceThreadOnly
-    void sendKeyEvent(int keyCode, boolean isPressed) {
+    protected void sendKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         if (!action.isEmpty()) {
