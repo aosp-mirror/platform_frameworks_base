@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package android.hardware.soundtrigger;
 
 import android.Manifest;
 import android.content.Intent;
@@ -24,6 +24,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.service.voice.AlwaysOnHotwordDetector;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
@@ -34,7 +35,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.List;
 
-/** @hide */
+/**
+ * Enrollment information about the different available keyphrases.
+ *
+ * @hide
+ */
 public class KeyphraseEnrollmentInfo {
     private static final String TAG = "KeyphraseEnrollmentInfo";
     /**
@@ -53,10 +58,14 @@ public class KeyphraseEnrollmentInfo {
     public static final String ACTION_MANAGE_VOICE_KEYPHRASES =
             "com.android.intent.action.MANAGE_VOICE_KEYPHRASES";
     /**
-     * Intent extra: The intent extra for un-enrolling a user for a particular keyphrase.
+     * Intent extra: The intent extra for the specific manage action that needs to be performed.
+     * Possible values are {@link AlwaysOnHotwordDetector#MANAGE_ACTION_ENROLL},
+     * {@link AlwaysOnHotwordDetector#MANAGE_ACTION_RE_ENROLL}
+     * or {@link AlwaysOnHotwordDetector#MANAGE_ACTION_UN_ENROLL}.
      */
-    public static final String EXTRA_VOICE_KEYPHRASE_UNENROLL =
-            "com.android.intent.extra.VOICE_KEYPHRASE_UNENROLL";
+    public static final String EXTRA_VOICE_KEYPHRASE_ACTION =
+            "com.android.intent.extra.VOICE_KEYPHRASE_ACTION";
+
     /**
      * Intent extra: The hint text to be shown on the voice keyphrase management UI.
      */
@@ -68,7 +77,7 @@ public class KeyphraseEnrollmentInfo {
     public static final String EXTRA_VOICE_KEYPHRASE_LOCALE =
             "com.android.intent.extra.VOICE_KEYPHRASE_LOCALE";
 
-    private KeyphraseInfo[] mKeyphrases;
+    private KeyphraseMetadata[] mKeyphrases;
     private String mEnrollmentPackage;
     private String mParseError;
 
@@ -156,8 +165,8 @@ public class KeyphraseEnrollmentInfo {
                         && !searchKeyphraseSupportedLocales.isEmpty()) {
                     supportedLocales = searchKeyphraseSupportedLocales.split(",");
                 }
-                mKeyphrases = new KeyphraseInfo[1];
-                mKeyphrases[0] = new KeyphraseInfo(
+                mKeyphrases = new KeyphraseMetadata[1];
+                mKeyphrases[0] = new KeyphraseMetadata(
                         searchKeyphraseId, searchKeyphrase, supportedLocales);
             } else {
                 mParseError = "searchKeyphraseId not specified in meta-data";
@@ -188,7 +197,7 @@ public class KeyphraseEnrollmentInfo {
      * @return An array of available keyphrases that can be enrolled on the system.
      *         It may be null if no keyphrases can be enrolled.
      */
-    public KeyphraseInfo[] getKeyphrases() {
+    public KeyphraseMetadata[] listKeyphraseMetadata() {
         return mKeyphrases;
     }
 
@@ -196,51 +205,56 @@ public class KeyphraseEnrollmentInfo {
      * Returns an intent to launch an activity that manages the given keyphrase
      * for the locale.
      *
-     * @param enroll Indicates if the intent should enroll the user or un-enroll them.
+     * @param action The enrollment related action that this intent is supposed to perform.
+     *        This can be one of {@link AlwaysOnHotwordDetector#MANAGE_ACTION_ENROLL},
+     *        {@link AlwaysOnHotwordDetector#MANAGE_ACTION_RE_ENROLL}
+     *        or {@link AlwaysOnHotwordDetector#MANAGE_ACTION_UN_ENROLL}
      * @param keyphrase The keyphrase that the user needs to be enrolled to.
      * @param locale The locale for which the enrollment needs to be performed.
+     *        This is a Java locale, for example "en_US".
      * @return An {@link Intent} to manage the keyphrase. This can be null if managing the
      *         given keyphrase/locale combination isn't possible.
      */
-    public Intent getManageKeyphraseIntent(boolean enroll, String keyphrase, String locale) {
+    public Intent getManageKeyphraseIntent(int action, String keyphrase, String locale) {
         if (mEnrollmentPackage == null || mEnrollmentPackage.isEmpty()) {
             Slog.w(TAG, "No enrollment application exists");
             return null;
         }
 
-        if (isKeyphraseEnrollmentSupported(keyphrase, locale)) {
+        if (getKeyphraseMetadata(keyphrase, locale) != null) {
             Intent intent = new Intent(ACTION_MANAGE_VOICE_KEYPHRASES)
                     .setPackage(mEnrollmentPackage)
                     .putExtra(EXTRA_VOICE_KEYPHRASE_HINT_TEXT, keyphrase)
-                    .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale);
-            if (!enroll) intent.putExtra(EXTRA_VOICE_KEYPHRASE_UNENROLL, true);
+                    .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale)
+                    .putExtra(EXTRA_VOICE_KEYPHRASE_ACTION, action);
             return intent;
         }
         return null;
     }
 
     /**
-     * Indicates if enrollment is supported for the given keyphrase & locale.
+     * Gets the {@link KeyphraseMetadata} for the given keyphrase and locale, null if any metadata
+     * isn't available for the given combination.
      *
      * @param keyphrase The keyphrase that the user needs to be enrolled to.
      * @param locale The locale for which the enrollment needs to be performed.
+     *        This is a Java locale, for example "en_US".
      * @return true, if an enrollment client supports the given keyphrase and the given locale.
      */
-    public boolean isKeyphraseEnrollmentSupported(String keyphrase, String locale) {
+    public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, String locale) {
         if (mKeyphrases == null || mKeyphrases.length == 0) {
             Slog.w(TAG, "Enrollment application doesn't support keyphrases");
-            return false;
+            return null;
         }
-        for (KeyphraseInfo keyphraseInfo : mKeyphrases) {
+        for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
             // Check if the given keyphrase is supported in the locale provided by
             // the enrollment application.
-            String supportedKeyphrase = keyphraseInfo.keyphrase;
-            if (supportedKeyphrase.equalsIgnoreCase(keyphrase)
-                    && keyphraseInfo.supportedLocales.contains(locale)) {
-                return true;
+            if (keyphraseMetadata.supportsPhrase(keyphrase)
+                    && keyphraseMetadata.supportsLocale(locale)) {
+                return keyphraseMetadata;
             }
         }
-        Slog.w(TAG, "Enrollment application doesn't support the given keyphrase");
-        return false;
+        Slog.w(TAG, "Enrollment application doesn't support the given keyphrase/locale");
+        return null;
     }
 }

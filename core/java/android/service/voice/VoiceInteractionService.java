@@ -20,6 +20,8 @@ import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
+import android.hardware.soundtrigger.SoundTriggerHelper;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -53,16 +55,6 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.voice.VoiceInteractionService";
 
-    // TODO(sansid): Unhide these.
-    /** @hide */
-    public static final int KEYPHRASE_UNAVAILABLE = 0;
-    /** @hide */
-    public static final int KEYPHRASE_UNENROLLED = 1;
-    /** @hide */
-    public static final int KEYPHRASE_ENROLLED = 2;
-    /** @hide */
-    public static final int KEYPHRASE_ACTIVE = 3;
-
     /**
      * Name under which a VoiceInteractionService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
@@ -76,8 +68,8 @@ public class VoiceInteractionService extends Service {
 
     IVoiceInteractionManagerService mSystemService;
 
-    private SoundTriggerManager mSoundTriggerManager;
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
+    private SoundTriggerHelper mSoundTriggerHelper;
 
     public void startSession(Bundle args) {
         try {
@@ -92,7 +84,7 @@ public class VoiceInteractionService extends Service {
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
         mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
-        mSoundTriggerManager = new SoundTriggerManager();
+        mSoundTriggerHelper = new SoundTriggerHelper();
     }
 
     @Override
@@ -104,34 +96,18 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
-     * Gets the state of always-on hotword detection for the given keyphrase and locale
-     * on this system.
-     * Availability implies that the hardware on this system is capable of listening for
-     * the given keyphrase or not.
-     * The return code is one of {@link #KEYPHRASE_UNAVAILABLE}, {@link #KEYPHRASE_UNENROLLED}
-     * {@link #KEYPHRASE_ENROLLED} or {@link #KEYPHRASE_ACTIVE}.
-     *
-     * @param keyphrase The keyphrase whose availability is being checked.
-     * @param locale The locale for which the availability is being checked.
-     * @return Indicates if always-on hotword detection is available for the given keyphrase.
-     * TODO(sansid): Unhide this.
-     * @hide
+     * @param keyphrase The keyphrase that's being used, for example "Hello Android".
+     * @param locale The locale for which the enrollment needs to be performed.
+     *        This is a Java locale, for example "en_US".
+     * @param callback The callback to notify of detection events.
+     * @return An always-on hotword detector for the given keyphrase and locale.
      */
-    public final int getAlwaysOnKeyphraseAvailability(String keyphrase, String locale) {
-        // The available keyphrases is a combination of DSP availability and
-        // the keyphrases that have an enrollment application for them.
-        if (!mSoundTriggerManager.isKeyphraseSupported(keyphrase, locale)
-                || !mKeyphraseEnrollmentInfo.isKeyphraseEnrollmentSupported(keyphrase, locale)) {
-            return KEYPHRASE_UNAVAILABLE;
-        }
-        if (!mSoundTriggerManager.isKeyphraseEnrolled(keyphrase, locale)) {
-            return KEYPHRASE_UNENROLLED;
-        }
-        if (!mSoundTriggerManager.isKeyphraseActive(keyphrase, locale)) {
-            return KEYPHRASE_ENROLLED;
-        } else {
-            return KEYPHRASE_ACTIVE;
-        }
+    public final AlwaysOnHotwordDetector getAlwaysOnHotwordDetector(
+            String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
+        // TODO: Cache instances and return the same one instead of creating a new interactor
+        // for the same keyphrase/locale combination.
+        return new AlwaysOnHotwordDetector(keyphrase, locale, callback,
+                mKeyphraseEnrollmentInfo, mSoundTriggerHelper);
     }
 
     /**

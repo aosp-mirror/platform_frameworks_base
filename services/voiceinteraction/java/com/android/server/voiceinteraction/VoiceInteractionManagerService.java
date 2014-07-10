@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.hardware.soundtrigger.KeyphraseSoundModel;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +36,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
+
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
@@ -44,6 +46,7 @@ import com.android.server.UiThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 
 /**
@@ -52,6 +55,10 @@ import java.io.PrintWriter;
 public class VoiceInteractionManagerService extends SystemService {
 
     static final String TAG = "VoiceInteractionManagerService";
+
+    // TODO: Add descriptive error codes.
+    public static final int STATUS_ERROR = -1;
+    public static final int STATUS_OK = 1;
 
     final Context mContext;
     final ContentResolver mResolver;
@@ -224,6 +231,59 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.finishLocked(callingPid, callingUid, token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public List<KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(
+                IVoiceInteractionService service) {
+            // Allow the call if this is the current voice interaction service
+            // or the caller holds the MANAGE_VOICE_KEYPHRASES permission.
+            synchronized (this) {
+                boolean permissionGranted =
+                        mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+                        == PackageManager.PERMISSION_GRANTED;
+                boolean currentVoiceInteractionService = service != null
+                        && mImpl != null
+                        && mImpl.mService != null
+                        && service.asBinder() == mImpl.mService.asBinder();
+
+                if (!permissionGranted && !currentVoiceInteractionService) {
+                    if (!currentVoiceInteractionService) {
+                        throw new SecurityException(
+                                "Caller is not the current voice interaction service");
+                    }
+                    if (!permissionGranted) {
+                        throw new SecurityException("Caller does not hold the permission "
+                                + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
+                    }
+                }
+
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    // TODO: Add the implementation here.
+                    return null;
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public int updateKeyphraseSoundModel(KeyphraseSoundModel model) {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    // TODO: Add the implementation here.
+                    return VoiceInteractionManagerService.STATUS_ERROR;
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

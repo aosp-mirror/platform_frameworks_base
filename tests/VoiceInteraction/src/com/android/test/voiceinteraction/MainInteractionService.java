@@ -32,7 +32,7 @@ public class MainInteractionService extends VoiceInteractionService {
         Log.i(TAG, "Creating " + this);
         Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
         Log.i(TAG, "Keyphrase enrollment meta-data: "
-                + Arrays.toString(getKeyphraseEnrollmentInfo().getKeyphrases()));
+                + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
     }
 
     @Override

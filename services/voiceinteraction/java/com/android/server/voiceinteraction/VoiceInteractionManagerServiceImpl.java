@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +41,7 @@ import android.service.voice.VoiceInteractionServiceInfo;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
+
 import com.android.internal.app.IVoiceInteractor;
 
 import java.io.FileDescriptor;

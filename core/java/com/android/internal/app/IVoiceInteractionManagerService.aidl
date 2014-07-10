@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.internal.app.IVoiceInteractor;
+import android.hardware.soundtrigger.KeyphraseSoundModel;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -29,4 +30,16 @@ interface IVoiceInteractionManagerService {
             IVoiceInteractor interactor);
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType);
     void finish(IBinder token);
+
+    /**
+     * Lists the registered Sound models for keyphrase detection.
+     * May be null if no matching sound models exist.
+     *
+     * @param service The current voice interaction service.
+     */
+    List<KeyphraseSoundModel> listRegisteredKeyphraseSoundModels(in IVoiceInteractionService service);
+    /**
+     * Updates the given keyphrase sound model. Adds the model if it doesn't exist currently.
+     */
+    int updateKeyphraseSoundModel(in KeyphraseSoundModel model);
 }
