@@ -279,6 +279,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ColorStateList mTextColor;
     private ColorStateList mHintTextColor;
     private ColorStateList mLinkTextColor;
+    @ViewDebug.ExportedProperty(category = "text")
     private int mCurTextColor;
     private int mCurHintTextColor;
     private boolean mFreezesText;
@@ -2516,6 +2517,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.ExportedProperty(category = "text")
     public float getTextSize() {
         return mTextPaint.getTextSize();
+    }
+
+    /**
+     * @return the size (in scaled pixels) of thee default text size in this TextView.
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "text")
+    public float getScaledTextSize() {
+        return mTextPaint.getTextSize() / mTextPaint.density;
+    }
+
+    /** @hide */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = Typeface.NORMAL, to = "NORMAL"),
+            @ViewDebug.IntToString(from = Typeface.BOLD, to = "BOLD"),
+            @ViewDebug.IntToString(from = Typeface.ITALIC, to = "ITALIC"),
+            @ViewDebug.IntToString(from = Typeface.BOLD_ITALIC, to = "BOLD_ITALIC")
+    })
+    public int getTypefaceStyle() {
+        return mTextPaint.getTypeface().getStyle();
     }
 
     /**
