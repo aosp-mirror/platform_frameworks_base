@@ -377,11 +377,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // apps.
     final File mDrmAppPrivateInstallDir;
 
-    /** Directory where third-party apps are staged before install */
-    final File mAppStagingDir;
-
-    private final Random mTempFileRandom = new Random();
-
     // ----------------------------------------------------------------
 
     // Lock for state used when installing and doing other long running
@@ -1363,7 +1358,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
-            mAppStagingDir = new File(dataDir, "app-staging");
 
             sUserManager = new UserManagerService(context, this,
                     mInstallLock, mPackages);
@@ -1767,7 +1761,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
-        mInstallerService = new PackageInstallerService(context, this, mAppStagingDir);
+        mInstallerService = new PackageInstallerService(context, this, mAppInstallDir);
 
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
@@ -4172,6 +4166,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
+            Slog.e(TAG, "Failed during collect: " + e);
             mLastScanError = e.error;
             return false;
         }
@@ -4200,6 +4195,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
+            Slog.e(TAG, "Failed during scan: " + e);
             mLastScanError = e.error;
             return null;
         }
@@ -7652,8 +7648,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         verificationParams.setInstallerUid(uid);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(originFile, observer, filteredFlags, installerPackageName,
-                verificationParams, user, packageAbiOverride);
+        msg.obj = new InstallParams(originFile, false, observer, filteredFlags,
+                installerPackageName, verificationParams, user, packageAbiOverride);
+        mHandler.sendMessage(msg);
+    }
+
+    void installStage(String packageName, File stageDir, IPackageInstallObserver2 observer,
+            PackageInstallerParams params, String installerPackageName, int installerUid,
+            UserHandle user) {
+        final VerificationParams verifParams = new VerificationParams(null, params.originatingUri,
+                params.referrerUri, installerUid, null);
+
+        final Message msg = mHandler.obtainMessage(INIT_COPY);
+        msg.obj = new InstallParams(stageDir, true, observer, params.installFlags,
+                installerPackageName, verifParams, user, params.abiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -7766,17 +7774,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    void installStage(String packageName, File stageDir, IPackageInstallObserver2 observer2,
-            PackageInstallerParams params, String installerPackageName, int installerUid,
-            UserHandle user) {
-        Slog.e(TAG, "TODO: install stage!");
-        try {
-            observer2.packageInstalled(packageName, null,
-                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
-        } catch (RemoteException ignored) {
         }
     }
 
@@ -8365,10 +8362,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         final File originFile;
 
         /**
-         * Flag indicating that {@link #originFile} lives in a trusted location,
+         * Flag indicating that {@link #originFile} has already been staged,
          * meaning downstream users don't need to defensively copy the contents.
          */
-        boolean originTrusted;
+        boolean originStaged;
 
         final IPackageInstallObserver2 observer;
         int flags;
@@ -8379,12 +8376,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageAbiOverride;
         final String packageInstructionSetOverride;
 
-        InstallParams(File originFile, IPackageInstallObserver2 observer, int flags,
-                String installerPackageName, VerificationParams verificationParams, UserHandle user,
-                String packageAbiOverride) {
+        InstallParams(File originFile, boolean originStaged, IPackageInstallObserver2 observer,
+                int flags, String installerPackageName, VerificationParams verificationParams,
+                UserHandle user, String packageAbiOverride) {
             super(user);
             this.originFile = Preconditions.checkNotNull(originFile);
-            this.originTrusted = false;
+            this.originStaged = originStaged;
             this.observer = observer;
             this.flags = flags;
             this.installerPackageName = installerPackageName;
@@ -8912,8 +8909,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     static abstract class InstallArgs {
         /** @see InstallParams#originFile */
         final File originFile;
-        /** @see InstallParams#originTrusted */
-        final boolean originTrusted;
+        /** @see InstallParams#originStaged */
+        final boolean originStaged;
 
         // TODO: define inherit location
 
@@ -8926,11 +8923,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String instructionSet;
         final String abiOverride;
 
-        InstallArgs(File originFile, boolean originTrusted, IPackageInstallObserver2 observer,
+        InstallArgs(File originFile, boolean originStaged, IPackageInstallObserver2 observer,
                 int flags, String installerPackageName, ManifestDigest manifestDigest,
                 UserHandle user, String instructionSet, String abiOverride) {
             this.originFile = originFile;
-            this.originTrusted = originTrusted;
+            this.originStaged = originStaged;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
@@ -9009,7 +9006,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install */
         FileInstallArgs(InstallParams params) {
-            super(params.originFile, params.originTrusted, params.observer, params.flags,
+            super(params.originFile, params.originStaged, params.observer, params.flags,
                     params.installerPackageName, params.getManifestDigest(), params.getUser(),
                     params.packageInstructionSetOverride, params.packageAbiOverride);
             if (isFwdLocked()) {
@@ -9028,7 +9025,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install from existing */
         FileInstallArgs(File originFile, String instructionSet) {
-            super(originFile, true, null, 0, null, null, null, instructionSet, null);
+            super(originFile, false, null, 0, null, null, null, instructionSet, null);
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
@@ -9053,37 +9050,45 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
-            try {
-                final File tempDir = createTempPackageDir(mAppInstallDir);
-                codeFile = tempDir;
-                resourceFile = tempDir;
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed to create copy file: " + e);
-                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            }
+            int ret = PackageManager.INSTALL_SUCCEEDED;
 
-            final IParcelFileDescriptorFactory target = new IParcelFileDescriptorFactory.Stub() {
-                @Override
-                public ParcelFileDescriptor open(String name, int mode) throws RemoteException {
-                    if (!FileUtils.isValidExtFilename(name)) {
-                        throw new IllegalArgumentException("Invalid filename: " + name);
-                    }
-                    try {
-                        final File file = new File(codeFile, name);
-                        final FileDescriptor fd = Os.open(file.getAbsolutePath(),
-                                O_RDWR | O_CREAT, 0644);
-                        Os.chmod(file.getAbsolutePath(), 0644);
-                        return new ParcelFileDescriptor(fd);
-                    } catch (ErrnoException e) {
-                        throw new RemoteException("Failed to open: " + e.getMessage());
-                    }
+            if (originStaged) {
+                Slog.d(TAG, originFile + " already staged; skipping copy");
+                codeFile = originFile;
+                resourceFile = originFile;
+            } else {
+                try {
+                    final File tempDir = mInstallerService.allocateSessionDir();
+                    codeFile = tempDir;
+                    resourceFile = tempDir;
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to create copy file: " + e);
+                    return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 }
-            };
 
-            int ret = imcs.copyPackage(originFile.getAbsolutePath(), target);
-            if (ret != PackageManager.INSTALL_SUCCEEDED) {
-                Slog.e(TAG, "Failed to copy package");
-                return ret;
+                final IParcelFileDescriptorFactory target = new IParcelFileDescriptorFactory.Stub() {
+                    @Override
+                    public ParcelFileDescriptor open(String name, int mode) throws RemoteException {
+                        if (!FileUtils.isValidExtFilename(name)) {
+                            throw new IllegalArgumentException("Invalid filename: " + name);
+                        }
+                        try {
+                            final File file = new File(codeFile, name);
+                            final FileDescriptor fd = Os.open(file.getAbsolutePath(),
+                                    O_RDWR | O_CREAT, 0644);
+                            Os.chmod(file.getAbsolutePath(), 0644);
+                            return new ParcelFileDescriptor(fd);
+                        } catch (ErrnoException e) {
+                            throw new RemoteException("Failed to open: " + e.getMessage());
+                        }
+                    }
+                };
+
+                ret = imcs.copyPackage(originFile.getAbsolutePath(), target);
+                if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                    Slog.e(TAG, "Failed to copy package");
+                    return ret;
+                }
             }
 
             String[] abiList = (abiOverride != null) ?
@@ -9288,7 +9293,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** New install */
         AsecInstallArgs(InstallParams params) {
-            super(params.originFile, params.originTrusted, params.observer, params.flags,
+            super(params.originFile, params.originStaged, params.observer, params.flags,
                     params.installerPackageName, params.getManifestDigest(), params.getUser(),
                     params.packageInstructionSetOverride, params.packageAbiOverride);
         }
@@ -9318,7 +9323,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install from existing */
         AsecInstallArgs(File originPackageFile, String cid, String instructionSet,
                 boolean isExternal, boolean isForwardLocked) {
-            super(originPackageFile, true, null, (isExternal ? INSTALL_EXTERNAL : 0)
+            super(originPackageFile, false, null, (isExternal ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSet, null);
             this.cid = cid;
@@ -10082,6 +10087,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
         } catch (PackageParserException e) {
+            Slog.e(TAG, "Failed during install: " + e);
             res.returnCode = e.error;
             return;
         }
@@ -10098,6 +10104,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
+            Slog.e(TAG, "Failed during install: " + e);
             res.returnCode = e.error;
             return;
         }
@@ -10276,63 +10283,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return name.startsWith("vmdl") && name.endsWith(".tmp");
             }
         };
-        deleteTempPackageFilesInDirectory(mAppInstallDir, filter);
-        deleteTempPackageFilesInDirectory(mDrmAppPrivateInstallDir, filter);
-    }
-
-    private static final void deleteTempPackageFilesInDirectory(File directory,
-            FilenameFilter filter) {
-        final File[] files = directory.listFiles(filter);
-        if (!ArrayUtils.isEmpty(files)) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    FileUtils.deleteContents(file);
-                    file.delete();
-                } else if (file.isFile()) {
-                    file.delete();
-                }
-            }
+        for (File file : mDrmAppPrivateInstallDir.listFiles(filter)) {
+            file.delete();
         }
-    }
-
-    private File createTempPackageDir(File installDir) throws IOException {
-        int n = 0;
-        while (n++ < 32) {
-            final File file = new File(installDir, "vmdl" + mTempFileRandom.nextInt() + ".tmp");
-            try {
-                Os.mkdir(file.getAbsolutePath(), 0755);
-                Os.chmod(file.getAbsolutePath(), 0755);
-                if (!SELinux.restorecon(file)) {
-                    throw new IOException("Failed to restorecon");
-                }
-                return file;
-            } catch (ErrnoException e) {
-                if (e.errno == EEXIST) continue;
-                throw e.rethrowAsIOException();
-            }
-        }
-        throw new IOException("Failed to create temp directory");
-    }
-
-    private File createTempPackageFile(File installDir) throws IOException {
-        int n = 0;
-        while (n++ < 32) {
-            final File file = new File(installDir, "vmdl" + mTempFileRandom.nextInt() + ".tmp");
-            try {
-                final FileDescriptor fd = Os.open(file.getAbsolutePath(),
-                        O_RDWR | O_CREAT | O_EXCL, 0644);
-                IoUtils.closeQuietly(fd);
-                Os.chmod(file.getAbsolutePath(), 0644);
-                if (!SELinux.restorecon(file)) {
-                    throw new IOException("Failed to restorecon");
-                }
-                return file;
-            } catch (ErrnoException e) {
-                if (e.errno == EEXIST) continue;
-                throw e.rethrowAsIOException();
-            }
-        }
-        throw new IOException("Failed to create temp file");
     }
 
     @Override

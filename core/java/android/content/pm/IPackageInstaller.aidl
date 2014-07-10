@@ -23,11 +23,11 @@ import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IPackageInstaller {
-    int createSession(int userId, String installerPackageName, in PackageInstallerParams params);
+    int createSession(String installerPackageName, in PackageInstallerParams params, int userId);
     IPackageInstallerSession openSession(int sessionId);
 
-    int[] getSessions(int userId, String installerPackageName);
+    int[] getSessions(String installerPackageName, int userId);
 
-    void uninstall(int userId, String basePackageName, in IPackageDeleteObserver observer);
-    void uninstallSplit(int userId, String basePackageName, String splitName, in IPackageDeleteObserver observer);
+    void uninstall(String basePackageName, int flags, in IPackageDeleteObserver observer, int userId);
+    void uninstallSplit(String basePackageName, String splitName, int flags, in IPackageDeleteObserver observer, int userId);
 }

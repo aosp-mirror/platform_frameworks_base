@@ -1463,8 +1463,8 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInstaller getPackageInstaller() {
         try {
-            return new PackageInstaller(this, mPM.getPackageInstaller(), mContext.getUserId(),
-                    mContext.getPackageName());
+            return new PackageInstaller(this, mPM.getPackageInstaller(), mContext.getPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

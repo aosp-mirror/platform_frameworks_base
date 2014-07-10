@@ -54,6 +54,8 @@ public class FileBridge extends Thread {
     private static final int CMD_WRITE = 1;
     /** CMD_FSYNC */
     private static final int CMD_FSYNC = 2;
+    /** CMD_CLOSE */
+    private static final int CMD_CLOSE = 3;
 
     private FileDescriptor mTarget;
 
@@ -102,11 +104,16 @@ public class FileBridge extends Thread {
                     // Sync and echo back to confirm
                     Os.fsync(mTarget);
                     IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+
+                } else if (cmd == CMD_CLOSE) {
+                    // Close and echo back to confirm
+                    Os.fsync(mTarget);
+                    Os.close(mTarget);
+                    mClosed = true;
+                    IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+                    break;
                 }
             }
-
-            // Client was closed; one last fsync
-            Os.fsync(mTarget);
 
         } catch (ErrnoException e) {
             Log.e(TAG, "Failed during bridge: ", e);
@@ -130,22 +137,30 @@ public class FileBridge extends Thread {
 
         @Override
         public void close() throws IOException {
-            IoBridge.closeAndSignalBlockedThreads(mClient);
+            try {
+                writeCommandAndBlock(CMD_CLOSE, "close()");
+            } finally {
+                IoBridge.closeAndSignalBlockedThreads(mClient);
+            }
         }
 
         @Override
         public void flush() throws IOException {
-            Memory.pokeInt(mTemp, 0, CMD_FSYNC, ByteOrder.BIG_ENDIAN);
+            writeCommandAndBlock(CMD_FSYNC, "fsync()");
+        }
+
+        private void writeCommandAndBlock(int cmd, String cmdString) throws IOException {
+            Memory.pokeInt(mTemp, 0, cmd, ByteOrder.BIG_ENDIAN);
             IoBridge.write(mClient, mTemp, 0, MSG_LENGTH);
 
             // Wait for server to ack
             if (IoBridge.read(mClient, mTemp, 0, MSG_LENGTH) == MSG_LENGTH) {
-                if (Memory.peekInt(mTemp, 0, ByteOrder.BIG_ENDIAN) == CMD_FSYNC) {
+                if (Memory.peekInt(mTemp, 0, ByteOrder.BIG_ENDIAN) == cmd) {
                     return;
                 }
             }
 
-            throw new SyncFailedException("Failed to fsync() across bridge");
+            throw new IOException("Failed to execute " + cmdString + " across bridge");
         }
 
         @Override
