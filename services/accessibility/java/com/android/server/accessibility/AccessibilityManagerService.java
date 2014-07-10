@@ -2443,6 +2443,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     case AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS: {
                         expandQuickSettings();
                     } return true;
+                    case AccessibilityService.GLOBAL_ACTION_POWER_DIALOG: {
+                        showGlobalActions();
+                    } return true;
                 }
                 return false;
             } finally {
@@ -2779,6 +2782,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             Binder.restoreCallingIdentity(token);
+        }
+
+        private void showGlobalActions() {
+            mWindowManagerService.showGlobalActions();
         }
 
         private IAccessibilityInteractionConnection getConnectionLocked(int windowId) {

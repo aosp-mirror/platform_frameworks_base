@@ -164,6 +164,11 @@ public abstract class WindowManagerInternal {
     public abstract void getWindowFrame(IBinder token, Rect outBounds);
 
     /**
+     * Opens the global actions dialog.
+     */
+    public abstract void showGlobalActions();
+
+    /**
      * Invalidate all visible windows. Then report back on the callback once all windows have
      * redrawn.
      */
