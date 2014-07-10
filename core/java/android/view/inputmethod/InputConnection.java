@@ -723,4 +723,15 @@ public interface InputConnection {
      * valid.
      */
     public boolean performPrivateCommand(String action, Bundle data);
+
+    /**
+     * Called by the IME to ask the editor for calling back
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
+     * notify cursor/anchor locations.
+     *
+     * @param request the details of the request.
+     * @return a result code that depends on {@link CursorAnchorInfoRequest#getRequestType()}. See
+     * {@link CursorAnchorInfoRequest} for details.
+     */
+    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request);
 }

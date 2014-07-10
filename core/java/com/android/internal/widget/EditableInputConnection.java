@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.widget.TextView;
@@ -184,5 +185,19 @@ public class EditableInputConnection extends BaseInputConnection {
         mTextView.hideErrorIfUnchanged();
 
         return success;
+    }
+
+    @Override
+    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
+        if (DEBUG) Log.v(TAG, "requestCursorAnchorInfo " + request);
+        final int result = super.requestCursorAnchorInfo(request);
+        if (mIMM != null && request != null && (request.getRequestType() ==
+                CursorAnchorInfoRequest.TYPE_CURSOR_ANCHOR_INFO)) {
+            mIMM.setCursorAnchorInfoMonitorMode(request.getRequestFlags());
+            // One-shot event is not yet fully supported.
+            // TODO: Support one-shot event correctly.
+            return CursorAnchorInfoRequest.RESULT_SCHEDULED;
+        }
+        return result;
     }
 }
