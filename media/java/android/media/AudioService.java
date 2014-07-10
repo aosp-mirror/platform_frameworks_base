@@ -850,11 +850,10 @@ public class AudioService extends IAudioService.Stub {
             streamType = getActiveStreamType(suggestedStreamType);
         }
 
-        // Play sounds on STREAM_RING only and if lock screen is not on.
+        // Play sounds on STREAM_RING and STREAM_REMOTE_MUSIC only.
         if ((streamType != STREAM_REMOTE_MUSIC) &&
                 (flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
-                ((mStreamVolumeAlias[streamType] != AudioSystem.STREAM_RING)
-                 || (mKeyguardManager != null && mKeyguardManager.isKeyguardLocked()))) {
+                (mStreamVolumeAlias[streamType] != AudioSystem.STREAM_RING)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
 
