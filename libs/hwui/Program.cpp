@@ -60,7 +60,6 @@ Program::Program(const ProgramDescription& description, const char* vertex, cons
             GLint status;
             glGetProgramiv(mProgramId, GL_LINK_STATUS, &status);
             if (status != GL_TRUE) {
-                ALOGE("Error while linking shaders:");
                 GLint infoLen = 0;
                 glGetProgramiv(mProgramId, GL_INFO_LOG_LENGTH, &infoLen);
                 if (infoLen > 1) {
@@ -68,14 +67,7 @@ Program::Program(const ProgramDescription& description, const char* vertex, cons
                     glGetProgramInfoLog(mProgramId, infoLen, 0, &log[0]);
                     ALOGE("%s", log);
                 }
-
-                glDetachShader(mProgramId, mVertexShader);
-                glDetachShader(mProgramId, mFragmentShader);
-
-                glDeleteShader(mVertexShader);
-                glDeleteShader(mFragmentShader);
-
-                glDeleteProgram(mProgramId);
+                LOG_ALWAYS_FATAL("Error while linking shaders");
             } else {
                 mInitialized = true;
             }
@@ -153,8 +145,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
         // use a fixed size instead
         GLchar log[512];
         glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
-        ALOGE("Error while compiling shader: %s", log);
-        glDeleteShader(shader);
+        LOG_ALWAYS_FATAL("Error while compiling shader: %s", log);
         return 0;
     }
 
