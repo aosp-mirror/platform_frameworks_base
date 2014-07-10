@@ -135,7 +135,7 @@ public class SettingsProvider extends ContentProvider {
         sRestrictedKeys.put(Settings.Secure.LOCATION_MODE, UserManager.DISALLOW_SHARE_LOCATION);
         sRestrictedKeys.put(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 UserManager.DISALLOW_SHARE_LOCATION);
-        sRestrictedKeys.put(Settings.Global.INSTALL_NON_MARKET_APPS,
+        sRestrictedKeys.put(Settings.Secure.INSTALL_NON_MARKET_APPS,
                 UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
         sRestrictedKeys.put(Settings.Global.ADB_ENABLED, UserManager.DISALLOW_DEBUGGING_FEATURES);
         sRestrictedKeys.put(Settings.Global.PACKAGE_VERIFIER_ENABLE,
