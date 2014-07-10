@@ -251,6 +251,21 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return replace(length, length, text, 0, text.length());
     }
 
+    /**
+     * Appends the character sequence {@code text} and spans {@code what} over the appended part.
+     * See {@link Spanned} for an explanation of what the flags mean.
+     * @param text the character sequence to append.
+     * @param what the object to be spanned over the appended text.
+     * @param flags see {@link Spanned}.
+     * @return this {@code SpannableStringBuilder}.
+     */
+    public SpannableStringBuilder append(CharSequence text, Object what, int flags) {
+        int start = length();
+        append(text);
+        setSpan(what, start, length(), flags);
+        return this;
+    }
+
     // Documentation from interface
     public SpannableStringBuilder append(CharSequence text, int start, int end) {
         int length = length();
