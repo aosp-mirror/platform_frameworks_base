@@ -57,6 +57,7 @@ public final class NetworkCapabilities implements Parcelable {
             mTransportTypes = nc.mTransportTypes;
             mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
             mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
+            mNetworkSpecifier = nc.mNetworkSpecifier;
         }
     }
 
@@ -449,7 +450,8 @@ public final class NetworkCapabilities implements Parcelable {
      * </p>
      * The interpretation of this {@code String} is bearer specific and bearers that use
      * it should document their particulars.  For example, Bluetooth may use some sort of
-     * device id while WiFi could used ssid and/or bssid.  Cellular may use carrier spn.
+     * device id while WiFi could used SSID and/or BSSID.  Cellular may use carrier SPN (name)
+     * or Subscription ID.
      *
      * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
      *                         specific network specifier where the bearer has a choice of
