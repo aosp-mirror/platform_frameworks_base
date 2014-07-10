@@ -199,6 +199,9 @@ public class VpnService extends Service {
      * Both IPv4 and IPv6 addresses are supported. The VPN must already be established. Fails if the
      * address is already in use or cannot be assigned to the interface for any other reason.
      *
+     * Adding an address implicitly allows traffic from that address family (i.e., IPv4 or IPv6) to
+     * be routed over the VPN. @see Builder#allowFamily
+     *
      * @throws {@link IllegalArgumentException} if the address is invalid.
      *
      * @param address The IP address (IPv4 or IPv6) to assign to the VPN interface.
@@ -218,6 +221,11 @@ public class VpnService extends Service {
      * Both IPv4 and IPv6 addresses are supported. The VPN must already be established. Fails if the
      * address is not assigned to the VPN interface, or if it is the only address assigned (thus
      * cannot be removed), or if the address cannot be removed for any other reason.
+     *
+     * After removing an address, if there are no addresses, routes or DNS servers of a particular
+     * address family (i.e., IPv4 or IPv6) configured on the VPN, that <b>DOES NOT</b> block that
+     * family from being routed. In other words, once an address family has been allowed, it stays
+     * allowed for the rest of the VPN's session. @see Builder#allowFamily
      *
      * @throws {@link IllegalArgumentException} if the address is invalid.
      *
