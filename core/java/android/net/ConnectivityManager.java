@@ -1500,6 +1500,20 @@ public class ConnectivityManager {
     }
 
     /**
+     * Get the set of tethered dhcp ranges.
+     *
+     * @return an array of 0 or more {@code String} of tethered dhcp ranges.
+     * {@hide}
+     */
+    public String[] getTetheredDhcpRanges() {
+        try {
+            return mService.getTetheredDhcpRanges();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
      * Attempt to tether the named interface.  This will setup a dhcp server
      * on the interface, forward and NAT IP packets and forward DNS requests
      * to the best active upstream network interface.  Note that if no upstream

@@ -93,6 +93,8 @@ interface IConnectivityManager
 
     String[] getTetheringErroredIfaces();
 
+    String[] getTetheredDhcpRanges();
+
     String[] getTetherableUsbRegexs();
 
     String[] getTetherableWifiRegexs();
