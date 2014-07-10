@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.CaptioningManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
@@ -295,6 +297,17 @@ public abstract class TvInputService extends Service {
         public abstract boolean onTune(Uri channelUri);
 
         /**
+         * Enables or disables the caption.
+         * <p>
+         * The locale for the user's preferred captioning language can be obtained by calling
+         * {@link CaptioningManager#getLocale CaptioningManager.getLocale()}.
+         *
+         * @param enabled {@code true} to enable, {@code false} to disable.
+         * @see CaptioningManager
+         */
+        public abstract void onSetCaptionEnabled(boolean enabled);
+
+        /**
          * Selects a given track.
          * <p>
          * If it is called multiple times on the same type of track (ie. Video, Audio, Text), the
@@ -302,9 +315,10 @@ public abstract class TvInputService extends Service {
          * Also, if the select operation was successful, the implementation should call
          * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
          * </p>
+         *
          * @param track The track to be selected.
          * @return {@code true} if the select operation was successful, {@code false} otherwise.
-         * @see #dispatchTrackInfoChanged(TvTrackInfo[])
+         * @see #dispatchTrackInfoChanged
          * @see TvTrackInfo#KEY_IS_SELECTED
          */
         public boolean onSelectTrack(TvTrackInfo track) {
@@ -317,9 +331,10 @@ public abstract class TvInputService extends Service {
          * If the unselect operation was successful, the implementation should call
          * {@link #dispatchTrackInfoChanged(List)} to report the updated track information.
          * </p>
+         *
          * @param track The track to be unselected.
          * @return {@code true} if the unselect operation was successful, {@code false} otherwise.
-         * @see #dispatchTrackInfoChanged(TvTrackInfo[])
+         * @see #dispatchTrackInfoChanged
          * @see TvTrackInfo#KEY_IS_SELECTED
          */
         public boolean onUnselectTrack(TvTrackInfo track) {
@@ -492,6 +507,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onSetCaptionEnabled}.
+         */
+        void setCaptionEnabled(boolean enabled) {
+            onSetCaptionEnabled(enabled);
+        }
+
+        /**
          * Calls {@link #onSelectTrack}.
          */
         void selectTrack(TvTrackInfo track) {
@@ -656,6 +678,7 @@ public abstract class TvInputService extends Service {
         return false;
     }
 
+    @SuppressLint("HandlerLeak")
     private final class ServiceHandler extends Handler {
         private static final int DO_CREATE_SESSION = 1;
         private static final int DO_BROADCAST_AVAILABILITY_CHANGE = 2;

@@ -44,11 +44,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_SURFACE = 2;
     private static final int DO_SET_VOLUME = 3;
     private static final int DO_TUNE = 4;
-    private static final int DO_SELECT_TRACK = 5;
-    private static final int DO_UNSELECT_TRACK = 6;
-    private static final int DO_CREATE_OVERLAY_VIEW = 7;
-    private static final int DO_RELAYOUT_OVERLAY_VIEW = 8;
-    private static final int DO_REMOVE_OVERLAY_VIEW = 9;
+    private static final int DO_SET_CAPTION_ENABLED = 5;
+    private static final int DO_SELECT_TRACK = 6;
+    private static final int DO_UNSELECT_TRACK = 7;
+    private static final int DO_CREATE_OVERLAY_VIEW = 8;
+    private static final int DO_RELAYOUT_OVERLAY_VIEW = 9;
+    private static final int DO_REMOVE_OVERLAY_VIEW = 10;
 
     private final HandlerCaller mCaller;
 
@@ -98,6 +99,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.tune((Uri) msg.obj);
                 return;
             }
+            case DO_SET_CAPTION_ENABLED: {
+                mTvInputSessionImpl.setCaptionEnabled((Boolean) msg.obj);
+                return;
+            }
             case DO_SELECT_TRACK: {
                 mTvInputSessionImpl.selectTrack((TvTrackInfo) msg.obj);
                 return;
@@ -145,6 +150,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void tune(Uri channelUri) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TUNE, channelUri));
+    }
+
+    @Override
+    public void setCaptionEnabled(boolean enabled) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_CAPTION_ENABLED, enabled));
     }
 
     @Override
