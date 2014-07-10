@@ -22962,6 +22962,7 @@ package android.provider {
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
     field public static final java.lang.String DURATION = "duration";
+    field public static final java.lang.String EXTRA_CALL_TYPE_FILTER = "extra_call_type_filter";
     field public static final java.lang.String GEOCODED_LOCATION = "geocoded_location";
     field public static final int INCOMING_TYPE = 1; // 0x1
     field public static final java.lang.String IS_READ = "is_read";
