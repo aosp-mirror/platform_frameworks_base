@@ -162,6 +162,7 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
+	external/icu/icu4c/source/common \
 	external/skia/src/core \
 	external/skia/src/pdf \
 	external/skia/src/images \
@@ -171,8 +172,6 @@ LOCAL_C_INCLUDES += \
 	external/expat/lib \
 	external/openssl/include \
 	external/tremor/Tremor \
-	external/icu4c/i18n \
-	external/icu4c/common \
 	external/jpeg \
 	external/harfbuzz_ng/src \
 	external/zlib \
