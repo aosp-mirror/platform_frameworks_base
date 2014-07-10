@@ -2609,6 +2609,10 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         @Override // Binder call
         public void powerHint(int hintId, int data) {
+            if (!mSystemReady) {
+                // Service not ready yet, so who the heck cares about power hints, bah.
+                return;
+            }
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
             powerHintInternal(hintId, data);
         }
