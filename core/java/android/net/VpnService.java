@@ -16,6 +16,9 @@
 
 package android.net;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -360,6 +363,9 @@ public class VpnService extends Service {
          * addresses are supported. At least one address must be set before
          * calling {@link #establish}.
          *
+         * Adding an address implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
+         *
          * @throws IllegalArgumentException if the address is invalid.
          */
         public Builder addAddress(InetAddress address, int prefixLength) {
@@ -377,6 +383,9 @@ public class VpnService extends Service {
          * using a numeric address string. See {@link InetAddress} for the
          * definitions of numeric address formats.
          *
+         * Adding an address implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
+         *
          * @throws IllegalArgumentException if the address is invalid.
          * @see #addAddress(InetAddress, int)
          */
@@ -387,6 +396,9 @@ public class VpnService extends Service {
         /**
          * Add a network route to the VPN interface. Both IPv4 and IPv6
          * routes are supported.
+         *
+         * Adding a route implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
          *
          * @throws IllegalArgumentException if the route is invalid.
          */
@@ -411,6 +423,9 @@ public class VpnService extends Service {
          * using a numeric address string. See {@link InetAddress} for the
          * definitions of numeric address formats.
          *
+         * Adding a route implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
+         *
          * @throws IllegalArgumentException if the route is invalid.
          * @see #addRoute(InetAddress, int)
          */
@@ -422,6 +437,9 @@ public class VpnService extends Service {
          * Add a DNS server to the VPN connection. Both IPv4 and IPv6
          * addresses are supported. If none is set, the DNS servers of
          * the default network will be used.
+         *
+         * Adding a server implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
          *
          * @throws IllegalArgumentException if the address is invalid.
          */
@@ -441,6 +459,9 @@ public class VpnService extends Service {
          * using a numeric address string. See {@link InetAddress} for the
          * definitions of numeric address formats.
          *
+         * Adding a server implicitly allows traffic from that address family
+         * (i.e., IPv4 or IPv6) to be routed over the VPN. @see #allowFamily
+         *
          * @throws IllegalArgumentException if the address is invalid.
          * @see #addDnsServer(InetAddress)
          */
@@ -456,6 +477,29 @@ public class VpnService extends Service {
                 mConfig.searchDomains = new ArrayList<String>();
             }
             mConfig.searchDomains.add(domain);
+            return this;
+        }
+
+        /**
+         * Allows traffic from the specified address family.
+         *
+         * By default, if no address, route or DNS server of a specific family (IPv4 or IPv6) is
+         * added to this VPN, then all outgoing traffic of that family is blocked. If any address,
+         * route or DNS server is added, that family is allowed.
+         *
+         * This method allows an address family to be unblocked even without adding an address,
+         * route or DNS server of that family. Traffic of that family will then typically
+         * fall-through to the underlying network if it's supported.
+         *
+         * {@code family} must be either {@code AF_INET} (for IPv4) or {@code AF_INET6} (for IPv6).
+         * {@link IllegalArgumentException} is thrown if it's neither.
+         *
+         * @param family The address family ({@code AF_INET} or {@code AF_INET6}) to allow.
+         *
+         * @return this {@link Builder} object to facilitate chaining of method calls.
+         */
+        public Builder allowFamily(int family) {
+            // TODO
             return this;
         }
 
