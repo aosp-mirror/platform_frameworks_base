@@ -81,7 +81,8 @@ public class GeoFencerProxy extends GeoFencerBase {
 
     private GeoFencerProxy(Context context, String serviceName) {
         mContext = context;
-        mIntent = new Intent(serviceName);
+        mIntent = new Intent();
+        mIntent.setPackage(serviceName);
         mContext.bindService(mIntent, mServiceConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                 | Context.BIND_ALLOW_OOM_MANAGEMENT);
