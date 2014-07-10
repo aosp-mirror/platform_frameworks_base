@@ -828,7 +828,16 @@ public final class BridgeTypedArray extends TypedArray {
 
     @Override
     public int[] extractThemeAttrs() {
+        // The drawables are always inflated with a Theme and we don't care about caching. So,
+        // just return.
         return null;
+    }
+
+    @Override
+    public int getChangingConfigurations() {
+        // We don't care about caching. Any change in configuration is a fresh render. So,
+        // just return.
+        return 0;
     }
 
     /**
