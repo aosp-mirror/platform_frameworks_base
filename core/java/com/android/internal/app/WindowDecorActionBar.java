@@ -222,6 +222,10 @@ public class WindowDecorActionBar extends ActionBar implements
         if (a.getBoolean(R.styleable.ActionBar_hideOnContentScroll, false)) {
             setHideOnContentScrollEnabled(true);
         }
+        final int elevation = a.getDimensionPixelSize(R.styleable.ActionBar_elevation, 0);
+        if (elevation != 0) {
+            setElevation(elevation);
+        }
         a.recycle();
     }
 
@@ -234,6 +238,19 @@ public class WindowDecorActionBar extends ActionBar implements
             throw new IllegalStateException("Can't make a decor toolbar out of " +
                     view.getClass().getSimpleName());
         }
+    }
+
+    @Override
+    public void setElevation(float elevation) {
+        mContainerView.setElevation(elevation);
+        if (mSplitView != null) {
+            mSplitView.setElevation(elevation);
+        }
+    }
+
+    @Override
+    public float getElevation() {
+        return mContainerView.getElevation();
     }
 
     public void onConfigurationChanged(Configuration newConfig) {

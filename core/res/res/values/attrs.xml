@@ -6783,10 +6783,20 @@
         <attr name="itemPadding" format="dimension" />
         <!-- Set true to hide the action bar on a vertical nested scroll of content. -->
         <attr name="hideOnContentScroll" format="boolean" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetStart" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetEnd" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetLeft" format="dimension" />
+        <!-- Minimum inset for content views within a bar. Navigation buttons and
+             menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetRight" format="dimension" />
+        <!-- Elevation for the action bar itself -->
+        <attr name="elevation" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
