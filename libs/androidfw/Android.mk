@@ -76,7 +76,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_STATIC_LIBRARIES := libziparchive
 
 LOCAL_C_INCLUDES := \
-    external/icu4c/common \
     external/zlib \
     system/core/include
 
