@@ -95,7 +95,7 @@ public:
             break;
         case HDMI_EVENT_HOT_PLUG:
             mEvent.hotplug.connected = event.hotplug.connected;
-            mEvent.hotplug.port = event.hotplug.port;
+            mEvent.hotplug.port_id = event.hotplug.port_id;
             break;
         default:
             // TODO: add more type whenever new type is introduced.
@@ -162,7 +162,7 @@ private:
     void propagateHotplugEvent(const hotplug_event_t& event) {
         // Note that this method should be called in service thread.
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        jint port = event.port;
+        jint port = event.port_id;
         jboolean connected = (jboolean) event.connected;
         env->CallVoidMethod(mController->getCallbacksObj(),
                 gHdmiCecControllerClassInfo.handleHotplug, port, connected);
@@ -248,7 +248,7 @@ jobjectArray HdmiCecController::getPortInfos() {
         hdmi_port_info* info = &ports[i];
         jboolean cecSupported = (jboolean) info->cec_supported;
         jboolean arcSupported = (jboolean) info->arc_supported;
-        jobject infoObj = env->NewObject(hdmiPortInfo, ctor, info->port_num, info->type,
+        jobject infoObj = env->NewObject(hdmiPortInfo, ctor, info->port_id, info->type,
                 info->physical_address, cecSupported, mhlSupported, arcSupported);
         env->SetObjectArrayElement(res, i, infoObj);
     }
