@@ -498,7 +498,7 @@ please see themes_device_defaults.xml.
         <item name="windowFullscreen">false</item>
         <item name="windowOverscan">false</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowContentOverlay">@drawable/ab_solid_shadow_material</item>
+        <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@style/WindowTitle.Material</item>
         <item name="windowTitleSize">@dimen/action_bar_default_height_material</item>

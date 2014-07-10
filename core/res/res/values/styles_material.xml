@@ -803,6 +803,7 @@ please see styles_device_defaults.xml.
         <item name="homeLayout">@layout/action_bar_home_material</item>
         <item name="gravity">center_vertical</item>
         <item name="contentInsetStart">16dp</item>
+        <item name="elevation">8dp</item>
     </style>
 
     <style name="Widget.Material.ActionBar.Solid">

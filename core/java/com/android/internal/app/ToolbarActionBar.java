@@ -122,6 +122,16 @@ public class ToolbarActionBar extends ActionBar {
     }
 
     @Override
+    public void setElevation(float elevation) {
+        mToolbar.setElevation(elevation);
+    }
+
+    @Override
+    public float getElevation() {
+        return mToolbar.getElevation();
+    }
+
+    @Override
     public Context getThemedContext() {
         return mToolbar.getContext();
     }

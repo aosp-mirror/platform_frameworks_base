@@ -3157,6 +3157,7 @@ package android.app {
     method public abstract deprecated void addTab(android.app.ActionBar.Tab, int, boolean);
     method public abstract android.view.View getCustomView();
     method public abstract int getDisplayOptions();
+    method public float getElevation();
     method public abstract int getHeight();
     method public int getHideOffset();
     method public abstract deprecated int getNavigationItemCount();
@@ -3188,6 +3189,7 @@ package android.app {
     method public abstract void setDisplayShowHomeEnabled(boolean);
     method public abstract void setDisplayShowTitleEnabled(boolean);
     method public abstract void setDisplayUseLogoEnabled(boolean);
+    method public void setElevation(float);
     method public void setHideOffset(int);
     method public void setHideOnContentScrollEnabled(boolean);
     method public void setHomeActionContentDescription(java.lang.CharSequence);

@@ -993,6 +993,33 @@ public abstract class ActionBar {
         }
     }
 
+    /**
+     * Set the Z-axis elevation of the action bar in pixels.
+     *
+     * <p>The action bar's elevation is the distance it is placed from its parent surface. Higher
+     * values are closer to the user.</p>
+     *
+     * @param elevation Elevation value in pixels
+     */
+    public void setElevation(float elevation) {
+        if (elevation != 0) {
+            throw new UnsupportedOperationException("Setting a non-zero elevation is " +
+                    "not supported in this action bar configuration.");
+        }
+    }
+
+    /**
+     * Get the Z-axis elevation of the action bar in pixels.
+     *
+     * <p>The action bar's elevation is the distance it is placed from its parent surface. Higher
+     * values are closer to the user.</p>
+     *
+     * @return Elevation value in pixels
+     */
+    public float getElevation() {
+        return 0;
+    }
+
     /** @hide */
     public void setDefaultDisplayHomeAsUpEnabled(boolean enabled) {
     }
