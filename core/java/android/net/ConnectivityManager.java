@@ -743,12 +743,33 @@ public class ConnectivityManager {
      *        network type or {@code null} if the type is not
      *        supported by the device.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
             return mService.getNetworkInfo(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns connection status information about a particular
+     * Network.
+     *
+     * @param network {@link Network} specifying which network
+     *        in which you're interested.
+     * @return a {@link NetworkInfo} object for the requested
+     *        network or {@code null} if the {@code Network}
+     *        is not valid.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     */
+    public NetworkInfo getNetworkInfo(Network network) {
+        try {
+            return mService.getNetworkInfoForNetwork(network);
         } catch (RemoteException e) {
             return null;
         }
@@ -761,12 +782,29 @@ public class ConnectivityManager {
      * @return an array of {@link NetworkInfo} objects.  Check each
      * {@link NetworkInfo#getType} for which type each applies.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public NetworkInfo[] getAllNetworkInfo() {
         try {
             return mService.getAllNetworkInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns an array of all {@link Network} currently tracked by the
+     * framework.
+     *
+     * @return an array of {@link Network} objects.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     */
+    public Network[] getAllNetworks() {
+        try {
+            return mService.getAllNetworks();
         } catch (RemoteException e) {
             return null;
         }

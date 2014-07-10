@@ -1071,6 +1071,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private NetworkInfo getFilteredNetworkInfo(int networkType, int uid) {
         NetworkInfo info = getNetworkInfoForType(networkType);
+        return getFilteredNetworkInfo(info, networkType, uid);
+    }
+
+    private NetworkInfo getFilteredNetworkInfo(NetworkInfo info, int networkType, int uid) {
         if (isNetworkBlocked(networkType, uid)) {
             // network is blocked; clone and override state
             info = new NetworkInfo(info);
@@ -1176,6 +1180,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     @Override
+    public NetworkInfo getNetworkInfoForNetwork(Network network) {
+        enforceAccessPermission();
+        if (network == null) return null;
+
+        final int uid = Binder.getCallingUid();
+        NetworkAgentInfo nai = null;
+        synchronized (mNetworkForNetId) {
+            nai = mNetworkForNetId.get(network.netId);
+        }
+        if (nai == null) return null;
+        synchronized (nai) {
+            if (nai.networkInfo == null) return null;
+
+            return getFilteredNetworkInfo(nai.networkInfo, nai.networkInfo.getType(), uid);
+        }
+    }
+
+    @Override
     public NetworkInfo[] getAllNetworkInfo() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
@@ -1189,6 +1211,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         return result.toArray(new NetworkInfo[result.size()]);
+    }
+
+    @Override
+    public Network[] getAllNetworks() {
+        enforceAccessPermission();
+        final ArrayList<Network> result = new ArrayList();
+        synchronized (mNetworkForNetId) {
+            for (int i = 0; i < mNetworkForNetId.size(); i++) {
+                result.add(new Network(mNetworkForNetId.valueAt(i).network));
+            }
+        }
+        return result.toArray(new Network[result.size()]);
     }
 
     @Override
@@ -1223,16 +1257,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public LinkProperties getLinkProperties(Network network) {
         enforceAccessPermission();
-        NetworkAgentInfo nai = mNetworkForNetId.get(network.netId);
-        if (nai != null) return new LinkProperties(nai.linkProperties);
+        NetworkAgentInfo nai = null;
+        synchronized (mNetworkForNetId) {
+            nai = mNetworkForNetId.get(network.netId);
+        }
+
+        if (nai != null) {
+            synchronized (nai) {
+                return new LinkProperties(nai.linkProperties);
+            }
+        }
         return null;
     }
 
     @Override
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         enforceAccessPermission();
-        NetworkAgentInfo nai = mNetworkForNetId.get(network.netId);
-        if (nai != null) return new NetworkCapabilities(nai.networkCapabilities);
+        NetworkAgentInfo nai = null;
+        synchronized (mNetworkForNetId) {
+            nai = mNetworkForNetId.get(network.netId);
+        }
+        if (nai != null) {
+            synchronized (nai) {
+                return new NetworkCapabilities(nai.networkCapabilities);
+            }
+        }
         return null;
     }
 
@@ -1777,8 +1826,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
-
-        DetailedState netState = nai.networkInfo.getDetailedState();
+        DetailedState netState;
+        synchronized (nai) {
+            netState = nai.networkInfo.getDetailedState();
+        }
 
         if ((netState != DetailedState.CONNECTED &&
                 netState != DetailedState.CAPTIVE_PORTAL_CHECK)) {
@@ -1792,9 +1843,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
         try {
-            LinkProperties lp = nai.linkProperties;
-            boolean ok = modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt,
-                    nai.network.netId, uid);
+            LinkProperties lp = null;
+            int netId = INVALID_NET_ID;
+            synchronized (nai) {
+                lp = nai.linkProperties;
+                netId = nai.network.netId;
+            }
+            boolean ok = modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt, netId, uid);
             if (DBG) log("requestRouteToHostAddress ok=" + ok);
             return ok;
         } finally {
@@ -3096,7 +3151,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     } else {
                         if (VDBG) log("Update of Linkproperties for " + nai.name());
                         LinkProperties oldLp = nai.linkProperties;
-                        nai.linkProperties = (LinkProperties)msg.obj;
+                        synchronized (nai) {
+                            nai.linkProperties = (LinkProperties)msg.obj;
+                        }
                         updateLinkProperties(nai, oldLp);
                     }
                     break;
@@ -3242,7 +3299,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 loge("Error connecting NetworkAgent");
                 NetworkAgentInfo nai = mNetworkAgentInfos.remove(msg.replyTo);
                 if (nai != null) {
-                    mNetworkForNetId.remove(nai.network.netId);
+                    synchronized (mNetworkForNetId) {
+                        mNetworkForNetId.remove(nai.network.netId);
+                    }
                     mLegacyTypeTracker.remove(nai);
                 }
             }
@@ -3275,7 +3334,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
             mLegacyTypeTracker.remove(nai);
-            mNetworkForNetId.remove(nai.network.netId);
+            synchronized (mNetworkForNetId) {
+                mNetworkForNetId.remove(nai.network.netId);
+            }
             // Since we've lost the network, go through all the requests that
             // it was satisfying and see if any other factory can satisfy them.
             final ArrayList<NetworkAgentInfo> toActivate = new ArrayList<NetworkAgentInfo>();
@@ -5565,7 +5626,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
         if (VDBG) log("Got NetworkAgent Messenger");
         mNetworkAgentInfos.put(na.messenger, na);
-        mNetworkForNetId.put(na.network.netId, na);
+        synchronized (mNetworkForNetId) {
+            mNetworkForNetId.put(na.network.netId, na);
+        }
         na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
         NetworkInfo networkInfo = na.networkInfo;
         na.networkInfo = null;
@@ -5710,7 +5773,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkCapabilities networkCapabilities) {
         // TODO - what else here?  Verify still satisfies everybody?
         // Check if satisfies somebody new?  call callbacks?
-        networkAgent.networkCapabilities = networkCapabilities;
+        synchronized (networkAgent) {
+            networkAgent.networkCapabilities = networkCapabilities;
+        }
     }
 
     private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
@@ -5924,8 +5989,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
         NetworkInfo.State state = newInfo.getState();
-        NetworkInfo oldInfo = networkAgent.networkInfo;
-        networkAgent.networkInfo = newInfo;
+        NetworkInfo oldInfo = null;
+        synchronized (networkAgent) {
+            oldInfo = networkAgent.networkInfo;
+            networkAgent.networkInfo = newInfo;
+        }
 
         if (oldInfo != null && oldInfo.getState() == state) {
             if (VDBG) log("ignoring duplicate network state non-change");
@@ -6054,9 +6122,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private LinkProperties getLinkPropertiesForTypeInternal(int networkType) {
         NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
-        return (nai != null) ?
-                new LinkProperties(nai.linkProperties) :
-                new LinkProperties();
+        if (nai != null) {
+            synchronized (nai) {
+                return new LinkProperties(nai.linkProperties);
+            }
+        }
+        return new LinkProperties();
     }
 
     private NetworkInfo getNetworkInfoForType(int networkType) {
@@ -6075,8 +6146,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private NetworkCapabilities getNetworkCapabilitiesForType(int networkType) {
         NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
-        return (nai != null) ?
-                new NetworkCapabilities(nai.networkCapabilities) :
-                new NetworkCapabilities();
+        if (nai != null) {
+            synchronized (nai) {
+                return new NetworkCapabilities(nai.networkCapabilities);
+            }
+        }
+        return new NetworkCapabilities();
     }
 }
