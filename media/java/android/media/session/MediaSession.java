@@ -699,6 +699,25 @@ public final class MediaSession {
     }
 
     /**
+     * Return true if this is considered an active playback state.
+     *
+     * @hide
+     */
+    public static boolean isActiveState(int state) {
+        switch (state) {
+            case PlaybackState.STATE_FAST_FORWARDING:
+            case PlaybackState.STATE_REWINDING:
+            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+            case PlaybackState.STATE_SKIPPING_TO_NEXT:
+            case PlaybackState.STATE_BUFFERING:
+            case PlaybackState.STATE_CONNECTING:
+            case PlaybackState.STATE_PLAYING:
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Represents an ongoing session. This may be passed to apps by the session
      * owner to allow them to create a {@link MediaController} to communicate with
      * the session.

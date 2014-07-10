@@ -21,6 +21,7 @@ import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
@@ -157,9 +158,56 @@ public class MediaSessionLegacyHelper {
     }
 
     public void sendMediaButtonEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        if (keyEvent == null) {
+            Log.w(TAG, "Tried to send a null key event. Ignoring.");
+            return;
+        }
         mSessionManager.dispatchMediaKeyEvent(keyEvent, needWakeLock);
         if (DEBUG) {
             Log.d(TAG, "dispatched media key " + keyEvent);
+        }
+    }
+
+    public void sendVolumeKeyEvent(KeyEvent keyEvent, boolean musicOnly) {
+        if (keyEvent == null) {
+            Log.w(TAG, "Tried to send a null key event. Ignoring.");
+            return;
+        }
+        boolean down = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
+        boolean up = keyEvent.getAction() == KeyEvent.ACTION_UP;
+        int direction = 0;
+        switch (keyEvent.getKeyCode()) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                direction = AudioManager.ADJUST_RAISE;
+                break;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                direction = AudioManager.ADJUST_LOWER;
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                // TODO
+                break;
+        }
+        if ((down || up) && direction != 0) {
+            int flags;
+            // If this is action up we want to send a beep for non-music events
+            if (up) {
+                direction = 0;
+            }
+            if (musicOnly) {
+                // This flag is used when the screen is off to only affect
+                // active media
+                flags = AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
+            } else {
+                // These flags are consistent with the home screen
+                if (up) {
+                    flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
+                } else {
+                    flags = AudioManager.FLAG_SHOW_UI;
+                }
+            }
+
+            mSessionManager.dispatchAdjustVolumeBy(AudioManager.USE_DEFAULT_STREAM_TYPE,
+                    direction, flags);
         }
     }
 

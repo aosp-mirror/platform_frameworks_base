@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.routeprovider.RouteRequest;
@@ -948,6 +949,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             }
             if (session == null) {
+                if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0) {
+                    if (DEBUG) {
+                        Log.d(TAG, "No active session to adjust, skipping media only volume event");
+                        return;
+                    }
+                }
                 try {
                     if (delta == 0) {
                         mAudioService.adjustSuggestedStreamVolume(delta, suggestedStream, flags,

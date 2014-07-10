@@ -68,18 +68,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private static final boolean DEBUG = false;
 
     /**
-     * These are the playback states that count as currently active.
-     */
-    private static final int[] ACTIVE_STATES = {
-            PlaybackState.STATE_FAST_FORWARDING,
-            PlaybackState.STATE_REWINDING,
-            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
-            PlaybackState.STATE_SKIPPING_TO_NEXT,
-            PlaybackState.STATE_BUFFERING,
-            PlaybackState.STATE_CONNECTING,
-            PlaybackState.STATE_PLAYING };
-
-    /**
      * The length of time a session will still be considered active after
      * pausing in ms.
      */
@@ -402,7 +390,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public boolean isPlaybackActive(boolean includeRecentlyActive) {
         int state = mPlaybackState == null ? 0 : mPlaybackState.getState();
-        if (isActiveState(state)) {
+        if (MediaSession.isActiveState(state)) {
             return true;
         }
         if (includeRecentlyActive && state == mPlaybackState.STATE_PAUSED) {
@@ -553,15 +541,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(indent + "route=" + (mRoute == null ? null : mRoute.toString()));
         pw.println(indent + "connection=" + (mConnection == null ? null : mConnection.toString()));
         pw.println(indent + "params=" + (mRequest == null ? null : mRequest.toString()));
-    }
-
-    private boolean isActiveState(int state) {
-        for (int i = 0; i < ACTIVE_STATES.length; i++) {
-            if (ACTIVE_STATES[i] == state) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String getShortMetadataString() {
@@ -804,7 +783,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setPlaybackState(PlaybackState state) {
             int oldState = mPlaybackState == null ? 0 : mPlaybackState.getState();
             int newState = state == null ? 0 : state.getState();
-            if (isActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
+            if (MediaSession.isActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
                 mLastActiveTime = SystemClock.elapsedRealtime();
             }
             mPlaybackState = state;
