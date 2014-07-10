@@ -38,8 +38,8 @@ import android.util.SparseIntArray;
 
 import static com.android.internal.telephony.PhoneConstants.SUBSCRIPTION_KEY;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_IDP_STRING;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -2215,81 +2215,79 @@ public class PhoneNumberUtils
     cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormat) {
         String retStr = dialStr;
 
+        boolean useNanp = (currFormat == defaultFormat) && (currFormat == FORMAT_NANP);
+
         // Checks if the plus sign character is in the passed-in dial string
         if (dialStr != null &&
             dialStr.lastIndexOf(PLUS_SIGN_STRING) != -1) {
-            // Format the string based on the rules for the country the number is from,
-            // and the current country the phone is camped on.
-            if ((currFormat == defaultFormat) && (currFormat == FORMAT_NANP)) {
-                // Handle case where default and current telephone numbering plans are NANP.
-                String postDialStr = null;
-                String tempDialStr = dialStr;
 
-                // Sets the retStr to null since the conversion will be performed below.
-                retStr = null;
-                if (DBG) log("checkAndProcessPlusCode,dialStr=" + dialStr);
-                // This routine is to process the plus sign in the dial string by loop through
-                // the network portion, post dial portion 1, post dial portion 2... etc. if
-                // applied
-                do {
-                    String networkDialStr;
+            // Handle case where default and current telephone numbering plans are NANP.
+            String postDialStr = null;
+            String tempDialStr = dialStr;
+
+            // Sets the retStr to null since the conversion will be performed below.
+            retStr = null;
+            if (DBG) log("checkAndProcessPlusCode,dialStr=" + dialStr);
+            // This routine is to process the plus sign in the dial string by loop through
+            // the network portion, post dial portion 1, post dial portion 2... etc. if
+            // applied
+            do {
+                String networkDialStr;
+                // Format the string based on the rules for the country the number is from,
+                // and the current country the phone is camped
+                if (useNanp) {
                     networkDialStr = extractNetworkPortion(tempDialStr);
-                    // Handles the conversion within NANP
-                    networkDialStr = processPlusCodeWithinNanp(networkDialStr);
+                } else  {
+                    networkDialStr = extractNetworkPortionAlt(tempDialStr);
 
-                    // Concatenates the string that is converted from network portion
-                    if (!TextUtils.isEmpty(networkDialStr)) {
-                        if (retStr == null) {
-                            retStr = networkDialStr;
-                        } else {
-                            retStr = retStr.concat(networkDialStr);
-                        }
+                }
+
+                networkDialStr = processPlusCode(networkDialStr, useNanp);
+
+                // Concatenates the string that is converted from network portion
+                if (!TextUtils.isEmpty(networkDialStr)) {
+                    if (retStr == null) {
+                        retStr = networkDialStr;
                     } else {
-                        // This should never happen since we checked the if dialStr is null
-                        // and if it contains the plus sign in the beginning of this function.
-                        // The plus sign is part of the network portion.
-                        Rlog.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
-                        return dialStr;
+                        retStr = retStr.concat(networkDialStr);
                     }
-                    postDialStr = extractPostDialPortion(tempDialStr);
-                    if (!TextUtils.isEmpty(postDialStr)) {
-                        int dialableIndex = findDialableIndexFromPostDialStr(postDialStr);
+                } else {
+                    // This should never happen since we checked the if dialStr is null
+                    // and if it contains the plus sign in the beginning of this function.
+                    // The plus sign is part of the network portion.
+                    Rlog.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
+                    return dialStr;
+                }
+                postDialStr = extractPostDialPortion(tempDialStr);
+                if (!TextUtils.isEmpty(postDialStr)) {
+                    int dialableIndex = findDialableIndexFromPostDialStr(postDialStr);
 
-                        // dialableIndex should always be greater than 0
-                        if (dialableIndex >= 1) {
-                            retStr = appendPwCharBackToOrigDialStr(dialableIndex,
-                                     retStr,postDialStr);
-                            // Skips the P/W character, extracts the dialable portion
-                            tempDialStr = postDialStr.substring(dialableIndex);
-                        } else {
-                            // Non-dialable character such as P/W should not be at the end of
-                            // the dial string after P/W processing in CdmaConnection.java
-                            // Set the postDialStr to "" to break out of the loop
-                            if (dialableIndex < 0) {
-                                postDialStr = "";
-                            }
-                            Rlog.e("wrong postDialStr=", postDialStr);
+                    // dialableIndex should always be greater than 0
+                    if (dialableIndex >= 1) {
+                        retStr = appendPwCharBackToOrigDialStr(dialableIndex,
+                                 retStr,postDialStr);
+                        // Skips the P/W character, extracts the dialable portion
+                        tempDialStr = postDialStr.substring(dialableIndex);
+                    } else {
+                        // Non-dialable character such as P/W should not be at the end of
+                        // the dial string after P/W processing in CdmaConnection.java
+                        // Set the postDialStr to "" to break out of the loop
+                        if (dialableIndex < 0) {
+                            postDialStr = "";
                         }
+                        Rlog.e("wrong postDialStr=", postDialStr);
                     }
-                    if (DBG) log("checkAndProcessPlusCode,postDialStr=" + postDialStr);
-                } while (!TextUtils.isEmpty(postDialStr) && !TextUtils.isEmpty(tempDialStr));
-            } else {
-                // TODO: Support NANP international conversion and other telephone numbering plans.
-                // Currently the phone is never used in non-NANP system, so return the original
-                // dial string.
-                Rlog.e("checkAndProcessPlusCode:non-NANP not supported", dialStr);
-            }
+                }
+                if (DBG) log("checkAndProcessPlusCode,postDialStr=" + postDialStr);
+            } while (!TextUtils.isEmpty(postDialStr) && !TextUtils.isEmpty(tempDialStr));
         }
         return retStr;
-     }
+    }
 
-    // This function gets the default international dialing prefix
-    private static String getDefaultIdp( ) {
-        String ps = null;
-        SystemProperties.get(PROPERTY_IDP_STRING, ps);
-        if (TextUtils.isEmpty(ps)) {
-            ps = NANP_IDP_STRING;
-        }
+    private static String getCurrentIdp(boolean useNanp) {
+        // in case, there is no IDD is found, we shouldn't convert it.
+        String ps = SystemProperties.get(
+                PROPERTY_OPERATOR_IDP_STRING, useNanp ? NANP_IDP_STRING : PLUS_SIGN_STRING);
         return ps;
     }
 
@@ -2399,31 +2397,32 @@ public class PhoneNumberUtils
     }
 
     /**
-     * This function handles the plus code conversion within NANP CDMA network
+     * This function handles the plus code conversion
      * If the number format is
      * 1)+1NANP,remove +,
      * 2)other than +1NANP, any + numbers,replace + with the current IDP
      */
-    private static String processPlusCodeWithinNanp(String networkDialStr) {
+    private static String processPlusCode(String networkDialStr, boolean useNanp) {
         String retStr = networkDialStr;
 
-        if (DBG) log("processPlusCodeWithinNanp,networkDialStr=" + networkDialStr);
+        if (DBG) log("processPlusCode, networkDialStr = " + networkDialStr
+                + "for NANP = " + useNanp);
         // If there is a plus sign at the beginning of the dial string,
         // Convert the plus sign to the default IDP since it's an international number
         if (networkDialStr != null &&
             networkDialStr.charAt(0) == PLUS_SIGN_CHAR &&
             networkDialStr.length() > 1) {
             String newStr = networkDialStr.substring(1);
-            if (isOneNanp(newStr)) {
+            // TODO: for nonNanp, should the '+' be removed if following number is country code
+            if (useNanp && isOneNanp(newStr)) {
                 // Remove the leading plus sign
                 retStr = newStr;
-             } else {
-                 String idpStr = getDefaultIdp();
-                 // Replaces the plus sign with the default IDP
-                 retStr = networkDialStr.replaceFirst("[+]", idpStr);
+            } else {
+                // Replaces the plus sign with the default IDP
+                retStr = networkDialStr.replaceFirst("[+]", getCurrentIdp(useNanp));
             }
         }
-        if (DBG) log("processPlusCodeWithinNanp,retStr=" + retStr);
+        if (DBG) log("processPlusCode, retStr=" + retStr);
         return retStr;
     }
 
