@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.IBinder;
@@ -496,6 +497,57 @@ public class VpnService extends Service {
          * @return this {@link Builder} object to facilitate chaining of method calls.
          */
         public Builder allowFamily(int family) {
+            // TODO
+            return this;
+        }
+
+        /**
+         * Adds an application that's allowed to access the VPN connection.
+         *
+         * If this method is called at least once, only applications added through this method (and
+         * no others) are allowed access. Else (if this method is never called), all applications
+         * are allowed by default.
+         *
+         * A {@link Builder} may have only a set of allowed applications OR a set of disallowed
+         * ones, but not both. Calling this method after {@link #addDisallowedApplication} has
+         * already been called, or vice versa, will throw an {@link UnsupportedOperationException}.
+         *
+         * {@code packageName} must be the canonical name of a currently installed application.
+         * {@link PackageManager.NameNotFoundException} is thrown if there's no such application.
+         *
+         * @throws {@link PackageManager.NameNotFoundException} If the application isn't installed.
+         *
+         * @param packageName The full name (e.g.: "com.google.apps.contacts") of an application.
+         *
+         * @return this {@link Builder} object to facilitate chaining method calls.
+         */
+        public Builder addAllowedApplication(String packageName)
+                throws PackageManager.NameNotFoundException {
+            // TODO
+            return this;
+        }
+
+        /**
+         * Adds an application that's denied access to the VPN connection.
+         *
+         * By default, all applications are allowed access, except for those denied through this
+         * method.
+         *
+         * A {@link Builder} may have only a set of allowed applications OR a set of disallowed
+         * ones, but not both. Calling this method after {@link #addAllowedApplication} has already
+         * been called, or vice versa, will throw an {@link UnsupportedOperationException}.
+         *
+         * {@code packageName} must be the canonical name of a currently installed application.
+         * {@link PackageManager.NameNotFoundException} is thrown if there's no such application.
+         *
+         * @throws {@link PackageManager.NameNotFoundException} If the application isn't installed.
+         *
+         * @param packageName The full name (e.g.: "com.google.apps.contacts") of an application.
+         *
+         * @return this {@link Builder} object to facilitate chaining method calls.
+         */
+        public Builder addDisallowedApplication(String packageName)
+                throws PackageManager.NameNotFoundException {
             // TODO
             return this;
         }

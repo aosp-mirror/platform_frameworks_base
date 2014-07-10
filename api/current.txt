@@ -852,7 +852,7 @@ package android {
     field public static final int mirrorForRtl = 16843726; // 0x10103ce
     field public static final int mode = 16843134; // 0x101017e
     field public static final int moreIcon = 16843061; // 0x1010135
-    field public static final int multiArch = 16843918; // 0x101048e
+    field public static final int multiArch = 16843919; // 0x101048f
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
     field public static final int navigationBarColor = 16843860; // 0x1010454
@@ -16841,6 +16841,8 @@ package android.net {
     ctor public VpnService.Builder();
     method public android.net.VpnService.Builder addAddress(java.net.InetAddress, int);
     method public android.net.VpnService.Builder addAddress(java.lang.String, int);
+    method public android.net.VpnService.Builder addAllowedApplication(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.net.VpnService.Builder addDisallowedApplication(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.net.VpnService.Builder addDnsServer(java.net.InetAddress);
     method public android.net.VpnService.Builder addDnsServer(java.lang.String);
     method public android.net.VpnService.Builder addRoute(java.net.InetAddress, int);
