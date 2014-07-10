@@ -106,6 +106,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         public void run() {
             // Mark Recents as no longer visible
             AlternateRecentsComponent.notifyVisibilityChanged(false);
+            mVisible = false;
             // Finish Recents
             if (mLaunchIntent != null) {
                 if (mLaunchOpts != null) {
@@ -170,7 +171,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+            if (action.equals(Intent.ACTION_SCREEN_OFF) && mVisible) {
                 mFinishLaunchHomeRunnable.run();
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // Refresh the search widget
@@ -518,8 +519,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (mConfig.searchBarAppWidgetId >= 0) {
             mAppWidgetHost.stopListening();
         }
-
-        mVisible = false;
     }
 
     @Override
@@ -641,6 +640,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public void onTaskViewClicked() {
         // Mark recents as no longer visible
         AlternateRecentsComponent.notifyVisibilityChanged(false);
+        mVisible = false;
     }
 
     @Override
