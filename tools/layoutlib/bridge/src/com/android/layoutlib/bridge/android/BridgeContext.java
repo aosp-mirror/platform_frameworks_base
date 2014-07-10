@@ -613,19 +613,16 @@ public final class BridgeContext extends Context {
             }
 
             if (value != null) {
-                if ((value.getFirst() == ResourceType.STYLE)
-                        || (value.getFirst() == ResourceType.ATTR)) {
-                    // look for the style in the current theme, and its parent:
-                    ResourceValue item = mRenderResources.findItemInTheme(value.getSecond(),
+                if (value.getFirst() == ResourceType.STYLE) {
+                    // look for the style in all resources:
+                    StyleResourceValue item = mRenderResources.getStyle(value.getSecond(),
                             isFrameworkRes);
                     if (item != null) {
-                        if (item instanceof StyleResourceValue) {
-                            if (defaultPropMap != null) {
-                                defaultPropMap.put("style", item.getName());
-                            }
-
-                            defStyleValues = (StyleResourceValue)item;
+                        if (defaultPropMap != null) {
+                            defaultPropMap.put("style", item.getName());
                         }
+
+                        defStyleValues = item;
                     } else {
                         Bridge.getLog().error(null,
                                 String.format(
