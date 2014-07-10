@@ -24,7 +24,7 @@ import com.android.internal.telecomm.IInCallAdapter;
  * Receives commands from {@link InCallService} implementations which should be executed by
  * Telecomm. When Telecomm binds to a {@link InCallService}, an instance of this class is given to
  * the in-call service through which it can manipulate live (active, dialing, ringing) calls. When
- * the in-call service is notified of new calls ({@link InCallService#addCall}), it can use the
+ * the in-call service is notified of new calls, it can use the
  * given call IDs to execute commands such as {@link #answerCall} for incoming calls or
  * {@link #disconnectCall} for active calls the user would like to end. Some commands are only
  * appropriate for calls in certain states; please consult each method for such limitations.
@@ -167,16 +167,15 @@ public final class InCallAdapter {
      * A post-dial DTMF string is a string of digits entered after a phone number, when dialed,
      * that are immediately sent as DTMF tones to the recipient as soon as the connection is made.
      * While these tones are playing, Telecomm will notify the {@link InCallService} that the call
-     * is in the {@link InCallService#setPostDial(String,String)} state.
+     * is in the post dial state.
      *
      * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_PAUSE} symbol, Telecomm
      * will temporarily pause playing the tones for a pre-defined period of time.
      *
      * If the DTMF string contains a {@link TelecommConstants#DTMF_CHARACTER_WAIT} symbol, Telecomm
      * will pause playing the tones and notify the {@link InCallService} that the call is in the
-     * {@link InCallService#setPostDialWait(String,String)} state. When the user decides to continue
-     * the postdial sequence, the {@link InCallService} should invoke the
-     * {@link #postDialContinue(String,boolean)} method.
+     * post dial wait state. When the user decides to continue the postdial sequence, the
+     * {@link InCallService} should invoke the {@link #postDialContinue(String,boolean)} method.
      *
      * @param callId The unique ID of the call for which postdial string playing should continue.
      * @param proceed Whether or not to continue with the post-dial sequence.
