@@ -30,23 +30,26 @@ import java.util.List;
  * device administrator to override default app-specific restrictions or any other
  * operation that needs explicit authorization from the administrator.
  * <p>
- * Apps can expose a set of restrictions via a runtime receiver mechanism or via
- * static meta data in the manifest.
+ * Apps can expose a set of restrictions via an XML file specified in the manifest.
  * <p>
  * If the user has an active restrictions provider, dynamic requests can be made in
  * addition to the statically imposed restrictions. Dynamic requests are app-specific
- * and can be expressed via a predefined set of templates.
+ * and can be expressed via a predefined set of request types.
  * <p>
  * The RestrictionsManager forwards the dynamic requests to the active
  * restrictions provider. The restrictions provider can respond back to requests by calling
  * {@link #notifyPermissionResponse(String, Bundle)}, when
- * a response is received from the administrator of the device or user 
+ * a response is received from the administrator of the device or user.
  * The response is relayed back to the application via a protected broadcast,
  * {@link #ACTION_PERMISSION_RESPONSE_RECEIVED}.
  * <p>
+ * Prior responses to requests can also be queried through calls to
+ * {@link #getPermissionResponse(String, PermissionResponseCallback)}, if the provider
+ * saves old responses.
+ * <p>
  * Static restrictions are specified by an XML file referenced by a meta-data attribute
  * in the manifest. This enables applications as well as any web administration consoles
- * to be able to read the template from the apk.
+ * to be able to read the list of available restrictions from the apk.
  * <p>
  * The syntax of the XML format is as follows:
  * <pre>
@@ -62,20 +65,22 @@ import java.util.List;
  * The attributes for each restriction depend on the restriction type.
  *
  * @see RestrictionEntry
+ * @see AbstractRestrictionsProvider
  */
 public class RestrictionsManager {
+
+    private static final String TAG = "RestrictionsManager";
 
     /**
      * Broadcast intent delivered when a response is received for a permission
      * request. The response is not available for later query, so the receiver
      * must persist and/or immediately act upon the response. The application
      * should not interrupt the user by coming to the foreground if it isn't
-     * currently in the foreground. It can post a notification instead, informing
-     * the user of a change in state.
+     * currently in the foreground. It can either post a notification informing
+     * the user of the response or wait until the next time the user launches the app.
      * <p>
      * For instance, if the user requested permission to make an in-app purchase,
-     * the app can post a notification that the request had been granted or denied,
-     * and allow the purchase to go through.
+     * the app can post a notification that the request had been approved or denied.
      * <p>
      * The broadcast Intent carries the following extra:
      * {@link #EXTRA_RESPONSE_BUNDLE}.
@@ -84,59 +89,22 @@ public class RestrictionsManager {
             "android.intent.action.PERMISSION_RESPONSE_RECEIVED";
 
     /**
-     * Protected broadcast intent sent to the active restrictions provider. The intent
-     * contains the following extras:<p>
-     * <ul>
-     * <li>{@link #EXTRA_PACKAGE_NAME} : String; the package name of the application requesting
-     * permission.</li>
-     * <li>{@link #EXTRA_TEMPLATE_ID} : String; the template of the request.</li>
-     * <li>{@link #EXTRA_REQUEST_BUNDLE} : Bundle; contains the template-specific keys and values
-     * for the request.
-     * </ul>
-     * @see DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)
-     * @see #requestPermission(String, String, Bundle)
-     */
-    public static final String ACTION_REQUEST_PERMISSION =
-            "android.intent.action.REQUEST_PERMISSION";
-
-    /**
      * The package name of the application making the request.
      */
     public static final String EXTRA_PACKAGE_NAME = "package_name";
 
     /**
-     * The template id that specifies what kind of a request it is and may indicate
-     * how the request is to be presented to the administrator. Must be either one of
-     * the predefined templates or a custom one specified by the application that the
-     * restrictions provider is familiar with.
-     */
-    public static final String EXTRA_TEMPLATE_ID = "template_id";
-
-    /**
-     * A bundle containing the details about the request. The contents depend on the
-     * template id.
-     * @see #EXTRA_TEMPLATE_ID
-     */
-    public static final String EXTRA_REQUEST_BUNDLE = "request_bundle";
-
-    /**
      * Contains a response from the administrator for specific request.
      * The bundle contains the following information, at least:
      * <ul>
-     * <li>{@link #REQUEST_KEY_ID}: The request id.</li>
-     * <li>{@link #REQUEST_KEY_DATA}: The request reference data.</li>
+     * <li>{@link #REQUEST_KEY_ID}: The request ID.</li>
+     * <li>{@link #RESPONSE_KEY_RESULT}: The response result.</li>
      * </ul>
-     * <p>
-     * And depending on what the request template was, the bundle will contain the actual
-     * result of the request. For {@link #REQUEST_TEMPLATE_QUESTION}, the result will be in
-     * {@link #RESPONSE_KEY_BOOLEAN}, which is of type boolean; true if the administrator
-     * approved the request, false otherwise.
      */
-    public static final String EXTRA_RESPONSE_BUNDLE = "response_bundle";
-
+    public static final String EXTRA_RESPONSE_BUNDLE = "response";
 
     /**
-     * Request template that presents a simple question, with a possible title and icon.
+     * Request type for a simple question, with a possible title and icon.
      * <p>
      * Required keys are
      * {@link #REQUEST_KEY_ID} and {@link #REQUEST_KEY_MESSAGE}.
@@ -145,17 +113,33 @@ public class RestrictionsManager {
      * {@link #REQUEST_KEY_DATA}, {@link #REQUEST_KEY_ICON}, {@link #REQUEST_KEY_TITLE},
      * {@link #REQUEST_KEY_APPROVE_LABEL} and {@link #REQUEST_KEY_DENY_LABEL}.
      */
-    public static final String REQUEST_TEMPLATE_QUESTION = "android.req_template.type.simple";
+    public static final String REQUEST_TYPE_QUESTION = "android.request.type.question";
+
+    /**
+     * Request type for a local password challenge. This is a way for an app to ask
+     * the administrator to override an operation that is restricted on the device, such
+     * as configuring Wi-Fi access points. It is most useful for situations where there
+     * is no network connectivity for a remote administrator's response. The normal user of the
+     * device is not expected to know the password. The challenge is meant for the administrator.
+     * <p>
+     * Required keys are
+     * {@link #REQUEST_KEY_ID} and {@link #REQUEST_KEY_MESSAGE}.
+     * <p>
+     * Optional keys are
+     * {@link #REQUEST_KEY_DATA}, {@link #REQUEST_KEY_ICON}, {@link #REQUEST_KEY_TITLE},
+     * {@link #REQUEST_KEY_APPROVE_LABEL} and {@link #REQUEST_KEY_DENY_LABEL}.
+     */
+    public static final String REQUEST_TYPE_LOCAL_APPROVAL = "android.request.type.local_approval";
 
     /**
      * Key for request ID contained in the request bundle.
      * <p>
-     * App-generated request id to identify the specific request when receiving
+     * App-generated request ID to identify the specific request when receiving
      * a response. This value is returned in the {@link #EXTRA_RESPONSE_BUNDLE}.
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_ID = "android.req_template.req_id";
+    public static final String REQUEST_KEY_ID = "android.request.id";
 
     /**
      * Key for request data contained in the request bundle.
@@ -167,7 +151,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_DATA = "android.req_template.data";
+    public static final String REQUEST_KEY_DATA = "android.request.data";
 
     /**
      * Key for request title contained in the request bundle.
@@ -177,7 +161,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_TITLE = "android.req_template.title";
+    public static final String REQUEST_KEY_TITLE = "android.request.title";
 
     /**
      * Key for request message contained in the request bundle.
@@ -187,7 +171,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_MESSAGE = "android.req_template.mesg";
+    public static final String REQUEST_KEY_MESSAGE = "android.request.mesg";
 
     /**
      * Key for request icon contained in the request bundle.
@@ -197,7 +181,7 @@ public class RestrictionsManager {
      * <p>
      * Type: Bitmap
      */
-    public static final String REQUEST_KEY_ICON = "android.req_template.icon";
+    public static final String REQUEST_KEY_ICON = "android.request.icon";
 
     /**
      * Key for request approval button label contained in the request bundle.
@@ -207,7 +191,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_APPROVE_LABEL = "android.req_template.accept";
+    public static final String REQUEST_KEY_APPROVE_LABEL = "android.request.approve_label";
 
     /**
      * Key for request rejection button label contained in the request bundle.
@@ -217,7 +201,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_DENY_LABEL = "android.req_template.reject";
+    public static final String REQUEST_KEY_DENY_LABEL = "android.request.deny_label";
 
     /**
      * Key for requestor's name contained in the request bundle. This value is not specified by
@@ -226,7 +210,7 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_REQUESTOR_NAME = "android.req_template.requestor";
+    public static final String REQUEST_KEY_REQUESTOR_NAME = "android.request.requestor";
 
     /**
      * Key for requestor's device name contained in the request bundle. This value is not specified
@@ -235,20 +219,110 @@ public class RestrictionsManager {
      * <p>
      * Type: String
      */
-    public static final String REQUEST_KEY_DEVICE_NAME = "android.req_template.device";
+    public static final String REQUEST_KEY_DEVICE_NAME = "android.request.device";
 
     /**
      * Key for the response in the response bundle sent to the application, for a permission
      * request.
      * <p>
-     * Type: boolean
+     * Type: int
+     * <p>
+     * Possible values: {@link #RESULT_APPROVED}, {@link #RESULT_DENIED},
+     * {@link #RESULT_NO_RESPONSE}, {@link #RESULT_UNKNOWN_REQUEST} or
+     * {@link #RESULT_ERROR}.
      */
-    public static final String RESPONSE_KEY_BOOLEAN = "android.req_template.response";
+    public static final String RESPONSE_KEY_RESULT = "android.response.result";
 
-    private static final String TAG = "RestrictionsManager";
+    /**
+     * Response result value indicating that the request was approved.
+     */
+    public static final int RESULT_APPROVED = 1;
+
+    /**
+     * Response result value indicating that the request was denied.
+     */
+    public static final int RESULT_DENIED = 2;
+
+    /**
+     * Response result value indicating that the request has not received a response yet.
+     */
+    public static final int RESULT_NO_RESPONSE = 3;
+
+    /**
+     * Response result value indicating that the request is unknown, when returned through a
+     * call to #getPendingResponse
+     */
+    public static final int RESULT_UNKNOWN_REQUEST = 4;
+
+    /**
+     * Response result value indicating an error condition. Additional error code might be available
+     * in the response bundle, for the key {@link #RESPONSE_KEY_ERROR_CODE}. There might also be
+     * an associated error message in the response bundle, for the key
+     * {@link #RESPONSE_KEY_ERROR_MESSAGE}.
+     */
+    public static final int RESULT_ERROR = 5;
+
+    /**
+     * Error code indicating that there was a problem with the request.
+     * <p>
+     * Stored in {@link #RESPONSE_KEY_ERROR_CODE} field in the response bundle.
+     */
+    public static final int RESULT_ERROR_BAD_REQUEST = 1;
+
+    /**
+     * Error code indicating that there was a problem with the network.
+     * <p>
+     * Stored in {@link #RESPONSE_KEY_ERROR_CODE} field in the response bundle.
+     */
+    public static final int RESULT_ERROR_NETWORK = 2;
+
+    /**
+     * Error code indicating that there was an internal error.
+     * <p>
+     * Stored in {@link #RESPONSE_KEY_ERROR_CODE} field in the response bundle.
+     */
+    public static final int RESULT_ERROR_INTERNAL = 3;
+
+    /**
+     * Key for the optional error code in the response bundle sent to the application.
+     * <p>
+     * Type: int
+     * <p>
+     * Possible values: {@link #RESULT_ERROR_BAD_REQUEST}, {@link #RESULT_ERROR_NETWORK} or
+     * {@link #RESULT_ERROR_INTERNAL}.
+     */
+    public static final String RESPONSE_KEY_ERROR_CODE = "android.response.errorcode";
+
+    /**
+     * Key for the optional error message in the response bundle sent to the application.
+     * <p>
+     * Type: String
+     */
+    public static final String RESPONSE_KEY_ERROR_MESSAGE = "android.response.errormsg";
+
+    /**
+     * Key for the optional timestamp of when the administrator responded to the permission
+     * request. It is an represented in milliseconds since January 1, 1970 00:00:00.0 UTC.
+     * <p>
+     * Type: long
+     */
+    public static final String RESPONSE_KEY_RESPONSE_TIMESTAMP = "android.response.timestamp";
 
     private final Context mContext;
     private final IRestrictionsManager mService;
+
+    /**
+     * Callback object for returning a response for a request.
+     *
+     * @see #getPermissionResponse
+     */
+    public static abstract class PermissionResponseCallback {
+        /**
+         * Contains the response
+         * @param response
+         */
+        public abstract void onResponse(Bundle response);
+    }
 
     /**
      * @hide
@@ -261,7 +335,8 @@ public class RestrictionsManager {
     /**
      * Returns any available set of application-specific restrictions applicable
      * to this application.
-     * @return
+     * @return the application restrictions as a Bundle. Returns null if there
+     * are no restrictions.
      */
     public Bundle getApplicationRestrictions() {
         try {
@@ -275,10 +350,11 @@ public class RestrictionsManager {
     }
 
     /**
-     * Called by an application to check if permission requests can be made. If false,
-     * there is no need to request permission for an operation, unless a static
-     * restriction applies to that operation.
-     * @return
+     * Called by an application to check if there is an active restrictions provider. If
+     * there isn't, {@link #getPermissionResponse(String, PermissionResponseCallback)}
+     * and {@link #requestPermission(String, Bundle)} are not available.
+     *
+     * @return whether there is an active restrictions provider.
      */
     public boolean hasRestrictionsProvider() {
         try {
@@ -294,20 +370,20 @@ public class RestrictionsManager {
     /**
      * Called by an application to request permission for an operation. The contents of the
      * request are passed in a Bundle that contains several pieces of data depending on the
-     * chosen request template.
+     * chosen request type.
      *
-     * @param requestTemplate The request template to use. The template could be one of the
-     * predefined templates specified in this class or a custom template that the specific
-     * Restrictions Provider might understand. For custom templates, the template name should be
-     * namespaced to avoid collisions with predefined templates and templates specified by
-     * other Restrictions Provider vendors.
-     * @param requestData A Bundle containing the data corresponding to the specified request
-     * template. The keys for the data in the bundle depend on the kind of template chosen.
+     * @param requestType The type of request. The type could be one of the
+     * predefined types specified here or a custom type that the specific
+     * restrictions provider might understand. For custom types, the type name should be
+     * namespaced to avoid collisions with predefined types and types specified by
+     * other restrictions providers.
+     * @param request A Bundle containing the data corresponding to the specified request
+     * type. The keys for the data in the bundle depend on the request type.
      */
-    public void requestPermission(String requestTemplate, Bundle requestData) {
+    public void requestPermission(String requestType, Bundle request) {
         try {
             if (mService != null) {
-                mService.requestPermission(mContext.getPackageName(), requestTemplate, requestData);
+                mService.requestPermission(mContext.getPackageName(), requestType, request);
             }
         } catch (RemoteException re) {
             Log.w(TAG, "Couldn't reach service");
@@ -315,10 +391,39 @@ public class RestrictionsManager {
     }
 
     /**
-     * Called by the Restrictions Provider when a response is available to be
-     * delivered to an application.
-     * @param packageName
-     * @param response
+     * Called by an application to query for any available response from the restrictions provider
+     * for the given requestId. The call returns immediately and the response will be returned
+     * via the provided callback. This does not initiate a new request and does not wait
+     * for a response to be received. It merely returns any previously received response
+     * or indicates if there was no available response. If there are multiple responses
+     * available for the same request ID, the most recent one is returned.
+     *
+     * @param requestId The ID of the original request made via
+     * {@link #requestPermission(String, Bundle)}. It's possible to also query for responses
+     * to requests made on a different device with the same requestId, if the Restrictions
+     * Provider happens to sync responses across devices with the same account managed by the
+     * restrictions provider.
+     * @param callback The response is returned via the callback object. Cannot be null.
+     */
+    public void getPermissionResponse(String requestId, PermissionResponseCallback callback) {
+        if (requestId == null || callback == null) {
+            throw new NullPointerException("requestId or callback cannot be null");
+        }
+        try {
+            if (mService != null) {
+                mService.getPermissionResponse(mContext.getPackageName(), requestId,
+                        new PermissionResponseCallbackWrapper(callback));
+            }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Couldn't reach service");
+        }
+    }
+
+    /**
+     * Called by the restrictions provider to deliver a response to an application.
+     *
+     * @param packageName the application to deliver the response to.
+     * @param response the Bundle containing the response status, request ID and other information.
      */
     public void notifyPermissionResponse(String packageName, Bundle response) {
         try {
@@ -333,6 +438,7 @@ public class RestrictionsManager {
     /**
      * Parse and return the list of restrictions defined in the manifest for the specified
      * package, if any.
+     *
      * @param packageName The application for which to fetch the restrictions list.
      * @return The list of RestrictionEntry objects created from the XML file specified
      * in the manifest, or null if none was specified.
@@ -340,5 +446,20 @@ public class RestrictionsManager {
     public List<RestrictionEntry> getManifestRestrictions(String packageName) {
         // TODO:
         return null;
+    }
+
+    private static class PermissionResponseCallbackWrapper
+            extends IPermissionResponseCallback.Stub {
+
+        private PermissionResponseCallback mCallback;
+
+        PermissionResponseCallbackWrapper(PermissionResponseCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse(Bundle response) {
+            mCallback.onResponse(response);
+        }
     }
 }

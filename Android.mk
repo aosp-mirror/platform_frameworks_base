@@ -118,7 +118,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
 	core/java/android/content/IOnPrimaryClipChangedListener.aidl \
+        core/java/android/content/IPermissionResponseCallback.aidl \
 	core/java/android/content/IRestrictionsManager.aidl \
+        core/java/android/content/IRestrictionsProvider.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/ISyncServiceAdapter.aidl \
