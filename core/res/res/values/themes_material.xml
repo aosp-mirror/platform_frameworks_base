@@ -315,6 +315,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height_material</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Material.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
         <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
@@ -653,6 +654,7 @@ please see themes_device_defaults.xml.
         <item name="actionButtonStyle">@style/Widget.Material.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Material.Light.ActionButton.Overflow</item>
         <item name="actionOverflowMenuStyle">@style/Widget.Material.Light.PopupMenu.Overflow</item>
+        <item name="actionBarPopupTheme">@null</item>
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
@@ -737,6 +739,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.Material.Light</item>
 
         <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
         <item name="colorPrimary">@color/material_blue_grey_800</item>
@@ -778,6 +781,7 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
 
+        <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlHighlight">@color/ripple_material_light</item>
         <item name="colorButtonNormal">@color/btn_default_material_light</item>
     </style>
@@ -814,6 +818,7 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
 
+        <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlHighlight">@color/ripple_material_dark</item>
         <item name="colorButtonNormal">@color/btn_default_material_dark</item>
     </style>

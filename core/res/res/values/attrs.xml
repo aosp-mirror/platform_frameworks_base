@@ -730,6 +730,9 @@
         <attr name="actionBarTabTextStyle" format="reference" />
         <attr name="actionOverflowButtonStyle" format="reference" />
         <attr name="actionOverflowMenuStyle" format="reference" />
+        <!-- Reference to a theme that should be used to inflate popups
+             shown by widgets in the action bar. -->
+        <attr name="actionBarPopupTheme" format="reference" />
         <!-- Reference to a style for the Action Bar -->
         <attr name="actionBarStyle" format="reference" />
         <!-- Reference to a style for the split Action Bar. This style

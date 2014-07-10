@@ -95,7 +95,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
         mAnchorView = anchorView;
 
-        menu.addMenuPresenter(this);
+        // Present the menu using our context, not the menu builder's context.
+        menu.addMenuPresenter(this, context);
     }
 
     public void setAnchorView(View anchor) {

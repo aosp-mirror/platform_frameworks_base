@@ -16,6 +16,9 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
+
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.widget.ActionMenuPresenter;
 import android.widget.ActionMenuView;
 
@@ -32,6 +35,15 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
 public abstract class AbsActionBarView extends ViewGroup {
+    private static final TimeInterpolator sAlphaInterpolator = new DecelerateInterpolator();
+
+    private static final int FADE_DURATION = 200;
+
+    protected final VisibilityAnimListener mVisAnimListener = new VisibilityAnimListener();
+
+    /** Context against which to inflate popup menus. */
+    protected final Context mPopupContext;
+
     protected ActionMenuView mMenuView;
     protected ActionMenuPresenter mActionMenuPresenter;
     protected ViewGroup mSplitView;
@@ -40,11 +52,6 @@ public abstract class AbsActionBarView extends ViewGroup {
     protected int mContentHeight;
 
     protected Animator mVisibilityAnim;
-    protected final VisibilityAnimListener mVisAnimListener = new VisibilityAnimListener();
-
-    private static final TimeInterpolator sAlphaInterpolator = new DecelerateInterpolator();
-
-    private static final int FADE_DURATION = 200;
 
     public AbsActionBarView(Context context) {
         this(context, null);
@@ -61,6 +68,14 @@ public abstract class AbsActionBarView extends ViewGroup {
     public AbsActionBarView(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        final TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(R.attr.actionBarPopupTheme, tv, true)
+                && tv.resourceId != 0) {
+            mPopupContext = new ContextThemeWrapper(context, tv.resourceId);
+        } else {
+            mPopupContext = context;
+        }
     }
 
     @Override
