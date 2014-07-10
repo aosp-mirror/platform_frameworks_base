@@ -41,7 +41,7 @@ public class StackScrollAlgorithm {
 
     /** When a child is activated, the other cards' alpha fade to this value. */
     private static final float ACTIVATED_INVERSE_ALPHA = 0.9f;
-    private static final float DIMMED_SCALE = 0.95f;
+    public static final float DIMMED_SCALE = 0.95f;
 
     private int mPaddingBetweenElements;
     private int mCollapsedSize;
