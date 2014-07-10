@@ -446,6 +446,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
         /**
          * Build a request using the current target Surfaces and settings.
+         * <p>Note that, although it is possible to create a {@code CaptureRequest} with no target
+         * {@link Surface}s, passing such a request into {@link CameraCaptureSession#capture},
+         * {@link CameraCaptureSession#captureBurst},
+         * {@link CameraCaptureSession#setRepeatingBurst}, or
+         * {@link CameraCaptureSession#setRepeatingRequest} will cause that method to throw an
+         * {@link IllegalArgumentException}.</p>
          *
          * @return A new capture request instance, ready for submission to the
          * camera device.
