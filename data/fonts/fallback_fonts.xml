@@ -234,12 +234,12 @@
     </family>
     <family>
         <fileset>
-            <file lang="zh-CN">NotoSansHans-Regular.otf</file>
+            <file lang="zh-Hans">NotoSansHans-Regular.otf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file lang="zh-TW">NotoSansHant-Regular.otf</file>
+            <file lang="zh-Hant">NotoSansHant-Regular.otf</file>
         </fileset>
     </family>
     <family>
