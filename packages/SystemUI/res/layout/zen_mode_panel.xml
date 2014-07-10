@@ -79,15 +79,4 @@
         android:orientation="vertical"
         android:paddingTop="3dp" />
 
-    <TextView
-        android:id="@+id/zen_alarm_warning"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingLeft="@dimen/qs_panel_padding"
-        android:paddingRight="@dimen/qs_panel_padding"
-        android:paddingTop="8dp"
-        android:text="@string/zen_alarm_warning"
-        android:textAppearance="@style/TextAppearance.QS.Warning" />
-
 </com.android.systemui.volume.ZenModePanel>

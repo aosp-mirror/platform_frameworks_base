@@ -85,7 +85,6 @@ public class ZenModePanel extends LinearLayout {
     private TextView mZenSubheadExpanded;
     private View mMoreSettings;
     private LinearLayout mZenConditions;
-    private View mAlarmWarning;
 
     private Callback mCallback;
     private ZenModeController mController;
@@ -152,8 +151,6 @@ public class ZenModePanel extends LinearLayout {
         });
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
-
-        mAlarmWarning = findViewById(R.id.zen_alarm_warning);
     }
 
     @Override
@@ -279,10 +276,9 @@ public class ZenModePanel extends LinearLayout {
         mZenSubheadCollapsed.setVisibility(!mExpanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && mExpanded ? VISIBLE : GONE);
         mZenConditions.setVisibility(!zenOff && mExpanded ? VISIBLE : GONE);
-        mAlarmWarning.setVisibility(zenNone && mExpanded ? VISIBLE : GONE);
 
         if (zenNone) {
-            mZenSubheadExpanded.setText(R.string.zen_no_interruptions);
+            mZenSubheadExpanded.setText(R.string.zen_no_interruptions_with_warning);
             mZenSubheadCollapsed.setText(mExitConditionText);
         } else if (zenImportant) {
             mZenSubheadExpanded.setText(R.string.zen_important_interruptions);
