@@ -27540,6 +27540,7 @@ package android.telecomm {
     method public final boolean getAudioModeIsVoip();
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final int getCallCapabilities();
+    method public final android.telecomm.CallVideoProvider getCallVideoProvider();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
     method public final int getFeatures();
     method public final android.net.Uri getHandle();
