@@ -15918,14 +15918,19 @@ package android.media.session {
   }
 
   public final class PlaybackState implements android.os.Parcelable {
+    ctor public PlaybackState();
+    ctor public PlaybackState(android.media.session.PlaybackState);
     method public int describeContents();
     method public long getActions();
     method public long getBufferPosition();
     method public java.lang.CharSequence getErrorMessage();
-    method public long getLastPositionUpdateTime();
-    method public float getPlaybackSpeed();
+    method public float getPlaybackRate();
     method public long getPosition();
     method public int getState();
+    method public void setActions(long);
+    method public void setBufferPosition(long);
+    method public void setErrorMessage(java.lang.CharSequence);
+    method public void setState(int, long, float);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
@@ -15949,17 +15954,6 @@ package android.media.session {
     field public static final int STATE_SKIPPING_TO_NEXT = 10; // 0xa
     field public static final int STATE_SKIPPING_TO_PREVIOUS = 9; // 0x9
     field public static final int STATE_STOPPED = 1; // 0x1
-  }
-
-  public static final class PlaybackState.Builder {
-    ctor public PlaybackState.Builder();
-    ctor public PlaybackState.Builder(android.media.session.PlaybackState);
-    method public android.media.session.PlaybackState build();
-    method public android.media.session.PlaybackState.Builder setActions(long);
-    method public android.media.session.PlaybackState.Builder setBufferPosition(long);
-    method public android.media.session.PlaybackState.Builder setErrorMessage(java.lang.CharSequence);
-    method public android.media.session.PlaybackState.Builder setState(int, long, float, long);
-    method public android.media.session.PlaybackState.Builder setState(int, long, float);
   }
 
 }
