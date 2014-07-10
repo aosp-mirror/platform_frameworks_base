@@ -100,7 +100,7 @@ public class ZenModePanel extends LinearLayout {
         super(context, attrs);
         mContext = context;
         mFavorites = new Favorites();
-        mInflater = LayoutInflater.from(new ContextThemeWrapper(context, R.style.QSWhiteTheme));
+        mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
         updateTag();
