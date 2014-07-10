@@ -514,13 +514,20 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
                                                  mCurrentCount + ", array length = " + d.length);
         }
-        // FIXME: requires 64-bit path
 
-        int i[] = new int[d.length];
-        for (int ct=0; ct < d.length; ct++) {
-            i[ct] = (int)d[ct].getID(mRS);
+        if (RenderScript.sPointerSize == 8) {
+            long i[] = new long[d.length * 4];
+            for (int ct=0; ct < d.length; ct++) {
+                i[ct * 4] = d[ct].getID(mRS);
+            }
+            copy1DRangeFromUnchecked(0, mCurrentCount, i);
+        } else {
+            int i[] = new int[d.length];
+            for (int ct=0; ct < d.length; ct++) {
+                i[ct] = (int)d[ct].getID(mRS);
+            }
+            copy1DRangeFromUnchecked(0, mCurrentCount, i);
         }
-        copy1DRangeFromUnchecked(0, mCurrentCount, i);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
