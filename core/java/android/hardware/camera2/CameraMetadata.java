@@ -217,26 +217,16 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The minimal set of capabilities that every camera
      * device (regardless of {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel})
-     * will support.</p>
-     * <p>The full set of features supported by this capability makes
-     * the camera2 api backwards compatible with the camera1
-     * (android.hardware.Camera) API.</p>
+     * supports.</p>
+     * <p>This capability is listed by all devices, and
+     * indicates that the camera device has a feature set
+     * that's comparable to the baseline requirements for the
+     * older android.hardware.Camera API.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @hide
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0;
-
-    /**
-     * <p>This is a catch-all capability to include all other
-     * tags or functionality not encapsulated by one of the other
-     * capabilities.</p>
-     * <p>A typical example is all tags marked 'optional'.</p>
-     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @hide
-     */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL = 1;
 
     /**
      * <p>The camera device can be manually controlled (3A algorithms such
@@ -292,7 +282,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SENSOR_SENSITIVITY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 2;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1;
 
     /**
      * <p>The camera device post-processing stages can be manually controlled.
@@ -339,7 +329,26 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#TONEMAP_MODE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 3;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2;
+
+    /**
+     * <p>The camera device supports outputting RAW buffers that can be
+     * saved offline into a DNG format.</p>
+     * <ul>
+     * <li>RAW_SENSOR is supported as an output format.</li>
+     * <li>The maximum available resolution for RAW_SENSOR streams
+     * will match either the value in
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
+     * <li>All DNG-related optional metadata entries are provided
+     * by the camera device.</li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 3;
 
     /**
      * <p>The camera device supports the Zero Shutter Lag use case.</p>
@@ -359,29 +368,6 @@ public abstract class CameraMetadata<TKey> {
      * @hide
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
-
-    /**
-     * <p>The camera device supports outputting RAW buffers that can be
-     * saved offline into a DNG format. It can reprocess DNG
-     * files (produced from the same camera device) back into YUV.</p>
-     * <ul>
-     * <li>At least one input stream can be used.</li>
-     * <li>RAW16 is supported as output/input format.</li>
-     * <li>RAW16 is reprocessable into both YUV_420_888 and JPEG
-     * formats.</li>
-     * <li>The maximum available resolution for RAW16 streams (both
-     * input/output) will match either the value in
-     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize} or
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</li>
-     * <li>All DNG-related optional metadata entries are provided
-     * by the camera device.</li>
-     * </ul>
-     *
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
-     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
-     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 5;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -1145,8 +1131,7 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.<br />
-     * </p>
+     * frame rate of video recording.  </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;

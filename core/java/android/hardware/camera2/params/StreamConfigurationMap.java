@@ -357,6 +357,10 @@ public final class StreamConfigurationMap {
      * <p>When multiple streams are used in a request, the minimum frame duration will be
      * {@code max(individual stream min durations)}.</p>
      *
+     * <p>For devices that do not support manual sensor control
+     * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
+     * this function may return {@link #NO_MIN_FRAME_DURATION}.</p>
+     *
      * <!--
      * TODO: uncomment after adding input stream support
      * <p>The minimum frame duration of a stream (of a particular format, size) is the same
@@ -366,8 +370,7 @@ public final class StreamConfigurationMap {
      * @param format an image format from {@link ImageFormat} or {@link PixelFormat}
      * @param size an output-compatible size
      * @return a minimum frame duration {@code >} 0 in nanoseconds, or
-     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available (this
-     *          can only occur on limited mode devices).
+     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
      * @throws NullPointerException if {@code size} was {@code null}
@@ -404,6 +407,10 @@ public final class StreamConfigurationMap {
      * <p>When multiple streams are used in a request, the minimum frame duration will be
      * {@code max(individual stream min durations)}.</p>
      *
+     * <p>For devices that do not support manual sensor control
+     * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
+     * this function may return {@link #NO_MIN_FRAME_DURATION}.</p>
+     *
      * <!--
      * TODO: uncomment after adding input stream support
      * <p>The minimum frame duration of a stream (of a particular format, size) is the same
@@ -415,8 +422,7 @@ public final class StreamConfigurationMap {
      *          non-empty array returned by {@link #getOutputSizes(Class)}
      * @param size an output-compatible size
      * @return a minimum frame duration {@code >} 0 in nanoseconds, or
-     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available (this
-     *          can only occur on limited mode devices).
+     *          {@link #NO_MIN_FRAME_DURATION} if the minimum frame duration is not available.
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
      * @throws NullPointerException if {@code size} or {@code klass} was {@code null}

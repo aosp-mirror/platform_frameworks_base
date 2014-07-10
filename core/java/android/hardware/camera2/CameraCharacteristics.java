@@ -862,6 +862,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * devices, but the application should query this field to be sure.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DNG
