@@ -80,6 +80,7 @@
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
+    <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />

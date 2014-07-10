@@ -16,10 +16,12 @@
 
 package android.app;
 
+import android.annotation.SdkConstant;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.WorkSource;
 
 /**
@@ -93,6 +95,17 @@ public class AlarmManager
      * wakes up.
      */
     public static final int ELAPSED_REALTIME = 3;
+
+    /**
+     * Broadcast Action: Sent after the value returned by
+     * {@link #getNextAlarmClock()} has changed.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * It is only sent to registered receivers.</p>
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED =
+            "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
 
     /** @hide */
     public static final long WINDOW_EXACT = 0;
@@ -188,7 +201,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null, null);
     }
 
     /**
@@ -249,7 +262,7 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null, null);
     }
 
     /**
@@ -299,7 +312,7 @@ public class AlarmManager
      */
     public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null, null);
     }
 
     /**
@@ -337,17 +350,45 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null, null);
+    }
+
+    /**
+     * Schedule an alarm that represents an alarm clock.
+     *
+     * The system may choose to display information about this alarm to the user.
+     *
+     * <p>
+     * This method is like {@link #setExact(int, long, PendingIntent)}, but implies
+     * {@link #RTC_WAKEUP}.
+     *
+     * @param info
+     * @param operation Action to perform when the alarm goes off;
+     *        typically comes from {@link PendingIntent#getBroadcast
+     *        IntentSender.getBroadcast()}.
+     *
+     * @see #set
+     * @see #setRepeating
+     * @see #setWindow
+     * @see #setExact
+     * @see #cancel
+     * @see #getNextAlarmClock()
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     */
+    public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
+        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, operation, null, info);
     }
 
     /** @hide */
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation, WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource, null);
     }
 
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            PendingIntent operation, WorkSource workSource) {
+            PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -361,7 +402,7 @@ public class AlarmManager
 
         try {
             mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
-                    workSource);
+                    workSource, alarmClock);
         } catch (RemoteException ex) {
         }
     }
@@ -461,7 +502,7 @@ public class AlarmManager
      */
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null, null);
     }
     
     /**
@@ -504,6 +545,38 @@ public class AlarmManager
         try {
             mService.setTimeZone(timeZone);
         } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * Gets information about the next alarm clock currently scheduled.
+     *
+     * The alarm clocks considered are those scheduled by {@link #setAlarmClock}
+     * from any package of the calling user.
+     *
+     * @see #setAlarmClock
+     * @see AlarmClockInfo
+     */
+    public AlarmClockInfo getNextAlarmClock() {
+        return getNextAlarmClock(UserHandle.myUserId());
+    }
+
+    /**
+     * Gets information about the next alarm clock currently scheduled.
+     *
+     * The alarm clocks considered are those scheduled by {@link #setAlarmClock}
+     * from any package of the given {@parm userId}.
+     *
+     * @see #setAlarmClock
+     * @see AlarmClockInfo
+     *
+     * @hide
+     */
+    public AlarmClockInfo getNextAlarmClock(int userId) {
+        try {
+            return mService.getNextAlarmClock(userId);
+        } catch (RemoteException ex) {
+            return null;
         }
     }
 }
