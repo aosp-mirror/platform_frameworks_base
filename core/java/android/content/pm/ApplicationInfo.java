@@ -491,13 +491,55 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String nativeLibraryDir;
 
     /**
-     * The ABI that this application requires, This is inferred from the ABIs
+     * The path under the apps data directory we store unpacked libraries. For
+     * new installs, we create subdirectories under legacyNativeLibraryDir that are
+     * architecture specific. For legacy installs, the shared libraries are
+     * placed directly under this path.
+     *
+     * For "legacy" installs {@code nativeLibraryDir} will be equal to this path.
+     * For newer installs, it will be derived based on the codePath and the primary
+     * cpu abi.
+     *
+     * @hide.
+     */
+    public String legacyNativeLibraryDir;
+
+    /**
+     * The primary ABI that this application requires, This is inferred from the ABIs
      * of the native JNI libraries the application bundles. Will be {@code null}
      * if this application does not require any particular ABI.
      *
+     * If non-null, the application will always be launched with this ABI.
+     *
      * {@hide}
      */
-    public String cpuAbi;
+    public String primaryCpuAbi;
+
+    /**
+     * The secondary ABI for this application. Might be non-null for multi-arch
+     * installs. The application itself never uses this ABI, but other applications that
+     * use its code might.
+     *
+     * {@hide}
+     */
+    public String secondaryCpuAbi;
+
+    /**
+     * The derived APK "root" for the given package. Will be non-null for bundled and
+     * updated system apps. This will be a top level path under which apks and libraries
+     * are installed, for eg. {@code /system}, {@code /oem} or {@code /vendor}. This is
+     * used to calculate the location of native code for a given package, for e.g
+     * {@code /vendor/lib} or {@code /vendor/lib64}.
+     *
+     * For app updates or fresh app installs, this will be {@code null} and we will use
+     * {@code legacyNativeLibraryDir}
+     *
+     * NOTE: This can be removed if we have a unified layout for bundled and installed
+     * apps.
+     *
+     * {@hide}
+     */
+    public String apkRoot;
 
     /**
      * The kernel user-ID that has been assigned to this application;
@@ -641,7 +683,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = orig.splitSourceDirs;
         splitPublicSourceDirs = orig.splitPublicSourceDirs;
         nativeLibraryDir = orig.nativeLibraryDir;
-        cpuAbi = orig.cpuAbi;
+        legacyNativeLibraryDir = orig.legacyNativeLibraryDir;
+        primaryCpuAbi = orig.primaryCpuAbi;
+        secondaryCpuAbi = orig.secondaryCpuAbi;
+        apkRoot = orig.apkRoot;
         resourceDirs = orig.resourceDirs;
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
@@ -685,7 +730,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
         dest.writeString(nativeLibraryDir);
-        dest.writeString(cpuAbi);
+        dest.writeString(legacyNativeLibraryDir);
+        dest.writeString(primaryCpuAbi);
+        dest.writeString(secondaryCpuAbi);
+        dest.writeString(apkRoot);
         dest.writeStringArray(resourceDirs);
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
@@ -728,7 +776,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
         nativeLibraryDir = source.readString();
-        cpuAbi = source.readString();
+        legacyNativeLibraryDir = source.readString();
+        primaryCpuAbi = source.readString();
+        secondaryCpuAbi = source.readString();
+        apkRoot = source.readString();
         resourceDirs = source.readStringArray();
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();

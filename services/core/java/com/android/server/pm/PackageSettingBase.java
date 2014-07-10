@@ -55,8 +55,16 @@ class PackageSettingBase extends GrantedPermissions {
     String codePathString;
     File resourcePath;
     String resourcePathString;
-    String nativeLibraryPathString;
-    String cpuAbiString;
+
+    /**
+     * The path under which native libraries for legacy apps are unpacked.
+     * Will be set to {@code null} for newer installs, where the path can be
+     * derived from {@link #codePath} unambiguously.
+     */
+    String legacyNativeLibraryPathString;
+
+    String primaryCpuAbiString;
+    String secondaryCpuAbiString;
     long timeStamp;
     long firstInstallTime;
     long lastUpdateTime;
@@ -84,11 +92,13 @@ class PackageSettingBase extends GrantedPermissions {
     /* package name of the app that installed this package */
     String installerPackageName;
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
-            String nativeLibraryPathString, String cpuAbiString, int pVersionCode, int pkgFlags) {
+            String legacyNativeLibraryPathString, String primaryCpuAbiString,
+            String secondaryCpuAbiString, int pVersionCode, int pkgFlags) {
         super(pkgFlags);
         this.name = name;
         this.realName = realName;
-        init(codePath, resourcePath, nativeLibraryPathString, cpuAbiString, pVersionCode);
+        init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
+                secondaryCpuAbiString, pVersionCode);
     }
 
     /**
@@ -104,8 +114,9 @@ class PackageSettingBase extends GrantedPermissions {
         codePathString = base.codePathString;
         resourcePath = base.resourcePath;
         resourcePathString = base.resourcePathString;
-        nativeLibraryPathString = base.nativeLibraryPathString;
-        cpuAbiString = base.cpuAbiString;
+        legacyNativeLibraryPathString = base.legacyNativeLibraryPathString;
+        primaryCpuAbiString = base.primaryCpuAbiString;
+        secondaryCpuAbiString = base.secondaryCpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
@@ -132,14 +143,15 @@ class PackageSettingBase extends GrantedPermissions {
 
     }
 
-    void init(File codePath, File resourcePath, String nativeLibraryPathString,
-            String requiredCpuAbiString, int pVersionCode) {
+    void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
+              String primaryCpuAbiString, String secondaryCpuAbiString, int pVersionCode) {
         this.codePath = codePath;
         this.codePathString = codePath.toString();
         this.resourcePath = resourcePath;
         this.resourcePathString = resourcePath.toString();
-        this.nativeLibraryPathString = nativeLibraryPathString;
-        this.cpuAbiString = requiredCpuAbiString;
+        this.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
+        this.primaryCpuAbiString = primaryCpuAbiString;
+        this.secondaryCpuAbiString = secondaryCpuAbiString;
         this.versionCode = pVersionCode;
     }
 
@@ -170,7 +182,8 @@ class PackageSettingBase extends GrantedPermissions {
         grantedPermissions = base.grantedPermissions;
         gids = base.gids;
 
-        cpuAbiString = base.cpuAbiString;
+        primaryCpuAbiString = base.primaryCpuAbiString;
+        secondaryCpuAbiString = base.secondaryCpuAbiString;
         timeStamp = base.timeStamp;
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
