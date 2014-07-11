@@ -20,10 +20,23 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Replaces calls to certain methods that do not exist in the Desktop VM.
  */
 public class ReplaceMethodCallsAdapter extends ClassVisitor {
+
+    /**
+     * Descriptors for specialized versions {@link System#arraycopy} that are not present on the
+     * Desktop VM.
+     */
+    private static Set<String> ARRAYCOPY_DESCRIPTORS = new HashSet<String>(Arrays.asList(
+            "([CI[CII)V", "([BI[BII)V", "([SI[SII)V", "([II[III)V",
+            "([JI[JII)V", "([FI[FII)V", "([DI[DII)V", "([ZI[ZII)V"));
+
     public ReplaceMethodCallsAdapter(ClassVisitor cv) {
         super(Opcodes.ASM4, cv);
     }
@@ -42,10 +55,12 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-            // Check if method is java.lang.System.arrayCopy([CI[CII)V
-            if (owner.equals("java/lang/System") && name.equals("arraycopy")
-                    && desc.equals("([CI[CII)V")) {
-                desc = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
+            // Check if method is a specialized version of java.lang.System.arrayCopy
+            if (owner.equals("java/lang/System") && name.equals("arraycopy")) {
+
+                if (ARRAYCOPY_DESCRIPTORS.contains(desc)) {
+                    desc = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
+                }
             }
             super.visitMethodInsn(opcode, owner, name, desc);
         }
