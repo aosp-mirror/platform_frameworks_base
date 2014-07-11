@@ -1505,4 +1505,6 @@
         <item>users</item>
     </string-array>
 
+    <bool name="config_networkSamplingWakesDevice">true</bool>
+
 </resources>
