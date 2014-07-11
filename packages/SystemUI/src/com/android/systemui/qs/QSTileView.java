@@ -190,6 +190,7 @@ public class QSTileView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
+        final int h = getMeasuredHeight();
 
         int top = 0;
         top += mTileSpacingPx;
@@ -199,8 +200,8 @@ public class QSTileView extends ViewGroup {
         if (mRipple != null) {
             // center the touch feedback on the center of the icon, and dial it down a bit
             final int cx = w / 2;
-            final int cy = mIcon.getTop() + mIcon.getHeight() / 2;
-            final int rad = (int)(mIcon.getHeight() * 1.5);
+            final int cy = mDual ? mIcon.getTop() + mIcon.getHeight() / 2 : h / 2;
+            final int rad = (int)(mIcon.getHeight() * 1.25);
             mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
         }
         top = mIcon.getBottom();
