@@ -20,7 +20,9 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1734,7 +1736,10 @@ public final class BluetoothAdapter {
      *
      * @param callback the callback LE scan results are delivered
      * @return true, if the scan was started successfully
+     * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
+     *             instead.
      */
+    @Deprecated
     public boolean startLeScan(LeScanCallback callback) {
         return startLeScan(null, callback);
     }
@@ -1751,7 +1756,10 @@ public final class BluetoothAdapter {
      * @param serviceUuids Array of services to look for
      * @param callback the callback LE scan results are delivered
      * @return true, if the scan was started successfully
+     * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
+     *             instead.
      */
+    @Deprecated
     public boolean startLeScan(UUID[] serviceUuids, LeScanCallback callback) {
         if (DBG) Log.d(TAG, "startLeScan(): " + serviceUuids);
 
@@ -1794,7 +1802,9 @@ public final class BluetoothAdapter {
      *
      * @param callback used to identify which scan to stop
      *        must be the same handle used to start the scan
+     * @deprecated Use {@link BluetoothLeScanner#stopScan(ScanCallback)} instead.
      */
+    @Deprecated
     public void stopLeScan(LeScanCallback callback) {
         if (DBG) Log.d(TAG, "stopLeScan()");
         GattCallbackWrapper wrapper;

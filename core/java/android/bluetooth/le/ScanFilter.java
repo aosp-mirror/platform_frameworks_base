@@ -45,10 +45,10 @@ import java.util.UUID;
 public final class ScanFilter implements Parcelable {
 
     @Nullable
-    private final String mLocalName;
+    private final String mDeviceName;
 
     @Nullable
-    private final String mMacAddress;
+    private final String mDeviceAddress;
 
     @Nullable
     private final ParcelUuid mServiceUuid;
@@ -69,14 +69,14 @@ public final class ScanFilter implements Parcelable {
     private final int mMinRssi;
     private final int mMaxRssi;
 
-    private ScanFilter(String name, String macAddress, ParcelUuid uuid,
+    private ScanFilter(String name, String deviceAddress, ParcelUuid uuid,
             ParcelUuid uuidMask, byte[] serviceData, byte[] serviceDataMask,
             int manufacturerId, byte[] manufacturerData, byte[] manufacturerDataMask,
             int minRssi, int maxRssi) {
-        mLocalName = name;
+        mDeviceName = name;
         mServiceUuid = uuid;
         mServiceUuidMask = uuidMask;
-        mMacAddress = macAddress;
+        mDeviceAddress = deviceAddress;
         mServiceData = serviceData;
         mServiceDataMask = serviceDataMask;
         mManufacturerId = manufacturerId;
@@ -93,13 +93,13 @@ public final class ScanFilter implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mLocalName == null ? 0 : 1);
-        if (mLocalName != null) {
-            dest.writeString(mLocalName);
+        dest.writeInt(mDeviceName == null ? 0 : 1);
+        if (mDeviceName != null) {
+            dest.writeString(mDeviceName);
         }
-        dest.writeInt(mMacAddress == null ? 0 : 1);
-        if (mMacAddress != null) {
-            dest.writeString(mMacAddress);
+        dest.writeInt(mDeviceAddress == null ? 0 : 1);
+        if (mDeviceAddress != null) {
+            dest.writeString(mDeviceAddress);
         }
         dest.writeInt(mServiceUuid == null ? 0 : 1);
         if (mServiceUuid != null) {
@@ -145,10 +145,10 @@ public final class ScanFilter implements Parcelable {
                 public ScanFilter createFromParcel(Parcel in) {
                     Builder builder = new Builder();
                     if (in.readInt() == 1) {
-                        builder.setName(in.readString());
+                        builder.setDeviceName(in.readString());
                     }
                     if (in.readInt() == 1) {
-                        builder.setMacAddress(in.readString());
+                        builder.setDeviceAddress(in.readString());
                     }
                     if (in.readInt() == 1) {
                         ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
@@ -196,11 +196,11 @@ public final class ScanFilter implements Parcelable {
             };
 
     /**
-     * Returns the filter set the local name field of Bluetooth advertisement data.
+     * Returns the filter set the device name field of Bluetooth advertisement data.
      */
     @Nullable
-    public String getLocalName() {
-        return mLocalName;
+    public String getDeviceName() {
+        return mDeviceName;
     }
 
     /**
@@ -218,7 +218,7 @@ public final class ScanFilter implements Parcelable {
 
     @Nullable
     public String getDeviceAddress() {
-        return mMacAddress;
+        return mDeviceAddress;
     }
 
     @Nullable
@@ -249,14 +249,14 @@ public final class ScanFilter implements Parcelable {
     }
 
     /**
-     * Returns minimum value of rssi for the scan filter. {@link Integer#MIN_VALUE} if not set.
+     * Returns minimum value of RSSI for the scan filter. {@link Integer#MIN_VALUE} if not set.
      */
     public int getMinRssi() {
         return mMinRssi;
     }
 
     /**
-     * Returns maximum value of the rssi for the scan filter. {@link Integer#MAX_VALUE} if not set.
+     * Returns maximum value of the RSSI for the scan filter. {@link Integer#MAX_VALUE} if not set.
      */
     public int getMaxRssi() {
         return mMaxRssi;
@@ -272,7 +272,7 @@ public final class ScanFilter implements Parcelable {
         }
         BluetoothDevice device = scanResult.getDevice();
         // Device match.
-        if (mMacAddress != null && (device == null || !mMacAddress.equals(device.getAddress()))) {
+        if (mDeviceAddress != null && (device == null || !mDeviceAddress.equals(device.getAddress()))) {
             return false;
         }
 
@@ -286,13 +286,13 @@ public final class ScanFilter implements Parcelable {
 
         // Scan record is null but there exist filters on it.
         if (scanRecord == null
-                && (mLocalName != null || mServiceUuid != null || mManufacturerData != null
+                && (mDeviceName != null || mServiceUuid != null || mManufacturerData != null
                         || mServiceData != null)) {
             return false;
         }
 
         // Local name match.
-        if (mLocalName != null && !mLocalName.equals(scanRecord.getLocalName())) {
+        if (mDeviceName != null && !mDeviceName.equals(scanRecord.getDeviceName())) {
             return false;
         }
 
@@ -367,7 +367,7 @@ public final class ScanFilter implements Parcelable {
 
     @Override
     public String toString() {
-        return "BluetoothLeScanFilter [mLocalName=" + mLocalName + ", mMacAddress=" + mMacAddress
+        return "BluetoothLeScanFilter [mDeviceName=" + mDeviceName + ", mDeviceAddress=" + mDeviceAddress
                 + ", mUuid=" + mServiceUuid + ", mUuidMask=" + mServiceUuidMask + ", mServiceData="
                 + Arrays.toString(mServiceData) + ", mServiceDataMask="
                 + Arrays.toString(mServiceDataMask) + ", mManufacturerId=" + mManufacturerId
@@ -378,7 +378,7 @@ public final class ScanFilter implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mLocalName, mMacAddress, mManufacturerId, mManufacturerData,
+        return Objects.hash(mDeviceName, mDeviceAddress, mManufacturerId, mManufacturerData,
                 mManufacturerDataMask, mMaxRssi, mMinRssi, mServiceData, mServiceDataMask,
                 mServiceUuid, mServiceUuidMask);
     }
@@ -392,8 +392,8 @@ public final class ScanFilter implements Parcelable {
             return false;
         }
         ScanFilter other = (ScanFilter) obj;
-        return Objects.equals(mLocalName, other.mLocalName) &&
-                Objects.equals(mMacAddress, other.mMacAddress) &&
+        return Objects.equals(mDeviceName, other.mDeviceName) &&
+                Objects.equals(mDeviceAddress, other.mDeviceAddress) &&
                         mManufacturerId == other.mManufacturerId &&
                 Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
                 Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
@@ -409,8 +409,8 @@ public final class ScanFilter implements Parcelable {
      */
     public static final class Builder {
 
-        private String mLocalName;
-        private String mMacAddress;
+        private String mDeviceName;
+        private String mDeviceAddress;
 
         private ParcelUuid mServiceUuid;
         private ParcelUuid mUuidMask;
@@ -426,26 +426,26 @@ public final class ScanFilter implements Parcelable {
         private int mMaxRssi = Integer.MAX_VALUE;
 
         /**
-         * Set filter on local name.
+         * Set filter on device name.
          */
-        public Builder setName(String localName) {
-            mLocalName = localName;
+        public Builder setDeviceName(String deviceName) {
+            mDeviceName = deviceName;
             return this;
         }
 
         /**
-         * Set filter on device mac address.
+         * Set filter on device address.
          *
-         * @param macAddress The device mac address for the filter. It needs to be in the format of
-         *            "01:02:03:AB:CD:EF". The mac address can be validated using
+         * @param deviceAddress The device Bluetooth address for the filter. It needs to be in
+         *            the format of "01:02:03:AB:CD:EF". The device address can be validated using
          *            {@link BluetoothAdapter#checkBluetoothAddress}.
-         * @throws IllegalArgumentException If the {@code macAddress} is invalid.
+         * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
          */
-        public Builder setMacAddress(String macAddress) {
-            if (macAddress != null && !BluetoothAdapter.checkBluetoothAddress(macAddress)) {
-                throw new IllegalArgumentException("invalid mac address " + macAddress);
+        public Builder setDeviceAddress(String deviceAddress) {
+            if (deviceAddress != null && !BluetoothAdapter.checkBluetoothAddress(deviceAddress)) {
+                throw new IllegalArgumentException("invalid device address " + deviceAddress);
             }
-            mMacAddress = macAddress;
+            mDeviceAddress = deviceAddress;
             return this;
         }
 
@@ -564,7 +564,7 @@ public final class ScanFilter implements Parcelable {
         }
 
         /**
-         * Set the desired rssi range for the filter. A scan result with rssi in the range of
+         * Set the desired RSSI range for the filter. A scan result with RSSI in the range of
          * [minRssi, maxRssi] will be consider as a match.
          */
         public Builder setRssiRange(int minRssi, int maxRssi) {
@@ -579,7 +579,7 @@ public final class ScanFilter implements Parcelable {
          * @throws IllegalArgumentException If the filter cannot be built.
          */
         public ScanFilter build() {
-            return new ScanFilter(mLocalName, mMacAddress,
+            return new ScanFilter(mDeviceName, mDeviceAddress,
                     mServiceUuid, mUuidMask,
                     mServiceData, mServiceDataMask,
                     mManufacturerId, mManufacturerData, mManufacturerDataMask, mMinRssi, mMaxRssi);

@@ -18,7 +18,7 @@ package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.AdvertiseSettings;
-import android.bluetooth.le.AdvertisementData;
+import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.os.ParcelUuid;
@@ -40,8 +40,8 @@ interface IBluetoothGatt {
     void stopScan(in int appIf, in boolean isServer);
     void flushPendingBatchResults(in int appIf, in boolean isServer);
     void startMultiAdvertising(in int appIf,
-                               in AdvertisementData advertiseData,
-                               in AdvertisementData scanResponse,
+                               in AdvertiseData advertiseData,
+                               in AdvertiseData scanResponse,
                                in AdvertiseSettings settings);
     void stopMultiAdvertising(in int appIf);
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);

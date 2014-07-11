@@ -33,17 +33,17 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * This class provides a way to perform Bluetooth LE advertise operations, such as start and stop
- * advertising. An advertiser can broadcast up to 31 bytes of advertisement data represented by
- * {@link AdvertisementData}.
+ * This class provides a way to perform Bluetooth LE advertise operations, such as starting and
+ * stopping advertising. An advertiser can broadcast up to 31 bytes of advertisement data
+ * represented by {@link AdvertiseData}.
  * <p>
  * To get an instance of {@link BluetoothLeAdvertiser}, call the
  * {@link BluetoothAdapter#getBluetoothLeAdvertiser()} method.
  * <p>
- * Note most of the methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+ * <b>Note:</b> Most of the methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
  * permission.
  *
- * @see AdvertisementData
+ * @see AdvertiseData
  */
 public final class BluetoothLeAdvertiser {
 
@@ -57,8 +57,6 @@ public final class BluetoothLeAdvertiser {
 
     /**
      * Use BluetoothAdapter.getLeAdvertiser() instead.
-     *
-     * @param bluetoothManager
      * @hide
      */
     public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
@@ -68,8 +66,8 @@ public final class BluetoothLeAdvertiser {
     }
 
     /**
-     * Start Bluetooth LE Advertising. The {@code advertiseData} would be broadcasted after the
-     * operation succeeds. Returns immediately, the operation status are delivered through
+     * Start Bluetooth LE Advertising. On success, the {@code advertiseData} will be
+     * broadcasted. Returns immediately, the operation status is delivered through
      * {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
@@ -79,15 +77,15 @@ public final class BluetoothLeAdvertiser {
      * @param callback Callback for advertising status.
      */
     public void startAdvertising(AdvertiseSettings settings,
-            AdvertisementData advertiseData, final AdvertiseCallback callback) {
+            AdvertiseData advertiseData, final AdvertiseCallback callback) {
         startAdvertising(settings, advertiseData, null, callback);
     }
 
     /**
-     * Start Bluetooth LE Advertising. The {@code advertiseData} would be broadcasted after the
-     * operation succeeds. The {@code scanResponse} would be returned when the scanning device sends
-     * active scan request. Method returns immediately, the operation status are delivered through
-     * {@code callback}.
+     * Start Bluetooth LE Advertising. The {@code advertiseData} will be broadcasted if the
+     * operation succeeds. The {@code scanResponse} is returned when a scanning device sends
+     * an active scan request. This method returns immediately, the operation status is
+     * delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
@@ -97,7 +95,7 @@ public final class BluetoothLeAdvertiser {
      * @param callback Callback for advertising status.
      */
     public void startAdvertising(AdvertiseSettings settings,
-            AdvertisementData advertiseData, AdvertisementData scanResponse,
+            AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
@@ -110,8 +108,8 @@ public final class BluetoothLeAdvertiser {
         try {
             gatt = mBluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to get bluetooth gatt - ", e);
-            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_CONTROLLER_FAILURE);
+            Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
+            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
             return;
         }
         if (!mBluetoothAdapter.isMultipleAdvertisementSupported()) {
@@ -127,7 +125,7 @@ public final class BluetoothLeAdvertiser {
                 mLeAdvertisers.put(callback, wrapper);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to stop advertising", e);
+            Log.e(TAG, "Failed to stop advertising", e);
         }
     }
 
@@ -137,31 +135,24 @@ public final class BluetoothLeAdvertiser {
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
-     * @param callback {@link AdvertiseCallback} for delivering stopping advertising status.
+     * @param callback {@link AdvertiseCallback} identifies the advertising instance to stop.
      */
     public void stopAdvertising(final AdvertiseCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         AdvertiseCallbackWrapper wrapper = mLeAdvertisers.get(callback);
-        if (wrapper == null) {
-            postCallbackFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_NOT_STARTED);
-            return;
-        }
+        if (wrapper == null) return;
+
         try {
             IBluetoothGatt gatt = mBluetoothManager.getBluetoothGatt();
-            if (gatt == null) {
-                postCallbackFailure(callback,
-                        AdvertiseCallback.ADVERTISE_FAILED_GATT_SERVICE_FAILURE);
-            }
-            gatt.stopMultiAdvertising(wrapper.mLeHandle);
+            if (gatt != null) gatt.stopMultiAdvertising(wrapper.mLeHandle);
+
             if (wrapper.advertiseStopped()) {
                 mLeAdvertisers.remove(callback);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to stop advertising", e);
-            postCallbackFailure(callback,
-                    AdvertiseCallback.ADVERTISE_FAILED_GATT_SERVICE_FAILURE);
+            Log.e(TAG, "Failed to stop advertising", e);
         }
     }
 
@@ -171,8 +162,8 @@ public final class BluetoothLeAdvertiser {
     private static class AdvertiseCallbackWrapper extends IBluetoothGattCallback.Stub {
         private static final int LE_CALLBACK_TIMEOUT_MILLIS = 2000;
         private final AdvertiseCallback mAdvertiseCallback;
-        private final AdvertisementData mAdvertisement;
-        private final AdvertisementData mScanResponse;
+        private final AdvertiseData mAdvertisement;
+        private final AdvertiseData mScanResponse;
         private final AdvertiseSettings mSettings;
         private final IBluetoothGatt mBluetoothGatt;
 
@@ -183,7 +174,7 @@ public final class BluetoothLeAdvertiser {
         private boolean isAdvertising = false;
 
         public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
-                AdvertisementData advertiseData, AdvertisementData scanResponse,
+                AdvertiseData advertiseData, AdvertiseData scanResponse,
                 AdvertiseSettings settings,
                 IBluetoothGatt bluetoothGatt) {
             mAdvertiseCallback = advertiseCallback;
@@ -347,8 +338,12 @@ public final class BluetoothLeAdvertiser {
 
         @Override
         public void onMultiAdvertiseCallback(int status) {
+            // TODO: This logic needs to be re-visited to account
+            //       for whether the scan has actually been started
+            //       or not. Toggling the isAdvertising does not seem
+            //       correct.
             synchronized (this) {
-                if (status == 0) {
+                if (status == AdvertiseCallback.ADVERTISE_SUCCESS) {
                     isAdvertising = !isAdvertising;
                     if (!isAdvertising) {
                         try {
@@ -357,10 +352,11 @@ public final class BluetoothLeAdvertiser {
                         } catch (RemoteException e) {
                             Log.e(TAG, "remote exception when unregistering", e);
                         }
+                    } else {
+                        mAdvertiseCallback.onStartSuccess(null);
                     }
-                    mAdvertiseCallback.onSuccess(null);
                 } else {
-                    mAdvertiseCallback.onFailure(status);
+                    if (!isAdvertising) mAdvertiseCallback.onStartFailure(status);
                 }
                 notifyAll();
             }
@@ -398,7 +394,7 @@ public final class BluetoothLeAdvertiser {
         mHandler.post(new Runnable() {
                 @Override
             public void run() {
-                callback.onFailure(error);
+                callback.onStartFailure(error);
             }
         });
     }

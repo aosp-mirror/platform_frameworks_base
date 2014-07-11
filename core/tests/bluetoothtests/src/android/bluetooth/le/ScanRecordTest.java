@@ -51,7 +51,7 @@ public class ScanRecordTest extends TestCase {
         assertTrue(data.getServiceUuids().contains(uuid1));
         assertTrue(data.getServiceUuids().contains(uuid2));
 
-        assertEquals("Ped", data.getLocalName());
+        assertEquals("Ped", data.getDeviceName());
         assertEquals(-20, data.getTxPowerLevel());
 
         assertEquals(224, data.getManufacturerId());
