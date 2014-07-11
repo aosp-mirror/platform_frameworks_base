@@ -341,21 +341,6 @@ interface INetworkManagementService
     int getMarkForUid(int uid);
 
     /**
-     * Get the SO_MARK associated with protecting packets from VPN routing rules
-     */
-    int getMarkForProtect();
-
-    /**
-     * Route all traffic in {@code route} to {@code iface} setup for marked forwarding
-     */
-    void setMarkedForwardingRoute(String iface, in RouteInfo route);
-
-    /**
-     * Clear routes set by {@link setMarkedForwardingRoute}
-     */
-    void clearMarkedForwardingRoute(String iface, in RouteInfo route);
-
-    /**
      * Exempts {@code host} from the routing set up by {@link setMarkedForwardingRoute}
      * All connects to {@code host} will use the global routing table
      */
