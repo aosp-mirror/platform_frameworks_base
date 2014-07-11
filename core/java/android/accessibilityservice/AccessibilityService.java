@@ -353,6 +353,11 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_QUICK_SETTINGS = 5;
 
+    /**
+     * Action to open the power long-press dialog.
+     */
+    public static final int GLOBAL_ACTION_POWER_DIALOG = 6;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**

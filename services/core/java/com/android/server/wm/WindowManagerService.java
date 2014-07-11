@@ -5171,6 +5171,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void showGlobalActions() {
+        mPolicy.showGlobalActions();
+    }
+
     @Override
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
@@ -11130,7 +11134,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public boolean isKeyguardLocked() {
-            return isKeyguardLocked();
+            return WindowManagerService.this.isKeyguardLocked();
+        }
+
+        @Override
+        public void showGlobalActions() {
+            WindowManagerService.this.showGlobalActions();
         }
 
         @Override

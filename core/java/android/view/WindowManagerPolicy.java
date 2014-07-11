@@ -1162,6 +1162,12 @@ public interface WindowManagerPolicy {
     public void showRecentApps();
 
     /**
+     * Show the global actions dialog.
+     * @hide
+     */
+    public void showGlobalActions();
+
+    /**
      * @return The current height of the input method window.
      */
     public int getInputMethodWindowVisibleHeightLw();

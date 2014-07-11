@@ -527,6 +527,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_WINDOW_MANAGER_DRAWN_COMPLETE = 7;
     private static final int MSG_WAKING_UP = 8;
     private static final int MSG_DISPATCH_SHOW_RECENTS = 9;
+    private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -546,6 +547,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_SHOW_RECENTS:
                     showRecentApps(false);
+                    break;
+                case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
+                    showGlobalActionsInternal();
                     break;
                 case MSG_KEYGUARD_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
@@ -859,8 +863,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
                     performAuditoryFeedbackForAccessibilityIfNeed();
                 }
-                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-                showGlobalActionsDialog();
+                showGlobalActionsInternal();
                 break;
             case LONG_PRESS_POWER_SHUT_OFF:
             case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
@@ -880,7 +883,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    void showGlobalActionsDialog() {
+    @Override
+    public void showGlobalActions() {
+        mHandler.removeMessages(MSG_DISPATCH_SHOW_GLOBAL_ACTIONS);
+        mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_GLOBAL_ACTIONS);
+    }
+
+    void showGlobalActionsInternal() {
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
         }
