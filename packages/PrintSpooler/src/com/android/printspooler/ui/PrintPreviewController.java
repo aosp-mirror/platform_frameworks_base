@@ -45,22 +45,17 @@ import java.util.List;
 class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallback,
         PageAdapter.PreviewArea, EmbeddedContentContainer.OnSizeChangeListener {
 
-    private PrintActivity mActivity;
+    private final PrintActivity mActivity;
 
     private final MutexFileProvider mFileProvider;
-
     private final MyHandler mHandler;
 
     private final PageAdapter mPageAdapter;
-
     private final StaggeredGridLayoutManager mLayoutManger;
 
-    private PrintOptionsLayout mPrintOptionsLayout;
-
+    private final PrintOptionsLayout mPrintOptionsLayout;
     private final RecyclerView mRecyclerView;
-
     private final PrintContentView mContentView;
-
     private final EmbeddedContentContainer mEmbeddedContentContainer;
 
     private final PreloadController mPreloadController;
@@ -79,6 +74,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
                 R.integer.preview_page_per_row_count);
 
         mLayoutManger = new StaggeredGridLayoutManager(columnCount, OrientationHelper.VERTICAL);
+
         mRecyclerView = (RecyclerView) activity.findViewById(R.id.preview_content);
         mRecyclerView.setLayoutManager(mLayoutManger);
         mRecyclerView.setAdapter(mPageAdapter);

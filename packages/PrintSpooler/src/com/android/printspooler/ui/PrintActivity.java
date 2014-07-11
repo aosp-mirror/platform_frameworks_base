@@ -268,7 +268,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         mPrintPreviewController = new PrintPreviewController(PrintActivity.this,
                 fileProvider);
-
         mPrintedDocument = new RemotePrintDocument(PrintActivity.this,
                 IPrintDocumentAdapter.Stub.asInterface(documentAdapter),
                 fileProvider, new RemotePrintDocument.DocumentObserver() {
@@ -277,23 +276,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 finish();
             }
         }, PrintActivity.this);
-
         mProgressMessageController = new ProgressMessageController(
                 PrintActivity.this);
-
         mMediaSizeComparator = new MediaSizeComparator(PrintActivity.this);
-
         mDestinationSpinnerAdapter = new DestinationAdapter();
 
         bindUi();
-
         updateOptionsUi();
 
         // Now show the updated UI to avoid flicker.
         mOptionsContent.setVisibility(View.VISIBLE);
-
         mSelectedPages = computeSelectedPages();
-
         mPrintedDocument.start();
 
         ensurePreviewUiShown();
@@ -345,7 +338,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.isTracking() && !event.isCanceled()) {
-            if (mPrintPreviewController != null&&mPrintPreviewController.isOptionsOpened() && !hasErrors()) {
+            if (mPrintPreviewController != null&&mPrintPreviewController.isOptionsOpened()
+                    && !hasErrors()) {
                 mPrintPreviewController.closeOptions();
             } else {
                 cancelPrint();
@@ -364,8 +358,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public void onActionPerformed() {
-        if (mState == STATE_UPDATE_FAILED
-                && canUpdateDocument()) {
+        if (mState == STATE_UPDATE_FAILED && canUpdateDocument()) {
             updateDocument(true, true);
             ensurePreviewUiShown();
             setState(STATE_CONFIGURING);
@@ -648,7 +641,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
             MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
             for (int i = 0; i < mediaSizeCount; i++) {
-                MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i).value.asPortrait();
+                MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i)
+                        .value.asPortrait();
                 if (supportedSizePortrait.equals(newMediaSizePortrait)) {
                     currAttributes.setMediaSize(newMediaSize);
                     mMediaSizeSpinner.setSelection(i);

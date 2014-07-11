@@ -37,6 +37,11 @@ import com.android.printspooler.R;
 public final class PrintContentView extends ViewGroup implements View.OnClickListener {
     private static final int FIRST_POINTER_ID = 0;
 
+    private static final int ALPHA_MASK = 0xff000000;
+    private static final int ALPHA_SHIFT = 24;
+
+    private static final int COLOR_MASK = 0xffffff;
+
     private final ViewDragHelper mDragger;
 
     private final int mScrimColor;
@@ -187,9 +192,9 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
     }
 
     private int computeScrimColor() {
-        final int baseAlpha = (mScrimColor & 0xff000000) >>> 24;
+        final int baseAlpha = (mScrimColor & ALPHA_MASK) >>> ALPHA_SHIFT;
         final int adjustedAlpha = (int) (baseAlpha * (1 - mDragProgress));
-        return adjustedAlpha << 24 | (mScrimColor & 0xffffff);
+        return adjustedAlpha << ALPHA_SHIFT | (mScrimColor & COLOR_MASK);
     }
 
     private int getOpenedOptionsY() {

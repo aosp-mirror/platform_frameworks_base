@@ -87,7 +87,7 @@ public final class PageRange implements Parcelable {
      * @hide
      */
     public boolean contains(int pageIndex) {
-        return pageIndex >= mStart && pageIndex <= mEnd;
+        return (pageIndex >= mStart) && (pageIndex <= mEnd);
     }
 
     /**

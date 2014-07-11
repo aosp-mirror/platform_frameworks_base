@@ -38,4 +38,6 @@
 
     <dimen name="preview_list_padding">24dip</dimen>
 
+    <dimen name="preview_controls_elevation">8dip</dimen>
+
 </resources>

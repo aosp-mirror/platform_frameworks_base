@@ -68,54 +68,42 @@ public final class PageAdapter extends Adapter {
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final SparseArray<Void> mBoundPagesInAdapter = new SparseArray<>();
-
     private final SparseArray<Void> mConfirmedPagesInDocument = new SparseArray<>();
 
     private final PageClickListener mPageClickListener = new PageClickListener();
 
+    private final Context mContext;
     private final LayoutInflater mLayoutInflater;
 
-    private final Context mContext;
-
     private final ContentUpdateRequestCallback mContentUpdateRequestCallback;
-
     private final PageContentRepository mPageContentRepository;
-
     private final PreviewArea mPreviewArea;
-
-    private int mDocumentPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
-
-    private int mSelectedPageCount;
 
     // Which document pages to be written.
     private PageRange[] mRequestedPages;
-
     // Pages written in the current file.
     private PageRange[] mWrittenPages;
-
     // Pages the user selected in the UI.
     private PageRange[] mSelectedPages;
 
-    private float mSelectedPageElevation;
+    private int mDocumentPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+    private int mSelectedPageCount;
 
+    private float mSelectedPageElevation;
     private float mUnselectedPageElevation;
 
     private int mPreviewPageMargin;
-
     private int mPreviewListPadding;
-
     private int mFooterHeight;
 
     private int mColumnCount;
 
     private MediaSize mMediaSize;
-
     private Margins mMinMargins;
 
     private int mState;
 
     private int mPageContentWidth;
-
     private int mPageContentHeight;
 
     public interface ContentUpdateRequestCallback {

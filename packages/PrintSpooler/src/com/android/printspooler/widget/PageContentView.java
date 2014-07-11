@@ -43,7 +43,6 @@ public class PageContentView extends View
     private PageContentProvider mProvider;
 
     private MediaSize mMediaSize;
-
     private Margins mMinMargins;
 
     private boolean mContentRequested;

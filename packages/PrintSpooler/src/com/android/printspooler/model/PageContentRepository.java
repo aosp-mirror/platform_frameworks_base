@@ -44,7 +44,7 @@ import java.util.Map;
 public final class PageContentRepository {
     private static final String LOG_TAG = "PageContentRepository";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int INVALID_PAGE_INDEX = -1;
 
