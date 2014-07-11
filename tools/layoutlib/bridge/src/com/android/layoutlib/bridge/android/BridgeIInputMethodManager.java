@@ -237,9 +237,4 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public void setCursorAnchorMonitorMode(IBinder arg0, int arg1) {
-      // TODO Auto-generated method stub
-    }
 }
