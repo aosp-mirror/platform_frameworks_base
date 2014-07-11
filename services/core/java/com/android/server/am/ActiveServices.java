@@ -961,7 +961,7 @@ public final class ActiveServices {
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
         userId = mAm.handleIncomingUser(callingPid, callingUid, userId,
-                false, true, "service", null);
+                false, ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE, "service", null);
 
         ServiceMap smap = getServiceMap(userId);
         final ComponentName comp = service.getComponent();

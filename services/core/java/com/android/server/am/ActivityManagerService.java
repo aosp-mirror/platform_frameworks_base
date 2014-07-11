@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -42,6 +43,7 @@ import android.os.PersistableBundle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 
+import android.util.SparseIntArray;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
@@ -342,6 +344,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // How many bytes to write into the dropbox log before truncating
     static final int DROPBOX_MAX_SIZE = 256 * 1024;
+
+    // Access modes for handleIncomingUser.
+    static final int ALLOW_NON_FULL = 0;
+    static final int ALLOW_NON_FULL_IN_PROFILE = 1;
+    static final int ALLOW_FULL_ONLY = 2;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -1094,6 +1101,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     int mCurrentUserId = 0;
     int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER}; // Accessed by ActivityStack
+
+    /**
+     * Mapping from each known user ID to the profile group ID it is associated with.
+     */
+    SparseIntArray mUserProfileGroupIdsSelfLocked = new SparseIntArray();
+
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -3340,7 +3353,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivity", null);
+                false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
@@ -3354,12 +3367,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityAndWait");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivityAndWait", null);
+                false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                res, null, options, UserHandle.getCallingUserId(), null);
+                res, null, options, userId, null);
         return res;
     }
 
@@ -3370,7 +3383,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivityWithConfig", null);
+                false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
@@ -3428,7 +3441,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new NullPointerException("null session or interactor");
         }
         userId = handleIncomingUser(callingPid, callingUid, userId,
-                false, true, "startVoiceActivity", null);
+                false, ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
                 resolvedType, session, interactor, null, null, 0, startFlags,
@@ -3547,7 +3560,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     IActivityContainer container) {
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivityInPackage", null);
+                false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
 
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
@@ -3562,7 +3575,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int userId) {
         enforceNotIsolatedCaller("startActivities");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivity", null);
+                false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivities(caller, -1, callingPackage, intents,
                 resolvedTypes, resultTo, options, userId);
@@ -3574,7 +3587,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Bundle options, int userId) {
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "startActivityInPackage", null);
+                false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivities(null, uid, callingPackage, intents, resolvedTypes,
                 resultTo, options, userId);
@@ -4496,7 +4509,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         userId = handleIncomingUser(pid, uid,
-                userId, false, true, "clearApplicationUserData", null);
+                userId, false, ALLOW_FULL_ONLY, "clearApplicationUserData", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -4564,7 +4577,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, true, true, "killBackgroundProcesses", null);
+                userId, true, ALLOW_FULL_ONLY, "killBackgroundProcesses", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -4647,7 +4660,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final int callingPid = Binder.getCallingPid();
         userId = handleIncomingUser(callingPid, Binder.getCallingUid(),
-                userId, true, true, "forceStopPackage", null);
+                userId, true, ALLOW_FULL_ONLY, "forceStopPackage", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -5714,8 +5727,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             int callingUid = Binder.getCallingUid();
             int origUserId = userId;
             userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
-                    type == ActivityManager.INTENT_SENDER_BROADCAST, false,
-                    "getIntentSender", null);
+                    type == ActivityManager.INTENT_SENDER_BROADCAST,
+                    ALLOW_NON_FULL, "getIntentSender", null);
             if (origUserId == UserHandle.USER_CURRENT) {
                 // We don't want to evaluate this until the pending intent is
                 // actually executed.  However, we do want to always do the
@@ -7287,7 +7300,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
-                false, true, "getRecentTasks", null);
+                false, ALLOW_FULL_ONLY, "getRecentTasks", null);
 
         synchronized (this) {
             final boolean allowed = checkCallingPermission(
@@ -7958,14 +7971,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
-            if (UserHandle.getUserId(callingUid) != userId) {
-                if (checkAuthorityGrants(callingUid, cpi, userId, checkUser)) {
+            int tmpTargetUserId = unsafeConvertIncomingUser(UserHandle.getUserId(callingUid));
+            if (tmpTargetUserId != userId) {
+                if (checkAuthorityGrants(callingUid, cpi, tmpTargetUserId, checkUser)) {
                     return null;
                 }
                 checkedGrants = true;
             }
             userId = handleIncomingUser(callingPid, callingUid, userId,
-                    false, false, "checkContentProviderPermissionLocked " + cpi.authority, null);
+                    false, ALLOW_NON_FULL_IN_PROFILE,
+                    "checkContentProviderPermissionLocked " + cpi.authority, null);
+            if (userId != tmpTargetUserId) {
+                // When we actually went to determine the final targer user ID, this ended
+                // up different than our initial check for the authority.  This is because
+                // they had asked for USER_CURRENT_OR_SELF and we ended up switching to
+                // SELF.  So we need to re-check the grants again.
+                checkedGrants = false;
+            }
         }
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
                 cpi.applicationInfo.uid, cpi.exported)
@@ -8024,7 +8046,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean checkAuthorityGrants(int callingUid, ProviderInfo cpi, int userId, boolean checkUser) {
         final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
         if (perms != null) {
-            for (GrantUri grantUri : perms.keySet()) {
+            for (int i=perms.size()-1; i>=0; i--) {
+                GrantUri grantUri = perms.keyAt(i);
                 if (grantUri.sourceUserId == userId || !checkUser) {
                     if (matchesProvider(grantUri.uri, cpi)) {
                         return true;
@@ -8439,7 +8462,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call getContentProviderExternal()");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false, true, "getContentProvider", null);
+                false, ALLOW_FULL_ONLY, "getContentProvider", null);
         return getContentProviderExternalUnchecked(name, token, userId);
     }
 
@@ -8733,7 +8756,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public String getProviderMimeType(Uri uri, int userId) {
         enforceNotIsolatedCaller("getProviderMimeType");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, true, "getProviderMimeType", null);
+                userId, false, ALLOW_NON_FULL_IN_PROFILE, "getProviderMimeType", null);
         final String name = uri.getAuthority();
         final long ident = Binder.clearCallingIdentity();
         ContentProviderHolder holder = null;
@@ -9899,6 +9922,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
+            // Make sure we have the current profile info, since it is needed for
+            // security checks.
+            updateCurrentProfileIdsLocked();
+
             if (mRecentTasks == null) {
                 mRecentTasks = mTaskPersister.restoreTasksLocked();
                 if (!mRecentTasks.isEmpty()) {
@@ -10131,7 +10158,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     throws RemoteException {
                             }
                         }, 0, null, null,
-                        android.Manifest.permission.INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
+                        INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                         true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } catch (Throwable t) {
                 Slog.wtf(TAG, "Failed sending first user broadcasts", t);
@@ -11577,6 +11604,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("]");
             if (dumpAll) {
                 pw.print("  mStartedUserArray: "); pw.println(Arrays.toString(mStartedUserArray));
+            }
+            synchronized (mUserProfileGroupIdsSelfLocked) {
+                if (mUserProfileGroupIdsSelfLocked.size() > 0) {
+                    pw.println("  mUserProfileGroupIds:");
+                    for (int i=0; i<mUserProfileGroupIdsSelfLocked.size(); i++) {
+                        pw.print("    User #");
+                        pw.print(mUserProfileGroupIdsSelfLocked.keyAt(i));
+                        pw.print(" -> profile #");
+                        pw.println(mUserProfileGroupIdsSelfLocked.valueAt(i));
+                    }
+                }
             }
         }
         if (mHomeProcess != null && (dumpPackage == null
@@ -13329,6 +13367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // SERVICES
     // =========================================================
 
+    @Override
     public List<ActivityManager.RunningServiceInfo> getServices(int maxNum,
             int flags) {
         enforceNotIsolatedCaller("getServices");
@@ -13337,13 +13376,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public PendingIntent getRunningServiceControlPanel(ComponentName name) {
         enforceNotIsolatedCaller("getRunningServiceControlPanel");
         synchronized (this) {
             return mServices.getRunningServiceControlPanelLocked(name);
         }
     }
-    
+
+    @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
             String resolvedType, int userId) {
         enforceNotIsolatedCaller("startService");
@@ -13378,6 +13419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public int stopService(IApplicationThread caller, Intent service,
             String resolvedType, int userId) {
         enforceNotIsolatedCaller("stopService");
@@ -13391,6 +13433,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public IBinder peekService(Intent service, String resolvedType) {
         enforceNotIsolatedCaller("peekService");
         // Refuse possible leaked file descriptors
@@ -13402,6 +13445,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
+    @Override
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) {
         synchronized(this) {
@@ -13409,6 +13453,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void setServiceForeground(ComponentName className, IBinder token,
             int id, Notification notification, boolean removeNotification) {
         synchronized(this) {
@@ -13417,59 +13462,97 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) {
+        return handleIncomingUser(callingPid, callingUid, userId, allowAll,
+                requireFull ? ALLOW_FULL_ONLY : ALLOW_NON_FULL, name, callerPackage);
+    }
+
+    int unsafeConvertIncomingUser(int userId) {
+        return (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF)
+                ? mCurrentUserId : userId;
+    }
+
+    int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
+            int allowMode, String name, String callerPackage) {
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (callingUserId != userId) {
-            if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-                if ((requireFull || checkComponentPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        callingPid, callingUid, -1, true) != PackageManager.PERMISSION_GRANTED)
-                        && checkComponentPermission(INTERACT_ACROSS_USERS_FULL,
-                                callingPid, callingUid, -1, true)
-                                != PackageManager.PERMISSION_GRANTED) {
-                    if (userId == UserHandle.USER_CURRENT_OR_SELF) {
-                        // In this case, they would like to just execute as their
-                        // owner user instead of failing.
-                        userId = callingUserId;
-                    } else {
-                        StringBuilder builder = new StringBuilder(128);
-                        builder.append("Permission Denial: ");
-                        builder.append(name);
-                        if (callerPackage != null) {
-                            builder.append(" from ");
-                            builder.append(callerPackage);
-                        }
-                        builder.append(" asks to run as user ");
-                        builder.append(userId);
-                        builder.append(" but is calling from user ");
-                        builder.append(UserHandle.getUserId(callingUid));
-                        builder.append("; this requires ");
-                        builder.append(INTERACT_ACROSS_USERS_FULL);
-                        if (!requireFull) {
-                            builder.append(" or ");
-                            builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
-                        }
-                        String msg = builder.toString();
-                        Slog.w(TAG, msg);
-                        throw new SecurityException(msg);
+        if (callingUserId == userId) {
+            return userId;
+        }
+
+        // Note that we may be accessing mCurrentUserId outside of a lock...
+        // shouldn't be a big deal, if this is being called outside
+        // of a locked context there is intrinsically a race with
+        // the value the caller will receive and someone else changing it.
+        // We assume that USER_CURRENT_OR_SELF will use the current user; later
+        // we will switch to the calling user if access to the current user fails.
+        int targetUserId = unsafeConvertIncomingUser(userId);
+
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+            final boolean allow;
+            if (checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
+                    callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+                // If the caller has this permission, they always pass go.  And collect $200.
+                allow = true;
+            } else if (allowMode == ALLOW_FULL_ONLY) {
+                // We require full access, sucks to be you.
+                allow = false;
+            } else if (checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
+                    callingUid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+                // If the caller does not have either permission, they are always doomed.
+                allow = false;
+            } else if (allowMode == ALLOW_NON_FULL) {
+                // We are blanket allowing non-full access, you lucky caller!
+                allow = true;
+            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE) {
+                // We may or may not allow this depending on whether the two users are
+                // in the same profile.
+                synchronized (mUserProfileGroupIdsSelfLocked) {
+                    int callingProfile = mUserProfileGroupIdsSelfLocked.get(callingUserId,
+                            UserInfo.NO_PROFILE_GROUP_ID);
+                    int targetProfile = mUserProfileGroupIdsSelfLocked.get(targetUserId,
+                            UserInfo.NO_PROFILE_GROUP_ID);
+                    allow = callingProfile != UserInfo.NO_PROFILE_GROUP_ID
+                            && callingProfile == targetProfile;
+                }
+            } else {
+                throw new IllegalArgumentException("Unknown mode: " + allowMode);
+            }
+            if (!allow) {
+                if (userId == UserHandle.USER_CURRENT_OR_SELF) {
+                    // In this case, they would like to just execute as their
+                    // owner user instead of failing.
+                    targetUserId = callingUserId;
+                } else {
+                    StringBuilder builder = new StringBuilder(128);
+                    builder.append("Permission Denial: ");
+                    builder.append(name);
+                    if (callerPackage != null) {
+                        builder.append(" from ");
+                        builder.append(callerPackage);
                     }
+                    builder.append(" asks to run as user ");
+                    builder.append(userId);
+                    builder.append(" but is calling from user ");
+                    builder.append(UserHandle.getUserId(callingUid));
+                    builder.append("; this requires ");
+                    builder.append(INTERACT_ACROSS_USERS_FULL);
+                    if (allowMode != ALLOW_FULL_ONLY) {
+                        builder.append(" or ");
+                        builder.append(INTERACT_ACROSS_USERS);
+                    }
+                    String msg = builder.toString();
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
                 }
             }
-            if (userId == UserHandle.USER_CURRENT
-                    || userId == UserHandle.USER_CURRENT_OR_SELF) {
-                // Note that we may be accessing this outside of a lock...
-                // shouldn't be a big deal, if this is being called outside
-                // of a locked context there is intrinsically a race with
-                // the value the caller will receive and someone else changing it.
-                userId = mCurrentUserId;
-            }
-            if (!allowAll && userId < 0) {
-                throw new IllegalArgumentException(
-                        "Call does not support special user #" + userId);
-            }
         }
-        return userId;
+        if (!allowAll && targetUserId < 0) {
+            throw new IllegalArgumentException(
+                    "Call does not support special user #" + targetUserId);
+        }
+        return targetUserId;
     }
 
     boolean isSingleton(String componentProcessName, ApplicationInfo aInfo,
@@ -13479,12 +13562,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (UserHandle.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
             if ((flags & ServiceInfo.FLAG_SINGLE_USER) != 0) {
                 if (ActivityManager.checkUidPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        INTERACT_ACROSS_USERS,
                         aInfo.uid) != PackageManager.PERMISSION_GRANTED) {
                     ComponentName comp = new ComponentName(aInfo.packageName, className);
                     String msg = "Permission Denial: Component " + comp.flattenToShortString()
                             + " requests FLAG_SINGLE_USER, but app does not hold "
-                            + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                            + INTERACT_ACROSS_USERS;
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
                 }
@@ -13801,7 +13884,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             userId = this.handleIncomingUser(callingPid, callingUid, userId,
-                    true, true, "registerReceiver", callerPackage);
+                    true, ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
             List allSticky = null;
 
@@ -14046,7 +14129,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         userId = handleIncomingUser(callingPid, callingUid, userId,
-                true, false, "broadcast", callerPackage);
+                true, ALLOW_NON_FULL, "broadcast", callerPackage);
 
         // Make sure that the user who is receiving this broadcast is started.
         // If not, we will just skip it.
@@ -14510,8 +14593,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        userId = handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, true, false, "removeStickyBroadcast", null);
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, ALLOW_NON_FULL, "removeStickyBroadcast", null);
 
         synchronized(this) {
             if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
@@ -14604,7 +14687,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int userId, String abiOverride) {
         enforceNotIsolatedCaller("startInstrumentation");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, true, "startInstrumentation", null);
+                userId, false, ALLOW_FULL_ONLY, "startInstrumentation", null);
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Bundle");
@@ -16742,7 +16825,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private ProcessRecord findProcessLocked(String process, int userId, String callName) {
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, true, true, callName, null);
+                userId, true, ALLOW_FULL_ONLY, callName, null);
         ProcessRecord proc = null;
         try {
             int pid = Integer.parseInt(process);
@@ -16859,6 +16942,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             currentProfileIds[i] = profiles.get(i).id;
         }
         mCurrentProfileIds = currentProfileIds;
+
+        synchronized (mUserProfileGroupIdsSelfLocked) {
+            mUserProfileGroupIdsSelfLocked.clear();
+            final List<UserInfo> users = getUserManagerLocked().getUsers(false);
+            for (int i = 0; i < users.size(); i++) {
+                UserInfo user = users.get(i);
+                if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                    mUserProfileGroupIdsSelfLocked.put(user.id, user.profileGroupId);
+                }
+            }
+        }
     }
 
     private Set getProfileIdsLocked(int userId) {
@@ -17031,7 +17125,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         throws RemoteException {
                                 }
                             }, 0, null, null,
-                            android.Manifest.permission.INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
+                            INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                             true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
             }
@@ -17350,7 +17444,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kick things off.
                 broadcastIntentLocked(null, null, stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
-                        android.Manifest.permission.INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
+                        INTERACT_ACROSS_USERS, AppOpsManager.OP_NONE,
                         true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -17401,14 +17495,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public UserInfo getCurrentUser() {
-        if ((checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+        if ((checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) && (
                 checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED)) {
             String msg = "Permission Denial: getCurrentUser() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                    + " requires " + INTERACT_ACROSS_USERS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -17423,12 +17517,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean isUserRunning(int userId, boolean orStopped) {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+        if (checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: isUserRunning() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                    + " requires " + INTERACT_ACROSS_USERS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -17451,12 +17545,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public int[] getRunningUserIds() {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+        if (checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: isUserRunning() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                    + " requires " + INTERACT_ACROSS_USERS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

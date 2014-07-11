@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -900,6 +901,8 @@ public class UserManager {
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
+        // Svelte devices don't get multi-user.
+        if (ActivityManager.isLowRamDeviceStatic()) return 1;
         return SystemProperties.getInt("fw.max_users",
                 Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
     }
