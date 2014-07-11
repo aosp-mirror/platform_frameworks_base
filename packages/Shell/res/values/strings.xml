@@ -19,8 +19,12 @@
 
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
     <string name="bugreport_finished_title">Bug report captured</string>
+
+    <!-- Text of notification indicating that swipe left will share the captured bugreport. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_text" product="watch">Swipe left to share your bug report</string>
     <!-- Text of notification indicating that touching will share the captured bugreport. [CHAR LIMIT=100] -->
-    <string name="bugreport_finished_text">Touch to share your bug report</string>
+    <string name="bugreport_finished_text" product="default">Touch to share your bug report</string>
+
 
     <!-- Body of dialog informing user about contents of a bugreport. [CHAR LIMIT=NONE] -->
     <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, including personal and private information.  Only share bug reports with apps and people you trust.</string>
