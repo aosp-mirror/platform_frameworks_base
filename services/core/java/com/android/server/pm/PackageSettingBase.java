@@ -57,10 +57,11 @@ class PackageSettingBase extends GrantedPermissions {
     String resourcePathString;
 
     /**
-     * The path under which native libraries for legacy apps are unpacked.
-     * Will be set to {@code null} for newer installs, where the path can be
-     * derived from {@link #codePath} unambiguously.
+     * The path under which native libraries have been unpacked. This path is
+     * always derived at runtime, and is only stored here for cleanup when a
+     * package is uninstalled.
      */
+    @Deprecated
     String legacyNativeLibraryPathString;
 
     String primaryCpuAbiString;
