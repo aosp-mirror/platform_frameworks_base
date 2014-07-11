@@ -98,13 +98,8 @@
         android:background="?android:attr/selectableItemBackground"
         android:enabled="false"
         >
-        <com.android.systemui.statusbar.policy.Clock
+        <include layout="@layout/split_clock_view"
             android:id="@+id/clock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-            systemui:amPmStyle="normal"
             />
 
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_collapsed"
