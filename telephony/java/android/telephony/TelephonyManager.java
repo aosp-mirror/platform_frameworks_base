@@ -2870,9 +2870,9 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public int hasCarrierPrivileges(String pkgname) {
+    public int checkCarrierPrivilegesForPackage(String pkgname) {
         try {
-            return getITelephony().hasCarrierPrivileges(pkgname);
+            return getITelephony().checkCarrierPrivilegesForPackage(pkgname);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasCarrierPrivileges RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -2880,8 +2880,8 @@ public class TelephonyManager {
         }
         return CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     }
-    /** @hide */
 
+    /** @hide */
     @SystemApi
     public void dial(String number) {
         try {
