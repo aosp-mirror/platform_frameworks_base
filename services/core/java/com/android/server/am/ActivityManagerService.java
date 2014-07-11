@@ -1080,6 +1080,9 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private boolean mUserIsMonkey;
 
+    /** Flag whether the device has a recents UI */
+    final boolean mHasRecents;
+
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
 
@@ -1962,6 +1965,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
+
+        mHasRecents = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasRecents);
 
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
