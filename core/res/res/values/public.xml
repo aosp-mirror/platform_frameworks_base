@@ -2510,4 +2510,5 @@
        a view visibility changes. -->
   <public type="transition" name="slide_left"/>
   <public type="attr" name="multiArch" />
+  <public type="attr" name="touchscreenBlocksFocus" />
 </resources>

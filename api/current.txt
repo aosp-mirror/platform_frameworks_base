@@ -1283,6 +1283,7 @@ package android {
     field public static final int topLeftRadius = 16843177; // 0x10101a9
     field public static final int topOffset = 16843352; // 0x1010258
     field public static final int topRightRadius = 16843178; // 0x10101aa
+    field public static final int touchscreenBlocksFocus = 16843921; // 0x1010491
     field public static final int track = 16843631; // 0x101036f
     field public static final int transcriptMode = 16843008; // 0x1010100
     field public static final int transformPivotX = 16843552; // 0x1010320
@@ -33577,6 +33578,7 @@ package android.view {
     method public android.animation.LayoutTransition getLayoutTransition();
     method public int getNestedScrollAxes();
     method public int getPersistentDrawingCache();
+    method public boolean getTouchscreenBlocksFocus();
     method public int indexOfChild(android.view.View);
     method public final void invalidateChild(android.view.View, android.graphics.Rect);
     method public android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
@@ -33636,6 +33638,7 @@ package android.view {
     method public void setOnHierarchyChangeListener(android.view.ViewGroup.OnHierarchyChangeListener);
     method public void setPersistentDrawingCache(int);
     method protected void setStaticTransformationsEnabled(boolean);
+    method public void setTouchscreenBlocksFocus(boolean);
     method public void setTransitionGroup(boolean);
     method public boolean shouldDelayChildPressedState();
     method public boolean showContextMenuForChild(android.view.View);

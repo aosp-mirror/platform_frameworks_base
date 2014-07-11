@@ -2520,6 +2520,9 @@
             <enum name="blocksDescendants" value="2" />
         </attr>
 
+        <!-- Set to true if this ViewGroup blocks focus in the presence of a touchscreen. -->
+        <attr name="touchscreenBlocksFocus" format="boolean" />
+
         <!-- Sets whether this ViewGroup should split MotionEvents
              to separate child views during touch event dispatch.
              If false (default), touch events will be dispatched to

@@ -18,6 +18,7 @@ package android.view;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -361,6 +362,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     static final int FLAG_IS_TRANSITION_GROUP_SET = 0x2000000;
 
     /**
+     * When set, focus will not be permitted to enter this group if a touchscreen is present.
+     */
+    static final int FLAG_TOUCHSCREEN_BLOCKS_FOCUS = 0x4000000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -567,6 +573,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 case R.styleable.ViewGroup_transitionGroup:
                     setTransitionGroup(a.getBoolean(attr, false));
                     break;
+                case R.styleable.ViewGroup_touchscreenBlocksFocus:
+                    setTouchscreenBlocksFocus(a.getBoolean(attr, false));
+                    break;
             }
         }
 
@@ -660,6 +669,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // shortcut: don't report a new focusable view if we block our descendants from
                 // getting focus
                 && (getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS)
+                && !shouldBlockFocusForTouchscreen()
                 // shortcut: don't report a new focusable view if we already are focused
                 // (and we don't prefer our descendants)
                 //
@@ -901,7 +911,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         final int descendantFocusability = getDescendantFocusability();
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS &&
+                !shouldBlockFocusForTouchscreen()) {
             final int count = mChildrenCount;
             final View[] children = mChildren;
 
@@ -925,7 +936,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         final int descendantFocusability = getDescendantFocusability();
 
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS &&
+                !shouldBlockFocusForTouchscreen()) {
             final int count = mChildrenCount;
             final View[] children = mChildren;
 
@@ -941,11 +953,44 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // FOCUS_AFTER_DESCENDANTS and there are some descendants focusable.  this is
         // to avoid the focus search finding layouts when a more precise search
         // among the focusable children would be more interesting.
-        if (descendantFocusability != FOCUS_AFTER_DESCENDANTS
+        if ((descendantFocusability != FOCUS_AFTER_DESCENDANTS
                 // No focusable descendants
-                || (focusableCount == views.size())) {
+                || (focusableCount == views.size())) && !shouldBlockFocusForTouchscreen()) {
             super.addFocusables(views, direction, focusableMode);
         }
+    }
+
+    /**
+     * Set whether this ViewGroup should ignore focus requests for itself and its children.
+     * If this option is enabled and the ViewGroup or a descendant currently has focus, focus
+     * will proceed forward.
+     *
+     * @param touchscreenBlocksFocus true to enable blocking focus in the presence of a touchscreen
+     */
+    public void setTouchscreenBlocksFocus(boolean touchscreenBlocksFocus) {
+        if (touchscreenBlocksFocus) {
+            mGroupFlags |= FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
+            if (hasFocus()) {
+                final View newFocus = focusSearch(FOCUS_FORWARD);
+                if (newFocus != null) {
+                    newFocus.requestFocus();
+                }
+            }
+        } else {
+            mGroupFlags &= ~FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
+        }
+    }
+
+    /**
+     * Check whether this ViewGroup should ignore focus requests for itself and its children.
+     */
+    public boolean getTouchscreenBlocksFocus() {
+        return (mGroupFlags & FLAG_TOUCHSCREEN_BLOCKS_FOCUS) != 0;
+    }
+
+    boolean shouldBlockFocusForTouchscreen() {
+        return getTouchscreenBlocksFocus() &&
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
     }
 
     @Override
@@ -2439,6 +2484,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     + direction);
         }
         int descendantFocusability = getDescendantFocusability();
+
+        if (shouldBlockFocusForTouchscreen()) {
+            return false;
+        }
 
         switch (descendantFocusability) {
             case FOCUS_BLOCK_DESCENDANTS:

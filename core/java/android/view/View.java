@@ -7431,7 +7431,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ViewParent ancestor = mParent;
         while (ancestor instanceof ViewGroup) {
             final ViewGroup vgAncestor = (ViewGroup) ancestor;
-            if (vgAncestor.getDescendantFocusability() == ViewGroup.FOCUS_BLOCK_DESCENDANTS) {
+            if (vgAncestor.getDescendantFocusability() == ViewGroup.FOCUS_BLOCK_DESCENDANTS
+                    || vgAncestor.shouldBlockFocusForTouchscreen()) {
                 return true;
             } else {
                 ancestor = vgAncestor.getParent();

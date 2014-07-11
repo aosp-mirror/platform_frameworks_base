@@ -1904,4 +1904,5 @@
 
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />
+  <java-symbol type="attr" name="touchscreenBlocksFocus" />
 </resources>
