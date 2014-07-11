@@ -45,7 +45,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     protected NetworkInfo mNetworkInfo;
     protected LinkProperties mLinkProperties;
     protected NetworkCapabilities mNetworkCapabilities;
-    protected Network mNetwork = new Network(ConnectivityManager.INVALID_NET_ID);
+    protected Network mNetwork = new Network(ConnectivityManager.NETID_UNSET);
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
