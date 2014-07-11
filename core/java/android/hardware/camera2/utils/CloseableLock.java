@@ -110,7 +110,9 @@ public class CloseableLock implements AutoCloseable {
     @Override
     public void close() {
         if (mClosed) {
-            log("close - already closed; ignoring");
+            if (VERBOSE) {
+                log("close - already closed; ignoring");
+            }
             return;
         }
 
@@ -139,7 +141,9 @@ public class CloseableLock implements AutoCloseable {
             mLock.unlock();
         }
 
-        log("close - completed");
+        if (VERBOSE) {
+            log("close - completed");
+        }
     }
 
     /**
@@ -169,7 +173,9 @@ public class CloseableLock implements AutoCloseable {
 
             // Lock is already closed, all further acquisitions will fail
             if (mClosed) {
-                log("acquire lock early aborted (already closed)");
+                if (VERBOSE) {
+                    log("acquire lock early aborted (already closed)");
+                }
                 return null;
             }
 
@@ -187,7 +193,9 @@ public class CloseableLock implements AutoCloseable {
 
                 // Did another thread #close while we were waiting? Unblock immediately.
                 if (mClosed) {
-                    log("acquire lock unblocked aborted (already closed)");
+                    if (VERBOSE) {
+                        log("acquire lock unblocked aborted (already closed)");
+                    }
                     return null;
                 }
             }
@@ -200,7 +208,9 @@ public class CloseableLock implements AutoCloseable {
             mLock.unlock();
         }
 
-        log("acquired lock (local own count = " + ownedLocks + "");
+        if (VERBOSE) {
+            log("acquired lock (local own count = " + ownedLocks + ")");
+        }
         return new ScopedLock();
     }
 
@@ -231,7 +241,9 @@ public class CloseableLock implements AutoCloseable {
 
             // Lock is already closed, all further acquisitions will fail
             if (mClosed) {
-                log("acquire exclusive lock early aborted (already closed)");
+                if (VERBOSE) {
+                    log("acquire exclusive lock early aborted (already closed)");
+                }
                 return null;
             }
 
@@ -254,7 +266,9 @@ public class CloseableLock implements AutoCloseable {
 
              // Did another thread #close while we were waiting? Unblock immediately.
                 if (mClosed) {
-                    log("acquire exclusive lock unblocked aborted (already closed)");
+                    if (VERBOSE) {
+                        log("acquire exclusive lock unblocked aborted (already closed)");
+                    }
                     return null;
                 }
             }
@@ -267,7 +281,9 @@ public class CloseableLock implements AutoCloseable {
             mLock.unlock();
         }
 
-        log("acquired exclusive lock (local own count = " + ownedLocks + "");
+        if (VERBOSE) {
+            log("acquired exclusive lock (local own count = " + ownedLocks + ")");
+        }
         return new ScopedLock();
     }
 
@@ -318,13 +334,13 @@ public class CloseableLock implements AutoCloseable {
             mLock.unlock();
         }
 
-        log("released lock (local lock count " + ownedLocks + ")");
+        if (VERBOSE) {
+             log("released lock (local lock count " + ownedLocks + ")");
+        }
     }
 
     private void log(String what) {
-        if (VERBOSE) {
-            Log.v(TAG + "[" + mName + "]", what);
-        }
+        Log.v(TAG + "[" + mName + "]", what);
     }
 
 }
