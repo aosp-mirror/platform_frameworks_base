@@ -28,6 +28,7 @@ import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -61,9 +62,12 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     /** ${inheritDoc} */
     @Override
     public void binderDied() {
-        for (IConnectionServiceAdapter adapter : mAdapters) {
+        Iterator<IConnectionServiceAdapter> it = mAdapters.iterator();
+        while (it.hasNext()) {
+            IConnectionServiceAdapter adapter = it.next();
             if (!adapter.asBinder().isBinderAlive()) {
-                removeAdapter(adapter);
+                it.remove();
+                adapter.asBinder().unlinkToDeath(this, 0);
             }
         }
     }
