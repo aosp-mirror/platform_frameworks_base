@@ -1621,4 +1621,6 @@
     the IMS connection -->
     <bool name="useImsAlwaysForEmergencyCall">true</bool>
 
+    <bool name="config_networkSamplingWakesDevice">true</bool>
+
 </resources>
