@@ -215,10 +215,12 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private void refreshExitConditionText() {
+        final String forever = mContext.getString(R.string.zen_mode_forever);
         if (mExitConditionId == null) {
-            mExitConditionText = mContext.getString(R.string.zen_mode_forever);
+            mExitConditionText = forever;
         } else if (ZenModeConfig.isValidCountdownConditionId(mExitConditionId)) {
-            mExitConditionText = parseExistingTimeCondition(mExitConditionId).summary;
+            final Condition condition = parseExistingTimeCondition(mExitConditionId);
+            mExitConditionText = condition != null ? condition.summary : forever;
         } else {
             mExitConditionText = "(until condition ends)";  // TODO persist current description
         }
