@@ -56,7 +56,6 @@
             android:id="@+id/zen_subhead_expanded"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:clickable="true"
             android:gravity="center_vertical"
             android:textAppearance="@style/TextAppearance.QS.Subhead" />
 
