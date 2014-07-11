@@ -540,7 +540,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         HdmiCecDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
-            invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
 

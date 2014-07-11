@@ -78,7 +78,7 @@ abstract class SystemAudioAction extends FeatureAction {
                     addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
                 } else {
                     setSystemAudioMode(false);
-                    finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
+                    finishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                 }
             }
         });
@@ -102,7 +102,12 @@ abstract class SystemAudioAction extends FeatureAction {
     final boolean processCommand(HdmiCecMessage cmd) {
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-                // TODO: Handle <FeatureAbort> of <SystemAudioModeRequest>
+                if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT
+                        && cmd.getParams()[0] == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
+                    setSystemAudioMode(false);
+                    finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
+                    return true;
+                }
                 if (cmd.getOpcode() != Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE
                         || !HdmiUtils.checkCommandSource(cmd, mAvrLogicalAddress, TAG)) {
                     return false;
