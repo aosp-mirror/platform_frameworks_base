@@ -639,7 +639,6 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public void collapse() {
-        // TODO: abort animation or ongoing touch
         if (DEBUG) logf("collapse: " + this);
         if (mPeekPending || mPeekAnimator != null) {
             mCollapseAfterPeek = true;
@@ -650,7 +649,7 @@ public abstract class PanelView extends FrameLayout {
                 removeCallbacks(mPeekRunnable);
                 mPeekRunnable.run();
             }
-        } else if (!isFullyCollapsed()) {
+        } else if (!isFullyCollapsed() && !mTracking) {
             if (mHeightAnimator != null) {
                 mHeightAnimator.cancel();
             }
