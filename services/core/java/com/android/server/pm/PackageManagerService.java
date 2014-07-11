@@ -10489,6 +10489,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        boolean blocked = false;
+        if ((flags & PackageManager.DELETE_ALL_USERS) != 0) {
+            int[] users = sUserManager.getUserIds();
+            for (int i = 0; i < users.length; ++i) {
+                if (getBlockUninstallForUser(packageName, users[i])) {
+                    blocked = true;
+                    break;
+                }
+            }
+        } else {
+            blocked = getBlockUninstallForUser(packageName, userId);
+        }
+        if (blocked) {
+            try {
+                observer.packageDeleted(packageName, PackageManager.DELETE_FAILED_OWNER_BLOCKED);
+            } catch (RemoteException re) {
+            }
+            return;
+        }
+
         if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId);
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {

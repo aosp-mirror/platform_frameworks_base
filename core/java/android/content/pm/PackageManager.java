@@ -841,8 +841,9 @@ public abstract class PackageManager {
     public static final int DELETE_FAILED_USER_RESTRICTED = -3;
 
     /**
-     * Deletion failed return code: this is returned from the PackageInstaller
-     * activity if it failed to delete a package because the a profile
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
+     * failed to delete the package because a profile
      * or device owner has marked the package as uninstallable.
      *
      * @hide
