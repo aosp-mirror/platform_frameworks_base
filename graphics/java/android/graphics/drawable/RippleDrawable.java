@@ -153,25 +153,6 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     /**
-     * @hide TO BE REMOVED FOR L-RELEASE
-     */
-    public RippleDrawable(Drawable content, Drawable mask) {
-        this(new RippleState(null, null, null), null, null);
-
-        if (content != null) {
-            addLayer(content, null, 0, 0, 0, 0, 0);
-        }
-
-        if (mask != null) {
-            addLayer(content, null, android.R.id.mask, 0, 0, 0, 0);
-        }
-
-        ensurePadding();
-
-        Log.e(LOG_TAG, "This constructor is being removed", new RuntimeException());
-    }
-
-    /**
      * Creates a new ripple drawable with the specified ripple color and
      * optional content and mask drawables.
      *
@@ -192,7 +173,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         if (mask != null) {
-            addLayer(content, null, android.R.id.mask, 0, 0, 0, 0);
+            addLayer(mask, null, android.R.id.mask, 0, 0, 0, 0);
         }
 
         setColor(color);
