@@ -51,6 +51,12 @@ public final class TelecommConstants {
     public static final String ACTION_CONNECTION_SERVICE = ConnectionService.class.getName();
 
     /**
+     * The {@link Intent} action used to configure a {@link ConnectionService}.
+     */
+    public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
+            "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
+
+    /**
      * Optional extra for {@link Intent#ACTION_CALL} containing a boolean that determines whether
      * the speakerphone should be automatically turned on for an outgoing call.
      */

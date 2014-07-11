@@ -28215,6 +28215,7 @@ package android.telecomm {
     ctor public TelecommConstants();
     field public static final java.lang.String ACTION_CALL_SERVICE_PROVIDER;
     field public static final java.lang.String ACTION_CONNECTION_SERVICE;
+    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
