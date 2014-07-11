@@ -398,6 +398,15 @@ public final class HdmiControlService extends SystemService {
         return Constants.INVALID_PORT_ID;
     }
 
+    boolean isValidPortId(int portId) {
+        for (HdmiPortInfo info : mPortInfo) {
+            if (portId == info.getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Returns {@link Looper} for IO operation.
      *

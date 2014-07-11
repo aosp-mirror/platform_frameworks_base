@@ -162,6 +162,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             handleSelectInternalSource(callback);
             return;
         }
+        if (!mService.isControlEnabled()) {
+            setActiveSource(targetAddress);
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
         HdmiCecDeviceInfo targetDevice = getDeviceInfo(targetAddress);
         if (targetDevice == null) {
             invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
@@ -240,18 +245,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         // Seq #20
-        if (!mService.isControlEnabled() || portId == getActivePortId()) {
+        if (!mService.isValidPortId(portId)) {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        // TODO: Make sure this call does not stem from <Active Source> message reception.
-
+        if (!mService.isControlEnabled()) {
+            setActivePortId(portId);
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
+        if (portId == getActivePortId()) {
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+            return;
+        }
         setActivePortId(portId);
         // TODO: Return immediately if the operation is triggered by <Text/Image View On>
-        //       and this is the first notification about the active input after power-on.
-        // TODO: Handle invalid port id / active input which should be treated as an
-        //       internal tuner.
-
+        //       and this is the first notification about the active input after power-on
+        //       (switch to HDMI didn't happen so far but is expected to happen soon).
         removeAction(RoutingControlAction.class);
 
         int oldPath = mService.portIdToPath(mService.portIdToPath(getActivePortId()));
