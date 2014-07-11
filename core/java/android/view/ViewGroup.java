@@ -3333,6 +3333,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Check if this ViewGroup is configured to clip child views to its padding.
+     *
+     * @return true if this ViewGroup clips children to its padding, false otherwise
+     *
+     * @attr ref android.R.styleable#ViewGroup_clipToPadding
+     */
+    public boolean getClipToPadding() {
+        return hasBooleanFlag(FLAG_CLIP_TO_PADDING);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

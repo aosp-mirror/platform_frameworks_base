@@ -33640,6 +33640,7 @@ package android.view {
     method protected boolean getChildStaticTransformation(android.view.View, android.view.animation.Transformation);
     method public boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
     method public boolean getClipChildren();
+    method public boolean getClipToPadding();
     method public int getDescendantFocusability();
     method public android.view.View getFocusedChild();
     method public android.view.animation.LayoutAnimationController getLayoutAnimation();
