@@ -61,7 +61,7 @@ public class SpeedBumpView extends ExpandableView {
         super.onLayout(changed, left, top, right, bottom);
         mLine.setPivotX(mLine.getWidth() / 2);
         mLine.setPivotY(mLine.getHeight() / 2);
-        setOutline(null);
+        setOutlineProvider(null);
     }
 
     @Override
