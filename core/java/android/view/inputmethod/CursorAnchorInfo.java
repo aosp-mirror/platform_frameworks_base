@@ -257,11 +257,12 @@ public final class CursorAnchorInfo implements Parcelable {
         /**
          * Sets the text range of the composing text. Calling this can be skipped if there is
          * no composing text.
-         * @param index index where the composing text starts.
+         * @param composingTextStart index where the composing text starts.
          * @param composingText the entire composing text.
          */
-        public Builder setComposingText(final int index, final CharSequence composingText) {
-            mComposingTextStart = index;
+        public Builder setComposingText(final int composingTextStart,
+            final CharSequence composingText) {
+            mComposingTextStart = composingTextStart;
             if (composingText == null) {
                 mComposingText = null;
             } else {
