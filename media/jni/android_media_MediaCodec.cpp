@@ -54,7 +54,8 @@ enum {
 };
 
 enum {
-    EVENT_NOTIFY = 1,
+    EVENT_CALLBACK = 1,
+    EVENT_SET_CALLBACK = 2,
 };
 
 struct CryptoErrorCodes {
@@ -82,9 +83,7 @@ JMediaCodec::JMediaCodec(
         JNIEnv *env, jobject thiz,
         const char *name, bool nameIsType, bool encoder)
     : mClass(NULL),
-      mObject(NULL),
-      mGeneration(1),
-      mRequestedActivityNotification(false) {
+      mObject(NULL) {
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
@@ -151,6 +150,18 @@ JMediaCodec::~JMediaCodec() {
     mClass = NULL;
 }
 
+status_t JMediaCodec::setCallback(jobject cb) {
+    if (cb != NULL) {
+        if (mCallbackNotification == NULL) {
+            mCallbackNotification = new AMessage(kWhatCallbackNotify, id());
+        }
+    } else {
+        mCallbackNotification.clear();
+    }
+
+    return mCodec->setCallback(mCallbackNotification);
+}
+
 status_t JMediaCodec::configure(
         const sp<AMessage> &format,
         const sp<IGraphicBufferProducer> &bufferProducer,
@@ -173,32 +184,13 @@ status_t JMediaCodec::createInputSurface(
 }
 
 status_t JMediaCodec::start() {
-    status_t err = mCodec->start();
-
-    if (err != OK) {
-        return err;
-    }
-
-    mActivityNotification = new AMessage(kWhatActivityNotify, id());
-    mActivityNotification->setInt32("generation", mGeneration);
-
-    requestActivityNotification();
-
-    return err;
+    return mCodec->start();
 }
 
 status_t JMediaCodec::stop() {
     mSurfaceTextureClient.clear();
 
-    status_t err = mCodec->stop();
-
-    sp<AMessage> msg = new AMessage(kWhatStopActivityNotifications, id());
-    sp<AMessage> response;
-    msg->postAndAwaitResponse(&response);
-
-    mActivityNotification.clear();
-
-    return err;
+    return mCodec->stop();
 }
 
 status_t JMediaCodec::flush() {
@@ -230,11 +222,7 @@ status_t JMediaCodec::queueSecureInputBuffer(
 }
 
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
-    status_t err = mCodec->dequeueInputBuffer(index, timeoutUs);
-
-    requestActivityNotification();
-
-    return err;
+    return mCodec->dequeueInputBuffer(index, timeoutUs);
 }
 
 status_t JMediaCodec::dequeueOutputBuffer(
@@ -244,8 +232,6 @@ status_t JMediaCodec::dequeueOutputBuffer(
     uint32_t flags;
     status_t err = mCodec->dequeueOutputBuffer(
             index, &offset, &size, &timeUs, &flags, timeoutUs);
-
-    requestActivityNotification();
 
     if (err != OK) {
         return err;
@@ -387,65 +373,114 @@ void JMediaCodec::setVideoScalingMode(int mode) {
     }
 }
 
-void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
-    switch (msg->what()) {
-        case kWhatRequestActivityNotifications:
-        {
-            if (mRequestedActivityNotification) {
-                break;
-            }
+void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
+    int32_t arg1, arg2 = 0;
+    jobject obj = NULL;
+    CHECK(msg->findInt32("callbackID", &arg1));
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
 
-            mCodec->requestActivityNotification(mActivityNotification);
-            mRequestedActivityNotification = true;
+    switch (arg1) {
+        case MediaCodec::CB_INPUT_AVAILABLE:
+        {
+            CHECK(msg->findInt32("index", &arg2));
             break;
         }
 
-        case kWhatActivityNotify:
+        case MediaCodec::CB_OUTPUT_AVAILABLE:
         {
-            {
-                int32_t generation;
-                CHECK(msg->findInt32("generation", &generation));
+            CHECK(msg->findInt32("index", &arg2));
 
-                if (generation != mGeneration) {
-                    // stale
-                    break;
+            size_t size, offset;
+            int64_t timeUs;
+            uint32_t flags;
+            CHECK(msg->findSize("size", &size));
+            CHECK(msg->findSize("offset", &offset));
+            CHECK(msg->findInt64("timeUs", &timeUs));
+            CHECK(msg->findInt32("flags", (int32_t *)&flags));
+
+            ScopedLocalRef<jclass> clazz(
+                    env, env->FindClass("android/media/MediaCodec$BufferInfo"));
+            jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "()V");
+            jmethodID method = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
+
+            obj = env->NewObject(clazz.get(), ctor);
+
+            if (obj == NULL) {
+                if (env->ExceptionCheck()) {
+                    ALOGE("Could not create MediaCodec.BufferInfo.");
+                    env->ExceptionClear();
                 }
-
-                mRequestedActivityNotification = false;
+                jniThrowException(env, "java/lang/IllegalStateException", NULL);
+                return;
             }
 
-            JNIEnv *env = AndroidRuntime::getJNIEnv();
-            env->CallVoidMethod(
-                    mObject,
-                    gFields.postEventFromNativeID,
-                    EVENT_NOTIFY,
-                    0 /* arg1 */,
-                    0 /* arg2 */,
-                    NULL /* obj */);
+            env->CallVoidMethod(obj, method, (jint)offset, (jint)size, timeUs, flags);
+            break;
+        }
+
+        case MediaCodec::CB_ERROR:
+        {
+            CHECK(msg->findInt32("err", &arg2));
+
+            int32_t actionCode;
+            CHECK(msg->findInt32("actionCode", &actionCode));
+
+            // use Integer object to pass the action code
+            ScopedLocalRef<jclass> clazz(
+                    env, env->FindClass("java/lang/Integer"));
+            jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(I)V");
+            obj = env->NewObject(clazz.get(), ctor, actionCode);
+
+            if (obj == NULL) {
+                if (env->ExceptionCheck()) {
+                    ALOGE("Could not create Integer object for actionCode.");
+                    env->ExceptionClear();
+                }
+                jniThrowException(env, "java/lang/IllegalStateException", NULL);
+                return;
+            }
 
             break;
         }
 
-        case kWhatStopActivityNotifications:
+        case MediaCodec::CB_OUTPUT_FORMAT_CHANGED:
         {
-            uint32_t replyID;
-            CHECK(msg->senderAwaitsResponse(&replyID));
+            sp<AMessage> format;
+            CHECK(msg->findMessage("format", &format));
 
-            ++mGeneration;
-            mRequestedActivityNotification = false;
+            if (OK != ConvertMessageToMap(env, format, &obj)) {
+                jniThrowException(env, "java/lang/IllegalStateException", NULL);
+                return;
+            }
 
-            sp<AMessage> response = new AMessage;
-            response->postReply(replyID);
             break;
         }
 
         default:
             TRESPASS();
     }
+
+    env->CallVoidMethod(
+            mObject,
+            gFields.postEventFromNativeID,
+            EVENT_CALLBACK,
+            arg1,
+            arg2,
+            obj);
+
+    env->DeleteLocalRef(obj);
 }
 
-void JMediaCodec::requestActivityNotification() {
-    (new AMessage(kWhatRequestActivityNotifications, id()))->post();
+void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatCallbackNotify:
+        {
+            handleCallback(msg);
+            break;
+        }
+        default:
+            TRESPASS();
+    }
 }
 
 }  // namespace android
@@ -549,6 +584,22 @@ static jint throwExceptionAsNecessary(
     }
 
     return 0;
+}
+
+static void android_media_MediaCodec_native_setCallback(
+        JNIEnv *env,
+        jobject thiz,
+        jobject cb) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    status_t err = codec->setCallback(cb);
+
+    throwExceptionAsNecessary(env, err);
 }
 
 static void android_media_MediaCodec_native_configure(
@@ -1118,6 +1169,10 @@ static void android_media_MediaCodec_native_finalize(
 
 static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaCodec_release },
+
+    { "native_setCallback",
+      "(Landroid/media/MediaCodec$Callback;)V",
+      (void *)android_media_MediaCodec_native_setCallback },
 
     { "native_configure",
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"

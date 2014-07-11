@@ -14292,6 +14292,7 @@ package android.media {
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
     method public final void releaseOutputBuffer(int, long);
+    method public void setCallback(android.media.MediaCodec.Callback);
     method public final void setParameters(android.os.Bundle);
     method public final void setVideoScalingMode(int);
     method public final void signalEndOfInputStream();
@@ -14320,6 +14321,14 @@ package android.media {
     field public int offset;
     field public long presentationTimeUs;
     field public int size;
+  }
+
+  public static abstract class MediaCodec.Callback {
+    ctor public MediaCodec.Callback();
+    method public abstract void onError(android.media.MediaCodec, int, int);
+    method public abstract void onInputBufferAvailable(android.media.MediaCodec, int);
+    method public abstract void onOutputBufferAvailable(android.media.MediaCodec, int, android.media.MediaCodec.BufferInfo);
+    method public abstract void onOutputFormatChanged(android.media.MediaCodec, android.media.MediaFormat);
   }
 
   public static final class MediaCodec.CodecException extends java.lang.IllegalStateException {
