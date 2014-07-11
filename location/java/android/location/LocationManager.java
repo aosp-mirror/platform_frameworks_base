@@ -16,24 +16,22 @@
 
 package android.location;
 
+import com.android.internal.location.ProviderProperties;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Log;
 
-
-import java.lang.SecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.android.internal.location.ProviderProperties;
 
 /**
  * This class provides access to the system location services.  These
@@ -60,6 +58,7 @@ public class LocationManager {
 
     private final Context mContext;
     private final ILocationManager mService;
+    private final GpsMeasurementListenerTransport mGpsMeasurementListenerTransport;
     private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
             new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
     private final HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport> mNmeaListeners =
@@ -310,6 +309,7 @@ public class LocationManager {
     public LocationManager(Context context, ILocationManager service) {
         mService = service;
         mContext = context;
+        mGpsMeasurementListenerTransport = new GpsMeasurementListenerTransport(mContext, mService);
     }
 
     private LocationProvider createProvider(String name, ProviderProperties properties) {
@@ -1568,6 +1568,29 @@ public class LocationManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
         }
+    }
+
+    /**
+     * Adds a GPS Measurement listener.
+     *
+     * @param listener a {@link android.location.GpsMeasurementsEvent.Listener} object to register.
+     * @return {@code true} if the listener was successfully registered, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        return mGpsMeasurementListenerTransport.add(listener);
+    }
+
+    /**
+     * Removes a GPS Measurement listener.
+     *
+     * @param listener a {@link GpsMeasurementsEvent.Listener} object to remove.
+     *
+     * @hide
+     */
+    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        mGpsMeasurementListenerTransport.remove(listener);
     }
 
      /**
