@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.pdf.PdfRenderer;
 import android.os.AsyncTask;
-import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
@@ -69,7 +68,6 @@ public final class PageContentRepository {
     private RenderSpec mLastRenderSpec;
 
     private int mScheduledPreloadFirstShownPage = INVALID_PAGE_INDEX;
-
     private int mScheduledPreloadLastShownPage = INVALID_PAGE_INDEX;
 
     private int mState;
@@ -525,7 +523,8 @@ public final class PageContentRepository {
                     * BYTES_PER_PIXEL;
             final int maxCachedPageCount = mPageContentCache.getMaxSizeInBytes()
                     / bitmapSizeInBytes;
-            final int halfPreloadCount = (maxCachedPageCount - (lastShownPage - firstShownPage)) /2;
+            final int halfPreloadCount = (maxCachedPageCount
+                    - (lastShownPage - firstShownPage)) / 2 - 1;
 
             final int excessFromStart;
             if (firstShownPage - halfPreloadCount < 0) {

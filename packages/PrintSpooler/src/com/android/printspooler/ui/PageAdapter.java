@@ -708,17 +708,17 @@ public final class PageAdapter extends Adapter {
     }
 
     public void startPreloadContent(PageRange pageRangeInAdapter) {
-//        final int startPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getStart());
-//        final int startPageInFile = computePageIndexInFile(startPageInDocument);
-//        final int endPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getEnd());
-//        final int endPageInFile = computePageIndexInFile(endPageInDocument);
-//        if (startPageInDocument != INVALID_PAGE_INDEX && endPageInDocument != INVALID_PAGE_INDEX) {
-//            mPageContentRepository.startPreload(startPageInFile, endPageInFile);
-//        }
+        final int startPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getStart());
+        final int startPageInFile = computePageIndexInFile(startPageInDocument);
+        final int endPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getEnd());
+        final int endPageInFile = computePageIndexInFile(endPageInDocument);
+        if (startPageInDocument != INVALID_PAGE_INDEX && endPageInDocument != INVALID_PAGE_INDEX) {
+            mPageContentRepository.startPreload(startPageInFile, endPageInFile);
+        }
     }
 
     public void stopPreloadContent() {
-//        mPageContentRepository.stopPreload();
+        mPageContentRepository.stopPreload();
     }
 
     private void doDestroy() {
