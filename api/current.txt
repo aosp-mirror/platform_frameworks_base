@@ -31334,10 +31334,17 @@ package android.util {
 
   public final class Range {
     ctor public Range(T, T);
+    method public T clamp(T);
+    method public boolean contains(T);
+    method public boolean contains(android.util.Range<T>);
     method public static android.util.Range<T> create(T, T);
+    method public android.util.Range<T> extend(android.util.Range<T>);
+    method public android.util.Range<T> extend(T, T);
+    method public android.util.Range<T> extend(T);
     method public T getLower();
     method public T getUpper();
-    method public boolean inRange(T);
+    method public android.util.Range<T> intersect(android.util.Range<T>);
+    method public android.util.Range<T> intersect(T, T);
   }
 
   public final class Rational extends java.lang.Number implements java.lang.Comparable {
@@ -31353,6 +31360,7 @@ package android.util {
     method public boolean isNaN();
     method public boolean isZero();
     method public long longValue();
+    method public static android.util.Rational parseRational(java.lang.String) throws java.lang.NumberFormatException;
     field public static final android.util.Rational NEGATIVE_INFINITY;
     field public static final android.util.Rational NaN;
     field public static final android.util.Rational POSITIVE_INFINITY;
@@ -31363,6 +31371,7 @@ package android.util {
     ctor public Size(int, int);
     method public int getHeight();
     method public int getWidth();
+    method public static android.util.Size parseSize(java.lang.String) throws java.lang.NumberFormatException;
   }
 
   public final class SizeF {
