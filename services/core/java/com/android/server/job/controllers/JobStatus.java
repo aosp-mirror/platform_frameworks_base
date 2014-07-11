@@ -42,6 +42,8 @@ public class JobStatus {
 
     final JobInfo job;
     final int uId;
+    final String name;
+    final String tag;
 
     // Constraints.
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
@@ -72,6 +74,8 @@ public class JobStatus {
     private JobStatus(JobInfo job, int uId, int numFailures) {
         this.job = job;
         this.uId = uId;
+        this.name = job.getService().flattenToShortString();
+        this.tag = "*job*/" + this.name;
         this.numFailures = numFailures;
     }
 
@@ -138,6 +142,14 @@ public class JobStatus {
 
     public int getUid() {
         return uId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public PersistableBundle getExtras() {

@@ -136,7 +136,8 @@ public class JobStore {
      * Whether this jobStatus object already exists in the JobStore.
      */
     public boolean containsJobIdForUid(int jobId, int uId) {
-        for (JobStatus ts : mJobSet) {
+        for (int i=mJobSet.size()-1; i>=0; i--) {
+            JobStatus ts = mJobSet.valueAt(i);
             if (ts.getUid() == uId && ts.getJobId() == jobId) {
                 return true;
             }
@@ -267,7 +268,8 @@ public class JobStore {
             List<JobStatus> mStoreCopy = new ArrayList<JobStatus>();
             synchronized (JobStore.this) {
                 // Copy over the jobs so we can release the lock before writing.
-                for (JobStatus jobStatus : mJobSet) {
+                for (int i=0; i<mJobSet.size(); i++) {
+                    JobStatus jobStatus = mJobSet.valueAt(i);
                     JobStatus copy = new JobStatus(jobStatus.getJob(), jobStatus.getUid(),
                             jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
                     mStoreCopy.add(copy);
@@ -290,7 +292,8 @@ public class JobStore {
 
                 out.startTag(null, "job-info");
                 out.attribute(null, "version", Integer.toString(JOBS_FILE_VERSION));
-                for (JobStatus jobStatus : jobList) {
+                for (int i=0; i<jobList.size(); i++) {
+                    JobStatus jobStatus = jobList.get(i);
                     if (DEBUG) {
                         Slog.d(TAG, "Saving job " + jobStatus.getJobId());
                     }

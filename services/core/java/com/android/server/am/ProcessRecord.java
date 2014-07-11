@@ -83,7 +83,6 @@ final class ProcessRecord {
     int pssProcState = -1;      // The proc state we are currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
-    boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
     boolean hasClientActivities;  // Are there any client services with activities?
@@ -225,8 +224,7 @@ final class ProcessRecord {
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPss="); pw.print(lastPss);
                 pw.print(" lastCachedPss="); pw.println(lastCachedPss);
-        pw.print(prefix); pw.print("keeping="); pw.print(keeping);
-                pw.print(" cached="); pw.print(cached);
+        pw.print(prefix); pw.print("cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         if (serviceb) {
             pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
@@ -275,16 +273,15 @@ final class ProcessRecord {
         if (hasStartedServices) {
             pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);
         }
-        if (!keeping) {
+        if (setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
             long wtime;
             synchronized (mBatteryStats) {
                 wtime = mBatteryStats.getProcessWakeTime(info.uid,
                         pid, SystemClock.elapsedRealtime());
             }
-            long timeUsed = wtime - lastWakeTime;
             pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
                     pw.print(" timeUsed=");
-                    TimeUtils.formatDuration(timeUsed, pw); pw.println("");
+                    TimeUtils.formatDuration(wtime-lastWakeTime, pw); pw.println("");
             pw.print(prefix); pw.print("lastCpuTime="); pw.print(lastCpuTime);
                     pw.print(" timeUsed=");
                     TimeUtils.formatDuration(curCpuTime-lastCpuTime, pw); pw.println("");

@@ -39,6 +39,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IBatteryStats;
 import com.android.server.job.controllers.JobStatus;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,8 +58,6 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private static final long EXECUTING_TIMESLICE_MILLIS = 60 * 1000;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
-    /** String prefix for all wakelock names. */
-    private static final String JS_WAKELOCK_PREFIX = "*job*/";
 
     private static final String[] VERB_STRINGS = {
             "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_PENDING"
@@ -87,6 +86,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private final JobCompletedListener mCompletedListener;
     /** Used for service binding, etc. */
     private final Context mContext;
+    private final IBatteryStats mBatteryStats;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
@@ -109,13 +109,15 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     /** Track when job will timeout. */
     private long mTimeoutElapsed;
 
-    JobServiceContext(JobSchedulerService service, Looper looper) {
-        this(service.getContext(), service, looper);
+    JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats, Looper looper) {
+        this(service.getContext(), batteryStats, service, looper);
     }
 
     @VisibleForTesting
-    JobServiceContext(Context context, JobCompletedListener completedListener, Looper looper) {
+    JobServiceContext(Context context, IBatteryStats batteryStats,
+            JobCompletedListener completedListener, Looper looper) {
         mContext = context;
+        mBatteryStats = batteryStats;
         mCallbackHandler = new JobServiceHandler(looper);
         mCompletedListener = completedListener;
         mAvailable = true;
@@ -151,6 +153,11 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
                 return false;
+            }
+            try {
+                mBatteryStats.noteJobStart(job.getName(), job.getUid());
+            } catch (RemoteException e) {
+                // Whatever.
             }
             mAvailable = false;
             return true;
@@ -228,8 +235,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                JS_WAKELOCK_PREFIX + mRunningJob.getServiceComponent().getPackageName());
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mRunningJob.getTag());
         mWakeLock.setWorkSource(new WorkSource(mRunningJob.getUid()));
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
@@ -483,6 +489,11 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             removeMessages(MSG_TIMEOUT);
             mCompletedListener.onJobCompleted(mRunningJob, reschedule);
             synchronized (mLock) {
+                try {
+                    mBatteryStats.noteJobFinish(mRunningJob.getName(), mRunningJob.getUid());
+                } catch (RemoteException e) {
+                    // Whatever.
+                }
                 mWakeLock.release();
                 mContext.unbindService(JobServiceContext.this);
                 mWakeLock = null;
