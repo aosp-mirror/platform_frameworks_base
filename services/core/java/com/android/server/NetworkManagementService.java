@@ -1763,43 +1763,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public int getMarkForProtect() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        final NativeDaemonEvent event;
-        try {
-            event = mConnector.execute("interface", "fwmark", "get", "protect");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-        event.checkCode(GetMarkResult);
-        return Integer.parseInt(event.getMessage());
-    }
-
-    @Override
-    public void setMarkedForwardingRoute(String iface, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            LinkAddress dest = route.getDestinationLinkAddress();
-            mConnector.execute("interface", "fwmark", "route", "add", iface,
-                    dest.getAddress().getHostAddress(), dest.getPrefixLength());
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void clearMarkedForwardingRoute(String iface, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            LinkAddress dest = route.getDestinationLinkAddress();
-            mConnector.execute("interface", "fwmark", "route", "remove", iface,
-                    dest.getAddress().getHostAddress(), dest.getPrefixLength());
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void setHostExemption(LinkAddress host) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
