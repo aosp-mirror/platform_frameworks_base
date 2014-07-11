@@ -5506,12 +5506,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // prevent status bar interaction from clearing certain flags
         boolean statusBarHasFocus = win.getAttrs().type == TYPE_STATUS_BAR;
-        if (statusBarHasFocus) {
+        if (statusBarHasFocus && !isStatusBarKeyguard()) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_IMMERSIVE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            if (!isStatusBarKeyguard() || mHideLockScreen) {
+            if (mHideLockScreen) {
                 flags |= View.STATUS_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSLUCENT;
             }
             vis = (vis & ~flags) | (oldVis & flags);
