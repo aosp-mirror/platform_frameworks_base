@@ -299,6 +299,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (enabledOnly && !profile.isEnabled()) {
                 continue;
             }
+            if (mRemovingUserIds.get(profile.id)) {
+                continue;
+            }
             users.add(profile);
         }
         return users;
