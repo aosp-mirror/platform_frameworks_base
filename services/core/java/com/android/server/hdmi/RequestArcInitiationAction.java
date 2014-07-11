@@ -42,7 +42,7 @@ final class RequestArcInitiationAction extends RequestArcAction {
             public void onSendCompleted(int error) {
                 if (error == Constants.SEND_RESULT_SUCCESS) {
                     mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
-                    addTimer(mState, TIMEOUT_MS);
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
                 } else {
                     // If failed to send <Request ARC Initiation>, start "Disabled"
                     // ARC transmission action.

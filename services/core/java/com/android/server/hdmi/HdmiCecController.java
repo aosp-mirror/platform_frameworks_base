@@ -77,8 +77,6 @@ final class HdmiCecController {
 
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
-    private static final int RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION = 3;
-
     // Predicate for whether the given logical address is remote device's one or not.
     private final Predicate<Integer> mRemoteDeviceAddressPredicate = new Predicate<Integer>() {
         @Override
@@ -198,8 +196,7 @@ final class HdmiCecController {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != Constants.ADDR_UNREGISTERED
                     && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
-                if (!sendPollMessage(curAddress, curAddress,
-                        RETRY_COUNT_FOR_LOGICAL_ADDRESS_ALLOCATION)) {
+                if (!sendPollMessage(curAddress, curAddress, HdmiConfig.ADDRESS_ALLOCATION_RETRY)) {
                     logicalAddress = curAddress;
                     break;
                 }

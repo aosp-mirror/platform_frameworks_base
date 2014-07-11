@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiCecDeviceInfo;
-
 import android.util.Slog;
 
 /**
@@ -80,7 +79,7 @@ final class SetArcTransmissionStateAction extends FeatureAction {
                     // If succeeds to send <Report ARC Initiated>, wait general timeout
                     // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
                     mState = STATE_WAITING_TIMEOUT;
-                    addTimer(mState, TIMEOUT_MS);
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
                 } else {
                     // If fails to send <Report ARC Initiated>, disable ARC and
                     // send <Report ARC Terminated> directly.

@@ -37,7 +37,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
     boolean start() {
         mState = STATE_WAITING_FOR_SYSTEM_AUDIO_MODE_STATUS;
 
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         sendGiveSystemAudioModeStatus();
         return true;
     }

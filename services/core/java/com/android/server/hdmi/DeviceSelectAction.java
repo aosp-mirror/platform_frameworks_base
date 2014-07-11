@@ -111,7 +111,7 @@ final class DeviceSelectAction extends FeatureAction {
             }
         });
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     @Override

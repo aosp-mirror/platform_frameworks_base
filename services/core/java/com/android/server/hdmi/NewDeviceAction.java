@@ -87,7 +87,7 @@ final class NewDeviceAction extends FeatureAction {
 
         sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(),
                 mDeviceLogicalAddress));
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 
@@ -161,7 +161,7 @@ final class NewDeviceAction extends FeatureAction {
         }
         sendCommand(HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(getSourceAddress(),
                 mDeviceLogicalAddress));
-        addTimer(mState, TIMEOUT_MS);
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     private void addDeviceInfo() {
