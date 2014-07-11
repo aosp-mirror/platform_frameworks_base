@@ -60,8 +60,9 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_STOP_DTMF_TONE = 12;
     private static final int MSG_CONFERENCE = 13;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 14;
-    private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
-    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
+    private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 15;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 16;
+    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 17;
 
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
@@ -179,6 +180,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void swapWithBackgroundCall(String callId) {
+            mHandler.obtainMessage(MSG_SWAP_WITH_BACKGROUND_CALL, callId).sendToTarget();
+        }
+
+        @Override
         public void onPostDialContinue(String callId, boolean proceed) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
@@ -255,6 +261,9 @@ public abstract class ConnectionService extends Service {
                 case MSG_SPLIT_FROM_CONFERENCE:
                     splitFromConference((String) msg.obj);
                     break;
+                case MSG_SWAP_WITH_BACKGROUND_CALL:
+                    swapWithBackgroundCall((String) msg.obj);
+                    break;
                 case MSG_ON_POST_DIAL_CONTINUE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -302,14 +311,6 @@ public abstract class ConnectionService extends Service {
             }
         }
 
-        /** {@inheritDoc} */
-        @Override
-        public void onFeaturesChanged(Connection c, int features) {
-            String id = mIdByConnection.get(c);
-            Log.d(this, "Adapter set features %d", features);
-            mAdapter.setFeatures(id, features);
-        }
-
         @Override
         public void onDisconnected(Connection c, int cause, String message) {
             String id = mIdByConnection.get(c);
@@ -318,8 +319,16 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onHandleChanged(Connection c, Uri newHandle) {
-            // TODO: Unsupported yet
+        public void onHandleChanged(Connection c, Uri handle, int presentation) {
+            String id = mIdByConnection.get(c);
+            mAdapter.setHandle(id, handle, presentation);
+        }
+
+        @Override
+        public void onCallerDisplayNameChanged(
+                Connection c, String callerDisplayName, int presentation) {
+            String id = mIdByConnection.get(c);
+            mAdapter.setCallerDisplayName(id, callerDisplayName, presentation);
         }
 
         @Override
@@ -525,6 +534,11 @@ public abstract class ConnectionService extends Service {
         }
 
         // TODO(santoscordon): Find existing conference call and invoke split(connection).
+    }
+
+    private void swapWithBackgroundCall(String callId) {
+        Log.d(this, "swapWithBackgroundCall(%s)", callId);
+        findConnectionForAction(callId, "swapWithBackgroundCall").onSwapWithBackgroundCall();
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {

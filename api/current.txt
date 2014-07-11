@@ -27583,7 +27583,7 @@ package android.telecomm {
   public final class CallCapabilities {
     method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
-    field public static final int ALL = 255; // 0xff
+    field public static final int ALL = 3327; // 0xcff
     field public static final int GENERIC_CONFERENCE = 128; // 0x80
     field public static final int HOLD = 1; // 0x1
     field public static final int MERGE_CALLS = 4; // 0x4
@@ -27593,21 +27593,16 @@ package android.telecomm {
     field public static final int SUPPORTS_VT_REMOTE = 512; // 0x200
     field public static final int SUPPORT_HOLD = 2; // 0x2
     field public static final int SWAP_CALLS = 8; // 0x8
+    field public static final int VoLTE = 1024; // 0x400
+    field public static final int VoWIFI = 2048; // 0x800
   }
 
-  public final class CallFeatures {
-    field public static final int NONE = 0; // 0x0
-    field public static final int VoLTE = 1; // 0x1
-    field public static final int VoWIFI = 2; // 0x2
-  }
-
-  public final class CallNumberPresentation extends java.lang.Enum {
-    method public static android.telecomm.CallNumberPresentation valueOf(java.lang.String);
-    method public static final android.telecomm.CallNumberPresentation[] values();
-    enum_constant public static final android.telecomm.CallNumberPresentation ALLOWED;
-    enum_constant public static final android.telecomm.CallNumberPresentation PAYPHONE;
-    enum_constant public static final android.telecomm.CallNumberPresentation RESTRICTED;
-    enum_constant public static final android.telecomm.CallNumberPresentation UNKNOWN;
+  public class CallPropertyPresentation {
+    ctor public CallPropertyPresentation();
+    field public static final int ALLOWED = 0; // 0x0
+    field public static final int PAYPHONE = 3; // 0x3
+    field public static final int RESTRICTED = 1; // 0x1
+    field public static final int UNKNOWN = 2; // 0x2
   }
 
   public final class CallServiceDescriptor implements android.os.Parcelable {
@@ -27690,9 +27685,11 @@ package android.telecomm {
     method public final android.telecomm.CallAudioState getCallAudioState();
     method public final int getCallCapabilities();
     method public final android.telecomm.CallVideoProvider getCallVideoProvider();
+    method public final java.lang.String getCallerDisplayName();
+    method public final int getCallerDisplayNamePresentation();
     method public final java.util.List<android.telecomm.Connection> getChildConnections();
-    method public final int getFeatures();
     method public final android.net.Uri getHandle();
+    method public final int getHandlePresentation();
     method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
@@ -27711,16 +27708,17 @@ package android.telecomm {
     method protected void onSetAudioState(android.telecomm.CallAudioState);
     method protected void onSetState(int);
     method protected void onStopDtmfTone();
+    method protected void onSwapWithBackgroundCall();
     method protected void onUnhold();
     method public final void setActive();
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
     method public final void setCallVideoProvider(android.telecomm.CallVideoProvider);
+    method public final void setCallerDisplayName(java.lang.String, int);
     method public final void setDestroyed();
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
-    method public final void setFeatures(int);
-    method public final void setHandle(android.net.Uri);
+    method public final void setHandle(android.net.Uri, int);
     method public final void setOnHold();
     method public final void setParentConnection(android.telecomm.Connection);
     method public final void setPostDialWait(java.lang.String);
@@ -27741,13 +27739,13 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(java.lang.String, android.net.Uri, android.os.Bundle, int);
-    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, android.os.Bundle, int);
+    ctor public ConnectionRequest(android.telecomm.PhoneAccount, java.lang.String, android.net.Uri, int, android.os.Bundle, int);
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
     method public java.lang.String getCallId();
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
+    method public int getHandlePresentation();
     method public int getVideoState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -27794,6 +27792,7 @@ package android.telecomm {
     method public void rejectCall(java.lang.String, boolean, java.lang.String);
     method public void setAudioRoute(int);
     method public void stopDtmfTone(java.lang.String);
+    method public void swapWithBackgroundCall(java.lang.String);
     method public void unholdCall(java.lang.String);
   }
 
@@ -27801,15 +27800,17 @@ package android.telecomm {
     method public int describeContents();
     method public android.telecomm.PhoneAccount getAccount();
     method public android.telecomm.RemoteCallVideoProvider getCallVideoProvider() throws android.os.RemoteException;
+    method public java.lang.String getCallerDisplayName();
+    method public int getCallerDisplayNamePresentation();
     method public java.util.List<java.lang.String> getCannedSmsResponses();
     method public int getCapabilities();
     method public long getConnectTimeMillis();
     method public android.telecomm.CallServiceDescriptor getCurrentCallServiceDescriptor();
     method public int getDisconnectCauseCode();
     method public java.lang.String getDisconnectCauseMsg();
-    method public int getFeatures();
     method public android.telecomm.GatewayInfo getGatewayInfo();
     method public android.net.Uri getHandle();
+    method public int getHandlePresentation();
     method public java.lang.String getId();
     method public android.telecomm.CallState getState();
     method public android.telecomm.StatusHints getStatusHints();
@@ -27878,9 +27879,12 @@ package android.telecomm {
     method public void disconnect();
     method public boolean getAudioModeIsVoip();
     method public int getCallCapabilities();
+    method public java.lang.String getCallerDisplayName();
+    method public int getCallerDisplayNamePresentation();
     method public int getDisconnectCause();
     method public java.lang.String getDisconnectMessage();
-    method public int getFeatures();
+    method public android.net.Uri getHandle();
+    method public int getHandlePresentation();
     method public int getState();
     method public android.telecomm.StatusHints getStatusHints();
     method public void hold();
@@ -27890,19 +27894,21 @@ package android.telecomm {
     method public void removeListener(android.telecomm.RemoteConnection.Listener);
     method public void setAudioState(android.telecomm.CallAudioState);
     method public void stopDtmf();
+    method public void swapWithBackgroundCall();
     method public void unhold();
   }
 
   public static abstract interface RemoteConnection.Listener {
+    method public abstract void onAudioModeIsVoipChanged(android.telecomm.RemoteConnection, boolean);
     method public abstract void onCallCapabilitiesChanged(android.telecomm.RemoteConnection, int);
+    method public abstract void onCallerDisplayNameChanged(android.telecomm.RemoteConnection, java.lang.String, int);
     method public abstract void onDestroyed(android.telecomm.RemoteConnection);
     method public abstract void onDisconnected(android.telecomm.RemoteConnection, int, java.lang.String);
-    method public abstract void onFeaturesChanged(android.telecomm.RemoteConnection, int);
+    method public abstract void onHandleChanged(android.telecomm.RemoteConnection, android.net.Uri, int);
     method public abstract void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public abstract void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
-    method public abstract void onSetAudioModeIsVoip(android.telecomm.RemoteConnection, boolean);
-    method public abstract void onSetStatusHints(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
     method public abstract void onStateChanged(android.telecomm.RemoteConnection, int);
+    method public abstract void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
   }
 
   public abstract interface Response {
@@ -27916,9 +27922,10 @@ package android.telecomm {
   }
 
   public final class StatusHints implements android.os.Parcelable {
-    ctor public StatusHints(android.content.ComponentName, java.lang.String, int);
+    ctor public StatusHints(android.content.ComponentName, java.lang.String, int, android.os.Bundle);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
+    method public android.os.Bundle getExtras();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
     method public int getIconId();
     method public java.lang.String getLabel();
