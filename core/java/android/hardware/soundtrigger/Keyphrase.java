@@ -30,7 +30,11 @@ public class Keyphrase implements Parcelable {
     /** A hint text to display corresponding to this keyphrase, e.g. "Hello There". */
     public final String hintText;
     /** The locale of interest when using this Keyphrase. */
-    public String locale;
+    public final String locale;
+    /** The various recognition modes supported by this keyphrase */
+    public final int recognitionModeFlags;
+    /** The users associated with this keyphrase */
+    public final int[] users;
 
     public static final Parcelable.Creator<Keyphrase> CREATOR
             = new Parcelable.Creator<Keyphrase>() {
@@ -44,13 +48,26 @@ public class Keyphrase implements Parcelable {
     };
 
     private static Keyphrase fromParcel(Parcel in) {
-        return new Keyphrase(in.readInt(), in.readString(), in.readString());
+        int id = in.readInt();
+        String hintText = in.readString();
+        String locale = in.readString();
+        int recognitionModeFlags = in.readInt();
+        int numUsers = in.readInt();
+        int[] users = null;
+        if (numUsers > 0) {
+            users = new int[numUsers];
+            in.readIntArray(users);
+        }
+        return new Keyphrase(id, hintText, locale, recognitionModeFlags, users);
     }
 
-    public Keyphrase(int id, String hintText, String locale) {
+    public Keyphrase(int id, String hintText, String locale, int recognitionModeFlags,
+            int[] users) {
         this.id = id;
         this.hintText = hintText;
         this.locale = locale;
+        this.recognitionModeFlags = recognitionModeFlags;
+        this.users = users;
     }
 
     @Override
@@ -58,6 +75,13 @@ public class Keyphrase implements Parcelable {
         dest.writeInt(id);
         dest.writeString(hintText);
         dest.writeString(locale);
+        dest.writeInt(recognitionModeFlags);
+        if (users != null) {
+            dest.writeInt(users.length);
+            dest.writeIntArray(users);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     @Override
@@ -97,5 +121,15 @@ public class Keyphrase implements Parcelable {
         } else if (!locale.equals(other.locale))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Keyphrase[id=" + id + ", text=" + hintText + ", locale=" + locale
+                + ", recognitionModes=" + recognitionModeFlags + "]";
+    }
+
+    protected SoundTrigger.Keyphrase convertToSoundTriggerKeyphrase() {
+        return new SoundTrigger.Keyphrase(id, recognitionModeFlags, locale, hintText, users);
     }
 }

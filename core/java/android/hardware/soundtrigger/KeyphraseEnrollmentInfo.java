@@ -239,7 +239,8 @@ public class KeyphraseEnrollmentInfo {
      * @param keyphrase The keyphrase that the user needs to be enrolled to.
      * @param locale The locale for which the enrollment needs to be performed.
      *        This is a Java locale, for example "en_US".
-     * @return true, if an enrollment client supports the given keyphrase and the given locale.
+     * @return The metadata, if an enrollment client supports the given keyphrase
+     *         and the given locale, null otherwise.
      */
     public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, String locale) {
         if (mKeyphrases == null || mKeyphrases.length == 0) {
