@@ -77,9 +77,9 @@ public class ImageReader implements AutoCloseable {
      * data.</p>
      *
      * @param width
-     *            The width in pixels of the Images that this reader will produce.
+     *            The default width in pixels of the Images that this reader will produce.
      * @param height
-     *            The height in pixels of the Images that this reader will produce.
+     *            The default height in pixels of the Images that this reader will produce.
      * @param format
      *            The format of the Image that this reader will produce. This
      *            must be one of the {@link android.graphics.ImageFormat} or
@@ -130,39 +130,43 @@ public class ImageReader implements AutoCloseable {
     }
 
     /**
-     * The width of each {@link Image}, in pixels.
+     * The default width of {@link Image Images}, in pixels.
      *
-     * <p>ImageReader guarantees that all Images acquired from ImageReader (for example, with
-     * {@link #acquireNextImage}) will have the same dimensions as specified in
-     * {@link #newInstance}.</p>
+     * <p>The width may be overridden by the producer sending buffers to this
+     * ImageReader's Surface. If so, the actual width of the images can be
+     * found using {@link Image#getWidth}.</p>
      *
-     * @return the width of an Image
+     * @return the expected width of an Image
      */
     public int getWidth() {
         return mWidth;
     }
 
     /**
-     * The height of each {@link Image}, in pixels.
+     * The default height of {@link Image Images}, in pixels.
      *
-     * <p>ImageReader guarantees that all Images acquired from ImageReader (for example, with
-     * {@link #acquireNextImage}) will have the same dimensions as specified in
-     * {@link #newInstance}.</p>
+     * <p>The height may be overridden by the producer sending buffers to this
+     * ImageReader's Surface. If so, the actual height of the images can be
+     * found using {@link Image#getHeight}.</p>
      *
-     * @return the height of an Image
+     * @return the expected height of an Image
      */
     public int getHeight() {
         return mHeight;
     }
 
     /**
-     * The {@link ImageFormat image format} of each Image.
+     * The default {@link ImageFormat image format} of {@link Image Images}.
      *
-     * <p>ImageReader guarantees that all {@link Image Images} acquired from ImageReader
-     *  (for example, with {@link #acquireNextImage}) will have the same format as specified in
-     * {@link #newInstance}.</p>
+     * <p>Some color formats may be overridden by the producer sending buffers to
+     * this ImageReader's Surface if the default color format allows. ImageReader
+     * guarantees that all {@link Image Images} acquired from ImageReader
+     * (for example, with {@link #acquireNextImage}) will have a "compatible"
+     * format to what was specified in {@link #newInstance}.
+     * As of now, each format is only compatible to itself.
+     * The actual format of the images can be found using {@link Image#getFormat}.</p>
      *
-     * @return the format of an Image
+     * @return the expected format of an Image
      *
      * @see ImageFormat
      */
