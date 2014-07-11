@@ -203,5 +203,8 @@ final class Constants {
     //       in config.xml to allow customization.
     static final int IRT_MS = 300;
 
+    static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "hdmi_cec.preferred_address.playback";
+    static final String PROPERTY_PREFERRED_ADDRESS_TV = "hdmi_cec.preferred_address.tv";
+
     private Constants() { /* cannot be instantiated */ }
 }

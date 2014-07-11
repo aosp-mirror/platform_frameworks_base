@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -108,14 +109,23 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     void init() {
         assertRunOnServiceThread();
-        mPreferredAddress = Constants.ADDR_UNREGISTERED;
-        // TODO: load preferred address from permanent storage.
+        mPreferredAddress = getPreferredAddress();
     }
 
     /**
      * Called once a logical address of the local device is allocated.
      */
     protected abstract void onAddressAllocated(int logicalAddress, boolean fromBootup);
+
+    /**
+     * Get the preferred logical address from system properties.
+     */
+    protected abstract int getPreferredAddress();
+
+    /**
+     * Set the preferred logical address to system properties.
+     */
+    protected abstract void setPreferredAddress(int addr);
 
     /**
      * Dispatch incoming message.
@@ -398,6 +408,7 @@ abstract class HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mAddress = mPreferredAddress = logicalAddress;
         onAddressAllocated(logicalAddress, fromBootup);
+        setPreferredAddress(logicalAddress);
     }
 
     @ServiceThreadOnly
@@ -424,18 +435,6 @@ abstract class HdmiCecLocalDevice {
     void clearAddress() {
         assertRunOnServiceThread();
         mAddress = Constants.ADDR_UNREGISTERED;
-    }
-
-    @ServiceThreadOnly
-    void setPreferredAddress(int addr) {
-        assertRunOnServiceThread();
-        mPreferredAddress = addr;
-    }
-
-    @ServiceThreadOnly
-    int getPreferredAddress() {
-        assertRunOnServiceThread();
-        return mPreferredAddress;
     }
 
     @ServiceThreadOnly
