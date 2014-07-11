@@ -5146,6 +5146,11 @@ package android.app {
     method public void onCommandResult(android.os.Bundle);
   }
 
+  public static class VoiceInteractor.CompleteVoiceRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.CompleteVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onCompleteResult(android.os.Bundle);
+  }
+
   public static class VoiceInteractor.ConfirmationRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
     method public void onConfirmationResult(boolean, android.os.Bundle);
@@ -26510,6 +26515,7 @@ package android.service.voice {
     method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
     method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
     method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onCreate(android.os.Bundle);
@@ -26545,6 +26551,7 @@ package android.service.voice {
     method public void sendAbortVoiceResult(android.os.Bundle);
     method public void sendCancelResult();
     method public void sendCommandResult(boolean, android.os.Bundle);
+    method public void sendCompleteVoiceResult(android.os.Bundle);
     method public void sendConfirmResult(boolean, android.os.Bundle);
   }
 

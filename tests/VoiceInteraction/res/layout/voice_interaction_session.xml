@@ -50,6 +50,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/confirm"
                     />
+                <Button android:id="@+id/complete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/complete"
+                    />
                 <Button android:id="@+id/abort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

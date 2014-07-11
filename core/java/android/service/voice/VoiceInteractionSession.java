@@ -108,6 +108,16 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
 
         @Override
+        public IVoiceInteractorRequest startCompleteVoice(String callingPackage,
+                IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
+            Request request = newRequest(callback);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_COMPLETE_VOICE,
+                    new Caller(callingPackage, Binder.getCallingUid()), request,
+                    message, extras));
+            return request.mInterface;
+        }
+
+        @Override
         public IVoiceInteractorRequest startAbortVoice(String callingPackage,
                 IVoiceInteractorCallback callback, CharSequence message, Bundle extras) {
             Request request = newRequest(callback);
@@ -208,6 +218,16 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             }
         }
 
+        public void sendCompleteVoiceResult(Bundle result) {
+            try {
+                if (DEBUG) Log.d(TAG, "sendCompleteVoiceResult: req=" + mInterface
+                        + " result=" + result);
+                finishRequest();
+                mCallback.deliverCompleteVoiceResult(mInterface, result);
+            } catch (RemoteException e) {
+            }
+        }
+
         public void sendAbortVoiceResult(Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendConfirmResult: req=" + mInterface
@@ -249,10 +269,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     static final int MSG_START_CONFIRMATION = 1;
-    static final int MSG_START_ABORT_VOICE = 2;
-    static final int MSG_START_COMMAND = 3;
-    static final int MSG_SUPPORTS_COMMANDS = 4;
-    static final int MSG_CANCEL = 5;
+    static final int MSG_START_COMPLETE_VOICE = 2;
+    static final int MSG_START_ABORT_VOICE = 3;
+    static final int MSG_START_COMMAND = 4;
+    static final int MSG_SUPPORTS_COMMANDS = 5;
+    static final int MSG_CANCEL = 6;
 
     static final int MSG_TASK_STARTED = 100;
     static final int MSG_TASK_FINISHED = 101;
@@ -270,6 +291,13 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                             + " prompt=" + args.arg3 + " extras=" + args.arg4);
                     onConfirm((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
                             (Bundle)args.arg4);
+                    break;
+                case MSG_START_COMPLETE_VOICE:
+                    args = (SomeArgs)msg.obj;
+                    if (DEBUG) Log.d(TAG, "onCompleteVoice: req=" + ((Request) args.arg2).mInterface
+                            + " message=" + args.arg3 + " extras=" + args.arg4);
+                    onCompleteVoice((Caller) args.arg1, (Request) args.arg2,
+                            (CharSequence) args.arg3, (Bundle) args.arg4);
                     break;
                 case MSG_START_ABORT_VOICE:
                     args = (SomeArgs)msg.obj;
@@ -699,6 +727,27 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      */
     public abstract void onConfirm(Caller caller, Request request, CharSequence prompt,
             Bundle extras);
+
+    /**
+     * Request to complete the voice interaction session because the voice activity successfully
+     * completed its interaction using voice.  Corresponds to
+     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+     * VoiceInteractor.CompleteVoiceRequest}.  The default implementation just sends an empty
+     * confirmation back to allow the activity to exit.
+     *
+     * @param caller Who is making the request.
+     * @param request The active request.
+     * @param message The message informing the user of the problem, as per
+     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+     * VoiceInteractor.CompleteVoiceRequest}.
+     * @param extras Any additional information, as per
+     * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+     * VoiceInteractor.CompleteVoiceRequest}.
+     */
+    public void onCompleteVoice(Caller caller, Request request, CharSequence message,
+           Bundle extras) {
+        request.sendCompleteVoiceResult(null);
+    }
 
     /**
      * Request to abort the voice interaction session because the voice activity can not

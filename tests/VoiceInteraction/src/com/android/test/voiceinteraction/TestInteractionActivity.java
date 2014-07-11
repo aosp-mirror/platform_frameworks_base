@@ -30,6 +30,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
 
     VoiceInteractor mInteractor;
     Button mAbortButton;
+    Button mCompleteButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,8 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         setContentView(R.layout.test_interaction);
         mAbortButton = (Button)findViewById(R.id.abort);
         mAbortButton.setOnClickListener(this);
+        mCompleteButton = (Button)findViewById(R.id.complete);
+        mCompleteButton.setOnClickListener(this);
 
         // Framework should take care of these.
         getWindow().setGravity(Gravity.TOP);
@@ -86,6 +89,21 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 @Override
                 public void onAbortResult(Bundle result) {
                     Log.i(TAG, "Abort result: result=" + result);
+                    getActivity().finish();
+                }
+            };
+            mInteractor.submitRequest(req);
+        } else if (v == mCompleteButton) {
+            VoiceInteractor.CompleteVoiceRequest req = new VoiceInteractor.CompleteVoiceRequest(
+                    "Woohoo, completed!", null) {
+                @Override
+                public void onCancel() {
+                    Log.i(TAG, "Canceled!");
+                }
+
+                @Override
+                public void onCompleteResult(Bundle result) {
+                    Log.i(TAG, "Complete result: result=" + result);
                     getActivity().finish();
                 }
             };

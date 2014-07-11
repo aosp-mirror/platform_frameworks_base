@@ -19,7 +19,9 @@
     <string name="start">Start</string>
     <string name="confirm">Confirm</string>
     <string name="abort">Abort</string>
+    <string name="complete">Complete</string>
     <string name="abortVoice">Abort Voice</string>
+    <string name="completeVoice">Complete Voice</string>
 
 </resources>
 
