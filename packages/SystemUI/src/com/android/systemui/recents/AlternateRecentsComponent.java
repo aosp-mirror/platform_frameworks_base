@@ -23,12 +23,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.view.View;
 import com.android.systemui.R;
@@ -317,6 +315,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     Rect getThumbnailTransitionRect(int runningTaskId) {
         // Get the stack of tasks that we are animating into
         TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy);
+        if (stack.getTaskCount() == 0) {
+            return new Rect();
+        }
+
+        // Get the stack
         TaskStackView tsv = new TaskStackView(mContext, stack);
         TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
         tsv.computeRects(mTaskStackBounds.width(), mTaskStackBounds.height() - mStatusBarHeight, 0, 0);

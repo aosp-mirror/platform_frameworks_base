@@ -170,11 +170,14 @@ public class TaskStack {
         }
     }
 
+    // The task offset to apply to a task id as a group affiliation
+    static final int IndividualTaskIdOffset = 1 << 16;
+
     FilteredTaskList mTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<TaskGrouping>();
-    HashMap<String, TaskGrouping> mAffinitiesGroups = new HashMap<String, TaskGrouping>();
+    HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<Integer, TaskGrouping>();
 
     /** Sets the callbacks for this task stack */
     public void setCallbacks(TaskStackCallbacks cb) {
@@ -303,7 +306,7 @@ public class TaskStack {
     }
 
     /** Returns the group with the specified affiliation. */
-    public TaskGrouping getGroupWithAffiliation(String affiliation) {
+    public TaskGrouping getGroupWithAffiliation(int affiliation) {
         return mAffinitiesGroups.get(affiliation);
     }
 
@@ -325,9 +328,9 @@ public class TaskStack {
             NamedCounter counter = new NamedCounter("task-group", "");
             int taskCount = tasks.size();
             String prevPackage = "";
-            String prevAffiliation = "";
+            int prevAffiliation = -1;
             Random r = new Random();
-            int groupCountDown = 1000;
+            int groupCountDown = 5;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 String packageName = t.key.baseIntent.getComponent().getPackageName();
@@ -337,12 +340,12 @@ public class TaskStack {
                     group = getGroupWithAffiliation(prevAffiliation);
                     groupCountDown--;
                 } else {
-                    String affiliation = counter.nextName();
+                    int affiliation = IndividualTaskIdOffset + t.key.id;
                     group = new TaskGrouping(affiliation);
                     addGroup(group);
                     prevAffiliation = affiliation;
                     prevPackage = packageName;
-                    groupCountDown = 1000;
+                    groupCountDown = 5;
                 }
                 group.addTask(t);
                 taskMap.put(t.key, t);
@@ -361,13 +364,13 @@ public class TaskStack {
             int groupCount = mGroups.size();
             for (int i = 0; i < groupCount; i++) {
                 TaskGrouping group = mGroups.get(i);
-                Collections.sort(group.mTasks, new Comparator<Task.TaskKey>() {
+                Collections.sort(group.mTaskKeys, new Comparator<Task.TaskKey>() {
                     @Override
                     public int compare(Task.TaskKey taskKey, Task.TaskKey taskKey2) {
                         return (int) (taskKey.firstActiveTime - taskKey2.firstActiveTime);
                     }
                 });
-                ArrayList<Task.TaskKey> groupTasks = group.mTasks;
+                ArrayList<Task.TaskKey> groupTasks = group.mTaskKeys;
                 int groupTaskCount = groupTasks.size();
                 for (int j = 0; j < groupTaskCount; j++) {
                     tasks.set(taskIndex, taskMap.get(groupTasks.get(j)));
@@ -376,14 +379,20 @@ public class TaskStack {
             }
             mTaskList.set(tasks);
         } else {
-            // Create a group per task
-            NamedCounter counter = new NamedCounter("task-group", "");
+            // Create the task groups
             ArrayList<Task> tasks = mTaskList.getTasks();
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
-                TaskGrouping group = new TaskGrouping(counter.nextName());
-                addGroup(group);
+                TaskGrouping group;
+                int affiliation = t.taskAffiliation > 0 ? t.taskAffiliation :
+                        IndividualTaskIdOffset + t.key.id;
+                if (mAffinitiesGroups.containsKey(affiliation)) {
+                    group = getGroupWithAffiliation(affiliation);
+                } else {
+                    group = new TaskGrouping(affiliation);
+                    addGroup(group);
+                }
                 group.addTask(t);
             }
         }

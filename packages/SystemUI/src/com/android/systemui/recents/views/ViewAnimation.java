@@ -36,7 +36,7 @@ public class ViewAnimation {
         // The transform of the current task view
         TaskViewTransform currentTaskTransform;
         // Whether this is the front most task view
-        boolean isCurrentTaskFrontMost;
+        boolean isCurrentTaskLaunchTarget;
         // The view index of the current task view
         int currentStackViewIndex;
         // The total number of task views

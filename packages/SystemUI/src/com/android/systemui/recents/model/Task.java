@@ -79,6 +79,7 @@ public class Task {
 
     public TaskKey key;
     public TaskGrouping group;
+    public int taskAffiliation;
     public Drawable applicationIcon;
     public Drawable activityIcon;
     public String activityLabel;
@@ -94,10 +95,11 @@ public class Task {
         // Only used by RecentsService for task rect calculations.
     }
 
-    public Task(int id, boolean isActive, Intent intent, String activityTitle,
-                Drawable activityIcon, int colorPrimary, int userId, long firstActiveTime,
-                long lastActiveTime) {
+    public Task(int id, boolean isActive, Intent intent, int taskAffiliation, String activityTitle,
+                Drawable activityIcon, int colorPrimary, int userId,
+                long firstActiveTime, long lastActiveTime) {
         this.key = new TaskKey(id, intent, userId, firstActiveTime, lastActiveTime);
+        this.taskAffiliation = taskAffiliation;
         this.activityLabel = activityTitle;
         this.activityIcon = activityIcon;
         this.colorPrimary = colorPrimary;
@@ -148,7 +150,7 @@ public class Task {
     public String toString() {
         String groupAffiliation = "no group";
         if (group != null) {
-            groupAffiliation = group.affiliation;
+            groupAffiliation = Integer.toString(group.affiliation);
         }
         return "Task (" + groupAffiliation + "): " + key.baseIntent.getComponent().getPackageName() +
                 " [" + super.toString() + "]";

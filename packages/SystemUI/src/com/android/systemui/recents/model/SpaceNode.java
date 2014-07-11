@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.model;
 
-import android.content.Context;
 import android.graphics.Rect;
 
 import java.util.ArrayList;
@@ -35,15 +34,13 @@ public class SpaceNode {
         public void onSpaceNodeMeasured(SpaceNode node, Rect rect);
     }
 
-    Context mContext;
-
     SpaceNode mStartNode;
     SpaceNode mEndNode;
 
     TaskStack mStack;
 
-    public SpaceNode(Context context) {
-        mContext = context;
+    public SpaceNode() {
+        // Do nothing
     }
 
     /** Sets the current stack for this space node */

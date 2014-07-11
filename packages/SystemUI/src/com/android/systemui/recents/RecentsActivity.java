@@ -48,6 +48,7 @@ import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
@@ -125,7 +126,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
-    // Broadcast receiver to handle messages from our RecentsService
+    // Broadcast receiver to handle messages from AlternateRecentsComponent
     final BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -458,11 +459,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
-        // Start listening for widget package changes if there is one bound
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            mAppWidgetHost.startListening(this);
-        }
-
         mVisible = true;
     }
 
@@ -473,6 +469,22 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Console.AnsiRed);
         }
         super.onResume();
+
+        // Start listening for widget package changes if there is one bound, post it since we don't
+        // want it stalling the startup
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> callback =
+                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(this);
+            mRecentsView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = callback.get();
+                    if (cb != null) {
+                        mAppWidgetHost.startListening(cb);
+                    }
+                }
+            }, 1);
+        }
     }
 
     @Override

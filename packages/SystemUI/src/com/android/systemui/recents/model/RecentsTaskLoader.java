@@ -396,7 +396,7 @@ public class RecentsTaskLoader {
         Resources res = context.getResources();
         ArrayList<Task> tasksToForceLoad = new ArrayList<Task>();
         TaskStack stack = new TaskStack();
-        SpaceNode root = new SpaceNode(context);
+        SpaceNode root = new SpaceNode();
         root.setStack(stack);
 
         // Get the recent tasks
@@ -428,7 +428,7 @@ public class RecentsTaskLoader {
             boolean isForemostTask = (i == (taskCount - 1));
 
             // Create a new task
-            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, activityLabel,
+            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, 0, activityLabel,
                     activityIcon, activityColor, t.userId, t.firstActiveTime, t.lastActiveTime);
 
             // Preload the specified number of apps
@@ -522,7 +522,7 @@ public class RecentsTaskLoader {
             ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
             if (info == null) continue;
 
-            stack.addTask(new Task(t.persistentId, true, t.baseIntent, null, null, 0, 0,
+            stack.addTask(new Task(t.persistentId, true, t.baseIntent, 0, null, null, 0, 0,
                     t.firstActiveTime, t.lastActiveTime));
         }
         stack.createSimulatedAffiliatedGroupings();

@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -242,10 +241,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareEnterRecentsAnimation(boolean isTaskViewFrontMost, int offsetY, int offscreenY,
-                                             Rect taskRect) {
+    public void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask, int offsetY,
+                                             int offscreenY) {
         if (mConfig.launchedFromAppWithScreenshot) {
-            if (isTaskViewFrontMost) {
+            if (isTaskViewLaunchTargetTask) {
                 // Hide the task view as we are going to animate the full screenshot into view
                 // and then replace it with this view once we are done
                 setVisibility(View.INVISIBLE);
@@ -259,7 +258,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             }
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
-            if (isTaskViewFrontMost) {
+            if (isTaskViewLaunchTargetTask) {
                 // Hide the front most task bar view so we can animate it in
                 mBarView.prepareEnterRecentsAnimation();
                 // Set the dim to 0 so we can animate it in
@@ -282,7 +281,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
         TaskViewTransform transform = ctx.currentTaskTransform;
 
         if (mConfig.launchedFromAppWithScreenshot) {
-            if (ctx.isCurrentTaskFrontMost) {
+            if (ctx.isCurrentTaskLaunchTarget) {
                 // Animate the full screenshot down first, before swapping with this task view
                 ctx.fullScreenshotView.animateOnEnterRecents(ctx, new Runnable() {
                     @Override
@@ -318,7 +317,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks, View.On
             ctx.postAnimationTrigger.increment();
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
-            if (ctx.isCurrentTaskFrontMost) {
+            if (ctx.isCurrentTaskLaunchTarget) {
                 // Animate the task bar of the first task view
                 mBarView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay, mEnableThumbnailClip);
 

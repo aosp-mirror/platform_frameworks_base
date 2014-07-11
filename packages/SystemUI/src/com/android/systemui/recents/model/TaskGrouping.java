@@ -6,20 +6,21 @@ import java.util.HashMap;
 /** Represents a grouping of tasks witihin a stack. */
 public class TaskGrouping {
 
-    String affiliation;
+    int affiliation;
     long latestActiveTimeInGroup;
 
-    ArrayList<Task.TaskKey> mTasks = new ArrayList<Task.TaskKey>();
-    HashMap<Task.TaskKey, Integer> mTaskIndices = new HashMap<Task.TaskKey, Integer>();
+    Task.TaskKey mFrontMostTaskKey;
+    ArrayList<Task.TaskKey> mTaskKeys = new ArrayList<Task.TaskKey>();
+    HashMap<Task.TaskKey, Integer> mTaskKeyIndices = new HashMap<Task.TaskKey, Integer>();
 
     /** Creates a group with a specified affiliation. */
-    public TaskGrouping(String affiliation) {
+    public TaskGrouping(int affiliation) {
         this.affiliation = affiliation;
     }
 
     /** Adds a new task to this group. */
     void addTask(Task t) {
-        mTasks.add(t.key);
+        mTaskKeys.add(t.key);
         if (t.key.lastActiveTime > latestActiveTimeInGroup) {
             latestActiveTimeInGroup = t.key.lastActiveTime;
         }
@@ -29,11 +30,11 @@ public class TaskGrouping {
 
     /** Removes a task from this group. */
     void removeTask(Task t) {
-        mTasks.remove(t.key);
+        mTaskKeys.remove(t.key);
         latestActiveTimeInGroup = 0;
-        int taskCount = mTasks.size();
+        int taskCount = mTaskKeys.size();
         for (int i = 0; i < taskCount; i++) {
-            long lastActiveTime = mTasks.get(i).lastActiveTime;
+            long lastActiveTime = mTaskKeys.get(i).lastActiveTime;
             if (lastActiveTime > latestActiveTimeInGroup) {
                 latestActiveTimeInGroup = lastActiveTime;
             }
@@ -44,24 +45,31 @@ public class TaskGrouping {
 
     /** Gets the front task */
     public boolean isFrontMostTask(Task t) {
-        return t.key.equals(mTasks.get(mTasks.size() - 1));
+        return (t.key == mFrontMostTaskKey);
     }
 
     /** Finds the index of a given task in a group. */
     public int indexOf(Task t) {
-        return mTaskIndices.get(t.key);
+        return mTaskKeyIndices.get(t.key);
     }
 
     /** Returns the number of tasks in this group. */
-    public int getTaskCount() { return mTasks.size(); }
+    public int getTaskCount() { return mTaskKeys.size(); }
 
     /** Updates the mapping of tasks to indices. */
     private void updateTaskIndices() {
-        mTaskIndices.clear();
-        int taskCount = mTasks.size();
+        if (mTaskKeys.isEmpty()) {
+            mFrontMostTaskKey = null;
+            mTaskKeyIndices.clear();
+            return;
+        }
+
+        mFrontMostTaskKey = mTaskKeys.get(mTaskKeys.size() - 1);
+        mTaskKeyIndices.clear();
+        int taskCount = mTaskKeys.size();
         for (int i = 0; i < taskCount; i++) {
-            Task.TaskKey k = mTasks.get(i);
-            mTaskIndices.put(k, i);
+            Task.TaskKey k = mTaskKeys.get(i);
+            mTaskKeyIndices.put(k, i);
         }
     }
 }

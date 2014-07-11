@@ -773,14 +773,29 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Mark that we have completely the first layout
             mAwaitingFirstLayout = false;
 
+            // Find the target task with the specified id
+            ArrayList<Task> tasks = mStack.getTasks();
+            Task targetTask = null;
+            int targetTaskId = mConfig.launchedToTaskId;
+            if (targetTaskId != -1) {
+                int taskCount = tasks.size();
+                for (int i = 0; i < taskCount; i++) {
+                    Task t = tasks.get(i);
+                    if (t.key.id == targetTaskId) {
+                        targetTask = t;
+                        break;
+                    }
+                }
+            }
+
             // Prepare the first view for its enter animation
             int offsetTopAlign = -mStackAlgorithm.mTaskRect.top;
             int offscreenY = mStackAlgorithm.mRect.bottom -
                     (mStackAlgorithm.mTaskRect.top - mStackAlgorithm.mRect.top);
             for (int i = childCount - 1; i >= 0; i--) {
                 TaskView tv = (TaskView) getChildAt(i);
-                tv.prepareEnterRecentsAnimation((i == (getChildCount() - 1)), offsetTopAlign,
-                        offscreenY, mStackAlgorithm.mTaskRect);
+                tv.prepareEnterRecentsAnimation(tv.getTask() == targetTask, offsetTopAlign,
+                        offscreenY);
             }
 
             // If the enter animation started already and we haven't completed a layout yet, do the
@@ -809,41 +824,40 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         if (mStack.getTaskCount() > 0) {
-            if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
-                // Find the target task with the specified id
-                ArrayList<Task> tasks = mStack.getTasks();
-                Task targetTask = null;
-                int targetTaskId = mConfig.launchedToTaskId;
-                if (targetTaskId != -1) {
-                    int taskCount = tasks.size();
-                    for (int i = 0; i < taskCount; i++) {
-                        Task t = tasks.get(i);
-                        if (t.key.id == targetTaskId) {
-                            targetTask = t;
-                            break;
-                        }
+            // Find the target task with the specified id
+            ArrayList<Task> tasks = mStack.getTasks();
+            Task targetTask = null;
+            int targetTaskId = mConfig.launchedToTaskId;
+            if (targetTaskId != -1) {
+                int taskCount = tasks.size();
+                for (int i = 0; i < taskCount; i++) {
+                    Task t = tasks.get(i);
+                    if (t.key.id == targetTaskId) {
+                        targetTask = t;
+                        break;
                     }
                 }
+            }
 
-                // Find the group and task index of the target task
-                if (targetTask != null) {
-                    ctx.targetTaskTransform = new TaskViewTransform();
-                    mStackAlgorithm.getStackTransform(targetTask, getStackScroll(), ctx.targetTaskTransform);
-                    Rect taskStackBounds = new Rect();
-                    mConfig.getTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(), taskStackBounds);
-                    ctx.targetTaskTransform.rect.offset(taskStackBounds.left, taskStackBounds.top);
-                }
+            // Find the transform for the target task
+            if (targetTask != null) {
+                ctx.targetTaskTransform = new TaskViewTransform();
+                mStackAlgorithm.getStackTransform(targetTask, getStackScroll(), ctx.targetTaskTransform);
+                Rect taskStackBounds = new Rect();
+                mConfig.getTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(), taskStackBounds);
+                ctx.targetTaskTransform.rect.offset(taskStackBounds.left, taskStackBounds.top);
             }
 
             // Animate all the task views into view
             int childCount = getChildCount();
             for (int i = childCount - 1; i >= 0; i--) {
                 TaskView tv = (TaskView) getChildAt(i);
+                Task task = tv.getTask();
                 ctx.currentTaskTransform = new TaskViewTransform();
                 ctx.currentStackViewIndex = i;
                 ctx.currentStackViewCount = childCount;
-                ctx.isCurrentTaskFrontMost = (i == (getChildCount() - 1));
-                mStackAlgorithm.getStackTransform(tv.getTask(), getStackScroll(), ctx.currentTaskTransform);
+                ctx.isCurrentTaskLaunchTarget = (task == targetTask);
+                mStackAlgorithm.getStackTransform(task, getStackScroll(), ctx.currentTaskTransform);
                 tv.startEnterRecentsAnimation(ctx);
             }
 

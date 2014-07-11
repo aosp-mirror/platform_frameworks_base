@@ -765,8 +765,7 @@ final class ActivityStack {
             return null;
         }
 
-        TaskRecord tr = who.task;
-        if (mService.getMostRecentTask() != tr || isHomeStack()) {
+        if (isHomeStack()) {
             // This is an optimization -- since we never show Home or Recents within Recents itself,
             // we can just go ahead and skip taking the screenshot if this is the home stack.  In
             // the case where the most recent task is not the task that was supplied, then the stack
