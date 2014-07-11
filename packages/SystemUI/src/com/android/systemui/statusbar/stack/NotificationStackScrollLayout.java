@@ -1317,7 +1317,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getPeekHeight() {
-        return mIntrinsicPadding + mCollapsedSize + mBottomStackPeekSize;
+        return mIntrinsicPadding + mCollapsedSize + mBottomStackPeekSize
+                + mCollapseSecondCardPadding;
     }
 
     private int clampPadding(int desiredPadding) {
@@ -1795,11 +1796,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getEmptyBottomMargin() {
-        int emptyMargin = mMaxLayoutHeight - mContentHeight;
+        int emptyMargin = mMaxLayoutHeight - mContentHeight - mBottomStackPeekSize;
         if (needsHeightAdaption()) {
-            emptyMargin = emptyMargin - mBottomStackSlowDownHeight - mBottomStackPeekSize;
+            emptyMargin -= mBottomStackSlowDownHeight;
         } else {
-            emptyMargin = emptyMargin - mBottomStackPeekSize;
+            emptyMargin -= mCollapseSecondCardPadding;
         }
         return Math.max(emptyMargin, 0);
     }
