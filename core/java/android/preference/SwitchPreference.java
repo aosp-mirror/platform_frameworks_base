@@ -36,10 +36,11 @@ import android.widget.Switch;
  * @attr ref android.R.styleable#SwitchPreference_disableDependentsState
  */
 public class SwitchPreference extends TwoStatePreference {
+    private final Listener mListener = new Listener();
+
     // Switch text for on and off states
     private CharSequence mSwitchOn;
     private CharSequence mSwitchOff;
-    private final Listener mListener = new Listener();
 
     private class Listener implements CompoundButton.OnCheckedChangeListener {
         @Override
@@ -122,6 +123,11 @@ public class SwitchPreference extends TwoStatePreference {
 
         View checkableView = view.findViewById(com.android.internal.R.id.switchWidget);
         if (checkableView != null && checkableView instanceof Checkable) {
+            if (checkableView instanceof Switch) {
+                final Switch switchView = (Switch) checkableView;
+                switchView.setOnCheckedChangeListener(null);
+            }
+
             ((Checkable) checkableView).setChecked(mChecked);
 
             sendAccessibilityEvent(checkableView);

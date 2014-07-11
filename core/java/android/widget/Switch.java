@@ -568,22 +568,38 @@ public class Switch extends CompoundButton {
             }
         }
 
-        mTrackDrawable.getPadding(mTempRect);
+        final int trackHeight;
+        final Rect padding = mTempRect;
+        if (mTrackDrawable != null) {
+            mTrackDrawable.getPadding(padding);
+            trackHeight = mTrackDrawable.getIntrinsicHeight();
+        } else {
+            padding.setEmpty();
+            trackHeight = 0;
+        }
+
+        final int thumbWidth;
+        final int thumbHeight;
+        if (mThumbDrawable != null) {
+            thumbWidth = mThumbDrawable.getIntrinsicWidth();
+            thumbHeight = mThumbDrawable.getIntrinsicHeight();
+        } else {
+            thumbWidth = 0;
+            thumbHeight = 0;
+        }
 
         final int maxTextWidth = mShowText ? Math.max(mOnLayout.getWidth(), mOffLayout.getWidth())
                 + mThumbTextPadding * 2 : 0;
-        mThumbWidth = Math.max(maxTextWidth, mThumbDrawable.getIntrinsicWidth());
+        mThumbWidth = Math.max(maxTextWidth, thumbWidth);
 
         final int switchWidth = Math.max(mSwitchMinWidth,
-                2 * mThumbWidth + mTempRect.left + mTempRect.right);
-        final int switchHeight = Math.max(mTrackDrawable.getIntrinsicHeight(),
-                mThumbDrawable.getIntrinsicHeight());
-
-
+                2 * mThumbWidth + padding.left + padding.right);
+        final int switchHeight = Math.max(trackHeight, thumbHeight);
         mSwitchWidth = switchWidth;
         mSwitchHeight = switchHeight;
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
         final int measuredHeight = getMeasuredHeight();
         if (measuredHeight < switchHeight) {
             setMeasuredDimension(getMeasuredWidthAndState(), switchHeight);
@@ -830,32 +846,34 @@ public class Switch extends CompoundButton {
 
     @Override
     public void draw(Canvas c) {
-        final Rect tempRect = mTempRect;
-        final Drawable trackDrawable = mTrackDrawable;
-        final Drawable thumbDrawable = mThumbDrawable;
+        final Rect padding = mTempRect;
 
         // Layout the track.
         final int switchLeft = mSwitchLeft;
         final int switchTop = mSwitchTop;
         final int switchRight = mSwitchRight;
         final int switchBottom = mSwitchBottom;
-        trackDrawable.setBounds(switchLeft, switchTop, switchRight, switchBottom);
-        trackDrawable.getPadding(tempRect);
+        if (mTrackDrawable != null) {
+            mTrackDrawable.setBounds(switchLeft, switchTop, switchRight, switchBottom);
+            mTrackDrawable.getPadding(padding);
+        }
 
-        final int switchInnerLeft = switchLeft + tempRect.left;
+        final int switchInnerLeft = switchLeft + padding.left;
 
         // Relies on mTempRect, MUST be called first!
         final int thumbPos = getThumbOffset();
 
         // Layout the thumb.
-        thumbDrawable.getPadding(tempRect);
-        final int thumbLeft = switchInnerLeft - tempRect.left + thumbPos;
-        final int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + tempRect.right;
-        thumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+        if (mThumbDrawable != null) {
+            mThumbDrawable.getPadding(padding);
+            final int thumbLeft = switchInnerLeft - padding.left + thumbPos;
+            final int thumbRight = switchInnerLeft + thumbPos + mThumbWidth + padding.right;
+            mThumbDrawable.setBounds(thumbLeft, switchTop, thumbRight, switchBottom);
 
-        final Drawable background = getBackground();
-        if (background != null) {
-            background.setHotspotBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+            final Drawable background = getBackground();
+            if (background != null) {
+                background.setHotspotBounds(thumbLeft, switchTop, thumbRight, switchBottom);
+            }
         }
 
         // Draw the background.
@@ -866,35 +884,44 @@ public class Switch extends CompoundButton {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        final Rect tempRect = mTempRect;
+        final Rect padding = mTempRect;
         final Drawable trackDrawable = mTrackDrawable;
-        final Drawable thumbDrawable = mThumbDrawable;
-        trackDrawable.getPadding(tempRect);
+        if (trackDrawable != null) {
+            trackDrawable.getPadding(padding);
+        } else {
+            padding.setEmpty();
+        }
 
         final int switchTop = mSwitchTop;
         final int switchBottom = mSwitchBottom;
-        final int switchInnerLeft = mSwitchLeft + tempRect.left;
-        final int switchInnerTop = switchTop + tempRect.top;
-        final int switchInnerRight = mSwitchRight - tempRect.right;
-        final int switchInnerBottom = switchBottom - tempRect.bottom;
+        final int switchInnerLeft = mSwitchLeft + padding.left;
+        final int switchInnerTop = switchTop + padding.top;
+        final int switchInnerRight = mSwitchRight - padding.right;
+        final int switchInnerBottom = switchBottom - padding.bottom;
 
-        if (mSplitTrack) {
-            final Insets insets = thumbDrawable.getOpticalInsets();
-            thumbDrawable.copyBounds(tempRect);
-            tempRect.left += insets.left;
-            tempRect.right -= insets.right;
+        final Drawable thumbDrawable = mThumbDrawable;
+        if (trackDrawable != null) {
+            if (mSplitTrack && thumbDrawable != null) {
+                final Insets insets = thumbDrawable.getOpticalInsets();
+                thumbDrawable.copyBounds(padding);
+                padding.left += insets.left;
+                padding.right -= insets.right;
 
-            final int saveCount = canvas.save();
-            canvas.clipRect(tempRect, Op.DIFFERENCE);
-            trackDrawable.draw(canvas);
-            canvas.restoreToCount(saveCount);
-        } else {
-            trackDrawable.draw(canvas);
+                final int saveCount = canvas.save();
+                canvas.clipRect(padding, Op.DIFFERENCE);
+                trackDrawable.draw(canvas);
+                canvas.restoreToCount(saveCount);
+            } else {
+                trackDrawable.draw(canvas);
+            }
         }
 
         final int saveCount = canvas.save();
-        canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
-        thumbDrawable.draw(canvas);
+
+        if (thumbDrawable != null) {
+            canvas.clipRect(switchInnerLeft, switchTop, switchInnerRight, switchBottom);
+            thumbDrawable.draw(canvas);
+        }
 
         final Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
         if (switchText != null) {
@@ -904,8 +931,15 @@ public class Switch extends CompoundButton {
             }
             mTextPaint.drawableState = drawableState;
 
-            final Rect thumbBounds = thumbDrawable.getBounds();
-            final int left = (thumbBounds.left + thumbBounds.right) / 2 - switchText.getWidth() / 2;
+            final int cX;
+            if (thumbDrawable != null) {
+                final Rect bounds = thumbDrawable.getBounds();
+                cX = bounds.left + bounds.right;
+            } else {
+                cX = getWidth() / 2;
+            }
+
+            final int left = cX / 2 - switchText.getWidth() / 2;
             final int top = (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2;
             canvas.translate(left, top);
             switchText.draw(canvas);
@@ -955,11 +989,12 @@ public class Switch extends CompoundButton {
     }
 
     private int getThumbScrollRange() {
-        if (mTrackDrawable == null) {
+        if (mTrackDrawable != null) {
+            mTrackDrawable.getPadding(mTempRect);
+            return mSwitchWidth - mThumbWidth - mTempRect.left - mTempRect.right;
+        } else {
             return 0;
         }
-        mTrackDrawable.getPadding(mTempRect);
-        return mSwitchWidth - mThumbWidth - mTempRect.left - mTempRect.right;
     }
 
     @Override
@@ -1002,16 +1037,6 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    public void invalidateDrawable(Drawable drawable) {
-        super.invalidateDrawable(drawable);
-
-        if (drawable == mThumbDrawable) {
-            // Handle changes to thumb width and height.
-            requestLayout();
-        }
-    }
-
-    @Override
     protected boolean verifyDrawable(Drawable who) {
         return super.verifyDrawable(who) || who == mThumbDrawable || who == mTrackDrawable;
     }
@@ -1019,8 +1044,19 @@ public class Switch extends CompoundButton {
     @Override
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
-        mThumbDrawable.jumpToCurrentState();
-        mTrackDrawable.jumpToCurrentState();
+
+        if (mThumbDrawable != null) {
+            mThumbDrawable.jumpToCurrentState();
+        }
+
+        if (mTrackDrawable != null) {
+            mTrackDrawable.jumpToCurrentState();
+        }
+
+        if (mPositionAnimator != null && mPositionAnimator.isRunning()) {
+            mPositionAnimator.end();
+            mPositionAnimator = null;
+        }
     }
 
     @Override
