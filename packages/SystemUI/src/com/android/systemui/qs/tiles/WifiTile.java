@@ -90,6 +90,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleSecondaryClick() {
+        if (!mState.enabled) {
+            mController.setWifiEnabled(true);
+            mState.enabled = true;
+        }
         showDetail(true);
     }
 
