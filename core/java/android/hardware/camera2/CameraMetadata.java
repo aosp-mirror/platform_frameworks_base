@@ -387,8 +387,11 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2;
 
     /**
-     * <p>The camera device supports outputting RAW buffers that can be
-     * saved offline into a DNG format.</p>
+     * <p>The camera device supports outputting RAW buffers and
+     * metadata for interpreting them.</p>
+     * <p>Devices supporting the RAW capability allow both for
+     * saving DNG files, and for direct application processing of
+     * raw sensor images.</p>
      * <ul>
      * <li>RAW_SENSOR is supported as an output format.</li>
      * <li>The maximum available resolution for RAW_SENSOR streams
@@ -403,7 +406,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_DNG = 3;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_RAW = 3;
 
     /**
      * <p>The camera device supports the Zero Shutter Lag use case.</p>
@@ -1186,8 +1189,7 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.<br />
-     * </p>
+     * frame rate of video recording.  </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
