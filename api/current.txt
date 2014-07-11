@@ -17341,6 +17341,23 @@ package android.net.wifi {
     enum_constant public static final android.net.wifi.SupplicantState UNINITIALIZED;
   }
 
+  public class WifiAdapter implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getName();
+    method public boolean is5GHzBandSupported();
+    method public boolean isDeviceToApRttSupported();
+    method public boolean isDeviceToDeviceRttSupported();
+    method public boolean isEnhancedPowerReportingSupported();
+    method public boolean isOffChannelTdlsSupported();
+    method public boolean isP2pSupported();
+    method public boolean isPasspointSupported();
+    method public boolean isPortableHotspotSupported();
+    method public boolean isPreferredNetworkOffloadSupported();
+    method public boolean isTdlsSupported();
+    method public boolean isWifiScannerSupported();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class WifiConfiguration implements android.os.Parcelable {
     ctor public WifiConfiguration();
     method public int describeContents();
@@ -17479,6 +17496,7 @@ package android.net.wifi {
     method public boolean disableNetwork(int);
     method public boolean disconnect();
     method public boolean enableNetwork(int, boolean);
+    method public java.util.List<android.net.wifi.WifiAdapter> getAdapters();
     method public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
     method public android.net.wifi.WifiInfo getConnectionInfo();
     method public android.net.DhcpInfo getDhcpInfo();

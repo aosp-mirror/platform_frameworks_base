@@ -568,9 +568,10 @@ public class WifiManager {
     }
 
     /**
-     * @hide
+     * Retrieve all wifi adapters available on this device
+     * @return list of adapters
      */
-    public List<WifiAdapter> getAdaptors() {
+    public List<WifiAdapter> getAdapters() {
         try {
             return mService.getAdaptors();
         } catch (RemoteException e) {
