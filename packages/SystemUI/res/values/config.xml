@@ -157,5 +157,8 @@
 
     <!-- Doze: should the significant motion sensor be used as a tease signal? -->
     <bool name="doze_tease_on_significant_motion">true</bool>
+
+    <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
+    <integer name="volume_panel_dismiss_delay">200</integer>
 </resources>
 

@@ -11,12 +11,14 @@ import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -45,6 +47,7 @@ public class VolumeUI extends SystemUI {
     private static final int DEFAULT = 1;  // enabled by default
 
     private final Handler mHandler = new Handler();
+
     private AudioManager mAudioManager;
     private MediaSessionManager mMediaSessionManager;
     private VolumeController mVolumeController;
@@ -52,6 +55,7 @@ public class VolumeUI extends SystemUI {
 
     private VolumePanel mDialogPanel;
     private VolumePanel mPanel;
+    private int mDismissDelay;
 
     @Override
     public void start() {
@@ -79,6 +83,7 @@ public class VolumeUI extends SystemUI {
     }
 
     private void initPanel() {
+        mDismissDelay = mContext.getResources().getInteger(R.integer.volume_panel_dismiss_delay);
         mPanel = new VolumePanel(mContext, null, new ZenModeControllerImpl(mContext, mHandler));
         mPanel.setCallback(new VolumePanel.Callback() {
             @Override
@@ -109,15 +114,20 @@ public class VolumeUI extends SystemUI {
     private final Runnable mStartZenSettings = new Runnable() {
         @Override
         public void run() {
-            mDialogPanel.postDismiss();
-            try {
-                // Dismiss the lock screen when Settings starts.
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-            }
-            final Intent intent = ZenModePanel.ZEN_SETTINGS;
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Dismiss the lock screen when Settings starts.
+                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                    } catch (RemoteException e) {
+                    }
+                    final Intent intent = ZenModePanel.ZEN_SETTINGS;
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                }
+            });
+            mDialogPanel.postDismiss(mDismissDelay);
         }
     };
 
@@ -153,7 +163,7 @@ public class VolumeUI extends SystemUI {
 
         @Override
         public void dismiss() throws RemoteException {
-            mPanel.postDismiss();
+            mPanel.postDismiss(0);
         }
 
         @Override
