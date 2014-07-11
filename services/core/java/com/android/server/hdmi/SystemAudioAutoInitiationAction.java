@@ -48,7 +48,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
             @Override
             public void onSendCompleted(int error) {
                 if (error != Constants.SEND_RESULT_SUCCESS) {
-                    tv().setSystemAudioMode(false);
+                    tv().setSystemAudioMode(false, true);
                     finish();
                 }
             }
@@ -79,7 +79,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
         } else {
             // If the last setting is non-system audio, turn off system audio mode
             // and update system audio status (volume or mute).
-            tv().setSystemAudioMode(false);
+            tv().setSystemAudioMode(false, true);
             if (canChangeSystemAudio()) {
                 addAndStartAction(new SystemAudioStatusAction(tv(), mAvrAddress, null));
             }
@@ -106,7 +106,7 @@ final class SystemAudioAutoInitiationAction extends FeatureAction {
                 addAndStartAction(new SystemAudioActionFromTv(tv(), mAvrAddress, true, null));
             }
         } else {
-            tv().setSystemAudioMode(false);
+            tv().setSystemAudioMode(false, true);
         }
         finish();
     }

@@ -240,8 +240,8 @@ final class HotplugDetectionAction extends FeatureAction {
             return;
         }
 
-        // Turn off system audio mode.
-        tv().setSystemAudioMode(false);
+        // Turn off system audio mode and update settings.
+        tv().setSystemAudioMode(false, true);
         if (tv().isArcEstabilished()) {
             addAndStartAction(new RequestArcTerminationAction(localDevice(), address));
         }

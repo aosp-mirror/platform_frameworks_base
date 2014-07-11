@@ -26,6 +26,7 @@ import android.media.AudioPort;
 import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -89,22 +90,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiCecDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
-        // TODO: load system audio mode and set it to mSystemAudioMode.
     }
 
     @Override
     @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress) {
         assertRunOnServiceThread();
-        // TODO: vendor-specific initialization here.
-
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        mSystemAudioMode = mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, false);
         launchRoutingControl(true);
         launchDeviceDiscovery();
-
         registerAudioPortUpdateListener();
         // TODO: unregister audio port update listener if local device is released.
     }
@@ -516,10 +514,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         // If there is AVR, initiate System Audio Auto initiation action,
                         // which turns on and off system audio according to last system
                         // audio setting.
-                        HdmiCecDeviceInfo avrInfo = getAvrDeviceInfo();
-                        if (avrInfo != null) {
+                        if (mSystemAudioMode && getAvrDeviceInfo() != null) {
                             addAndStartAction(new SystemAudioAutoInitiationAction(
-                                    HdmiCecLocalDeviceTv.this, avrInfo.getLogicalAddress()));
+                                    HdmiCecLocalDeviceTv.this,
+                                    getAvrDeviceInfo().getLogicalAddress()));
                             if (mArcEstablished) {
                                 startArcAction(true);
                             }
@@ -551,11 +549,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     // # Seq 25
-    void setSystemAudioMode(boolean on) {
+    void setSystemAudioMode(boolean on, boolean updateSetting) {
         synchronized (mLock) {
             if (on != mSystemAudioMode) {
                 mSystemAudioMode = on;
-                // TODO: Need to set the preference for SystemAudioMode.
+                if (updateSetting) {
+                    mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
+                }
                 mService.announceSystemAudioModeChange(on);
             }
         }
@@ -756,7 +756,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!isMessageForSystemAudio(message)) {
             return false;
         }
-        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message));
+        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message), true);
         return true;
     }
 
@@ -1093,9 +1093,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
 
-        // Once adding additional param which describes whether to record it to NVM or not to this
-        // method, put "false" for it.
-        setSystemAudioMode(false);
+        // Turn off the mode but do not write it the settings, so that the next time TV powers on
+        // the system audio mode setting can be restored automatically.
+        setSystemAudioMode(false, false);
     }
 
     @ServiceThreadOnly

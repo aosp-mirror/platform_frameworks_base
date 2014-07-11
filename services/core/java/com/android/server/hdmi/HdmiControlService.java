@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -42,6 +43,8 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.Settings.Global;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -206,6 +209,8 @@ public final class HdmiControlService extends SystemService {
     public void onStart() {
         mIoThread.start();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+        mProhibitMode = false;
+        mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
         mCecController = HdmiCecController.create(this);
 
         if (mCecController != null) {
@@ -235,12 +240,16 @@ public final class HdmiControlService extends SystemService {
             filter.addAction(Intent.ACTION_SCREEN_ON);
             getContext().registerReceiver(mPowerStateReceiver, filter);
         }
+    }
 
-        // TODO: Read the preference for SystemAudioMode and initialize mSystemAudioMode and
-        // start to monitor the preference value and invoke SystemAudioActionFromTv if needed.
-        mHdmiControlEnabled = true;
-        // TODO: Get control flag from persistent storage
-        mProhibitMode = false;
+    boolean readBooleanSetting(String key, boolean defVal) {
+        ContentResolver cr = getContext().getContentResolver();
+        return Global.getInt(cr, key, defVal ? Constants.TRUE : Constants.FALSE) == Constants.TRUE;
+    }
+
+    void writeBooleanSetting(String key, boolean value) {
+        ContentResolver cr = getContext().getContentResolver();
+        Global.putInt(cr, key, value ? Constants.TRUE : Constants.FALSE);
     }
 
     @ServiceThreadOnly

@@ -154,6 +154,9 @@ final class Constants {
 
     static final int UNKNOWN_VENDOR_ID = 0xFFFFFF;
 
+    static final int TRUE = 1;
+    static final int FALSE = 0;
+
     // Constants related to operands of HDMI CEC commands.
     // Refer to CEC Table 29 in HDMI Spec v1.4b.
     // [Abort Reason]

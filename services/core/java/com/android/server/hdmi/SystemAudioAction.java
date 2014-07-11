@@ -95,7 +95,7 @@ abstract class SystemAudioAction extends FeatureAction {
     }
 
     protected void setSystemAudioMode(boolean mode) {
-        tv().setSystemAudioMode(mode);
+        tv().setSystemAudioMode(mode, true);
     }
 
     @Override
