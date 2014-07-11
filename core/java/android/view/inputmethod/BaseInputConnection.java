@@ -429,6 +429,21 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
+     * The default implementation is responsible for handling
+     * {@link CursorAnchorInfoRequest#TYPE_CURSOR_RECT}. In fact, for derived classes, calling
+     * {@code super.requestCursorAnchorInfo(request)} is the only way to handle
+     * {@link CursorAnchorInfoRequest#TYPE_CURSOR_RECT}.
+     */
+    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
+        if (request != null && mIMM != null &&
+                request.getRequestType() == CursorAnchorInfoRequest.TYPE_CURSOR_RECT) {
+            mIMM.setCursorRectMonitorMode(request.getRequestFlags());
+            return CursorAnchorInfoRequest.RESULT_SCHEDULED;
+        }
+        return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+    }
+
+    /**
      * The default implementation places the given text into the editable,
      * replacing any existing composing text.  The new text is marked as
      * in a composing state with the composing style.

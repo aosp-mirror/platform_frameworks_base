@@ -53,6 +53,7 @@ import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -250,18 +251,6 @@ public class InputMethodService extends AbstractInputMethodService {
      * The IME is visible.
      */
     public static final int IME_VISIBLE = 0x2;
-
-    /**
-     * The IME does not require cursor/anchor position.
-     */
-    public static final int CURSOR_ANCHOR_MONITOR_MODE_NONE = 0x0;
-
-    /**
-     * Passing this flag into a call to {@link #setCursorAnchorMonitorMode(int)} will result in
-     * the cursor rectangle being provided in screen coordinates to subsequent
-     * {@link #onUpdateCursor(Rect)} callbacks.
-     */
-    public static final int CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT = 0x1;
 
     InputMethodManager mImm;
     
@@ -1722,8 +1711,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * Called when the application has reported a new location of its text cursor.  This is only
      * called if explicitly requested by the input method.  The default implementation does nothing.
      * @param newCursor The new cursor position, in screen coordinates if the input method calls
-     * {@link #setCursorAnchorMonitorMode} with {@link #CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT}.
-     * Otherwise, this is in local coordinates.
+     * {@link InputConnection#requestCursorAnchorInfo(CursorAnchorInfoRequest)} with
+     * {@link CursorAnchorInfoRequest#FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES}. Otherwise,
+     * this is in local coordinates.
      */
     public void onUpdateCursor(Rect newCursor) {
         // Intentionally empty
@@ -1738,13 +1728,6 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
         // Intentionally empty
-    }
-
-    /**
-     * Update the cursor/anthor monitor mode.
-     */
-    public void setCursorAnchorMonitorMode(int monitorMode) {
-        mImm.setCursorAnchorMonitorMode(mToken, monitorMode);
     }
 
     /**

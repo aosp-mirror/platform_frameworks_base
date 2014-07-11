@@ -13324,7 +13324,6 @@ package android.inputmethodservice {
     method public void setBackDisposition(int);
     method public void setCandidatesView(android.view.View);
     method public void setCandidatesViewShown(boolean);
-    method public void setCursorAnchorMonitorMode(int);
     method public void setExtractView(android.view.View);
     method public void setExtractViewShown(boolean);
     method public void setInputView(android.view.View);
@@ -13336,8 +13335,6 @@ package android.inputmethodservice {
     field public static final int BACK_DISPOSITION_DEFAULT = 0; // 0x0
     field public static final int BACK_DISPOSITION_WILL_DISMISS = 2; // 0x2
     field public static final int BACK_DISPOSITION_WILL_NOT_DISMISS = 1; // 0x1
-    field public static final int CURSOR_ANCHOR_MONITOR_MODE_CURSOR_RECT = 1; // 0x1
-    field public static final int CURSOR_ANCHOR_MONITOR_MODE_NONE = 0; // 0x0
   }
 
   public class InputMethodService.InputMethodImpl extends android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl {
@@ -34976,6 +34973,7 @@ package android.view.inputmethod {
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public static final void removeComposingSpans(android.text.Spannable);
     method public boolean reportFullscreenMode(boolean);
+    method public int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public static void setComposingSpans(android.text.Spannable);
@@ -35039,6 +35037,25 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, boolean);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
+  }
+
+  public final class CursorAnchorInfoRequest implements android.os.Parcelable {
+    ctor public CursorAnchorInfoRequest(int, int);
+    ctor public CursorAnchorInfoRequest(android.os.Parcel);
+    method public int describeContents();
+    method public int getRequestFlags();
+    method public int getRequestType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE = 2; // 0x2
+    field public static final int FLAG_CURSOR_ANCHOR_INFO_MONITOR = 1; // 0x1
+    field public static final int FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES = 2; // 0x2
+    field public static final int FLAG_CURSOR_RECT_MONITOR = 1; // 0x1
+    field public static final int FLAG_CURSOR_RECT_WITH_VIEW_MATRIX = 4; // 0x4
+    field public static final int RESULT_NOT_HANDLED = 0; // 0x0
+    field public static final int RESULT_SCHEDULED = 1; // 0x1
+    field public static final int TYPE_CURSOR_ANCHOR_INFO = 1; // 0x1
+    field public static final int TYPE_CURSOR_RECT = 2; // 0x2
   }
 
   public class EditorInfo implements android.text.InputType android.os.Parcelable {
@@ -35138,6 +35155,7 @@ package android.view.inputmethod {
     method public abstract boolean performEditorAction(int);
     method public abstract boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public abstract boolean reportFullscreenMode(boolean);
+    method public abstract int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
     method public abstract boolean sendKeyEvent(android.view.KeyEvent);
     method public abstract boolean setComposingRegion(int, int);
     method public abstract boolean setComposingText(java.lang.CharSequence, int);
@@ -35165,6 +35183,7 @@ package android.view.inputmethod {
     method public boolean performEditorAction(int);
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public boolean reportFullscreenMode(boolean);
+    method public int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public boolean setComposingText(java.lang.CharSequence, int);

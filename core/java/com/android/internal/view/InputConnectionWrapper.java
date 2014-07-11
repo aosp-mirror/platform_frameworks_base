@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
@@ -40,6 +41,7 @@ public class InputConnectionWrapper implements InputConnection {
         public CharSequence mSelectedText;
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
+        public int mCursorAnchorInfoRequestResult;
         
         // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
         // exclusive access to this object.
@@ -152,7 +154,20 @@ public class InputConnectionWrapper implements InputConnection {
                 }
             }
         }
-        
+
+        public void setRequestCursorAnchorInfoResult(int result, int seq) {
+            synchronized (this) {
+                if (seq == mSeq) {
+                    mCursorAnchorInfoRequestResult = result;
+                    mHaveValue = true;
+                    notifyAll();
+                } else {
+                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
+                            + ") in setCursorAnchorInfoRequestResult, ignoring.");
+                }
+            }
+        }
+
         /**
          * Waits for a result for up to {@link #MAX_WAIT_TIME_MILLIS} milliseconds.
          * 
@@ -412,5 +427,23 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
+        int value = CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+        try {
+            InputContextCallback callback = InputContextCallback.getInstance();
+            mIInputContext.requestCursorAnchorInfo(request, callback.mSeq, callback);
+            synchronized (callback) {
+                callback.waitForResultLocked();
+                if (callback.mHaveValue) {
+                    value = callback.mCursorAnchorInfoRequestResult;
+                }
+            }
+            callback.dispose();
+        } catch (RemoteException e) {
+            return CursorAnchorInfoRequest.RESULT_NOT_HANDLED;
+        }
+        return value;
     }
 }

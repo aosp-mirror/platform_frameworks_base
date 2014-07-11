@@ -3027,8 +3027,11 @@ public class Editor {
             if (null == imm) {
                 return;
             }
+            if (!imm.isActive(mTextView)) {
+                return;
+            }
             // Skip if the IME has not requested the cursor/anchor position.
-            if (!imm.isWatchingCursor(mTextView)) {
+            if (!imm.isCursorAnchorInfoEnabled()) {
                 return;
             }
             Layout layout = mTextView.getLayout();
