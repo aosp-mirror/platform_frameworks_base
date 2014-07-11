@@ -4617,56 +4617,70 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            final Collection<String> paths = pkg.getAllCodePaths();
-            for (String path : paths) {
-                for (String instructionSet : instructionSets) {
-                    try {
-                        boolean isDexOptNeededInternal = DexFile.isDexOptNeededInternal(path,
-                                pkg.packageName, instructionSet, defer);
-                        // There are three basic cases here:
-                        // 1.) we need to dexopt, either because we are forced or it is needed
-                        // 2.) we are defering a needed dexopt
-                        // 3.) we are skipping an unneeded dexopt
-                        if (forceDex || (!defer && isDexOptNeededInternal)) {
-                            Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
-                            final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                            int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                    pkg.packageName, instructionSet);
-                            // Note that we ran dexopt, since rerunning will
-                            // probably just result in an error again.
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+            return DEX_OPT_SKIPPED;
+        }
+
+        final Collection<String> paths = pkg.getAllCodePaths();
+        boolean performedDexOpt = false;
+        // There are three basic cases here:
+        // 1.) we need to dexopt, either because we are forced or it is needed
+        // 2.) we are defering a needed dexopt
+        // 3.) we are skipping an unneeded dexopt
+        for (String path : paths) {
+            for (String instructionSet : instructionSets) {
+                try {
+                    final boolean isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
+                            pkg.packageName, instructionSet, defer);
+                    if (forceDex || (!defer && isDexOptNeeded)) {
+                        Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName + " isa=" + instructionSet);
+                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                        final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
+                                pkg.packageName, instructionSet);
+
+                        if (ret < 0) {
+                            // Don't bother running dexopt again if we failed, it will probably
+                            // just result in an error again. Also, don't bother dexopting for other
+                            // paths & ISAs.
                             pkg.mDexOptNeeded = false;
-                            if (ret < 0) {
-                                return DEX_OPT_FAILED;
-                            }
-                            return DEX_OPT_PERFORMED;
+                            return DEX_OPT_FAILED;
+                        } else {
+                            performedDexOpt = true;
                         }
-                        if (defer && isDexOptNeededInternal) {
-                            if (mDeferredDexOpt == null) {
-                                mDeferredDexOpt = new HashSet<PackageParser.Package>();
-                            }
-                            mDeferredDexOpt.add(pkg);
-                            return DEX_OPT_DEFERRED;
-                        }
-                        pkg.mDexOptNeeded = false;
-                        return DEX_OPT_SKIPPED;
-                    } catch (FileNotFoundException e) {
-                        Slog.w(TAG, "Apk not found for dexopt: " + path);
-                        return DEX_OPT_FAILED;
-                    } catch (IOException e) {
-                        Slog.w(TAG, "IOException reading apk: " + path, e);
-                        return DEX_OPT_FAILED;
-                    } catch (StaleDexCacheError e) {
-                        Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
-                        return DEX_OPT_FAILED;
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Exception when doing dexopt : ", e);
-                        return DEX_OPT_FAILED;
                     }
+
+                    // We're deciding to defer a needed dexopt. Don't bother dexopting for other
+                    // paths and instruction sets. We'll deal with them all together when we process
+                    // our list of deferred dexopts.
+                    if (defer && isDexOptNeeded) {
+                        if (mDeferredDexOpt == null) {
+                            mDeferredDexOpt = new HashSet<PackageParser.Package>();
+                        }
+                        mDeferredDexOpt.add(pkg);
+                        return DEX_OPT_DEFERRED;
+                    }
+                } catch (FileNotFoundException e) {
+                    Slog.w(TAG, "Apk not found for dexopt: " + path);
+                    return DEX_OPT_FAILED;
+                } catch (IOException e) {
+                    Slog.w(TAG, "IOException reading apk: " + path, e);
+                    return DEX_OPT_FAILED;
+                } catch (StaleDexCacheError e) {
+                    Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
+                    return DEX_OPT_FAILED;
+                } catch (Exception e) {
+                    Slog.w(TAG, "Exception when doing dexopt : ", e);
+                    return DEX_OPT_FAILED;
                 }
             }
         }
-        return DEX_OPT_SKIPPED;
+
+        // If we've gotten here, we're sure that no error occurred and that we haven't
+        // deferred dex-opt. We've either dex-opted one more paths or instruction sets or
+        // we've skipped all of them because they are up to date. In both cases this
+        // package doesn't need dexopt any longer.
+        pkg.mDexOptNeeded = false;
+        return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
     }
 
     private static String[] getAppDexInstructionSets(ApplicationInfo info) {
@@ -4687,9 +4701,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static String[] getAppDexInstructionSets(PackageSetting ps) {
         if (ps.primaryCpuAbiString != null) {
             if (ps.secondaryCpuAbiString != null) {
-                return new String[] { ps.primaryCpuAbiString, ps.secondaryCpuAbiString };
+                return new String[] {
+                        VMRuntime.getInstructionSet(ps.primaryCpuAbiString),
+                        VMRuntime.getInstructionSet(ps.secondaryCpuAbiString) };
             } else {
-                return new String[] { ps.primaryCpuAbiString };
+                return new String[] {
+                        VMRuntime.getInstructionSet(ps.primaryCpuAbiString) };
             }
         }
 
