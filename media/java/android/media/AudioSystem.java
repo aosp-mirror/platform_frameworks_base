@@ -290,6 +290,9 @@ public class AudioSystem
     public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_LINE |
                                                                 DEVICE_OUT_HDMI_ARC |
                                                                 DEVICE_OUT_SPDIF);
+    public static final int DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER =
+            (DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO |
+             DEVICE_OUT_SPEAKER);
 
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = DEVICE_BIT_IN | 0x1;
@@ -437,10 +440,7 @@ public class AudioSystem
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
-    public static final int FORCE_SYSTEM_AUDIO_HDMI_ARC = 12;
-    public static final int FORCE_SYSTEM_AUDIO_SPDIF = 13;
-    public static final int FORCE_SYSTEM_LINE = 14;
-    private static final int NUM_FORCE_CONFIG = 15;
+    private static final int NUM_FORCE_CONFIG = 12;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use

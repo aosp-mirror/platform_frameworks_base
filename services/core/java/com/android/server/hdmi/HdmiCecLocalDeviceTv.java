@@ -20,6 +20,9 @@ import android.content.Intent;
 import android.hardware.hdmi.HdmiCecDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.media.AudioManager.OnAudioPortUpdateListener;
+import android.media.AudioPatch;
+import android.media.AudioPort;
 import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -101,6 +104,33 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mAddress, mService.getVendorId()));
         launchRoutingControl(true);
         launchDeviceDiscovery();
+
+        registerAudioPortUpdateListener();
+        // TODO: unregister audio port update listener if local device is released.
+    }
+
+    private void registerAudioPortUpdateListener() {
+        mService.getAudioManager().registerAudioPortUpdateListener(
+                new OnAudioPortUpdateListener() {
+                    @Override
+                    public void OnAudioPatchListUpdate(AudioPatch[] patchList) {}
+
+                    @Override
+                    public void OnAudioPortListUpdate(AudioPort[] portList) {
+                        if (!mSystemAudioMode) {
+                            return;
+                        }
+                        int devices = mService.getAudioManager().getDevicesForStream(
+                                AudioSystem.STREAM_MUSIC);
+                        if ((devices & ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER)
+                                != 0) {
+                            // TODO: release system audio here.
+                        }
+                    }
+
+                    @Override
+                    public void OnServiceDied() {}
+                });
     }
 
     /**
