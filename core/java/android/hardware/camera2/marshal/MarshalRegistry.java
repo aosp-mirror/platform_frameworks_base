@@ -81,17 +81,18 @@ public class MarshalRegistry {
                     break;
                 }
             }
-        }
 
-        if (marshaler == null) {
-            throw new UnsupportedOperationException(
-                     "Could not find marshaler that matches the requested " +
-                     "combination of type reference " +
-                     typeToken + " and native type " +
-                     MarshalHelpers.toStringNativeType(nativeType));
-        }
+            if (marshaler == null) {
+                throw new UnsupportedOperationException(
+                        "Could not find marshaler that matches the requested " +
+                                "combination of type reference " +
+                                typeToken + " and native type " +
+                                MarshalHelpers.toStringNativeType(nativeType));
+            }
 
-        sMarshalerMap.put(marshalToken, marshaler);
+            // Only put when no cached version exists to avoid +0.5ms lookup per call.
+            sMarshalerMap.put(marshalToken, marshaler);
+        }
 
         return marshaler;
     }
@@ -100,10 +101,12 @@ public class MarshalRegistry {
         public MarshalToken(TypeReference<T> typeReference, int nativeType) {
             this.typeReference = typeReference;
             this.nativeType = nativeType;
+            this.hash = typeReference.hashCode() ^ nativeType;
         }
 
         final TypeReference<T> typeReference;
         final int nativeType;
+        private final int hash;
 
         @Override
         public boolean equals(Object other) {
@@ -118,7 +121,7 @@ public class MarshalRegistry {
 
         @Override
         public int hashCode() {
-            return typeReference.hashCode() ^ nativeType;
+            return hash;
         }
     }
 

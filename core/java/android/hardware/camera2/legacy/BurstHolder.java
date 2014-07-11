@@ -17,6 +17,9 @@
 package android.hardware.camera2.legacy;
 
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.impl.CameraMetadataNative;
+import android.util.Log;
+import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +28,8 @@ import java.util.List;
  * Immutable container for a burst of capture results.
  */
 public class BurstHolder {
-
-    private final ArrayList<CaptureRequest> mRequests;
+    private static final String TAG = "BurstHolder";
+    private final ArrayList<RequestHolder.Builder> mRequestBuilders;
     private final boolean mRepeating;
     private final int mRequestId;
 
@@ -38,7 +41,13 @@ public class BurstHolder {
      * @param requests a {@link java.util.List} of {@link CaptureRequest}s in this burst.
      */
     public BurstHolder(int requestId, boolean repeating, List<CaptureRequest> requests) {
-        mRequests = new ArrayList<CaptureRequest>(requests);
+        mRequestBuilders = new ArrayList<RequestHolder.Builder>();
+        int i = 0;
+        for (CaptureRequest r : requests) {
+            mRequestBuilders.add(new RequestHolder.Builder(requestId, /*subsequenceId*/i,
+                    /*request*/r, repeating));
+            ++i;
+        }
         mRepeating = repeating;
         mRequestId = requestId;
     }
@@ -61,7 +70,7 @@ public class BurstHolder {
      * Return the number of requests in this burst sequence.
      */
     public int getNumberOfRequests() {
-        return mRequests.size();
+        return mRequestBuilders.size();
     }
 
     /**
@@ -73,8 +82,8 @@ public class BurstHolder {
     public List<RequestHolder> produceRequestHolders(long frameNumber) {
         ArrayList<RequestHolder> holders = new ArrayList<RequestHolder>();
         int i = 0;
-        for (CaptureRequest r : mRequests) {
-            holders.add(new RequestHolder(mRequestId, i, r, mRepeating, frameNumber + i));
+        for (RequestHolder.Builder b : mRequestBuilders) {
+            holders.add(b.build(frameNumber + i));
             ++i;
         }
         return holders;
