@@ -908,6 +908,9 @@ public class VolumePanel extends Handler {
 
             if (mDialog != null) {
                 mDialog.show();
+                if (mCallback != null) {
+                    mCallback.onVisible(true);
+                }
             }
         }
 
@@ -1160,6 +1163,9 @@ public class VolumePanel extends Handler {
                         mDialog.dismiss();
                         clearRemoteStreamController();
                         mActiveStreamType = -1;
+                        if (mCallback != null) {
+                            mCallback.onVisible(false);
+                        }
                     }
                 }
                 synchronized (sConfirmSafeVolumeLock) {
@@ -1262,5 +1268,6 @@ public class VolumePanel extends Handler {
     public interface Callback {
         void onZenSettings();
         void onInteraction();
+        void onVisible(boolean visible);
     }
 }
