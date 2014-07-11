@@ -61,6 +61,33 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 20</a> <em>(July 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added extended notification support for Android Wear in
+            {@link android.support.v4.app.NotificationCompat.WearableExtender}, which allows you
+            to specify wearable-specific features in your notifications.</li>
+          <li>Added {@link android.support.v4.app.NotificationCompat.Action.WearableExtender},
+            which allows actions to be added on wearable notifications.</li>
+          <li>Added {@link android.support.v4.app.NotificationManagerCompat}, which allows you
+            to issue notifications that properly support wearable features.</li>
+          <li>Added {@link android.support.v4.app.RemoteInput}, which allows a handheld device
+            to receive voice input from a notification that appears on a wearable device.</li>
+          <li>Improved the handling of touch feedback in
+            {@link android.support.v4.widget.SwipeRefreshLayout}.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19.1.0</a> <em>(March 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
