@@ -34,6 +34,26 @@ LOCAL_JNI_SHARED_LIBRARIES = libpmtestdual
 
 LOCAL_PROGUARD_ENABLED := disabled
 
+LOCAL_MANIFEST_FILE := dual/AndroidManifest.xml
+
+LOCAL_SDK_VERSION := current
+include $(BUILD_PACKAGE)
+
+LOCAL_PATH:= $(TOP_LOCAL_PATH)
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(call all-subdir-java-files)
+
+LOCAL_PACKAGE_NAME := PMTest_Java_multiarch
+LOCAL_MULTILIB := both
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_MANIFEST_FILE := multiarch/AndroidManifest.xml
+
+LOCAL_JNI_SHARED_LIBRARIES = libpmtestdual
+
+LOCAL_PROGUARD_ENABLED := disabled
+
 LOCAL_SDK_VERSION := current
 include $(BUILD_PACKAGE)
 
